@@ -1,0 +1,62 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Graphite tokens so Excalidraw's own controls read as part of Synthesis. */
+.excalidraw {
+  --color-primary: #3b637f;
+  --color-primary-darker: #335770;
+  --color-primary-darkest: #2a495e;
+  --color-primary-light: #e3ecf3;
+  --color-primary-hover: #335770;
+  --color-brand-hover: #335770;
+  --color-brand-active: #2a495e;
+  --color-surface-primary-container: #e3ecf3;
+  --color-on-primary-container: #2a495e;
+  --ui-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --default-border-radius: 8px;
+  --border-radius-lg: 10px;
+}
+.excalidraw.theme--dark {
+  --color-primary: #a9c7db;
+  --color-primary-darker: #bcd4e4;
+  --color-primary-darkest: #cfe1ec;
+  --color-primary-light: #2b3b47;
+  --color-primary-hover: #bcd4e4;
+  --color-brand-hover: #bcd4e4;
+  --color-brand-active: #cfe1ec;
+  --color-surface-primary-container: #2b3b47;
+  --color-on-primary-container: #cfe1ec;
+  --island-bg-color: #262a30;
+  --color-surface-lowest: #17191c;
+  --color-surface-low: #262a30;
+  --color-surface-mid: #30353d;
+  --color-surface-high: #3c434c;
+  --popup-bg-color: #262a30;
+  --input-bg-color: #1d2024;
+  --default-bg-color: #17191c;
+  --color-on-surface: #ecebed;
+  --text-primary-color: #ecebed;
+  --color-gray-30: #929caa;
+}
+
+/* Features that need a network connection or belong to excalidraw.com are not offered. */
+.excalidraw .sidebar-trigger,
+.excalidraw .library-menu-browse-button,
+.excalidraw .library-menu-control-buttons--at-bottom a,
+.excalidraw .encrypted-icon,
+.excalidraw .HelpDialog__header {
+  display: none !important;
+}
+
+/* Leave room for the floating Synthesis composer above the footer on narrow canvases. */
+.excalidraw .layer-ui__wrapper__footer-right {
+  display: none;
+}

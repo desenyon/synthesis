@@ -5,7 +5,16 @@
 - **Product audit and unified redesign** (2026-11-12): one design system, native window, reversible archive, canon diff, verified interactions.
 - **Safe AI depth, first slice** (2026-11-12): ranked and recorded context, staged proposals with per-change review, `@` mentions, quick capture, Markdown import/export.
 
-## Active — finish M3
+- **Subscription harness by default** and **Canvas on the Excalidraw engine** (2026-11-13).
+
+## Active — finish the canvas move
+
+1. Confirm card dragging with a clean self-test run; mount the web view once at the shell level.
+2. Rebuild "reference in conversation", card artwork and "show on canvas" on the new engine.
+3. Prune unused bundle chunks (locales, Mermaid) if size matters.
+4. Apply the owner's visual references: dot-matrix world-composition bar and pixel-icon glass toggle.
+
+## Then — finish M3
 
 1. Exercise the live provider path once the owner supplies a key and approves the calls: streaming, stop, errors, and whether the model follows the proposal contract. Adjust the prompt from what is observed.
 2. ~~Review inbox and local consistency check~~ — done 2026-11-12 as the Review workspace.

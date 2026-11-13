@@ -56,6 +56,20 @@ public struct Toast: Identifiable {
   @Published public var proposals: [String: Proposal] = [:]
   /// Every staged change set in this world that still has something to decide.
   @Published public var pendingProposals: [Proposal] = []
+  /// The canvas engine and its web view, created the first time Canvas is shown and kept for
+  /// the rest of the run.
+  var canvasSession: CanvasSession?
+  func canvas() -> CanvasSession {
+    if let canvasSession { return canvasSession }
+    let session = CanvasSession(studio: self)
+    canvasSession = session
+    return session
+  }
+  /// Gives the canvas a moment to hand over unsaved edits; used before the app quits.
+  public func flushCanvas() async { await canvasSession?.flush() }
+  public var canvasWebView: NSView? { canvasSession?.webView }
+  public var canvasLoaded: Bool { canvasSession?.loaded ?? false }
+  public func canvasCommand(_ name: String) { canvasSession?.command(name) }
   /// Record whose canon review should open as soon as its editor appears.
   public var reviewCanon: String?
   /// Records shared with the model for each answer, keyed by assistant message.

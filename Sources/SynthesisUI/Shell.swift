@@ -93,7 +93,12 @@ public struct ConnectedRoot: View {
         }
         IconButton(icon: "xmark", label: "Dismiss", t: studio.t, size: 22) { studio.toast = nil }
       }.padding(.leading, 14).padding(.trailing, 8).frame(height: 40).floatingPanel(studio.t)
-        .padding(.bottom, 22).transition(.move(edge: .bottom).combined(with: .opacity))
+        // On Canvas the bottom centre belongs to the composer, so confirmations sit above it.
+        .padding(
+          .bottom,
+          studio.destination == .canvas && studio.selectedRecord == nil && studio.mode == .assisted
+            && !studio.companionExpanded ? 96 : 22
+        ).transition(.move(edge: .bottom).combined(with: .opacity))
         .id(toast.id).accessibilityElement(children: .contain)
     }
   }

@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 import SynthesisCore
 import SynthesisUI
+import WebKit
 
 /// Standard titled window with the content extended under a transparent title bar, so the app
 /// keeps native window controls, resizing, full screen and accessibility while drawing its own
@@ -104,7 +105,14 @@ final class StudioWindow: NSWindow {
   }
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
     studio.persistPendingComposer()
-    return studio.flushEditor() ? .terminateNow : .terminateCancel
+    guard studio.flushEditor() else { return .terminateCancel }
+    guard studio.canvasWebView != nil else { return .terminateNow }
+    // The canvas hands over its latest edits asynchronously; wait for that before quitting.
+    Task {
+      await studio.flushCanvas()
+      NSApp.reply(toApplicationShouldTerminate: true)
+    }
+    return .terminateLater
   }
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 
@@ -157,9 +165,9 @@ final class StudioWindow: NSWindow {
     item(edit, "Redo", #selector(redoAction), "z", [.command, .shift])
     edit.addItem(.separator())
     for (title, selector, key) in [
-      ("Cut", "cut:", "x"), ("Copy", "copy:", "c"),
-      ("Paste", "paste:", "v"), ("Select All", "selectAll:", "a"),
+      ("Cut", "cut:", "x"), ("Copy", "copy:", "c"), ("Paste", "paste:", "v"),
     ] { edit.addItem(withTitle: title, action: Selector(selector), keyEquivalent: key) }
+    item(edit, "Select All", #selector(selectAllAction), "a")
     let view = submenu(main, "View")
     for (index, destination) in Destination.allCases.enumerated() {
       item(view, destination.rawValue, #selector(go(_:)), "\(index + 1)", tag: index)
@@ -193,6 +201,19 @@ final class StudioWindow: NSWindow {
       NSApp.sendAction(Selector(("redo:")), to: nil, from: nil)
     } else {
       studio.canvasUndo?(false)
+    }
+  }
+  /// True when keyboard focus is inside the canvas engine's web view.
+  private var canvasHasFocus: Bool {
+    guard let web = studio.canvasWebView, let responder = window.firstResponder as? NSView
+    else { return false }
+    return responder === web || responder.isDescendant(of: web)
+  }
+  @objc func selectAllAction() {
+    if canvasHasFocus {
+      studio.canvasCommand("selectAll")
+    } else {
+      NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: nil)
     }
   }
   @objc func settings() { studio.sheet = .settings }
@@ -245,7 +266,8 @@ final class StudioWindow: NSWindow {
       try await Task.sleep(for: .milliseconds(1500))
       let lines = await studio.runInteractionSelfTest(window: window) { name in
         if let frameView = self.window.contentView?.superview {
-          _ = try? self.snapshot(frameView, to: folder.appendingPathComponent("\(name).png"))
+          _ = try? await self.shot(
+            frameView, to: folder.appendingPathComponent("\(name).png"), web: true)
         }
       }
       for line in lines { print("SELFTEST \(line)") }
@@ -263,6 +285,68 @@ final class StudioWindow: NSWindow {
     previousApplication?.activate()
     fflush(stdout)
     exit(0)
+  }
+  /// Renders the window frame and, when the canvas is showing, its web content. View caching
+  /// cannot see web content, so the web view's own snapshot is laid in wherever the cached
+  /// image shows the plain backdrop behind it; native overlays drawn above the canvas stay.
+  private func shot(_ frameView: NSView, to url: URL, web: Bool) async throws -> (Int, Int) {
+    frameView.layoutSubtreeIfNeeded()
+    frameView.displayIfNeeded()
+    guard let bitmap = frameView.bitmapImageRepForCachingDisplay(in: frameView.bounds) else {
+      throw SynthesisError.invalid("Could not allocate a capture bitmap.")
+    }
+    frameView.cacheDisplay(in: frameView.bounds, to: bitmap)
+    if web, let webView = studio.canvasWebView as? WKWebView, webView.window === window,
+      let image = try? await webView.takeSnapshot(configuration: nil)
+    {
+      lay(image, from: webView, into: bitmap, of: frameView)
+    }
+    guard let png = bitmap.representation(using: .png, properties: [:]) else {
+      throw SynthesisError.invalid("Could not encode a capture.")
+    }
+    try png.write(to: url)
+    return (bitmap.pixelsWide, bitmap.pixelsHigh)
+  }
+  private func lay(
+    _ image: NSImage, from webView: NSView, into bitmap: NSBitmapImageRep, of frameView: NSView
+  ) {
+    let scale = CGFloat(bitmap.pixelsWide) / frameView.bounds.width
+    let rect = webView.convert(webView.bounds, to: frameView)
+    let width = Int((rect.width * scale).rounded())
+    let height = Int((rect.height * scale).rounded())
+    let left = Int((rect.minX * scale).rounded())
+    let top = Int(((frameView.bounds.height - rect.maxY) * scale).rounded())
+    guard width > 8, height > 8, bitmap.samplesPerPixel == 4, let base = bitmap.bitmapData,
+      let layer = NSBitmapImageRep(
+        bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height, bitsPerSample: 8,
+        samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+        colorSpaceName: bitmap.colorSpaceName, bitmapFormat: bitmap.bitmapFormat, bytesPerRow: 0,
+        bitsPerPixel: 32), let context = NSGraphicsContext(bitmapImageRep: layer)
+    else { return }
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = context
+    image.draw(in: NSRect(x: 0, y: 0, width: width, height: height))
+    NSGraphicsContext.restoreGraphicsState()
+    guard let source = layer.bitmapData else { return }
+    // The backdrop colour is read from a corner of the canvas area, which no overlay covers.
+    let key = base + (top + 3) * bitmap.bytesPerRow + (left + 3) * 4
+    let backdrop = (key[0], key[1], key[2])
+    for y in 0..<height where top + y < bitmap.pixelsHigh {
+      let row = base + (top + y) * bitmap.bytesPerRow
+      let from = source + y * layer.bytesPerRow
+      for x in 0..<width where left + x < bitmap.pixelsWide {
+        let pixel = row + (left + x) * 4
+        if abs(Int(pixel[0]) - Int(backdrop.0)) < 3, abs(Int(pixel[1]) - Int(backdrop.1)) < 3,
+          abs(Int(pixel[2]) - Int(backdrop.2)) < 3
+        {
+          let web = from + x * 4
+          pixel[0] = web[0]
+          pixel[1] = web[1]
+          pixel[2] = web[2]
+          pixel[3] = 255
+        }
+      }
+    }
   }
   private func capture(_ directory: String) async {
     do {
@@ -286,6 +370,16 @@ final class StudioWindow: NSWindow {
           window.backgroundColor = NSColor(studio.t.background)
           window.layoutTrafficLights()
           try await Task.sleep(for: .milliseconds(700))
+          let canvas = studio.destination == .canvas && studio.selectedRecord == nil
+          if canvas {
+            // The engine loads asynchronously; wait for the board, then frame it.
+            for _ in 0..<40 where !studio.canvasLoaded {
+              try await Task.sleep(for: .milliseconds(250))
+            }
+            try await Task.sleep(for: .milliseconds(500))
+            studio.canvasFit?()
+            try await Task.sleep(for: .milliseconds(900))
+          }
           window.layoutTrafficLights()
           guard let content = window.contentView, let frameView = content.superview else {
             continue
@@ -294,8 +388,9 @@ final class StudioWindow: NSWindow {
             throw SynthesisError.invalid("Capture viewport mismatch: \(content.bounds.size)")
           }
           let start = CFAbsoluteTimeGetCurrent()
-          let pixels = try snapshot(
-            frameView, to: folder.appendingPathComponent("\(state)-\(width)x\(height).png"))
+          let pixels = try await shot(
+            frameView, to: folder.appendingPathComponent("\(state)-\(width)x\(height).png"),
+            web: canvas)
           print(
             "CAPTURE \(state) \(width)x\(height), bitmap \(pixels.0)x\(pixels.1), \(Int((CFAbsoluteTimeGetCurrent() - start) * 1000))ms"
           )

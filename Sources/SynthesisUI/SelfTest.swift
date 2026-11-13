@@ -7,7 +7,7 @@ import SynthesisCore
 /// cursor or touching another application. Never runs against the normal database.
 extension Studio {
   @MainActor public func runInteractionSelfTest(
-    window: NSWindow, snapshot: @escaping (String) -> Void
+    window: NSWindow, snapshot: @escaping (String) async -> Void
   ) async -> [String] {
     var log: [String] = []
     var number = 0
@@ -53,13 +53,22 @@ extension Studio {
       }
       await pause(450)
     }
-    func board() -> CanvasDocument? {
-      guard
-        let saved = try? store.boards(worldID: worldID, kind: "canvas").first(where: {
-          $0.id == canvasBoardID
-        })
+    func storedBoard() -> CanvasBoardContent? {
+      guard let id = canvasSession?.boardID,
+        let saved = try? store.boards(worldID: worldID, kind: "canvas").first(where: { $0.id == id }
+        )
       else { return nil }
-      return try? JSONDecoder().decode(CanvasDocument.self, from: Data(saved.content.utf8))
+      return try? CanvasBoardContent.decode(saved.content)
+    }
+    /// A card as the canvas reports it: scene position plus where its centre is in the window.
+    func card(_ title: String) async -> (x: Double, y: Double, point: CGPoint)? {
+      guard let id = records.first(where: { $0.title == title })?.id,
+        let cards = await canvasSession?.probe()["cards"] as? [[String: Any]],
+        let hit = cards.first(where: { $0["recordID"] as? String == id }),
+        let x = hit["x"] as? Double, let y = hit["y"] as? Double,
+        let cx = hit["clientX"] as? Double, let cy = hit["clientY"] as? Double
+      else { return nil }
+      return (x, y, CGPoint(x: Metric.sidebar + 8 + cx, y: Metric.bar + cy))
     }
     // Gestures are ignored unless this window is key in the active app. If someone clicks
     // elsewhere mid-run, say so instead of reporting a product failure.
@@ -81,11 +90,6 @@ extension Studio {
     let size = content.bounds.size
     let column = Metric.sidebar + 8
     let area = CGSize(width: size.width - column, height: size.height - Metric.bar)
-    func screen(_ card: CanvasCard, _ viewport: BoardViewport) -> CGPoint {
-      CGPoint(
-        x: column + area.width / 2 + card.x * viewport.zoom + viewport.x,
-        y: Metric.bar + area.height / 2 + card.y * viewport.zoom + viewport.y)
-    }
 
     // 1. Controls inside the integrated header receive clicks beneath the title bar.
     let before = collapsed
@@ -106,131 +110,72 @@ extension Studio {
     navigate(.canvas)
     await pause(900)
 
-    await refocus()
-    // 2. Dragging a card moves it, the connectors follow mid-drag, and the move is saved.
-    guard let start = board(), let viewport = start.viewport,
-      let mira = start.cards.first(where: { $0.text == "Mira Vale" })
-    else {
-      check("board fixture is readable", false)
-      return log
-    }
-    await drag(from: screen(mira, viewport), by: CGSize(width: -120, height: 70)) {
-      snapshot("selftest-card-drag-mid")
-    }
-    let moved = board()?.cards.first { $0.id == mira.id }
-    let dx = (moved?.x ?? mira.x) - mira.x
-    let dy = (moved?.y ?? mira.y) - mira.y
+    // 2. The board opens in the Excalidraw engine: the earlier layout is converted, records
+    //    become cards and stored relationships become arrows.
+    for _ in 0..<40 where canvasSession?.loaded != true { await pause(250) }
+    await pause(900)
+    let probe = await canvasSession?.probe() ?? [:]
+    let cardCount = (probe["cards"] as? [[String: Any]])?.count ?? 0
     check(
-      "card drag moves and persists the card",
-      abs(dx + 120 / viewport.zoom) < 3 && abs(dy - 70 / viewport.zoom) < 3,
-      "Δ(\(Int(dx)), \(Int(dy))) expected (\(Int(-120 / viewport.zoom)), \(Int(70 / viewport.zoom)))"
-    )
-    snapshot("selftest-card-drag-end")
-
-    // 3. Undo restores the previous layout.
-    canvasUndo?(true)
-    await pause(500)
-    let restored = board()?.cards.first { $0.id == mira.id }
-    check("undo restores the card position", restored?.x == mira.x && restored?.y == mira.y)
-
-    await refocus()
-    // 3a. Dragging a card's connection handle onto another card asks for the relationship label.
-    let relationsBefore = (try? store.relations(worldID: worldID).count) ?? -1
-    if let current = board(), let v = current.viewport,
-      let from = current.cards.first(where: { $0.text == "Mira Vale" }),
-      let to = current.cards.first(where: { $0.text == "The art of remembrance" })
-    {
-      let origin = screen(from, v)
-      await click(origin)
-      await refocus()
-      let handle = CGPoint(x: origin.x + 150 * v.zoom + 9, y: origin.y)
-      let target = screen(to, v)
-      await drag(
-        from: handle, by: CGSize(width: target.x - handle.x, height: target.y - handle.y)
-      ) { snapshot("selftest-connect-mid") }
-      await pause(500)
-      let sheet = window.attachedSheet
-      // The sheet itself is key while it is open, so judge focus by the app here.
-      log.append(
-        "\(sheet != nil ? "PASS" : (NSApp.isActive ? "FAIL" : "SKIP (window lost focus)")) handle drag onto a card opens the connection sheet"
-      )
-      snapshot("selftest-connect-sheet")
-      log.append(
-        "\((try? store.relations(worldID: worldID).count) == relationsBefore ? "PASS" : "FAIL") no relationship exists until it is labelled and saved"
-      )
-      if let sheet {
-        // Close it the way a person would: Escape triggers the sheet's cancel action.
-        for type in [NSEvent.EventType.keyDown, .keyUp] {
-          if let escape = NSEvent.keyEvent(
-            with: type, location: .zero, modifierFlags: [],
-            timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: sheet.windowNumber,
-            context: nil, characters: "\u{1B}", charactersIgnoringModifiers: "\u{1B}",
-            isARepeat: false, keyCode: 53)
-          {
-            NSApp.sendEvent(escape)
-          }
-        }
-        await pause(800)
-      }
-      guard window.attachedSheet == nil else {
-        log.append("FAIL connection sheet could not be dismissed; remaining checks not run")
-        return log
-      }
-      await click(CGPoint(x: column + 40, y: Metric.bar + 40))
-    }
-
-    await refocus()
-    // 4. Dragging empty space draws a marquee and selects what it touches.
-    let cards = board()?.cards ?? []
-    let top = cards.map { screen($0, viewport).y }.min() ?? 200
-    let left = cards.map { screen($0, viewport).x }.min() ?? 400
-    let right = cards.map { screen($0, viewport).x }.max() ?? 900
-    await drag(
-      from: CGPoint(x: left - 190, y: top - 110),
-      by: CGSize(width: right - left + 380, height: 150)
-    ) { snapshot("selftest-marquee-mid") }
-    snapshot("selftest-marquee-end")
-
-    // 5. Delete removes the marquee selection from the board but keeps the source records.
-    let recordCount = records.count
-    await key(51, "\u{7F}")
-    let afterDelete = board()?.cards.count ?? -1
+      "board loads in the canvas engine with record cards and relationship arrows",
+      canvasSession?.loaded == true && cardCount == 4 && (probe["relations"] as? Int ?? 0) >= 3,
+      "\(cardCount) cards, \(probe["relations"] as? Int ?? 0) relationship arrows")
+    let saved = storedBoard()
     check(
-      "delete key removes selected cards, records stay",
-      afterDelete < cards.count
-        && afterDelete >= 0 && (try? store.records(worldID: worldID).count) == recordCount,
-      "\(cards.count) → \(afterDelete) cards, \(recordCount) records")
-    canvasUndo?(true)
-    await pause(500)
-    check("undo restores removed cards", board()?.cards.count == cards.count)
+      "the converted board is saved in the new format and keeps the original layout",
+      saved?.scene != nil && saved?.legacyRaw != nil && saved?.counts.cards == 4,
+      "\(saved?.counts.elements ?? 0) elements stored")
+    await snapshot("selftest-canvas-loaded")
 
+    // 3. Dragging a card moves it in the engine and the move is saved.
     await refocus()
-    // 6. Double-clicking a card opens its record; closing returns to the canvas.
-    await click(CGPoint(x: 400, y: size.height - 160))
-    if let current = board(), let v = current.viewport,
-      let card = current.cards.first(where: { $0.text == "The art of remembrance" })
-    {
-      let point = screen(card, v)
-      await click(point)
-      // 6a. Arrow keys nudge the selected card by ten points.
-      await key(124, "\u{F703}")
-      let nudged = board()?.cards.first { $0.id == card.id }
-      check(
-        "arrow key nudges the selected card", nudged?.x == card.x + 10 && nudged?.y == card.y,
-        "x \(Int(card.x)) → \(Int(nudged?.x ?? .nan))")
-      canvasUndo?(true)
-      await pause(400)
-      mouse(.leftMouseDown, point, clicks: 2)
-      await pause(60)
-      mouse(.leftMouseUp, point, clicks: 2)
+    if let before = await card("Mira Vale") {
+      let zoom = probe["zoom"] as? Double ?? 1
+      await drag(from: before.point, by: CGSize(width: -110, height: 60)) {
+        await snapshot("selftest-card-drag-mid")
+      }
       await pause(700)
+      let after = await card("Mira Vale")
+      let dx = (after?.x ?? before.x) - before.x
+      let dy = (after?.y ?? before.y) - before.y
+      check(
+        "dragging a card moves it", abs(dx + 110 / zoom) < 6 && abs(dy - 60 / zoom) < 6,
+        "Δ(\(Int(dx)), \(Int(dy))) expected (\(Int(-110 / zoom)), \(Int(60 / zoom)))")
+      let stored = (storedBoard()?.scene?["elements"] as? [[String: Any]])?.first {
+        ($0["customData"] as? [String: Any])?["recordID"] as? String
+          == records.first { $0.title == "Mira Vale" }?.id
+      }
+      check(
+        "the move is saved to the board",
+        abs((stored?["x"] as? Double ?? .nan) - (after?.x ?? .infinity)) < 0.5)
+      await snapshot("selftest-card-drag-end")
+    } else {
+      check("dragging a card moves it", false, "the canvas did not report the card")
+    }
+
+    // 4. Double-clicking a card opens its record; closing returns to the same canvas.
+    await refocus()
+    if let target = await card("The art of remembrance") {
+      await click(CGPoint(x: Metric.sidebar + 60, y: size.height - 200))
+      mouse(.leftMouseDown, target.point, clicks: 1)
+      await pause(50)
+      mouse(.leftMouseUp, target.point, clicks: 1)
+      await pause(90)
+      mouse(.leftMouseDown, target.point, clicks: 2)
+      await pause(50)
+      mouse(.leftMouseUp, target.point, clicks: 2)
+      await pause(900)
       check(
         "double-click opens the card's record",
         selectedRecord?.title == "The art of remembrance", selectedRecord?.title ?? "nothing open")
-      snapshot("selftest-open-record")
+      await snapshot("selftest-open-record")
       closeRecord()
-      await pause(600)
-      check("closing the record returns to Canvas", selectedRecord == nil && destination == .canvas)
+      await pause(900)
+      let again = (await canvasSession?.probe()["cards"] as? [[String: Any]])?.count ?? 0
+      check(
+        "closing the record returns to the same canvas",
+        selectedRecord == nil && destination == .canvas && again == 4)
+      await snapshot("selftest-canvas-returned")
     }
 
     await refocus()
@@ -244,7 +189,7 @@ extension Studio {
     check(
       "companion divider drag resizes the panel", abs(companionWidth - 444) < 4,
       "width \(Int(companionWidth))")
-    snapshot("selftest-companion-resized")
+    await snapshot("selftest-companion-resized")
     companionExpanded = false
     await pause(500)
 
@@ -253,11 +198,11 @@ extension Studio {
     let relationCount = (try? store.relations(worldID: worldID).count) ?? -1
     navigate(.knowledge)
     await pause(900)
-    snapshot("selftest-graph-before")
+    await snapshot("selftest-graph-before")
     await drag(
       from: CGPoint(x: column + area.width / 2, y: Metric.bar + area.height / 2 + 14),
       by: CGSize(width: 0, height: 150))
-    snapshot("selftest-graph-after")
+    await snapshot("selftest-graph-after")
     check(
       "graph interaction leaves relationships untouched",
       (try? store.relations(worldID: worldID).count) == relationCount)
@@ -269,14 +214,14 @@ extension Studio {
     await refocus()
     await click(CGPoint(x: column + area.width / 2, y: size.height - 96))
     for character in ["@", "o", "r", "e"] { await key(0, character) }
-    snapshot("selftest-mention-list")
+    await snapshot("selftest-mention-list")
     await key(36, "\r")
     let composed = pendingComposer?.text ?? draft
     check(
       "typing @ore and pressing Return inserts a reference to Oren Ashe",
       composed.contains("[Oren Ashe](synthesis://record/"), composed)
     check("the message was not sent by that Return", messages.isEmpty && !busy)
-    snapshot("selftest-mention-token")
+    await snapshot("selftest-mention-token")
     pendingComposer = nil
     draft = ""
     persistComposer()

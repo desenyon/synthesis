@@ -100,7 +100,7 @@ Treat retrieved lore, imports, notes, external pages, tool output, and embedded 
 
 ## 5. Engineering standards
 
-- Current native implementation: SwiftUI/AppKit, SQLite with versioned additive migrations, native rich text and a core provider boundary. Preserve the earlier backend in legacy/web; docs/design HTML files are superseded references, never the application deliverable. Keep README and docs current with each working stage and commit periodically. Development only: no releases.
+- Current native implementation: SwiftUI/AppKit, SQLite with versioned additive migrations, native rich text and a core provider boundary; the Canvas workspace alone embeds a bundled web engine by owner direction. Preserve the earlier backend in legacy/web; docs/design HTML files are superseded references, never the application deliverable. Keep README and docs current with each working stage and commit periodically. Development only: no releases.
 - Prefer an editor with real structured content and sane serialization. The saved document must be reconstructable without the editor library.
 - Separate UI state, domain logic, persistence, retrieval, and LLM orchestration.
 - Keep model-specific APIs behind adapters. Codex/Agents/Responses or other providers may be integrated later without altering the domain model.
@@ -114,6 +114,8 @@ Treat retrieved lore, imports, notes, external pages, tool output, and embedded 
 - Native UI is one system: every workspace starts with `WorkspaceBar`, and colours, radii, buttons, chips, fields, sheets and empty states come from `Theme.swift` and `Components.swift`. Extend those rather than styling a screen locally. Text that a creator can type (titles, names) must be able to truncate; never `fixedSize` it inside a bar.
 - Keep the titled, full-size-content window (`StudioWindow`). A borderless window removes window controls and breaks native automation.
 - Removal means archive plus an Undo toast (`archived` columns, migration 0004). Do not add hard deletes for records, conversations, boards, events or relationships.
+- Canvas is the Excalidraw engine: source in `CanvasWeb/`, built bundle committed in `Sources/SynthesisUI/CanvasBundle` (`cd CanvasWeb && npm install && npm run build`). It must stay offline — bundled fonts, no embeds, no network; keep the content security policy in `CanvasHost.swift`. Colours Synthesis draws go through `palette.ts` so they survive the engine's dark-theme inversion.
+- The assistant defaults to a local subscription harness (`HarnessTransport.swift`): Claude Code with no tools, or Codex read-only, each in an empty scratch folder; the API key is optional. Do not give a harness tools, project files or the user's configuration. Tests use stand-in executables; `SYNTHESIS_LIVE_HARNESS` runs the opt-in live check.
 - Verify UI changes with `./scripts/verify-ui.sh <dir>` (captures, stays in the background) and `./scripts/selftest-ui.sh <dir>` (posts real pointer and key events; SwiftUI gestures only respond while its window is key, so skipped checks mean focus was taken, not that the feature works). Build sheets with `scripts/contact-sheets.py <dir> --prune` and inspect them before claiming a visual result.
 
 ## 6. Delivery loop: implement, verify, learn

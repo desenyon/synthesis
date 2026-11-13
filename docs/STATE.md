@@ -1,30 +1,22 @@
-# Current state — 2026-11-12
+# Current state — 2026-11-13
 
-Two bodies of work landed today. The full checklist, causes and evidence are in [verification/AUDIT.md](verification/AUDIT.md).
-
-1. **Product audit and unified redesign.** All six workspaces, the editor, the command palette and every sheet share one design system; native window controls; reversible archive everywhere; canon review as a diff; verified pointer interactions.
-2. **Safe AI depth (M3 slice).** Grounded, inspectable context for every answer; AI change sets staged for item-by-item review; `@` mention tokens with autocomplete; quick capture from ⌘K; Markdown import and export.
+Read [HANDOFF.md](HANDOFF.md) for the working details of the newest pieces and what to do next. The audit checklist and its evidence are in [verification/AUDIT.md](verification/AUDIT.md).
 
 ## What works, as observed
 
-- Native window with traffic lights, resize, full screen and restored frame; one bar per workspace with the persistent AI Assisted / Manual switch.
-- Conversation: modes, `@` mentions, Markdown rendering, "Read N records" disclosure, proposal review cards, save as AI-proposed draft.
-- Canvas: card drag with live connectors, marquee, keyboard, drag-to-connect, group and arrange, undo/redo, board management, docked or takeover companion.
-- Library with full-text search, filters, archive and file drop; editor with details inspector and canon diff review.
-- Graph, Timeline and Atlas with editing; archive with Undo for every kind of removal.
-- Import Markdown/text; export Markdown folder or full JSON (schema 4, including proposals and recorded context).
-- Review workspace: pending proposals across conversations, drafts awaiting canon review, and a local consistency check that works in Manual mode.
+- One design system across seven workspaces; native window; archive with Undo everywhere.
+- **Assistant on your subscription by default**: Claude Code or Codex as a locked-down local harness, OpenAI API key optional. One live request through each harness answered from world context and returned a change set that was staged, not applied.
+- Conversation: modes, `@` mentions, sources read, proposal review cards.
+- **Canvas on the Excalidraw engine**: free drawing, shapes, text, images and frames, with Synthesis record cards and relationship arrows. The earlier boards convert on first open and the original layout is kept. Verified in the running app: board loads with 4 cards and 3 relationship arrows, conversion is saved, double-click opens a record, returning to Canvas shows the same board, companion docks and resizes.
+- Library, editor with canon diff, Graph, Timeline, Atlas, Review (proposals, canon queue, local checks).
+- Import Markdown/text; export Markdown folder or full JSON.
 
-## Checks run
+## Checks run on this state
 
-- `./scripts/check.sh`: strict lint, 41 tests in 3 suites, optimized build — passed.
-- `./scripts/verify-ui.sh`: 148 captures for the audit (four sizes), 10 more for the M3 screens; contact sheets inspected.
-- `./scripts/selftest-ui.sh`: 15 of 15 interaction checks passed on the release build.
+- `./scripts/check.sh`: strict lint, 45 tests in 5 suites, optimized build — passed.
+- Canvas captures at 1440×900 and 1024×768 (dark, light, rail, companion, Manual) inspected.
+- `./scripts/selftest-ui.sh`: 10 passed, 2 skipped because the window lost focus (palette tap, card drag). Not a clean run.
 
 ## Not verified
 
-No live provider call was made. Streaming, stop, and whether a real model follows the proposal contract are unobserved; everything downstream of the model's text is tested with scripted answers. Trackpad pan and pinch, large boards and graphs, VoiceOver, the native file pickers and drag-and-drop import were not exercised.
-
-## Next
-
-See ROADMAP. The branch is pushed to GitHub; nothing is released or deployed.
+Card dragging in the new canvas through the self-test; canvas captures after navigating away in a background window; Excalidraw's own tools beyond what the captures show; the streaming UI and Stop against a live harness in the running app; trackpad gestures; large boards and graphs; VoiceOver.

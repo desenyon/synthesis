@@ -19,7 +19,7 @@ The accepted graphite foundation, applied as one system. Tokens live in `Theme.s
 ## Workspaces
 
 - Conversation: 720-point reading column, bottom composer, explicit provider disclosure. Assistant output is labelled "Suggestion · not canon".
-- Canvas: saved, manually arranged board. 300-point cards with 17-point titles, 14-point text and a state badge. Connectors join facing sides with an arrowhead at the target; board-only links are dashed. Empty boards stay empty. Floating toolbar, zoom and compact composer; the companion docks at 320–460 points or takes over below 860.
+- Canvas: saved board on the Excalidraw engine, themed with the graphite tokens. 300-point record cards (category, 20-point title, 14-point text, state line) in the application palette; relationship arrows in the accent colour. Empty boards stay empty. The engine's toolbar sits top-centre; the compact composer floats bottom-centre; the companion docks at 320–460 points or takes over below 860.
 - Graph: derived from stored relationships, never saved. Layout is deterministic and shaped to the window.
 - Library, Timeline, Atlas: lists and cards use the same tiles, badges and empty states.
 - Editor: writing column up to 780 points with a 300-point details inspector. Canon review is a diff.

@@ -48,3 +48,13 @@ The owner accepted the graphite foundation and explicitly authorized integration
 ## 2026-11-13 — owner direction: subscription harness by default (protected)
 
 The owner directed that the assistant should not depend on an API key: the default is a local harness signed in with a subscription, with the API still allowed. Implemented as Claude Code (preferred when installed, because it can run with no tools at all) or Codex, with the OpenAI key as a third option. The harness is spawned per message and locked down as described in AI_SETUP. Alternatives considered: the Claude Agent SDK (adds a Node runtime to a native app for no gain over the CLI already installed) and a long-lived harness session (keeps context between turns but makes cancellation, isolation and the Manual-mode guarantee harder to prove). Both harnesses were verified live once; see AI_SETUP.
+
+## 2026-11-13 — owner direction: Canvas built on Excalidraw (protected)
+
+The owner directed that the canvas be built on Excalidraw's open-source engine and customised as needed. This supersedes the earlier "no WebView" implementation note for the Canvas workspace only; the rest of the application stays native SwiftUI/AppKit.
+
+- Uses the published `@excalidraw/excalidraw` package (MIT) rather than a source fork: the component API covers cards, arrows, theming, menus and link handling, and upgrades stay simple. A fork remains possible if deeper engine changes are needed.
+- The bundle is built with Vite and committed, so building the app needs no Node toolchain. Fonts are bundled; the CJK handwriting font is omitted for size.
+- Record cards and relationships are ordinary Excalidraw elements tagged with `customData`, so every engine feature (drawing, shapes, text, images, frames, grouping, alignment, undo) applies to them.
+- Removing a relationship arrow hides it on that board; it does not archive the relationship. This mirrors "removing a card keeps the record".
+- Trade-off accepted: a web view cannot be captured by view caching and is not repainted by WebKit while re-attached in an occluded window, which limits background screenshots (see HANDOFF).

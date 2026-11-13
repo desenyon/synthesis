@@ -5,8 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
-    "conversation-home", "conversation", "canvas", "canvas-selected", "companion", "manual",
-    "collapsed", "light", "graph", "graph-selected", "library", "editor", "timeline", "atlas",
+    "conversation-home", "conversation", "canvas", "companion", "manual", "collapsed", "light",
+    "graph", "graph-selected", "library", "editor", "timeline", "atlas",
     "palette", "light-conversation", "light-library", "light-graph", "light-editor",
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
@@ -177,7 +177,12 @@ extension Studio {
       palette = true
     default: destination = .canvas
     }
+    // The canvas is web content, and WebKit does not repaint a re-attached web view while the
+    // runner's window is behind others. Consecutive canvas states therefore keep the same view;
+    // returning to the canvas after other screens is covered by the interaction self-test.
+    let canvasStates = ["canvas", "companion", "manual", "collapsed", "light"]
+    let stays = canvasStates.contains(state) && canvasStates.contains(captureHint)
     captureHint = state
-    captureNonce += 1
+    if !stays { captureNonce += 1 }
   }
 }

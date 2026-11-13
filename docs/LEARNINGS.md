@@ -47,3 +47,15 @@ Observation 4: a contact-sheet script that matched `light-*.png` silently showed
 Observation 5: an overlay wider than a 1-point divider did not receive drags, and a handle drawn half outside a card lost hover on its outer half. Hit targets must be real layout, not overhang.
 
 Instruction change: AGENTS.md section 5 gained four bullets — use the shared chrome and tokens; keep the titled window; remove by archiving with Undo; verify UI with `verify-ui.sh` and `selftest-ui.sh`, including the focus caveat. No protected section was edited. Validation: `./scripts/check.sh` passed (32 tests), 148 captures inspected, self-test passed. Rollback: delete those four bullets; nothing else depends on them.
+
+## Canvas on Excalidraw and subscription harness — 2026-11-13
+
+Observation 1: Excalidraw's dark theme is a CSS `invert(93%) hue-rotate(180deg)` on the canvas. Colours written by Synthesis looked wrong until they were stored through the inverse of that filter (`CanvasWeb/src/palette.ts`).
+
+Observation 2: WebKit has no `CanvasRenderingContext2D.filter`, which Excalidraw uses to cancel that inversion for pictures; images appeared as negatives until `canvasFilter.ts` supplied it. Evidence: canvas captures before and after.
+
+Observation 3: view caching cannot capture a `WKWebView`, and `screencapture -l` returned a skewed Stage Manager thumbnail for a background window. The runner now composites `takeSnapshot` into the cached frame. WebKit also does not repaint a web view re-attached in an occluded window, so consecutive canvas captures keep one view.
+
+Observation 4: both harnesses follow the proposal contract when asked to change lore (one live request each). Codex reports its answer in one update; Claude Code streams.
+
+Instruction change: AGENTS.md section 5 gained two bullets (canvas bundle workflow and offline rule; harness default and lock-down). No protected section was edited. Validation: `./scripts/check.sh` (45 tests), canvas captures, live harness test. Rollback: delete those two bullets.

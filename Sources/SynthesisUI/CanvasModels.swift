@@ -3,8 +3,9 @@ import SwiftUI
 import SynthesisCore
 import UniformTypeIdentifiers
 
-/// Serialized shapes stored in the world-scoped boards table. New fields must stay optional or
-/// defaulted so earlier board documents continue to decode.
+/// The layout format of the earlier native canvas. It is still used to seed boards (the sample
+/// world, "Copy to canvas" from Graph) and to read boards saved before the Excalidraw engine;
+/// the canvas converts it on first open. Fields must stay optional or defaulted.
 struct CanvasCard: Identifiable, Codable, Equatable {
   var id = UUID().uuidString
   var text = "An unwritten thought"
@@ -49,65 +50,6 @@ struct DisplayEdge: Identifiable, Equatable {
   var target: String
   var label: String
   var localIndex: Int?
-}
-
-/// Connector path between two card rectangles: leaves and enters on facing sides.
-struct EdgeGeometry {
-  var start: CGPoint
-  var end: CGPoint
-  var control1: CGPoint
-  var control2: CGPoint
-  /// Unit direction the connector travels as it reaches `end`.
-  var heading: CGVector
-  var path: Path {
-    var path = Path()
-    path.move(to: start)
-    path.addCurve(to: end, control1: control1, control2: control2)
-    return path
-  }
-  var arrow: Path {
-    let size = 7.0
-    let back = CGPoint(x: end.x - heading.dx * size, y: end.y - heading.dy * size)
-    let normal = CGVector(dx: -heading.dy, dy: heading.dx)
-    var path = Path()
-    path.move(to: end)
-    path.addLine(
-      to: CGPoint(x: back.x + normal.dx * size * 0.55, y: back.y + normal.dy * size * 0.55))
-    path.addLine(
-      to: CGPoint(x: back.x - normal.dx * size * 0.55, y: back.y - normal.dy * size * 0.55))
-    path.closeSubpath()
-    return path
-  }
-  var midpoint: CGPoint {
-    // Cubic Bézier at t = 0.5.
-    CGPoint(
-      x: (start.x + 3 * control1.x + 3 * control2.x + end.x) / 8,
-      y: (start.y + 3 * control1.y + 3 * control2.y + end.y) / 8)
-  }
-  /// `lane` separates parallel connectors between the same pair of cards.
-  static func between(_ a: CGRect, _ b: CGRect, lane: Double = 0, gap: Double = 3) -> EdgeGeometry {
-    let dx = b.midX - a.midX
-    let dy = b.midY - a.midY
-    let horizontal =
-      abs(dx) / max(1, (a.width + b.width) / 2) >= abs(dy) / max(1, (a.height + b.height) / 2)
-    if horizontal {
-      let forward = dx >= 0
-      let start = CGPoint(x: forward ? a.maxX + gap : a.minX - gap, y: a.midY + lane)
-      let end = CGPoint(x: forward ? b.minX - gap : b.maxX + gap, y: b.midY + lane)
-      let reach = max(24, abs(end.x - start.x) / 2) * (forward ? 1 : -1)
-      return EdgeGeometry(
-        start: start, end: end, control1: CGPoint(x: start.x + reach, y: start.y),
-        control2: CGPoint(x: end.x - reach, y: end.y),
-        heading: CGVector(dx: forward ? 1 : -1, dy: 0))
-    }
-    let forward = dy >= 0
-    let start = CGPoint(x: a.midX + lane, y: forward ? a.maxY + gap : a.minY - gap)
-    let end = CGPoint(x: b.midX + lane, y: forward ? b.minY - gap : b.maxY + gap)
-    let reach = max(24, abs(end.y - start.y) / 2) * (forward ? 1 : -1)
-    return EdgeGeometry(
-      start: start, end: end, control1: CGPoint(x: start.x, y: start.y + reach),
-      control2: CGPoint(x: end.x, y: end.y - reach), heading: CGVector(dx: 0, dy: forward ? 1 : -1))
-  }
 }
 
 /// Lane offsets so several connectors between one pair of cards do not overlap.

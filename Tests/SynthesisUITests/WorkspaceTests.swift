@@ -37,46 +37,6 @@ import Testing
     studio.openChat(chat, keepWorkspace: true)
     #expect(studio.conversationID == nil)
   }
-  @Test func delayedViewportSaveCannotOverwriteReopenedBoard() async throws {
-    let store = try WorkspaceStore(path: ":memory:")
-    let studio = try Studio(store: store)
-    let first = BoardController(studio: studio)
-    first.load()
-    first.moveViewport(CGSize(width: 12, height: 8))
-    #expect(first.save())  // Navigation flush cancels the delayed save.
-    let second = BoardController(studio: studio)
-    second.load()
-    second.mutate { $0.cards.append(CanvasCard(text: "Newer edit")) }
-    try await Task.sleep(for: .milliseconds(500))
-    let reopened = BoardController(studio: studio)
-    reopened.load()
-    #expect(reopened.document.cards.first?.text == "Newer edit")
-    #expect(reopened.viewport.x == 12 && reopened.viewport.y == 8)
-  }
-  @Test func boardUndoPreservesSourceRecordAndSavedLayout() throws {
-    let store = try WorkspaceStore(path: ":memory:")
-    let studio = try Studio(store: store)
-    let record = try store.createRecord(
-      worldID: studio.worldID, title: "Mira", body: "Cartographer", kind: "entity")
-    let board = BoardController(studio: studio)
-    board.load()
-    board.add(record)
-    board.mutate {
-      $0.cards[0].x = 211
-      $0.cards[0].group = "group-a"
-    }
-    board.viewport = BoardViewport(x: 3, y: 4, zoom: 0.9)
-    #expect(board.save())
-    let reopened = BoardController(studio: studio)
-    reopened.load()
-    #expect(reopened.document.cards[0].x == 211 && reopened.document.cards[0].group == "group-a")
-    #expect(reopened.viewport.zoom == 0.9)
-    board.removeSelection()
-    #expect(board.document.cards.isEmpty)
-    board.step(back: true)
-    #expect(board.document.cards.first?.recordID == record.id)
-    #expect(try store.record(worldID: studio.worldID, id: record.id).body == "Cartographer")
-  }
   @Test func pendingDraftSurvivesImmediateWorldSwitch() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let studio = try Studio(store: store)
@@ -88,17 +48,6 @@ import Testing
     #expect(studio.draft.isEmpty)
     studio.switchWorld(original)
     #expect(studio.draft == "Last keystrokes")
-  }
-  @Test func malformedBoardIsPreservedAndDoesNotTrapNavigation() throws {
-    let store = try WorkspaceStore(path: ":memory:")
-    let studio = try Studio(store: store)
-    _ = try store.saveBoard(
-      worldID: studio.worldID, name: "Damaged", kind: "canvas", content: "not-json")
-    let board = BoardController(studio: studio)
-    board.load()
-    #expect(!board.loaded && board.failure != nil)
-    #expect(board.save())  // No pending edits exist; allow leaving without overwriting.
-    #expect(try store.boards(worldID: studio.worldID, kind: "canvas").first?.content == "not-json")
   }
   @Test func openingARecordKeepsTheWorkspaceItCameFrom() throws {
     let store = try WorkspaceStore(path: ":memory:")
@@ -209,23 +158,6 @@ import Testing
       ])
     #expect(TextDiff.lines(old: "same", new: "same").allSatisfy { $0.kind == .same })
   }
-  @Test func connectorsLeaveAndEnterOnFacingSides() {
-    let left = CGRect(x: 0, y: 0, width: 300, height: 160)
-    let right = CGRect(x: 500, y: 20, width: 300, height: 160)
-    let across = EdgeGeometry.between(left, right)
-    #expect(across.start.x > left.maxX && across.end.x < right.minX)
-    #expect(across.heading == CGVector(dx: 1, dy: 0))
-    let below = CGRect(x: 10, y: 400, width: 300, height: 160)
-    let down = EdgeGeometry.between(left, below)
-    #expect(down.start.y > left.maxY && down.end.y < below.minY)
-    #expect(down.heading == CGVector(dx: 0, dy: 1))
-    let lanes = edgeLanes([
-      DisplayEdge(id: "a", source: "x", target: "y", label: "leads"),
-      DisplayEdge(id: "b", source: "y", target: "x", label: "serves"),
-      DisplayEdge(id: "c", source: "x", target: "z", label: "maps"),
-    ])
-    #expect(lanes["a"] != lanes["b"] && lanes["c"] == 0)
-  }
   @Test func graphLayoutIsDeterministicSeparatedAndFollowsOrientation() {
     let nodes = ["a", "b", "c", "d", "e", "f"]
     let edges = [("a", "b"), ("b", "c"), ("c", "d"), ("d", "e"), ("e", "f")]
@@ -244,40 +176,6 @@ import Testing
     #expect(spread(wide).x > spread(wide).y)
     let tall = GraphLayout.positions(nodes: nodes, edges: edges, landscape: false)
     #expect(spread(tall).y > spread(tall).x)
-  }
-  @Test func boardZoomKeepsTheAnchoredPointAndLayoutToolsAreUndoable() throws {
-    let store = try WorkspaceStore(path: ":memory:")
-    let studio = try Studio(store: store)
-    let board = BoardController(studio: studio)
-    board.load()
-    board.viewport = BoardViewport(x: 40, y: -20, zoom: 1)
-    let anchor = CGPoint(x: 150, y: 90)
-    let world = CGPoint(x: (anchor.x - 40) / 1, y: (anchor.y + 20) / 1)
-    board.zoom(factor: 1.5, anchor: anchor)
-    #expect(abs(world.x * board.viewport.zoom + board.viewport.x - anchor.x) < 0.001)
-    #expect(abs(world.y * board.viewport.zoom + board.viewport.y - anchor.y) < 0.001)
-    board.zoom(factor: 100, anchor: .zero)
-    #expect(board.viewport.zoom == 2)
-    for title in ["One", "Two", "Three"] {
-      board.add(try store.createRecord(worldID: studio.worldID, title: title, kind: "entity"))
-    }
-    let positions = board.document.cards.map { CGPoint(x: $0.x, y: $0.y) }
-    #expect(Set(positions.map { "\($0.x),\($0.y)" }).count == 3)
-    board.selectAll()
-    board.arrange(row: false, sizes: [:])
-    #expect(Set(board.document.cards.map(\.x)).count == 1)
-    board.group()
-    #expect(board.selectionIsGrouped)
-    board.ungroup()
-    #expect(!board.selectionIsGrouped)
-    board.step(back: true)
-    board.step(back: true)
-    board.step(back: true)
-    #expect(board.document.cards.map { CGPoint(x: $0.x, y: $0.y) } == positions)
-    board.rename("  The coast  ")
-    let reopened = BoardController(studio: studio)
-    reopened.load()
-    #expect(reopened.name == "The coast" && reopened.document.cards.count == 3)
   }
   @Test func loreReferencesRoundTripBetweenTokensAndMarkdown() {
     let base: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 15)]
@@ -374,6 +272,41 @@ import Testing
     studio.toast?.action?()
     #expect(studio.records.filter { $0.origin == "imported" }.isEmpty)
     #expect(try store.archivedRecords(worldID: studio.worldID).count == 2)
+  }
+  @Test func boardContentReadsBothFormatsAndNeverGuessesAtDamagedData() throws {
+    // A board saved by the earlier native canvas is recognised and kept verbatim.
+    var old = CanvasDocument()
+    old.cards = [CanvasCard(text: "Mira", recordID: "r1", x: -200, y: 40)]
+    old.edges = [CanvasEdge(label: "knows", source: "a", target: "b")]
+    let oldJSON = String(decoding: try JSONEncoder().encode(old), as: UTF8.self)
+    let legacy = try CanvasBoardContent.decode(oldJSON)
+    #expect(legacy.scene == nil && legacy.legacy?.cards.first?.recordID == "r1")
+    #expect(legacy.legacyRaw == oldJSON)
+
+    // After conversion the scene is stored in the new format with the original alongside.
+    var converted = legacy
+    converted.scene = [
+      "elements": [
+        ["id": "e1", "type": "rectangle", "customData": ["synthesis": "card", "recordID": "r1"]],
+        ["id": "e2", "type": "text"],
+      ],
+      "appState": ["zoom": 1.0], "files": [String: Any](),
+    ]
+    converted.hiddenRelations = ["rel-1"]
+    let stored = try converted.encoded()
+    let reopened = try CanvasBoardContent.decode(stored)
+    #expect(reopened.counts.cards == 1 && reopened.counts.elements == 2)
+    #expect(reopened.hiddenRelations == ["rel-1"] && reopened.legacy == nil)
+    let kept = try #require(reopened.legacyRaw)
+    #expect(try JSONDecoder().decode(CanvasDocument.self, from: Data(kept.utf8)) == old)
+    #expect(try CanvasBoardContent.decode(try reopened.encoded()).counts.cards == 1)
+
+    // New empty boards and seed layouts both open; unreadable data is refused, not replaced.
+    #expect(try CanvasBoardContent.decode(CanvasBoardContent.empty).counts.elements == 0)
+    #expect(try CanvasBoardContent.decode("{}").legacy?.cards.isEmpty == true)
+    #expect(throws: Error.self) { try CanvasBoardContent.decode("not-json") }
+    #expect(throws: Error.self) { try CanvasBoardContent.decode("[1,2,3]") }
+    #expect(throws: Error.self) { try CanvasBoardContent.decode(#"{"unexpected":true}"#) }
   }
 
 }
