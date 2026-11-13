@@ -12,7 +12,7 @@
 1. Confirm card dragging with a clean self-test run; mount the web view once at the shell level.
 2. Rebuild "reference in conversation", card artwork and "show on canvas" on the new engine.
 3. Prune unused bundle chunks (locales, Mermaid) if size matters.
-4. Apply the owner's visual references: dot-matrix world-composition bar and pixel-icon glass toggle.
+4. ~~Owner's visual references~~ — done: `WorldComposition` / `DotMatrixBar` in Library, `PixelThemeToggle` for appearance. Extending the style further waits on the owner.
 
 ## Then — finish M3
 

@@ -214,11 +214,7 @@ struct Sidebar: View {
           t: studio.t, title: "Settings", icon: "gearshape", selected: false, collapsed: false,
           trailing: nil
         ) { studio.sheet = .settings }
-        IconButton(
-          icon: studio.dark ? "sun.max" : "moon",
-          label: studio.dark ? "Switch to light appearance" : "Switch to dark appearance",
-          t: studio.t, size: 30
-        ) { studio.toggleTheme() }
+        PixelThemeToggle(studio: studio, thumb: 22).padding(.trailing, 2)
       }
     }
   }

@@ -112,6 +112,10 @@ struct LibraryScreen: View {
       } else {
         ScrollView {
           LazyVStack(spacing: 1) {
+            if filter == .all, studio.libraryCategory == nil, query.isEmpty {
+              WorldComposition(studio: studio).padding(.horizontal, 8).padding(.top, 6)
+                .padding(.bottom, 12)
+            }
             ForEach(rows) { record in
               RecordRow(studio: studio, record: record, archived: filter == .archived) {
                 refreshArchive()

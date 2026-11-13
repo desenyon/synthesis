@@ -10,6 +10,7 @@ Read [HANDOFF.md](HANDOFF.md) for the working details of the newest pieces and w
 - **Canvas on the Excalidraw engine**: free drawing, shapes, text, images and frames, with Synthesis record cards and relationship arrows. The earlier boards convert on first open and the original layout is kept. Verified in the running app: board loads with 4 cards and 3 relationship arrows, conversion is saved, double-click opens a record, returning to Canvas shows the same board, companion docks and resizes.
 - Library, editor with canon diff, Graph, Timeline, Atlas, Review (proposals, canon queue, local checks).
 - Import Markdown/text; export Markdown folder or full JSON.
+- Library opens with a world-composition card (dot-matrix bar of real counts by kind); the appearance switch is a pixel-icon glass toggle. Both follow the owner's 2026-11-13 references and were inspected in dark and light.
 
 ## Checks run on this state
 

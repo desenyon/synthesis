@@ -168,24 +168,8 @@ struct StudioSheet: View {
         VStack(alignment: .leading, spacing: 20) {
           group("Assistant") { assistant }
           group("Appearance") {
-            settingRow("Theme") {
-              HStack(spacing: 2) {
-                ForEach([("Dark", true), ("Light", false)], id: \.0) { item in
-                  Button {
-                    if studio.dark != item.1 { studio.toggleTheme() }
-                  } label: {
-                    Text(item.0).font(.system(size: 12.5, weight: .medium))
-                      .padding(.horizontal, 12).frame(height: 24)
-                      .foregroundStyle(studio.dark == item.1 ? studio.t.text : studio.t.muted)
-                      .background(
-                        studio.dark == item.1 ? studio.t.secondarySurface : .clear,
-                        in: RoundedRectangle(cornerRadius: 6)
-                      )
-                      .contentShape(Rectangle())
-                  }.buttonStyle(.plain)
-                }
-              }.padding(2).background(studio.t.background, in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(studio.t.hairline, lineWidth: 1))
+            settingRow("Theme", studio.dark ? "Dark" : "Light") {
+              PixelThemeToggle(studio: studio, thumb: 30)
             }
           }
           group("This world") {
