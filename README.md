@@ -4,6 +4,8 @@ A native macOS worldbuilding studio. **Current milestone: UI design and interact
 
 The latest UI replaces the earlier light editorial design with a graphite infinite canvas, compact modular navigation, a floating guided-chat composer, and an integrated draggable header. There is no separate macOS title bar, fake window chrome or embedded webpage.
 
+![Current native canvas UI](docs/verification/canvas-final/canvas-1440x900.png)
+
 ## Run the UI study
 
 ```sh
@@ -28,7 +30,7 @@ This is a **local UI walkthrough**, not a connected AI session. Guide prompts ar
 
 ## Design and evidence
 
-[Current UI direction](docs/UI_DIRECTION.md) · [Current state](docs/STATE.md) · [Roadmap](docs/ROADMAP.md) · [Decisions](docs/DECISIONS.md)
+[Native review evidence](docs/verification/UI_REVIEW.md) · [Current UI direction](docs/UI_DIRECTION.md) · [Current state](docs/STATE.md) · [Roadmap](docs/ROADMAP.md) · [Decisions](docs/DECISIONS.md)
 
 The new design follows the latest supplied canvas/module/chat references. Earlier `docs/design/*.html` and `docs/verification/round1` / `round2` are superseded studies, not the current UI.
 

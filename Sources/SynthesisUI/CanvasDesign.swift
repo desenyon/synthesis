@@ -607,7 +607,7 @@ public struct CanvasDesignRoot: View {
       }
       switch overlay {
       case .search:
-        TextField("Search fragments and modules", text: $model.query).textFieldStyle(.plain)
+        TextField("Search canvas fragments", text: $model.query).textFieldStyle(.plain)
           .padding(12).background(model.t.base, in: RoundedRectangle(cornerRadius: 7))
         ScrollView {
           VStack(spacing: 4) {
@@ -654,7 +654,7 @@ public struct CanvasDesignRoot: View {
       case .appearance:
         Toggle("Dark appearance", isOn: $model.dark).toggleStyle(.switch)
         Toggle("ASCII landscape", isOn: $model.scenery).toggleStyle(.switch)
-        Text("The landscape is a cached image. There are no continuous background effects.").font(
+        Text("A quiet landscape behind your canvas.").font(
           .system(size: 12)
         ).foregroundStyle(model.t.secondary)
       }

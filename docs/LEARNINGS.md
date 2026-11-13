@@ -1,6 +1,6 @@
 # Learnings
 
-No AGENTS.md amendments yet. Preserve operational instructions until actual execution produces a durable, verified lesson.
+Instruction changes below are evidence-backed owner corrections and operational fixes; protected canon and privacy rules remain intact.
 
 ## Owner-directed correction: complete rebuild
 
@@ -23,3 +23,5 @@ Independent review reproduced a queued-request cancellation race: cancel before 
 Owner explicitly rejected the light editorial interface and requested a compact reference-driven canvas UI first. AGENTS initial-experience paragraph now records that direction and pauses feature expansion. Protected canon/privacy/history requirements are unchanged. Evidence: latest owner message and three new reference images. Validation: actual optimized native UI, screenshots and interaction walkthrough. Rollback: owner-directed change only; previous implementation remains at f35e968.
 
 Performance corrections in the UI study: isolate composer draft and viewport state, commit node movement at drag end, and pre-render ASCII scenery. An idle process observation showed 0.0% CPU and 139008 KB RSS; this is not a frame-rate measurement.
+
+Final UI inspection caught clipped starter cards in smaller windows and cards touching the composer. Initial framing now fits visible fragments into the space above the composer; manual pan/zoom remains available. Module-specific starter chips now match their guide questions.
