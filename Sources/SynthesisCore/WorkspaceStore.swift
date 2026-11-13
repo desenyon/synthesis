@@ -1,0 +1,156 @@
+import Foundation
+
+public final class WorkspaceStore {
+    private let db: Database
+    public init(path: String) throws { db = try Database(path: path) }
+    public static var defaultPath: String {
+        ProcessInfo.processInfo.environment["SYNTHESIS_DATABASE_PATH"] ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Synthesis/synthesis.sqlite").path
+    }
+    public func preference(_ key: String) throws -> String? { try db.rows("SELECT value FROM preferences WHERE key=?", [key]).first?["value"] }
+    public func setPreference(_ key: String, value: String) throws { try db.execute("INSERT INTO preferences(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", [key,value]) }
+    public func worlds() throws -> [World] { try db.rows("SELECT * FROM worlds WHERE owner_id='local' ORDER BY created_at,rowid").map { World(id: $0["id"]!,name: $0["name"]!,description: $0["description"]!,demo: $0["demo"] == "1") } }
+    public func world(_ id: String) throws -> World { guard let world = try worlds().first(where: { $0.id == id }) else { throw SynthesisError.notFound }; return world }
+    public func createWorld(name: String, description: String = "", demo: Bool = false) throws -> World {
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty, name.count <= 100 else { throw SynthesisError.invalid("Give your world a name of up to 100 characters.") }
+        let id = UUID().uuidString, now = timestamp()
+        try db.execute("INSERT INTO worlds VALUES(?,'local',?,?,?,?,?)", [id,name,description,demo ? "1":"0",now,now])
+        return try world(id)
+    }
+    private func decodeRecord(_ row: [String: String]) -> LoreRecord {
+        LoreRecord(id: row["id"]!,worldID: row["world_id"]!,title: row["title"]!,body: row["body"]!,kind: row["kind"]!,category: row["category"]!,state: row["state"]!,origin: row["origin"]!,version: Int(row["version"]!)!,canonical: row["canonical"],rtf: row["rtf"],updatedAt: row["updated_at"]!)
+    }
+    public func records(worldID: String) throws -> [LoreRecord] {
+        _ = try world(worldID)
+        return try db.rows("SELECT r.*,d.rtf FROM records r LEFT JOIN rich_documents d ON d.record_id=r.id WHERE r.world_id=? ORDER BY r.updated_at DESC,r.rowid DESC", [worldID]).map(decodeRecord)
+    }
+    public func record(worldID: String, id: String) throws -> LoreRecord {
+        _ = try world(worldID)
+        guard let row = try db.rows("SELECT r.*,d.rtf FROM records r LEFT JOIN rich_documents d ON d.record_id=r.id WHERE r.world_id=? AND r.id=?", [worldID,id]).first else { throw SynthesisError.notFound }
+        return decodeRecord(row)
+    }
+    private func snapshot(_ r: LoreRecord) throws {
+        let data = try JSONEncoder().encode(r)
+        try db.execute("INSERT INTO native_revisions VALUES(?,?,?,?,?,?)", [UUID().uuidString,r.worldID,r.id,String(r.version),String(decoding: data,as: UTF8.self),timestamp()])
+    }
+    public func createRecord(worldID: String, title: String, body: String = "", kind: String = "lore", category: String = "", origin: String = "user-authored") throws -> LoreRecord {
+        _ = try world(worldID)
+        guard ["lore","entity","capture"].contains(kind), !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, title.count <= 160, body.count <= 200000 else { throw SynthesisError.invalid("Choose a title and keep the document under 200,000 characters.") }
+        return try db.transaction {
+            let id = UUID().uuidString, now = timestamp()
+            try db.execute("INSERT INTO records(id,world_id,kind,title,body,category,tags,aliases,state,origin,canonical,version,created_at,updated_at) VALUES(?,?,?,?,?,?,'[]','[]',?,?,NULL,1,?,?)", [id,worldID,kind,title,body,category,kind == "capture" ? "idea":"draft",origin,now,now])
+            let r = try record(worldID: worldID,id: id); try snapshot(r); return r
+        }
+    }
+    public func saveRecord(worldID: String,id: String,version: Int,title: String,body: String,rtf: String?,category: String? = nil) throws -> LoreRecord {
+        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,title.count <= 160,body.count <= 200000,(rtf?.count ?? 0) < 4_000_000 else { throw SynthesisError.invalid("A title is required. Keep the document under 200,000 characters.") }
+        return try db.transaction {
+            let current = try record(worldID: worldID,id: id)
+            guard current.version == version else { throw SynthesisError.stale }
+            try db.execute("UPDATE records SET title=?,body=?,category=?,state=?,version=version+1,updated_at=? WHERE id=? AND world_id=?", [title,body,category ?? current.category,current.kind == "capture" ? "idea":"draft",timestamp(),id,worldID])
+            if let rtf { try db.execute("INSERT INTO rich_documents VALUES(?,?) ON CONFLICT(record_id) DO UPDATE SET rtf=excluded.rtf", [id,rtf]) }
+            else { try db.execute("DELETE FROM rich_documents WHERE record_id=?", [id]) }
+            let r = try record(worldID: worldID,id: id); try snapshot(r); return r
+        }
+    }
+    public func convertCapture(worldID: String,id: String) throws -> LoreRecord {
+        try db.transaction {
+            let r = try record(worldID: worldID,id: id)
+            if r.kind == "lore" { return r }
+            guard r.kind == "capture" else { throw SynthesisError.invalid("Only an inbox idea can be converted.") }
+            try db.execute("UPDATE records SET kind='lore',state='draft',version=version+1,updated_at=? WHERE id=?", [timestamp(),id])
+            let updated = try record(worldID: worldID,id: id); try snapshot(updated); return updated
+        }
+    }
+    public func promote(worldID: String,id: String,version: Int,confirmation: String) throws -> LoreRecord {
+        guard confirmation == id else { throw SynthesisError.invalid("Explicit approval of this exact record is required.") }
+        return try db.transaction {
+            let r = try record(worldID: worldID,id: id)
+            guard r.version == version else { throw SynthesisError.stale }
+            guard r.kind != "capture" else { throw SynthesisError.invalid("Convert this idea into a document before canon review.") }
+            let canonical = String(decoding: try JSONEncoder().encode(r),as: UTF8.self)
+            try db.execute("UPDATE records SET state='canon',canonical=?,version=version+1,updated_at=? WHERE id=?", [canonical,timestamp(),id])
+            let accepted = try record(worldID: worldID,id: id); try snapshot(accepted); return accepted
+        }
+    }
+    public func history(worldID: String,id: String) throws -> [RecordRevision] {
+        _ = try record(worldID: worldID,id: id)
+        return try db.rows("SELECT * FROM native_revisions WHERE world_id=? AND record_id=? ORDER BY version DESC", [worldID,id]).map {
+            RecordRevision(id: $0["id"]!,version: Int($0["version"]!)!,snapshot: try JSONDecoder().decode(LoreRecord.self,from: Data($0["snapshot"]!.utf8)),createdAt: $0["created_at"]!)
+        }
+    }
+    public func search(worldID: String,query: String) throws -> [LoreRecord] {
+        _ = try world(worldID)
+        let tokens = query.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }.prefix(20)
+        guard !tokens.isEmpty else { return [] }
+        let match = tokens.map { "\"\($0)\"*" }.joined(separator: " AND ")
+        let ids = try db.rows("SELECT id FROM records_fts WHERE records_fts MATCH ? AND world_id=? ORDER BY rank LIMIT 50", [match,worldID])
+        return try ids.map { try record(worldID: worldID,id: $0["id"]!) }
+    }
+    public func conversations(worldID: String) throws -> [Conversation] {
+        _ = try world(worldID)
+        return try db.rows("SELECT * FROM conversations WHERE world_id=? ORDER BY updated_at DESC,rowid DESC", [worldID]).map { Conversation(id: $0["id"]!,worldID: worldID,title: $0["title"]!,updatedAt: $0["updated_at"]!) }
+    }
+    public func createConversation(worldID: String,title: String = "New conversation") throws -> Conversation {
+        _ = try world(worldID); let id = UUID().uuidString, now = timestamp()
+        try db.execute("INSERT INTO conversations VALUES(?,?,?,?,?)", [id,worldID,String(title.prefix(120)),now,now])
+        return Conversation(id: id,worldID: worldID,title: String(title.prefix(120)),updatedAt: now)
+    }
+    public func renameConversation(worldID: String,id: String,title: String) throws {
+        _ = try messages(worldID: worldID,conversationID: id)
+        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw SynthesisError.invalid("A conversation needs a name.") }
+        try db.execute("UPDATE conversations SET title=?,updated_at=? WHERE id=? AND world_id=?", [String(title.prefix(120)),timestamp(),id,worldID])
+    }
+    public func messages(worldID: String,conversationID: String) throws -> [ChatMessage] {
+        guard try conversations(worldID: worldID).contains(where: { $0.id == conversationID }) else { throw SynthesisError.notFound }
+        return try db.rows("SELECT * FROM messages WHERE conversation_id=? AND world_id=? ORDER BY rowid", [conversationID,worldID]).map { ChatMessage(id: $0["id"]!,worldID: worldID,conversationID: conversationID,role: $0["role"]!,body: $0["body"]!,state: $0["state"]!) }
+    }
+    @discardableResult public func appendMessage(worldID: String,conversationID: String,role: String,body: String,state: String) throws -> ChatMessage {
+        _ = try messages(worldID: worldID,conversationID: conversationID)
+        guard ["user","assistant","system"].contains(role),body.count <= 300000 else { throw SynthesisError.invalid("Invalid message.") }
+        let id = UUID().uuidString, now = timestamp()
+        try db.execute("INSERT INTO messages VALUES(?,?,?,?,?,?,?,?)", [id,worldID,conversationID,role,body,state,now,now])
+        try db.execute("UPDATE conversations SET updated_at=? WHERE id=?", [now,conversationID])
+        return ChatMessage(id: id,worldID: worldID,conversationID: conversationID,role: role,body: body,state: state)
+    }
+    public func addRelation(worldID: String,source: String,target: String,label: String) throws -> Relation {
+        let a = try record(worldID: worldID,id: source),b = try record(worldID: worldID,id: target)
+        guard a.kind == "entity",b.kind == "entity",source != target,!label.isEmpty,label.count <= 80 else { throw SynthesisError.invalid("Choose two different entities and a relationship label.") }
+        let id = UUID().uuidString, now = timestamp()
+        try db.execute("INSERT INTO relationships VALUES(?,?,?,?,?,'draft','user-authored',?,?)", [id,worldID,source,target,label,now,now])
+        return Relation(id:id,sourceID:source,targetID:target,label:label)
+    }
+    public func relations(worldID: String) throws -> [Relation] {
+        _ = try world(worldID)
+        return try db.rows("SELECT * FROM relationships WHERE world_id=?", [worldID]).map { Relation(id:$0["id"]!,sourceID:$0["source_id"]!,targetID:$0["target_id"]!,label:$0["label"]!) }
+    }
+    public func addEvent(worldID: String,title: String,date: String,source: String,order: Int? = nil) throws -> WorldEvent {
+        _ = try record(worldID:worldID,id:source)
+        guard !title.isEmpty,title.count <= 160,date.count <= 160 else { throw SynthesisError.invalid("Give the event a short title and date label.") }
+        let id=UUID().uuidString,now=timestamp(),label=date.isEmpty ? "unknown":date
+        try db.execute("INSERT INTO events(id,world_id,title,date_label,sort_order,source_id,body,created_at,updated_at) VALUES(?,?,?,?,?,?,'',?,?)", [id,worldID,title,label,order.map(String.init),source,now,now])
+        return WorldEvent(id:id,title:title,dateLabel:label,sourceID:source,order:order)
+    }
+    public func events(worldID:String) throws -> [WorldEvent] {
+        _ = try world(worldID)
+        return try db.rows("SELECT * FROM events WHERE world_id=? ORDER BY sort_order IS NULL,sort_order,created_at", [worldID]).map { WorldEvent(id:$0["id"]!,title:$0["title"]!,dateLabel:$0["date_label"]!,sourceID:$0["source_id"]!,order:$0["sort_order"].flatMap(Int.init)) }
+    }
+    public func saveBoard(worldID:String,id:String?=nil,name:String,kind:String,content:String) throws -> Board {
+        _ = try world(worldID)
+        guard content.utf8.count <= 12_000_000,["canvas","atlas"].contains(kind) else { throw SynthesisError.invalid("Workspace is too large or has an unknown type.") }
+        if let id { guard try boards(worldID:worldID,kind:kind).contains(where:{$0.id==id}) else {throw SynthesisError.notFound} }
+        let actual=id ?? UUID().uuidString,now=timestamp()
+        try db.execute("INSERT INTO boards VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,content=excluded.content,updated_at=excluded.updated_at",[actual,worldID,name,content,kind,now,now])
+        return Board(id:actual,name:name,kind:kind,content:content)
+    }
+    public func boards(worldID:String,kind:String) throws -> [Board] {
+        _ = try world(worldID)
+        return try db.rows("SELECT * FROM boards WHERE world_id=? AND kind=? ORDER BY created_at",[worldID,kind]).map {Board(id:$0["id"]!,name:$0["name"]!,kind:$0["kind"]!,content:$0["content"]!)}
+    }
+    public func exportWorld(_ id:String) throws -> Data {
+        struct Export:Codable { var schemaVersion=1;var world:World;var records:[LoreRecord];var conversations:[Conversation];var messages:[ChatMessage];var relationships:[Relation];var events:[WorldEvent];var boards:[Board];var revisions:[RecordRevision] }
+        let chats=try conversations(worldID:id),pages=try records(worldID:id)
+        let export=try Export(world:world(id),records:pages,conversations:chats,messages:chats.flatMap{try messages(worldID:id,conversationID:$0.id)},relationships:relations(worldID:id),events:events(worldID:id),boards:boards(worldID:id,kind:"canvas")+boards(worldID:id,kind:"atlas"),revisions:pages.flatMap{try history(worldID:id,id:$0.id)})
+        let encoder=JSONEncoder();encoder.outputFormatting=[.prettyPrinted,.sortedKeys];return try encoder.encode(export)
+    }
+}

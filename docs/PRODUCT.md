@@ -1,9 +1,11 @@
-# WorldOS
+# Synthesis
 
-A local, single-creator IDE for fictional worlds. Freeform Markdown is the writing surface; stable entities and typed connections are the memory. A three-pane shell places navigation, writing, and contextual assistance together. Slate-black surfaces, icy-blue selection, restrained serif document headings, and compact sans-serif controls establish the visual system.
+A native macOS creative studio for fictional universes. Conversation is the default in AI Assisted mode. Manual mode is an independent writing and organization workspace and blocks model requests in the core. Light layered surfaces, warm charcoal dark mode, editorial headings, system sans-serif controls and a restrained ASCII orbital background form the current design system.
 
-Primary journey: create a world → capture an idea → convert it to a draft page → create and link an entity → search → follow relationships in the graph or sources in the timeline. Save status, revision history, and recoverable drafts protect writing.
+The header holds world selection, mode and appearance. The navigation collapses from 240 to 68 points; at narrow widths it becomes a temporary drawer. The central workspace has no permanent AI sidebar. The application uses real macOS window controls outside its content.
 
-Canon is deliberate. Editing a canonical page produces a draft revision while the accepted snapshot remains intact. A scoped review action accepts that exact revision. AI may only stage proposals; the provider never receives approval tools. Proposals retain evidence, base revisions, and before/after content.
+Current daily journey: create a world, capture an idea, write in the native rich editor, convert the capture into a document, create entities, search the active world's material and reopen saved work. Chat history and preferences persist in local SQLite. No model key is required for manual work.
 
-Non-goals for this release: public hosting, collaboration, custom calendars, branching, maps, rich block editing, embeddings, and autonomous simulations. Markdown remains fully reconstructable and exportable.
+Canon is deliberate: saving modifies the working draft; accepted canon is a separate snapshot. The creator reviews current accepted text and the exact proposed revision before explicitly promoting it. AI has no canon acceptance capability. History is retained. All UI content and imported lore are untrusted data.
+
+Canvas, graph, timeline and atlas are successive native workspaces sharing the same store. Their implementation status is tracked in STATE.md, not inferred from navigation entries. Branches, custom calendars, collaboration and advanced simulation are later work.
