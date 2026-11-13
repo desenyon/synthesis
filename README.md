@@ -50,6 +50,8 @@ uv run --with pillow python scripts/contact-sheets.py docs/verification/latest -
 
 The suite (41 tests) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Visual checks use the real native window, never HTML previews. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the audit checklist and evidence are in [AUDIT](docs/verification/AUDIT.md).
 
+The assistant uses Claude Code or Codex with your subscription by default (no API key), or an OpenAI key if you prefer; see [AI setup](docs/AI_SETUP.md).
+
 Data: `~/Library/Application Support/Synthesis/synthesis.sqlite`, overridable with `SYNTHESIS_DATABASE_PATH`. Keys remain in macOS Keychain. See [AI setup](docs/AI_SETUP.md), [architecture](docs/ARCHITECTURE.md), [design direction](docs/UI_DIRECTION.md), [roadmap](docs/ROADMAP.md).
 
 Typing in ⌘K also offers to capture the text as an idea. Worlds export as a folder of Markdown files or as complete JSON; Markdown and text files import as drafts.

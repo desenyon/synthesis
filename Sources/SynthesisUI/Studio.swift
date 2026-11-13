@@ -77,6 +77,10 @@ public struct Toast: Identifiable {
   @Published public var sheet: Sheet?
   @Published public var palette = false
   @Published public var providerConfigured = false
+  @Published public var provider = ProviderKind.claudeCode
+  @Published public var providerStatus: ProviderStatus?
+  @Published public var checkingProvider = false
+  @Published public var harnessModels: [ProviderKind: String] = [:]
   @Published public var modelName = ""
   @Published public var editorSave: (() -> Bool)?
   @Published public var canvasBoardID: String?
@@ -109,13 +113,32 @@ public struct Toast: Identifiable {
   public init(store: WorkspaceStore, transport: (any ModelTransport)? = nil) throws {
     self.store = store
     let configuredModel = try store.preference("model") ?? ""
+    // Requests go to whichever provider is selected when they are sent. The transports read
+    // the choice from defaults so they stay independent of this observable object.
+    let setting: @Sendable (String) -> String = {
+      UserDefaults.standard.string(forKey: $0) ?? ""
+    }
     self.engine = AgentEngine(
       store: store,
       transport: transport
-        ?? OpenAITransport(model: { UserDefaults.standard.string(forKey: "Synthesis.model") ?? "" })
-    )
+        ?? ProviderRouter(
+          kind: { ProviderKind(rawValue: setting("Synthesis.provider")) ?? .claudeCode },
+          claude: ClaudeCodeTransport(model: { setting("Synthesis.model.claude-code") }),
+          codex: CodexTransport(model: { setting("Synthesis.model.codex") }),
+          openAI: OpenAITransport(model: { setting("Synthesis.model") })))
     modelName = configuredModel
     UserDefaults.standard.set(configuredModel, forKey: "Synthesis.model")
+    // Default to a local harness signed in with a subscription; an API key is the fallback.
+    provider =
+      try store.preference("provider").flatMap(ProviderKind.init(rawValue:))
+      ?? (HarnessLocator.find(.claudeCode) != nil
+        ? .claudeCode : (HarnessLocator.find(.codex) != nil ? .codex : .openAI))
+    UserDefaults.standard.set(provider.rawValue, forKey: "Synthesis.provider")
+    for kind in [ProviderKind.claudeCode, .codex] {
+      let value = try store.preference("model:\(kind.rawValue)") ?? ""
+      harnessModels[kind] = value
+      UserDefaults.standard.set(value, forKey: "Synthesis.model.\(kind.rawValue)")
+    }
     worlds = try store.worlds()
     if worlds.isEmpty { worlds = [try store.createWorld(name: "My world")] }
     let last = try store.preference("world")
@@ -129,8 +152,54 @@ public struct Toast: Identifiable {
       try store.preference("destination").flatMap(Destination.init(rawValue:))
       ?? (mode == .manual ? .canvas : .chat)
     draft = try store.preference("composer:\(worldID)") ?? ""
-    providerConfigured = ProviderKeychain.configured && !configuredModel.isEmpty
+    refreshProviderAvailability()
     try reload()
+  }
+
+  // MARK: Provider
+
+  /// Whether the selected provider can be used at all: a harness that is installed, or a
+  /// stored API key with a model. Sign-in is the harness's own concern and is checked on demand.
+  public func refreshProviderAvailability() {
+    switch provider {
+    case .openAI: providerConfigured = ProviderKeychain.configured && !modelName.isEmpty
+    default: providerConfigured = HarnessLocator.find(provider) != nil
+    }
+  }
+  public func setProvider(_ kind: ProviderKind) {
+    guard kind != provider else { return }
+    stop()
+    perform {
+      try store.setPreference("provider", value: kind.rawValue)
+      provider = kind
+      UserDefaults.standard.set(kind.rawValue, forKey: "Synthesis.provider")
+      providerStatus = nil
+      refreshProviderAvailability()
+    }
+  }
+  public func setHarnessModel(_ value: String, for kind: ProviderKind) {
+    let model = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    perform {
+      try store.setPreference("model:\(kind.rawValue)", value: model)
+      harnessModels[kind] = model
+      UserDefaults.standard.set(model, forKey: "Synthesis.model.\(kind.rawValue)")
+    }
+  }
+  /// Asks the harness for its own sign-in status. No model request is made.
+  public func checkProvider() {
+    let kind = provider
+    checkingProvider = true
+    Task { @MainActor [weak self] in
+      let status = await ProviderStatus.check(kind)
+      guard let self, self.provider == kind else { return }
+      self.providerStatus = status
+      self.checkingProvider = false
+      self.refreshProviderAvailability()
+    }
+  }
+  /// One line for the composer: who receives a message if it is sent now.
+  public var providerDisclosure: String {
+    "Sending shares this message and world context with \(provider.recipient)."
   }
   public func reload() throws {
     worlds = try store.worlds()

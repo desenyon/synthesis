@@ -44,3 +44,7 @@ The owner accepted the graphite foundation and explicitly authorized integration
 - **Confirmation by ID.** `resolveChange` requires the proposal's ID, as `promote` requires the record's, so the approval boundary is a property of the store API and is covered by a test.
 - **Context is recorded, not just sent.** Every answer stores the records it was given and why, satisfying traceability and making the privacy disclosure concrete.
 - **Mentions are tokens over Markdown.** The stored message keeps `[Title](synthesis://record/id)`; the composer shows a token. Old drafts and transcripts need no migration.
+
+## 2026-11-13 — owner direction: subscription harness by default (protected)
+
+The owner directed that the assistant should not depend on an API key: the default is a local harness signed in with a subscription, with the API still allowed. Implemented as Claude Code (preferred when installed, because it can run with no tools at all) or Codex, with the OpenAI key as a third option. The harness is spawned per message and locked down as described in AI_SETUP. Alternatives considered: the Claude Agent SDK (adds a Node runtime to a native app for no gain over the CLI already installed) and a long-lived harness session (keeps context between turns but makes cancellation, isolation and the Manual-mode guarantee harder to prove). Both harnesses were verified live once; see AI_SETUP.

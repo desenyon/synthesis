@@ -16,7 +16,9 @@ struct StudioSheet: View {
     self.sheet = sheet
     _kind = State(initialValue: studio.newRecordKind)
     _category = State(initialValue: studio.libraryCategory ?? "")
-    _model = State(initialValue: studio.modelName)
+    _model = State(
+      initialValue: studio.provider.usesSubscription
+        ? (studio.harnessModels[studio.provider] ?? "") : studio.modelName)
     _worldName = State(initialValue: studio.world?.name ?? "")
     let target = studio.renameTarget ?? studio.conversationID
     _name = State(
@@ -164,6 +166,7 @@ struct StudioSheet: View {
     SheetScaffold(title: "Settings", t: studio.t, width: 520, close: close) {
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
+          group("Assistant") { assistant }
           group("Appearance") {
             settingRow("Theme") {
               HStack(spacing: 2) {
@@ -220,49 +223,6 @@ struct StudioSheet: View {
               }.buttonStyle(QuietButton(t: studio.t))
             }
           }
-          group("Assistant") {
-            HStack(spacing: 8) {
-              Circle().fill(studio.providerConfigured ? studio.t.positive : studio.t.muted)
-                .frame(width: 7, height: 7)
-              Text(
-                studio.providerConfigured
-                  ? "Connected to OpenAI · \(studio.modelName)" : "No model connected"
-              ).font(.system(size: 13.5, weight: .medium))
-            }
-            Text(
-              "Optional. Every manual tool works without a provider. A request is made only when you send a message; it shares that message and context from the selected world with OpenAI."
-            ).font(.system(size: 12.5)).foregroundStyle(studio.t.secondary).lineSpacing(3)
-              .fixedSize(horizontal: false, vertical: true)
-            FormField(
-              label: "API key · kept in macOS Keychain",
-              placeholder: studio.providerConfigured
-                ? "Stored — leave blank to keep it" : "OpenAI API key", text: $key, t: studio.t,
-              secure: true)
-            FormField(
-              label: "Model ID", placeholder: "A model available to your account", text: $model,
-              t: studio.t)
-            HStack(spacing: 8) {
-              Button("Save connection") { saveConnection() }
-                .buttonStyle(QuietButton(t: studio.t, primary: true))
-                .disabled(
-                  model.trimmingCharacters(in: .whitespaces).isEmpty
-                    || (key.isEmpty && !ProviderKeychain.configured))
-              if studio.providerConfigured {
-                Button("Disconnect") {
-                  studio.stop()
-                  studio.perform {
-                    try ProviderKeychain.remove()
-                    studio.providerConfigured = false
-                    saved = false
-                  }
-                }.buttonStyle(QuietButton(t: studio.t, role: .danger))
-              }
-              if saved {
-                Label("Saved. No request was made.", systemImage: "checkmark")
-                  .font(.system(size: 12.5)).foregroundStyle(studio.t.positive)
-              }
-            }
-          }
           if !studio.worlds.contains(where: { $0.demo }) {
             group("Sample") {
               settingRow(
@@ -283,6 +243,149 @@ struct StudioSheet: View {
       Button("Done", action: close).buttonStyle(QuietButton(t: studio.t, primary: true))
     }
   }
+  /// Provider choice. A local harness signed in with a subscription is the default; an API
+  /// key is available for those who prefer it. Synthesis never sees harness credentials.
+  @ViewBuilder private var assistant: some View {
+    let t = studio.t
+    Text(
+      "Optional — every manual tool works without it. A request is made only when you send a message."
+    ).font(.system(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(3)
+      .fixedSize(horizontal: false, vertical: true)
+    VStack(spacing: 6) {
+      ForEach(ProviderKind.allCases) { kind in
+        let selected = studio.provider == kind
+        Button {
+          studio.setProvider(kind)
+          if kind.usesSubscription { studio.checkProvider() }
+        } label: {
+          HStack(spacing: 10) {
+            Image(systemName: selected ? "largecircle.fill.circle" : "circle")
+              .font(.system(size: 14)).foregroundStyle(selected ? t.accent : t.muted)
+            VStack(alignment: .leading, spacing: 2) {
+              Text(kind.title).font(.system(size: 13.5, weight: .medium))
+              Text(
+                kind == .claudeCode
+                  ? "Uses your Claude subscription through the Claude Code app on this Mac"
+                  : kind == .codex
+                    ? "Uses your ChatGPT subscription through Codex on this Mac"
+                    : "Pay-as-you-go with your own key, kept in macOS Keychain"
+              ).font(.system(size: 12)).foregroundStyle(t.muted)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            if kind.usesSubscription && HarnessLocator.find(kind) == nil {
+              Text("Not installed").font(.system(size: 11.5, weight: .medium))
+                .foregroundStyle(t.muted)
+            } else if kind == ProviderKind.allCases.first(where: { HarnessLocator.find($0) != nil })
+            {
+              Text("Recommended").font(.system(size: 11.5, weight: .medium))
+                .foregroundStyle(t.accent)
+            }
+          }.padding(10).frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+              selected ? t.accentSoft.opacity(0.5) : t.background.opacity(0.5),
+              in: RoundedRectangle(cornerRadius: 9)
+            )
+            .overlay(
+              RoundedRectangle(cornerRadius: 9).stroke(
+                selected ? t.accent.opacity(0.5) : t.hairline, lineWidth: 1)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 9))
+        }.buttonStyle(.plain).accessibilityAddTraits(selected ? .isSelected : [])
+      }
+    }
+    if studio.provider.usesSubscription { harness } else { apiKey }
+  }
+  @ViewBuilder private var harness: some View {
+    let t = studio.t
+    let kind = studio.provider
+    let installed = HarnessLocator.find(kind) != nil
+    HStack(spacing: 8) {
+      Circle().fill(
+        !installed
+          ? t.muted
+          : (studio.providerStatus.map { $0.signedIn ? t.positive : t.warning } ?? t.accent)
+      ).frame(width: 7, height: 7)
+      Text(
+        !installed
+          ? "\(kind.title) was not found"
+          : (studio.providerStatus?.detail ?? "Installed · sign-in not checked yet")
+      ).font(.system(size: 13, weight: .medium)).fixedSize(horizontal: false, vertical: true)
+      Spacer(minLength: 8)
+      if installed {
+        Button(studio.checkingProvider ? "Checking…" : "Check sign-in") { studio.checkProvider() }
+          .buttonStyle(QuietButton(t: t)).disabled(studio.checkingProvider)
+          .help("Asks \(kind.title) for its status. No message is sent.")
+      }
+    }
+    Text(
+      !installed
+        ? "Install \(kind.title), open Terminal and run `\(kind == .claudeCode ? "claude" : "codex login")` to sign in, then come back here."
+        : kind == .claudeCode
+          ? "Synthesis starts Claude Code for each message with all tools, plugins and settings files turned off, in an empty folder. It can only read what you send and write text. Your sign-in stays inside Claude Code."
+          : "Synthesis starts Codex for each message in a read-only sandbox and an empty folder, without your Codex config, rules, apps or plugins. Your sign-in stays inside Codex."
+    ).font(.system(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(3)
+      .fixedSize(horizontal: false, vertical: true)
+    if installed {
+      HStack(alignment: .bottom, spacing: 8) {
+        FormField(
+          label: "Model (optional)",
+          placeholder: kind == .claudeCode
+            ? "Leave empty for your default, or sonnet, opus, haiku…"
+            : "Leave empty for your default", text: $model, t: t
+        ) { studio.setHarnessModel(model, for: kind) }
+        Button("Save") {
+          studio.setHarnessModel(model, for: kind)
+          saved = true
+        }.buttonStyle(QuietButton(t: t)).padding(.bottom, 2)
+          .disabled(
+            model.trimmingCharacters(in: .whitespaces) == (studio.harnessModels[kind] ?? ""))
+      }.onChange(of: studio.provider) { _, value in
+        model = value.usesSubscription ? (studio.harnessModels[value] ?? "") : studio.modelName
+        saved = false
+      }
+    }
+  }
+  @ViewBuilder private var apiKey: some View {
+    let t = studio.t
+    HStack(spacing: 8) {
+      Circle().fill(studio.providerConfigured ? t.positive : t.muted).frame(width: 7, height: 7)
+      Text(
+        studio.providerConfigured ? "Connected to OpenAI · \(studio.modelName)" : "No key connected"
+      ).font(.system(size: 13, weight: .medium))
+    }
+    FormField(
+      label: "API key · kept in macOS Keychain",
+      placeholder: ProviderKeychain.configured
+        ? "Stored — leave blank to keep it" : "OpenAI API key",
+      text: $key, t: t, secure: true)
+    FormField(
+      label: "Model ID", placeholder: "A model available to your account", text: $model, t: t)
+    HStack(spacing: 8) {
+      Button("Save connection") { saveConnection() }
+        .buttonStyle(QuietButton(t: t, primary: true))
+        .disabled(
+          model.trimmingCharacters(in: .whitespaces).isEmpty
+            || (key.isEmpty && !ProviderKeychain.configured))
+      if ProviderKeychain.configured {
+        Button("Remove key") {
+          studio.stop()
+          studio.perform {
+            try ProviderKeychain.remove()
+            studio.refreshProviderAvailability()
+            saved = false
+          }
+        }.buttonStyle(QuietButton(t: t, role: .danger))
+      }
+      if saved {
+        Label("Saved. No request was made.", systemImage: "checkmark")
+          .font(.system(size: 12.5)).foregroundStyle(t.positive)
+      }
+    }.onChange(of: studio.provider) { _, value in
+      model = value.usesSubscription ? (studio.harnessModels[value] ?? "") : studio.modelName
+      saved = false
+    }
+  }
   private func saveConnection() {
     studio.perform {
       if !key.isEmpty { try ProviderKeychain.save(key) }
@@ -290,7 +393,7 @@ struct StudioSheet: View {
       try studio.store.setPreference("model", value: value)
       studio.modelName = value
       UserDefaults.standard.set(value, forKey: "Synthesis.model")
-      studio.providerConfigured = ProviderKeychain.configured && !value.isEmpty
+      studio.refreshProviderAvailability()
       key = ""
       saved = true
     }

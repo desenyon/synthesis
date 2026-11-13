@@ -462,12 +462,15 @@ struct UnifiedComposer: View {
         Image(systemName: "arrow.up.forward").font(.system(size: 10))
         Text(
           collapsed || companion
-            ? "Sending shares your message and world context with OpenAI."
-            : "Sending shares this message and context from this world with OpenAI.")
+            ? "Sent to \(studio.provider.usesSubscription ? studio.provider.title : "OpenAI") with world context."
+            : studio.providerDisclosure
+        ).help(studio.providerDisclosure)
       } else {
         Image(systemName: "bolt.slash").font(.system(size: 10))
-        Text("No model connected.")
-        Button("Connect one") { studio.sheet = .settings }.buttonStyle(.plain)
+        Text(
+          studio.provider.usesSubscription
+            ? "\(studio.provider.title) was not found on this Mac." : "No model connected.")
+        Button("Set up") { studio.sheet = .settings }.buttonStyle(.plain)
           .foregroundStyle(studio.t.accent)
         if !collapsed && !companion { Text("Messages are kept locally until then.") }
       }
