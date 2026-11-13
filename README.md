@@ -33,7 +33,7 @@ swift format lint --strict --recursive Sources Tests Package.swift
 ./scripts/verify-ui.sh docs/verification/latest
 ```
 
-The suite covers persistence, world isolation, canon approval, cancellation, audited relationships, board layout/undo and companion save protection. Visual checks use actual native windows, never HTML previews. Current verification is recorded in [STATE](docs/STATE.md).
+The suite covers persistence, world isolation, canon approval, cancellation, audited relationships, board layout/undo and companion save protection. Visual checks use actual native windows, never HTML previews. Current verification is recorded in [STATE](docs/STATE.md) and the [native review with screenshots](docs/verification/CONNECTED_REVIEW.md): 20 passing tests and 27 inspected captures. Direct drag/resize gesture acceptance remains pending because native automation could not drag this borderless window.
 
 Data: `~/Library/Application Support/Synthesis/synthesis.sqlite`, overridable with `SYNTHESIS_DATABASE_PATH`. Keys remain in macOS Keychain. See [AI setup](docs/AI_SETUP.md), [architecture](docs/ARCHITECTURE.md), [design direction](docs/UI_DIRECTION.md), [roadmap](docs/ROADMAP.md).
 

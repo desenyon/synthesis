@@ -76,4 +76,28 @@ import Testing
     #expect(board.document.cards.first?.recordID == record.id)
     #expect(try store.record(worldID: studio.worldID, id: record.id).body == "Cartographer")
   }
+  @Test func pendingDraftSurvivesImmediateWorldSwitch() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    let original = studio.worldID
+    let other = try store.createWorld(name: "Other")
+    studio.pendingComposer = (original, "Last keystrokes")
+    studio.switchWorld(other.id)
+    #expect(try store.preference("composer:\(original)") == "Last keystrokes")
+    #expect(studio.draft.isEmpty)
+    studio.switchWorld(original)
+    #expect(studio.draft == "Last keystrokes")
+  }
+  @Test func malformedBoardIsPreservedAndDoesNotTrapNavigation() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    _ = try store.saveBoard(
+      worldID: studio.worldID, name: "Damaged", kind: "canvas", content: "not-json")
+    let board = BoardController(studio: studio)
+    board.load()
+    #expect(!board.loaded && board.failure != nil)
+    #expect(board.save())  // No pending edits exist; allow leaving without overwriting.
+    #expect(try store.boards(worldID: studio.worldID, kind: "canvas").first?.content == "not-json")
+  }
+
 }

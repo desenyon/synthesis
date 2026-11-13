@@ -11,7 +11,13 @@ public struct ConnectedRoot: View {
       VStack(spacing: 0) {
         header(compact: compact)
         HStack(spacing: 0) {
-          if !compact { navigation(collapsed: studio.collapsed) }
+          if !compact {
+            navigation(
+              collapsed: studio.collapsed
+                || (geo.size.width < 1200 && studio.companionExpanded
+                  && studio.destination == .canvas)
+            )
+          }
           ZStack(alignment: .topLeading) {
             workspace.id(studio.worldID).frame(maxWidth: .infinity, maxHeight: .infinity)
             if compact && studio.mobileNavigation {
@@ -253,11 +259,14 @@ struct WorldEmblem: View {
 struct WorldBadge: View {
   @ObservedObject var studio: Studio
   var body: some View {
-    if let image = studio.worldCover {
-      Image(nsImage: image).resizable().scaledToFill().clipped().clipShape(
-        RoundedRectangle(cornerRadius: 10))
-    } else {
-      WorldEmblem(t: studio.t)
+    GeometryReader { geo in
+      if let image = studio.worldCover {
+        Image(nsImage: image).resizable().scaledToFill().frame(
+          width: geo.size.width, height: geo.size.height
+        ).clipped().clipShape(RoundedRectangle(cornerRadius: 10))
+      } else {
+        WorldEmblem(t: studio.t)
+      }
     }
   }
 }

@@ -45,7 +45,7 @@ struct BoardViewport: Codable, Equatable {
   @discardableResult func save() -> Bool {
     saveTask?.cancel()
     saveTask = nil
-    guard loaded else { return false }
+    guard loaded else { return true }
     do {
       document.viewport = viewport
       let data = try JSONEncoder().encode(document)

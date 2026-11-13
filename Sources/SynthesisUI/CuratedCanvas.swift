@@ -25,6 +25,7 @@ struct CuratedCanvas: View {
   @State private var showLibrary = false
   @State private var previousCompanion = false
   @State private var editingCardID: String?
+  @State private var hoveredEdge: String?
   init(studio: Studio) {
     self.studio = studio
     _board = StateObject(wrappedValue: BoardController(studio: studio))
@@ -50,7 +51,7 @@ struct CuratedCanvas: View {
                 }
               })
           ConversationStudio(studio: studio, companion: true).frame(
-            width: min(studio.companionWidth, max(300, geo.size.width * 0.48))
+            width: geo.size.width < 1000 ? 320 : studio.companionWidth
           )
           .transition(.move(edge: .trailing).combined(with: .opacity))
         }
@@ -58,6 +59,8 @@ struct CuratedCanvas: View {
     }.onAppear {
       board.load()
       studio.editorSave = { board.save() }
+      studio.canvasUndo = { board.step(back: $0) }
+      studio.canvasFit = { board.fit(viewportSize) }
       if let width = try? studio.store.preference("companion-width"), let value = Double(width) {
         studio.companionWidth = min(460, max(320, value))
       }
@@ -91,7 +94,9 @@ struct CuratedCanvas: View {
         Text("Canvas").font(.system(size: 13)).foregroundStyle(studio.t.secondary)
         Spacer()
         if let failure = board.failure {
-          Button("Save failed · Retry") { board.save() }.foregroundStyle(.orange).help(failure)
+          Button(board.loaded ? "Save failed · Retry" : "Could not load · Retry") {
+            if board.loaded { board.save() } else { board.load() }
+          }.foregroundStyle(.orange).help(failure)
         } else {
           Text("Saved locally").font(.system(size: 12)).foregroundStyle(studio.t.muted)
         }
@@ -104,7 +109,7 @@ struct CuratedCanvas: View {
       GeometryReader { geo in
         ZStack(alignment: .bottom) {
           boardSpace(size: geo.size).padding(
-            .bottom, studio.mode == .assisted && !studio.companionExpanded ? 98 : 20)
+            .bottom, studio.mode == .assisted && !studio.companionExpanded ? 160 : 20)
           VStack(spacing: 12) {
             Spacer()
             if studio.mode == .assisted && !studio.companionExpanded {
@@ -167,7 +172,7 @@ struct CuratedCanvas: View {
             let start = point(a, area.size)
             let end = point(b, area.size)
             let active =
-              board.selection.isEmpty || board.selection.contains(a.id)
+              hoveredEdge == edge.id || board.selection.isEmpty || board.selection.contains(a.id)
               || board.selection.contains(b.id)
             var path = Path()
             path.move(to: start)
@@ -204,6 +209,7 @@ struct CuratedCanvas: View {
                 .background(studio.t.background, in: Capsule()).overlay(
                   Capsule().stroke(studio.t.border, lineWidth: 0.7))
             }.buttonStyle(.plain).help("Inspect relationship: \(edge.label)")
+              .onHover { hoveredEdge = $0 ? edge.id : nil }
               .position(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 - 18)
           }
         }
@@ -214,7 +220,13 @@ struct CuratedCanvas: View {
             connect: { beginConnection(card) }
           )
           .frame(width: 300).scaleEffect(board.viewport.zoom).position(point(card, area.size))
-          .offset(dragID == card.id ? drag : .zero)
+          .offset(
+            tool != "Pan"
+              && (dragID == card.id
+                || (dragID != nil && board.selection.contains(card.id)
+                  && board.selection.contains(dragID!)))
+              ? drag : .zero
+          )
           .gesture(
             DragGesture(minimumDistance: 6).onChanged { value in
               dragID = card.id
@@ -241,7 +253,11 @@ struct CuratedCanvas: View {
             Button("Connect to…") { beginConnection(card) }
             Button("Add artwork…") { board.importImage(cardID: card.id) }
             Button("Reference in conversation") {
-              studio.draft += " [\(card.text)](synthesis://record/\(card.recordID ?? ""))"
+              if let id = card.recordID {
+                studio.draft += " [\(card.text)](synthesis://record/\(id))"
+              } else {
+                studio.draft += "\nCanvas note: \(card.text)"
+              }
               studio.persistComposer()
               if studio.mode == .assisted { studio.companionExpanded = true }
             }
@@ -280,7 +296,7 @@ struct CuratedCanvas: View {
             studio.t.surface, in: RoundedRectangle(cornerRadius: 10)
           ).frame(maxHeight: .infinity, alignment: .top).padding(.top, 12)
         }
-      }.clipped().contextMenu {
+      }.offset(tool == "Pan" && dragID != nil ? drag : .zero).clipped().contextMenu {
         Button("Add note") { prepareCreate("capture") }
         Button("Add entity") { prepareCreate("entity") }
         Button("Add from library") { showLibrary = true }
@@ -644,7 +660,7 @@ struct EntityCanvasCard: View {
       if let data = card.image.flatMap({ Data(base64Encoded: $0) }),
         let image = ImageCache.image(data)
       {
-        Image(nsImage: image).resizable().scaledToFill().frame(height: 120).clipped()
+        Image(nsImage: image).resizable().scaledToFill().frame(height: 100).clipped()
       }
       VStack(alignment: .leading, spacing: 12) {
         HStack(spacing: 8) {
@@ -665,12 +681,12 @@ struct EntityCanvasCard: View {
         if let record, !record.body.isEmpty {
           Text(record.body).font(.system(size: 14)).lineSpacing(4).foregroundStyle(
             studio.t.secondary
-          ).lineLimit(4)
+          ).lineLimit(5)
         }
         HStack(spacing: 6) {
           Circle().fill(record?.state == "canon" ? Color(hex: 0x85B69B) : semantic).frame(
             width: 5, height: 5)
-          Text(record?.state == "canon" ? "Canon" : "Draft").font(
+          Text(record?.state.capitalized ?? "Reference").font(
             .system(size: 12, weight: .medium))
           Spacer()
           if record?.canonical != nil && record?.state != "canon" {

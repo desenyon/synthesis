@@ -45,9 +45,13 @@ final class StudioWindow: NSWindow {
       NSApp.terminate(nil)
     }
   }
-  func windowShouldClose(_ sender: NSWindow) -> Bool { studio.flushEditor() }
+  func windowShouldClose(_ sender: NSWindow) -> Bool {
+    studio.persistPendingComposer()
+    return studio.flushEditor()
+  }
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-    studio.flushEditor() ? .terminateNow : .terminateCancel
+    studio.persistPendingComposer()
+    return studio.flushEditor() ? .terminateNow : .terminateCancel
   }
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
   private func buildMenu() {
@@ -79,13 +83,31 @@ final class StudioWindow: NSWindow {
     let edit = NSMenuItem()
     edit.title = "Edit"
     let editMenu = NSMenu(title: "Edit")
+    editMenu.addItem(withTitle: "Undo", action: #selector(undoAction), keyEquivalent: "z").target =
+      self
+    editMenu.addItem(withTitle: "Redo", action: #selector(redoAction), keyEquivalent: "Z").target =
+      self
     for (title, selector, key) in [
-      ("Undo", "undo:", "z"), ("Redo", "redo:", "Z"), ("Cut", "cut:", "x"), ("Copy", "copy:", "c"),
+      ("Cut", "cut:", "x"), ("Copy", "copy:", "c"),
       ("Paste", "paste:", "v"), ("Select All", "selectAll:", "a"),
     ] { editMenu.addItem(withTitle: title, action: Selector(selector), keyEquivalent: key) }
     edit.submenu = editMenu
     main.addItem(edit)
     NSApp.mainMenu = main
+  }
+  @objc func undoAction() {
+    if window.firstResponder is NSTextView {
+      NSApp.sendAction(Selector(("undo:")), to: nil, from: nil)
+    } else {
+      studio.canvasUndo?(true)
+    }
+  }
+  @objc func redoAction() {
+    if window.firstResponder is NSTextView {
+      NSApp.sendAction(Selector(("redo:")), to: nil, from: nil)
+    } else {
+      studio.canvasUndo?(false)
+    }
   }
   @objc func settings() { studio.sheet = .settings }
   @objc func search() { studio.sheet = .search }

@@ -55,6 +55,9 @@ public enum Destination: String, CaseIterable, Identifiable {
   @Published public var companionExpanded = false
   @Published public var companionWidth = 400.0
   @Published public var libraryCategory: String?
+  var pendingComposer: (world: String, text: String)?
+  public var canvasUndo: ((Bool) -> Void)?
+  public var canvasFit: (() -> Void)?
   private var running: Task<Void, Never>?
   private var requestID = UUID()
   public enum Sheet: String, Identifiable {
@@ -101,6 +104,13 @@ public enum Destination: String, CaseIterable, Identifiable {
       self.error = error.localizedDescription
     }
   }
+  public func persistPendingComposer() {
+    if let pendingComposer, pendingComposer.world == worldID {
+      draft = pendingComposer.text
+      self.pendingComposer = nil
+    }
+    persistComposer()
+  }
   public func persistComposer() {
     perform { try store.setPreference("composer:\(worldID)", value: draft) }
   }
@@ -130,6 +140,10 @@ public enum Destination: String, CaseIterable, Identifiable {
     selectedRecord = nil
     editorSave = nil
     destination = value
+    if value != .canvas {
+      canvasUndo = nil
+      canvasFit = nil
+    }
     mobileNavigation = false
     inspector = false
   }
@@ -137,7 +151,7 @@ public enum Destination: String, CaseIterable, Identifiable {
     guard flushEditor() else { return }
     stop()
     perform {
-      persistComposer()
+      persistPendingComposer()
       canvasBoardID = nil
       companionExpanded = false
       worldID = id

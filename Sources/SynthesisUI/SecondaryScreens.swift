@@ -72,21 +72,32 @@ struct RelationshipGraph: View {
           let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
           let radius = min(geo.size.width, geo.size.height) * 0.30 * zoom
           ZStack {
-            Canvas { context, _ in
-              for edge in relationships {
-                guard let a = visible.firstIndex(where: { $0.id == edge.sourceID }),
-                  let b = visible.firstIndex(where: { $0.id == edge.targetID })
-                else { continue }
+            ForEach(relationships) { edge in
+              if let a = visible.firstIndex(where: { $0.id == edge.sourceID }),
+                let b = visible.firstIndex(where: { $0.id == edge.targetID })
+              {
                 let start = point(a, center: center, radius: radius)
                 let end = point(b, center: center, radius: radius)
-                var path = Path()
-                path.move(to: start)
-                path.addLine(to: end)
-                context.stroke(path, with: .color(studio.t.accent.opacity(0.65)), lineWidth: 1.8)
-                context.draw(
-                  Text(edge.label + " →").font(.system(size: 14, weight: .medium)).foregroundColor(
-                    studio.t.secondary),
-                  at: CGPoint(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 - 12))
+                let emphasized =
+                  selected == nil || selected == edge.sourceID || selected == edge.targetID
+                Path { path in
+                  path.move(to: start)
+                  path.addLine(to: end)
+                }
+                .stroke(
+                  studio.t.accent.opacity(emphasized ? 0.6 : 0.18), lineWidth: emphasized ? 1.8 : 1
+                ).allowsHitTesting(false)
+                Button {
+                  selected = edge.sourceID
+                } label: {
+                  Text(edge.label + " →").font(.system(size: 13, weight: .medium)).padding(
+                    .horizontal, 10
+                  ).padding(.vertical, 6)
+                    .foregroundStyle(studio.t.accent).background(studio.t.surface, in: Capsule())
+                }.buttonStyle(.plain).position(
+                  x: start.x + (end.x - start.x) * 0.38, y: start.y + (end.y - start.y) * 0.38 - 12
+                )
+                .help("Inspect source of \(edge.label)")
               }
             }
             ForEach(Array(visible.enumerated()), id: \.element.id) { index, entity in
@@ -94,7 +105,7 @@ struct RelationshipGraph: View {
                 selected = entity.id
               } label: {
                 VStack(spacing: 10) {
-                  Image(systemName: entity.category == "Places" ? "mappin" : "sparkle").font(
+                  Image(systemName: categoryIcon(entity.category)).font(
                     .system(size: 20)
                   ).foregroundStyle(studio.t.accent)
                     .frame(width: 50, height: 50).background(studio.t.surface, in: Circle())

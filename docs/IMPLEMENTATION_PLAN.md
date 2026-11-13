@@ -8,3 +8,5 @@ Owner-authorized successor to the transient UI study. Preserve the graphite shel
 4. Verify core isolation/cancellation/history, native interactions and final screenshots. Update all product/state docs and commit bounded increments. No paid model calls, releases or push.
 
 Acceptance is the running application and observed flows, not compilation alone. Record any unsupported rich-response or gesture capabilities explicitly.
+
+Status: stages 1–3 implemented; stage 4 has passing lint/build/20 tests, 27 inspected native captures and a persisted native workflow walkthrough. Drag/resize and frame-rate acceptance remain open. See docs/verification/CONNECTED_REVIEW.md for observed evidence and exact limits.

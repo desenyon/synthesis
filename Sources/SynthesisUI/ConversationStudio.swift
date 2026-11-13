@@ -108,7 +108,7 @@ struct ConversationStudio: View {
             }.frame(maxWidth: 720, alignment: .leading).padding(narrow ? 24 : 48)
               .padding(.top, companion ? 20 : max(20, (geo.size.height - 700) / 3)).frame(
                 maxWidth: .infinity)
-          }
+          }.clipped()
         } else {
           ScrollViewReader { proxy in
             ScrollView {
@@ -118,7 +118,7 @@ struct ConversationStudio: View {
                   VStack(alignment: .leading, spacing: 14) {
                     HStack(spacing: 10) {
                       ProgressView().controlSize(.small)
-                      Text(studio.streamed.isEmpty ? "Reading your world…" : "Responding…").font(
+                      Text(studio.streamed.isEmpty ? "Waiting for model…" : "Responding…").font(
                         .system(size: 13)
                       ).foregroundStyle(studio.t.secondary)
                     }
@@ -133,7 +133,7 @@ struct ConversationStudio: View {
             }.onChange(of: studio.messages.count) { _, _ in
               withAnimation(.easeOut(duration: 0.18)) { proxy.scrollTo("latest", anchor: .bottom) }
             }
-          }
+          }.clipped()
         }
         if studio.mode == .assisted {
           UnifiedComposer(studio: studio, companion: companion).frame(maxWidth: 800)
@@ -246,6 +246,7 @@ struct UnifiedComposer: View {
     }
     .onChange(of: studio.draft) { _, value in if value != text { text = value } }
     .onChange(of: text) { _, _ in
+      if loadedWorld == studio.worldID { studio.pendingComposer = (loadedWorld, text) }
       saveTask?.cancel()
       saveTask = Task { @MainActor in
         do {
@@ -297,6 +298,7 @@ struct UnifiedComposer: View {
   }
   private func commitDraft() {
     guard loadedWorld == studio.worldID else { return }
+    studio.pendingComposer = nil
     if studio.draft != text {
       studio.draft = text
       studio.persistComposer()

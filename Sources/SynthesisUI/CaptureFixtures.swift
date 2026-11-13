@@ -65,6 +65,21 @@ extension Studio {
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
     _ = flushEditor()
     editorSave = nil
+    // Each capture represents opening this board at the requested window size.
+    // Clear only the isolated fixture viewport; normal workspaces retain theirs.
+    perform {
+      if let saved = try store.boards(worldID: worldID, kind: "canvas").first(where: {
+        $0.id == board
+      }),
+        var document = try? JSONDecoder().decode(
+          CanvasDocument.self, from: Data(saved.content.utf8))
+      {
+        document.viewport = nil
+        _ = try store.saveBoard(
+          worldID: worldID, id: saved.id, name: saved.name, kind: "canvas",
+          content: String(decoding: try JSONEncoder().encode(document), as: UTF8.self))
+      }
+    }
     selectedRecord = nil
     stop()
     setMode(state == "manual" ? .manual : .assisted)
