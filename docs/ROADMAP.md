@@ -1,13 +1,11 @@
 # Roadmap
 
-## Active — UI acceptance
+## Active — connected workspace refinement
 
-Build and inspect the actual native UI against the latest references. Compact canvas-first composition, modular navigation, guided chat, integrated window chrome, restrained motion and responsive input. Iterate on visible evidence; no feature expansion or releases.
+Retain graphite visual foundation while reconnecting Conversation, Canvas, Library, Graph, Timeline and Atlas to one world. Make assistance independent, persistent and core-enforced. Use actual records, saved curated boards, readable card typography, real edges, optional companion and optional guides.
 
-Acceptance: the owner can inspect the running window and exercise panning, dragging, module selection, guided conversation, local note editing, search, sidebar collapse and theme switching. The interface must be honestly labeled as a local UI study while persistence/AI integration is withheld.
+Acceptance: inspect the running native app, persistence through navigation/restart, Manual cancellation, source navigation, curated board vs derived graph transfer, and all requested visual states. Capture limitations explicitly.
 
-## After UI direction is accepted
+## Next
 
-Reconnect the accepted UI to the preserved world/lore/chat store and provider boundary in useful vertical slices. Preserve exact-version canon approval, local ownership, world isolation, history and deliberate external provider use. Then harden rich responses, multi-record proposal diffs, recovery, canvas/atlas history and accessibility.
-
-The previous native application slice is preserved at `f35e968`. Its earlier checks are historical evidence, not proof that all those capabilities are connected to the new UI.
+Expand structured proposal previews and rich response types after the connected daily workflow is verified. Improve large-board profiling, spatial keyboard navigation, recoverable drafts after failed-save crashes, and atlas history. No releases or public deployment.

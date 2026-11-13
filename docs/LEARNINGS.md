@@ -25,3 +25,9 @@ Owner explicitly rejected the light editorial interface and requested a compact 
 Performance corrections in the UI study: isolate composer draft and viewport state, commit node movement at drag end, and pre-render ASCII scenery. An idle process observation showed 0.0% CPU and 139008 KB RSS; this is not a frame-rate measurement.
 
 Final UI inspection caught clipped starter cards in smaller windows and cards touching the composer. Initial framing now fits visible fragments into the space above the composer; manual pan/zoom remains available. Module-specific starter chips now match their guide questions.
+
+## Connected refinement — 2026-11-12
+
+Owner explicitly authorized connecting the accepted visual foundation to the real model and removing the UI-study restriction. AGENTS initial-experience paragraph was replaced with that direction; canon/privacy boundaries were unchanged. Evidence: the twelve-priority targeted refinement request. Validation: optimized native build, 18 tests including four new UI-model regressions, and ongoing native inspection. Rollback: revert only this operational paragraph if the owner changes direction.
+
+Independent review found delayed viewport saves could overwrite newer controllers and companion conversation switching cleared the canvas save guard. Explicit flush now cancels deferred saves; companion chat navigation preserves its workspace/save callback. Tests cover both scenarios, plus mode independence and board layout/undo. Compact composer provider disclosure was restored; Manual no longer changes destination.

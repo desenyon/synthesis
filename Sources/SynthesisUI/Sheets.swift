@@ -13,7 +13,7 @@ struct StudioSheet: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 24) {
       HStack {
-        Text(title).font(.system(size: 24, weight: .medium, design: .serif))
+        Text(title).font(.system(size: 24, weight: .medium))
         Spacer()
         IconButton(icon: "xmark", label: "Close", t: studio.t) { studio.sheet = nil }
       }
@@ -57,6 +57,19 @@ struct StudioSheet: View {
           .roundedBorder)
         ScrollView {
           VStack(alignment: .leading, spacing: 10) {
+            ForEach(
+              [Destination.chat, .canvas, .library, .knowledge, .timeline, .atlas].filter {
+                query.isEmpty || $0.rawValue.localizedCaseInsensitiveContains(query)
+              }
+            ) { destination in
+              Button {
+                studio.sheet = nil
+                studio.navigate(destination)
+              } label: {
+                Label(destination.rawValue, systemImage: destination.icon).font(.system(size: 14))
+                  .padding(10)
+              }.buttonStyle(.plain)
+            }
             ForEach(searchRecords) { record in
               Button {
                 studio.sheet = nil
@@ -119,6 +132,11 @@ struct StudioSheet: View {
         Button(studio.dark ? "Switch to light" : "Switch to dark") { studio.toggleTheme() }
           .buttonStyle(QuietButton(t: studio.t))
       }.font(.system(size: 13))
+      HStack {
+        Text("World cover").font(.system(size: 14, weight: .medium))
+        Spacer()
+        Button("Choose image…") { studio.chooseWorldCover() }.buttonStyle(QuietButton(t: studio.t))
+      }
       Divider().overlay(studio.t.border)
       Text("Your model connection").font(.system(size: 16, weight: .medium))
       Text(

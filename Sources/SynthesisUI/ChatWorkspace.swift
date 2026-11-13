@@ -135,7 +135,7 @@ struct Composer: View {
       VStack(alignment: .leading, spacing: 12) {
         ComposerInput(
           text: $studio.draft, placeholder: "Ask anything about your world…", color: studio.t.text,
-          submit: studio.send
+          submit: { studio.send() }
         ).frame(height: min(150, max(64, CGFloat(studio.draft.count / 75 + 1) * 22 + 26))).onChange(
           of: studio.draft
         ) { _, _ in studio.persistComposer() }
@@ -207,7 +207,25 @@ struct ChatRow: View {
     if message.role == "user" {
       HStack {
         Spacer(minLength: 30)
-        Text(message.body).font(.system(size: 15)).lineSpacing(5).textSelection(.enabled).padding(
+        Text(
+          (try? AttributedString(
+            markdown: message.body,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+            ?? AttributedString(message.body)
+        )
+        .environment(
+          \.openURL,
+          OpenURLAction { url in
+            if url.scheme == "synthesis", url.host == "record",
+              let record = studio.records.first(where: { $0.id == url.lastPathComponent })
+            {
+              studio.openRecord(record)
+              return .handled
+            }
+            return .discarded
+          }
+        ).tint(studio.t.accent).font(.system(size: 15)).lineSpacing(5).textSelection(.enabled)
+        .padding(
           .horizontal, 20
         ).padding(.vertical, 15).background(
           studio.t.secondarySurface, in: RoundedRectangle(cornerRadius: 20)
@@ -227,8 +245,12 @@ struct ChatRow: View {
       VStack(alignment: .leading, spacing: 16) {
         HStack(spacing: 9) {
           BrandMark(size: 20, color: studio.t.accent)
-          Text("Synthesis").font(.system(size: 12, weight: .semibold))
-          Text("Suggestion · not canon").font(.system(size: 11)).foregroundStyle(studio.t.muted)
+          Text(message.state == "imported-example" ? "Imported example" : "Synthesis").font(
+            .system(size: 13, weight: .semibold))
+          Text(
+            message.state == "imported-example"
+              ? "Authored sample · not a model response" : "Suggestion · not canon"
+          ).font(.system(size: 11)).foregroundStyle(studio.t.muted)
         }
         MarkdownContent(text: message.body, t: studio.t).environment(
           \.openURL,
@@ -265,15 +287,48 @@ struct MarkdownContent: View {
   let text: String
   let t: Theme
   var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
+    VStack(alignment: .leading, spacing: 14) {
       ForEach(Array(text.components(separatedBy: "\n\n").enumerated()), id: \.offset) { _, block in
-        Text(
-          (try? AttributedString(
-            markdown: block, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
-            ?? AttributedString(block)
-        ).font(.system(size: block.hasPrefix("#") ? 20 : 16)).lineSpacing(6).foregroundStyle(t.text)
-          .textSelection(.enabled).tint(t.accent).frame(maxWidth: .infinity, alignment: .leading)
+        if block.hasPrefix("```") {
+          Text(
+            block.components(separatedBy: "\n").dropFirst().filter { !$0.hasPrefix("```") }.joined(
+              separator: "\n")
+          )
+          .font(.system(size: 13, design: .monospaced)).textSelection(.enabled).padding(16)
+          .frame(maxWidth: .infinity, alignment: .leading).background(
+            t.secondarySurface, in: RoundedRectangle(cornerRadius: 10))
+        } else if block.contains("|"), block.contains("---") {
+          let rows = block.components(separatedBy: "\n").filter { line in
+            !line.trimmingCharacters(in: CharacterSet(charactersIn: "|:- ")).isEmpty
+          }.map { $0.split(separator: "|").map { String($0).trimmingCharacters(in: .whitespaces) } }
+          Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 12) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
+              GridRow {
+                ForEach(Array(row.enumerated()), id: \.offset) { _, cell in
+                  Text(inline(cell)).font(
+                    .system(size: 14, weight: index == 0 ? .semibold : .regular)
+                  ).textSelection(.enabled)
+                }
+              }
+              if index == 0 { Divider().gridCellUnsizedAxes(.horizontal) }
+            }
+          }.padding(16).background(t.surface, in: RoundedRectangle(cornerRadius: 10))
+        } else {
+          let heading = block.hasPrefix("#")
+          let content =
+            heading
+            ? String(block.drop(while: { $0 == "#" })).trimmingCharacters(in: .whitespaces) : block
+          Text(inline(content)).font(
+            .system(size: heading ? 22 : 16, weight: heading ? .medium : .regular)
+          )
+          .lineSpacing(6).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
+        }
       }
-    }
+    }.foregroundStyle(t.text).tint(t.accent)
+  }
+  private func inline(_ value: String) -> AttributedString {
+    (try? AttributedString(
+      markdown: value, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+      ?? AttributedString(value)
   }
 }

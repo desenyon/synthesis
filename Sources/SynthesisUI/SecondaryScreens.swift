@@ -7,13 +7,14 @@ struct WorkspaceHeading: View {
   let t: Theme
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
-      Text(title).font(.system(size: 34, design: .serif)).tracking(-0.8)
+      Text(title).font(.system(size: 28, weight: .medium)).tracking(-0.8)
       Text(subtitle).font(.system(size: 13)).foregroundStyle(t.secondary)
     }
   }
 }
 
-struct KnowledgeScreen: View {
+typealias KnowledgeScreen = RelationshipGraph
+struct RelationshipGraph: View {
   @ObservedObject var studio: Studio
   @State private var relationships: [Relation] = []
   @State private var query = ""
@@ -32,9 +33,13 @@ struct KnowledgeScreen: View {
     VStack(alignment: .leading, spacing: 24) {
       HStack {
         WorkspaceHeading(
-          title: "Everything is connected.",
-          subtitle: "Follow the people, places, and forces shaping your world.", t: studio.t)
+          title: "Knowledge Graph",
+          subtitle: "Derived from your world’s entity relationships", t: studio.t)
         Spacer()
+        Button(selected == nil ? "Copy graph to canvas" : "Copy neighborhood to canvas") {
+          transferToCanvas()
+        }
+        .buttonStyle(QuietButton(t: studio.t)).disabled(entities.isEmpty)
         Button {
           source = entities.first?.id ?? ""
           target = entities.dropFirst().first?.id ?? ""
@@ -58,7 +63,7 @@ struct KnowledgeScreen: View {
           Image(systemName: "point.3.connected.trianglepath.dotted").font(
             .system(size: 44, weight: .ultraLight)
           ).foregroundStyle(studio.t.accent)
-          Text("Start with someone. Or somewhere.").font(.system(size: 25, design: .serif))
+          Text("Start with someone. Or somewhere.").font(.system(size: 24, weight: .medium))
           Button("Create an entity") { studio.sheet = .document }.buttonStyle(
             QuietButton(t: studio.t))
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -77,9 +82,10 @@ struct KnowledgeScreen: View {
                 var path = Path()
                 path.move(to: start)
                 path.addLine(to: end)
-                context.stroke(path, with: .color(studio.t.accent.opacity(0.3)), lineWidth: 1.5)
+                context.stroke(path, with: .color(studio.t.accent.opacity(0.65)), lineWidth: 1.8)
                 context.draw(
-                  Text(edge.label).font(.system(size: 11)).foregroundColor(studio.t.secondary),
+                  Text(edge.label + " →").font(.system(size: 14, weight: .medium)).foregroundColor(
+                    studio.t.secondary),
                   at: CGPoint(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 - 12))
               }
             }
@@ -96,14 +102,10 @@ struct KnowledgeScreen: View {
                       Circle().stroke(
                         studio.t.accent.opacity(selected == entity.id ? 0.8 : 0.15), lineWidth: 1.5)
                     )
-                  Text(entity.title).font(.system(size: 13, weight: .medium)).lineLimit(2).frame(
+                  Text(entity.title).font(.system(size: 16, weight: .medium)).lineLimit(2).frame(
                     width: 150)
                 }
               }.buttonStyle(.plain).position(point(index, center: center, radius: radius))
-                .gesture(
-                  DragGesture().onChanged { value in positions[entity.id] = value.translation }
-                    .onEnded { _ in }
-                )
                 .contextMenu { Button("Open source record") { studio.openRecord(entity) } }
             }
           }.clipped()
@@ -147,6 +149,33 @@ struct KnowledgeScreen: View {
         }.padding(28).frame(width: 430)
       }
   }
+  private func transferToCanvas() {
+    studio.perform {
+      var ids = Set(visible.map(\.id))
+      if let selected {
+        ids = [selected]
+        for relation in relationships
+        where relation.sourceID == selected || relation.targetID == selected {
+          ids.insert(relation.sourceID)
+          ids.insert(relation.targetID)
+        }
+      }
+      var document = CanvasDocument()
+      document.cards = entities.filter { ids.contains($0.id) }.enumerated().map { index, record in
+        var card = CanvasCard(text: record.title, recordID: record.id)
+        card.width = 300
+        card.x = Double(index % 2) * 380 - 190
+        card.y = Double(index / 2) * 320 - 120
+        return card
+      }
+      let data = try JSONEncoder().encode(document)
+      let board = try studio.store.saveBoard(
+        worldID: studio.worldID, name: "Graph selection", kind: "canvas",
+        content: String(decoding: data, as: UTF8.self))
+      studio.canvasBoardID = board.id
+      studio.navigate(.canvas)
+    }
+  }
   private func refresh() {
     studio.perform { relationships = try studio.store.relations(worldID: studio.worldID) }
   }
@@ -179,7 +208,7 @@ struct TimelineScreen: View {
     VStack(alignment: .leading, spacing: 26) {
       HStack {
         WorkspaceHeading(
-          title: "A world remembers.",
+          title: "Universal history",
           subtitle: "History with room for uncertainty, myth, and missing years.", t: studio.t)
         Spacer()
         Button {
@@ -211,7 +240,7 @@ struct TimelineScreen: View {
               VStack(alignment: .leading, spacing: 12) {
                 Text(event.dateLabel).font(.system(size: 12, weight: .medium)).foregroundStyle(
                   studio.t.accent)
-                Text(event.title).font(.system(size: 25, design: .serif))
+                Text(event.title).font(.system(size: 24, weight: .medium))
                 if let record = studio.records.first(where: { $0.id == event.sourceID }) {
                   Button {
                     studio.openRecord(record)
@@ -226,7 +255,7 @@ struct TimelineScreen: View {
           }
           if filtered.isEmpty {
             Text(events.isEmpty ? "Every history starts somewhere." : "No matching events.").font(
-              .system(size: 27, design: .serif)
+              .system(size: 24, weight: .medium)
             ).padding(.top, 70)
             Text(
               studio.records.isEmpty
@@ -240,7 +269,7 @@ struct TimelineScreen: View {
     }.padding(30).onAppear { refresh() }
       .sheet(isPresented: $adding) {
         VStack(alignment: .leading, spacing: 20) {
-          Text("A moment that matters.").font(.system(size: 27, design: .serif))
+          Text("A moment that matters.").font(.system(size: 24, weight: .medium))
           TextField("Event title", text: $title)
           TextField("Date or era · leave empty if unknown", text: $date)
           TextField("Optional chronology order (integer)", text: $order)

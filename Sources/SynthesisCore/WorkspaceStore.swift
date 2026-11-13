@@ -287,16 +287,76 @@ public final class WorkspaceStore {
     let id = UUID().uuidString
     let now = timestamp()
     try db.execute(
-      "INSERT INTO relationships VALUES(?,?,?,?,?,'draft','user-authored',?,?)",
+      "INSERT INTO relationships(id,world_id,source_id,target_id,label,state,origin,created_at,updated_at) VALUES(?,?,?,?,?,'draft','user-authored',?,?)",
       [id, worldID, source, target, label, now, now])
     return Relation(id: id, sourceID: source, targetID: target, label: label)
   }
   public func relations(worldID: String) throws -> [Relation] {
     _ = try world(worldID)
-    return try db.rows("SELECT * FROM relationships WHERE world_id=?", [worldID]).map {
+    return try db.rows("SELECT * FROM relationships WHERE world_id=? AND archived=0", [worldID]).map
+    {
       Relation(
         id: $0["id"]!, sourceID: $0["source_id"]!, targetID: $0["target_id"]!, label: $0["label"]!)
     }
+  }
+  public func updateRelation(worldID: String, id: String, label: String) throws {
+    let value = label.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !value.isEmpty, value.count <= 80 else {
+      throw SynthesisError.invalid("Use a relationship label of 1–80 characters.")
+    }
+    guard let relation = try relations(worldID: worldID).first(where: { $0.id == id }) else {
+      throw SynthesisError.notFound
+    }
+    guard
+      try db.rows("SELECT state FROM relationships WHERE id=? AND world_id=?", [id, worldID])
+        .first?["state"] != "canon"
+    else {
+      throw SynthesisError.invalid(
+        "Canonical relationships require a reviewed revision. This connection was not changed.")
+    }
+    try db.transaction {
+      try archiveRelationSnapshot(worldID: worldID, relation: relation, action: "rename")
+      try db.execute(
+        "UPDATE relationships SET label=?,updated_at=? WHERE id=? AND world_id=?",
+        [value, timestamp(), id, worldID])
+    }
+  }
+  public func archiveRelation(worldID: String, id: String) throws {
+    guard let relation = try relations(worldID: worldID).first(where: { $0.id == id }) else {
+      throw SynthesisError.notFound
+    }
+    guard
+      try db.rows("SELECT state FROM relationships WHERE id=? AND world_id=?", [id, worldID])
+        .first?["state"] != "canon"
+    else {
+      throw SynthesisError.invalid(
+        "Canonical relationships require a reviewed revision. This connection was not changed.")
+    }
+    try db.transaction {
+      try archiveRelationSnapshot(worldID: worldID, relation: relation, action: "archive")
+      try db.execute(
+        "UPDATE relationships SET archived=1,updated_at=? WHERE id=? AND world_id=?",
+        [timestamp(), id, worldID])
+    }
+  }
+  public func restoreRelation(worldID: String, id: String) throws {
+    _ = try world(worldID)
+    guard
+      let row = try db.rows(
+        "SELECT id FROM relationships WHERE world_id=? AND id=? AND archived=1", [worldID, id]
+      ).first, row["id"] == id
+    else { throw SynthesisError.notFound }
+    try db.execute(
+      "UPDATE relationships SET archived=0,updated_at=? WHERE id=? AND world_id=?",
+      [timestamp(), id, worldID])
+  }
+  private func archiveRelationSnapshot(worldID: String, relation: Relation, action: String) throws {
+    try db.execute(
+      "INSERT INTO relationship_history VALUES(?,?,?,?,?,?,?,?)",
+      [
+        UUID().uuidString, worldID, relation.id, relation.sourceID, relation.targetID,
+        relation.label, action, timestamp(),
+      ])
   }
   public func addEvent(
     worldID: String, title: String, date: String, source: String, order: Int? = nil
@@ -401,12 +461,14 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 1
+      var schemaVersion = 2
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
       var messages: [ChatMessage]
       var relationships: [Relation]
+      var relationshipHistory: [[String: String]]
+      var archivedRelationships: [[String: String]]
       var events: [WorldEvent]
       var boards: [Board]
       var revisions: [RecordRevision]
@@ -418,7 +480,11 @@ public final class WorkspaceStore {
     let export = try Export(
       world: world(id), records: pages, conversations: chats,
       messages: chats.flatMap { try messages(worldID: id, conversationID: $0.id) },
-      relationships: relations(worldID: id), events: events(worldID: id),
+      relationships: relations(worldID: id),
+      relationshipHistory: db.rows("SELECT * FROM relationship_history WHERE world_id=?", [id]),
+      archivedRelationships: db.rows(
+        "SELECT * FROM relationships WHERE world_id=? AND archived=1", [id]),
+      events: events(worldID: id),
       boards: boards(worldID: id, kind: "canvas") + boards(worldID: id, kind: "atlas"),
       revisions: pages.flatMap { try history(worldID: id, id: $0.id) },
       links: db.rows("SELECT * FROM links WHERE world_id=?", [id]),

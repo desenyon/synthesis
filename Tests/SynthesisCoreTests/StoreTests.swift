@@ -137,4 +137,28 @@ struct StoreTests {
     #expect(try store.search(worldID: world.id, query: "Newalias").isEmpty)
     #expect(try store.search(worldID: world.id, query: "Oldalias").first?.id == record.id)
   }
+  @Test func relationshipEditsAreScopedAuditedAndReversible() throws {
+    let s = try fixture()
+    let a = try s.createWorld(name: "A")
+    let b = try s.createWorld(name: "B")
+    let x = try s.createRecord(worldID: a.id, title: "Mira", kind: "entity")
+    let y = try s.createRecord(worldID: a.id, title: "Tidekeepers", kind: "entity")
+    let relation = try s.addRelation(worldID: a.id, source: x.id, target: y.id, label: "guided by")
+    #expect(throws: Error.self) {
+      try s.updateRelation(worldID: b.id, id: relation.id, label: "wrong")
+    }
+    #expect(throws: Error.self) { try s.archiveRelation(worldID: b.id, id: relation.id) }
+    try s.updateRelation(worldID: a.id, id: relation.id, label: "trained by")
+    #expect(try s.relations(worldID: a.id).first?.label == "trained by")
+    try s.archiveRelation(worldID: a.id, id: relation.id)
+    #expect(try s.relations(worldID: a.id).isEmpty)
+    let export = String(decoding: try s.exportWorld(a.id), as: UTF8.self)
+    #expect(
+      export.contains("guided by") && export.contains("trained by") && export.contains("archive"))
+    #expect(throws: Error.self) { try s.restoreRelation(worldID: b.id, id: relation.id) }
+    try s.restoreRelation(worldID: a.id, id: relation.id)
+    #expect(try s.relations(worldID: a.id).first?.id == relation.id)
+    #expect(try s.record(worldID: a.id, id: x.id).canonical == nil)
+  }
+
 }

@@ -76,9 +76,10 @@ struct LibraryScreen: View {
   @State private var filter = "All"
   var visible: [LoreRecord] {
     studio.records.filter { r in
-      (filter == "All" || (filter == "Documents" && r.kind == "lore")
-        || (filter == "Entities" && r.kind == "entity")
-        || (filter == "Inbox" && r.kind == "capture"))
+      (studio.libraryCategory == nil || r.category == studio.libraryCategory)
+        && (filter == "All" || (filter == "Documents" && r.kind == "lore")
+          || (filter == "Entities" && r.kind == "entity")
+          || (filter == "Inbox" && r.kind == "capture"))
         && (query.isEmpty || r.title.localizedCaseInsensitiveContains(query)
           || r.body.localizedCaseInsensitiveContains(query)
           || r.category.localizedCaseInsensitiveContains(query))
@@ -89,7 +90,7 @@ struct LibraryScreen: View {
       VStack(alignment: .leading, spacing: 28) {
         HStack(alignment: .top) {
           VStack(alignment: .leading, spacing: 10) {
-            Text("Your world, gathered.").font(.system(size: 36, weight: .regular, design: .serif))
+            Text(studio.libraryCategory ?? "Library").font(.system(size: 30, weight: .medium))
               .tracking(-1)
             Text("The people, places, and possibilities taking shape.").font(.system(size: 14))
               .foregroundStyle(studio.t.secondary)
@@ -107,6 +108,10 @@ struct LibraryScreen: View {
             .system(size: 14))
         }.padding(13).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 12))
         HStack(spacing: 6) {
+          if studio.libraryCategory != nil {
+            Button("All categories") { studio.libraryCategory = nil }.buttonStyle(
+              QuietButton(t: studio.t))
+          }
           ForEach(["All", "Documents", "Entities", "Inbox"], id: \.self) { type in
             Button {
               filter = type

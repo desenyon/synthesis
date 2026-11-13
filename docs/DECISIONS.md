@@ -22,3 +22,7 @@ Earlier Next.js/Drizzle and Markdown-only design choices were superseded by the 
 ## 2026-11-12 — latest owner direction (protected)
 
 UI first: pause broader application feature development. Replace the light serif welcome composition with an infinite canvas, reference-matched modular navigation (power systems, universal history and related sections), customized guided chat, fluid interactions and no separate macOS title bar. The newly supplied three screenshots and Zeron composer are the current visual reference set. This supersedes the earlier light chat-home visual specification where they conflict; data ownership, explicit canon approval and privacy boundaries remain.
+
+## 2026-11-12 — connected workspace refinement (owner-protected)
+
+The owner accepted the graphite foundation and explicitly authorized integration into the real application. This supersedes the UI-study pause: independent persisted assistance mode, Conversation as assisted entry, compact canvas composer with resizable docked companion, actual source-backed records, curated Canvas separate from derived Graph, and shared Library/Timeline/Atlas. Empty boards remain empty. Templates and guided prompts are optional. No model call without deliberate submission; no implicit canon promotion.

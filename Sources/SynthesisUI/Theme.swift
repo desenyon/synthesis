@@ -2,16 +2,16 @@ import SwiftUI
 
 public struct Theme {
   public let dark: Bool
-  public var background: Color { Color(hex: dark ? 0x242426 : 0xF8F9FB) }
-  public var sidebar: Color { Color(hex: dark ? 0x202022 : 0xF0F2F5) }
-  public var surface: Color { Color(hex: dark ? 0x303033 : 0xFFFFFF) }
-  public var secondarySurface: Color { Color(hex: dark ? 0x37373B : 0xF0F2F6) }
+  public var background: Color { Color(hex: dark ? 0x17191C : 0xF8F9FB) }
+  public var sidebar: Color { Color(hex: dark ? 0x1D2024 : 0xF0F2F5) }
+  public var surface: Color { Color(hex: dark ? 0x262A30 : 0xFFFFFF) }
+  public var secondarySurface: Color { Color(hex: dark ? 0x30353D : 0xF0F2F6) }
   public var text: Color { Color(hex: dark ? 0xECEBED : 0x20232B) }
-  public var secondary: Color { Color(hex: dark ? 0xB0ACB6 : 0x697281) }
-  public var muted: Color { Color(hex: dark ? 0x9A96A1 : 0x7D8593) }
-  public var border: Color { Color(hex: dark ? 0x454248 : 0xE1E5EC) }
-  public var accent: Color { Color(hex: dark ? 0xA2B4FF : 0x526EEA) }
-  public var accentSoft: Color { Color(hex: dark ? 0x353B51 : 0xE8EDFF) }
+  public var secondary: Color { Color(hex: dark ? 0xBEC5CE : 0x697281) }
+  public var muted: Color { Color(hex: dark ? 0x929CAA : 0x7D8593) }
+  public var border: Color { Color(hex: dark ? 0x3C434C : 0xE1E5EC) }
+  public var accent: Color { Color(hex: dark ? 0xA9C7DB : 0x3B637F) }
+  public var accentSoft: Color { Color(hex: dark ? 0x2B3B47 : 0xE3ECF3) }
 }
 extension Color {
   init(hex: UInt32) {
@@ -27,7 +27,7 @@ struct QuietButton: ButtonStyle {
     configuration.label.font(.system(size: 13, weight: .medium)).padding(.horizontal, 14).padding(
       .vertical, 10
     ).background(primary ? t.accent : t.surface, in: RoundedRectangle(cornerRadius: 10))
-      .foregroundStyle(primary ? Color.white : t.text).overlay(
+      .foregroundStyle(primary ? (t.dark ? t.background : Color.white) : t.text).overlay(
         RoundedRectangle(cornerRadius: 10).stroke(
           primary ? .clear : t.border.opacity(0.7), lineWidth: 1)
       ).opacity(configuration.isPressed ? 0.75 : 1)

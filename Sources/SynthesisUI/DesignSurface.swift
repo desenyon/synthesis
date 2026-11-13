@@ -491,19 +491,23 @@ struct FragmentInspector: View {
 struct CanvasInputSurface: NSViewRepresentable {
   var onPan: (CGSize) -> Void
   var onZoom: (Double) -> Void
+  var onClick: () -> Void = {}
   func makeNSView(context: Context) -> InputView {
     let v = InputView()
     v.onPan = onPan
     v.onZoom = onZoom
+    v.onClick = onClick
     return v
   }
   func updateNSView(_ view: InputView, context: Context) {
     view.onPan = onPan
     view.onZoom = onZoom
+    view.onClick = onClick
   }
   final class InputView: NSView {
     var onPan: ((CGSize) -> Void)?
     var onZoom: ((Double) -> Void)?
+    var onClick: (() -> Void)?
     override var acceptsFirstResponder: Bool { true }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     override func mouseDragged(with event: NSEvent) {
@@ -517,6 +521,9 @@ struct CanvasInputSurface: NSViewRepresentable {
       }
     }
     override func magnify(with event: NSEvent) { onZoom?(Double(event.magnification)) }
-    override func mouseDown(with event: NSEvent) { window?.makeFirstResponder(self) }
+    override func mouseDown(with event: NSEvent) {
+      window?.makeFirstResponder(self)
+      onClick?()
+    }
   }
 }

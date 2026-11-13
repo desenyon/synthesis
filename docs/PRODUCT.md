@@ -1,7 +1,9 @@
-# Synthesis
+# Synthesis product
 
-Current work is an interactive native UI study. See [UI_DIRECTION](UI_DIRECTION.md). The latest owner direction supersedes the earlier light editorial design: compact modular navigation, an infinite canvas, a floating guided composer, and an integrated header. UI study interactions do not invoke AI or save fragments into established lore. Full-app integration waits for UI acceptance.
+A native worldbuilding studio: conversation, writing and spatial exploration are views of one universe. The creator owns all lore and deliberate canon.
 
-The enduring product is a creative studio for fictional universes, with freeform capture, structured memory and deliberate canon. Manual work remains valuable without AI. World ownership, history, source traceability and explicit canon approvals are protected.
+Assisted entry: dedicated Conversation with saved history, local lore references and explicit external-provider disclosure. Manual independently blocks model requests while preserving all creative tools. Canvas is a manually curated board; Graph is an automatic relationship view that can be copied into Canvas. Library, Timeline and Atlas share source records.
 
-The preserved application slice supports SQLite worlds, writing, entities, links, search, history and review. Those capabilities remain implementation assets; their presence does not mean they are currently wired to the new review interface. Later product scope remains described in the roadmap.
+Daily journey: create a world → capture or write a draft → add it to a board → link actual entities → navigate the graph or source record → revisit saved content. Guidance is optional, and a new world is genuinely empty. User-authored and AI-proposed drafts remain distinct from accepted canon; review shows the old accepted text and proposed draft before explicit approval.
+
+Current visual contract: compact graphite shell, readable sans-serif hierarchy, light counterpart, restrained semantic colors, real entity cards and optional world artwork. No permanent assistant overlay, fake starter lore, decorative edges, analytics or preview-only production labels.

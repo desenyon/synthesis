@@ -13,5 +13,6 @@ let package = Package(
     .target(name: "SynthesisUI", dependencies: ["SynthesisCore"], resources: [.copy("Assets")]),
     .executableTarget(name: "SynthesisApp", dependencies: ["SynthesisUI", "SynthesisCore"]),
     .testTarget(name: "SynthesisCoreTests", dependencies: ["SynthesisCore"]),
+    .testTarget(name: "SynthesisUITests", dependencies: ["SynthesisUI", "SynthesisCore"]),
   ], swiftLanguageModes: [.v5]
 )

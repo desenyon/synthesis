@@ -14,7 +14,6 @@ final class StudioWindow: NSWindow {
 @MainActor final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
   var window: NSWindow!
   var studio: Studio!
-  var design: CanvasDesignModel!
   func applicationDidFinishLaunching(_ notification: Notification) {
     do {
       let store = try WorkspaceStore(path: WorkspaceStore.defaultPath)
@@ -26,12 +25,10 @@ final class StudioWindow: NSWindow {
       window.title = "Synthesis"
       window.minSize = NSSize(width: 360, height: 580)
       window.delegate = self
-      design = CanvasDesignModel(records: studio.records)
-      design.loadBlueprint()
       window.isOpaque = false
       window.backgroundColor = .clear
       window.hasShadow = true
-      window.contentView = NSHostingView(rootView: CanvasDesignRoot(studio: studio, model: design))
+      window.contentView = NSHostingView(rootView: ConnectedRoot(studio: studio))
       window.center()
       window.makeKeyAndOrderFront(nil)
       NSApp.setActivationPolicy(.regular)
@@ -90,19 +87,23 @@ final class StudioWindow: NSWindow {
     main.addItem(edit)
     NSApp.mainMenu = main
   }
-  @objc func settings() { design.openAppearance() }
-  @objc func search() { design.openSearch() }
+  @objc func settings() { studio.sheet = .settings }
+  @objc func search() { studio.sheet = .search }
   @objc func closeWindow() { window.close() }
-  @objc func newItem() { design.createNote() }
+  @objc func newItem() { studio.sheet = .document }
   private func capture(_ directory: String) async {
     do {
       try FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
-      studio.loadSample()
+      let fixture = try studio.prepareConnectedCapture()
       try await Task.sleep(for: .milliseconds(150))
-      let sizes: [(Int, Int)] = [(1440, 900), (1920, 1080), (1024, 768), (390, 844)]
+      let sizes: [(Int, Int)] = [(1440, 900), (1920, 1080), (1024, 768)]
       for (width, height) in sizes {
-        for state in ["canvas", "conversation", "power-system", "detail", "collapsed", "light"] {
-          design.configureCapture(state)
+        for state in [
+          "conversation-home", "conversation", "canvas", "companion", "manual", "collapsed",
+          "light", "graph", "library",
+        ] {
+          studio.configureConnectedCapture(
+            state, board: fixture.board, conversation: fixture.conversation)
           window.setContentSize(NSSize(width: width, height: height))
           try await Task.sleep(for: .milliseconds(450))
           guard let view = window.contentView else { continue }

@@ -24,7 +24,7 @@ The creator owns the world and its canon. The software assists with capture, wri
 
 ### The initial product experience
 
-The current milestone is UI-first, per the owner's latest explicit correction: a compact native canvas-first studio, modular worldbuilding sidebar, floating guided-chat composer and integrated draggable header without a separate macOS title bar. Use docs/UI_DIRECTION.md and the latest supplied reference screenshots. Pause broader feature expansion until the interface direction is accepted. The current UI study must clearly distinguish local guided interactions from real AI and must not modify established lore/canon. Preserve the implemented application and its safety boundaries for later integration.
+The current milestone connects the accepted graphite visual foundation to the real world model, per the owner's targeted refinement directive. Conversation is the assisted entry point; Canvas is a saved manually curated board with a compact composer and optional resizable companion. Library, Graph, Timeline and Atlas are distinct connected workspaces. AI Assisted / Manual is persistent and independent of navigation, enforced at the native provider boundary. Graph derives from stored relationships and may be copied into a curated canvas. Use docs/UI_DIRECTION.md. No starter instructions may masquerade as lore; guided prompts are optional. Preserve explicit canon approval and native window chrome integration.
 
 The system must eventually support:
 

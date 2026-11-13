@@ -3,10 +3,10 @@ import SwiftUI
 import SynthesisCore
 
 public enum Destination: String, CaseIterable, Identifiable {
-  case chat = "Chat"
+  case chat = "Conversation"
   case library = "Library"
   case canvas = "Canvas"
-  case knowledge = "Knowledge"
+  case knowledge = "Graph"
   case timeline = "Timeline"
   case atlas = "Atlas"
   case manual = "Studio"
@@ -36,6 +36,7 @@ public enum Destination: String, CaseIterable, Identifiable {
   @Published public var destination: Destination = .chat
   @Published public var mode: WorkspaceMode = .assisted
   @Published public var dark = false
+  @Published public var worldCover: NSImage?
   @Published public var collapsed = false
   @Published public var mobileNavigation = false
   @Published public var draft = ""
@@ -50,6 +51,10 @@ public enum Destination: String, CaseIterable, Identifiable {
   @Published public var search = ""
   @Published public var editorSave: (() -> Bool)?
   @Published public var inspector = false
+  @Published public var canvasBoardID: String?
+  @Published public var companionExpanded = false
+  @Published public var companionWidth = 400.0
+  @Published public var libraryCategory: String?
   private var running: Task<Void, Never>?
   private var requestID = UUID()
   public enum Sheet: String, Identifiable {
@@ -72,10 +77,11 @@ public enum Destination: String, CaseIterable, Identifiable {
     if worlds.isEmpty { worlds = [try store.createWorld(name: "My world")] }
     let last = try store.preference("world")
     worldID = worlds.first { $0.id == last }?.id ?? worlds[0].id
+    worldCover = Self.cover(store: store, worldID: worldID)
     mode = WorkspaceMode(rawValue: try store.preference("mode") ?? "assisted") ?? .assisted
-    dark = try store.preference("theme") == "dark"
+    dark = try store.preference("theme") != "light"
     collapsed = try store.preference("sidebar") == "collapsed"
-    destination = mode == .manual ? .manual : .chat
+    destination = mode == .manual ? .canvas : .chat
     draft = try store.preference("composer:\(worldID)") ?? ""
     providerConfigured = ProviderKeychain.configured && !configuredModel.isEmpty
     try reload()
@@ -103,10 +109,9 @@ public enum Destination: String, CaseIterable, Identifiable {
       try engine.setMode(value)
       mode = value
       stop()
-      if flushEditor() {
-        selectedRecord = nil
-        editorSave = nil
-        destination = value == .manual ? .manual : .chat
+      // Assistance is independent of navigation. Keep editors and boards intact.
+      if value == .manual {
+        companionExpanded = false
       }
       try reload()
     }
@@ -133,34 +138,41 @@ public enum Destination: String, CaseIterable, Identifiable {
     stop()
     perform {
       persistComposer()
+      canvasBoardID = nil
+      companionExpanded = false
       worldID = id
+      worldCover = Self.cover(store: store, worldID: id)
       conversationID = nil
       selectedRecord = nil
       editorSave = nil
       try store.setPreference("world", value: id)
       draft = try store.preference("composer:\(id)") ?? ""
-      destination = mode == .manual ? .manual : .chat
+      destination = mode == .manual ? .canvas : .chat
       try reload()
     }
   }
-  public func newChat() {
+  public func newChat(keepWorkspace: Bool = false) {
     guard flushEditor() else { return }
     stop()
-    selectedRecord = nil
-    editorSave = nil
+    if !keepWorkspace {
+      selectedRecord = nil
+      editorSave = nil
+      destination = .chat
+    }
     conversationID = nil
     messages = []
-    destination = .chat
     mobileNavigation = false
   }
-  public func openChat(_ chat: Conversation) {
+  public func openChat(_ chat: Conversation, keepWorkspace: Bool = false) {
     guard flushEditor() else { return }
     stop()
     perform {
       conversationID = chat.id
-      selectedRecord = nil
-      editorSave = nil
-      destination = .chat
+      if !keepWorkspace {
+        selectedRecord = nil
+        editorSave = nil
+        destination = .chat
+      }
       try reload()
       mobileNavigation = false
     }
@@ -197,7 +209,7 @@ public enum Destination: String, CaseIterable, Identifiable {
     busy = false
     streamed = ""
   }
-  public func send() {
+  public func send(keepWorkspace: Bool = false) {
     guard mode == .assisted, !busy, !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     else { return }
     guard draft.count <= 30000 else {
@@ -218,7 +230,7 @@ public enum Destination: String, CaseIterable, Identifiable {
       streamed = ""
       draft = ""
       persistComposer()
-      destination = .chat
+      if !keepWorkspace { destination = .chat }
       running = Task { [weak self] in
         guard let self, !Task.isCancelled, self.requestID == request else { return }
         do {
@@ -286,6 +298,26 @@ public enum Destination: String, CaseIterable, Identifiable {
         draft += "\n\nAttached reference: \(url.lastPathComponent)\n\(text)"
         persistComposer()
       }
+    }
+  }
+  private static func cover(store: WorkspaceStore, worldID: String) -> NSImage? {
+    guard let value = try? store.preference("world-cover:\(worldID)"),
+      let data = Data(base64Encoded: value)
+    else { return nil }
+    return NSImage(data: data)
+  }
+  public func chooseWorldCover() {
+    let panel = NSOpenPanel()
+    panel.allowedContentTypes = [.image]
+    panel.allowsMultipleSelection = false
+    guard panel.runModal() == .OK, let url = panel.url else { return }
+    perform {
+      let data = try Data(contentsOf: url)
+      guard data.count <= 4_000_000, let image = NSImage(data: data) else {
+        throw SynthesisError.invalid("Choose a world cover smaller than 4 MB.")
+      }
+      try store.setPreference("world-cover:\(worldID)", value: data.base64EncodedString())
+      worldCover = image
     }
   }
   public func exportWorld() {

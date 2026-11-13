@@ -15,10 +15,12 @@ struct CanvasCard: Identifiable, Codable, Equatable {
   var group: String?
 }
 struct CanvasEdge: Codable, Equatable {
+  var label: String?
   var source: String
   var target: String
 }
 struct CanvasDocument: Codable, Equatable {
+  var viewport: BoardViewport?
   var cards: [CanvasCard] = []
   var edges: [CanvasEdge] = []
 }
