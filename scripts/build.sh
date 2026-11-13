@@ -4,8 +4,9 @@ cd "${0:A:h:h}"
 export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
 synthesis_sdk="$(xcode-select -p)/SDKs/MacOSX26.5.sdk"
 if [[ ! -d "$synthesis_sdk" ]]; then synthesis_sdk="$(xcrun --show-sdk-path)"; fi
-swift build --build-system native --sdk "$synthesis_sdk"
-synthesis_bin="$(swift build --build-system native --sdk "$synthesis_sdk" --show-bin-path)"
+synthesis_configuration="${1:-debug}"
+swift build --build-system native --sdk "$synthesis_sdk" -c "$synthesis_configuration"
+synthesis_bin="$(swift build --build-system native --sdk "$synthesis_sdk" -c "$synthesis_configuration" --show-bin-path)"
 app="dist/Synthesis.app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$synthesis_bin/Synthesis" "$app/Contents/MacOS/Synthesis"

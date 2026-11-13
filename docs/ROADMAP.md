@@ -1,13 +1,24 @@
-# Native rebuild gates
+# Native rebuild roadmap
 
-1. Repository discovery — done; no working frontend existed.
-2. Light application shell — in progress: native root, 60pt header, collapsible navigation, no permanent inspector.
-3. Chat-first home — expansive composer, editorial typography, subtle ASCII world art.
-4. Functional chat — persisted conversations/messages, real provider transport, honest unavailable/errors, cancel.
-5. Manual mode — persisted mode, core request barrier and active cancellation; independent manual home.
-6. Library/editor — rich text, autosave, versions, categories and entities.
-7. Visual verification — real native app at 1440×900, 1920×1080, 1024×768 and 390×844; home, chat, manual, editor, collapsed, dark. Native rendering replaces browser-only verification because the requested app is native.
-8. Functional verification — storage, isolation, approval, mode cancellation, interactions, theme, navigation and recovery.
-9. Secondary tools — only after core gates: functional canvas, graph, timeline, atlas. Clearly label remaining capabilities unavailable.
+## Current development slice
 
-Development only. No releases or deployments. No fixed iteration count substitutes for actual inspected improvements.
+1. Discovery: complete. No running frontend existed; old HTML studies and partial web domain scaffold preserved.
+2. New native shell: implemented and inspected. Light default, 60-point header, 240/68 navigation, central workspace, no permanent AI inspector.
+3. Chat home: implemented and visually inspected at four exact sizes. Native text input, presets, references, attachments, recent conversations.
+4. Chat operation: local submission/history/error path verified; streaming adapter implemented. Live external provider verification remains outstanding.
+5. Manual mode: independent studio verified. Core blocking and in-flight cancellation covered by transport tests; persistence confirmed after quitting/reopening.
+6. Library/editor: rich text, capture conversion, autosave, revision history, metadata, links and canon review. Daily capture/search/link journey verified in the actual app.
+7. Visual checks: two rounds inspected; exact-size corrected round passes. Final captures after connected-workspace changes pending.
+8. Functional checks: native walkthrough, ten core tests, strict format lint and debug build passed. Final optimized build/review pending.
+9. Connected tools: initial graph, timeline, canvas and atlas implemented. Source navigation, event creation, canvas note/undo/redo/reopen and atlas upload/marker/source exercised natively.
+
+## Next milestone — harden the working studio
+
+- Structured AI change sets: exact before/after diffs, evidence, reject/accept, stale-base checks across documents/entities/relationships. Current AI path saves an AI-origin draft for separate full-text canon review.
+- Verified live provider streaming with an owner-configured key; richer Markdown tables, images and structured previews.
+- Editor inline entity mention insertion, more formatting controls and durable failed-save recovery across process crashes.
+- Canvas/atlas history beyond a session, multi-board management, marker edit/removal and graph layout persistence; keyboard-accessible spatial manipulation.
+- Calendar/era navigation beyond freeform date filtering and spacing controls.
+- Expanded accessibility, large-corpus performance and macOS version coverage.
+
+No release or deployment work is scheduled. Later: branching canon, rules lab, narrative layers and collaboration.

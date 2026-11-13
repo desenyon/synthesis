@@ -1,6 +1,278 @@
 import SwiftUI
-struct CanvasScreen:View { @ObservedObject var studio:Studio;var body:some View{ComingSoon(studio:studio,title:"Room to connect.",detail:"The native canvas is being implemented. Your documents remain available in Library.",icon:"square.on.square")} }
-struct KnowledgeScreen:View { @ObservedObject var studio:Studio;var body:some View{ComingSoon(studio:studio,title:"Follow the connections.",detail:"Entity relationships will live here. Create entities in your library first.",icon:"point.3.connected.trianglepath.dotted")} }
-struct TimelineScreen:View { @ObservedObject var studio:Studio;var body:some View{ComingSoon(studio:studio,title:"A history taking shape.",detail:"The timeline is not available in this development stage.",icon:"clock.arrow.circlepath")} }
-struct AtlasScreen:View { @ObservedObject var studio:Studio;var body:some View{ComingSoon(studio:studio,title:"Beyond the horizon.",detail:"Map upload and place markers are not available in this development stage.",icon:"map")} }
-struct ComingSoon:View { @ObservedObject var studio:Studio;let title:String;let detail:String;let icon:String;var body:some View{VStack(spacing:20){Image(systemName:icon).font(.system(size:40,weight:.ultraLight)).foregroundStyle(studio.t.accent);Text(title).font(.system(size:36,design:.serif));Text(detail).font(.system(size:14)).foregroundStyle(studio.t.secondary).multilineTextAlignment(.center).frame(maxWidth:400);Button("Open library"){studio.navigate(.library)}.buttonStyle(QuietButton(t:studio.t))}.padding(32).frame(maxWidth:.infinity,maxHeight:.infinity)} }
+import SynthesisCore
+
+struct WorkspaceHeading: View {
+  let title: String
+  let subtitle: String
+  let t: Theme
+  var body: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text(title).font(.system(size: 34, design: .serif)).tracking(-0.8)
+      Text(subtitle).font(.system(size: 13)).foregroundStyle(t.secondary)
+    }
+  }
+}
+
+struct KnowledgeScreen: View {
+  @ObservedObject var studio: Studio
+  @State private var relationships: [Relation] = []
+  @State private var query = ""
+  @State private var selected: String?
+  @State private var linking = false
+  @State private var source = ""
+  @State private var target = ""
+  @State private var label = ""
+  @State private var zoom = 1.0
+  @State private var positions: [String: CGSize] = [:]
+  var entities: [LoreRecord] { studio.records.filter { $0.kind == "entity" } }
+  var visible: [LoreRecord] {
+    entities.filter { query.isEmpty || $0.title.localizedCaseInsensitiveContains(query) }
+  }
+  var body: some View {
+    VStack(alignment: .leading, spacing: 24) {
+      HStack {
+        WorkspaceHeading(
+          title: "Everything is connected.",
+          subtitle: "Follow the people, places, and forces shaping your world.", t: studio.t)
+        Spacer()
+        Button {
+          source = entities.first?.id ?? ""
+          target = entities.dropFirst().first?.id ?? ""
+          linking = true
+        } label: {
+          Image(systemName: "plus")
+        }
+        .buttonStyle(QuietButton(t: studio.t, primary: true)).disabled(entities.count < 2).help(
+          "Add relationship")
+      }
+      HStack {
+        Image(systemName: "magnifyingglass").foregroundStyle(studio.t.muted)
+        TextField("Find an entity", text: $query).textFieldStyle(.plain)
+        Spacer()
+        IconButton(icon: "minus", label: "Zoom out", t: studio.t) { zoom = max(0.4, zoom - 0.15) }
+        Text("\(Int(zoom * 100))%").font(.system(size: 11)).foregroundStyle(studio.t.secondary)
+        IconButton(icon: "plus", label: "Zoom in", t: studio.t) { zoom = min(2, zoom + 0.15) }
+      }.font(.system(size: 13))
+      if entities.isEmpty {
+        VStack(spacing: 18) {
+          Image(systemName: "point.3.connected.trianglepath.dotted").font(
+            .system(size: 44, weight: .ultraLight)
+          ).foregroundStyle(studio.t.accent)
+          Text("Start with someone. Or somewhere.").font(.system(size: 25, design: .serif))
+          Button("Create an entity") { studio.sheet = .document }.buttonStyle(
+            QuietButton(t: studio.t))
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+      } else {
+        GeometryReader { geo in
+          let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+          let radius = min(geo.size.width, geo.size.height) * 0.30 * zoom
+          ZStack {
+            Canvas { context, _ in
+              for edge in relationships {
+                guard let a = visible.firstIndex(where: { $0.id == edge.sourceID }),
+                  let b = visible.firstIndex(where: { $0.id == edge.targetID })
+                else { continue }
+                let start = point(a, center: center, radius: radius)
+                let end = point(b, center: center, radius: radius)
+                var path = Path()
+                path.move(to: start)
+                path.addLine(to: end)
+                context.stroke(path, with: .color(studio.t.accent.opacity(0.3)), lineWidth: 1.5)
+                context.draw(
+                  Text(edge.label).font(.system(size: 11)).foregroundColor(studio.t.secondary),
+                  at: CGPoint(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 - 12))
+              }
+            }
+            ForEach(Array(visible.enumerated()), id: \.element.id) { index, entity in
+              Button {
+                selected = entity.id
+              } label: {
+                VStack(spacing: 10) {
+                  Image(systemName: entity.category == "Places" ? "mappin" : "sparkle").font(
+                    .system(size: 20)
+                  ).foregroundStyle(studio.t.accent)
+                    .frame(width: 50, height: 50).background(studio.t.surface, in: Circle())
+                    .overlay(
+                      Circle().stroke(
+                        studio.t.accent.opacity(selected == entity.id ? 0.8 : 0.15), lineWidth: 1.5)
+                    )
+                  Text(entity.title).font(.system(size: 13, weight: .medium)).lineLimit(2).frame(
+                    width: 150)
+                }
+              }.buttonStyle(.plain).position(point(index, center: center, radius: radius))
+                .gesture(
+                  DragGesture().onChanged { value in positions[entity.id] = value.translation }
+                    .onEnded { _ in }
+                )
+                .contextMenu { Button("Open source record") { studio.openRecord(entity) } }
+            }
+          }.clipped()
+        }.background(studio.t.surface.opacity(0.35), in: RoundedRectangle(cornerRadius: 20))
+        if let entity = entities.first(where: { $0.id == selected }) {
+          HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 5) {
+              Text(entity.title).font(.system(size: 15, weight: .medium))
+              Text(entity.body.isEmpty ? "An entity waiting to take shape." : entity.body).font(
+                .system(size: 12)
+              ).foregroundStyle(studio.t.secondary).lineLimit(2)
+            }
+            Spacer()
+            Button("Open record ↗") { studio.openRecord(entity) }.buttonStyle(
+              QuietButton(t: studio.t))
+            IconButton(icon: "xmark", label: "Close selection", t: studio.t) { selected = nil }
+          }.padding(18).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 14))
+        }
+      }
+    }.padding(30).onAppear { refresh() }
+      .sheet(isPresented: $linking) {
+        VStack(alignment: .leading, spacing: 22) {
+          Text("Give the connection meaning.").font(.system(size: 26, design: .serif))
+          Picker("From", selection: $source) { ForEach(entities) { Text($0.title).tag($0.id) } }
+          TextField("Relationship · e.g. belongs to", text: $label).textFieldStyle(.roundedBorder)
+          Picker("To", selection: $target) { ForEach(entities) { Text($0.title).tag($0.id) } }
+          Text("Saved as a draft relationship. This does not establish canon.").font(.caption)
+            .foregroundStyle(.secondary)
+          HStack {
+            Button("Cancel") { linking = false }
+            Spacer()
+            Button("Connect") {
+              studio.perform {
+                _ = try studio.store.addRelation(
+                  worldID: studio.worldID, source: source, target: target, label: label)
+                linking = false
+                refresh()
+              }
+            }.disabled(source == target || label.isEmpty)
+          }
+        }.padding(28).frame(width: 430)
+      }
+  }
+  private func refresh() {
+    studio.perform { relationships = try studio.store.relations(worldID: studio.worldID) }
+  }
+  private func point(_ index: Int, center: CGPoint, radius: Double) -> CGPoint {
+    let angle = Double(index) / Double(max(1, visible.count)) * .pi * 2 - .pi / 2
+    let offset = positions[visible[index].id] ?? .zero
+    return CGPoint(
+      x: center.x + cos(angle) * radius + offset.width,
+      y: center.y + sin(angle) * radius + offset.height)
+  }
+}
+
+struct TimelineScreen: View {
+  @ObservedObject var studio: Studio
+  @State private var events: [WorldEvent] = []
+  @State private var adding = false
+  @State private var title = ""
+  @State private var date = ""
+  @State private var order = ""
+  @State private var source = ""
+  @State private var filter = ""
+  @State private var spacing = 30.0
+  var filtered: [WorldEvent] {
+    events.filter {
+      filter.isEmpty || $0.dateLabel.localizedCaseInsensitiveContains(filter)
+        || $0.title.localizedCaseInsensitiveContains(filter)
+    }
+  }
+  var body: some View {
+    VStack(alignment: .leading, spacing: 26) {
+      HStack {
+        WorkspaceHeading(
+          title: "A world remembers.",
+          subtitle: "History with room for uncertainty, myth, and missing years.", t: studio.t)
+        Spacer()
+        Button {
+          source = studio.records.first?.id ?? ""
+          adding = true
+        } label: {
+          Image(systemName: "plus")
+        }.buttonStyle(QuietButton(t: studio.t, primary: true)).disabled(studio.records.isEmpty)
+          .help("Add event")
+      }
+      HStack {
+        TextField("Find an era or event", text: $filter).textFieldStyle(.plain)
+        Spacer()
+        IconButton(icon: "minus", label: "Compact timeline", t: studio.t) {
+          spacing = max(12, spacing - 12)
+        }
+        IconButton(icon: "plus", label: "Expand timeline", t: studio.t) {
+          spacing = min(120, spacing + 12)
+        }
+      }.font(.system(size: 13))
+      ScrollView {
+        VStack(alignment: .leading, spacing: spacing) {
+          ForEach(filtered) { event in
+            HStack(alignment: .top, spacing: 20) {
+              VStack(spacing: 8) {
+                Circle().fill(studio.t.accent.opacity(0.7)).frame(width: 9, height: 9)
+                Rectangle().fill(studio.t.border).frame(width: 1, height: 80)
+              }.frame(width: 18)
+              VStack(alignment: .leading, spacing: 12) {
+                Text(event.dateLabel).font(.system(size: 12, weight: .medium)).foregroundStyle(
+                  studio.t.accent)
+                Text(event.title).font(.system(size: 25, design: .serif))
+                if let record = studio.records.first(where: { $0.id == event.sourceID }) {
+                  Button {
+                    studio.openRecord(record)
+                  } label: {
+                    Label(record.title + " ↗", systemImage: "doc.text")
+                  }.font(.system(size: 12)).buttonStyle(.plain).foregroundStyle(studio.t.secondary)
+                }
+                Text("Draft event").font(.system(size: 10)).foregroundStyle(studio.t.muted)
+              }
+              Spacer()
+            }.padding(.vertical, 10)
+          }
+          if filtered.isEmpty {
+            Text(events.isEmpty ? "Every history starts somewhere." : "No matching events.").font(
+              .system(size: 27, design: .serif)
+            ).padding(.top, 70)
+            Text(
+              studio.records.isEmpty
+                ? "Create a source document or entity in Library first."
+                : "Add an event with a source record. Dates can be unknown."
+            ).font(.system(size: 14)).foregroundStyle(studio.t.secondary)
+          }
+        }.padding(.vertical, 24).frame(maxWidth: 800, alignment: .leading).frame(
+          maxWidth: .infinity, alignment: .leading)
+      }
+    }.padding(30).onAppear { refresh() }
+      .sheet(isPresented: $adding) {
+        VStack(alignment: .leading, spacing: 20) {
+          Text("A moment that matters.").font(.system(size: 27, design: .serif))
+          TextField("Event title", text: $title)
+          TextField("Date or era · leave empty if unknown", text: $date)
+          TextField("Optional chronology order (integer)", text: $order)
+          Picker("Source", selection: $source) {
+            ForEach(studio.records) { Text($0.title).tag($0.id) }
+          }
+          Text(
+            "Date labels preserve your world's own language. Ordering does not invent calendar precision."
+          ).font(.caption).foregroundStyle(.secondary)
+          HStack {
+            Button("Cancel") { adding = false }
+            Spacer()
+            Button("Add event") {
+              studio.perform {
+                guard order.isEmpty || Int(order) != nil else {
+                  throw SynthesisError.invalid("Order must be an integer or blank.")
+                }
+                _ = try studio.store.addEvent(
+                  worldID: studio.worldID, title: title, date: date, source: source,
+                  order: Int(order))
+                adding = false
+                title = ""
+                date = ""
+                order = ""
+                refresh()
+              }
+            }.disabled(title.isEmpty || source.isEmpty)
+          }
+        }.textFieldStyle(.roundedBorder).padding(28).frame(width: 430)
+      }
+  }
+  private func refresh() {
+    studio.perform { events = try studio.store.events(worldID: studio.worldID) }
+  }
+}

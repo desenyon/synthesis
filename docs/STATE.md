@@ -17,3 +17,7 @@ Active: complete native rebuild, development only. Baseline preserved in `02a93e
 Functional mouse/keyboard walkthrough and second visual round pending. Canvas, graph, timeline, atlas are currently honest unavailable destinations. Core tables/operations exist; UI work follows primary-workspace validation. Rich chat tables/images, structured proposal diffs, tags/aliases UI, source/backlink inspector and crash-safe recovery need further work. No claims of live AI, browser testing, iOS support, GPUI, production release or notarization.
 
 Discovery: repository had no actual frontend or route, only black three-pane HTML studies and a partial TypeScript domain scaffold. Preserved under `legacy/web`. Native app is the new actual entry point. No push, release, tag or paid provider usage this session.
+
+## Owner steering — UI-first reset
+
+The owner rejected this light editorial redesign and reports sluggishness. New references request a compact modular, canvas-first native UI with a Zeron-style floating composer, integrated window chrome and guided creation. Feature expansion is paused. The running UI is being replaced again; earlier screenshots document rejected iterations, not approved design. Backend/domain work stays preserved. Independent review found and fixes were applied for queued cancellation, canonical context projection and metadata restoration; queued-cancellation regression was observed fail before the fix.
