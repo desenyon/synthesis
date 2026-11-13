@@ -13,10 +13,11 @@ Two bodies of work landed today. The full checklist, causes and evidence are in 
 - Library with full-text search, filters, archive and file drop; editor with details inspector and canon diff review.
 - Graph, Timeline and Atlas with editing; archive with Undo for every kind of removal.
 - Import Markdown/text; export Markdown folder or full JSON (schema 4, including proposals and recorded context).
+- Review workspace: pending proposals across conversations, drafts awaiting canon review, and a local consistency check that works in Manual mode.
 
 ## Checks run
 
-- `./scripts/check.sh`: strict lint, 40 tests in 3 suites, optimized build — passed.
+- `./scripts/check.sh`: strict lint, 41 tests in 3 suites, optimized build — passed.
 - `./scripts/verify-ui.sh`: 148 captures for the audit (four sizes), 10 more for the M3 screens; contact sheets inspected.
 - `./scripts/selftest-ui.sh`: 15 of 15 interaction checks passed on the release build.
 

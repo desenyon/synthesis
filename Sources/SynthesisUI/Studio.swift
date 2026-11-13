@@ -9,6 +9,7 @@ public enum Destination: String, CaseIterable, Identifiable {
   case knowledge = "Graph"
   case timeline = "Timeline"
   case atlas = "Atlas"
+  case review = "Review"
   public var id: String { rawValue }
   var icon: String {
     switch self {
@@ -18,6 +19,7 @@ public enum Destination: String, CaseIterable, Identifiable {
     case .knowledge: return "point.3.connected.trianglepath.dotted"
     case .timeline: return "calendar.day.timeline.left"
     case .atlas: return "map"
+    case .review: return "checkmark.seal"
     }
   }
   var summary: String {
@@ -28,6 +30,7 @@ public enum Destination: String, CaseIterable, Identifiable {
     case .knowledge: return "Relationships between entities"
     case .timeline: return "Events in order"
     case .atlas: return "Places on your map"
+    case .review: return "Proposals, canon and checks"
     }
   }
 }
@@ -51,6 +54,10 @@ public struct Toast: Identifiable {
   @Published public var messages: [ChatMessage] = []
   /// Staged AI change sets for the open conversation, keyed by the message that proposed them.
   @Published public var proposals: [String: Proposal] = [:]
+  /// Every staged change set in this world that still has something to decide.
+  @Published public var pendingProposals: [Proposal] = []
+  /// Record whose canon review should open as soon as its editor appears.
+  public var reviewCanon: String?
   /// Records shared with the model for each answer, keyed by assistant message.
   @Published public var contexts: [String: [ContextSource]] = [:]
   @Published public var conversationID: String?
@@ -129,6 +136,7 @@ public struct Toast: Identifiable {
     worlds = try store.worlds()
     records = try store.records(worldID: worldID)
     conversations = try store.conversations(worldID: worldID)
+    pendingProposals = try store.proposals(worldID: worldID).filter { $0.pending > 0 }
     if let conversationID {
       messages = try store.messages(worldID: worldID, conversationID: conversationID)
       proposals = Dictionary(
@@ -174,6 +182,12 @@ public struct Toast: Identifiable {
       }
     }
   }
+  /// Drafts whose accepted canon is older than their current text.
+  public var canonQueue: [LoreRecord] {
+    records.filter { $0.canonical != nil && $0.state != "canon" }
+  }
+  /// Things waiting on the creator: staged proposals plus drafts that moved past canon.
+  public var reviewCount: Int { pendingProposals.count + canonQueue.count }
   /// Display name for a proposal endpoint: a record, or something the same proposal creates.
   public func name(for reference: String?, in proposal: Proposal) -> String {
     guard let reference else { return "Unknown" }

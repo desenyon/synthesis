@@ -318,6 +318,9 @@ import Testing
           ["action": "revise_record", "id": rule.id, "body": "Two moons"],
         ],
       ])
+    // Review counts what waits on the creator even before the conversation is opened.
+    try studio.reload()
+    #expect(studio.pendingProposals.count == 1 && studio.reviewCount == 1)
     studio.openChat(chat)
     let proposal = try #require(studio.proposals[message.id])
     #expect(proposal.pending == 2 && studio.records.count == 1)
@@ -334,6 +337,13 @@ import Testing
     #expect(moon.origin == "ai-proposed" && moon.state == "draft")
     #expect(try store.record(worldID: studio.worldID, id: rule.id).body == "One moon")
     #expect(studio.toast?.message == "1 change saved as drafts")
+    #expect(studio.pendingProposals.isEmpty && studio.reviewCount == 0)
+    // Editing an accepted record puts it in the canon queue until it is reviewed.
+    _ = try store.saveRecord(
+      worldID: studio.worldID, id: rule.id, version: rule.version, title: "Rule",
+      body: "Two moons", rtf: nil)
+    try studio.reload()
+    #expect(studio.canonQueue.map(\.id) == [rule.id] && studio.reviewCount == 1)
   }
   @Test func quickCaptureAndImportCreateLabelledDrafts() throws {
     let store = try WorkspaceStore(path: ":memory:")

@@ -1,6 +1,6 @@
 # Synthesis
 
-A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Conversation, Canvas, Library, Graph, Timeline and Atlas** are six views of one saved world, sharing one design system.
+A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Conversation, Canvas, Library, Graph, Timeline, Atlas and Review** are views of one saved world, sharing one design system.
 
 ```sh
 export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
@@ -18,6 +18,7 @@ Requires macOS 14+ and Swift 6 Command Line Tools. Scripts select the compatible
 - **Graph** draws itself from entity relationships. Select an entity for its details, edit relationships, or copy a neighbourhood into an editable board.
 - **Library** holds every document, entity and idea with full-text search, filters and an archive. The editor has rich text, a details inspector (tags, aliases, links, relationships, timeline) and canon review as a line diff.
 - **Timeline** orders sourced events with free-form dates. **Atlas** pins records to a map image you supply.
+- **Review** gathers what is waiting on you: AI proposals from every conversation, drafts that have moved past accepted canon, and a local consistency check (clashing names, unlinked mentions, unconnected entities) that needs no model.
 
 Nothing is hard-deleted: removing a record, conversation, board, event or relationship archives it and offers Undo. No AI output becomes canon without your explicit acceptance of an exact revision.
 
@@ -26,7 +27,7 @@ Nothing is hard-deleted: removing a record, conversation, board, event or relati
 | Shortcut | Action |
 | - | - |
 | ⌘K | Search and commands |
-| ⌘1 – ⌘6 | Conversation, Canvas, Library, Graph, Timeline, Atlas |
+| ⌘1 – ⌘7 | Conversation, Canvas, Library, Graph, Timeline, Atlas, Review |
 | ⌘N / ⇧⌘N | New record / new conversation |
 | ⇧⌘I | Import Markdown or text files |
 | @ in a message | Reference lore; ↑↓ choose, ↵ insert |
@@ -47,7 +48,7 @@ On Canvas, drag empty space to marquee-select; scroll to pan; pinch or ⌘-scrol
 uv run --with pillow python scripts/contact-sheets.py docs/verification/latest --prune
 ```
 
-The suite (40 tests) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Visual checks use the real native window, never HTML previews. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the audit checklist and evidence are in [AUDIT](docs/verification/AUDIT.md).
+The suite (41 tests) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Visual checks use the real native window, never HTML previews. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the audit checklist and evidence are in [AUDIT](docs/verification/AUDIT.md).
 
 Data: `~/Library/Application Support/Synthesis/synthesis.sqlite`, overridable with `SYNTHESIS_DATABASE_PATH`. Keys remain in macOS Keychain. See [AI setup](docs/AI_SETUP.md), [architecture](docs/ARCHITECTURE.md), [design direction](docs/UI_DIRECTION.md), [roadmap](docs/ROADMAP.md).
 

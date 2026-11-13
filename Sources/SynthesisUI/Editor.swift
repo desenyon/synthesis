@@ -89,6 +89,10 @@ struct EditorScreen: View {
     }
     .onAppear {
       studio.editorSave = { save() }
+      if studio.reviewCanon == record.id {
+        studio.reviewCanon = nil
+        panel = .canon
+      }
       if studio.captureHint == "sheet-canon" { panel = .canon }
       if studio.captureHint == "sheet-history" { openHistory() }
     }

@@ -75,6 +75,7 @@ public struct ConnectedRoot: View {
       case .knowledge: RelationshipGraph(studio: studio)
       case .timeline: TimelineScreen(studio: studio)
       case .atlas: AtlasScreen(studio: studio)
+      case .review: ReviewScreen(studio: studio)
       }
     }
   }
@@ -111,7 +112,10 @@ struct Sidebar: View {
               NavRow(
                 t: studio.t, title: item.rawValue, icon: item.icon,
                 selected: studio.destination == item && studio.libraryCategory == nil,
-                collapsed: collapsed, trailing: "⌘\(index + 1)"
+                collapsed: collapsed,
+                trailing: item == .review && studio.reviewCount > 0
+                  ? "\(studio.reviewCount)" : "⌘\(index + 1)",
+                badge: item == .review && studio.reviewCount > 0
               ) { studio.navigate(item) }
             }
           }
@@ -223,6 +227,8 @@ struct NavRow: View {
   let collapsed: Bool
   var trailing: String?
   var tint: Color?
+  /// Shows the trailing value as an attention count, also on the collapsed rail.
+  var badge = false
   var action: () -> Void
   @State private var hover = false
   var body: some View {
@@ -235,7 +241,11 @@ struct NavRow: View {
           Text(title).font(.system(size: 13.5, weight: selected ? .medium : .regular))
             .lineLimit(1)
           Spacer(minLength: 0)
-          if let trailing {
+          if let trailing, badge {
+            Text(trailing).font(.system(size: 11, weight: .semibold)).monospacedDigit()
+              .foregroundStyle(t.accent).padding(.horizontal, 6).frame(minWidth: 18, minHeight: 18)
+              .background(t.accentSoft, in: Capsule())
+          } else if let trailing {
             Text(trailing).font(.system(size: 11.5)).monospacedDigit()
               .foregroundStyle(t.muted.opacity(trailing.hasPrefix("⌘") ? (hover ? 1 : 0) : 1))
           }
@@ -248,6 +258,11 @@ struct NavRow: View {
         )
         .contentShape(RoundedRectangle(cornerRadius: 7))
     }.buttonStyle(.plain).onHover { hover = $0 }.help(collapsed ? title : "")
+      .overlay(alignment: .topTrailing) {
+        if collapsed && badge {
+          Circle().fill(t.accent).frame(width: 7, height: 7).padding(7)
+        }
+      }
       .accessibilityLabel(title).accessibilityAddTraits(selected ? .isSelected : [])
   }
 }

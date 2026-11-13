@@ -8,8 +8,8 @@
 ## Active — finish M3
 
 1. Exercise the live provider path once the owner supplies a key and approves the calls: streaming, stop, errors, and whether the model follows the proposal contract. Adjust the prompt from what is observed.
-2. A review inbox: pending proposals across conversations in one place, with a count in navigation.
-3. Critique without a model: a local consistency check (duplicate names and aliases, entities with no relationships, events whose source is archived, drafts that diverge from canon) so Manual mode has its own review tool.
+2. ~~Review inbox and local consistency check~~ — done 2026-11-12 as the Review workspace.
+3. Extend the local check: contradictory relationships, timeline ordering conflicts, and tags that differ only by spelling.
 
 ## Next — M4 creative tools
 

@@ -8,7 +8,8 @@ extension Studio {
     "conversation-home", "conversation", "canvas", "canvas-selected", "companion", "manual",
     "collapsed", "light", "graph", "graph-selected", "library", "editor", "timeline", "atlas",
     "palette", "light-conversation", "light-library", "light-graph", "light-editor",
-    "manual-conversation", "toast", "empty-conversation", "empty-canvas", "empty-library",
+    "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
+    "empty-canvas", "empty-library",
     "empty-graph", "empty-timeline", "empty-atlas", "sheet-settings", "sheet-record",
     "sheet-canon", "sheet-history", "sheet-relation",
   ]
@@ -165,6 +166,7 @@ extension Studio {
       selectedRecord = records.first { $0.title == "Tidekeepers" }
     case "graph", "graph-selected", "light-graph", "sheet-relation", "empty-graph":
       destination = .knowledge
+    case "review", "review-canon", "review-checks": destination = .review
     case "timeline", "empty-timeline": destination = .timeline
     case "atlas", "empty-atlas": destination = .atlas
     case "editor", "light-editor":

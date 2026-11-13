@@ -5,7 +5,7 @@ The accepted graphite foundation, applied as one system. Tokens live in `Theme.s
 ## Shell
 
 - Native titled window, content under a transparent title bar. Traffic lights centred in a 56-point integrated header; no separate OS title bar.
-- Navigation: 220-point labelled panel or 56-point rail with tooltips. World switcher at the top, six workspaces, category lenses with counts, recent conversations, Settings.
+- Navigation: 220-point labelled panel or 56-point rail with tooltips. World switcher at the top, seven workspaces (Review shows a count when something waits), category lenses with counts, recent conversations, Settings.
 - Every workspace begins with `WorkspaceBar`: icon and title on the left, workspace actions, then the persistent AI Assisted / Manual switch and search. Titles truncate; when the full bar does not fit, labelled actions become icons.
 - ⌘K opens the command palette. Removal shows a toast with Undo.
 

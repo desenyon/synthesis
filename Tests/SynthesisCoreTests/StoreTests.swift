@@ -340,5 +340,58 @@ struct StoreTests {
     // The store is still usable: the failed savepoint did not leave a transaction open.
     #expect(try s.createRecord(worldID: w.id, title: "Still works").title == "Still works")
   }
+  @Test func worldChecksFindRealProblemsLocallyAndRememberDismissals() throws {
+    let s = try fixture()
+    let w = try s.createWorld(name: "Aster")
+    let other = try s.createWorld(name: "Elsewhere")
+    let mira = try s.createRecord(
+      worldID: w.id, title: "Mira Vale", body: "A cartographer.", kind: "entity")
+    let order = try s.createRecord(
+      worldID: w.id, title: "Tidekeepers", body: "Guides of the coast.", kind: "entity")
+    let twin = try s.createRecord(worldID: w.id, title: "mira vale", body: "A namesake.")
+    let page = try s.createRecord(
+      worldID: w.id, title: "The crossing",
+      body: "Mira Vale walked out while the Tidekeepers watched. Miravalescent is not a match.")
+    let empty = try s.createRecord(worldID: w.id, title: "Blank", kind: "entity")
+    let gone = try s.createRecord(worldID: w.id, title: "Lost source")
+    _ = try s.addEvent(worldID: w.id, title: "The flood", date: "", source: gone.id)
+    try s.archiveRecord(worldID: w.id, id: gone.id)
+    _ = try s.addRelation(worldID: w.id, source: mira.id, target: order.id, label: "guided by")
+    try s.linkRecord(worldID: w.id, source: page.id, target: order.id)
+    _ = try s.createRecord(worldID: other.id, title: "Mira Vale", body: "Mira Vale", kind: "entity")
+
+    let findings = try s.worldChecks(worldID: w.id)
+    let kinds = Dictionary(grouping: findings, by: \.kind).mapValues(\.count)
+    #expect(kinds[.duplicateName] == 1 && kinds[.orphanedEvent] == 1)
+    #expect(findings.first?.kind == .duplicateName)
+    #expect(findings.first?.recordIDs.sorted() == [mira.id, twin.id].sorted())
+    // The page names Mira without a link; it is already linked to the Tidekeepers.
+    let mentions = findings.filter { $0.kind == .unlinkedMention }
+    #expect(mentions.map(\.recordIDs) == [[page.id, mira.id]])
+    #expect(findings.contains { $0.kind == .isolatedEntity && $0.recordIDs == [empty.id] })
+    #expect(!findings.contains { $0.kind == .isolatedEntity && $0.recordIDs == [mira.id] })
+    #expect(findings.contains { $0.kind == .emptyRecord && $0.recordIDs == [empty.id] })
+    // Nothing was changed by looking, and another world's records never appear.
+    #expect(try s.linkedRecords(worldID: w.id, id: page.id).map(\.id) == [order.id])
+    #expect(findings.allSatisfy { finding in !finding.detail.contains("Elsewhere") })
+    #expect(try s.worldChecks(worldID: other.id).allSatisfy { $0.kind != .duplicateName })
+
+    // Linking resolves the mention; dismissing hides a finding until checks are restored.
+    try s.linkRecord(worldID: w.id, source: page.id, target: mira.id)
+    #expect(try s.worldChecks(worldID: w.id).allSatisfy { $0.kind != .unlinkedMention })
+    let duplicate = try #require(findings.first)
+    try s.dismissCheck(worldID: w.id, id: duplicate.id)
+    #expect(try s.worldChecks(worldID: w.id).allSatisfy { $0.id != duplicate.id })
+    #expect(try s.dismissedCheckCount(worldID: w.id) == 1)
+    try s.restoreChecks(worldID: w.id)
+    #expect(try s.worldChecks(worldID: w.id).contains { $0.id == duplicate.id })
+
+    var rule = try s.createRecord(worldID: w.id, title: "Rule", body: "One moon")
+    rule = try s.promote(worldID: w.id, id: rule.id, version: rule.version, confirmation: rule.id)
+    #expect(try s.canonQueue(worldID: w.id).isEmpty)
+    _ = try s.saveRecord(
+      worldID: w.id, id: rule.id, version: rule.version, title: "Rule", body: "Two moons", rtf: nil)
+    #expect(try s.canonQueue(worldID: w.id).map(\.id) == [rule.id])
+  }
 
 }
