@@ -24,7 +24,7 @@ The creator owns the world and its canon. The software assists with capture, wri
 
 ### The initial product experience
 
-A light, polished native macOS application with collapsible navigation and a large central chat-first workspace. AI Assisted / Manual is a persistent, core-enforced mode switch; Manual cancels and blocks model calls. No default document editor or permanent right assistant sidebar. Optional inspectors are closed by default. Follow docs/REBUILD.md, the owner's binding complete rebuild directive. Good keyboard navigation and fast capture matter more than animation.
+The current milestone is UI-first, per the owner's latest explicit correction: a compact native canvas-first studio, modular worldbuilding sidebar, floating guided-chat composer and integrated draggable header without a separate macOS title bar. Use docs/UI_DIRECTION.md and the latest supplied reference screenshots. Pause broader feature expansion until the interface direction is accepted. The current UI study must clearly distinguish local guided interactions from real AI and must not modify established lore/canon. Preserve the implemented application and its safety boundaries for later integration.
 
 The system must eventually support:
 

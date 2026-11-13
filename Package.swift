@@ -10,7 +10,7 @@ let package = Package(
   targets: [
     .systemLibrary(name: "CSQLite"),
     .target(name: "SynthesisCore", dependencies: ["CSQLite"], resources: [.copy("Migrations")]),
-    .target(name: "SynthesisUI", dependencies: ["SynthesisCore"]),
+    .target(name: "SynthesisUI", dependencies: ["SynthesisCore"], resources: [.copy("Assets")]),
     .executableTarget(name: "SynthesisApp", dependencies: ["SynthesisUI", "SynthesisCore"]),
     .testTarget(name: "SynthesisCoreTests", dependencies: ["SynthesisCore"]),
   ], swiftLanguageModes: [.v5]

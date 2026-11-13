@@ -1,7 +1,7 @@
 #!/bin/zsh
 set -euo pipefail
 cd "${0:A:h:h}"
-./scripts/build.sh
+./scripts/build.sh release
 synthesis_fixture="$(mktemp -d /tmp/synthesis-ui.XXXXXX)"
 synthesis_captures="${1:-$PWD/docs/verification/latest}"
 mkdir -p "$synthesis_captures"

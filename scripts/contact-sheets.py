@@ -4,10 +4,11 @@ import sys
 from PIL import Image, ImageDraw
 
 root = Path(sys.argv[1])
+states = ['canvas', 'conversation', 'power-system', 'detail', 'collapsed', 'light'] if (root / 'canvas-1440x900.png').exists() else ['ai-home', 'active-chat', 'manual', 'editor', 'collapsed', 'dark']
 for size in ['1440x900', '1920x1080', '1024x768', '390x844']:
     sheet = Image.new('RGB', (1440, 1120), '#d9dce3')
     draw = ImageDraw.Draw(sheet)
-    for i, state in enumerate(['ai-home', 'active-chat', 'manual', 'editor', 'collapsed', 'dark']):
+    for i, state in enumerate(states):
         picture = Image.open(root / f'{state}-{size}.png')
         expected = tuple(int(n) * 2 for n in size.split('x'))
         assert picture.size == expected, (state, size, picture.size)

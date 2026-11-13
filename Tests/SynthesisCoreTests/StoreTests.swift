@@ -116,4 +116,25 @@ struct StoreTests {
     }
     #expect(try s.boards(worldID: a.id, kind: "atlas").first?.name == "Map")
   }
+  @Test func revisionRestoreIncludesMetadataAndPreservesCanon() throws {
+    let store = try fixture()
+    let world = try store.createWorld(name: "Revision")
+    var record = try store.createRecord(worldID: world.id, title: "Sea", body: "Old text")
+    record = try store.saveMetadata(
+      worldID: world.id, id: record.id, version: record.version, tags: ["old-tag"],
+      aliases: ["Oldalias"])
+    let old = try store.history(worldID: world.id, id: record.id).first!
+    record = try store.promote(
+      worldID: world.id, id: record.id, version: record.version, confirmation: record.id)
+    let canon = record.canonical
+    record = try store.saveMetadata(
+      worldID: world.id, id: record.id, version: record.version, tags: ["new-tag"],
+      aliases: ["Newalias"])
+    record = try store.restoreRevision(
+      worldID: world.id, id: record.id, version: record.version, revisionID: old.id)
+    #expect(record.aliases == ["Oldalias"] && record.tags == ["old-tag"])
+    #expect(record.state == "draft" && record.canonical == canon)
+    #expect(try store.search(worldID: world.id, query: "Newalias").isEmpty)
+    #expect(try store.search(worldID: world.id, query: "Oldalias").first?.id == record.id)
+  }
 }

@@ -1,23 +1,22 @@
-# Implementation state — 2026-11-12
+# Current state — UI first
 
-Active: complete native rebuild, development only. Baseline preserved in `02a93e3`.
+## Latest owner direction
 
-## Verified so far
+Pause application feature expansion. The previous light serif redesign was rejected. Match the latest three references with an infinite canvas, compact modular sidebar, a Zeron-style floating chat composer, guided world creation, fluid interaction and no separate native title bar.
 
-- Real `dist/Synthesis.app` builds, is ad-hoc signed and launches. SwiftUI/AppKit, not GPUI or HTML.
-- New light chat-first shell, 240/68-point navigation, persisted dark theme and AI/Manual mode, native menus, ASCII orbital art.
-- SQLite worlds, persistent chat history, rename/search, missing-provider error path; OpenAI streaming transport implemented but no live API call made.
-- Manual library, capture, native rich editor, autosave, version history, explicit canon review, Markdown and JSON export.
-- `./scripts/test.sh`: 8 tests passed (disk reopen, world isolation, canon approval and stale saves, relationships, boards/RTF, Manual blocking, in-flight cancellation, stubbed reply persistence).
-- `./scripts/build.sh`: debug native bundle build/sign passed. Release build not yet run.
-- First actual native screenshot round generated all six requested states. All 24 images inspected in contact sheets; desktop/home/manual and compact/home also inspected larger. Found and fixed compact art overflow and duplicate native menu indicators. 1920 captures were constrained by the physical display; the harness now rejects incorrect dimensions and allows offscreen native rendering. Corrected round pending.
+## Current executable
 
-## Limits / remaining gates
+`dist/Synthesis.app` now opens **CanvasDesignRoot**, an optimized SwiftUI/AppKit UI study. The prior application is preserved in source and commit `f35e968`; its lore/database/schema remain intact. This is not GPUI and contains no WebView or HTML preview.
 
-Functional mouse/keyboard walkthrough and second visual round pending. Canvas, graph, timeline, atlas are currently honest unavailable destinations. Core tables/operations exist; UI work follows primary-workspace validation. Rich chat tables/images, structured proposal diffs, tags/aliases UI, source/backlink inspector and crash-safe recovery need further work. No claims of live AI, browser testing, iOS support, GPUI, production release or notarization.
+Implemented UI: borderless native window with draggable integrated header; 224/56-point modular navigation; dark/light tokens; native pan/zoom surface; draggable fragments; temporary fragment editor; floating composer; conversation view; per-module guided prompts; custom modules; search; local manual notes; cached ASCII landscape. The study makes no model calls and does not write fragments into established lore. It is labeled accordingly.
 
-Discovery: repository had no actual frontend or route, only black three-pane HTML studies and a partial TypeScript domain scaffold. Preserved under `legacy/web`. Native app is the new actual entry point. No push, release, tag or paid provider usage this session.
+Observed UI walkthrough: native launch with no OS title bar, typed answer → canvas fragment → next guide question, conversation view, custom Languages module, zoom to 90%, collapsed navigation. Final per-module guide and latest visual pass are being verified. Existing captures under `round1`/`round2` are rejected historical designs. `canvas-pass1` is the first current-direction inspection; it revealed a native Menu label issue and a card/composer overlap, both corrected in source.
 
-## Owner steering — UI-first reset
+## Checks and preserved functionality
 
-The owner rejected this light editorial redesign and reports sluggishness. New references request a compact modular, canvas-first native UI with a Zeron-style floating composer, integrated window chrome and guided creation. Feature expansion is paused. The running UI is being replaced again; earlier screenshots document rejected iterations, not approved design. Backend/domain work stays preserved. Independent review found and fixes were applied for queued cancellation, canonical context projection and metadata restoration; queued-cancellation regression was observed fail before the fix.
+- Optimized native build succeeded for the current UI.
+- Core suite last passed 11 tests. A queued-cancellation regression was first observed failing, then passed after the fix.
+- Independent read-only review identified queued cancellation, canonical context truncation and incomplete metadata restore; all three were corrected. Additional regression coverage is being finalized.
+- Earlier application interactive verification remains documented in `docs/verification/WALKTHROUGH.md`, clearly distinguished from current UI scope.
+
+No live provider call, browser test, public deployment, release, notarization or push is claimed. Immediate next work: finish visual/native interaction inspection, update evidence, and deliver the UI for owner review. Full-app integration waits for UI acceptance.

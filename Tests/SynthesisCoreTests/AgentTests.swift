@@ -5,12 +5,14 @@ import Testing
 
 actor CountingTransport: ModelTransport {
   var calls = 0
+  var lastRequest: ModelRequest?
   let delayed: Bool
   init(delayed: Bool = false) { self.delayed = delayed }
   func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
   {
     calls += 1
+    lastRequest = request
     if delayed { try await Task.sleep(for: .seconds(30)) }
     await onDelta("A possible idea")
     return "A possible idea"
@@ -84,5 +86,29 @@ actor CountingTransport: ModelTransport {
     } catch {}
     #expect(await transport.calls == 0)
     #expect(try store.messages(worldID: world.id, conversationID: conversation.id).isEmpty)
+  }
+  @Test func canonicalContextExcludesRichTextPayload() async throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Context")
+    var record = try store.createRecord(
+      worldID: world.id, title: "Rule", body: "Accepted law: there is only one moon.")
+    record = try store.saveRecord(
+      worldID: world.id, id: record.id, version: record.version, title: record.title,
+      body: record.body, rtf: String(repeating: "RTFPAYLOAD", count: 2000))
+    record = try store.promote(
+      worldID: world.id, id: record.id, version: record.version, confirmation: record.id)
+    _ = try store.saveRecord(
+      worldID: world.id, id: record.id, version: record.version, title: record.title,
+      body: "A draft with two moons.", rtf: nil)
+    let chat = try store.createConversation(worldID: world.id)
+    let transport = CountingTransport()
+    let engine = AgentEngine(store: store, transport: transport)
+    try await engine.submit(
+      worldID: world.id, conversationID: chat.id, prompt: "Check the moons", preset: "Critique"
+    ) { _ in }
+    let instructions = await transport.lastRequest?.instructions ?? ""
+    #expect(instructions.contains("Accepted law: there is only one moon."))
+    #expect(instructions.contains("A draft with two moons."))
+    #expect(!instructions.contains("RTFPAYLOAD"))
   }
 }
