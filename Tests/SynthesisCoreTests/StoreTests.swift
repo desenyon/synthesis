@@ -253,5 +253,92 @@ struct StoreTests {
     #expect(try s.linkedRecords(worldID: w.id, id: page.id).isEmpty)
     #expect(try s.record(worldID: w.id, id: entity.id).title == "Mira")
   }
+  @Test func contextIsRankedExplainedAndWorldScoped() throws {
+    let s = try fixture()
+    let a = try s.createWorld(name: "A")
+    let b = try s.createWorld(name: "B")
+    let sea = try s.createRecord(
+      worldID: a.id, title: "The Glass Sea", body: "Water that turns solid at dawn.",
+      kind: "entity")
+    let order = try s.createRecord(worldID: a.id, title: "Tidekeepers", kind: "entity")
+    let ledger = try s.createRecord(
+      worldID: a.id, title: "Ledger", body: "Lists every lantern lit on the harbour wall.")
+    let hidden = try s.createRecord(
+      worldID: a.id, title: "Old lantern notes", body: "lantern lantern lantern")
+    let unrelated = try s.createRecord(worldID: a.id, title: "Unrelated", body: "Nothing.")
+    _ = try s.createRecord(worldID: b.id, title: "Other lantern", body: "lantern")
+    _ = try s.addRelation(worldID: a.id, source: order.id, target: sea.id, label: "guards")
+    try s.archiveRecord(worldID: a.id, id: hidden.id)
+    let context = try s.contextRecords(
+      worldID: a.id,
+      prompt: "Who lights the lantern near [the sea](synthesis://record/\(sea.id))?")
+    #expect(context.map(\.id) == [sea.id, ledger.id, order.id, unrelated.id])
+    #expect(
+      context.map(\.reason) == [
+        "You referenced it", "Matches your message", "Related to The Glass Sea", "Recent work",
+      ])
+    #expect(try s.contextRecords(worldID: a.id, prompt: "lantern", limit: 1).count == 1)
+    #expect(try s.contextRecords(worldID: b.id, prompt: "sea").map(\.record.worldID) == [b.id])
+    #expect(WorkspaceStore.referencedRecordIDs(in: "no links here").isEmpty)
+  }
+  @Test func markdownImportAndExportArePortableAndLabelled() throws {
+    let s = try fixture()
+    let w = try s.createWorld(name: "Aster")
+    let imported = try s.importDocument(
+      worldID: w.id, filename: "notes.md", text: "\n# The Bell Tower\r\n\r\nIt rings at low tide.\n"
+    )
+    #expect(imported.title == "The Bell Tower" && imported.body == "It rings at low tide.")
+    #expect(imported.origin == "imported" && imported.state == "draft" && imported.kind == "lore")
+    let plain = try s.importDocument(
+      worldID: w.id, filename: "loose thought.txt", text: "No heading")
+    #expect(plain.title == "loose thought" && plain.body == "No heading")
+    let mira = try s.createRecord(
+      worldID: w.id, title: "Mira / Vale", body: "Mapmaker", kind: "entity", category: "Characters")
+    let twin = try s.createRecord(
+      worldID: w.id, title: "Mira : Vale", body: "Twin", kind: "entity", category: "Characters")
+    _ = try s.addRelation(worldID: w.id, source: mira.id, target: twin.id, label: "sister of")
+    _ = try s.addEvent(worldID: w.id, title: "The crossing", date: "", source: mira.id)
+    let files = try s.exportMarkdown(worldID: w.id)
+    let paths = files.map(\.path)
+    #expect(Set(paths).count == paths.count)
+    #expect(
+      paths.contains("Documents/The Bell Tower.md") && paths.contains("Characters/Mira - Vale.md"))
+    #expect(paths.contains("Characters/Mira - Vale 2.md"))
+    let page = try #require(files.first { $0.path == "Documents/The Bell Tower.md" }?.content)
+    #expect(page.contains("origin: imported") && page.contains("state: draft"))
+    #expect(page.contains("# The Bell Tower") && page.contains("It rings at low tide."))
+    #expect(
+      files.first { $0.path == "Relationships.md" }?.content.contains("— sister of →") == true)
+    #expect(
+      files.first { $0.path == "Timeline.md" }?.content.contains("**Date unknown** — The crossing")
+        == true)
+  }
+  @Test func nestedStoreOperationsRollBackTogether() throws {
+    let s = try fixture()
+    let w = try s.createWorld(name: "A")
+    let chat = try s.createConversation(worldID: w.id)
+    let proposal = try #require(
+      try s.stageProposal(
+        worldID: w.id, conversationID: chat.id, messageID: nil,
+        payload: [
+          "summary": "One oversized record",
+          "changes": [["action": "create_record", "kind": "entity", "title": "Kept pending"]],
+        ]))
+    // Force the inner create to fail after staging by making the title invalid in place.
+    var broken = proposal.changes
+    broken[0].title = String(repeating: "x", count: 400)
+    try s.db.execute(
+      "UPDATE proposals SET payload=? WHERE id=?",
+      [String(decoding: try JSONEncoder().encode(broken), as: UTF8.self), proposal.id])
+    #expect(throws: Error.self) {
+      try s.resolveChange(
+        worldID: w.id, proposalID: proposal.id, changeID: proposal.changes[0].id, accept: true,
+        confirmation: proposal.id)
+    }
+    #expect(try s.records(worldID: w.id).isEmpty)
+    #expect(try s.proposal(worldID: w.id, id: proposal.id).changes[0].status == "pending")
+    // The store is still usable: the failed savepoint did not leave a transaction open.
+    #expect(try s.createRecord(worldID: w.id, title: "Still works").title == "Still works")
+  }
 
 }

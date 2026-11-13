@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import SynthesisCore
 import Testing
@@ -277,6 +278,92 @@ import Testing
     let reopened = BoardController(studio: studio)
     reopened.load()
     #expect(reopened.name == "The coast" && reopened.document.cards.count == 3)
+  }
+  @Test func loreReferencesRoundTripBetweenTokensAndMarkdown() {
+    let base: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 15)]
+    let markdown =
+      "Ask [Mira Vale](synthesis://record/ABC-123) about [the sea](synthesis://record/x9), not [a web link](https://example.com)."
+    let shown = MentionCodec.attributed(markdown, base: base, accent: .blue, soft: .gray)
+    #expect(shown.string == "Ask Mira Vale about the sea, not [a web link](https://example.com).")
+    #expect(shown.attribute(MentionCodec.key, at: 4, effectiveRange: nil) as? String == "ABC-123")
+    #expect(shown.attribute(MentionCodec.key, at: 0, effectiveRange: nil) == nil)
+    #expect(MentionCodec.markdown(shown) == markdown)
+    #expect(MentionCodec.markdown(NSAttributedString(string: "plain")) == "plain")
+
+    let text = "Tell me about @mir" as NSString
+    #expect(MentionCodec.query(in: text, caret: text.length)?.text == "mir")
+    #expect(
+      MentionCodec.query(in: text, caret: text.length)?.range == NSRange(location: 14, length: 4))
+    #expect(MentionCodec.query(in: "@" as NSString, caret: 1)?.text == "")
+    #expect(MentionCodec.query(in: "mail@host" as NSString, caret: 9) == nil)
+    #expect(MentionCodec.query(in: "@one\ntwo" as NSString, caret: 8) == nil)
+    #expect(MentionCodec.query(in: "no mention" as NSString, caret: 10) == nil)
+  }
+  @Test func studioResolvesProposalsOnlyThroughExplicitActionsAndKeepsCanon() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    var rule = try store.createRecord(worldID: studio.worldID, title: "Rule", body: "One moon")
+    rule = try store.promote(
+      worldID: studio.worldID, id: rule.id, version: rule.version, confirmation: rule.id)
+    let chat = try store.createConversation(worldID: studio.worldID)
+    let message = try store.appendMessage(
+      worldID: studio.worldID, conversationID: chat.id, role: "assistant", body: "Two ideas.",
+      state: "complete")
+    try store.stageProposal(
+      worldID: studio.worldID, conversationID: chat.id, messageID: message.id,
+      payload: [
+        "summary": "Add a second moon",
+        "changes": [
+          ["action": "create_record", "kind": "entity", "title": "The Pale Moon"],
+          ["action": "revise_record", "id": rule.id, "body": "Two moons"],
+        ],
+      ])
+    studio.openChat(chat)
+    let proposal = try #require(studio.proposals[message.id])
+    #expect(proposal.pending == 2 && studio.records.count == 1)
+    #expect(studio.name(for: "change:\(proposal.changes[0].id)", in: proposal) == "The Pale Moon")
+
+    studio.resolve(proposal, change: proposal.changes[1], accept: false)
+    #expect(studio.proposals[message.id]?.pending == 1)
+    #expect(try store.record(worldID: studio.worldID, id: rule.id).state == "canon")
+
+    studio.resolveAll(try #require(studio.proposals[message.id]), accept: true)
+    let resolved = try #require(studio.proposals[message.id])
+    #expect(resolved.pending == 0 && resolved.state == "accepted")
+    let moon = try #require(studio.records.first { $0.title == "The Pale Moon" })
+    #expect(moon.origin == "ai-proposed" && moon.state == "draft")
+    #expect(try store.record(worldID: studio.worldID, id: rule.id).body == "One moon")
+    #expect(studio.toast?.message == "1 change saved as drafts")
+  }
+  @Test func quickCaptureAndImportCreateLabelledDrafts() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    studio.capture("  What if the tide runs backwards?\nAsk the keepers.  ")
+    let idea = try #require(studio.records.first)
+    #expect(idea.kind == "capture" && idea.state == "idea")
+    #expect(
+      idea.title == "What if the tide runs backwards?" && idea.body.contains("Ask the keepers."))
+    studio.capture("   ")
+    #expect(studio.records.count == 1)
+
+    let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let first = folder.appendingPathComponent("bell.md")
+    let second = folder.appendingPathComponent("harbour.txt")
+    let binary = folder.appendingPathComponent("image.md")
+    try "# The Bell\n\nIt rings at low tide.".write(to: first, atomically: true, encoding: .utf8)
+    try "Lanterns on the wall.".write(to: second, atomically: true, encoding: .utf8)
+    try Data([0xFF, 0xFE, 0x00, 0xD8]).write(to: binary)
+    studio.importDocuments([first, second, binary])
+    let imported = studio.records.filter { $0.origin == "imported" }
+    #expect(Set(imported.map(\.title)) == ["The Bell", "harbour"])
+    #expect(imported.allSatisfy { $0.state == "draft" && $0.canonical == nil })
+    #expect(studio.toast?.message.contains("Imported 2 documents") == true)
+    #expect(studio.toast?.message.contains("1 skipped") == true)
+    studio.toast?.action?()
+    #expect(studio.records.filter { $0.origin == "imported" }.isEmpty)
+    #expect(try store.archivedRecords(worldID: studio.worldID).count == 2)
   }
 
 }

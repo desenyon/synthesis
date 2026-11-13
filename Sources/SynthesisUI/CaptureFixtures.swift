@@ -64,6 +64,40 @@ extension Studio {
       body:
         "## A choice worth exploring\n\nThe [art of remembrance](synthesis://record/\(power.id)) asks for a memory in return. Mira could borrow a Tidekeeper’s crossing skill — but choose to surrender the memory of her first map instead.\n\n| Possibility | Consequence |\n| --- | --- |\n| Borrow the skill | Lose her first map |\n| Cross without it | Trust an uncertain route |\n\nThree things your drafts leave open:\n\n- Which memories the sea accepts\n- Whether a surrendered memory can be returned\n- Who decides the price\n\n> This is a hypothetical direction. The existing drafts do not establish which memory the sea would accept.",
       state: "imported-example")
+    // An authored change set attached to the sample answer, so proposal review can be seen
+    // without a provider. It is staged like any model proposal and applies nothing by itself.
+    if let example = try store.messages(worldID: worldID, conversationID: chat.id).last {
+      try store.saveMessageContext(
+        worldID: worldID, messageID: example.id,
+        sources: try store.contextRecords(
+          worldID: worldID,
+          prompt: "memory crossing [Mira Vale](synthesis://record/\(mira.id))", limit: 6))
+      try store.stageProposal(
+        worldID: worldID, conversationID: chat.id, messageID: example.id,
+        payload: [
+          "summary": "Record the price of a crossing and who decides it",
+          "changes": [
+            [
+              "action": "create_record", "kind": "entity", "title": "The Tide Ledger",
+              "category": "Cosmology",
+              "body":
+                "A record of every memory surrendered to the sea.\nOnly the eldest keeper may read it.",
+              "evidence": [power.id, order.id],
+            ],
+            [
+              "action": "relate", "source": order.id, "target": "The Tide Ledger",
+              "label": "keeps",
+            ],
+            [
+              "action": "revise_record", "id": mira.id,
+              "body":
+                "A cartographer tracing places that do not stay still.\nShe has never paid the sea's price.",
+              "reason": "Make her debt explicit before the crossing",
+            ],
+            ["action": "add_event", "title": "Mira asks to read the ledger", "source": mira.id],
+          ],
+        ])
+    }
     try store.appendMessage(
       worldID: worldID, conversationID: chat.id, role: "user",
       body:

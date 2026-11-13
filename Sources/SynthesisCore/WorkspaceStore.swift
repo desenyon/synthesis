@@ -1,7 +1,7 @@
 import Foundation
 
 public final class WorkspaceStore {
-  private let db: Database
+  let db: Database
   public init(path: String) throws { db = try Database(path: path) }
   public static var defaultPath: String {
     ProcessInfo.processInfo.environment["SYNTHESIS_DATABASE_PATH"]
@@ -316,9 +316,10 @@ public final class WorkspaceStore {
       id: id, worldID: worldID, conversationID: conversationID, role: role, body: body, state: state
     )
   }
-  public func addRelation(worldID: String, source: String, target: String, label: String) throws
-    -> Relation
-  {
+  public func addRelation(
+    worldID: String, source: String, target: String, label: String,
+    origin: String = "user-authored"
+  ) throws -> Relation {
     let a = try record(worldID: worldID, id: source)
     let b = try record(worldID: worldID, id: target)
     guard a.kind == "entity", b.kind == "entity", source != target, !label.isEmpty,
@@ -327,8 +328,8 @@ public final class WorkspaceStore {
     let id = UUID().uuidString
     let now = timestamp()
     try db.execute(
-      "INSERT INTO relationships(id,world_id,source_id,target_id,label,state,origin,created_at,updated_at) VALUES(?,?,?,?,?,'draft','user-authored',?,?)",
-      [id, worldID, source, target, label, now, now])
+      "INSERT INTO relationships(id,world_id,source_id,target_id,label,state,origin,created_at,updated_at) VALUES(?,?,?,?,?,'draft',?,?,?)",
+      [id, worldID, source, target, label, origin, now, now])
     return Relation(id: id, sourceID: source, targetID: target, label: label)
   }
   public func relations(worldID: String) throws -> [Relation] {
@@ -401,7 +402,8 @@ public final class WorkspaceStore {
       ])
   }
   public func addEvent(
-    worldID: String, title: String, date: String, source: String, order: Int? = nil
+    worldID: String, title: String, date: String, source: String, order: Int? = nil,
+    origin: String = "user-authored"
   ) throws -> WorldEvent {
     _ = try record(worldID: worldID, id: source)
     guard !title.isEmpty, title.count <= 160, date.count <= 160 else {
@@ -411,8 +413,8 @@ public final class WorkspaceStore {
     let now = timestamp()
     let label = date.isEmpty ? "unknown" : date
     try db.execute(
-      "INSERT INTO events(id,world_id,title,date_label,sort_order,source_id,body,created_at,updated_at) VALUES(?,?,?,?,?,?,'',?,?)",
-      [id, worldID, title, label, order.map(String.init), source, now, now])
+      "INSERT INTO events(id,world_id,title,date_label,sort_order,source_id,body,origin,created_at,updated_at) VALUES(?,?,?,?,?,?,'',?,?,?)",
+      [id, worldID, title, label, order.map(String.init), source, origin, now, now])
     return WorldEvent(id: id, title: title, dateLabel: label, sourceID: source, order: order)
   }
   public func events(worldID: String) throws -> [WorldEvent] {
@@ -548,7 +550,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 3
+      var schemaVersion = 4
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -565,6 +567,8 @@ public final class WorkspaceStore {
       var archivedConversationIDs: [String]
       var archivedBoards: [Board]
       var archivedEvents: [[String: String]]
+      var proposals: [Proposal]
+      var messageContext: [[String: String]]
     }
     // Archived material is exported too: archiving hides, it never discards.
     let hiddenChats = try conversations(worldID: id, archived: true)
@@ -586,7 +590,9 @@ public final class WorkspaceStore {
       archivedRecordIDs: hiddenPages.map(\.id), archivedConversationIDs: hiddenChats.map(\.id),
       archivedBoards: boards(worldID: id, kind: "canvas", archived: true)
         + boards(worldID: id, kind: "atlas", archived: true),
-      archivedEvents: db.rows("SELECT * FROM events WHERE world_id=? AND archived=1", [id]))
+      archivedEvents: db.rows("SELECT * FROM events WHERE world_id=? AND archived=1", [id]),
+      proposals: proposals(worldID: id),
+      messageContext: db.rows("SELECT * FROM message_context WHERE world_id=?", [id]))
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     return try encoder.encode(export)

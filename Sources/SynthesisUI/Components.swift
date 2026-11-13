@@ -28,6 +28,7 @@ struct QuietButton: ButtonStyle {
     @Environment(\.isEnabled) private var enabled
     var body: some View {
       configuration.label.font(.system(size: 13, weight: .medium)).lineLimit(1)
+        .fixedSize(horizontal: true, vertical: false)
         .padding(.horizontal, 12).frame(height: Metric.control)
         .foregroundStyle(foreground)
         .background(fill, in: RoundedRectangle(cornerRadius: Metric.radius))

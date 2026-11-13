@@ -159,6 +159,27 @@ struct CommandPalette: View {
           id: "new-\(entry.3)", section: "Create", icon: entry.1, title: entry.0, detail: entry.2,
           run: entry.4))
     }
+    let typed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+    if typed.count >= 3 {
+      // Anything typed here can be kept without filling in a form.
+      items.append(
+        Item(
+          id: "capture-text", section: "Keep this", icon: "lightbulb",
+          title: "Capture “\(typed.prefix(48))\(typed.count > 48 ? "…" : "")” as an idea",
+          detail: "Saved to Library"
+        ) { studio.capture(typed) })
+      if studio.mode == .assisted {
+        items.append(
+          Item(
+            id: "ask-text", section: "Keep this", icon: "bubble.left",
+            title: "Start a conversation with this", detail: "Nothing is sent yet"
+          ) {
+            studio.newChat()
+            studio.draft = typed
+            studio.persistComposer()
+          })
+      }
+    }
     let found: [LoreRecord]
     if query.trimmingCharacters(in: .whitespaces).isEmpty {
       found = Array(studio.records.prefix(5))
@@ -204,7 +225,12 @@ struct CommandPalette: View {
         studio.dark ? "sun.max" : "moon", "", { studio.toggleTheme() }
       ),
       ("Open settings", "gearshape", "⌘,", { studio.sheet = .settings }),
-      ("Export this world…", "square.and.arrow.up", "", { studio.exportWorld() }),
+      (
+        "Import Markdown or text files…", "square.and.arrow.down", "⇧⌘I",
+        { studio.importDocuments() }
+      ),
+      ("Export this world as Markdown…", "folder", "", { studio.exportMarkdown() }),
+      ("Export this world as JSON…", "square.and.arrow.up", "", { studio.exportWorld() }),
     ]
     for entry in settings where matches(entry.0) {
       items.append(

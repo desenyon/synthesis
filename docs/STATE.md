@@ -1,28 +1,29 @@
-# Product audit and redesign — 2026-11-12
+# Current state — 2026-11-12
 
-The native app was audited screen by screen and rebuilt on one design system. All six workspaces, the editor, the command palette and every sheet now share chrome, tokens and interaction patterns. The full checklist with causes, fixes and remaining work is [verification/AUDIT.md](verification/AUDIT.md).
+Two bodies of work landed today. The full checklist, causes and evidence are in [verification/AUDIT.md](verification/AUDIT.md).
+
+1. **Product audit and unified redesign.** All six workspaces, the editor, the command palette and every sheet share one design system; native window controls; reversible archive everywhere; canon review as a diff; verified pointer interactions.
+2. **Safe AI depth (M3 slice).** Grounded, inspectable context for every answer; AI change sets staged for item-by-item review; `@` mention tokens with autocomplete; quick capture from ⌘K; Markdown import and export.
 
 ## What works, as observed
 
-- Native window with traffic lights, resize, full screen and restored frame; integrated 56-point header with no separate title bar.
-- One bar per workspace with the persistent AI Assisted / Manual switch; bars collapse to icons in narrow windows.
-- ⌘K command palette; ⌘1–6 workspaces; ⌘\ navigation; ⇧⌘M mode; ⇧⌘N conversation; ⌘N record.
-- Conversation: mode explanation, lore references, Markdown with lists, quotes, tables and code, save as AI-proposed draft, rename and archive.
-- Canvas: card drag with live connectors, marquee, keyboard, drag-to-connect, group, arrange, undo/redo, board rename/archive/restore, docked or takeover companion.
-- Library with full-text search, filters and archive; editor with details inspector and canon review as a line diff.
-- Graph with force-directed layout, pan/zoom/drag, docked details and relationship editing; Timeline with edit/remove; Atlas with labelled markers.
-- Archive with Undo for records, conversations, boards, events and relationships. Nothing is hard-deleted; archived material is exported.
+- Native window with traffic lights, resize, full screen and restored frame; one bar per workspace with the persistent AI Assisted / Manual switch.
+- Conversation: modes, `@` mentions, Markdown rendering, "Read N records" disclosure, proposal review cards, save as AI-proposed draft.
+- Canvas: card drag with live connectors, marquee, keyboard, drag-to-connect, group and arrange, undo/redo, board management, docked or takeover companion.
+- Library with full-text search, filters, archive and file drop; editor with details inspector and canon diff review.
+- Graph, Timeline and Atlas with editing; archive with Undo for every kind of removal.
+- Import Markdown/text; export Markdown folder or full JSON (schema 4, including proposals and recorded context).
 
 ## Checks run
 
-- `./scripts/check.sh`: strict lint, 32 tests in 3 suites, optimized build — passed.
-- `./scripts/verify-ui.sh docs/verification/audit-2026-11-12`: 148 captures at four sizes; contact sheets inspected.
-- `./scripts/selftest-ui.sh docs/verification/audit-2026-11-12`: 13 of 13 interaction checks passed.
+- `./scripts/check.sh`: strict lint, 40 tests in 3 suites, optimized build — passed.
+- `./scripts/verify-ui.sh`: 148 captures for the audit (four sizes), 10 more for the M3 screens; contact sheets inspected.
+- `./scripts/selftest-ui.sh`: 15 of 15 interaction checks passed on the release build.
 
 ## Not verified
 
-No live provider call was made, so streaming and stop were not seen against a real model. Trackpad pan and pinch, large boards and graphs, VoiceOver, and light-theme sheets were not checked. The self-test needs its window to be key; if focus is taken during a run it reports the affected checks as skipped rather than passed.
+No live provider call was made. Streaming, stop, and whether a real model follows the proposal contract are unobserved; everything downstream of the model's text is tested with scripted answers. Trackpad pan and pinch, large boards and graphs, VoiceOver, the native file pickers and drag-and-drop import were not exercised.
 
 ## Next
 
-Structured, reviewable multi-record proposals; inline `@` mentions; a measured large-board and large-graph pass; an accessibility walk-through. AGENTS.md gained four operational rules in section 5 (see LEARNINGS.md); protected sections were not changed. Development only: no release, push or paid call.
+See ROADMAP. The branch is pushed to GitHub; nothing is released or deployed.

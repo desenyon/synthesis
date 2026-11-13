@@ -49,9 +49,9 @@ Audit of the native SwiftUI/AppKit application, started 2026-11-12 against commi
 
 Not done in this audit, in rough priority order:
 
-1. **Live provider path.** Streaming, stop and error states were not exercised against a real model; no key was configured and no paid call was made. The offline transport tests still pass.
-2. **Structured proposals.** Model output can only be saved as an AI-proposed draft. Multi-record proposals with a reviewable change set are not built.
-3. **Inline `@` mentions.** Lore references use a menu; typing `@` does not autocomplete.
+1. **Live provider path.** Streaming, stop and error states were not exercised against a real model; no key was configured and no paid call was made. The offline transport tests still pass. The proposal contract is written into the system prompt, but whether a given model follows it is unobserved.
+2. ~~Structured proposals~~ — built after the audit (see "Follow-up: safe AI depth").
+3. ~~Inline `@` mentions~~ — built after the audit.
 4. **Scale.** Canvas and Graph were checked with 4–7 items. Large boards and graphs are unmeasured; graph layout is O(n²) per iteration.
 5. **Trackpad gestures.** Two-finger pan and pinch zoom are implemented but cannot be posted by the self-test.
 6. **Accessibility pass.** Controls carry labels and selected traits, but VoiceOver and full keyboard traversal of cards and graph nodes were not walked.
@@ -59,3 +59,17 @@ Not done in this audit, in rough priority order:
 8. **Timeline and Atlas depth.** No drag reordering of events, no canon state for events, one map per world, markers cannot be dragged.
 9. **Light theme.** Seven light states were captured and inspected; sheets were captured in dark only.
 10. **Crash recovery.** A failed save is kept in the open editor but not recovered across a process crash.
+
+## Follow-up: safe AI depth (same day)
+
+Evidence: [m3-2026-11-12](m3-2026-11-12/) — contact sheets, capture log, self-test log.
+
+| Capability | What was built | Verified by |
+| - | - | - |
+| Grounded context | The assistant receives a ranked, bounded set of records: ones you referenced, full-text matches, their relationship and link neighbours, then recent work. The list is stored with each answer and shown as "Read N records from your world". | `contextIsRankedExplainedAndWorldScoped`, `modelChangeSetIsStagedForReviewAndNeverApplied`; capture `conversation` |
+| Reviewable proposals | A model answer may end with one `synthesis-proposal` block. It is parsed out of the transcript, validated against the selected world and staged. Each change (new record, revision with diff, relationship, event) is accepted or dismissed individually; accepted changes become AI-proposed drafts. Canon is untouched. | Same tests plus `studioResolvesProposalsOnlyThroughExplicitActionsAndKeepsCanon`, `nestedStoreOperationsRollBackTogether`; captures `conversation`, `companion` |
+| `@` mentions | Typing `@` offers matching lore; arrows, Return or Tab insert a token stored as a Markdown link; a token is edited as a whole. | `loreReferencesRoundTripBetweenTokensAndMarkdown`; self-test "typing @ore and pressing Return inserts a reference" and "the message was not sent by that Return" |
+| Quick capture | Anything typed in ⌘K can be saved as an idea or used to start a conversation. | `quickCaptureAndImportCreateLabelledDrafts` |
+| Portability | Import Markdown or text (menu, ⇧⌘I, Settings, or drop on Library) as drafts marked `imported`, with Undo. Export a folder of Markdown with front matter, or the full JSON. | `markdownImportAndExportArePortableAndLabelled`, same Studio test |
+
+Checks: `./scripts/check.sh` passed with 40 tests; `./scripts/selftest-ui.sh` passed 15 of 15. Not verified: a real model emitting the proposal block; the import and export file pickers themselves (the code beneath them is tested); drag-and-drop import.

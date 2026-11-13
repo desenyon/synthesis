@@ -224,7 +224,14 @@ struct ConversationStudio: View {
                 Text(studio.streamed.isEmpty ? "Waiting for the model…" : "Writing…")
                   .font(.system(size: 13)).foregroundStyle(studio.t.secondary)
               }
-              if !studio.streamed.isEmpty { MarkdownContent(text: studio.streamed, t: studio.t) }
+              if !studio.streamed.isEmpty {
+                // A change set arrives as JSON at the end; show prose, not the raw block.
+                MarkdownContent(text: ProposalParser.visible(studio.streamed), t: studio.t)
+                if studio.streamed.contains(ProposalParser.fence) {
+                  Label("Preparing changes for your review…", systemImage: "square.stack.3d.up")
+                    .font(.system(size: 13)).foregroundStyle(studio.t.secondary)
+                }
+              }
             }
           }
           Color.clear.frame(height: 1).id("latest")
@@ -307,6 +314,12 @@ struct ChatRow: View {
       }
       MarkdownContent(text: message.body, t: studio.t)
         .environment(\.openURL, recordLinkAction(studio))
+      if let proposal = studio.proposals[message.id] {
+        ProposalCard(studio: studio, proposal: proposal, narrow: narrow)
+      }
+      if let sources = studio.contexts[message.id], !sources.isEmpty {
+        ContextDisclosure(studio: studio, sources: sources)
+      }
       HStack(spacing: 2) {
         action(copied ? "Copied" : "Copy", copied ? "checkmark" : "doc.on.doc") {
           NSPasteboard.general.clearContents()
@@ -349,7 +362,21 @@ struct UnifiedComposer: View {
   @State private var loadedWorld = ""
   @State private var saveTask: Task<Void, Never>?
   @State private var inputHeight: CGFloat = 26
+  @State private var mentionQuery: String?
+  @State private var mentionIndex = 0
+  @State private var handle = ComposerHandle()
   private var empty: Bool { text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+  /// Records offered while an `@name` is being typed: title prefixes first, then other matches.
+  private var mentionMatches: [LoreRecord] {
+    guard let query = mentionQuery else { return [] }
+    if query.isEmpty { return Array(studio.records.prefix(6)) }
+    let hit = studio.records.filter {
+      $0.title.localizedCaseInsensitiveContains(query)
+        || ($0.aliases ?? []).contains { $0.localizedCaseInsensitiveContains(query) }
+    }
+    let leading = hit.filter { $0.title.lowercased().hasPrefix(query.lowercased()) }
+    return Array((leading + hit.filter { r in !leading.contains { $0.id == r.id } }).prefix(6))
+  }
   var body: some View {
     VStack(alignment: .leading, spacing: 7) {
       Group {
@@ -360,6 +387,13 @@ struct UnifiedComposer: View {
         RoundedRectangle(cornerRadius: 14).stroke(studio.t.border.opacity(0.9), lineWidth: 1)
       )
       .shadow(color: studio.t.shadow.opacity(collapsed ? 0.6 : 0.3), radius: 14, y: 5)
+      .overlay(alignment: .topLeading) {
+        if !mentionMatches.isEmpty {
+          // Sits just above the field so it never covers what is being typed.
+          mentionList.fixedSize()
+            .offset(x: 8, y: -(CGFloat(mentionMatches.count) * 35 + 44))
+        }
+      }
       disclosure
     }.onAppear {
       loadedWorld = studio.worldID
@@ -387,8 +421,10 @@ struct UnifiedComposer: View {
         text: $text,
         placeholder: companion
           ? "Ask about this canvas…" : "Write freely, or ask about your world…",
-        color: studio.t.text, placeholderColor: studio.t.muted, autofocus: !companion,
-        onHeight: { inputHeight = $0 }, submit: send
+        color: studio.t.text, placeholderColor: studio.t.muted, accent: studio.t.accent,
+        accentSoft: studio.t.accentSoft, autofocus: !companion, handle: handle,
+        onHeight: { inputHeight = $0 }, onMention: updateMention, onMentionKey: mentionKey,
+        submit: send
       ).frame(height: min(190, max(companion ? 26 : 48, inputHeight)))
         .padding(.horizontal, 14).padding(.top, 12)
       HStack(spacing: 4) {
@@ -409,7 +445,9 @@ struct UnifiedComposer: View {
       references.padding(.bottom, 1)
       ComposerInput(
         text: $text, placeholder: "Ask about this canvas…", color: studio.t.text,
-        placeholderColor: studio.t.muted, onHeight: { inputHeight = $0 }, submit: send
+        placeholderColor: studio.t.muted, accent: studio.t.accent,
+        accentSoft: studio.t.accentSoft, handle: handle, onHeight: { inputHeight = $0 },
+        onMention: updateMention, onMentionKey: mentionKey, submit: send
       ).frame(height: min(96, max(26, inputHeight))).padding(.bottom, 2)
       IconButton(icon: "sidebar.right", label: "Open the companion conversation", t: studio.t) {
         commitDraft()
@@ -452,11 +490,7 @@ struct UnifiedComposer: View {
         ForEach(referenceGroups, id: \.0) { group in
           Section(group.0) {
             ForEach(group.1) { record in
-              Button(record.title) {
-                commitDraft()
-                studio.reference(record)
-                text = studio.draft
-              }
+              Button(record.title) { handle.insertReference(title: record.title, id: record.id) }
             }
           }
         }
@@ -467,7 +501,58 @@ struct UnifiedComposer: View {
         if !collapsed { Text("Lore").font(.system(size: 13, weight: .medium)) }
       }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
         .hoverFill(studio.t)
-    }.help("Reference a record from this world")
+    }.help("Reference a record from this world — or type @ in your message")
+  }
+  private var mentionList: some View {
+    VStack(alignment: .leading, spacing: 1) {
+      ForEach(Array(mentionMatches.enumerated()), id: \.element.id) { offset, record in
+        Button {
+          mentionIndex = offset
+          commitMention()
+        } label: {
+          HStack(spacing: 9) {
+            CategoryTile(record: record, t: studio.t, size: 24)
+            Text(record.title).font(.system(size: 13.5, weight: .medium)).lineLimit(1)
+            Spacer(minLength: 12)
+            Text(record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category)
+              .font(.system(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+          }.padding(.horizontal, 8).frame(height: 34)
+            .background(
+              offset == mentionIndex ? studio.t.secondarySurface : .clear,
+              in: RoundedRectangle(cornerRadius: 7)
+            )
+            .contentShape(Rectangle())
+        }.buttonStyle(.plain).onHover { if $0 { mentionIndex = offset } }
+      }
+      HStack(spacing: 10) {
+        Text("↑↓ choose").font(.system(size: 11))
+        Text("↵ insert").font(.system(size: 11))
+        Text("esc close").font(.system(size: 11))
+      }.foregroundStyle(studio.t.muted).padding(.horizontal, 8).padding(.top, 5).padding(.bottom, 2)
+    }.padding(6).frame(width: 320).floatingPanel(studio.t)
+      .accessibilityElement(children: .contain).accessibilityLabel("Lore suggestions")
+  }
+  private func updateMention(_ query: String?) {
+    if query != mentionQuery { mentionIndex = 0 }
+    mentionQuery = query
+  }
+  private func commitMention() {
+    let matches = mentionMatches
+    guard matches.indices.contains(mentionIndex) else { return }
+    let record = matches[mentionIndex]
+    mentionQuery = nil
+    handle.insertReference(title: record.title, id: record.id, replacingQuery: true)
+  }
+  private func mentionKey(_ key: ComposerTextView.MentionKey) -> Bool {
+    let count = mentionMatches.count
+    guard count > 0 else { return false }
+    switch key {
+    case .up: mentionIndex = (mentionIndex - 1 + count) % count
+    case .down: mentionIndex = (mentionIndex + 1) % count
+    case .commit: commitMention()
+    case .cancel: mentionQuery = nil
+    }
+    return true
   }
   private var referenceGroups: [(String, [LoreRecord])] {
     let grouped = Dictionary(grouping: studio.records.prefix(60)) {

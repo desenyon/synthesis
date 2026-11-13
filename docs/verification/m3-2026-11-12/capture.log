@@ -1,0 +1,11 @@
+CAPTURE conversation 1440x900, bitmap 2880x1800, 618ms
+CAPTURE companion 1440x900, bitmap 2880x1800, 1035ms
+CAPTURE light-conversation 1440x900, bitmap 2880x1800, 610ms
+CAPTURE sheet-settings 1440x900, bitmap 2880x1800, 94ms
+CAPTURE sheet-settings panel
+CAPTURE conversation 1024x768, bitmap 2048x1536, 379ms
+CAPTURE companion 1024x768, bitmap 2048x1536, 707ms
+CAPTURE light-conversation 1024x768, bitmap 2048x1536, 371ms
+CAPTURE sheet-settings 1024x768, bitmap 2048x1536, 69ms
+CAPTURE sheet-settings panel
+Native captures complete: /Users/desenyon/.zeron/worktrees/synthesis/swift-falcon/docs/verification/m3-2026-11-12

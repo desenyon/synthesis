@@ -36,3 +36,11 @@ The owner accepted the graphite foundation and explicitly authorized integration
 - **Superseded UI removed.** The earlier studies (RootView, CanvasDesign and others) were deleted rather than kept compiling; git history is the archive. This reverses the earlier "retained source history" note in ARCHITECTURE.
 - **Graph layout is derived.** Fruchterman–Reingold inside a frame shaped like the workspace, seeded deterministically from sorted record IDs. Positions are not stored; dragging a node is a temporary adjustment.
 - **Verification without taking over the machine.** Captures render the window frame while the app stays behind other windows. Pointer checks post events to the app's own window; because SwiftUI gestures only respond in the key window of the active app, that runner comes forward briefly and reports skipped checks if focus is taken.
+
+## 2026-11-12 — safe AI depth
+
+- **Proposals ride in the answer text.** The provider adapter streams plain text, so a change set is one fenced JSON block at the end of the answer rather than provider-specific tool calls. This keeps the adapter boundary thin and lets any text model participate. The cost is that a model may ignore or malform the block; malformed blocks are dropped and the prose still shows.
+- **Per-change review, drafts only.** Accepting a proposed change calls the same draft operations a creator uses, with origin `ai-proposed`. There is deliberately no "accept as canon"; canon keeps its own exact-revision review.
+- **Confirmation by ID.** `resolveChange` requires the proposal's ID, as `promote` requires the record's, so the approval boundary is a property of the store API and is covered by a test.
+- **Context is recorded, not just sent.** Every answer stores the records it was given and why, satisfying traceability and making the privacy disclosure concrete.
+- **Mentions are tokens over Markdown.** The stored message keeps `[Title](synthesis://record/id)`; the composer shows a token. Old drafts and transcripts need no migration.

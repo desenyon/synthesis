@@ -49,6 +49,10 @@ public struct Toast: Identifiable {
   @Published public var records: [LoreRecord] = []
   @Published public var conversations: [Conversation] = []
   @Published public var messages: [ChatMessage] = []
+  /// Staged AI change sets for the open conversation, keyed by the message that proposed them.
+  @Published public var proposals: [String: Proposal] = [:]
+  /// Records shared with the model for each answer, keyed by assistant message.
+  @Published public var contexts: [String: [ContextSource]] = [:]
   @Published public var conversationID: String?
   @Published public var selectedRecord: LoreRecord?
   @Published public var destination: Destination = .chat
@@ -127,9 +131,56 @@ public struct Toast: Identifiable {
     conversations = try store.conversations(worldID: worldID)
     if let conversationID {
       messages = try store.messages(worldID: worldID, conversationID: conversationID)
+      proposals = Dictionary(
+        try store.proposals(worldID: worldID, conversationID: conversationID).compactMap {
+          proposal in proposal.messageID.map { ($0, proposal) }
+        }, uniquingKeysWith: { _, latest in latest })
+      contexts = try store.messageContext(worldID: worldID, conversationID: conversationID)
     } else {
       messages = []
+      proposals = [:]
+      contexts = [:]
     }
+  }
+
+  // MARK: Proposals
+
+  /// The creator's explicit decision on one staged change. Accepted changes become drafts.
+  public func resolve(_ proposal: Proposal, change: ProposedChange, accept: Bool) {
+    perform {
+      _ = try store.resolveChange(
+        worldID: worldID, proposalID: proposal.id, changeID: change.id, accept: accept,
+        confirmation: proposal.id)
+      try reload()
+    }
+  }
+  /// Resolves every pending change in order, stopping at the first that cannot be applied.
+  public func resolveAll(_ proposal: Proposal, accept: Bool) {
+    perform {
+      defer { try? reload() }
+      var applied = 0
+      for change in proposal.changes where change.status == "pending" {
+        _ = try store.resolveChange(
+          worldID: worldID, proposalID: proposal.id, changeID: change.id, accept: accept,
+          confirmation: proposal.id)
+        applied += 1
+      }
+      if applied > 0 {
+        show(
+          accept
+            ? "\(applied) \(applied == 1 ? "change" : "changes") saved as drafts"
+            : "\(applied) \(applied == 1 ? "change" : "changes") dismissed",
+          icon: accept ? "checkmark.circle" : "xmark.circle")
+      }
+    }
+  }
+  /// Display name for a proposal endpoint: a record, or something the same proposal creates.
+  public func name(for reference: String?, in proposal: Proposal) -> String {
+    guard let reference else { return "Unknown" }
+    if reference.hasPrefix("change:") {
+      return proposal.changes.first { "change:\($0.id)" == reference }?.title ?? "New record"
+    }
+    return records.first { $0.id == reference }?.title ?? "Archived record"
   }
   public func perform(_ body: () throws -> Void) {
     do { try body() } catch {
@@ -484,6 +535,96 @@ public struct Toast: Identifiable {
     perform {
       try store.setPreference("world-cover:\(worldID)", value: "")
       worldCover = nil
+    }
+  }
+  /// Imports Markdown or text files as draft documents marked `imported`.
+  public func importDocuments(_ urls: [URL]? = nil) {
+    var files = urls ?? []
+    if urls == nil {
+      let panel = NSOpenPanel()
+      panel.allowedContentTypes = [.plainText, .text]
+      panel.allowsMultipleSelection = true
+      panel.canChooseDirectories = false
+      panel.message = "Choose Markdown or text files to add to \(world?.name ?? "this world")."
+      guard panel.runModal() == .OK else { return }
+      files = panel.urls
+    }
+    var imported: [LoreRecord] = []
+    var skipped: [String] = []
+    for url in files.prefix(200) {
+      guard let data = try? Data(contentsOf: url), data.count <= 2_000_000,
+        let text = String(data: data, encoding: .utf8),
+        let record = try? store.importDocument(
+          worldID: worldID, filename: url.lastPathComponent, text: text)
+      else {
+        skipped.append(url.lastPathComponent)
+        continue
+      }
+      imported.append(record)
+    }
+    perform { try reload() }
+    if imported.isEmpty {
+      error =
+        skipped.isEmpty
+        ? nil : "Nothing was imported. Files must be UTF-8 text or Markdown under 2 MB."
+      return
+    }
+    let ids = imported.map(\.id)
+    show(
+      "Imported \(imported.count) \(imported.count == 1 ? "document" : "documents") as drafts"
+        + (skipped.isEmpty ? "" : " · \(skipped.count) skipped"),
+      icon: "square.and.arrow.down", actionTitle: "Undo"
+    ) { [weak self] in
+      guard let self else { return }
+      self.perform {
+        for id in ids { try self.store.archiveRecord(worldID: self.worldID, id: id) }
+        try self.reload()
+      }
+    }
+    if imported.count == 1 { openRecord(imported[0]) } else { navigate(.library) }
+  }
+  /// Writes one Markdown file per record into a folder the creator chooses.
+  public func exportMarkdown() {
+    let panel = NSOpenPanel()
+    panel.canChooseFiles = false
+    panel.canChooseDirectories = true
+    panel.canCreateDirectories = true
+    panel.prompt = "Export Here"
+    panel.message = "A folder named after this world will be created inside the one you choose."
+    guard panel.runModal() == .OK, let parent = panel.url else { return }
+    perform {
+      let files = try store.exportMarkdown(worldID: worldID)
+      var root = parent.appendingPathComponent("\(world?.name ?? "World") — Synthesis export")
+      var suffix = 2
+      while FileManager.default.fileExists(atPath: root.path) {
+        root = parent.appendingPathComponent(
+          "\(world?.name ?? "World") — Synthesis export \(suffix)")
+        suffix += 1
+      }
+      for file in files {
+        let url = root.appendingPathComponent(file.path)
+        try FileManager.default.createDirectory(
+          at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try file.content.write(to: url, atomically: true, encoding: .utf8)
+      }
+      show(
+        "Exported \(files.count) Markdown files", icon: "square.and.arrow.up", actionTitle: "Show"
+      ) { NSWorkspace.shared.activateFileViewerSelecting([root]) }
+    }
+  }
+  /// Saves a loose thought straight to the library without opening a form.
+  public func capture(_ text: String) {
+    let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !value.isEmpty else { return }
+    perform {
+      let first = value.split(separator: "\n").first.map(String.init) ?? value
+      let record = try store.createRecord(
+        worldID: worldID, title: String(first.prefix(70)), body: value, kind: "capture",
+        category: "Ideas")
+      try reload()
+      show("Captured as an idea", icon: "lightbulb", actionTitle: "Open") { [weak self] in
+        self?.openRecord(record)
+      }
     }
   }
   public func exportWorld() {

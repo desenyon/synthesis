@@ -124,6 +124,15 @@ struct LibraryScreen: View {
     }
     .onAppear { refreshArchive() }
     .onChange(of: studio.records) { _, _ in refreshArchive() }
+    .dropDestination(for: URL.self) { urls, _ in
+      // Dropped Markdown or text files become imported drafts.
+      let files = urls.filter {
+        ["md", "markdown", "txt", "text"].contains($0.pathExtension.lowercased())
+      }
+      guard !files.isEmpty else { return false }
+      studio.importDocuments(files)
+      return true
+    }
   }
   private func refreshArchive() {
     archived = (try? studio.store.archivedRecords(worldID: studio.worldID)) ?? []

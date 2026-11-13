@@ -84,14 +84,25 @@ final class Database {
     }
     return result
   }
+  private var depth = 0
+  /// Atomic unit of work. Nested calls become savepoints, so a store operation can be composed
+  /// from other transactional operations and still roll back as a whole.
   func transaction<T>(_ body: () throws -> T) throws -> T {
-    try execute("BEGIN IMMEDIATE")
+    let level = depth
+    try execute(level == 0 ? "BEGIN IMMEDIATE" : "SAVEPOINT nested_\(level)")
+    depth += 1
+    defer { depth -= 1 }
     do {
       let result = try body()
-      try execute("COMMIT")
+      try execute(level == 0 ? "COMMIT" : "RELEASE nested_\(level)")
       return result
     } catch {
-      try? execute("ROLLBACK")
+      if level == 0 {
+        try? execute("ROLLBACK")
+      } else {
+        try? execute("ROLLBACK TO nested_\(level)")
+        try? execute("RELEASE nested_\(level)")
+      }
       throw error
     }
   }

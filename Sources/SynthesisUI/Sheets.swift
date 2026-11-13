@@ -206,8 +206,19 @@ struct StudioSheet: View {
             }
             settingRow(
               "Export",
-              "Records, conversations, relationships, boards, history and archive as JSON."
-            ) { Button("Export…") { studio.exportWorld() }.buttonStyle(QuietButton(t: studio.t)) }
+              "Markdown: one readable file per record. JSON: everything, including history, proposals and the archive."
+            ) {
+              Button("Markdown…") { studio.exportMarkdown() }.buttonStyle(QuietButton(t: studio.t))
+              Button("JSON…") { studio.exportWorld() }.buttonStyle(QuietButton(t: studio.t))
+            }
+            settingRow(
+              "Import", "Markdown or text files become draft documents marked as imported."
+            ) {
+              Button("Choose files…") {
+                studio.sheet = nil
+                studio.importDocuments()
+              }.buttonStyle(QuietButton(t: studio.t))
+            }
           }
           group("Assistant") {
             HStack(spacing: 8) {

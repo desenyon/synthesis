@@ -147,6 +147,10 @@ final class StudioWindow: NSWindow {
     file.addItem(.separator())
     item(file, "Search and Commands…", #selector(search), "k")
     file.addItem(.separator())
+    item(file, "Import Markdown or Text…", #selector(importFiles), "i", [.command, .shift])
+    item(file, "Export World as Markdown…", #selector(exportMarkdown))
+    item(file, "Export World as JSON…", #selector(exportJSON))
+    file.addItem(.separator())
     item(file, "Close Window", #selector(closeWindow), "w")
     let edit = submenu(main, "Edit")
     item(edit, "Undo", #selector(undoAction), "z")
@@ -199,6 +203,9 @@ final class StudioWindow: NSWindow {
     studio.sheet = .document
   }
   @objc func newConversation() { studio.newChat() }
+  @objc func importFiles() { studio.importDocuments() }
+  @objc func exportMarkdown() { studio.exportMarkdown() }
+  @objc func exportJSON() { studio.exportWorld() }
   @objc func go(_ sender: NSMenuItem) {
     let all = Destination.allCases
     if all.indices.contains(sender.tag) { studio.navigate(all[sender.tag]) }

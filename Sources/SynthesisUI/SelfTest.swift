@@ -262,6 +262,25 @@ extension Studio {
       "graph interaction leaves relationships untouched",
       (try? store.relations(worldID: worldID).count) == relationCount)
 
+    // 9. Typing "@" in the composer offers lore; Return inserts a reference instead of sending.
+    newChat()
+    draft = ""
+    await pause(900)
+    await refocus()
+    await click(CGPoint(x: column + area.width / 2, y: size.height - 96))
+    for character in ["@", "o", "r", "e"] { await key(0, character) }
+    snapshot("selftest-mention-list")
+    await key(36, "\r")
+    let composed = pendingComposer?.text ?? draft
+    check(
+      "typing @ore and pressing Return inserts a reference to Oren Ashe",
+      composed.contains("[Oren Ashe](synthesis://record/"), composed)
+    check("the message was not sent by that Return", messages.isEmpty && !busy)
+    snapshot("selftest-mention-token")
+    pendingComposer = nil
+    draft = ""
+    persistComposer()
+
     return log
   }
 }
