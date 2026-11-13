@@ -43,6 +43,8 @@ Audit of the native SwiftUI/AppKit application, started 2026-11-12 against commi
 - `./scripts/verify-ui.sh docs/verification/audit-2026-11-12`: 148 captures from the release build (32 states × 1440×900, 1920×1080, 1024×768, 720×800, plus 20 sheets) at 2× backing scale. All four contact sheets and the sheet panel were inspected; 1440, 1024 and 720 were also inspected at full size during the passes. The final captures predate fix 25, which changes no resting state.
 - `./scripts/selftest-ui.sh`: 13 of 13 checks passed in one run on the release build (`selftest.log`). It posts real pointer and key events to the app's own window: header button under the title bar, palette row tap, card drag with persisted position, undo, drag-to-connect opening the label sheet without creating a relationship, marquee, Delete keeping source records, arrow-key nudge, double-click to open, Back to Canvas, companion resize, graph pan leaving relationships untouched.
 
+- Upgrade check: a database built from migrations 0001–0003 with one world, record, conversation, board and event was opened by the release build. Migration 0004 applied, every existing row was kept with `archived = 0`, and the sample fixtures were added as separate worlds without touching the existing one.
+
 ## Remaining work
 
 Not done in this audit, in rough priority order:
