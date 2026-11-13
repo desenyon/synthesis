@@ -160,5 +160,98 @@ struct StoreTests {
     #expect(try s.relations(worldID: a.id).first?.id == relation.id)
     #expect(try s.record(worldID: a.id, id: x.id).canonical == nil)
   }
+  @Test func archivingRecordsIsReversibleAndKeepsCanonAndHistory() throws {
+    let s = try fixture()
+    let a = try s.createWorld(name: "A")
+    let b = try s.createWorld(name: "B")
+    var mira = try s.createRecord(worldID: a.id, title: "Mira", body: "Mapmaker", kind: "entity")
+    let order = try s.createRecord(worldID: a.id, title: "Order", kind: "entity")
+    _ = try s.addRelation(worldID: a.id, source: mira.id, target: order.id, label: "guided by")
+    try s.linkRecord(worldID: a.id, source: order.id, target: mira.id)
+    mira = try s.promote(worldID: a.id, id: mira.id, version: mira.version, confirmation: mira.id)
+    let revisions = try s.history(worldID: a.id, id: mira.id).count
+    #expect(throws: Error.self) { try s.archiveRecord(worldID: b.id, id: mira.id) }
+    try s.archiveRecord(worldID: a.id, id: mira.id)
+    #expect(try s.records(worldID: a.id).map(\.id) == [order.id])
+    #expect(try s.archivedRecords(worldID: a.id).map(\.id) == [mira.id])
+    #expect(try s.search(worldID: a.id, query: "Mapmaker").isEmpty)
+    #expect(try s.relations(worldID: a.id).isEmpty)
+    #expect(try s.linkedRecords(worldID: a.id, id: order.id).isEmpty)
+    // Hidden, not discarded: still resolvable, canon and history untouched, and exported.
+    let hidden = try s.record(worldID: a.id, id: mira.id)
+    #expect(hidden.state == "canon" && hidden.canonical == mira.canonical)
+    #expect(try s.history(worldID: a.id, id: mira.id).count == revisions)
+    let export = String(decoding: try s.exportWorld(a.id), as: UTF8.self)
+    #expect(export.contains("Mapmaker") && export.contains("archivedRecordIDs"))
+    try s.restoreRecord(worldID: a.id, id: mira.id)
+    #expect(try s.records(worldID: a.id).count == 2)
+    #expect(try s.relations(worldID: a.id).first?.label == "guided by")
+    #expect(try s.search(worldID: a.id, query: "Mapmaker").first?.id == mira.id)
+  }
+  @Test func conversationsBoardsAndEventsArchiveWithinTheirWorld() throws {
+    let s = try fixture()
+    let a = try s.createWorld(name: "A")
+    let b = try s.createWorld(name: "B")
+    let chat = try s.createConversation(worldID: a.id, title: "Tides")
+    try s.appendMessage(
+      worldID: a.id, conversationID: chat.id, role: "user", body: "Keep this", state: "complete")
+    #expect(throws: Error.self) {
+      try s.setConversationArchived(worldID: b.id, id: chat.id, archived: true)
+    }
+    try s.setConversationArchived(worldID: a.id, id: chat.id, archived: true)
+    #expect(try s.conversations(worldID: a.id).isEmpty)
+    #expect(try s.conversations(worldID: a.id, archived: true).first?.id == chat.id)
+    #expect(try s.messages(worldID: a.id, conversationID: chat.id).first?.body == "Keep this")
+    try s.setConversationArchived(worldID: a.id, id: chat.id, archived: false)
+    #expect(try s.conversations(worldID: a.id).first?.id == chat.id)
+
+    let board = try s.saveBoard(worldID: a.id, name: "Coast", kind: "canvas", content: "{}")
+    #expect(throws: Error.self) {
+      try s.setBoardArchived(worldID: b.id, id: board.id, archived: true)
+    }
+    try s.setBoardArchived(worldID: a.id, id: board.id, archived: true)
+    #expect(try s.boards(worldID: a.id, kind: "canvas").isEmpty)
+    // An archived board can still be saved by an open editor without reappearing.
+    _ = try s.saveBoard(
+      worldID: a.id, id: board.id, name: "Coast", kind: "canvas", content: "{\"cards\":[]}")
+    #expect(try s.boards(worldID: a.id, kind: "canvas").isEmpty)
+    #expect(try s.boards(worldID: a.id, kind: "canvas", archived: true).first?.id == board.id)
+    #expect(throws: Error.self) {
+      try s.saveBoard(worldID: a.id, name: " ", kind: "canvas", content: "{}")
+    }
+
+    let source = try s.createRecord(worldID: a.id, title: "Source")
+    let other = try s.createRecord(worldID: b.id, title: "Elsewhere")
+    let event = try s.addEvent(worldID: a.id, title: "Flood", date: "", source: source.id)
+    #expect(throws: Error.self) {
+      try s.updateEvent(
+        worldID: a.id, id: event.id, title: "Flood", date: "", source: other.id, order: nil)
+    }
+    #expect(throws: Error.self) {
+      try s.setEventArchived(worldID: b.id, id: event.id, archived: true)
+    }
+    let edited = try s.updateEvent(
+      worldID: a.id, id: event.id, title: "The flood", date: "Before memory", source: source.id,
+      order: 2)
+    #expect(edited.dateLabel == "Before memory" && edited.order == 2)
+    #expect(try s.events(worldID: a.id).first?.title == "The flood")
+    try s.setEventArchived(worldID: a.id, id: event.id, archived: true)
+    #expect(try s.events(worldID: a.id).isEmpty)
+    #expect(String(decoding: try s.exportWorld(a.id), as: UTF8.self).contains("The flood"))
+    try s.setEventArchived(worldID: a.id, id: event.id, archived: false)
+    #expect(try s.events(worldID: a.id).count == 1)
+  }
+  @Test func worldRenameValidatesAndLinksCanBeRemoved() throws {
+    let s = try fixture()
+    let w = try s.createWorld(name: "Draft world")
+    #expect(throws: Error.self) { try s.renameWorld(w.id, name: "   ") }
+    #expect(try s.renameWorld(w.id, name: " Aster ").name == "Aster")
+    let page = try s.createRecord(worldID: w.id, title: "Page")
+    let entity = try s.createRecord(worldID: w.id, title: "Mira", kind: "entity")
+    try s.linkRecord(worldID: w.id, source: page.id, target: entity.id)
+    try s.unlinkRecord(worldID: w.id, source: page.id, target: entity.id)
+    #expect(try s.linkedRecords(worldID: w.id, id: page.id).isEmpty)
+    #expect(try s.record(worldID: w.id, id: entity.id).title == "Mira")
+  }
 
 }

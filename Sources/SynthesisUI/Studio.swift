@@ -4,25 +4,43 @@ import SynthesisCore
 
 public enum Destination: String, CaseIterable, Identifiable {
   case chat = "Conversation"
-  case library = "Library"
   case canvas = "Canvas"
+  case library = "Library"
   case knowledge = "Graph"
   case timeline = "Timeline"
   case atlas = "Atlas"
-  case manual = "Studio"
   public var id: String { rawValue }
   var icon: String {
     switch self {
-    case .chat: return "bubble.left.and.bubble.right"
+    case .chat: return "bubble.left"
+    case .canvas: return "rectangle.on.rectangle"
     case .library: return "books.vertical"
-    case .canvas: return "square.on.square"
     case .knowledge: return "point.3.connected.trianglepath.dotted"
-    case .timeline: return "clock.arrow.circlepath"
+    case .timeline: return "calendar.day.timeline.left"
     case .atlas: return "map"
-    case .manual: return "square.grid.2x2"
+    }
+  }
+  var summary: String {
+    switch self {
+    case .chat: return "Think with your world"
+    case .canvas: return "Arrange ideas by hand"
+    case .library: return "Every document, entity and idea"
+    case .knowledge: return "Relationships between entities"
+    case .timeline: return "Events in order"
+    case .atlas: return "Places on your map"
     }
   }
 }
+
+/// A short, auto-dismissing confirmation with an optional reversal.
+public struct Toast: Identifiable {
+  public let id = UUID()
+  var message: String
+  var icon = "checkmark.circle"
+  var actionTitle: String?
+  var action: (() -> Void)?
+}
+
 @MainActor public final class Studio: ObservableObject {
   public let store: WorkspaceStore
   public let engine: AgentEngine
@@ -44,28 +62,39 @@ public enum Destination: String, CaseIterable, Identifiable {
   @Published public var busy = false
   @Published public var streamed = ""
   @Published public var error: String?
-  @Published public var notice: String?
+  @Published public var toast: Toast?
   @Published public var sheet: Sheet?
+  @Published public var palette = false
   @Published public var providerConfigured = false
   @Published public var modelName = ""
-  @Published public var search = ""
   @Published public var editorSave: (() -> Bool)?
-  @Published public var inspector = false
   @Published public var canvasBoardID: String?
   @Published public var companionExpanded = false
   @Published public var companionWidth = 400.0
   @Published public var libraryCategory: String?
+  @Published public var newRecordKind = "lore"
+  @Published public var inspector = true
+  /// Set only by the isolated capture runner so a screenshot can show a selected state.
+  @Published public var captureHint = ""
+  /// Bumped by the capture runner to rebuild the workspace for each screenshot.
+  @Published public var captureNonce = 0
+  /// Conversation the rename sheet edits; defaults to the open conversation.
+  public var renameTarget: String?
   var pendingComposer: (world: String, text: String)?
   public var canvasUndo: ((Bool) -> Void)?
   public var canvasFit: (() -> Void)?
   private var running: Task<Void, Never>?
   private var requestID = UUID()
+  private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
-    case settings, world, search, document, rename
+    case settings, world, document, rename
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
   public var t: Theme { Theme(dark: dark) }
+  public var conversationTitle: String {
+    conversations.first { $0.id == conversationID }?.title ?? "New conversation"
+  }
   public init(store: WorkspaceStore, transport: (any ModelTransport)? = nil) throws {
     self.store = store
     let configuredModel = try store.preference("model") ?? ""
@@ -84,7 +113,10 @@ public enum Destination: String, CaseIterable, Identifiable {
     mode = WorkspaceMode(rawValue: try store.preference("mode") ?? "assisted") ?? .assisted
     dark = try store.preference("theme") != "light"
     collapsed = try store.preference("sidebar") == "collapsed"
-    destination = mode == .manual ? .canvas : .chat
+    inspector = try store.preference("inspector") != "hidden"
+    destination =
+      try store.preference("destination").flatMap(Destination.init(rawValue:))
+      ?? (mode == .manual ? .canvas : .chat)
     draft = try store.preference("composer:\(worldID)") ?? ""
     providerConfigured = ProviderKeychain.configured && !configuredModel.isEmpty
     try reload()
@@ -104,6 +136,19 @@ public enum Destination: String, CaseIterable, Identifiable {
       self.error = error.localizedDescription
     }
   }
+  public func show(
+    _ message: String, icon: String = "checkmark.circle", actionTitle: String? = nil,
+    action: (() -> Void)? = nil
+  ) {
+    let value = Toast(message: message, icon: icon, actionTitle: actionTitle, action: action)
+    toast = value
+    toastTask?.cancel()
+    toastTask = Task { @MainActor [weak self] in
+      try? await Task.sleep(for: .seconds(action == nil ? 3.5 : 7))
+      guard !Task.isCancelled, self?.toast?.id == value.id else { return }
+      withAnimation(.easeOut(duration: 0.18)) { self?.toast = nil }
+    }
+  }
   public func persistPendingComposer() {
     if let pendingComposer, pendingComposer.world == worldID {
       draft = pendingComposer.text
@@ -115,6 +160,7 @@ public enum Destination: String, CaseIterable, Identifiable {
     perform { try store.setPreference("composer:\(worldID)", value: draft) }
   }
   public func setMode(_ value: WorkspaceMode) {
+    guard value != mode else { return }
     perform {
       try engine.setMode(value)
       mode = value
@@ -134,6 +180,10 @@ public enum Destination: String, CaseIterable, Identifiable {
     collapsed.toggle()
     perform { try store.setPreference("sidebar", value: collapsed ? "collapsed" : "expanded") }
   }
+  public func toggleInspector() {
+    inspector.toggle()
+    perform { try store.setPreference("inspector", value: inspector ? "shown" : "hidden") }
+  }
   public func flushEditor() -> Bool { editorSave?() ?? true }
   public func navigate(_ value: Destination) {
     guard flushEditor() else { return }
@@ -144,16 +194,30 @@ public enum Destination: String, CaseIterable, Identifiable {
       canvasUndo = nil
       canvasFit = nil
     }
+    if value != .library { libraryCategory = nil }
     mobileNavigation = false
-    inspector = false
+    try? store.setPreference("destination", value: value.rawValue)
+  }
+  public func openLens(_ category: String?) {
+    guard flushEditor() else { return }
+    selectedRecord = nil
+    editorSave = nil
+    libraryCategory = category
+    destination = .library
+    canvasUndo = nil
+    canvasFit = nil
+    mobileNavigation = false
+    try? store.setPreference("destination", value: Destination.library.rawValue)
   }
   public func switchWorld(_ id: String) {
+    guard id != worldID else { return }
     guard flushEditor() else { return }
     stop()
     perform {
       persistPendingComposer()
       canvasBoardID = nil
       companionExpanded = false
+      libraryCategory = nil
       worldID = id
       worldCover = Self.cover(store: store, worldID: id)
       conversationID = nil
@@ -161,7 +225,6 @@ public enum Destination: String, CaseIterable, Identifiable {
       editorSave = nil
       try store.setPreference("world", value: id)
       draft = try store.preference("composer:\(id)") ?? ""
-      destination = mode == .manual ? .canvas : .chat
       try reload()
     }
   }
@@ -191,17 +254,27 @@ public enum Destination: String, CaseIterable, Identifiable {
       mobileNavigation = false
     }
   }
+  /// Opens a record over the current workspace; closing returns to where the creator was.
   public func openRecord(_ record: LoreRecord) {
     guard flushEditor() else { return }
     selectedRecord = record
     editorSave = nil
-    destination = .library
     mobileNavigation = false
-    inspector = false
   }
-  public func createRecord(title: String, kind: String = "lore", body: String = "") {
+  public func closeRecord() {
+    guard flushEditor() else { return }
+    selectedRecord = nil
+    editorSave = nil
+  }
+  public func createRecord(
+    title: String, kind: String = "lore", body: String = "", category: String = ""
+  ) {
     perform {
-      let record = try store.createRecord(worldID: worldID, title: title, body: body, kind: kind)
+      let name = title.trimmingCharacters(in: .whitespacesAndNewlines)
+      let record = try store.createRecord(
+        worldID: worldID,
+        title: name.isEmpty ? "Untitled \(Vocabulary.kindLabel(kind).lowercased())" : name,
+        body: body, kind: kind, category: category)
       try reload()
       openRecord(record)
       sheet = nil
@@ -215,6 +288,58 @@ public enum Destination: String, CaseIterable, Identifiable {
       sheet = nil
     }
   }
+  public func renameWorld(_ name: String) {
+    perform {
+      _ = try store.renameWorld(worldID, name: name)
+      try reload()
+    }
+  }
+
+  // MARK: Reversible removal
+
+  public func archive(_ record: LoreRecord) {
+    if selectedRecord?.id == record.id {
+      guard flushEditor() else { return }
+      selectedRecord = nil
+      editorSave = nil
+    }
+    perform {
+      try store.archiveRecord(worldID: worldID, id: record.id)
+      try reload()
+      show("Archived “\(record.title)”", icon: "archivebox", actionTitle: "Undo") { [weak self] in
+        self?.restore(recordID: record.id)
+      }
+    }
+  }
+  public func restore(recordID: String) {
+    perform {
+      try store.restoreRecord(worldID: worldID, id: recordID)
+      try reload()
+    }
+  }
+  public func archive(_ chat: Conversation) {
+    if conversationID == chat.id { stop() }
+    perform {
+      try store.setConversationArchived(worldID: worldID, id: chat.id, archived: true)
+      if conversationID == chat.id {
+        conversationID = nil
+        messages = []
+      }
+      try reload()
+      show("Archived “\(chat.title)”", icon: "archivebox", actionTitle: "Undo") { [weak self] in
+        self?.restore(conversationID: chat.id)
+      }
+    }
+  }
+  public func restore(conversationID id: String) {
+    perform {
+      try store.setConversationArchived(worldID: worldID, id: id, archived: false)
+      try reload()
+    }
+  }
+
+  // MARK: Conversation
+
   public func stop() {
     requestID = UUID()
     engine.cancel()
@@ -244,7 +369,10 @@ public enum Destination: String, CaseIterable, Identifiable {
       streamed = ""
       draft = ""
       persistComposer()
-      if !keepWorkspace { destination = .chat }
+      if !keepWorkspace {
+        selectedRecord = nil
+        destination = .chat
+      }
       running = Task { [weak self] in
         guard let self, !Task.isCancelled, self.requestID == request else { return }
         do {
@@ -287,16 +415,31 @@ public enum Destination: String, CaseIterable, Identifiable {
       self.conversationID == conversationID, mode == .assisted
     else { return }
     streamed = output
-    try? reload()
   }
+  /// Saves a model answer as an AI-origin draft. It never becomes canon without separate review.
   public func saveResponse(_ message: ChatMessage, entity: Bool = false) {
     perform {
+      let heading = message.body.split(separator: "\n").first.map(String.init) ?? ""
+      let title = heading.trimmingCharacters(in: CharacterSet(charactersIn: "# *_")).prefix(80)
       let record = try store.createRecord(
-        worldID: worldID, title: entity ? "New entity" : "Conversation draft", body: message.body,
-        kind: entity ? "entity" : "lore", origin: "ai-proposed")
+        worldID: worldID,
+        title: title.isEmpty ? (entity ? "New entity" : "Conversation draft") : String(title),
+        body: message.body, kind: entity ? "entity" : "lore", origin: "ai-proposed")
       try reload()
       openRecord(record)
     }
+  }
+  /// Appends a lore reference to the composer draft.
+  public func reference(_ record: LoreRecord) {
+    let link = "[\(record.title)](synthesis://record/\(record.id))"
+    let base = pendingComposer?.world == worldID ? pendingComposer!.text : draft
+    pendingComposer = nil
+    draft =
+      base.isEmpty || base.hasSuffix(" ") || base.hasSuffix("\n")
+      ? base + link + " "
+      : base
+        + " " + link + " "
+    persistComposer()
   }
   public func attachText() {
     let panel = NSOpenPanel()
@@ -314,6 +457,9 @@ public enum Destination: String, CaseIterable, Identifiable {
       }
     }
   }
+
+  // MARK: World
+
   private static func cover(store: WorkspaceStore, worldID: String) -> NSImage? {
     guard let value = try? store.preference("world-cover:\(worldID)"),
       let data = Data(base64Encoded: value)
@@ -334,16 +480,31 @@ public enum Destination: String, CaseIterable, Identifiable {
       worldCover = image
     }
   }
+  public func removeWorldCover() {
+    perform {
+      try store.setPreference("world-cover:\(worldID)", value: "")
+      worldCover = nil
+    }
+  }
   public func exportWorld() {
     let panel = NSSavePanel()
     panel.nameFieldStringValue = "\(world?.name ?? "world").json"
     if panel.runModal() == .OK, let url = panel.url {
       perform {
         try store.exportWorld(worldID).write(to: url, options: .atomic)
-        notice = "World exported with records, conversations and revisions."
+        show("World exported to \(url.lastPathComponent)", icon: "square.and.arrow.up")
       }
     }
   }
+  static func sampleArtwork() -> Data? {
+    let bundled = Bundle.main.resourceURL?.appendingPathComponent("Assets/aster-coast.png")
+    let url =
+      bundled.flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil }
+      ?? Bundle.module.url(forResource: "Assets", withExtension: nil)?.appendingPathComponent(
+        "aster-coast.png")
+    return url.flatMap { try? Data(contentsOf: $0) }
+  }
+  /// Opens the clearly labelled sample universe, creating it once. Never touches other worlds.
   public func loadSample() {
     perform {
       if let existing = try store.worlds().first(where: { $0.demo }) {
@@ -352,23 +513,74 @@ public enum Destination: String, CaseIterable, Identifiable {
       }
       let w = try store.createWorld(
         name: "Aster", description: "The drowned world · sample", demo: true)
+      let entity: (String, String, String) throws -> LoreRecord = { title, category, body in
+        try self.store.createRecord(
+          worldID: w.id, title: title, body: body, kind: "entity", category: category)
+      }
+      let city = try entity(
+        "The Drowned City", "Places",
+        "A harbour capital lost beneath the sea. Its lamps still burn under the glass.")
+      let tide = try entity(
+        "The Remembering Tide", "Cosmology",
+        "The belief that the sea keeps every memory surrendered to it, and returns them changed.")
+      let oren = try entity(
+        "Oren Ashe", "Characters",
+        "Eldest of the Tidekeepers. He remembers a crossing no one else survived.")
+      let power = try entity(
+        "The art of remembrance", "Power systems",
+        "Borrow a memory. Live the skill inside it.\n\nCost: one memory of your own.\nRestriction: a borrowed life cannot be changed."
+      )
+      let sea = try entity(
+        "The Glass Sea", "Places",
+        "At dawn, the water becomes a dark mirror. The drowned city remains visible beneath it until the first tide returns."
+      )
+      let keepers = try entity(
+        "Tidekeepers", "Factions", "A coastal order responsible for safe passage.")
+      let mira = try entity(
+        "Mira Vale", "Characters", "A cartographer tracing places that do not stay still.")
       _ = try store.createRecord(
-        worldID: w.id, title: "The Glass Sea",
+        worldID: w.id, title: "What does the glass keep?",
+        body: "What if the glass preserves the memory of everyone who has crossed it?",
+        kind: "capture", category: "Ideas")
+      let crossing = try store.createRecord(
+        worldID: w.id, title: "Crossing the Glass Sea",
         body:
-          "At dawn, the sea remembers how to be solid.\n\nFor a few quiet hours, the water becomes a single sheet of dark glass. Beneath it, the lights of the drowned city still burn.\n\nThose who cross\n\nMira Vale is the only cartographer who has walked beyond the old bell tower. The Tidekeepers guide travelers back before the glass becomes water.\n\nAn unresolved thought\n\nWhat if the glass preserves the memory of everyone who has crossed it?",
+          "At dawn, the sea remembers how to be solid.\n\nFor a few quiet hours, the water becomes a single sheet of dark glass. Beneath it, the lights of the drowned city still burn.\n\nThose who cross\n\nMira Vale is the only cartographer who has walked beyond the old bell tower. The Tidekeepers guide travelers back before the glass becomes water.",
         category: "Places")
-      let mira = try store.createRecord(
-        worldID: w.id, title: "Mira Vale",
-        body: "A cartographer tracing places that do not stay still.", kind: "entity",
-        category: "Characters")
-      let keepers = try store.createRecord(
-        worldID: w.id, title: "Tidekeepers", body: "A coastal order responsible for safe passage.",
-        kind: "entity", category: "Factions")
-      _ = try store.addRelation(
-        worldID: w.id, source: mira.id, target: keepers.id, label: "guided by")
+      for (a, b, label) in [
+        (mira, keepers, "guided by"), (mira, sea, "maps"), (keepers, power, "safeguards"),
+        (oren, keepers, "leads"), (sea, city, "covers"), (power, tide, "draws on"),
+        (oren, mira, "mentors"),
+      ] { _ = try store.addRelation(worldID: w.id, source: a.id, target: b.id, label: label) }
+      for (source, target) in [(crossing, sea), (crossing, mira), (crossing, keepers)] {
+        try store.linkRecord(worldID: w.id, source: source.id, target: target.id)
+      }
+      _ = try store.saveMetadata(
+        worldID: w.id, id: mira.id, version: mira.version, tags: ["cartography", "protagonist"],
+        aliases: ["The Mapmaker"])
       _ = try store.addEvent(
-        worldID: w.id, title: "The first crossing", date: "Before the coastal order",
-        source: mira.id)
+        worldID: w.id, title: "The drowning", date: "Before memory", source: city.id, order: 1)
+      _ = try store.addEvent(
+        worldID: w.id, title: "The coastal order is founded", date: "First tide-year",
+        source: keepers.id, order: 2)
+      _ = try store.addEvent(worldID: w.id, title: "The first crossing", date: "", source: mira.id)
+      var document = CanvasDocument()
+      let artwork = Self.sampleArtwork()
+      let positions = [(-210.0, -155.0), (210.0, -155.0), (-210.0, 155.0), (210.0, 155.0)]
+      for (index, record) in [mira, keepers, sea, power].enumerated() {
+        var card = CanvasCard(text: record.title, recordID: record.id)
+        card.width = 300
+        card.x = positions[index].0
+        card.y = positions[index].1
+        if record.id == sea.id { card.image = artwork?.base64EncodedString() }
+        document.cards.append(card)
+      }
+      _ = try store.saveBoard(
+        worldID: w.id, name: "The first crossing", kind: "canvas",
+        content: String(decoding: try JSONEncoder().encode(document), as: UTF8.self))
+      if let artwork {
+        try store.setPreference("world-cover:\(w.id)", value: artwork.base64EncodedString())
+      }
       switchWorld(w.id)
     }
   }

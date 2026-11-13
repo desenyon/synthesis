@@ -1,11 +1,21 @@
 # Roadmap
 
-## Active — connected workspace refinement
+## Done — product audit and unified redesign (2026-11-12)
 
-Retain graphite visual foundation while reconnecting Conversation, Canvas, Library, Graph, Timeline and Atlas to one world. Make assistance independent, persistent and core-enforced. Use actual records, saved curated boards, readable card typography, real edges, optional companion and optional guides.
+One design system across Conversation, Canvas, Library, Graph, Timeline, Atlas, the editor, the command palette and sheets. Native window controls, reversible archive, canon diff review, verified pointer interactions. Evidence and the full checklist: verification/AUDIT.md.
 
-Implemented and checked: connected native screens, 27 inspected captures, saved chat/source links, Manual editing and restart persistence, graph-to-canvas transfer, and 20 automated tests. Acceptance still open: direct drag/resize gestures and realistic large-board performance; native automation cannot drag this borderless window. See verification/CONNECTED_REVIEW.md.
+## Active — safe AI depth (M3)
+
+1. Structured proposals: the assistant stages creates, edits and relationships as a change set the creator reviews item by item. Canon stays an explicit, separate acceptance.
+2. Inline `@` mentions with autocomplete in the composer.
+3. Exercise the live provider path (streaming, stop, errors) once the owner supplies a key and approves the calls.
 
 ## Next
 
-Expand structured proposal previews and rich response types after the connected daily workflow is verified. Improve large-board profiling, spatial keyboard navigation, recoverable drafts after failed-save crashes, and atlas history. No releases or public deployment.
+- Measure and tune large boards and graphs; persist optional graph pins.
+- Accessibility walk-through with VoiceOver and full keyboard traversal.
+- Canvas: card resize, snapping, named groups.
+- Timeline: reorder by drag, canon state for events. Atlas: several maps, draggable markers.
+- Recover unsaved editor text after a crash.
+
+No releases or public deployment.

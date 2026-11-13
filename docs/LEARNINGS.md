@@ -33,3 +33,17 @@ Owner explicitly authorized connecting the accepted visual foundation to the rea
 Independent review found delayed viewport saves could overwrite newer controllers and companion conversation switching cleared the canvas save guard. Explicit flush now cancels deferred saves; companion chat navigation preserves its workspace/save callback. Tests cover both scenarios, plus mode independence and board layout/undo. Compact composer provider disclosure was restored; Manual no longer changes destination.
 
 Final inspection found graph edges drawn only inside a Canvas closure were absent after asynchronous state refresh. Moving relationship rendering to state-dependent SwiftUI Paths/labels made actual edges visible in the next capture. Window size alone is insufficient evidence of responsive fit: inspect the companion-open state too. Native CUA could click controls and type, but drag returned `noWindowsAvailable`; retain that verification boundary rather than infer gesture success. No additional AGENTS rule was needed.
+
+## Product audit — 2026-11-12
+
+Observation 1: a borderless window removed all window controls and made native drag automation fail with `noWindowsAvailable` for two sessions. Evidence: prior STATE and CONNECTED_REVIEW; after switching to a titled full-size-content window the self-test drags cards and the companion divider (13 of 13 checks, `verification/audit-2026-11-12/selftest.log`).
+
+Observation 2: posted mouse events reached AppKit views and SwiftUI buttons but not `onTapGesture` or `DragGesture` until the window was key in the active app. Evidence: the same self-test failed four gesture checks with `key=false active=false` and passed them with the window key. A gesture test that runs in a background window proves nothing.
+
+Observation 3: `.fixedSize()` on a menu whose label is a user-entered title made the bar wider than its panel and pushed the companion off-screen. Evidence: `companion` captures before and after; fixed by flexible title menus and `ViewThatFits` bars.
+
+Observation 4: a contact-sheet script that matched `light-*.png` silently showed `light-conversation` under the `light` label, which looked like a rendering bug. Evidence: pass-1 sheets. `scripts/contact-sheets.py` now parses names exactly.
+
+Observation 5: an overlay wider than a 1-point divider did not receive drags, and a handle drawn half outside a card lost hover on its outer half. Hit targets must be real layout, not overhang.
+
+Instruction change: AGENTS.md section 5 gained four bullets — use the shared chrome and tokens; keep the titled window; remove by archiving with Undo; verify UI with `verify-ui.sh` and `selftest-ui.sh`, including the focus caveat. No protected section was edited. Validation: `./scripts/check.sh` passed (32 tests), 148 captures inspected, self-test passed. Rollback: delete those four bullets; nothing else depends on them.

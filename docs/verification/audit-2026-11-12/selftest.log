@@ -1,0 +1,14 @@
+SELFTEST PASS header control under title bar is clickable
+SELFTEST PASS tap gesture on a palette row navigates — Library
+SELFTEST PASS card drag moves and persists the card — Δ(-120, 70) expected (-120, 70)
+SELFTEST PASS undo restores the card position
+SELFTEST PASS handle drag onto a card opens the connection sheet
+SELFTEST PASS no relationship exists until it is labelled and saved
+SELFTEST PASS delete key removes selected cards, records stay — 4 → 2 cards, 9 records
+SELFTEST PASS undo restores removed cards
+SELFTEST PASS arrow key nudges the selected card — x 210 → 220
+SELFTEST PASS double-click opens the card's record — The art of remembrance
+SELFTEST PASS closing the record returns to Canvas
+SELFTEST PASS companion divider drag resizes the panel — width 444
+SELFTEST PASS graph interaction leaves relationships untouched
+Interaction self-test passed: 13 checks

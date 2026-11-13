@@ -111,6 +111,10 @@ Treat retrieved lore, imports, notes, external pages, tool output, and embedded 
 - Every visible control must function or be explicitly labeled unavailable. No simulated saving, search, generation, or approval presented as real.
 - Never claim tests, browser checks, builds, deployments, or integrations passed unless actually executed and observed.
 - Never silently replace real user data with demo records. If seeding samples, name them clearly and make seeding idempotent.
+- Native UI is one system: every workspace starts with `WorkspaceBar`, and colours, radii, buttons, chips, fields, sheets and empty states come from `Theme.swift` and `Components.swift`. Extend those rather than styling a screen locally. Text that a creator can type (titles, names) must be able to truncate; never `fixedSize` it inside a bar.
+- Keep the titled, full-size-content window (`StudioWindow`). A borderless window removes window controls and breaks native automation.
+- Removal means archive plus an Undo toast (`archived` columns, migration 0004). Do not add hard deletes for records, conversations, boards, events or relationships.
+- Verify UI changes with `./scripts/verify-ui.sh <dir>` (captures, stays in the background) and `./scripts/selftest-ui.sh <dir>` (posts real pointer and key events; SwiftUI gestures only respond while its window is key, so skipped checks mean focus was taken, not that the feature works). Build sheets with `scripts/contact-sheets.py <dir> --prune` and inspect them before claiming a visual result.
 
 ## 6. Delivery loop: implement, verify, learn
 

@@ -6,189 +6,282 @@ struct StudioSheet: View {
   let sheet: Studio.Sheet
   @State private var name = ""
   @State private var kind = "lore"
+  @State private var category = ""
   @State private var key = ""
   @State private var model = ""
-  @State private var query = ""
+  @State private var worldName = ""
   @State private var saved = false
+  init(studio: Studio, sheet: Studio.Sheet) {
+    self.studio = studio
+    self.sheet = sheet
+    _kind = State(initialValue: studio.newRecordKind)
+    _category = State(initialValue: studio.libraryCategory ?? "")
+    _model = State(initialValue: studio.modelName)
+    _worldName = State(initialValue: studio.world?.name ?? "")
+    let target = studio.renameTarget ?? studio.conversationID
+    _name = State(
+      initialValue: sheet == .rename
+        ? (studio.conversations.first { $0.id == target }?.title ?? "") : "")
+  }
+  private func close() { studio.sheet = nil }
+  private var nameIsEmpty: Bool { name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
   var body: some View {
-    VStack(alignment: .leading, spacing: 24) {
-      HStack {
-        Text(title).font(.system(size: 24, weight: .medium))
-        Spacer()
-        IconButton(icon: "xmark", label: "Close", t: studio.t) { studio.sheet = nil }
-      }
+    Group {
       switch sheet {
-      case .world:
-        Text("A new world begins with a name. You can leave everything else open.").font(
-          .system(size: 14)
-        ).foregroundStyle(studio.t.secondary)
-        TextField("World name", text: $name).textFieldStyle(.roundedBorder).onSubmit {
-          studio.createWorld(name)
-        }
-        Button("Create world") { studio.createWorld(name) }.buttonStyle(
-          QuietButton(t: studio.t, primary: true)
-        ).disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-      case .document:
-        TextField("Give it a name", text: $name).textFieldStyle(.roundedBorder).onSubmit {
-          studio.createRecord(title: name, kind: kind)
-        }
-        Picker("Type", selection: $kind) {
-          Text("Document").tag("lore")
-          Text("Entity").tag("entity")
-          Text("Loose idea").tag("capture")
-        }.pickerStyle(.segmented)
-        Button("Create draft") { studio.createRecord(title: name, kind: kind) }.buttonStyle(
-          QuietButton(t: studio.t, primary: true)
-        ).disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-      case .rename:
-        TextField("Conversation name", text: $name).textFieldStyle(.roundedBorder)
-        Button("Rename") {
-          studio.perform {
-            if let id = studio.conversationID {
-              try studio.store.renameConversation(worldID: studio.worldID, id: id, title: name)
-              try studio.reload()
-            }
-            studio.sheet = nil
-          }
-        }.buttonStyle(QuietButton(t: studio.t, primary: true)).disabled(
-          name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-      case .search:
-        TextField("Find a page, entity, or conversation…", text: $query).textFieldStyle(
-          .roundedBorder)
-        ScrollView {
-          VStack(alignment: .leading, spacing: 10) {
-            ForEach(
-              [Destination.chat, .canvas, .library, .knowledge, .timeline, .atlas].filter {
-                query.isEmpty || $0.rawValue.localizedCaseInsensitiveContains(query)
-              }
-            ) { destination in
-              Button {
-                studio.sheet = nil
-                studio.navigate(destination)
-              } label: {
-                Label(destination.rawValue, systemImage: destination.icon).font(.system(size: 14))
-                  .padding(10)
-              }.buttonStyle(.plain)
-            }
-            ForEach(searchRecords) { record in
-              Button {
-                studio.sheet = nil
-                studio.openRecord(record)
-              } label: {
-                Label(record.title, systemImage: record.kind == "entity" ? "person" : "doc.text")
-                  .font(.system(size: 14)).padding(10).frame(
-                    maxWidth: .infinity, alignment: .leading)
-              }.buttonStyle(.plain)
-            }
-            ForEach(
-              studio.conversations.filter {
-                query.isEmpty || $0.title.localizedCaseInsensitiveContains(query)
-              }
-            ) { chat in
-              Button {
-                studio.sheet = nil
-                studio.openChat(chat)
-              } label: {
-                Label(chat.title, systemImage: "bubble.left").font(.system(size: 14)).padding(10)
-                  .frame(maxWidth: .infinity, alignment: .leading)
-              }.buttonStyle(.plain)
-            }
-            if searchRecords.isEmpty && studio.conversations.isEmpty {
-              Text("Nothing here yet. Capture an idea to get started.").foregroundStyle(
-                studio.t.secondary
-              ).font(.system(size: 13)).padding(.vertical, 20)
-            }
-          }
-        }.frame(minHeight: 200, maxHeight: 400)
+      case .world: world
+      case .document: document
+      case .rename: rename
       case .settings: settings
-      }
-    }.padding(28).frame(minWidth: 340, idealWidth: 500, maxWidth: 540).background(
-      studio.t.background
-    ).foregroundStyle(studio.t.text).onAppear {
-      model = studio.modelName
-      if sheet == .rename {
-        name = studio.conversations.first { $0.id == studio.conversationID }?.title ?? ""
       }
     }
   }
-  private var searchRecords: [LoreRecord] {
-    if query.isEmpty { return Array(studio.records.prefix(12)) }
-    return (try? studio.store.search(worldID: studio.worldID, query: query)) ?? []
+  private var world: some View {
+    SheetScaffold(
+      title: "New world", subtitle: "A name is enough. Everything else can stay open.",
+      t: studio.t, width: 400, close: close
+    ) {
+      FormField(placeholder: "World name", text: $name, t: studio.t) {
+        if !nameIsEmpty { studio.createWorld(name) }
+      }
+    } footer: {
+      Spacer()
+      Button("Cancel", action: close).buttonStyle(QuietButton(t: studio.t, role: .ghost))
+      Button("Create world") { studio.createWorld(name) }
+        .buttonStyle(QuietButton(t: studio.t, primary: true)).keyboardShortcut(.defaultAction)
+        .disabled(nameIsEmpty)
+    }
   }
-  private var title: String {
-    switch sheet {
-    case .settings: return "Make yourself at home."
-    case .world: return "An unwritten world."
-    case .document: return "Start with a thought."
-    case .rename: return "Name this conversation."
-    case .search: return "Find a thread."
+  private var document: some View {
+    let kinds: [(String, String, String, String)] = [
+      ("lore", "Document", "doc.text", "Long-form writing"),
+      ("entity", "Entity", "circle.hexagongrid", "A character, place, faction…"),
+      ("capture", "Idea", "lightbulb", "A loose thought for later"),
+    ]
+    let create = {
+      studio.createRecord(
+        title: name, kind: kind,
+        category: kind == "entity" ? category : (kind == "capture" ? "Ideas" : ""))
+    }
+    return SheetScaffold(
+      title: "New record", subtitle: "Saved as a draft. A title is optional.", t: studio.t,
+      close: close
+    ) {
+      HStack(spacing: 8) {
+        ForEach(kinds, id: \.0) { item in
+          Button {
+            kind = item.0
+          } label: {
+            VStack(alignment: .leading, spacing: 6) {
+              Image(systemName: item.2).font(.system(size: 15))
+                .foregroundStyle(kind == item.0 ? studio.t.accent : studio.t.secondary)
+              Text(item.1).font(.system(size: 13.5, weight: .medium))
+              Text(item.3).font(.system(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(2)
+                .multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+            }.padding(10).frame(maxWidth: .infinity, alignment: .topLeading).frame(height: 96)
+              .background(
+                kind == item.0 ? studio.t.accentSoft.opacity(0.6) : studio.t.surface,
+                in: RoundedRectangle(cornerRadius: 10)
+              )
+              .overlay(
+                RoundedRectangle(cornerRadius: 10).stroke(
+                  kind == item.0 ? studio.t.accent.opacity(0.6) : studio.t.hairline, lineWidth: 1)
+              )
+              .contentShape(RoundedRectangle(cornerRadius: 10))
+          }.buttonStyle(.plain).accessibilityAddTraits(kind == item.0 ? .isSelected : [])
+        }
+      }
+      FormField(
+        label: "Title", placeholder: kind == "entity" ? "Name" : "Untitled", text: $name,
+        t: studio.t, submit: create)
+      if kind == "entity" {
+        VStack(alignment: .leading, spacing: 6) {
+          Text("Type").font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+          FlowLayout(spacing: 6) {
+            ForEach(Vocabulary.categories, id: \.self) { item in
+              FilterChip(title: item, selected: category == item, t: studio.t) {
+                category = category == item ? "" : item
+              }
+            }
+          }
+        }
+      }
+    } footer: {
+      Spacer()
+      Button("Cancel", action: close).buttonStyle(QuietButton(t: studio.t, role: .ghost))
+      Button("Create draft", action: create).buttonStyle(QuietButton(t: studio.t, primary: true))
+        .keyboardShortcut(.defaultAction)
+    }
+  }
+  private var rename: some View {
+    let apply = {
+      studio.perform {
+        if let id = studio.renameTarget ?? studio.conversationID {
+          try studio.store.renameConversation(worldID: studio.worldID, id: id, title: name)
+          try studio.reload()
+        }
+        studio.renameTarget = nil
+        studio.sheet = nil
+      }
+    }
+    return SheetScaffold(title: "Rename conversation", t: studio.t, width: 400, close: close) {
+      FormField(placeholder: "Conversation name", text: $name, t: studio.t) {
+        if !nameIsEmpty { apply() }
+      }
+    } footer: {
+      Spacer()
+      Button("Cancel", action: close).buttonStyle(QuietButton(t: studio.t, role: .ghost))
+      Button("Rename", action: apply).buttonStyle(QuietButton(t: studio.t, primary: true))
+        .keyboardShortcut(.defaultAction).disabled(nameIsEmpty)
+    }
+  }
+  private func group<Content: View>(_ title: String, @ViewBuilder content: () -> Content)
+    -> some View
+  {
+    VStack(alignment: .leading, spacing: 10) {
+      SectionLabel(title: title, t: studio.t)
+      VStack(alignment: .leading, spacing: 12) { content() }.padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(studio.t.surface.opacity(0.55), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(studio.t.hairline, lineWidth: 1))
+    }
+  }
+  private func settingRow<Trailing: View>(
+    _ title: String, _ detail: String? = nil, @ViewBuilder trailing: () -> Trailing
+  ) -> some View {
+    HStack(spacing: 12) {
+      VStack(alignment: .leading, spacing: 2) {
+        Text(title).font(.system(size: 13.5, weight: .medium))
+        if let detail {
+          Text(detail).font(.system(size: 12)).foregroundStyle(studio.t.muted)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+      }
+      Spacer(minLength: 8)
+      trailing()
     }
   }
   private var settings: some View {
-    VStack(alignment: .leading, spacing: 20) {
-      HStack {
-        Label("Appearance", systemImage: studio.dark ? "moon" : "sun.max")
-        Spacer()
-        Button(studio.dark ? "Switch to light" : "Switch to dark") { studio.toggleTheme() }
-          .buttonStyle(QuietButton(t: studio.t))
-      }.font(.system(size: 13))
-      HStack {
-        Text("World cover").font(.system(size: 14, weight: .medium))
-        Spacer()
-        Button("Choose image…") { studio.chooseWorldCover() }.buttonStyle(QuietButton(t: studio.t))
-      }
-      Divider().overlay(studio.t.border)
-      Text("Your model connection").font(.system(size: 16, weight: .medium))
-      Text(
-        "Optional. All manual tools work without a provider. Only sending a message shares your prompt and selected world's context with OpenAI."
-      ).font(.system(size: 13)).foregroundStyle(studio.t.secondary).lineSpacing(4)
-      VStack(alignment: .leading, spacing: 8) {
-        Text("API key · macOS Keychain").font(.system(size: 12))
-        SecureField(
-          studio.providerConfigured
-            ? "Key stored — leave blank to keep it" : "Enter an OpenAI API key", text: $key
-        ).textFieldStyle(.roundedBorder)
-        Text("Model ID").font(.system(size: 12))
-        TextField("A model available to your OpenAI account", text: $model).textFieldStyle(
-          .roundedBorder)
-      }
-      HStack {
-        Button("Save connection") {
-          studio.perform {
-            if !key.isEmpty { try ProviderKeychain.save(key) }
-            try studio.store.setPreference(
-              "model", value: model.trimmingCharacters(in: .whitespacesAndNewlines))
-            studio.modelName = model.trimmingCharacters(in: .whitespacesAndNewlines)
-            UserDefaults.standard.set(studio.modelName, forKey: "Synthesis.model")
-            studio.providerConfigured = ProviderKeychain.configured && !studio.modelName.isEmpty
-            key = ""
-            saved = true
-          }
-        }.buttonStyle(QuietButton(t: studio.t, primary: true))
-        if studio.providerConfigured {
-          Button("Disconnect") {
-            studio.stop()
-            studio.perform {
-              try ProviderKeychain.remove()
-              studio.providerConfigured = false
-              saved = false
+    SheetScaffold(title: "Settings", t: studio.t, width: 520, close: close) {
+      ScrollView {
+        VStack(alignment: .leading, spacing: 20) {
+          group("Appearance") {
+            settingRow("Theme") {
+              HStack(spacing: 2) {
+                ForEach([("Dark", true), ("Light", false)], id: \.0) { item in
+                  Button {
+                    if studio.dark != item.1 { studio.toggleTheme() }
+                  } label: {
+                    Text(item.0).font(.system(size: 12.5, weight: .medium))
+                      .padding(.horizontal, 12).frame(height: 24)
+                      .foregroundStyle(studio.dark == item.1 ? studio.t.text : studio.t.muted)
+                      .background(
+                        studio.dark == item.1 ? studio.t.secondarySurface : .clear,
+                        in: RoundedRectangle(cornerRadius: 6)
+                      )
+                      .contentShape(Rectangle())
+                  }.buttonStyle(.plain)
+                }
+              }.padding(2).background(studio.t.background, in: RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(studio.t.hairline, lineWidth: 1))
             }
-          }.buttonStyle(.plain).foregroundStyle(studio.t.secondary)
-        }
-      }
-      if saved {
-        Text("Saved locally. No request was made.").font(.system(size: 12)).foregroundStyle(
-          studio.t.accent)
-      }
-      Divider().overlay(studio.t.border)
-      HStack {
-        Button("Export this world…") { studio.exportWorld() }.buttonStyle(QuietButton(t: studio.t))
-        Spacer()
-        Button("Open sample world") {
-          studio.loadSample()
-          studio.sheet = nil
-        }.font(.system(size: 12)).buttonStyle(.plain).foregroundStyle(studio.t.accent)
-      }
+          }
+          group("This world") {
+            HStack(alignment: .bottom, spacing: 8) {
+              FormField(label: "Name", placeholder: "World name", text: $worldName, t: studio.t) {
+                studio.renameWorld(worldName)
+              }
+              Button("Rename") { studio.renameWorld(worldName) }
+                .buttonStyle(QuietButton(t: studio.t)).padding(.bottom, 2)
+                .disabled(
+                  worldName.trimmingCharacters(in: .whitespaces).isEmpty
+                    || worldName == studio.world?.name)
+            }
+            settingRow("Cover image", "Optional. Stored on this device only.") {
+              WorldBadge(studio: studio, radius: 6).frame(width: 30, height: 30)
+              Button("Choose…") { studio.chooseWorldCover() }.buttonStyle(QuietButton(t: studio.t))
+              if studio.worldCover != nil {
+                Button("Remove") { studio.removeWorldCover() }
+                  .buttonStyle(QuietButton(t: studio.t, role: .ghost))
+              }
+            }
+            settingRow(
+              "Export",
+              "Records, conversations, relationships, boards, history and archive as JSON."
+            ) { Button("Export…") { studio.exportWorld() }.buttonStyle(QuietButton(t: studio.t)) }
+          }
+          group("Assistant") {
+            HStack(spacing: 8) {
+              Circle().fill(studio.providerConfigured ? studio.t.positive : studio.t.muted)
+                .frame(width: 7, height: 7)
+              Text(
+                studio.providerConfigured
+                  ? "Connected to OpenAI · \(studio.modelName)" : "No model connected"
+              ).font(.system(size: 13.5, weight: .medium))
+            }
+            Text(
+              "Optional. Every manual tool works without a provider. A request is made only when you send a message; it shares that message and context from the selected world with OpenAI."
+            ).font(.system(size: 12.5)).foregroundStyle(studio.t.secondary).lineSpacing(3)
+              .fixedSize(horizontal: false, vertical: true)
+            FormField(
+              label: "API key · kept in macOS Keychain",
+              placeholder: studio.providerConfigured
+                ? "Stored — leave blank to keep it" : "OpenAI API key", text: $key, t: studio.t,
+              secure: true)
+            FormField(
+              label: "Model ID", placeholder: "A model available to your account", text: $model,
+              t: studio.t)
+            HStack(spacing: 8) {
+              Button("Save connection") { saveConnection() }
+                .buttonStyle(QuietButton(t: studio.t, primary: true))
+                .disabled(
+                  model.trimmingCharacters(in: .whitespaces).isEmpty
+                    || (key.isEmpty && !ProviderKeychain.configured))
+              if studio.providerConfigured {
+                Button("Disconnect") {
+                  studio.stop()
+                  studio.perform {
+                    try ProviderKeychain.remove()
+                    studio.providerConfigured = false
+                    saved = false
+                  }
+                }.buttonStyle(QuietButton(t: studio.t, role: .danger))
+              }
+              if saved {
+                Label("Saved. No request was made.", systemImage: "checkmark")
+                  .font(.system(size: 12.5)).foregroundStyle(studio.t.positive)
+              }
+            }
+          }
+          if !studio.worlds.contains(where: { $0.demo }) {
+            group("Sample") {
+              settingRow(
+                "Aster, a sample universe",
+                "A clearly labelled world to explore. Your own worlds are not changed."
+              ) {
+                Button("Open sample") {
+                  studio.loadSample()
+                  close()
+                }.buttonStyle(QuietButton(t: studio.t))
+              }
+            }
+          }
+        }.padding(.bottom, 4)
+      }.frame(maxHeight: 520)
+    } footer: {
+      Spacer()
+      Button("Done", action: close).buttonStyle(QuietButton(t: studio.t, primary: true))
+    }
+  }
+  private func saveConnection() {
+    studio.perform {
+      if !key.isEmpty { try ProviderKeychain.save(key) }
+      let value = model.trimmingCharacters(in: .whitespacesAndNewlines)
+      try studio.store.setPreference("model", value: value)
+      studio.modelName = value
+      UserDefaults.standard.set(value, forKey: "Synthesis.model")
+      studio.providerConfigured = ProviderKeychain.configured && !value.isEmpty
+      key = ""
+      saved = true
     }
   }
 }
