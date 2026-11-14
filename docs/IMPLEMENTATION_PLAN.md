@@ -1,12 +1,9 @@
-# Connected workspace refinement
+# Background verification and open-source graph engine — 2026-11-13
 
-Owner-authorized successor to the transient UI study. Preserve the graphite shell, native borderless window and existing data/canon protections.
+1. Replace activating captures with a never-ordered native window, prohibited activation policy, fresh temporary DB and separate temporary bundle. Failure paths must exit, never open alerts. Run all checks as a bounded background workflow; no persistent watcher.
+2. Pin MIT SwiftFlow; adapt real entities/relationships to its nodes/edges. Use native custom nodes, routed edges, handles, selection, pan/zoom and layout. Keep semantic writes in WorkspaceStore with explicit labeling/review. Canvas remains manually curated; use engine layout only on explicit arrange/graph transfer.
+3. Test projection/isolation, connection validation, layout transfer and background lifecycle; inspect generated native screenshots without touching the user's desktop. Document exact scope and outstanding gesture limits; commit.
 
-1. Reconnect the root to Studio: separate Conversation, Canvas, Library, Graph, Timeline and Atlas. Add persistent independent assistance mode; preserve the current editor and canvas on mode changes. Dedicated chat and resizable docked companion share a persisted conversation.
-2. Replace starter nodes with stored records. Curated boards persist their own layout/viewport and images. Graph derives from entity relationships; copying a selection creates a separate editable board.
-3. Add readable typed cards, actual labeled edges and relationship editing, grouped canvas tools, selection/group/alignment/undo and fit. Keep empty worlds empty; guide/templates are opt-in.
-4. Verify core isolation/cancellation/history, native interactions and final screenshots. Update all product/state docs and commit bounded increments. No paid model calls, releases or push.
+Alternatives considered: Grape specializes in force visualization, Dagre in layout only, while SwiftFlow covers the requested interactive connection engine. Keep a small adapter around the pinned dependency and retain SQLite as the source of truth. No browser/UI automation during this work.
 
-Acceptance is the running application and observed flows, not compilation alone. Record any unsupported rich-response or gesture capabilities explicitly.
-
-Status: stages 1–3 implemented; stage 4 has passing lint/build/20 tests, 27 inspected native captures and a persisted native workflow walkthrough. Drag/resize and frame-rate acceptance remain open. See docs/verification/CONNECTED_REVIEW.md for observed evidence and exact limits.
+Completed: engine integration, isolated background workflow, 23 app tests, 291 upstream tests, two negative startup guards, optimized build/signature and 27 inspected hidden captures. Review: docs/verification/BACKGROUND_GRAPH_REVIEW.md. Physical gesture and large-world performance acceptance remain separate follow-up work; no foreground automation was performed.

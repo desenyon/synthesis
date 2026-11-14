@@ -24,6 +24,22 @@ New boards are empty. Templates and guided prompts are optional. Canvas removal 
 
 ⌘K opens global navigation/search; ⌘N creates a draft. Use the canvas toolbar for creation, selection, pan, connections and undo/redo. ⌘-click selects multiple cards; the selection menu groups or aligns them. Double-click or use the arrow to open a card's source. Drag empty space or scroll to pan, pinch/⌘-scroll to zoom, and use Fit for framing. Right-click exposes local actions. World artwork is optional in Settings; card artwork is available in its context menu.
 
+## Background verification
+
+```sh
+./scripts/verify-background.sh
+```
+
+Runs strict lint, tests, an optimized build and native screenshots without activating an app or showing a window. Uses a temporary app bundle, fresh database, separate preferences and a disabled model transport. It never replaces or restarts the app you are using. Captures and logs go to `test-results/background/`. Builds default to two workers at reduced CPU priority; override with `SYNTHESIS_BUILD_JOBS=4` if desired. This is a one-shot command, not a background watcher.
+
+For a detached terminal run: `./scripts/verify-background.sh > /tmp/synthesis-verification.log 2>&1 &`.
+
+## Graph engine
+
+Knowledge Graph uses [SwiftFlow](https://github.com/aaurelions/SwiftFlow) for native nodes, routed labeled edges, connection handles, selection, pan/zoom and fitting. Its layout utilities also power explicit canvas auto-arrange and graph-to-canvas transfer. Synthesis owns records and approvals: drawing a connection opens a labeled draft form, and graph delete shortcuts cannot delete lore. Canvas remains a separately persisted creative board; its existing card gestures are not migrated to SwiftFlow in this change.
+
+The MIT source is pinned under `Vendor/SwiftFlow`, including upstream tests and a small app-bundle resource lookup patch. See [provenance](Vendor/SwiftFlow/UPSTREAM.md) and [notices](THIRD_PARTY_NOTICES.md).
+
 ## Development checks
 
 ```sh
@@ -33,7 +49,7 @@ swift format lint --strict --recursive Sources Tests Package.swift
 ./scripts/verify-ui.sh docs/verification/latest
 ```
 
-The suite covers persistence, world isolation, canon approval, cancellation, audited relationships, board layout/undo and companion save protection. Visual checks use actual native windows, never HTML previews. Current verification is recorded in [STATE](docs/STATE.md) and the [native review with screenshots](docs/verification/CONNECTED_REVIEW.md): 20 passing tests and 27 inspected captures. Direct drag/resize gesture acceptance remains pending because native automation could not drag this borderless window.
+The suite covers persistence, world isolation, canon approval, cancellation, audited relationships, board layout/undo and companion save protection. Visual checks use actual native windows, never HTML previews. Current verification is recorded in [STATE](docs/STATE.md) and the [background graph review](docs/verification/BACKGROUND_GRAPH_REVIEW.md): 23 app tests, 291 upstream engine tests, two startup-isolation checks and 27 inspected hidden native captures. Direct drag/resize gesture acceptance remains pending; foreground automation is intentionally excluded while you work.
 
 Data: `~/Library/Application Support/Synthesis/synthesis.sqlite`, overridable with `SYNTHESIS_DATABASE_PATH`. Keys remain in macOS Keychain. See [AI setup](docs/AI_SETUP.md), [architecture](docs/ARCHITECTURE.md), [design direction](docs/UI_DIRECTION.md), [roadmap](docs/ROADMAP.md).
 

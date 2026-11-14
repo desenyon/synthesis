@@ -1,17 +1,21 @@
-# Connected workspace refinement — 2026-11-12
+# Background verification and graph engine — 2026-11-13
 
-Implemented in the actual native app; gesture acceptance remains open. ConnectedRoot replaces the transient UI study while retaining the graphite foundation. Conversation, curated Canvas, Library/editor, derived Graph, Timeline and Atlas use the same saved world. AI Assisted / Manual is independently persisted and enforced in the native provider core.
+The handoff was reviewed at d02798b; no newer commits or uncommitted changes were present at session start.
 
-## Verified
+## Implemented
 
-- `./scripts/check.sh`: strict Swift format lint, 20 tests in 3 suites, optimized build passed.
-- Final `./scripts/test.sh`: 20 tests passed after the visual corrections. Final strict lint and `git diff --check` passed.
-- `./scripts/verify-ui.sh docs/verification/connected-final`: optimized native build and 27 captures completed at 1440×900, 1920×1080 and 1024×768 (1× bitmap scale). All inspected in contact sheets; canvas, companion and graph also inspected at full size.
-- Live native UI: offline message submission and reopening; inline lore citation opens its source; companion shares the saved conversation; Manual preserves editing and canvas; graph neighborhood transfers into a saved independent board; draft creation, body editing, full-text search and reopening; theme and navigation controls; restart preserves draft body, mode, theme, sidebar and selected board.
-- Offline transport tests prove Manual blocks requests, cancels in-flight work and rejects queued cancelled work. Canon approval, world isolation, relationship audit/restore, save races, draft flush and malformed-board preservation are covered.
+- Knowledge Graph now uses MIT SwiftFlow for native graph rendering, curved labeled edges, handles, pan/zoom, fit and selection. `GraphEngine` preserves record IDs and filters by selected-world entity membership. Connections open an explicit labeled draft form; engine deletion cannot remove lore. Graph neighborhoods transfer to independent saved canvas boards. Canvas auto-arrange reuses the engine layout only on explicit action, with undo and persistence.
+- SwiftFlow is pinned at 3515701fad73d3c6f8722bd65c22ef0813dc11a0 under Vendor/SwiftFlow. One documented resource lookup patch supports signed command-line app bundles. Upstream algorithms/interaction behavior are unchanged; MIT notices are included.
+- `scripts/verify-background.sh` runs checks at reduced priority with two build workers by default. Captures use a separate temporary bundle, fresh DB, separate preferences, no Keychain lookup, a rejecting model transport and prohibited activation. Windows are never ordered. No menus, alerts, input automation, app restart or persistent watcher. Existing developer bundle remains untouched.
 
-## Limits and next acceptance work
+## Verification
 
-Direct drag automation failed with `noWindowsAvailable` on this borderless window. Node dragging, multi-selection dragging and companion resize gestures are implemented but not live-verified; no frame-rate claim. Atlas/Timeline are reconnected existing features, not exhaustively retested here. Live provider streaming was not called; screenshot responses are explicitly labeled authored examples in an isolated database, not fabricated model success. Structured multi-record proposals, rich image/canvas responses and agent tool loops remain future work.
+23 Synthesis tests in 4 suites and 291 upstream SwiftFlow tests in 27 suites passed. Strict format lint and optimized native capture build passed. All 27 native captures completed at 1440×900, 1920×1080 and 1024×768, at 2× backing scale. All inspected in contact sheets, plus the full-size graph. The capture log reports `BACKGROUND VERIFIED: no visible window or activation`; every capture checked visibility, key status, current activation and recorded activation notifications.
 
-Next: finish hardware gesture/performance acceptance, then structured reviewable proposal cards. Detailed evidence: [Connected review](verification/CONNECTED_REVIEW.md). Prior UI-study evidence is historical. AGENTS initial-experience paragraph was updated to the owner's connected-workspace directive; canon/privacy requirements were unchanged. Development only: no releases, push or paid provider calls.
+Evidence and exact commands: docs/verification/BACKGROUND_GRAPH_REVIEW.md. The two negative startup-isolation checks passed; the separate optimized `dist/Synthesis-next.app` build and strict ad-hoc signature verification passed. The new app remains unopened. Build warnings are the known deprecated SwiftPM native build-system flag.
+
+## Limits / next
+
+No foreground interaction testing was performed, by owner request. Physical handle dragging, canvas gestures and companion resizing remain live-verification gaps; hidden captures and model/upstream tests are not a substitute. Canvas retains its existing custom gesture surface; only its explicit auto-layout uses SwiftFlow in this stage. Large graphs and long-running sessions need profiling. Live provider streaming and structured multi-record proposals remain untested/incomplete as previously documented.
+
+AGENTS now records background-only unattended verification. No protected canon/privacy rule changed. No release, push, paid API call or current-app relaunch.

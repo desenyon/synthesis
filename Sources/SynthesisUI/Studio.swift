@@ -75,7 +75,8 @@ public enum Destination: String, CaseIterable, Identifiable {
         ?? OpenAITransport(model: { UserDefaults.standard.string(forKey: "Synthesis.model") ?? "" })
     )
     modelName = configuredModel
-    UserDefaults.standard.set(configuredModel, forKey: "Synthesis.model")
+    let capturing = ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil
+    if !capturing { UserDefaults.standard.set(configuredModel, forKey: "Synthesis.model") }
     worlds = try store.worlds()
     if worlds.isEmpty { worlds = [try store.createWorld(name: "My world")] }
     let last = try store.preference("world")
@@ -86,7 +87,7 @@ public enum Destination: String, CaseIterable, Identifiable {
     collapsed = try store.preference("sidebar") == "collapsed"
     destination = mode == .manual ? .canvas : .chat
     draft = try store.preference("composer:\(worldID)") ?? ""
-    providerConfigured = ProviderKeychain.configured && !configuredModel.isEmpty
+    providerConfigured = !capturing && !configuredModel.isEmpty && ProviderKeychain.configured
     try reload()
   }
   public func reload() throws {

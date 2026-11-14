@@ -1,4 +1,5 @@
 import AppKit
+import SwiftFlow
 import SwiftUI
 import SynthesisCore
 import UniformTypeIdentifiers
@@ -195,10 +196,30 @@ struct BoardViewport: Codable, Equatable {
     studio.perform { relationships = try studio.store.relations(worldID: worldID) }
   }
   func autoLayout() {
+    let nodes = document.cards.map { card in
+      Node(
+        id: card.id, position: XYPosition(x: card.x, y: card.y), data: card.id,
+        width: 300, height: 320)
+    }
+    var edges = document.edges.enumerated().map { index, edge in
+      FlowEdge<EmptyEdgeData>(id: "local-\(index)", source: edge.source, target: edge.target)
+    }
+    for relation in relationships {
+      if let source = document.cards.first(where: { $0.recordID == relation.sourceID }),
+        let target = document.cards.first(where: { $0.recordID == relation.targetID })
+      {
+        edges.append(FlowEdge(id: relation.id, source: source.id, target: target.id))
+      }
+    }
+    let arranged = GraphEngine.arranged(
+      nodes, edges: edges, cardSize: CGSize(width: 300, height: 320))
+    let positions = Dictionary(uniqueKeysWithValues: arranged.map { ($0.id, $0.position) })
     mutate { doc in
       for i in doc.cards.indices {
-        doc.cards[i].x = Double(i % 2) * 380 - 190
-        doc.cards[i].y = Double(i / 2) * 320 - 120
+        if let position = positions[doc.cards[i].id] {
+          doc.cards[i].x = position.x + 150
+          doc.cards[i].y = position.y + 160
+        }
       }
     }
   }

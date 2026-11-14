@@ -26,3 +26,9 @@ UI first: pause broader application feature development. Replace the light serif
 ## 2026-11-12 — connected workspace refinement (owner-protected)
 
 The owner accepted the graphite foundation and explicitly authorized integration into the real application. This supersedes the UI-study pause: independent persisted assistance mode, Conversation as assisted entry, compact canvas composer with resizable docked companion, actual source-backed records, curated Canvas separate from derived Graph, and shared Library/Timeline/Atlas. Empty boards remain empty. Templates and guided prompts are optional. No model call without deliberate submission; no implicit canon promotion.
+
+## 2026-11-13 — non-disruptive testing and open-source graph engine
+
+Owner requirement: verification must not switch away from their current work. Default unattended checks render to a never-ordered native window under prohibited activation, using isolated bundle/DB/preferences and no desktop input. Foreground gesture testing is a separate explicit activity, not a default verification step.
+
+Use MIT SwiftFlow as the native graph interaction engine, pinned at 3515701fad73d3c6f8722bd65c22ef0813dc11a0. Compared with Grape (force visualization) and Dagre (layout), it also supplies handles, connection callbacks, selection and viewport behavior. Keep Synthesis's visual components, shared storage and canon approval boundary above the engine. The dependency is vendored for an auditable resource-path patch required by our command-line .app packaging. No upstream algorithm changes. Updates must re-run upstream tests and background capture checks.

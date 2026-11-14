@@ -1,0 +1,750 @@
+Building for debugging...
+[0/10] /Users/desenyon/Developer/synthesis/Vendor/SwiftFlow/.build/arm64-apple-macosx/debug/SwiftFlowPackageTests.derived/runner.swift
+[1/10] Copying Info.plist
+[1/10] Copying Localizable.stringsdict
+[1/10] Copying Localizable.strings
+[2/10] Write sources
+[7/10] Write swift-version--1AB21518FC5DEDBE.txt
+[9/75] Emitting module SwiftFlow
+[10/82] Compiling SwiftFlow HandleType.swift
+[11/82] Compiling SwiftFlow KeyCode.swift
+[12/82] Compiling SwiftFlow KeyboardShortcuts.swift
+[13/82] Compiling SwiftFlow NodeChange.swift
+[14/82] Compiling SwiftFlow NodeExtent.swift
+[15/82] Compiling SwiftFlow NodeHandle.swift
+[16/82] Compiling SwiftFlow NodeOrigin.swift
+[17/82] Compiling SwiftFlow AutoLayoutUtils.swift
+[18/82] Compiling SwiftFlow BundleResources.swift
+[19/82] Compiling SwiftFlow ChangeUtils.swift
+[20/82] Compiling SwiftFlow ColorCodable.swift
+[21/82] Compiling SwiftFlow EdgeUtils.swift
+[22/82] Compiling SwiftFlow GeometryUtils.swift
+[23/82] Compiling SwiftFlow GraphUtils.swift
+[24/82] Compiling SwiftFlow Background.swift
+[25/82] Compiling SwiftFlow BaseEdge.swift
+[26/82] Compiling SwiftFlow ControlButton.swift
+[27/82] Compiling SwiftFlow Controls.swift
+[28/82] Compiling SwiftFlow EdgeLabelRenderer.swift
+[29/82] Compiling SwiftFlow EdgeText.swift
+[30/82] Compiling SwiftFlow EdgeToolbar.swift
+[31/82] Compiling SwiftFlow Handle.swift
+[32/82] Compiling SwiftFlow NodeStyle.swift
+[33/82] Compiling SwiftFlow OnConnectStartParams.swift
+[34/82] Compiling SwiftFlow PanOnScrollMode.swift
+[35/82] Compiling SwiftFlow Position.swift
+[36/82] Compiling SwiftFlow SelectionMode.swift
+[37/82] Compiling SwiftFlow ZIndexMode.swift
+[38/82] Compiling SwiftFlow AccessibilityAnnouncer.swift
+[39/82] Compiling SwiftFlow CoordinateExtent.swift
+[40/82] Compiling SwiftFlow DefaultEdgeOptions.swift
+[41/82] Compiling SwiftFlow EdgeChange.swift
+[42/82] Compiling SwiftFlow EdgePathResult.swift
+[43/82] Compiling SwiftFlow EdgeStyle.swift
+[44/82] Compiling SwiftFlow EnvironmentValues+SwiftFlow.swift
+[45/82] Compiling SwiftFlow FitViewOptions.swift
+[46/82] Compiling SwiftFlow SwiftFlowTheme.swift
+[47/82] Compiling SwiftFlow Viewport.swift
+[48/82] Compiling SwiftFlow XYPosition.swift
+[49/82] Compiling SwiftFlow SwiftFlowInstance.swift
+[50/82] Compiling SwiftFlow SwiftFlowProvider.swift
+[51/82] Compiling SwiftFlow SwiftFlowState.swift
+[52/82] Compiling SwiftFlow SwiftFlowStore.swift
+[53/82] Compiling SwiftFlow HandlePositionPreferenceKey.swift
+[54/82] Compiling SwiftFlow HandleTypePreferenceKey.swift
+[55/82] Compiling SwiftFlow NodeIntersectionUtils.swift
+[56/82] Compiling SwiftFlow NodeSizePreferenceKey.swift
+[57/82] Compiling SwiftFlow PlatformUtils.swift
+[58/82] Compiling SwiftFlow SerializationUtils.swift
+[59/82] Compiling SwiftFlow resource_bundle_accessor.swift
+[60/82] Compiling SwiftFlow MiniMap.swift
+[61/82] Compiling SwiftFlow NodeResizeControl.swift
+[62/82] Compiling SwiftFlow NodeResizer.swift
+[63/82] Compiling SwiftFlow NodeToolbar.swift
+[64/82] Compiling SwiftFlow Panel.swift
+[65/82] Compiling SwiftFlow SwiftFlow+Actions.swift
+[66/82] Compiling SwiftFlow SwiftFlow+Gestures.swift
+[67/82] Compiling SwiftFlow AccessibilityConfig.swift
+[68/82] Compiling SwiftFlow BackgroundVariant.swift
+[69/82] Compiling SwiftFlow BeforeDeleteResult.swift
+[70/82] Compiling SwiftFlow ColorMode.swift
+[71/82] Compiling SwiftFlow ConnectionLineType.swift
+[72/82] Compiling SwiftFlow ConnectionMode.swift
+[73/82] Compiling SwiftFlow ConnectionState.swift
+[74/82] Compiling SwiftFlow SwiftFlow+Rendering.swift
+[75/82] Compiling SwiftFlow SwiftFlow.swift
+[76/82] Compiling SwiftFlow ViewportPortal.swift
+[77/82] Compiling SwiftFlow Connection.swift
+[78/82] Compiling SwiftFlow Edge.swift
+[79/82] Compiling SwiftFlow InternalNode.swift
+[80/82] Compiling SwiftFlow Node.swift
+[81/104] Compiling SwiftFlowTests SerializationTests.swift
+[82/104] Compiling SwiftFlowTests SwiftFlowInstanceTests.swift
+[83/104] Compiling SwiftFlowTests ThemeTests.swift
+[84/104] Compiling SwiftFlowTests TypesTests.swift
+[85/104] Compiling SwiftFlowTests MiniMapTests.swift
+[86/104] Compiling SwiftFlowTests NodeExtentTests.swift
+[87/104] Compiling SwiftFlowTests SwiftFlowStateTests.swift
+[88/104] Compiling SwiftFlowTests SwiftFlowStoreTests.swift
+[89/106] Compiling SwiftFlowTests InteractionSupportTests.swift
+[90/106] Compiling SwiftFlowTests InternalNodeTests.swift
+[91/106] Compiling SwiftFlowTests CoordinateExtentTests.swift
+[92/106] Compiling SwiftFlowTests EdgePathParityTests.swift
+[93/106] Compiling SwiftFlowTests EdgeTests.swift
+[94/106] Compiling SwiftFlowTests AutoLayoutTests.swift
+[95/106] Compiling SwiftFlowTests ChangeUtilsTests.swift
+[96/106] Compiling SwiftFlowTests ConnectionTests.swift
+[97/106] Compiling SwiftFlowTests EdgeUtilsTests.swift
+[98/106] Compiling SwiftFlowTests GeometryUtilsTests.swift
+[99/106] Compiling SwiftFlowTests GraphUtilsTests.swift
+[100/106] Emitting module SwiftFlowTests
+[101/106] Compiling SwiftFlowTests NodeIntersectionTests.swift
+[102/106] Compiling SwiftFlowTests NodeTests.swift
+[103/106] Compiling SwiftFlowTests ViewportTests.swift
+[104/106] Compiling SwiftFlowTests XYPositionTests.swift
+[105/108] Compiling SwiftFlowPackageTests runner.swift
+[106/108] Emitting module SwiftFlowPackageTests
+[106/108] Write Objects.LinkFileList
+ld: warning: building for macOS-13.0, but linking with dylib '@rpath/Testing.framework/Versions/A/Testing' which was built for newer version 14.0
+[107/108] Linking SwiftFlowPackageTests
+Build complete! (43.57s)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "SwiftFlowStore" started.
+◇ Suite "ChangeUtils" started.
+◇ Suite "SwiftFlowInstance" started.
+◇ Suite "Edge" started.
+◇ Suite "Resize" started.
+◇ Suite "AutoLayout" started.
+◇ Suite "SwiftFlowTheme" started.
+◇ Suite "Serialization" started.
+◇ Suite "Accessibility" started.
+◇ Suite "ExpandParent" started.
+◇ Suite "KeyboardFocus" started.
+◇ Suite "InternalNode" started.
+◇ Suite "NodeIntersection" started.
+◇ Suite "GraphUtils" started.
+◇ Suite "GeometryUtils" started.
+◇ Suite "Connection" started.
+◇ Suite "EdgePathParity" started.
+◇ Suite "KeyMonitor" started.
+◇ Suite "EdgeUtils" started.
+◇ Suite "Node" started.
+◇ Suite "MiniMap geometry" started.
+◇ Suite "CoordinateExtent" started.
+◇ Suite "Types" started.
+◇ Suite "Viewport" started.
+◇ Test applyEdgeAdd() started.
+◇ Test applyNodeDimensions() started.
+◇ Test applyNodeRemove() started.
+◇ Test applyEdgeReplace() started.
+◇ Test applyMultipleNodeChanges() started.
+◇ Suite "XYPosition" started.
+◇ Suite "NodeExtent" started.
+◇ Test initWithData() started.
+◇ Test onConnectWithDefaults() started.
+◇ Suite "SwiftFlowState" started.
+◇ Test applyEdgeAddPreventsDuplicate() started.
+◇ Test changesAfterReplaceWithNewIdUseTheNewId() started.
+◇ Test addAfterRemoveOfSameId() started.
+◇ Test getNodeConnections() started.
+◇ Test getNodesData() started.
+◇ Test edgeWithCustomData() started.
+◇ Test selectionTracksInitialAndDirectChanges() started.
+◇ Test nodeDataPublisher() started.
+◇ Test selectionTracking() started.
+◇ Test applyEdgeRemove() started.
+◇ Test deletingNodeRemovesIncidentEdgesAndRespectsProtectedNodes() started.
+◇ Test equatable() started.
+◇ Test onNodesChange() started.
+◇ Test fitViewCentersRequestedNodes() started.
+◇ Test applyNodeAddPreventsDuplicate() started.
+◇ Test getViewportForBounds() started.
+◇ Test initDefaults() started.
+◇ Test initWithDefaults() started.
+◇ Test markerTypes() started.
+◇ Test manyChangesKeepOrder() started.
+◇ Test nodesInitializedEmpty() started.
+◇ Test applyNodePositionChange() started.
+◇ Test nodesInitialized() started.
+◇ Test viewportCommandsReachCanvasAndPreserveObserver() started.
+◇ Test applyNodeSelectionChange() started.
+◇ Test applyNodeReplace() started.
+◇ Test fitViewWithNodeIds() started.
+◇ Test edgeMarkerDefaults() started.
+◇ Test hashable() started.
+◇ Test applyEdgeSelectionChange() started.
+◇ Test codableDefaults() started.
+◇ Test onConnect() started.
+◇ Test initWithCustomValues() started.
+◇ Test getNode() started.
+◇ Test deleteElements() started.
+◇ Test fitViewHiddenIncluded() started.
+◇ Test initWithDefaults() started.
+◇ Test zoomIn() started.
+◇ Test getEdge() started.
+◇ Test onEdgesChange() started.
+◇ Test bottomRightHandleKeepsTopLeftCorner() started.
+◇ Test codableRoundTrip() started.
+◇ Test treeLayoutLeftToRight() started.
+◇ Test getNodesBounds() started.
+◇ Test darkTheme() started.
+◇ Test applyNodeChangeNonexistentId() started.
+◇ Test zoomToClamp() started.
+◇ Test themeEquatable() started.
+◇ Test defaultTheme() started.
+◇ Test centeredNodesKeepTheOppositeEdge() started.
+◇ Test applyNodeAdd() started.
+◇ Test screenToFlowPosition() started.
+◇ Test forceDirectedLayout() started.
+◇ Test singleNodeForceDirected() started.
+◇ Test lightTheme() started.
+◇ Test setViewportTriggersCallback() started.
+◇ Test gridUsesLargestSizeInEachRowAndColumn() started.
+◇ Test customTheme() started.
+◇ Test flowToScreenPosition() started.
+◇ Test treeLayoutBottomToTop() started.
+◇ Test gridLayout() started.
+◇ Test fitView() started.
+◇ Test setCenter() started.
+◇ Test connectionAnnouncementNamesBothNodes() started.
+◇ Test treeLayoutTopToBottom() started.
+◇ Test jsonRoundTrip() started.
+◇ Test getViewport() started.
+◇ Test jsonStringRoundTrip() started.
+◇ Test deleteElements() started.
+◇ Test topLeftHandleMovesPositionByTheGrowth() started.
+◇ Test equalityComparesStringsAndIgnoresClosures() started.
+◇ Test setViewport() started.
+◇ Test styleColorsRoundTripWithoutShift() started.
+◇ Test reset() started.
+◇ Test coordinateConversionRoundTrip() started.
+◇ Test jsonWithoutViewport() started.
+◇ Test selectionAnnouncementUsesPluralRules() started.
+◇ Test defaultStringsComeFromTheCatalog() started.
+◇ Test treePreservesInputOrderAndSpacesVariableSizes() started.
+◇ Test invalidUTF8Throws() started.
+◇ Test documentInit() started.
+◇ Test edgeTypeRawValues() started.
+◇ Test nodeCodablePreservesExtentAndStyle() started.
+◇ Test emptyNodesReturnsNoChanges() started.
+◇ Test edgeCodablePreservesAllFields() started.
+◇ Test zoomTo() started.
+◇ Test fitViewEmpty() started.
+◇ Test childInsideParentChangesNothing() started.
+◇ Test documentWithViewport() started.
+◇ Test treeLayoutRightToLeft() started.
+◇ Test nodesWithoutExpandParentAreIgnored() started.
+◇ Test zoomOut() started.
+◇ Test defaultSizesUsed() started.
+◇ Test focusOrderListsVisibleFocusableNodesThenEdges() started.
+◇ Test customStringsAndMessagesOverrideDefaults() started.
+◇ Test isNodeIntersectingTrue() started.
+◇ Test customEdgeDataRoundTrip() started.
+◇ Test draggingPastTopLeftMovesParentAndShiftsChildren() started.
+◇ Test invalidLayoutCountsAreSafe() started.
+◇ Test nonDeletableChildIsKept() started.
+◇ Test hiddenNodesExcluded() started.
+◇ Test draggingPastBottomRightGrowsTheParent() started.
+◇ Test asyncLayout() started.
+◇ Test outgoersNone() started.
+◇ Test noIntersection() started.
+◇ Test canvasKeysRequireAnActiveCanvasAndNoTextEditing() started.
+◇ Test intersectingNodes() started.
+◇ Test deletingParentRemovesDescendantsAndTheirEdges() started.
+◇ Test connectedEdgesDisconnected() started.
+◇ Test viewportForBounds() started.
+◇ Test isNodeIntersectingFalse() started.
+◇ Test incomersForNode3() started.
+◇ Test incomersNone() started.
+◇ Test connectedEdgesForMultipleNodes() started.
+◇ Test edgeCodablePreservesStyle() started.
+◇ Test outgoersForNode1() started.
+◇ Test isNodeCheck() started.
+◇ Test nodeOriginShiftsTopLeft() started.
+◇ Test stepIsSmoothStepWithoutRadius() started.
+◇ Test codable() started.
+◇ Test bezierLabelMatchesReactFlow() started.
+◇ Test endMarkerPointsIntoTopHandle() started.
+◇ Test connectedEdgesForSingleNode() started.
+◇ Test hashable() started.
+◇ Test smoothStepSameSideLoopsAroundOffset() started.
+◇ Test getNodesBoundsEmpty() started.
+◇ Test keysReachTheCanvasOnlyAfterClickingInsideIt() started.
+◇ Test getNodesBoundsHiddenExcluded() started.
+◇ Test equatable() started.
+◇ Test initDefaults() started.
+◇ Test canvasNodeOriginAppliesToNodesWithDefaultOrigin() started.
+◇ Test explicitNodeSizeIsUsedBeforeDefault() started.
+◇ Test initWithHandles() started.
+◇ Test getNodesBoundsDefaultSizes() started.
+◇ Test isEdgeCheck() started.
+◇ Test equatable() started.
+◇ Test initFromNode() started.
+◇ Test smoothStepPathSameY() started.
+◇ Test defaultEdgeOptionsFillOnlyUnsetValues() started.
+◇ Test initWithDefaults() started.
+◇ Test smoothStepRightToTopEntersFromAbove() started.
+◇ Test viewportForBoundsSmallContent() started.
+◇ Test straightPathCenterAndOffsets() started.
+◇ Test simpleBezierPathNotEmpty() started.
+◇ Test startMarkerFollowsSourceSide() started.
+◇ Test addEdgeTreatsEmptyAndNilHandlesAsEqual() started.
+◇ Test verticalBezierUsesHandleSides() started.
+◇ Test bezierPathWithPositions() started.
+◇ Test childBoundsAreRelativeToParent() started.
+◇ Test smoothStepHonorsCenterX() started.
+◇ Test smoothStepOppositeSidesSplitAtCenter() started.
+◇ Test addEdgeWithHandles() started.
+◇ Test extentCoordinate() started.
+◇ Test equatable() started.
+◇ Test reconnectEdgePreservesProperties() started.
+◇ Test initWithDefaults() started.
+◇ Test cyclicParentsAreReportedAndIgnored() started.
+◇ Test addEdgeUsesReactFlowIdFormat() started.
+◇ Test bezierLoopsWhenTargetIsBehindSource() started.
+◇ Test fittedBoundsAreCenteredWhenZoomIsCapped() started.
+◇ Test emptyAndTinyMapsHaveUsableGeometry() started.
+◇ Test stepPathWithPositions() started.
+◇ Test extentParent() started.
+◇ Test edgeWithoutHandleIdUsesFirstHandleOfType() started.
+◇ Test simpleBezierIsCubicThroughMidpoint() started.
+◇ Test visibleCanvasFitsAtEveryZoomAndPan() started.
+◇ Test reconnectEdgeNonexistent() started.
+◇ Test clickMapsBackToFlowAtLowZoom() started.
+◇ Test getNodesBoundsBasic() started.
+◇ Test mutableProperties() started.
+◇ Test initWithCustomValues() started.
+◇ Test addEdgePreventsDuplicateWhenHandlesMatch() started.
+◇ Test addEdgeWithDefaults() started.
+◇ Test simpleBezierPathWithPositions() started.
+◇ Test hashable() started.
+◇ Test reconnectEdgeBasic() started.
+◇ Test infinite() started.
+◇ Test addEdgeAllowsEdgeWithHandleWhenExistingHasNil() started.
+◇ Test codableRoundTrip() started.
+◇ Test addEdgePreventsDuplicates() started.
+◇ Test reconnectEdgeMultipleEdgesPreservesUnrelated() started.
+◇ Test clampWithinBounds() started.
+◇ Test straightPathNotEmpty() started.
+◇ Test stepPathNotEmpty() started.
+◇ Test bezierPathNotEmpty() started.
+◇ Test equatable() started.
+◇ Test edgeAngleAtStartVertical() started.
+◇ Test clampAboveMax() started.
+◇ Test edgeAngleAtEndHorizontal() started.
+◇ Test smoothStepPathWithPositions() started.
+◇ Test addEdgeAllowsEdgeWithNilHandleWhenExistingHasHandle() started.
+◇ Test edgeMidpointStraight() started.
+◇ Test initFromArrays() started.
+◇ Test addEdgeTargetHandleAwareDuplicate() started.
+◇ Test smoothStepPathNotEmpty() started.
+◇ Test smoothStepVerticalSameX() started.
+◇ Test accessibilityConfigDefaults() started.
+◇ Test edgePathDispatch() started.
+◇ Test clampBelowMin() started.
+◇ Test smoothStepVerticalPath() started.
+◇ Test addEdgeAllowsDifferentHandlesBetweenSameNodes() started.
+◇ Test keyboardShortcutsDefaults() started.
+◇ Test connectionStateInit() started.
+◇ Test edgePathWithPositionsAllTypes() started.
+◇ Test edgePathResultValues() started.
+◇ Test addEdgeTreatsNilHandleAsMatchingNilHandle() started.
+◇ Test clampInfinite() started.
+◇ Test codableDefaults() started.
+◇ Test nodeHandleDefaults() started.
+◇ Test connectionStateEquatable() started.
+◇ Test addEdgeCreatesNewEdge() started.
+◇ Test keyCodeEquatable() started.
+◇ Test keyCodeIntegerLiteral() started.
+◇ Test keyCodeHashable() started.
+◇ Test connectionLineTypeIsEdgeType() started.
+◇ Test keyCodeLetterKeys() started.
+◇ Test backgroundVariants() started.
+◇ Test nodeStyleInit() started.
+◇ Test colorModes() started.
+◇ Test positionCodable() started.
+◇ Test defaultEdgeOptionsDefaults() started.
+◇ Test nodeOriginCenter() started.
+◇ Test edgeStyleInit() started.
+◇ Test zIndexModes() started.
+◇ Test nodeHandleCustom() started.
+◇ Test connectionModes() started.
+◇ Test handleTypeValues() started.
+◇ Test selectionModes() started.
+◇ Test keyCodeModifierKeys() started.
+◇ Test panOnScrollModes() started.
+◇ Test fitViewOptionsDefaults() started.
+◇ Test keyCodeArrowKeys() started.
+◇ Test positionValues() started.
+◇ Test beforeDeleteWithItems() started.
+◇ Test edgePathResultInit() started.
+◇ Test onConnectStartParams() started.
+◇ Test nodeOriginTopLeft() started.
+◇ Test clampedZoomAboveMax() started.
+◇ Test fitViewOptionsCustom() started.
+◇ Test clampedZoomWithinRange() started.
+◇ Test keyCodeConstants() started.
+◇ Test clampedZoomBelowMin() started.
+◇ Test defaultEdgeOptionsCustom() started.
+◇ Test equatable() started.
+◇ Test beforeDeleteCancel() started.
+◇ Test identity() started.
+◇ Test codable() started.
+◇ Test zoomBounds() started.
+◇ Test nodeHandleCodable() started.
+◇ Test initWithDefaults() started.
+◇ Test initWithCustomValues() started.
+◇ Test hashable() started.
+✔ Test applyEdgeAdd() passed after 0.004 seconds.
+◇ Test subtraction() started.
+◇ Test equatable() started.
+◇ Test snappedToGridExact() started.
+◇ Test hashable() started.
+◇ Test codable() started.
+◇ Test addition() started.
+◇ Test zero() started.
+◇ Test initWithValues() started.
+◇ Test nodeWithParentExtent() started.
+◇ Test snappedNegativeValues() started.
+✔ Test applyEdgeReplace() passed after 0.004 seconds.
+◇ Test snappedToGrid() started.
+◇ Test parentVariant() started.
+◇ Test hashable() started.
+◇ Test equatable() started.
+◇ Test coordinateExtentVariant() started.
+◇ Test setViewportAnimated() started.
+◇ Test defaultState() started.
+◇ Test fitViewEmptyNoOp() started.
+◇ Test zoomIn() started.
+◇ Test anyNodeSnapshotFromNode() started.
+◇ Test activeConnectionState() started.
+◇ Test fitViewHiddenExcluded() started.
+✔ Test applyNodeDimensions() passed after 0.005 seconds.
+◇ Test setViewport() started.
+◇ Test fitViewWithAbsolutePositions() started.
+◇ Test connectionsMap() started.
+◇ Test zoomOut() started.
+◇ Test anyNodeSnapshotEquatable() started.
+◇ Test zoomToClamp() started.
+✔ Test applyNodeRemove() passed after 0.005 seconds.
+◇ Test zoomTo() started.
+◇ Test anyEdgeSnapshotFromEdge() started.
+◇ Test fitView() started.
+✔ Test applyMultipleNodeChanges() passed after 0.005 seconds.
+✔ Test edgeWithCustomData() passed after 0.005 seconds.
+✔ Test changesAfterReplaceWithNewIdUseTheNewId() passed after 0.005 seconds.
+✔ Test addAfterRemoveOfSameId() passed after 0.005 seconds.
+✔ Test equatable() passed after 0.005 seconds.
+✔ Test applyEdgeAddPreventsDuplicate() passed after 0.005 seconds.
+✔ Test markerTypes() passed after 0.005 seconds.
+✔ Test applyNodeAddPreventsDuplicate() passed after 0.005 seconds.
+✔ Test applyNodePositionChange() passed after 0.005 seconds.
+✔ Test applyNodeSelectionChange() passed after 0.005 seconds.
+✔ Test edgeMarkerDefaults() passed after 0.005 seconds.
+✔ Test applyNodeReplace() passed after 0.005 seconds.
+✔ Test initWithCustomValues() passed after 0.005 seconds.
+✔ Test hashable() passed after 0.005 seconds.
+✔ Test applyEdgeSelectionChange() passed after 0.005 seconds.
+✔ Test initWithDefaults() passed after 0.005 seconds.
+✔ Test manyChangesKeepOrder() passed after 0.005 seconds.
+✔ Test bottomRightHandleKeepsTopLeftCorner() passed after 0.005 seconds.
+✔ Test codableDefaults() passed after 0.005 seconds.
+✔ Test codableRoundTrip() passed after 0.005 seconds.
+✔ Test darkTheme() passed after 0.005 seconds.
+✔ Test applyNodeChangeNonexistentId() passed after 0.005 seconds.
+✔ Test applyEdgeRemove() passed after 0.005 seconds.
+✔ Test themeEquatable() passed after 0.005 seconds.
+✔ Test defaultTheme() passed after 0.005 seconds.
+✔ Test singleNodeForceDirected() passed after 0.005 seconds.
+✔ Test centeredNodesKeepTheOppositeEdge() passed after 0.005 seconds.
+✔ Test lightTheme() passed after 0.005 seconds.
+✔ Test customTheme() passed after 0.005 seconds.
+✔ Test treeLayoutLeftToRight() passed after 0.005 seconds.
+✔ Test treeLayoutBottomToTop() passed after 0.005 seconds.
+✔ Test gridLayout() passed after 0.005 seconds.
+✔ Test applyNodeAdd() passed after 0.005 seconds.
+✔ Test gridUsesLargestSizeInEachRowAndColumn() passed after 0.005 seconds.
+✔ Test treeLayoutTopToBottom() passed after 0.005 seconds.
+✔ Test topLeftHandleMovesPositionByTheGrowth() passed after 0.005 seconds.
+✔ Test jsonStringRoundTrip() passed after 0.005 seconds.
+✔ Test jsonWithoutViewport() passed after 0.005 seconds.
+✔ Test jsonRoundTrip() passed after 0.005 seconds.
+✔ Test treePreservesInputOrderAndSpacesVariableSizes() passed after 0.005 seconds.
+✔ Test documentInit() passed after 0.005 seconds.
+✔ Test edgeCodablePreservesAllFields() passed after 0.005 seconds.
+✔ Test forceDirectedLayout() passed after 0.005 seconds.
+✔ Test edgeTypeRawValues() passed after 0.005 seconds.
+✔ Test documentWithViewport() passed after 0.005 seconds.
+✔ Test childInsideParentChangesNothing() passed after 0.005 seconds.
+✔ Test nodesWithoutExpandParentAreIgnored() passed after 0.005 seconds.
+✔ Test emptyNodesReturnsNoChanges() passed after 0.005 seconds.
+✔ Test defaultSizesUsed() passed after 0.005 seconds.
+✔ Test treeLayoutRightToLeft() passed after 0.005 seconds.
+✔ Test invalidLayoutCountsAreSafe() passed after 0.005 seconds.
+✔ Test isNodeIntersectingTrue() passed after 0.005 seconds.
+✔ Test draggingPastTopLeftMovesParentAndShiftsChildren() passed after 0.005 seconds.
+✔ Test hiddenNodesExcluded() passed after 0.005 seconds.
+✔ Test customEdgeDataRoundTrip() passed after 0.005 seconds.
+✔ Test draggingPastBottomRightGrowsTheParent() passed after 0.005 seconds.
+✔ Test styleColorsRoundTripWithoutShift() passed after 0.005 seconds.
+✔ Test nonDeletableChildIsKept() passed after 0.005 seconds.
+✔ Test outgoersNone() passed after 0.005 seconds.
+✔ Test intersectingNodes() passed after 0.005 seconds.
+✔ Test noIntersection() passed after 0.005 seconds.
+✔ Test connectedEdgesDisconnected() passed after 0.005 seconds.
+✔ Test deletingParentRemovesDescendantsAndTheirEdges() passed after 0.005 seconds.
+✔ Test isNodeIntersectingFalse() passed after 0.005 seconds.
+✔ Test canvasKeysRequireAnActiveCanvasAndNoTextEditing() passed after 0.005 seconds.
+✔ Test nodeCodablePreservesExtentAndStyle() passed after 0.005 seconds.
+✔ Test viewportForBounds() passed after 0.005 seconds.
+✔ Test incomersNone() passed after 0.005 seconds.
+✔ Test incomersForNode3() passed after 0.005 seconds.
+✔ Test outgoersForNode1() passed after 0.005 seconds.
+✔ Test isNodeCheck() passed after 0.005 seconds.
+✔ Test connectedEdgesForMultipleNodes() passed after 0.005 seconds.
+✔ Test edgeCodablePreservesStyle() passed after 0.005 seconds.
+✔ Test nodeOriginShiftsTopLeft() passed after 0.005 seconds.
+✔ Test stepIsSmoothStepWithoutRadius() passed after 0.005 seconds.
+✔ Test hashable() passed after 0.005 seconds.
+✔ Test bezierLabelMatchesReactFlow() passed after 0.005 seconds.
+✔ Test connectedEdgesForSingleNode() passed after 0.005 seconds.
+✔ Test endMarkerPointsIntoTopHandle() passed after 0.005 seconds.
+✔ Test getNodesBoundsEmpty() passed after 0.005 seconds.
+✔ Test codable() passed after 0.005 seconds.
+✔ Test getNodesBoundsHiddenExcluded() passed after 0.005 seconds.
+✔ Test smoothStepSameSideLoopsAroundOffset() passed after 0.005 seconds.
+✔ Test canvasNodeOriginAppliesToNodesWithDefaultOrigin() passed after 0.005 seconds.
+✔ Test equatable() passed after 0.005 seconds.
+✔ Test initWithHandles() passed after 0.005 seconds.
+✔ Test initDefaults() passed after 0.005 seconds.
+✔ Test explicitNodeSizeIsUsedBeforeDefault() passed after 0.005 seconds.
+✔ Test getNodesBoundsDefaultSizes() passed after 0.005 seconds.
+✔ Test initFromNode() passed after 0.005 seconds.
+✔ Test isEdgeCheck() passed after 0.005 seconds.
+✔ Test equatable() passed after 0.005 seconds.
+✔ Test smoothStepPathSameY() passed after 0.005 seconds.
+✔ Test defaultEdgeOptionsFillOnlyUnsetValues() passed after 0.005 seconds.
+✔ Test straightPathCenterAndOffsets() passed after 0.005 seconds.
+✔ Test simpleBezierPathNotEmpty() passed after 0.005 seconds.
+✔ Test smoothStepRightToTopEntersFromAbove() passed after 0.005 seconds.
+✔ Test viewportForBoundsSmallContent() passed after 0.005 seconds.
+✔ Test initWithDefaults() passed after 0.005 seconds.
+✔ Test startMarkerFollowsSourceSide() passed after 0.005 seconds.
+✔ Test verticalBezierUsesHandleSides() passed after 0.005 seconds.
+✔ Test addEdgeTreatsEmptyAndNilHandlesAsEqual() passed after 0.005 seconds.
+✔ Test bezierPathWithPositions() passed after 0.005 seconds.
+✔ Test addEdgeWithHandles() passed after 0.005 seconds.
+✔ Test smoothStepHonorsCenterX() passed after 0.005 seconds.
+✔ Test childBoundsAreRelativeToParent() passed after 0.005 seconds.
+✔ Test equatable() passed after 0.005 seconds.
+✔ Test smoothStepOppositeSidesSplitAtCenter() passed after 0.005 seconds.
+✔ Test extentCoordinate() passed after 0.005 seconds.
+✔ Test initWithDefaults() passed after 0.005 seconds.
+✔ Test invalidUTF8Throws() passed after 0.006 seconds.
+✔ Test bezierLoopsWhenTargetIsBehindSource() passed after 0.005 seconds.
+✔ Test reconnectEdgePreservesProperties() passed after 0.005 seconds.
+✔ Test fittedBoundsAreCenteredWhenZoomIsCapped() passed after 0.005 seconds.
+✔ Test stepPathWithPositions() passed after 0.005 seconds.
+✔ Test cyclicParentsAreReportedAndIgnored() passed after 0.005 seconds.
+✔ Test simpleBezierIsCubicThroughMidpoint() passed after 0.005 seconds.
+✔ Test emptyAndTinyMapsHaveUsableGeometry() passed after 0.005 seconds.
+✔ Test addEdgeUsesReactFlowIdFormat() passed after 0.005 seconds.
+✔ Test reconnectEdgeNonexistent() passed after 0.005 seconds.
+✔ Test extentParent() passed after 0.005 seconds.
+✔ Test clickMapsBackToFlowAtLowZoom() passed after 0.005 seconds.
+✔ Test mutableProperties() passed after 0.005 seconds.
+✔ Test addEdgePreventsDuplicateWhenHandlesMatch() passed after 0.005 seconds.
+✔ Test visibleCanvasFitsAtEveryZoomAndPan() passed after 0.005 seconds.
+✔ Test getNodesBoundsBasic() passed after 0.005 seconds.
+✔ Test addEdgeWithDefaults() passed after 0.005 seconds.
+✔ Test simpleBezierPathWithPositions() passed after 0.005 seconds.
+✔ Test initWithCustomValues() passed after 0.005 seconds.
+✔ Test hashable() passed after 0.005 seconds.
+✔ Test reconnectEdgeBasic() passed after 0.005 seconds.
+✔ Test infinite() passed after 0.005 seconds.
+✔ Test edgeWithoutHandleIdUsesFirstHandleOfType() passed after 0.005 seconds.
+✔ Test codableRoundTrip() passed after 0.005 seconds.
+✔ Test addEdgeAllowsEdgeWithHandleWhenExistingHasNil() passed after 0.005 seconds.
+✔ Test clampWithinBounds() passed after 0.005 seconds.
+✔ Test straightPathNotEmpty() passed after 0.005 seconds.
+✔ Test addEdgePreventsDuplicates() passed after 0.005 seconds.
+✔ Test stepPathNotEmpty() passed after 0.005 seconds.
+✔ Test bezierPathNotEmpty() passed after 0.005 seconds.
+✔ Test reconnectEdgeMultipleEdgesPreservesUnrelated() passed after 0.005 seconds.
+✔ Test equatable() passed after 0.005 seconds.
+✔ Test clampAboveMax() passed after 0.005 seconds.
+✔ Test edgeAngleAtStartVertical() passed after 0.005 seconds.
+✔ Test edgeAngleAtEndHorizontal() passed after 0.005 seconds.
+✔ Test addEdgeAllowsEdgeWithNilHandleWhenExistingHasHandle() passed after 0.005 seconds.
+✔ Test edgeMidpointStraight() passed after 0.005 seconds.
+✔ Test smoothStepPathWithPositions() passed after 0.005 seconds.
+✔ Test addEdgeTargetHandleAwareDuplicate() passed after 0.005 seconds.
+✔ Test initFromArrays() passed after 0.005 seconds.
+✔ Test smoothStepVerticalSameX() passed after 0.005 seconds.
+✔ Test smoothStepPathNotEmpty() passed after 0.005 seconds.
+✔ Test clampBelowMin() passed after 0.005 seconds.
+✔ Test edgePathDispatch() passed after 0.005 seconds.
+✔ Test keyboardShortcutsDefaults() passed after 0.005 seconds.
+✔ Test smoothStepVerticalPath() passed after 0.005 seconds.
+✔ Test connectionStateInit() passed after 0.005 seconds.
+✔ Test addEdgeAllowsDifferentHandlesBetweenSameNodes() passed after 0.005 seconds.
+✔ Test edgePathWithPositionsAllTypes() passed after 0.005 seconds.
+✔ Test clampInfinite() passed after 0.005 seconds.
+✔ Test nodeHandleDefaults() passed after 0.005 seconds.
+✔ Test addEdgeTreatsNilHandleAsMatchingNilHandle() passed after 0.005 seconds.
+✔ Test edgePathResultValues() passed after 0.005 seconds.
+✔ Test connectionStateEquatable() passed after 0.005 seconds.
+✔ Test codableDefaults() passed after 0.006 seconds.
+✔ Test addEdgeCreatesNewEdge() passed after 0.005 seconds.
+✔ Test keyCodeIntegerLiteral() passed after 0.005 seconds.
+✔ Test keyCodeEquatable() passed after 0.005 seconds.
+✔ Test keyCodeHashable() passed after 0.005 seconds.
+✔ Test connectionLineTypeIsEdgeType() passed after 0.005 seconds.
+✔ Test initWithData() passed after 0.007 seconds.
+✔ Test keyCodeLetterKeys() passed after 0.005 seconds.
+✔ Test nodeStyleInit() passed after 0.005 seconds.
+✔ Test backgroundVariants() passed after 0.005 seconds.
+✔ Test colorModes() passed after 0.005 seconds.
+✔ Test positionCodable() passed after 0.005 seconds.
+✔ Test onConnectWithDefaults() passed after 0.007 seconds.
+✔ Test defaultEdgeOptionsDefaults() passed after 0.005 seconds.
+✔ Test edgeStyleInit() passed after 0.005 seconds.
+✔ Test getNodeConnections() passed after 0.007 seconds.
+✔ Test zIndexModes() passed after 0.005 seconds.
+✔ Test nodeOriginCenter() passed after 0.005 seconds.
+✔ Test connectionModes() passed after 0.005 seconds.
+✔ Test nodeHandleCustom() passed after 0.005 seconds.
+✔ Test selectionModes() passed after 0.005 seconds.
+✔ Test handleTypeValues() passed after 0.005 seconds.
+✔ Test fitViewOptionsDefaults() passed after 0.005 seconds.
+✔ Test nodeDataPublisher() passed after 0.007 seconds.
+✔ Test keyCodeModifierKeys() passed after 0.005 seconds.
+✔ Test keyCodeArrowKeys() passed after 0.005 seconds.
+✔ Test panOnScrollModes() passed after 0.005 seconds.
+✔ Test positionValues() passed after 0.005 seconds.
+✔ Test edgePathResultInit() passed after 0.005 seconds.
+✔ Test beforeDeleteWithItems() passed after 0.005 seconds.
+✔ Test getNodesData() passed after 0.007 seconds.
+✔ Test selectionTracksInitialAndDirectChanges() passed after 0.007 seconds.
+✔ Test nodeOriginTopLeft() passed after 0.005 seconds.
+✔ Test onConnectStartParams() passed after 0.005 seconds.
+✔ Test clampedZoomAboveMax() passed after 0.005 seconds.
+✔ Test fitViewOptionsCustom() passed after 0.005 seconds.
+✔ Test selectionTracking() passed after 0.007 seconds.
+✔ Test clampedZoomWithinRange() passed after 0.005 seconds.
+✔ Test keyCodeConstants() passed after 0.005 seconds.
+✔ Test defaultEdgeOptionsCustom() passed after 0.005 seconds.
+✔ Test equatable() passed after 0.005 seconds.
+✔ Test beforeDeleteCancel() passed after 0.005 seconds.
+✔ Test fitViewCentersRequestedNodes() passed after 0.007 seconds.
+✔ Test clampedZoomBelowMin() passed after 0.005 seconds.
+✔ Test zoomBounds() passed after 0.005 seconds.
+✔ Test deletingNodeRemovesIncidentEdgesAndRespectsProtectedNodes() passed after 0.007 seconds.
+✔ Test codable() passed after 0.005 seconds.
+✔ Test onNodesChange() passed after 0.007 seconds.
+✔ Test initWithCustomValues() passed after 0.004 seconds.
+✔ Test initWithDefaults() passed after 0.005 seconds.
+✔ Test initDefaults() passed after 0.007 seconds.
+✔ Test nodeHandleCodable() passed after 0.005 seconds.
+✔ Test nodesInitializedEmpty() passed after 0.007 seconds.
+✔ Test nodesInitialized() passed after 0.007 seconds.
+✔ Test viewportCommandsReachCanvasAndPreserveObserver() passed after 0.007 seconds.
+✔ Test hashable() passed after 0.004 seconds.
+✔ Test initWithDefaults() passed after 0.007 seconds.
+✔ Test fitViewWithNodeIds() passed after 0.007 seconds.
+✔ Test fitViewHiddenIncluded() passed after 0.007 seconds.
+✔ Test zoomIn() passed after 0.007 seconds.
+✔ Test getEdge() passed after 0.007 seconds.
+✔ Test identity() passed after 0.005 seconds.
+✔ Test getNode() passed after 0.007 seconds.
+✔ Test screenToFlowPosition() passed after 0.007 seconds.
+✔ Test deleteElements() passed after 0.007 seconds.
+✔ Test getViewportForBounds() passed after 0.007 seconds.
+✔ Test getNodesBounds() passed after 0.007 seconds.
+✔ Test onConnect() passed after 0.007 seconds.
+✔ Test setViewportTriggersCallback() passed after 0.007 seconds.
+✔ Test zoomToClamp() passed after 0.007 seconds.
+✔ Test fitView() passed after 0.007 seconds.
+✔ Test getViewport() passed after 0.007 seconds.
+✔ Test onEdgesChange() passed after 0.007 seconds.
+✔ Test flowToScreenPosition() passed after 0.007 seconds.
+✔ Test setCenter() passed after 0.007 seconds.
+✔ Test reset() passed after 0.007 seconds.
+✔ Test deleteElements() passed after 0.007 seconds.
+✔ Test coordinateConversionRoundTrip() passed after 0.007 seconds.
+✔ Test fitViewEmpty() passed after 0.007 seconds.
+✔ Test setViewport() passed after 0.007 seconds.
+✔ Test zoomTo() passed after 0.007 seconds.
+✔ Test zoomOut() passed after 0.007 seconds.
+✔ Test asyncLayout() passed after 0.007 seconds.
+✔ Test subtraction() passed after 0.003 seconds.
+✔ Test hashable() passed after 0.003 seconds.
+✔ Test snappedToGridExact() passed after 0.003 seconds.
+✔ Test zero() passed after 0.003 seconds.
+✔ Test equatable() passed after 0.003 seconds.
+✔ Test addition() paswarning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+sed after 0.003 seconds.
+✔ Test codable() passed after 0.003 seconds.
+✔ Test initWithValues() passed after 0.003 seconds.
+✔ Test snappedNegativeValues() passed after 0.003 seconds.
+✔ Test hashable() passed after 0.003 seconds.
+✔ Test equatable() passed after 0.003 seconds.
+✔ Suite "ChangeUtils" passed after 0.008 seconds.
+✔ Test snappedToGrid() passed after 0.003 seconds.
+✔ Test nodeWithParentExtent() passed after 0.003 seconds.
+✔ Test parentVariant() passed after 0.003 seconds.
+✔ Test coordinateExtentVariant() passed after 0.003 seconds.
+✔ Test anyNodeSnapshotEquatable() passed after 0.003 seconds.
+✔ Test anyEdgeSnapshotFromEdge() passed after 0.003 seconds.
+✔ Suite "Edge" passed after 0.008 seconds.
+✔ Suite "Resize" passed after 0.008 seconds.
+✔ Suite "SwiftFlowTheme" passed after 0.008 seconds.
+✔ Test customStringsAndMessagesOverrideDefaults() passed after 0.007 seconds.
+✔ Test connectionAnnouncementNamesBothNodes() passed after 0.007 seconds.
+✔ Test defaultStringsComeFromTheCatalog() passed after 0.007 seconds.
+✔ Test accessibilityConfigDefaults() passed after 0.006 seconds.
+✔ Suite "ExpandParent" passed after 0.008 seconds.
+✔ Test anyNodeSnapshotFromNode() passed after 0.003 seconds.
+✔ Suite "NodeIntersection" passed after 0.008 seconds.
+✔ Suite "Serialization" passed after 0.008 seconds.
+✔ Suite "Connection" passed after 0.008 seconds.
+✔ Suite "GeometryUtils" passed after 0.008 seconds.
+✔ Suite "InternalNode" passed after 0.008 seconds.
+✔ Suite "GraphUtils" passed after 0.008 seconds.
+✔ Test equalityComparesStringsAndIgnoresClosures() passed after 0.007 seconds.
+✔ Suite "MiniMap geometry" passed after 0.008 seconds.
+✔ Suite "Node" passed after 0.008 seconds.
+✔ Suite "EdgePathParity" passed after 0.008 seconds.
+✔ Suite "CoordinateExtent" passed after 0.008 seconds.
+✔ Suite "SwiftFlowStore" passed after 0.008 seconds.
+✔ Suite "NodeExtent" passed after 0.008 seconds.
+✔ Suite "SwiftFlowInstance" passed after 0.008 seconds.
+✔ Test focusOrderListsVisibleFocusableNodesThenEdges() passed after 0.007 seconds.
+✔ Suite "AutoLayout" passed after 0.008 seconds.
+✔ Suite "Viewport" passed after 0.008 seconds.
+✔ Suite "EdgeUtils" passed after 0.008 seconds.
+✔ Suite "XYPosition" passed after 0.008 seconds.
+✔ Suite "Types" passed after 0.008 seconds.
+✔ Suite "KeyboardFocus" passed after 0.008 seconds.
+✔ Test setViewportAnimated() passed after 0.003 seconds.
+✔ Test zoomIn() passed after 0.003 seconds.
+✔ Test activeConnectionState() passed after 0.003 seconds.
+✔ Test fitViewHiddenExcluded() passed after 0.003 seconds.
+✔ Test defaultState() passed after 0.003 seconds.
+✔ Test fitViewEmptyNoOp() passed after 0.003 seconds.
+✔ Test setViewport() passed after 0.003 seconds.
+✔ Test fitViewWithAbsolutePositions() passed after 0.003 seconds.
+✔ Test zoomOut() passed after 0.003 seconds.
+✔ Test zoomTo() passed after 0.003 seconds.
+✔ Test zoomToClamp() passed after 0.003 seconds.
+✔ Test connectionsMap() passed after 0.003 seconds.
+✔ Test fitView() passed after 0.003 seconds.
+✔ Suite "SwiftFlowState" passed after 0.008 seconds.
+✔ Test selectionAnnouncementUsesPluralRules() passed after 0.008 seconds.
+✔ Suite "Accessibility" passed after 0.009 seconds.
+✔ Test keysReachTheCanvasOnlyAfterClickingInsideIt() passed after 0.113 seconds.
+◇ Test keysGoToTextFieldsBeingEdited() started.
+✔ Test keysGoToTextFieldsBeingEdited() passed after 0.106 seconds.
+✔ Suite "KeyMonitor" passed after 0.221 seconds.
+✔ Test run with 291 tests in 27 suites passed after 0.222 seconds.

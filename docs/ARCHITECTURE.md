@@ -6,6 +6,8 @@
 
 `CuratedCanvas` owns a world-scoped `BoardController`: source record references, card artwork, manually arranged positions, groups, local board edges and viewport serialize to the existing boards table. Old board documents decode with optional new fields. Save guards prevent leaving on failure; explicit flush cancels delayed saves. Undo/redo applies to board changes without deleting lore. Semantic edges read the relationships table; v3 adds audit history and reversible archival. Canonical relationships are blocked from direct edits.
 
+`RelationshipGraph` uses vendored SwiftFlow at revision 3515701fad73d3c6f8722bd65c22ef0813dc11a0. `GraphEngine` projects world-scoped entities and valid relationship endpoints to engine nodes/edges, computes layout off the main actor and supplies neighborhoods. SwiftFlow owns paths, handles, selection and viewport interaction. Engine removal is disabled; connection gestures open a Synthesis draft form before any write. Relationship state is now exposed in the read model so canonical relationships do not offer edit/archive controls. SQLite validation remains authoritative. Graph node positions are derived, not saved edits. Canvas auto-arrange explicitly uses the same layout utility; existing canvas gestures remain native Synthesis code.
+
 `RelationshipGraph` derives its visualization from actual entities/relationships. Copying a graph neighborhood creates a separate board referencing the same records. Moving those cards never modifies the graph. Empty boards do not seed template nodes.
 
 The earlier `CanvasDesignRoot`/`CanvasDesignModel` are retained source history, never the primary route or capture target. Their transient study behavior is superseded. The ASCII landscape is not rendered behind the connected canvas. World covers and card images are optional, bounded local data; no external image request is implicit.
@@ -34,3 +36,9 @@ Context is currently bounded recent lore (up to 24 records), labeled with draft/
 ## Connected workspaces
 
 Page references use the existing world-scoped `links` table; incoming references are queried independently of semantic entity relationships. Tags/aliases participate in FTS and versioned snapshots. Graph and timeline query stored entities, relationships and sourced events. Canvas and atlas serialize typed Codable document shapes into world-scoped boards; images are stored as bounded base64 data inside the local board. Canvas undo/redo is bounded to 60 session snapshots. Board save failures keep the workspace open rather than navigating away. Canvas viewport and positions persist; Graph layout is derived and temporary. Relationship archive/history is included in JSON export. World-cover images are scoped preferences; canvas images are included in board export.
+
+## Unattended verification
+
+`scripts/verify-background.sh` runs bounded low-priority checks and hidden native captures. `verify-ui.sh` builds a separate temporary verification bundle and fresh DB; normal `dist/Synthesis.app` stays untouched. Capture startup sets prohibited activation before the app event loop, never orders the window, skips menus/alerts, avoids normal model preferences and Keychain checks, and injects a transport that rejects model calls. Every capture asserts no visible/key window or active application; an activation notification observer detects transient activation. Screenshots use the actual NSHostingView, not a screen recording or user input.
+
+SwiftFlow localization bundles are copied into Contents/Resources. A documented vendored lookup patch searches that signed-bundle location before SwiftPM's normal test/development fallback. MIT notices ship with the app.

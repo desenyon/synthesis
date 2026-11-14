@@ -1,0 +1,125 @@
+[0/1] Planning build
+Building for debugging...
+[0/5] Write sources
+[1/5] Write swift-version--1AB21518FC5DEDBE.txt
+[3/7] Emitting module SynthesisCore
+[4/8] Emitting module SynthesisCoreTests
+[5/8] Emitting module SwiftFlow
+[6/10] Emitting module SynthesisUI
+[7/10] Compiling SynthesisUI RelationshipGraph.swift
+[8/15] Emitting module SynthesisApp
+[8/15] Write Objects.LinkFileList
+[10/15] Emitting module SynthesisUITests
+[11/15] Compiling SynthesisUITests GraphEngineTests.swift
+[12/16] Compiling SynthesisUITests WorkspaceTests.swift
+[12/16] Linking Synthesis
+[13/16] Write Objects.LinkFileList
+[14/16] Applying Synthesis
+[15/16] Linking SynthesisPackageTests
+Build complete! (3.03s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite AgentTests started.
+◇ Suite StoreTests started.
+◇ Suite WorkspaceTests started.
+◇ Suite GraphEngineTests started.
+◇ Test manualModeBlocksTransportAtCoreBoundary() started.
+◇ Test canonAndStaleSaveBoundary() started.
+◇ Test relationshipIsolationAndUnknownDates() started.
+◇ Test boardsCannotBeOverwrittenFromAnotherWorld() started.
+◇ Test cancellationBeforeQueuedSubmitNeverStartsTransport() started.
+◇ Test relationshipEditsAreScopedAuditedAndReversible() started.
+◇ Test richTextAndCanvasPersistence() started.
+◇ Test linksMetadataAndExportsStayWorldScoped() started.
+◇ Test companionConversationSwitchKeepsBoardSaveProtection() started.
+◇ Test malformedBoardIsPreservedAndDoesNotTrapNavigation() started.
+◇ Test persistenceAcrossReopen() started.
+◇ Test switchingToManualCancelsInFlightAndDoesNotPersistAssistant() started.
+◇ Test responsesPersistWithoutChangingCanon() started.
+◇ Test assistanceModePreservesWorkspaceAndEditorGuard() started.
+◇ Test revisionRestoreIncludesMetadataAndPreservesCanon() started.
+◇ Test pendingDraftSurvivesImmediateWorldSwitch() started.
+◇ Test delayedViewportSaveCannotOverwriteReopenedBoard() started.
+◇ Test worldIsolation() started.
+◇ Test canonicalContextExcludesRichTextPayload() started.
+◇ Test boardUndoPreservesSourceRecordAndSavedLayout() started.
+◇ Test engineArrangeIsExplicitUndoableAndPersists() started.
+◇ Test projectionExcludesOtherWorldsDocumentsAndDanglingEdges() started.
+◇ Test cyclicGraphHasFiniteDistinctLayoutAndStableReferences() started.
+✔ Test boardsCannotBeOverwrittenFromAnotherWorld() passed after 0.016 seconds.
+✔ Test worldIsolation() passed after 0.016 seconds.
+✔ Test relationshipIsolationAndUnknownDates() passed after 0.016 seconds.
+✔ Test richTextAndCanvasPersistence() passed after 0.016 seconds.
+✔ Test canonAndStaleSaveBoundary() passed after 0.017 seconds.
+✔ Test revisionRestoreIncludesMetadataAndPreservesCanon() passed after 0.018 seconds.
+✔ Test relationshipEditsAreScopedAuditedAndReversible() passed after 0.018 seconds.
+✔ Test projectionExcludesOtherWorldsDocumentsAndDanglingEdges() passed after 0.019 seconds.
+✔ Test cyclicGraphHasFiniteDistinctLayoutAndStableReferences() passed after 0.019 seconds.
+✔ Test linksMetadataAndExportsStayWorldScoped() passed after 0.019 seconds.
+✔ Test persistenceAcrossReopen() passed after 0.022 seconds.
+✔ Suite StoreTests passed after 0.022 seconds.
+✔ Test engineArrangeIsExplicitUndoableAndPersists() passed after 0.030 seconds.
+✔ Suite GraphEngineTests passed after 0.030 seconds.
+✔ Test manualModeBlocksTransportAtCoreBoundary() passed after 0.030 seconds.
+✔ Test cancellationBeforeQueuedSubmitNeverStartsTransport() passed after 0.039 seconds.
+✔ Test malformedBoardIsPreservedAndDoesNotTrapNavigation() passed after 0.038 seconds.
+✔ Test companionConversationSwitchKeepsBoardSaveProtection() passed after 0.038 seconds.
+✔ Test responsesPersistWithoutChangingCanon() passed after 0.039 seconds.
+✔ Test pendingDraftSurvivesImmediateWorldSwitch() passed after 0.039 seconds.
+✔ Test assistanceModePreservesWorkspaceAndEditorGuard() passed after 0.039 seconds.
+✔ Test boardUndoPreservesSourceRecordAndSavedLayout() passed after 0.039 seconds.
+✔ Test canonicalContextExcludesRichTextPayload() passed after 0.039 seconds.
+✔ Test switchingToManualCancelsInFlightAndDoesNotPersistAssistant() passed after 0.039 seconds.
+✔ Suite AgentTests passed after 0.039 seconds.
+✔ Test delayedViewportSaveCannotOverwriteReopenedBoard() passed after 0.543 seconds.
+✔ Suite WorkspaceTests passed after 0.543 seconds.
+✔ Test run with 23 tests in 4 suites passed after 0.543 seconds.
+[0/1] Planning build
+Building for production...
+[0/3] Write sources
+[1/3] Write swift-version--1AB21518FC5DEDBE.txt
+[3/4] Compiling SynthesisUI BoardController.swift
+[3/5] Write Objects.LinkFileList
+[4/5] Linking Synthesis
+Build complete! (13.35s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.WoQ47a/SynthesisVerification.app: replacing existing signature
+Built /tmp/synthesis-ui.WoQ47a/SynthesisVerification.app (development, ad-hoc signed; not a release).
+PASS: capture refuses a missing isolated database path
+PASS: capture refuses and preserves an existing database
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.WoQ47a/SynthesisVerification.app: 1 (Operation not permitted)
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, capture+PNG 587ms
+CAPTURE conversation 1440x900, bitmap 2880x1800, capture+PNG 591ms
+CAPTURE canvas 1440x900, bitmap 2880x1800, capture+PNG 927ms
+CAPTURE companion 1440x900, bitmap 2880x1800, capture+PNG 757ms
+CAPTURE manual 1440x900, bitmap 2880x1800, capture+PNG 362ms
+CAPTURE collapsed 1440x900, bitmap 2880x1800, capture+PNG 914ms
+CAPTURE light 1440x900, bitmap 2880x1800, capture+PNG 942ms
+CAPTURE graph 1440x900, bitmap 2880x1800, capture+PNG 184ms
+CAPTURE library 1440x900, bitmap 2880x1800, capture+PNG 83ms
+CAPTURE conversation-home 1920x1080, bitmap 3840x2160, capture+PNG 930ms
+CAPTURE conversation 1920x1080, bitmap 3840x2160, capture+PNG 911ms
+CAPTURE canvas 1920x1080, bitmap 3840x2160, capture+PNG 1410ms
+CAPTURE companion 1920x1080, bitmap 3840x2160, capture+PNG 1119ms
+CAPTURE manual 1920x1080, bitmap 3840x2160, capture+PNG 549ms
+CAPTURE collapsed 1920x1080, bitmap 3840x2160, capture+PNG 1428ms
+CAPTURE light 1920x1080, bitmap 3840x2160, capture+PNG 1396ms
+CAPTURE graph 1920x1080, bitmap 3840x2160, capture+PNG 267ms
+CAPTURE library 1920x1080, bitmap 3840x2160, capture+PNG 99ms
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, capture+PNG 408ms
+CAPTURE conversation 1024x768, bitmap 2048x1536, capture+PNG 404ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, capture+PNG 587ms
+CAPTURE companion 1024x768, bitmap 2048x1536, capture+PNG 499ms
+CAPTURE manual 1024x768, bitmap 2048x1536, capture+PNG 230ms
+CAPTURE collapsed 1024x768, bitmap 2048x1536, capture+PNG 546ms
+CAPTURE light 1024x768, bitmap 2048x1536, capture+PNG 582ms
+CAPTURE graph 1024x768, bitmap 2048x1536, capture+PNG 121ms
+CAPTURE library 1024x768, bitmap 2048x1536, capture+PNG 58ms
+BACKGROUND VERIFIED: no visible window or activation
+Native captures complete: /Users/desenyon/Developer/synthesis/test-results/background-final
+Background native captures: /Users/desenyon/Developer/synthesis/test-results/background-final
+Optional contact sheets: uv run --with pillow python scripts/contact-sheets.py '/Users/desenyon/Developer/synthesis/test-results/background-final'
+Background verification passed. Artifacts: /Users/desenyon/Developer/synthesis/test-results/background-final

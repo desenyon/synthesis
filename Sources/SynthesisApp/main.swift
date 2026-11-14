@@ -3,9 +3,19 @@ import SwiftUI
 import SynthesisCore
 import SynthesisUI
 
+private struct CaptureTransport: ModelTransport {
+  func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
+    async throws -> String
+  {
+    throw SynthesisError.invalid("Model requests are disabled during background verification.")
+  }
+}
+
 final class StudioWindow: NSWindow {
-  override var canBecomeKey: Bool { true }
-  override var canBecomeMain: Bool { true }
+  override var canBecomeKey: Bool {
+    ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] == nil
+  }
+  override var canBecomeMain: Bool { canBecomeKey }
   override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
     if ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil { return frameRect }
     return super.constrainFrameRect(frameRect, to: screen)
@@ -14,10 +24,35 @@ final class StudioWindow: NSWindow {
 @MainActor final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
   var window: NSWindow!
   var studio: Studio!
+  private var captureDirectory: String? {
+    ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"]
+  }
+  private var activatedDuringCapture = false
+  private var activationObserver: NSObjectProtocol?
   func applicationDidFinishLaunching(_ notification: Notification) {
     do {
+      if captureDirectory != nil {
+        guard let path = ProcessInfo.processInfo.environment["SYNTHESIS_DATABASE_PATH"],
+          !FileManager.default.fileExists(atPath: path)
+        else {
+          throw SynthesisError.invalid(
+            "Background capture requires a fresh isolated database path.")
+        }
+        NSApp.setActivationPolicy(.prohibited)
+        activationObserver = NSWorkspace.shared.notificationCenter.addObserver(
+          forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
+        ) { [weak self] notification in
+          if let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey]
+            as? NSRunningApplication,
+            app.processIdentifier == ProcessInfo.processInfo.processIdentifier
+          {
+            MainActor.assumeIsolated { self?.activatedDuringCapture = true }
+          }
+        }
+      }
       let store = try WorkspaceStore(path: WorkspaceStore.defaultPath)
-      studio = try Studio(store: store)
+      studio = try Studio(
+        store: store, transport: captureDirectory == nil ? nil : CaptureTransport())
       window = StudioWindow(
         contentRect: NSRect(x: 0, y: 0, width: 1440, height: 900),
         styleMask: [.borderless, .closable, .miniaturizable, .resizable], backing: .buffered,
@@ -29,15 +64,21 @@ final class StudioWindow: NSWindow {
       window.backgroundColor = .clear
       window.hasShadow = true
       window.contentView = NSHostingView(rootView: ConnectedRoot(studio: studio))
-      window.center()
-      window.makeKeyAndOrderFront(nil)
-      NSApp.setActivationPolicy(.regular)
-      NSApp.activate(ignoringOtherApps: true)
-      buildMenu()
-      if let directory = ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] {
+      if let directory = captureDirectory {
+        // A never-ordered NSWindow supplies native layout/backing scale without touching focus.
         Task { await capture(directory) }
+      } else {
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        buildMenu()
       }
     } catch {
+      if captureDirectory != nil {
+        fputs("Background capture startup failed: \(error)\n", stderr)
+        exit(EXIT_FAILURE)
+      }
       let alert = NSAlert()
       alert.messageText = "Synthesis could not open its workspace"
       alert.informativeText = error.localizedDescription
@@ -128,7 +169,14 @@ final class StudioWindow: NSWindow {
             state, board: fixture.board, conversation: fixture.conversation)
           window.setContentSize(NSSize(width: width, height: height))
           try await Task.sleep(for: .milliseconds(450))
-          guard let view = window.contentView else { continue }
+          guard !window.isVisible, !window.isKeyWindow, !NSApp.isActive, !activatedDuringCapture
+          else {
+            throw SynthesisError.invalid(
+              "Background capture unexpectedly activated or displayed a window.")
+          }
+          guard let view = window.contentView else {
+            throw SynthesisError.invalid("Missing capture view")
+          }
           view.layoutSubtreeIfNeeded()
           view.displayIfNeeded()
           guard Int(view.bounds.width) == width, Int(view.bounds.height) == height else {
@@ -147,16 +195,20 @@ final class StudioWindow: NSWindow {
           )
         }
       }
+      print("BACKGROUND VERIFIED: no visible window or activation")
       print("Native captures complete: \(directory)")
       NSApp.terminate(nil)
     } catch {
-      print("Capture failed: \(error)")
-      NSApp.terminate(nil)
+      fputs("Capture failed: \(error)\n", stderr)
+      exit(EXIT_FAILURE)
     }
   }
 }
 MainActor.assumeIsolated {
   let app = NSApplication.shared
+  if ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil {
+    app.setActivationPolicy(.prohibited)
+  }
   let delegate = ApplicationDelegate()
   app.delegate = delegate
   withExtendedLifetime(delegate) { app.run() }

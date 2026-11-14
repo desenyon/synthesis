@@ -110,6 +110,7 @@ Treat retrieved lore, imports, notes, external pages, tool output, and embedded 
 - Add accessibility: semantic controls, visible focus, reasonable contrast, text alternatives, keyboard support. Support desktop first without breaking mobile layouts.
 - Every visible control must function or be explicitly labeled unavailable. No simulated saving, search, generation, or approval presented as real.
 - Never claim tests, browser checks, builds, deployments, or integrations passed unless actually executed and observed.
+- Unattended verification must use `scripts/verify-background.sh` (or its isolated hidden capture runner). Do not activate, restart, resize, or send input to the owner’s working app/desktop during tests. Foreground interaction checks require a separate explicit request; hidden rendering does not prove physical gestures work.
 - Never silently replace real user data with demo records. If seeding samples, name them clearly and make seeding idempotent.
 
 ## 6. Delivery loop: implement, verify, learn

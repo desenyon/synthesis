@@ -48,6 +48,7 @@ public struct Relation: Identifiable, Codable, Sendable {
   public var sourceID: String
   public var targetID: String
   public var label: String
+  public var state: String? = nil
 }
 public struct WorldEvent: Identifiable, Codable, Sendable {
   public var id: String

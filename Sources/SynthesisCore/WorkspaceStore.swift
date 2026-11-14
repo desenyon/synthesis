@@ -289,14 +289,15 @@ public final class WorkspaceStore {
     try db.execute(
       "INSERT INTO relationships(id,world_id,source_id,target_id,label,state,origin,created_at,updated_at) VALUES(?,?,?,?,?,'draft','user-authored',?,?)",
       [id, worldID, source, target, label, now, now])
-    return Relation(id: id, sourceID: source, targetID: target, label: label)
+    return Relation(id: id, sourceID: source, targetID: target, label: label, state: "draft")
   }
   public func relations(worldID: String) throws -> [Relation] {
     _ = try world(worldID)
     return try db.rows("SELECT * FROM relationships WHERE world_id=? AND archived=0", [worldID]).map
     {
       Relation(
-        id: $0["id"]!, sourceID: $0["source_id"]!, targetID: $0["target_id"]!, label: $0["label"]!)
+        id: $0["id"]!, sourceID: $0["source_id"]!, targetID: $0["target_id"]!, label: $0["label"]!,
+        state: $0["state"])
     }
   }
   public func updateRelation(worldID: String, id: String, label: String) throws {
