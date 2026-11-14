@@ -69,6 +69,8 @@ final class StudioWindow: NSWindow {
   var window: StudioWindow!
   var studio: Studio!
   private var previousApplication: NSRunningApplication?
+  private var closeApproved = false
+  private var closePending = false
   private var capturing: Bool {
     ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil
   }
@@ -148,7 +150,21 @@ final class StudioWindow: NSWindow {
   }
   func windowShouldClose(_ sender: NSWindow) -> Bool {
     studio.persistPendingComposer()
-    return studio.flushEditor()
+    guard studio.flushEditor() else { return false }
+    if closeApproved || studio.canvasWebView == nil { return true }
+    guard !closePending else { return false }
+    closePending = true
+    Task {
+      let saved = await studio.flushCanvas()
+      closePending = false
+      if saved && studio.flushEditor() {
+        closeApproved = true
+        window.performClose(nil)
+      } else if !saved {
+        studio.error = "The canvas has not confirmed its save. Keep this window open and retry."
+      }
+    }
+    return false
   }
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
     studio.persistPendingComposer()
@@ -156,8 +172,11 @@ final class StudioWindow: NSWindow {
     guard studio.canvasWebView != nil else { return .terminateNow }
     // The canvas hands over its latest edits asynchronously; wait for that before quitting.
     Task {
-      await studio.flushCanvas()
-      NSApp.reply(toApplicationShouldTerminate: true)
+      let saved = await studio.flushCanvas()
+      if !saved {
+        studio.error = "The canvas has not confirmed its save. Keep this window open and retry."
+      }
+      NSApp.reply(toApplicationShouldTerminate: saved && studio.flushEditor())
     }
     return .terminateLater
   }

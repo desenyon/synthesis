@@ -322,6 +322,23 @@ struct CanvasBoardContent {
     } else {
       checks.append("FAIL board missing after audit")
     }
+    // Let the engine's trailing autosave settle before simulating a lost acknowledgement.
+    try await Task.sleep(for: .milliseconds(650))
+    // Withhold only the flush command to verify the native shutdown decision on timeout.
+    _ = try await webView.evaluateJavaScript(
+      "window.__auditCommand = window.synthesis.command; window.synthesis.command = name => { if (name !== 'flush') window.__auditCommand(name); }; true"
+    )
+    let mayClose = await studio.flushCanvas()
+    checks.append(
+      !mayClose
+        ? "PASS unacknowledged canvas save blocks shutdown"
+        : "FAIL shutdown allowed without save acknowledgement")
+    _ = try await webView.evaluateJavaScript(
+      "window.synthesis.command = window.__auditCommand; delete window.__auditCommand")
+    let recovered = await studio.flushCanvas()
+    checks.append(
+      recovered
+        ? "PASS confirmed retry clears canvas save failure" : "FAIL canvas save did not recover")
     return checks
   }
   /// Where cards are on screen, for the interaction self-test.

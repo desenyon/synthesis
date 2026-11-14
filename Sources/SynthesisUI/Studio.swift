@@ -66,7 +66,11 @@ public struct Toast: Identifiable {
     return session
   }
   /// Gives the canvas a moment to hand over unsaved edits; used before the app quits.
-  public func flushCanvas() async { await canvasSession?.flush() }
+  public func flushCanvas() async -> Bool {
+    guard let canvasSession else { return true }
+    await canvasSession.flush()
+    return canvasSession.failure == nil
+  }
   public var canvasWebView: NSView? { canvasSession?.webView }
   public var canvasLoaded: Bool { canvasSession?.loaded ?? false }
   /// Opens Canvas with this record's card selected, adding the card if the board lacks it.
