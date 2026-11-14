@@ -7,7 +7,7 @@ import SynthesisCore
 /// the optional companion conversation are native.
 struct CuratedCanvas: View {
   enum Panel: String, Identifiable {
-    case create, library, rename
+    case create, library, rename, artwork
     var id: String { rawValue }
   }
   @ObservedObject var studio: Studio
@@ -49,6 +49,7 @@ struct CuratedCanvas: View {
       }
     }
     .onAppear {
+      if studio.captureHint == "sheet-artwork" { panel = .artwork }
       session.switchBoard(studio.canvasBoardID)
       studio.editorSave = nil
       studio.canvasUndo = { session.command($0 ? "undo" : "redo") }
@@ -56,6 +57,9 @@ struct CuratedCanvas: View {
       if let width = try? studio.store.preference("companion-width"), let value = Double(width) {
         studio.companionWidth = min(460, max(320, value))
       }
+    }
+    .onChange(of: studio.captureNonce) { _, _ in
+      if studio.captureHint == "sheet-artwork" { panel = .artwork }
     }
     .onChange(of: studio.canvasBoardID) { _, id in if id != nil { session.switchBoard(id) } }
     .onChange(of: session.request) { _, request in
@@ -67,18 +71,34 @@ struct CuratedCanvas: View {
         panel = .library
       case "entity": prepareCreate()
       case "image": session.addImage()
+      case "illustration": panel = .artwork
       case "export": session.exportImage()
+      case "reference":
+        if studio.mode == .assisted { studio.referenceCanvasSelection() }
+      case "artwork":
+        if let id = session.selection.first { session.chooseArtwork(for: id) }
       default: break
       }
     }
-    .sheet(item: $panel) { item in
+    .studioSheet(item: $panel) { item in
       switch item {
       case .create: createForm
       case .library: libraryPicker
       case .rename: renameForm
+      case .artwork:
+        ArtworkPicker(
+          t: studio.t,
+          select: { data in
+            if let id = session.selection.first, session.selection.count == 1 {
+              session.setArtwork(data.base64EncodedString(), for: id)
+            } else {
+              session.addImage(data.base64EncodedString())
+            }
+            panel = nil
+          }, close: closePanel)
       }
     }
-    .sheet(item: $session.connection) { connection in
+    .studioSheet(item: $session.connection) { connection in
       RelationEditor(
         t: studio.t, title: "Is this a relationship?", source: connection.source.title,
         target: connection.target.title, label: $edgeLabel,
@@ -135,6 +155,7 @@ struct CuratedCanvas: View {
           panel = .library
         }
         Button("Image…") { session.addImage() }
+        Button("GPT illustrations…") { panel = .artwork }
         if let card = session.selection.first, session.selection.count == 1 {
           Divider()
           Button(
@@ -275,7 +296,7 @@ struct CuratedCanvas: View {
           UnifiedComposer(studio: studio, collapsed: true)
             .frame(width: min(440, geo.size.width - 40))
             // Clear of the engine's zoom and undo controls on narrower canvases.
-            .padding(.bottom, geo.size.width < 1100 ? 64 : 12)
+            .padding(.bottom, 76)
         }
       }
     }

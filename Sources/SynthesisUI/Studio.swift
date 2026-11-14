@@ -747,7 +747,10 @@ public struct Toast: Identifiable {
       }
     }
   }
+  public func auditCanvas() async throws -> [String] { try await canvas().audit() }
+
   static func sampleArtwork() -> Data? {
+    if let generated = StudioArtwork.atlas.data { return generated }
     let bundled = Bundle.main.resourceURL?.appendingPathComponent("Assets/aster-coast.png")
     let url =
       bundled.flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil }
@@ -817,13 +820,16 @@ public struct Toast: Identifiable {
       _ = try store.addEvent(worldID: w.id, title: "The first crossing", date: "", source: mira.id)
       var document = CanvasDocument()
       let artwork = Self.sampleArtwork()
-      let positions = [(-210.0, -155.0), (210.0, -155.0), (-210.0, 155.0), (210.0, 155.0)]
+      let positions = [(-370.0, 20.0), (0.0, -160.0), (390.0, 30.0), (0.0, 170.0)]
       for (index, record) in [mira, keepers, sea, power].enumerated() {
         var card = CanvasCard(text: record.title, recordID: record.id)
         card.width = 300
         card.x = positions[index].0
         card.y = positions[index].1
         if record.id == sea.id { card.image = artwork?.base64EncodedString() }
+        if record.id == mira.id {
+          card.image = StudioArtwork.cartographer.data?.base64EncodedString()
+        }
         document.cards.append(card)
       }
       _ = try store.saveBoard(

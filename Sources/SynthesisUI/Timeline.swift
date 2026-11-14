@@ -13,6 +13,7 @@ struct TimelineScreen: View {
   @State private var date = ""
   @State private var order = ""
   @State private var source = ""
+  @State private var sourcePicker = false
   private var filtered: [WorldEvent] {
     events.filter {
       query.isEmpty || $0.dateLabel.localizedCaseInsensitiveContains(query)
@@ -49,7 +50,7 @@ struct TimelineScreen: View {
       }
     }
     .onAppear { refresh() }
-    .sheet(isPresented: $composing) { form }
+    .studioSheet(isPresented: $composing) { form }
   }
   private func row(_ event: WorldEvent, first: Bool, last: Bool) -> some View {
     let sourceRecord = studio.records.first { $0.id == event.sourceID }
@@ -153,10 +154,8 @@ struct TimelineScreen: View {
       VStack(alignment: .leading, spacing: 6) {
         Text("Source record").font(.system(size: 12, weight: .medium))
           .foregroundStyle(studio.t.secondary)
-        PlainMenu {
-          ForEach(studio.records.prefix(80)) { record in
-            Button(record.title) { source = record.id }
-          }
+        Button {
+          sourcePicker = true
         } label: {
           HStack {
             Text(studio.records.first { $0.id == source }?.title ?? "Choose a record")
@@ -168,7 +167,13 @@ struct TimelineScreen: View {
             .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
             .overlay(
               RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.border, lineWidth: 1))
-        }
+        }.buttonStyle(.plain)
+          .popover(isPresented: $sourcePicker) {
+            SearchableRecordPicker(records: studio.records, t: studio.t) { record in
+              source = record.id
+              sourcePicker = false
+            }
+          }
       }
       Text(
         order.isEmpty || Int(order) != nil
@@ -226,7 +231,7 @@ private struct EventCard: View {
       IconMenu(icon: "ellipsis", label: "Event actions", t: t, size: 24) {
         Button("Edit…", action: edit)
         Button("Remove", action: remove)
-      }.opacity(hover ? 1 : 0)
+      }
     }.padding(14).frame(maxWidth: .infinity, alignment: .leading)
       .background(
         t.surface.opacity(hover ? 1 : 0.7), in: RoundedRectangle(cornerRadius: Metric.cardRadius)

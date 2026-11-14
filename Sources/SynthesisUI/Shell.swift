@@ -69,7 +69,7 @@ public struct ConnectedRoot: View {
     .foregroundStyle(studio.t.text)
     .ignoresSafeArea()
     .preferredColorScheme(studio.dark ? .dark : .light)
-    .sheet(item: $studio.sheet) { StudioSheet(studio: studio, sheet: $0).id($0) }
+    .studioSheet(item: $studio.sheet) { StudioSheet(studio: studio, sheet: $0).id($0) }
     .alert(
       "Something needs attention",
       isPresented: Binding(get: { studio.error != nil }, set: { if !$0 { studio.error = nil } })

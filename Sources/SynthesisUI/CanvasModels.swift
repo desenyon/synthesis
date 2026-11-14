@@ -71,8 +71,26 @@ func pickImage(limit: Int = 6_000_000) throws -> String? {
   panel.allowsMultipleSelection = false
   guard panel.runModal() == .OK, let url = panel.url else { return nil }
   let data = try Data(contentsOf: url)
-  guard data.count <= limit, NSImage(data: data) != nil else {
-    throw SynthesisError.invalid("Choose an image under \(limit / 1_000_000) MB.")
+  return try browserImageBase64(data, limit: limit)
+}
+
+/// The web engine accepts PNG/JPEG, while the native picker also accepts HEIC/TIFF.
+/// Convert at the boundary instead of labelling arbitrary image bytes as PNG.
+func browserImageBase64(_ data: Data, limit: Int) throws -> String {
+  guard data.count <= limit, let bitmap = NSBitmapImageRep(data: data) else {
+    throw SynthesisError.invalid("Choose a readable image under \(limit / 1_000_000) MB.")
   }
-  return data.base64EncodedString()
+  guard bitmap.pixelsWide > 0, bitmap.pixelsHigh > 0,
+    bitmap.pixelsWide <= 8192, bitmap.pixelsHigh <= 8192
+  else {
+    throw SynthesisError.invalid("Choose an image no larger than 8192 pixels on either side.")
+  }
+  let png = data.starts(with: [137, 80, 78, 71, 13, 10, 26, 10])
+  let jpeg = data.starts(with: [255, 216, 255])
+  let output = (png || jpeg) ? data : bitmap.representation(using: .png, properties: [:])
+  guard let output, output.count <= limit else {
+    throw SynthesisError.invalid(
+      "This image is too large after conversion. Export a smaller PNG or JPEG.")
+  }
+  return output.base64EncodedString()
 }

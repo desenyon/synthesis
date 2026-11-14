@@ -382,7 +382,12 @@ struct UnifiedComposer: View {
       Group {
         if collapsed { compactField } else { fullField }
       }
-      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 14))
+      .background(
+        LinearGradient(
+          colors: [studio.t.secondarySurface.opacity(0.9), studio.t.surface],
+          startPoint: .topLeading, endPoint: .bottomTrailing),
+        in: RoundedRectangle(cornerRadius: 14)
+      )
       .overlay(
         RoundedRectangle(cornerRadius: 14).stroke(studio.t.border.opacity(0.9), lineWidth: 1)
       )
@@ -454,7 +459,7 @@ struct UnifiedComposer: View {
         withAnimation(.easeOut(duration: 0.18)) { studio.companionExpanded = true }
       }.padding(.bottom, 1)
       sendButton
-    }.padding(.leading, 8).padding(.trailing, 7).padding(.vertical, 7)
+    }.padding(.leading, 11).padding(.trailing, 10).padding(.vertical, 12)
   }
   @ViewBuilder private var disclosure: some View {
     HStack(spacing: 5) {

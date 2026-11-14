@@ -5,7 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
-    "conversation-home", "conversation", "canvas", "companion", "manual", "collapsed", "light",
+    "conversation-home", "conversation", "sheet-artwork", "canvas", "companion", "manual",
+    "collapsed", "light",
     "graph", "graph-selected", "library", "editor", "timeline", "atlas",
     "palette", "light-conversation", "light-library", "light-graph", "light-editor",
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",

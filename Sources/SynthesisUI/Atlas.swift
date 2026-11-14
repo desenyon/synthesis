@@ -5,6 +5,8 @@ import SynthesisCore
 /// A creator-supplied map with markers that open real records. The image stays on this device.
 struct AtlasScreen: View {
   @ObservedObject var studio: Studio
+  @State private var markerPicker = false
+  @State private var artworkPicker = false
   @State private var boardID: String?
   @State private var loadFailed = false
   @State private var map = AtlasDocument()
@@ -23,22 +25,28 @@ struct AtlasScreen: View {
           t: studio.t)
       } trailing: {
         if map.image != nil {
-          PlainMenu {
-            let unplaced = studio.records.filter { record in
-              !map.markers.contains { $0.recordID == record.id }
-            }
-            ForEach(unplaced.prefix(60)) { record in
-              Button(record.title) { placing = record.id }
-            }
-            if unplaced.isEmpty { Text("Every record is already on the map") }
+          Button {
+            markerPicker = true
           } label: {
             Label("Place marker", systemImage: "mappin.and.ellipse")
               .font(.system(size: 13, weight: .medium)).foregroundStyle(studio.t.onAccent)
               .padding(.horizontal, 12).frame(height: Metric.control)
               .background(studio.t.accent, in: RoundedRectangle(cornerRadius: Metric.radius))
-          }.disabled(studio.records.isEmpty).help("Choose a record, then click the map")
+          }.buttonStyle(.plain).disabled(studio.records.isEmpty)
+            .help("Choose a record, then click the map")
+            .popover(isPresented: $markerPicker) {
+              SearchableRecordPicker(
+                records: studio.records.filter { record in
+                  !map.markers.contains { $0.recordID == record.id }
+                }, t: studio.t
+              ) { record in
+                placing = record.id
+                markerPicker = false
+              }
+            }
           IconMenu(icon: "ellipsis", label: "Map actions", t: studio.t) {
             Button("Replace map image…") { upload() }
+            Button("Choose an illustration…") { artworkPicker = true }
           }
         }
       }
@@ -54,9 +62,19 @@ struct AtlasScreen: View {
           ) {
             Button("Choose a map image…") { upload() }
               .buttonStyle(QuietButton(t: studio.t, primary: true))
+            Button("Choose a GPT illustration…") { artworkPicker = true }
+              .buttonStyle(QuietButton(t: studio.t))
           }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
       }
+    }
+    .studioSheet(isPresented: $artworkPicker) {
+      ArtworkPicker(
+        t: studio.t, mapOnly: true,
+        select: { data in
+          replaceImage(data.base64EncodedString())
+          artworkPicker = false
+        }, close: { artworkPicker = false })
     }
     .onAppear {
       studio.editorSave = { persist() }
@@ -210,9 +228,18 @@ struct AtlasScreen: View {
   private func upload() {
     studio.perform {
       if let image = try pickImage() {
-        map.image = image
-        zoom = 1
-        pan = .zero
+        replaceImage(image)
+      }
+    }
+  }
+  private func replaceImage(_ image: String) {
+    let previous = map
+    map.image = image
+    zoom = 1
+    pan = .zero
+    if persist() {
+      studio.show("Map image updated", icon: "photo", actionTitle: "Undo") {
+        map = previous
         persist()
       }
     }

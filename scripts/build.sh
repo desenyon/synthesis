@@ -5,9 +5,9 @@ export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
 synthesis_sdk="$(xcode-select -p)/SDKs/MacOSX26.5.sdk"
 if [[ ! -d "$synthesis_sdk" ]]; then synthesis_sdk="$(xcrun --show-sdk-path)"; fi
 synthesis_configuration="${1:-debug}"
-swift build --build-system native --sdk "$synthesis_sdk" -c "$synthesis_configuration"
+swift build --build-system native --sdk "$synthesis_sdk" -c "$synthesis_configuration" --jobs "${SYNTHESIS_BUILD_JOBS:-2}"
 synthesis_bin="$(swift build --build-system native --sdk "$synthesis_sdk" -c "$synthesis_configuration" --show-bin-path)"
-app="dist/Synthesis.app"
+app="${2:-${SYNTHESIS_APP_BUNDLE:-dist/Synthesis.app}}"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$synthesis_bin/Synthesis" "$app/Contents/MacOS/Synthesis"
 cp -R Sources/SynthesisCore/Migrations "$app/Contents/Resources/"

@@ -5,6 +5,12 @@ import SynthesisCore
 import UniformTypeIdentifiers
 import WebKit
 
+enum CanvasMessageScope {
+  static func accepts(_ message: [String: Any], current: String) -> Bool {
+    message["type"] as? String == "ready" || message["sessionID"] as? String == current
+  }
+}
+
 /// What a board row holds. New boards store an Excalidraw scene; boards saved by the earlier
 /// native canvas (a `CanvasDocument`) are converted the first time they are opened and the
 /// original is kept alongside the new scene.
@@ -89,9 +95,12 @@ struct CanvasBoardContent {
   private var worldID = ""
   private var content = CanvasBoardContent()
   private var ready = false
+  private var openRequestID = UUID()
+  private var loadID = UUID().uuidString
   private var pendingLoad = false
   private var writable = false
   private var flushWaiters: [CheckedContinuation<Void, Never>] = []
+  private var flushTimeout: Task<Void, Never>?
   private var observers: Set<AnyCancellable> = []
   private static let scheme = "synthesis-canvas"
 
@@ -123,6 +132,9 @@ struct CanvasBoardContent {
     // Cards follow their records, and the canvas follows the theme.
     studio.$records.dropFirst().debounce(for: .milliseconds(120), scheduler: RunLoop.main)
       .sink { [weak self] _ in self?.sync() }.store(in: &observers)
+    studio.$mode.dropFirst().removeDuplicates().sink { [weak self] mode in
+      self?.call("setAssistance", [mode == .assisted])
+    }.store(in: &observers)
     studio.$dark.dropFirst().removeDuplicates().sink { [weak self] dark in
       self?.call("setTheme", [dark ? "dark" : "light"])
     }.store(in: &observers)
@@ -132,6 +144,19 @@ struct CanvasBoardContent {
 
   /// Opens the requested board, the last one used in this world, or creates the first.
   func open(boardID requested: String? = nil) {
+    let requestID = UUID()
+    openRequestID = requestID
+    if loaded && (worldID != studio.worldID || (requested != nil && requested != boardID)) {
+      Task {
+        await flush()
+        guard openRequestID == requestID, failure == nil else { return }
+        openBoard(boardID: requested)
+      }
+    } else {
+      openBoard(boardID: requested)
+    }
+  }
+  private func openBoard(boardID requested: String?) {
     let world = studio.worldID
     do {
       var boards = try studio.store.boards(worldID: world, kind: "canvas")
@@ -145,6 +170,7 @@ struct CanvasBoardContent {
       let preferred = try requested ?? studio.store.preference("canvas-selected:\(world)")
       let board = boards.first { $0.id == preferred } ?? boards[0]
       if board.id == boardID, world == worldID, loaded { return }
+      loadID = UUID().uuidString
       worldID = world
       boardID = board.id
       name = board.name
@@ -170,12 +196,7 @@ struct CanvasBoardContent {
     }
   }
   /// Saves outstanding edits to the board that is open, then opens the requested one.
-  func switchBoard(_ id: String?) {
-    Task {
-      await flush()
-      open(boardID: id)
-    }
-  }
+  func switchBoard(_ id: String?) { open(boardID: id) }
   func rename(_ value: String) {
     let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmed.isEmpty, let boardID, writable else { return }
@@ -190,7 +211,8 @@ struct CanvasBoardContent {
     guard ready, pendingLoad else { return }
     pendingLoad = false
     var payload: [String: Any] = [
-      "name": name, "theme": studio.dark ? "dark" : "light",
+      "sessionID": loadID, "assisted": studio.mode == .assisted, "name": name,
+      "theme": studio.dark ? "dark" : "light",
       "hiddenRelations": content.hiddenRelations, "records": recordPayload(),
       "relations": relationPayload(),
     ]
@@ -250,6 +272,7 @@ struct CanvasBoardContent {
       if let image = try pickImage(limit: 4_000_000) { call("addImage", [image]) }
     }
   }
+  func addImage(_ base64: String) { call("addImage", [base64]) }
   func command(_ name: String) { call("command", [name]) }
   func showHiddenRelations() {
     content.hiddenRelations = []
@@ -262,17 +285,44 @@ struct CanvasBoardContent {
     guard loaded, writable else { return }
     await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
       flushWaiters.append(continuation)
-      command("flush")
-      Task { @MainActor in
-        try? await Task.sleep(for: .milliseconds(900))
+      guard flushWaiters.count == 1 else { return }
+      flushTimeout = Task { @MainActor [weak self] in
+        do { try await Task.sleep(for: .milliseconds(900)) } catch { return }
+        guard let self, !self.flushWaiters.isEmpty else { return }
+        self.failure = "The canvas did not confirm its save. Keep this board open and retry."
         self.resumeFlush()
       }
+      command("flush")
     }
   }
   private func resumeFlush() {
+    flushTimeout?.cancel()
+    flushTimeout = nil
     let waiting = flushWaiters
     flushWaiters = []
     for continuation in waiting { continuation.resume() }
+  }
+  func audit() async throws -> [String] {
+    guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else { return [] }
+    let value = try await webView.callAsyncJavaScript(
+      "return await window.synthesis.audit()", arguments: [:], in: nil, contentWorld: .page)
+    var checks = value as? [String] ?? ["FAIL missing engine audit response"]
+    await flush()
+    checks.append(
+      failure == nil ? "PASS scene persisted after engine audit" : "FAIL scene save: \(failure!)")
+    if let board = try studio.store.boards(worldID: worldID, kind: "canvas").first(where: {
+      $0.id == boardID
+    }) {
+      let saved = try CanvasBoardContent.decode(board.content)
+      let files = saved.scene?["files"] as? [String: Any] ?? [:]
+      checks.append(
+        saved.counts.cards > 0 && !files.isEmpty
+          ? "PASS persisted board retains records and image files"
+          : "FAIL persisted board missing content")
+    } else {
+      checks.append("FAIL board missing after audit")
+    }
+    return checks
   }
   /// Where cards are on screen, for the interaction self-test.
   func probe() async -> [String: Any] {
@@ -304,6 +354,10 @@ struct CanvasBoardContent {
   // MARK: Messages from the canvas
 
   fileprivate func receive(_ message: [String: Any]) {
+    // Late WebKit messages belong to the board generation that emitted them.
+    guard CanvasMessageScope.accepts(message, current: loadID) else {
+      return
+    }
     switch message["type"] as? String {
     case "ready":
       ready = true

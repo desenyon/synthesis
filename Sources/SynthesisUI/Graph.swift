@@ -168,7 +168,7 @@ struct RelationshipGraph: View {
       }
     }
     .onChange(of: studio.records) { _, _ in refresh() }
-    .sheet(item: $panel) { item in
+    .studioSheet(item: $panel) { item in
       switch item {
       case .create: createSheet
       case .edit: editSheet

@@ -4,11 +4,25 @@ import SynthesisCore
 import SynthesisUI
 import WebKit
 
+private struct CaptureTransport: ModelTransport {
+  func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
+    async throws -> String
+  {
+    throw SynthesisError.invalid("Model requests are blocked during verification.")
+  }
+}
+
 /// Standard titled window with the content extended under a transparent title bar, so the app
 /// keeps native window controls, resizing, full screen and accessibility while drawing its own
 /// integrated header.
 final class StudioWindow: NSWindow {
   static let headerHeight: CGFloat = 56
+  private var backgroundCapture: Bool {
+    ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil
+      && ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"] == nil
+  }
+  override var canBecomeKey: Bool { !backgroundCapture && super.canBecomeKey }
+  override var canBecomeMain: Bool { !backgroundCapture && super.canBecomeMain }
   override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
     if ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil { return frameRect }
     return super.constrainFrameRect(frameRect, to: screen)
@@ -46,8 +60,19 @@ final class StudioWindow: NSWindow {
   }
   func applicationDidFinishLaunching(_ notification: Notification) {
     do {
+      // Set before creating any hosting view: a first-screen sheet can otherwise request focus.
+      NSApp.setActivationPolicy(
+        capturing && ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"] == nil
+          ? .prohibited : .regular)
+      if capturing {
+        guard let path = ProcessInfo.processInfo.environment["SYNTHESIS_DATABASE_PATH"],
+          !FileManager.default.fileExists(atPath: path)
+        else {
+          throw SynthesisError.invalid("Verification requires a fresh isolated database path.")
+        }
+      }
       let store = try WorkspaceStore(path: WorkspaceStore.defaultPath)
-      studio = try Studio(store: store)
+      studio = try Studio(store: store, transport: capturing ? CaptureTransport() : nil)
       window = StudioWindow(
         contentRect: NSRect(x: 0, y: 0, width: 1440, height: 900),
         styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
@@ -63,7 +88,6 @@ final class StudioWindow: NSWindow {
       window.contentView = NSHostingView(rootView: ConnectedRoot(studio: studio))
       window.center()
       if !capturing { window.setFrameAutosaveName("SynthesisMainWindow") }
-      NSApp.setActivationPolicy(.regular)
       buildMenu()
       if let directory = ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"],
         capturing
@@ -86,6 +110,10 @@ final class StudioWindow: NSWindow {
         NSApp.activate(ignoringOtherApps: true)
       }
     } catch {
+      if capturing {
+        fputs("Verification startup failed: \(error)\n", stderr)
+        exit(1)
+      }
       let alert = NSAlert()
       alert.messageText = "Synthesis could not open its workspace"
       alert.informativeText = error.localizedDescription
@@ -380,7 +408,23 @@ final class StudioWindow: NSWindow {
             studio.canvasFit?()
             try await Task.sleep(for: .milliseconds(900))
           }
+          if state == "canvas", width == 1440,
+            ProcessInfo.processInfo.environment["SYNTHESIS_CANVAS_AUDIT"] == "1"
+          {
+            let checks = try await studio.auditCanvas()
+            for line in checks { print("CANVAS_AUDIT \(line)") }
+            if checks.contains(where: { $0.hasPrefix("FAIL") }) {
+              throw SynthesisError.invalid("Canvas engine audit failed; see checks above.")
+            }
+          }
+          try await Task.sleep(for: .milliseconds(200))
+          studio.toast = nil
           window.layoutTrafficLights()
+          guard !NSApp.isActive, !window.isKeyWindow else {
+            throw SynthesisError.invalid(
+              "Background verification unexpectedly took focus (active=\(NSApp.isActive), key=\(window.isKeyWindow))."
+            )
+          }
           guard let content = window.contentView, let frameView = content.superview else {
             continue
           }
@@ -399,7 +443,7 @@ final class StudioWindow: NSWindow {
               sheetView, to: folder.appendingPathComponent("\(state)-panel-\(width)x\(height).png"))
             print("CAPTURE \(state) panel")
           } else if state.hasPrefix("sheet-") {
-            print("CAPTURE \(state) panel missing")
+            print("CAPTURE \(state) content inline; native modal presentation not exercised")
           }
         }
       }
@@ -414,6 +458,11 @@ final class StudioWindow: NSWindow {
 }
 MainActor.assumeIsolated {
   let app = NSApplication.shared
+  if ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil,
+    ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"] == nil
+  {
+    app.setActivationPolicy(.prohibited)
+  }
   let delegate = ApplicationDelegate()
   app.delegate = delegate
   withExtendedLifetime(delegate) { app.run() }

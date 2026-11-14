@@ -5,16 +5,16 @@ import SynthesisCore
 /// so the light and dark themes stay complete counterparts.
 public struct Theme {
   public let dark: Bool
-  public var background: Color { Color(hex: dark ? 0x17191C : 0xF8F9FB) }
-  public var sidebar: Color { Color(hex: dark ? 0x1D2024 : 0xF0F2F5) }
-  public var surface: Color { Color(hex: dark ? 0x262A30 : 0xFFFFFF) }
-  public var secondarySurface: Color { Color(hex: dark ? 0x30353D : 0xECEFF3) }
+  public var background: Color { Color(hex: dark ? 0x141617 : 0xF8F9FB) }
+  public var sidebar: Color { Color(hex: dark ? 0x1B1D1E : 0xF0F2F5) }
+  public var surface: Color { Color(hex: dark ? 0x232525 : 0xFFFFFF) }
+  public var secondarySurface: Color { Color(hex: dark ? 0x2D302F : 0xECEFF3) }
   public var text: Color { Color(hex: dark ? 0xECEBED : 0x20232B) }
   public var secondary: Color { Color(hex: dark ? 0xBEC5CE : 0x5C6573) }
   public var muted: Color { Color(hex: dark ? 0x929CAA : 0x7D8593) }
-  public var border: Color { Color(hex: dark ? 0x3C434C : 0xDCE1E8) }
-  public var accent: Color { Color(hex: dark ? 0xA9C7DB : 0x3B637F) }
-  public var accentSoft: Color { Color(hex: dark ? 0x2B3B47 : 0xE3ECF3) }
+  public var border: Color { Color(hex: dark ? 0x3A3E3D : 0xDCE1E8) }
+  public var accent: Color { Color(hex: dark ? 0xB7D4C1 : 0x3B637F) }
+  public var accentSoft: Color { Color(hex: dark ? 0x29362F : 0xE3ECF3) }
   /// Text or icon colour placed on a filled accent control.
   public var onAccent: Color { dark ? Color(hex: 0x14181C) : .white }
   public var hover: Color { text.opacity(dark ? 0.06 : 0.05) }

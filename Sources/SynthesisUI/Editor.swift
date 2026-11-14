@@ -97,7 +97,7 @@ struct EditorScreen: View {
       if studio.captureHint == "sheet-history" { openHistory() }
     }
     .onDisappear { saving?.cancel() }
-    .sheet(item: $panel) { item in
+    .studioSheet(item: $panel) { item in
       switch item {
       case .history: historySheet
       case .canon: canonSheet
@@ -445,6 +445,7 @@ struct EditorScreen: View {
 
 /// Everything connected to the open record: status, metadata, links, relationships and events.
 struct RecordInspector: View {
+  @State private var linkPicker = false
   @ObservedObject var studio: Studio
   let record: LoreRecord
   var flush: () -> Bool
@@ -509,18 +510,22 @@ struct RecordInspector: View {
         section("Links") {
           if outgoing.isEmpty { hint("Link this to a character, place or another page.") }
           ForEach(outgoing) { linkRow($0, prefix: nil, removable: true) }
-          PlainMenu {
-            let candidates = studio.records.filter { candidate in
-              candidate.id != record.id && !outgoing.contains { $0.id == candidate.id }
-            }
-            ForEach(candidates.prefix(60)) { candidate in
-              Button(candidate.title) { link(candidate) }
-            }
-            if candidates.isEmpty { Text("Nothing else to link yet") }
+          Button {
+            linkPicker = true
           } label: {
             Label("Add link", systemImage: "plus").font(.system(size: 12.5, weight: .medium))
               .foregroundStyle(t.accent).padding(.horizontal, 8).frame(height: 26).hoverFill(t)
-          }.padding(.leading, -8)
+          }.buttonStyle(.plain).padding(.leading, -8)
+            .popover(isPresented: $linkPicker) {
+              SearchableRecordPicker(
+                records: studio.records.filter { candidate in
+                  candidate.id != record.id && !outgoing.contains { $0.id == candidate.id }
+                }, t: t
+              ) { candidate in
+                link(candidate)
+                linkPicker = false
+              }
+            }
         }
         if !incoming.isEmpty {
           section("Referenced by") {

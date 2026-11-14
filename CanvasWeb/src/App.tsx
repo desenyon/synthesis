@@ -23,20 +23,27 @@ import {
   type RelationInfo,
 } from "./cards";
 import { palette, type Theme } from "./palette";
+import { acceptsSession, containsCardPoint } from "./sceneRules";
+import { StudioOverlay } from "./StudioOverlay";
 
 type El = any;
 type Api = any;
 
+let activeSession = "";
+let loadEpoch = 0;
+
 /** Messages to the native application. Outside the app (plain browser) they are logged. */
 function post(message: Record<string, unknown>) {
   const handler = (window as any).webkit?.messageHandlers?.synthesis;
-  if (handler) handler.postMessage(message);
+  if (handler) handler.postMessage({ ...message, sessionID: activeSession });
   else console.debug("synthesis →", message);
 }
 
 type LegacyCard = { id: string; text: string; recordID?: string; image?: string; x: number; y: number; group?: string };
 type LegacyEdge = { label?: string; source: string; target: string };
 type LoadPayload = {
+  sessionID: string;
+  assisted: boolean;
   name: string;
   theme: Theme;
   scene: { elements: El[]; appState?: Record<string, unknown>; files?: Record<string, El> } | null;
@@ -65,6 +72,7 @@ function imageSize(dataURL: string): Promise<{ width: number; height: number }> 
 
 export function App() {
   const [api, setApi] = useState<Api>(null);
+  const [assisted, setAssisted] = useState(true);
   const [theme, setTheme] = useState<Theme>("dark");
   const [name, setName] = useState("Board");
   const live = useRef({
@@ -92,6 +100,9 @@ export function App() {
     s.applying = false;
   }, []);
 
+  const getRecords = useCallback(() => live.current.records, []);
+  const getRelations = useCallback(() => live.current.relations, []);
+
   const synchronise = useCallback(() => {
     const s = live.current;
     if (!s.api || !s.loaded) return;
@@ -100,7 +111,15 @@ export function App() {
     if (cards) elements = cards;
     const relations = syncRelations(elements, s.relations, s.hidden, s.theme);
     if (relations) elements = relations;
-    if (cards || relations) apply(elements);
+    let presentationChanged = false;
+    elements = elements.map(e => {
+      if (["card", "part"].includes(e.customData?.synthesis) && e.opacity !== 0) {
+        presentationChanged = true;
+        return newElementWith(e, {opacity:0});
+      }
+      return e;
+    });
+    if (cards || relations || presentationChanged) apply(elements);
   }, [apply]);
 
   const serialise = useCallback((withFiles: boolean) => {
@@ -152,6 +171,8 @@ export function App() {
           }
           continue;
         }
+        // Undo restores the engine element; restore its board visibility as well.
+        if (s.hidden.delete(id)) save();
         const label = arrowLabel(el, all)?.originalText?.trim() ?? "";
         if (relation && label && label !== relation.label) {
           relation.label = label;
@@ -175,7 +196,7 @@ export function App() {
         label: arrowLabel(el, all)?.originalText?.trim() ?? "",
       });
     }
-  }, []);
+  }, [save]);
 
   /// Tells the application which record cards are selected, so its bar can act on them.
   const reportSelection = useCallback(() => {
@@ -239,6 +260,12 @@ export function App() {
 
     const bridge = {
       async load(payload: LoadPayload) {
+        const epoch = ++loadEpoch;
+        activeSession = payload.sessionID;
+        setAssisted(payload.assisted);
+        window.clearTimeout(s.saveTimer);
+        window.clearTimeout(s.analyzeTimer);
+        s.selectionKey = "";
         s.loaded = false;
         s.theme = payload.theme;
         s.records = new Map(payload.records.map((r) => [r.id, r]));
@@ -254,6 +281,8 @@ export function App() {
             new Promise((resolve) => setTimeout(resolve, 800)),
           ]);
         } catch {}
+        if (epoch !== loadEpoch || !acceptsSession(activeSession, payload.sessionID)) return;
+        api.resetScene();
         let elements: El[] = [];
         let appState: Record<string, unknown> = {};
         let fit = false;
@@ -281,11 +310,11 @@ export function App() {
           elements = await migrate(payload.legacy, s.records, payload.theme, api);
           fit = true;
         }
+        if (epoch !== loadEpoch || !acceptsSession(activeSession, payload.sessionID)) return;
         s.applying = true;
-        api.resetScene();
         api.updateScene({
           elements,
-          appState: { ...appState, theme: payload.theme, viewBackgroundColor: palette(payload.theme).background },
+          appState: { ...appState, selectedElementIds: {}, selectedGroupIds: {}, editingGroupId: null, theme: payload.theme, viewBackgroundColor: "transparent" },
           captureUpdate: CaptureUpdateAction.NEVER,
         });
         api.history.clear();
@@ -293,15 +322,16 @@ export function App() {
         s.loaded = true;
         synchronise();
         if (fit && api.getSceneElements().length) {
-          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.72, animate: false });
+          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.82, animate: false });
         }
         post({ type: "loaded", migrated: Boolean(payload.legacy && !payload.scene), ...serialise(true) });
       },
+      setAssistance(enabled: boolean) { setAssisted(enabled); },
       setTheme(next: Theme) {
         s.theme = next;
         setTheme(next);
         if (!s.loaded) return;
-        apply(api.getSceneElementsIncludingDeleted(), { theme: next, viewBackgroundColor: palette(next).background });
+        apply(api.getSceneElementsIncludingDeleted(), { theme: next, viewBackgroundColor: "transparent" });
         synchronise();
       },
       /** Latest records and relationships from the world. */
@@ -339,8 +369,10 @@ export function App() {
         onChange();
       },
       async addImage(base64: string) {
+        const epoch = loadEpoch;
         const dataURL = `data:${imageMime(base64)};base64,${base64}`;
         const size = await imageSize(dataURL);
+        if (epoch !== loadEpoch || !s.loaded) return;
         const width = Math.min(480, size.width);
         const height = (width / size.width) * size.height;
         const fileId = `file:${randomId()}`;
@@ -359,13 +391,14 @@ export function App() {
       },
       /** Sets or clears the picture at the top of a record's card. */
       async setCardArt(recordID: string, base64: string | null) {
+        const epoch = loadEpoch;
         const all: El[] = api.getSceneElementsIncludingDeleted();
         const selected = api.getAppState().selectedElementIds ?? {};
         const rect =
           all.find((e) => isCard(e) && e.customData.recordID === recordID && selected[e.id]) ??
           all.find((e) => isCard(e) && e.customData.recordID === recordID);
         if (!rect) return;
-        const group = rect.groupIds?.[rect.groupIds.length - 1];
+        const group = rect.groupIds?.[0];
         const isArt = (e: El) => !e.isDeleted && e.type === "image" && e.customData?.role === "art" && e.groupIds?.includes(group);
         let next = all.map((e) =>
           isArt(e)
@@ -378,6 +411,7 @@ export function App() {
         if (base64) {
           const dataURL = `data:${imageMime(base64)};base64,${base64}`;
           const size = await imageSize(dataURL);
+          if (epoch !== loadEpoch || !s.loaded) return;
           const height = Math.min(150, (CARD_WIDTH / size.width) * size.height);
           const fileId = `file:${randomId()}`;
           api.addFiles([{ id: fileId, dataURL, mimeType: imageMime(base64), created: Date.now() }]);
@@ -402,7 +436,7 @@ export function App() {
         s.relations = [...s.relations.filter((r) => r.id !== relation.id), relation];
         const all: El[] = api.getSceneElementsIncludingDeleted();
         const arrow = all.find((e) => e.id === arrowID);
-        if (!arrow) return synchronise();
+        if (!arrow) { synchronise(); save(); return; }
         const a = all.find((e) => e.id === arrow.startBinding?.elementId);
         const b = all.find((e) => e.id === arrow.endBinding?.elementId);
         if (!a || !b) return synchronise();
@@ -444,19 +478,25 @@ export function App() {
       },
       command(name: string) {
         const key = (k: string, extra: Record<string, unknown> = {}) =>
-          document.dispatchEvent(new KeyboardEvent("keydown", { key: k, code: `Key${k.toUpperCase()}`, metaKey: true, bubbles: true, ...extra }));
+          document.querySelector(".excalidraw")?.dispatchEvent(new KeyboardEvent("keydown", { key: k, code: `Key${k.toUpperCase()}`, metaKey: true, bubbles: true, ...extra }));
         if (name === "undo") key("z");
         else if (name === "redo") key("z", { shiftKey: true });
         else if (name === "selectAll") key("a");
+        else if (["zoomIn", "zoomOut", "resetZoom"].includes(name)) {
+          const state = api.getAppState();
+          const old = state.zoom.value;
+          const zoom = name === "resetZoom" ? 1 : Math.min(4, Math.max(0.1, old * (name === "zoomIn" ? 1.2 : 1/1.2)));
+          api.updateScene({appState: {zoom: {value: zoom}, scrollX: state.scrollX + state.width / 2 * (1/zoom - 1/old), scrollY: state.scrollY + state.height / 2 * (1/zoom - 1/old)}, captureUpdate: CaptureUpdateAction.NEVER});
+        }
         else if (name === "fit" && api.getSceneElements().length) {
-          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.72, animate: true });
+          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.82, animate: true });
         } else if (name === "flush") {
           window.clearTimeout(s.saveTimer);
           if (s.loaded) post({ type: "change", ...serialise(true) });
         }
       },
       async exportImage() {
-        const elements = api.getSceneElements();
+        const elements = api.getSceneElements().map((e:El)=>["card","part"].includes(e.customData?.synthesis)?{...e,opacity:100}:e);
         if (!elements.length) return post({ type: "exported", data: "" });
         const blob = await exportToBlob({
           elements,
@@ -468,6 +508,63 @@ export function App() {
         const reader = new FileReader();
         reader.onload = () => post({ type: "exported", data: String(reader.result).split(",")[1] ?? "" });
         reader.readAsDataURL(blob);
+      },
+      /** Deterministic, isolated WebKit integration checks. Never calls a model. */
+      async audit() {
+        const results: string[] = [];
+        const check = (name: string, ok: boolean) => results.push(`${ok ? "PASS" : "FAIL"} ${name}`);
+        const wait = () => new Promise(resolve => setTimeout(resolve, 100));
+        const original: LoadPayload = structuredClone({sessionID:activeSession,assisted:true,name,theme:s.theme,
+          scene:serialise(true).scene as any,legacy:null,hiddenRelations:[...s.hidden],records:[...s.records.values()],relations:s.relations.map(r=>({...r}))});
+        const card = api.getSceneElements().find(isCard);
+        if (!card) return ["FAIL fixture has no card"];
+        await wait();
+        const stockToolbar = document.querySelector(".App-menu_top");
+        check("custom toolbar replaces stock controls", !stockToolbar || getComputedStyle(stockToolbar).display === "none");
+        check("custom cards paint above engine", Number(getComputedStyle(document.querySelector(".studio-overlay")!).zIndex) > 2 && document.querySelectorAll(".studio-record").length > 0);
+        (document.querySelector('[aria-label="Pan · H"]') as HTMLButtonElement).click(); await wait();
+        check("custom pan tool reaches engine", api.getAppState().activeTool.type === "hand");
+        (document.querySelector('[aria-label="Select · V"]') as HTMLButtonElement).click(); await wait();
+        const before = api.getAppState().zoom.value;
+        (document.querySelector('[aria-label="Zoom in"]') as HTMLButtonElement).click(); await wait();
+        check("custom zoom control reaches engine", api.getAppState().zoom.value > before);
+        bridge.command("resetZoom"); await wait();
+        const initial = {...api.getSceneElements().find((e:El)=>e.id===card.id)};
+        await bridge.testDrag(card.customData.recordID, 40, 25); await wait();
+        const moved = {...api.getSceneElements().find((e:El)=>e.id===card.id)};
+        check(`overlay permits real engine card drag (${moved.x-initial.x}, ${moved.y-initial.y})`, Math.abs(moved.x-initial.x-40)<1 && Math.abs(moved.y-initial.y-25)<1);
+        bridge.command("undo"); await wait();
+        const undone = api.getSceneElements().find((e:El)=>e.id===card.id);
+        check("custom undo restores dragged card", Math.abs(undone.x-initial.x)<1);
+        bridge.command("redo"); await wait();
+        check("custom redo restores move", Math.abs(api.getSceneElements().find((e:El)=>e.id===card.id).x-moved.x)<1);
+        const relation = s.relations.find(r=>api.getSceneElements().some((e:El)=>isRelation(e)&&e.customData.relationID===r.id));
+        if (relation) {
+          bridge.sync([...s.records.values()],s.relations.map(r=>r.id===relation.id?{...r,label:"audit updated"}:r));
+          const arrow=api.getSceneElements().find((e:El)=>isRelation(e)&&e.customData.relationID===relation.id);
+          check("stored relationship rename refreshes label",arrowLabel(arrow,api.getSceneElements())?.originalText==="audit updated");
+          bridge.sync([...s.records.values()],s.relations.filter(r=>r.id!==relation.id));
+          check("archived relationship disappears",!api.getSceneElements().some((e:El)=>isRelation(e)&&e.customData.relationID===relation.id));
+        }
+        const second = api.getSceneElements().filter(isCard)[1];
+        if (second) {
+          const oldTitle = s.records.get(second.customData.recordID)?.title;
+          api.updateScene({elements:api.getSceneElementsIncludingDeleted().map((e:El)=>e.customData?.synthesis === "card" || e.customData?.synthesis === "part" ? {...e,groupIds:[...e.groupIds,"audit:outer"]} : e)});
+          bridge.sync([...s.records.values()].map(r=>r.id===card.customData.recordID?{...r,title:"Updated first card"}:r),s.relations);
+          const title = api.getSceneElements().find((e:El)=>e.customData?.role==="title" && e.groupIds?.[0]===second.groupIds[0]);
+          check("grouping cards never mixes their record content",title?.originalText===oldTitle);
+        }
+        const files=Object.keys(original.scene!.files??{});
+        await bridge.load(original); await wait();
+        check("image files survive board reload",files.length>0 && files.every(id=>api.getFiles()[id]?.dataURL));
+        const selectedCard=api.getSceneElements().find(isCard);
+        api.updateScene({appState:{selectedElementIds:{[selectedCard.id]:true}}}); await wait();
+        bridge.setAssistance(false); await wait();
+        check("manual mode removes canvas AI action",!document.querySelector('[aria-label="Reference in conversation"]'));
+        bridge.setAssistance(true); await wait();
+        check("assisted mode restores contextual reference",!!document.querySelector('[aria-label="Reference in conversation"]'));
+        await bridge.load(original);
+        return results;
       },
       /** For the interaction self-test: where things are on screen right now. */
       probe() {
@@ -544,8 +641,8 @@ export function App() {
       const point = viewportCoordsToSceneCoords({ clientX: event.clientX, clientY: event.clientY }, state);
       const hit = [...api.getSceneElements()]
         .reverse()
-        .find((e: El) => isCard(e) && point.x >= e.x && point.x <= e.x + e.width && point.y >= e.y && point.y <= e.y + e.height);
-      if (!hit || (event.target as HTMLElement)?.closest?.(".layer-ui__wrapper, .excalidraw-textEditorContainer")) return;
+        .find((e: El) => isCard(e) && containsCardPoint(e, point));
+      if (!hit || (event.target as HTMLElement)?.closest?.(".layer-ui__wrapper, .excalidraw-textEditorContainer, .studio-overlay button")) return;
       event.stopPropagation();
       event.preventDefault();
       post({ type: "openRecord", id: hit.customData.recordID });
@@ -569,10 +666,14 @@ export function App() {
       window.removeEventListener("dblclick", openOnDoubleClick, true);
       window.removeEventListener("pointerup", settle, true);
       window.removeEventListener("keyup", settle, true);
+      for (const type of ["pointerdown", "pointermove", "pointerup"]) window.removeEventListener(type, trace as any, true);
+      window.clearTimeout(s.saveTimer);
+      window.clearTimeout(s.analyzeTimer);
     };
-  }, [api, apply, analyse, onChange, openSpot, reportSelection, serialise, synchronise]);
+  }, [api, apply, analyse, onChange, openSpot, reportSelection, serialise, synchronise, save]);
 
   return (
+    <div className={`synthesis-board ${theme}`}>
     <Excalidraw
       excalidrawAPI={setApi}
       theme={theme}
@@ -581,7 +682,7 @@ export function App() {
       aiEnabled={false}
       validateEmbeddable={() => false}
       handleKeyboardGlobally={false}
-      autoFocus
+      autoFocus={false}
       UIOptions={{
         canvasActions: {
           loadScene: false,
@@ -590,7 +691,7 @@ export function App() {
           toggleTheme: false,
           changeViewBackgroundColor: false,
           saveAsImage: false,
-          clearCanvas: true,
+          clearCanvas: false,
         },
       }}
       onLinkOpen={(element: El, event: CustomEvent) => {
@@ -613,6 +714,8 @@ export function App() {
         <MainMenu.DefaultItems.ClearCanvas />
       </MainMenu>
     </Excalidraw>
+    {api && <StudioOverlay api={api} theme={theme} assisted={assisted} records={getRecords} relations={getRelations} post={post}/>}
+    </div>
   );
 }
 

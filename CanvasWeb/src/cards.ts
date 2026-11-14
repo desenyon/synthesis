@@ -5,6 +5,7 @@
 // the record ID; Synthesis rewrites the text whenever the record changes.
 
 import { convertToExcalidrawElements, FONT_FAMILY, newElementWith } from "@excalidraw/excalidraw";
+import { cardGroup, relationDisposition } from "./sceneRules";
 import { categoryColor, palette, type Theme } from "./palette";
 
 export type RecordInfo = {
@@ -144,7 +145,10 @@ export function buildCard(
         x,
         y,
         width: CARD_WIDTH,
-        height: cursor - y,
+        // The DOM card uses a readable 21px body line height and separate header/footer.
+        height: Math.max(cursor - y, 38 + header + (header ? 6 : 0) + 20
+          + parts.title.text.split("\n").length * 22 + 7
+          + (body ? Math.min(5, body.split("\n").length) * 21 : 21) + 34 + 14),
         backgroundColor: p.surface,
         fillStyle: "solid",
         strokeColor: p.border,
@@ -162,7 +166,7 @@ export function buildCard(
 
 export const isCard = (el: El) => !el.isDeleted && el.type === "rectangle" && el.customData?.synthesis === "card";
 export const isRelation = (el: El) => el.type === "arrow" && el.customData?.synthesis === "relation";
-const groupOf = (el: El): string | undefined => el.groupIds?.[el.groupIds.length - 1];
+const groupOf = cardGroup;
 
 /**
  * Brings every card up to date with its record and theme. Returns the new element list, or
@@ -268,11 +272,14 @@ export function buildArrow(a: El, b: El, label: string, theme: Theme, customData
         height: Math.abs(end.y - start.y),
         points: [
           [0, 0],
+          [(end.x - start.x) * 0.25, (end.y - start.y) * 0.15],
+          [(end.x - start.x) * 0.75, (end.y - start.y) * 0.85],
           [end.x - start.x, end.y - start.y],
         ],
         strokeColor: p.accent,
-        strokeWidth: 1,
+        strokeWidth: 1.5,
         roughness: 0,
+        roundness: { type: 2 },
         endArrowhead: "arrow",
         customData,
         ...(label ? { label: { text: label, fontSize: 14, fontFamily: FONT, strokeColor: p.accent } } : {}),
@@ -306,9 +313,23 @@ export function syncRelations(
   theme: Theme,
 ): El[] | null {
   let next: El[] | null = null;
+  const byID = new Map(elements.map(e => [e.id,e]));
+  for (const arrow of elements.filter(e => isRelation(e) && !e.isDeleted)) {
+    const source = byID.get(arrow.startBinding?.elementId)?.customData?.recordID;
+    const target = byID.get(arrow.endBinding?.elementId)?.customData?.recordID;
+    const disposition = relationDisposition(arrow.customData.relationID,source,target,relations,hidden);
+    const label = arrowLabel(arrow,elements);
+    const relation = relations.find(r => r.id === arrow.customData.relationID);
+    const color = palette(theme).accent;
+    if (disposition !== "keep") {
+      next = (next ?? [...elements]).map(e => e.id===arrow.id || e.id===label?.id ? newElementWith(e,{isDeleted:true}) : e);
+    } else if (relation && (label?.originalText !== relation.label || arrow.strokeColor !== color)) {
+      next = (next ?? [...elements]).map(e => e.id===arrow.id ? newElementWith(e,{strokeColor:color}) : e.id===label?.id ? newElementWith(e,{text:relation.label,originalText:relation.label,strokeColor:color}) : e);
+    }
+  }
   const current = () => next ?? elements;
   const cardFor = (recordID: string) => current().find((e) => isCard(e) && e.customData.recordID === recordID);
-  const drawn = new Set(elements.filter((e) => isRelation(e) && !e.isDeleted).map((e) => e.customData.relationID));
+  const drawn = new Set(current().filter((e) => isRelation(e) && !e.isDeleted).map((e) => e.customData.relationID));
   for (const relation of relations) {
     if (drawn.has(relation.id) || hidden.has(relation.id)) continue;
     const a = cardFor(relation.sourceID);
