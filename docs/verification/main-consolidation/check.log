@@ -1,0 +1,202 @@
+Building for debugging...
+[0/17] /Users/desenyon/Developer/synthesis/.build/arm64-apple-macosx/debug/SynthesisPackageTests.derived/runner.swift
+[1/17] Write sources
+[7/17] Write Synthesis-entitlement.plist
+[8/17] Copying Assets
+[9/17] Copying Migrations
+[10/17] Copying CanvasBundle
+[11/17] Write swift-version--1AB21518FC5DEDBE.txt
+[13/30] Compiling SynthesisCore Portability.swift
+[14/30] Compiling SynthesisCore WorldChecks.swift
+[15/30] Compiling SynthesisCore WorkspaceStore.swift
+[16/30] Compiling SynthesisCore OpenAITransport.swift
+[17/30] Compiling SynthesisCore Placeholder.swift
+[18/30] Compiling SynthesisCore Rules.swift
+[19/30] Compiling SynthesisCore Retrieval.swift
+[20/30] Compiling SynthesisCore Proposals.swift
+[21/31] Compiling SynthesisCore AgentEngine.swift
+[22/31] Compiling SynthesisCore Database.swift
+[23/31] Emitting module SynthesisCore
+[24/31] Compiling SynthesisCore HarnessTransport.swift
+[25/31] Compiling SynthesisCore Models.swift
+[26/31] Compiling SynthesisCore resource_bundle_accessor.swift
+[27/60] Compiling SynthesisCoreTests HarnessTests.swift
+[28/60] Emitting module SynthesisCoreTests
+[29/60] Compiling SynthesisCoreTests AgentTests.swift
+[30/60] Compiling SynthesisCoreTests StoreTests.swift
+[31/60] Compiling SynthesisUI CanvasModels.swift
+[32/60] Compiling SynthesisUI CaptureFixtures.swift
+[33/60] Compiling SynthesisUI CommandPalette.swift
+[34/60] Compiling SynthesisUI TextEditing.swift
+[35/60] Compiling SynthesisUI Theme.swift
+[36/62] Compiling SynthesisUI Shell.swift
+[37/62] Compiling SynthesisUI Studio.swift
+[38/62] Emitting module SynthesisUI
+[39/62] Compiling SynthesisUI RecordPicker.swift
+[40/62] Compiling SynthesisUI Review.swift
+[41/62] Compiling SynthesisUI SelfTest.swift
+[42/62] Compiling SynthesisUI Timeline.swift
+[43/62] Compiling SynthesisUI resource_bundle_accessor.swift
+[44/62] Compiling SynthesisUI Markdown.swift
+[45/62] Compiling SynthesisUI PixelComponents.swift
+[46/62] Compiling SynthesisUI ProposalReview.swift
+[47/62] Compiling SynthesisUI Components.swift
+[48/62] Compiling SynthesisUI Conversation.swift
+[49/62] Compiling SynthesisUI CuratedCanvas.swift
+[50/62] Compiling SynthesisUI SheetPresentation.swift
+[51/62] Compiling SynthesisUI Sheets.swift
+[52/62] Compiling SynthesisUI Artwork.swift
+[53/62] Compiling SynthesisUI Atlas.swift
+[54/62] Compiling SynthesisUI CanvasHost.swift
+[55/62] Compiling SynthesisUI Editor.swift
+[56/62] Compiling SynthesisUI Graph.swift
+[57/62] Compiling SynthesisUI Library.swift
+[58/67] Emitting module SynthesisApp
+[59/67] Compiling SynthesisApp main.swift
+[59/67] Write Objects.LinkFileList
+[60/67] Linking Synthesis
+[61/67] Applying Synthesis
+[63/67] Compiling SynthesisUITests WorkspaceTests.swift
+[64/67] Compiling SynthesisUITests CanvasBoundaryTests.swift
+[65/67] Emitting module SynthesisUITests
+[66/69] Compiling SynthesisPackageTests runner.swift
+[67/69] Emitting module SynthesisPackageTests
+[67/69] Write Objects.LinkFileList
+[68/69] Linking SynthesisPackageTests
+Build complete! (38.64s)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite HarnessTests started.
+◇ Suite StoreTests started.
+◇ Suite WorkspaceTests started.
+◇ Suite AgentTests started.
+◇ Suite CanvasBoundaryTests started.
+◇ Suite LiveHarnessTests started.
+◇ Test claudeCodeStreamIsParsedIntoDeltasAndAResult() started.
+◇ Test relationshipEditsAreScopedAuditedAndReversible() started.
+◇ Test canonAndStaleSaveBoundary() started.
+◇ Test relationshipIsolationAndUnknownDates() started.
+◇ Test archivingRecordsIsReversibleAndKeepsCanonAndHistory() started.
+◇ Test worldIsolation() started.
+◇ Test linksMetadataAndExportsStayWorldScoped() started.
+◇ Test markdownImportAndExportArePortableAndLabelled() started.
+◇ Test worldChecksFindRealProblemsLocallyAndRememberDismissals() started.
+◇ Test nestedStoreOperationsRollBackTogether() started.
+◇ Test revisionRestoreIncludesMetadataAndPreservesCanon() started.
+◇ Test worldRenameValidatesAndLinksCanBeRemoved() started.
+◇ Test richTextAndCanvasPersistence() started.
+◇ Test contextIsRankedExplainedAndWorldScoped() started.
+◇ Test claudeCodeRunsLockedDownAndStreamsTheAnswer() started.
+◇ Test persistenceAcrossReopen() started.
+◇ Test rulesStayWorldScopedDraftUntilAcceptedAndReversible() started.
+◇ Test boardsCannotBeOverwrittenFromAnotherWorld() started.
+◇ Test companionConversationSwitchKeepsBoardSaveProtection() started.
+◇ Test graphLayoutIsDeterministicSeparatedAndFollowsOrientation() started.
+◇ Test codexRunsReadOnlyInAnEmptyFolderWithoutUserConfig() started.
+◇ Test conversationsBoardsAndEventsArchiveWithinTheirWorld() started.
+◇ Test manualModeBlocksTransportAtCoreBoundary() started.
+◇ Test locatorStatusAndRouterFollowTheChosenProvider() started.
+◇ Test codexEventsAreParsedIntoMessagesAndFailures() started.
+◇ Test savedAssistantOutputIsAnAIProposedDraftNeverCanon() started.
+◇ Test cancellingARequestTerminatesTheHarness() started.
+◇ Test boardContentReadsBothFormatsAndNeverGuessesAtDamagedData() started.
+◇ Test switchingToManualCancelsInFlightAndDoesNotPersistAssistant() started.
+◇ Test streamingTextHidesAnUnfinishedChangeSet() started.
+◇ Test harnessFailuresAreExplainedAndMissingHarnessIsUnavailable() started.
+◇ Test cancellationBeforeQueuedSubmitNeverStartsTransport() started.
+◇ Test quickCaptureAndImportCreateLabelledDrafts() started.
+◇ Test archivingFromTheStudioIsUndoable() started.
+◇ Test canonicalContextExcludesRichTextPayload() started.
+◇ Test openingARecordKeepsTheWorkspaceItCameFrom() started.
+◇ Test studioResolvesProposalsOnlyThroughExplicitActionsAndKeepsCanon() started.
+◇ Test modelChangeSetIsStagedForReviewAndNeverApplied() started.
+◇ Test assistanceModePreservesWorkspaceAndEditorGuard() started.
+◇ Test markdownBlocksCoverListsQuotesTablesAndFencedCode() started.
+◇ Test pendingDraftSurvivesImmediateWorldSwitch() started.
+◇ Test loreReferencesRoundTripBetweenTokensAndMarkdown() started.
+◇ Test sampleWorldIsIdempotentAndLeavesOtherWorldsAlone() started.
+◇ Test recordPickerCanFindBeyondTheOldMenuLimitAndByAlias() started.
+◇ Test responsesPersistWithoutChangingCanon() started.
+◇ Test generatedArtworkIsDecodableAndWithinCanvasLimit() started.
+◇ Test canonDiffMarksOnlyChangedLines() started.
+◇ Test staleCanvasMessagesAreRejected() started.
+◇ Test corruptAndOversizedImageInputsAreRejected() started.
+◇ Test importedTIFFIsActuallyConvertedToPNG() started.
+◇ Test realHarnessAnswersFromWorldContextAndStagesAProposal() started.
+✔ Test claudeCodeStreamIsParsedIntoDeltasAndAResult() passed after 0.031 seconds.
+✔ Test nestedStoreOperationsRollBackTogether() passed after 0.030 seconds.
+✔ Test worldIsolation() passed after 0.031 seconds.
+✔ Test canonAndStaleSaveBoundary() passed after 0.031 seconds.
+✔ Test relationshipIsolationAndUnknownDates() passed after 0.031 seconds.
+✔ Test markdownImportAndExportArePortableAndLabelled() passed after 0.031 seconds.
+✔ Test archivingRecordsIsReversibleAndKeepsCanonAndHistory() passed after 0.031 secowarning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+nds.
+✔ Test revisionRestoreIncludesMetadataAndPreservesCanon() passed after 0.031 seconds.
+✔ Test relationshipEditsAreScopedAuditedAndReversible() passed after 0.031 seconds.
+✔ Test linksMetadataAndExportsStayWorldScoped() passed after 0.031 seconds.
+✔ Test codexEventsAreParsedIntoMessagesAndFailures() passed after 0.030 seconds.
+✔ Test locatorStatusAndRouterFollowTheChosenProvider() passed after 0.031 seconds.
+✔ Test richTextAndCanvasPersistence() passed after 0.033 seconds.
+✔ Test worldRenameValidatesAndLinksCanBeRemoved() passed after 0.033 seconds.
+✔ Test boardsCannotBeOverwrittenFromAnotherWorld() passed after 0.034 seconds.
+✔ Test worldChecksFindRealProblemsLocallyAndRememberDismissals() passed after 0.036 seconds.
+✔ Test contextIsRankedExplainedAndWorldScoped() passed after 0.039 seconds.
+✔ Test conversationsBoardsAndEventsArchiveWithinTheirWorld() passed after 0.039 seconds.
+✔ Test rulesStayWorldScopedDraftUntilAcceptedAndReversible() passed after 0.040 seconds.
+✔ Test persistenceAcrossReopen() passed after 0.041 seconds.
+✔ Suite StoreTests passed after 0.041 seconds.
+✔ Test realHarnessAnswersFromWorldContextAndStagesAProposal() passed after 0.032 seconds.
+✔ Suite LiveHarnessTests passed after 0.053 seconds.
+✔ Test manualModeBlocksTransportAtCoreBoundary() passed after 0.062 seconds.
+✔ Test companionConversationSwitchKeepsBoardSaveProtection() passed after 0.137 seconds.
+✔ Test streamingTextHidesAnUnfinishedChangeSet() passed after 0.137 seconds.
+✔ Test graphLayoutIsDeterministicSeparatedAndFollowsOrientation() passed after 0.137 seconds.
+✔ Test savedAssistantOutputIsAnAIProposedDraftNeverCanon() passed after 0.137 seconds.
+✔ Test boardContentReadsBothFormatsAndNeverGuessesAtDamagedData() passed after 0.137 seconds.
+✔ Test cancellationBeforeQueuedSubmitNeverStartsTransport() passed after 0.137 seconds.
+✔ Test archivingFromTheStudioIsUndoable() passed after 0.137 seconds.
+✔ Test quickCaptureAndImportCreateLabelledDrafts() passed after 0.137 seconds.
+✔ Test studioResolvesProposalsOnlyThroughExplicitActionsAndKeepsCanon() passed after 0.137 seconds.
+✔ Test openingARecordKeepsTheWorkspaceItCameFrom() passed after 0.137 seconds.
+✔ Test assistanceModePreservesWorkspaceAndEditorGuard() passed after 0.137 seconds.
+✔ Test markdownBlocksCoverListsQuotesTablesAndFencedCode() passed after 0.137 seconds.
+✔ Test modelChangeSetIsStagedForReviewAndNeverApplied() passed after 0.139 seconds.
+✔ Test loreReferencesRoundTripBetweenTokensAndMarkdown() passed after 0.139 seconds.
+✔ Test recordPickerCanFindBeyondTheOldMenuLimitAndByAlias() passed after 0.139 seconds.
+✔ Test sampleWorldIsIdempotentAndLeavesOtherWorldsAlone() passed after 0.139 seconds.
+✔ Test pendingDraftSurvivesImmediateWorldSwitch() passed after 0.139 seconds.
+✔ Test responsesPersistWithoutChangingCanon() passed after 0.140 seconds.
+✔ Test canonDiffMarksOnlyChangedLines() passed after 0.140 seconds.
+✔ Test generatedArtworkIsDecodableAndWithinCanvasLimit() passed after 0.140 seconds.
+✔ Test corruptAndOversizedImageInputsAreRejected() passed after 0.139 seconds.
+✔ Test staleCanvasMessagesAreRejected() passed after 0.139 seconds.
+✔ Test importedTIFFIsActuallyConvertedToPNG() passed after 0.139 seconds.
+✔ Suite WorkspaceTests passed after 0.140 seconds.
+✔ Suite CanvasBoundaryTests passed after 0.140 seconds.
+✔ Test canonicalContextExcludesRichTextPayload() passed after 0.140 seconds.
+✔ Test switchingToManualCancelsInFlightAndDoesNotPersistAssistant() passed after 0.140 seconds.
+✔ Suite AgentTests passed after 0.140 seconds.
+✔ Test harnessFailuresAreExplainedAndMissingHarnessIsUnavailable() passed after 0.363 seconds.
+✔ Test codexRunsReadOnlyInAnEmptyFolderWithoutUserConfig() passed after 0.363 seconds.
+✔ Test claudeCodeRunsLockedDownAndStreamsTheAnswer() passed after 0.363 seconds.
+✔ Test cancellingARequestTerminatesTheHarness() passed after 0.669 seconds.
+✔ Suite HarnessTests passed after 0.669 seconds.
+✔ Test run with 51 tests in 6 suites passed after 0.670 seconds.
+Building for production...
+[0/9] Write sources
+[1/9] Copying Assets
+[2/9] Copying Migrations
+[3/9] Write sources
+[5/9] Copying CanvasBundle
+[6/9] Write swift-version--1AB21518FC5DEDBE.txt
+[8/10] Compiling SynthesisCore AgentEngine.swift
+[9/11] Compiling SynthesisUI Artwork.swift
+[10/12] Compiling SynthesisApp main.swift
+[10/12] Write Objects.LinkFileList
+[11/12] Linking Synthesis
+Build complete! (53.45s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+dist/Synthesis.app: replacing existing signature
+Built dist/Synthesis.app (development, ad-hoc signed; not a release).

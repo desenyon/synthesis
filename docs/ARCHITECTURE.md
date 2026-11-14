@@ -1,5 +1,7 @@
 # Architecture
 
+Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bundle: `dist/Synthesis.app`. The former `swift-falcon` worktree is retired.
+
 ## Application shell
 
 `SynthesisApp` hosts `ConnectedRoot` (Shell.swift) in `StudioWindow`, a titled window with full-size content and a transparent title bar. The window keeps native controls, resizing, full screen and frame autosave; `layoutTrafficLights()` centres the buttons in the 56-point header and is reapplied from `update()`.
@@ -49,7 +51,7 @@ A model answer may end with one fenced `synthesis-proposal` JSON block. `Proposa
 
 ## Data notes
 
-Page references use the world-scoped `links` table; incoming references are queried independently of semantic relationships. Tags and aliases participate in FTS and versioned snapshots. Canvas and atlas serialize typed Codable documents into world-scoped boards; images are bounded base64 inside the local board. World covers are scoped preferences. Exports (schema version 3) include records, conversations, revisions, relationships and their history, events, boards, links and everything archived.
+Page references use the world-scoped `links` table; incoming references are queried independently of semantic relationships. Tags and aliases participate in FTS and versioned snapshots. Canvas and atlas serialize typed Codable documents into world-scoped boards; images are bounded base64 inside the local board. World covers are scoped preferences. Exports (schema version 5) include records, conversations, revisions, relationships and their history, events, boards, links and everything archived.
 
 ## Canvas presentation and isolation — refinement audit
 
@@ -62,3 +64,7 @@ Every load carries a unique session ID echoed on bridge messages. Native and web
 `Artwork.swift` exposes optional bundled GPT illustrations, with provenance in `Assets/GENERATED_ARTWORK.md`. Atlas replacement is an explicit local action with Undo. `browserImageBase64` bounds inputs and converts TIFF/HEIC into actual PNG for WebKit. `RecordPicker.swift` supplies searchable selections without arbitrary 60/80-record menu limits.
 
 The capture runner uses a fresh explicit database, a transport that always rejects model requests and accessory activation with non-key/non-main, mouse-transparent capture windows below normal window level. `SynthesisApplication` ignores activation requests only for background captures. Background sheet content renders inline through `SheetPresentation.swift`; real AppKit sheet presentation is retained in normal use and the explicit foreground runner. `verify-ui.sh` packages into a temporary bundle, leaving the user's app alone. Native compositing combines the window snapshot with the actual WebKit snapshot. `window.synthesis.audit()` exercises the engine in this isolated fixture; it does not claim physical event or animation performance coverage.
+
+## Preserved rules backend
+
+The previously unfinished core work is now checkpointed: migration 0006 adds world-scoped `rules` and `rule_scenarios`. `Rules.swift` supports rule/scenario storage, explicit rule approval, accepted wording, reversible archive and local structural checks. Rules are included with selected records in assistant context and Markdown export; JSON export schema 5 retains rules and scenarios. The dedicated UI is unfinished and is not claimed as a completed workspace.

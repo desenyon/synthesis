@@ -1,16 +1,12 @@
-# Handoff — 2026-11-13 reference and feature audit
+# Handoff — main consolidation, 2026-11-13
 
-Read `AGENTS.md`, `STATE.md` and `verification/REFINEMENT_AUDIT.md`. Continue in **`/Users/desenyon/.zeron/worktrees/synthesis/swift-falcon`**, branch `zeron/you-are-an-elite-product-designer-ux`. Claude’s `4ab3f73` app is the baseline; do not revive the main-checkout SwiftFlow UI. The owner has now authorized iterative audits and implementation, superseding the earlier request to wait for review.
+**Use `/Users/desenyon/Developer/synthesis` on `main`.** The owner selected the reviewed Claude-based app as the primary implementation, authorized pushing it to GitHub and removing the other worktrees. Build and launch `dist/Synthesis.app` from this checkout. The old `swift-falcon` path is retired; do not recreate it or launch its archived binaries.
 
-## Preserve these unfinished owner changes
+The merge retains both histories while using the reviewed source tree, not the superseded SwiftFlow frontend. The unfinished rules backend formerly left uncommitted is now checkpointed at `7e8b5d3`, with formatting corrected and tests retained. It includes migration 0006, rules/scenarios, assistant-context/Markdown support and export schema 5. This does not complete a Rules Lab UI.
 
-These were already dirty before this audit and were not edited or staged by it:
+Private recovery copies (Git bundle, original unfinished files, SQLite snapshot and retired worktree/build artifacts) live outside the repository under `~/Library/Application Support/Synthesis/Development Archives/`. Do not publish them. No lore was replaced and no provider request was sent.
 
-- `Sources/SynthesisCore/{AgentEngine,Portability,WorkspaceStore}.swift`
-- `Tests/SynthesisCoreTests/StoreTests.swift`
-- Untracked `Sources/SynthesisCore/Rules.swift` and `Migrations/0006_rules.sql`
-
-They contain the unfinished rules lab. They compile and their tests ran as part of the 51-test suite, but full strict lint reports eight formatting errors in that work. Do not mistake them for committed audit changes or silently discard them. The review binary includes the current working tree, including these files; the audit commits do not.
+Read `AGENTS.md`, `STATE.md` and `verification/MAIN_CONSOLIDATION.md` first. The earlier reference audit remains in `verification/REFINEMENT_AUDIT.md`; it describes that session's limits, including a lint failure subsequently resolved during consolidation.
 
 ## Implemented
 
@@ -23,7 +19,7 @@ They contain the unfinished rules lab. They compile and their tests ran as part 
 
 ## Builds and evidence
 
-Separate review bundle: `dist/Synthesis-review.app`. It was built, **not opened over the owner’s work**. Do not overwrite or restart their running `dist/Synthesis.app` to test. No foreground self-test, live provider call, release or push occurred.
+Primary review bundle: `dist/Synthesis.app` in the main checkout. The owner explicitly requested launching it for this review. Future automated checks stay in the background and must not restart the user’s running app. A separate `dist/Synthesis-review.app` remains an optional build target, not the primary launch path. No release or live provider call is authorized by this consolidation.
 
 ```sh
 export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
@@ -35,7 +31,7 @@ SYNTHESIS_CANVAS_AUDIT=1 SYNTHESIS_CAPTURE_STATES=canvas,companion,light,manual,
 python3 scripts/check-capture-isolation.py dist/Synthesis-review.app/Contents/MacOS/Synthesis
 ```
 
-Observed: scoped lint; 51 native tests; six Node tests; TypeScript/bundle build; optimized native build; 17 WebKit/native-save checks. The 78-image broad sweep (`test-results/refinement-final`) has 20 inspected contact pages. Focused sweeps correct stacking, duplicate text, mobile chrome and picker clipping; final evidence is linked from the audit ledger. Captured conversations/proposals are authored test fixtures, never presented as real model execution. Engine dragging uses internal synthetic pointer events; it is not a physical mouse/trackpad test.
+Observed in the consolidation: full strict lint; 51 native tests; six Node tests; TypeScript/bundle build; optimized native build; 17 WebKit/native-save checks. The 78-image broad sweep (`test-results/refinement-final`) has 20 inspected contact pages. Focused sweeps correct stacking, duplicate text, mobile chrome and picker clipping; final evidence is linked from the audit ledger. Captured conversations/proposals are authored test fixtures, never presented as real model execution. Engine dragging uses internal synthetic pointer events; it is not a physical mouse/trackpad test.
 
 ## Continue in this order
 

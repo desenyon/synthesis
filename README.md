@@ -8,6 +8,8 @@ export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
 open dist/Synthesis.app
 ```
 
+The primary checkout is `/Users/desenyon/Developer/synthesis` on `main`, which is also the GitHub default branch. Build and launch `dist/Synthesis.app` here. Other worktree builds are retired.
+
 Requires macOS 14+ and Swift 6 Command Line Tools. The canvas bundle is committed; Node is only needed to change it (`cd CanvasWeb && npm install && npm run build`). Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md). Scripts select the compatible installed SDK. This is a development build, ad-hoc signed; no releases or deployment.
 
 ## Workspaces
@@ -47,7 +49,7 @@ On Canvas, double-click a card to open its record. Draw an arrow from one entity
 uv run --with pillow python scripts/contact-sheets.py docs/verification/latest --prune
 ```
 
-The native suite (51 tests; includes preserved, uncommitted rules work) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Six additional Node tests cover canvas geometry, relationship state, nested groups and session isolation (`cd CanvasWeb && npm test`). Visual checks use the real native window and bundled WebKit engine, never HTML previews. The background runner builds a temporary app, requires a fresh isolated database and refuses model requests. It does not overwrite the running bundle. Background sheets render their real content inline to avoid modal activation; native modal interaction requires the explicit foreground test. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the current audit and evidence are in [REFINEMENT_AUDIT](docs/verification/REFINEMENT_AUDIT.md). The full strict lint currently reports eight pre-existing formatting errors in unfinished core rules work; scoped UI/app lint, tests and release build pass independently.
+The native suite (51 tests; includes the checkpointed rules backend) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Six additional Node tests cover canvas geometry, relationship state, nested groups and session isolation (`cd CanvasWeb && npm test`). Visual checks use the real native window and bundled WebKit engine, never HTML previews. The background runner builds a temporary app, requires a fresh isolated database and refuses model requests. It does not overwrite the running bundle. Background sheets render their real content inline to avoid modal activation; native modal interaction requires the explicit foreground test. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the current audit and evidence are in [REFINEMENT_AUDIT](docs/verification/REFINEMENT_AUDIT.md). Full strict lint, the native suite and optimized build pass on the consolidated checkout. The rules backend is preserved in Git; its dedicated UI remains unfinished.
 
 The assistant uses Claude Code or Codex with your subscription by default (no API key), or an OpenAI key if you prefer; see [AI setup](docs/AI_SETUP.md).
 
@@ -57,4 +59,4 @@ Typing in ⌘K also offers to capture the text as an idea. Worlds export as a fo
 
 Current limits: Claude’s earlier handoff records one live request per subscription harness; this audit makes no model-provider calls. Live streaming/Stop UI, large boards/graphs, trackpad and VoiceOver remain unverified. PNG export uses engine-rendered cards and does not yet reproduce the DOM card material exactly. Bundled GPT artwork is optional; on-demand image generation is not implemented. Earlier evidence under `docs/verification` is historical.
 
-To build a separate review bundle without replacing a running app: `./scripts/build.sh release dist/Synthesis-review.app`. The active continuation checkout is `/Users/desenyon/.zeron/worktrees/synthesis/swift-falcon`; do not use the superseded main-checkout build.
+To build a separate review bundle without replacing a running app: `./scripts/build.sh release dist/Synthesis-review.app`. Use the primary checkout above; historical worktree paths in old verification logs are not current launch targets.

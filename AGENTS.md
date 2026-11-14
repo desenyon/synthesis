@@ -40,7 +40,7 @@ Do not build every later feature in the first milestone.
 
 ## 2. First actions in every coding session
 
-1. Inspect the repository, current git status, README, package scripts, and relevant code. Never assume the repo is blank.
+1. Inspect the repository, current git status, README, package scripts, and relevant code. Never assume the repo is blank. The canonical checkout is `/Users/desenyon/Developer/synthesis` on `main`; build/open `dist/Synthesis.app` there. The former `swift-falcon` worktree and old build archives are not current launch targets.
 2. Read this file and `docs/STATE.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, and `docs/DECISIONS.md` if present.
 3. Identify the active milestone, the next user-visible capability, and its acceptance criteria.
 4. Write or update a short execution plan for multi-step changes; then implement. Do not stop after planning unless explicitly asked.

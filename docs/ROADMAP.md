@@ -2,6 +2,8 @@
 
 ## Done
 
+- **Main consolidation** (2026-11-13): reviewed implementation is primary in `/Users/desenyon/Developer/synthesis`; source history and unfinished rules work preserved.
+
 - **Product audit and unified redesign** (2026-11-12): one design system, native window, reversible archive, canon diff, verified interactions.
 - **Safe AI depth, first slice** (2026-11-12): ranked and recorded context, staged proposals with per-change review, `@` mentions, quick capture, Markdown import/export.
 
@@ -12,7 +14,7 @@
 - Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).
 - Next: interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Match live/export card appearance; measure large boards and derived graphs.
 - Then: streamed-response/Stop behavior with controlled transport, editor crash recovery, accessibility/trackpad walkthrough, deeper Timeline and Atlas operations.
-- Keep unfinished rules-lab files separate from this audit. Full strict lint is blocked by eight pre-existing formatting errors in that work.
+- Rules backend is checkpointed and its formatting errors are resolved. Dedicated Rules Lab UI remains incomplete.
 - Reference parity and complete product acceptance remain open; screenshots alone do not certify all interactions.
 
 ## Then — finish M3

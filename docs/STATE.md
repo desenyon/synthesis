@@ -1,6 +1,6 @@
 # Current state — 2026-11-13
 
-Active checkout: `/Users/desenyon/.zeron/worktrees/synthesis/swift-falcon`, branch `zeron/you-are-an-elite-product-designer-ux`. Claude’s implementation remains the baseline. The owner authorized the current feature/reference audit after the review handoff. No release or push.
+Active checkout: **`/Users/desenyon/Developer/synthesis` on `main`**. The reviewed Claude-based implementation is now the primary app. The owner authorized consolidation, removal of other worktrees, a GitHub push/default-branch update and a foreground launch for review. No release or provider call. See [MAIN_CONSOLIDATION](verification/MAIN_CONSOLIDATION.md).
 
 ## Implemented in this audit
 
@@ -10,7 +10,15 @@ Active checkout: `/Users/desenyon/.zeron/worktrees/synthesis/swift-falcon`, bran
 - Searchable, uncapped record pickers for editor links, Atlas and Timeline. Timeline actions stay discoverable. Shared dark tokens and composer surfaces match the supplied reference direction; light remains available.
 - Background verification builds an isolated app bundle/database, blocks model requests, checks that it never becomes active/key, and rejects missing/existing database paths before window construction. The owner’s running bundle is untouched.
 
-## Observed checks
+## Consolidation verification
+
+- `./scripts/check.sh` passes on the consolidated checkout: full strict lint, 51 tests in six suites and optimized native build.
+- `cd CanvasWeb && npm run typecheck && npm test && npm run build`: passes, six tests.
+- Previously uncommitted rules files are checkpointed in Git; the eight formatting errors are resolved. Dedicated Rules Lab UI remains incomplete.
+- Main-checkout background capture: 17 engine/persistence/shutdown checks and startup-isolation checks passed; canvas screenshot inspected. One worktree remains.
+- Primary development bundle: `dist/Synthesis.app`. Existing local data is retained, with a private SQLite backup before review launch.
+
+## Earlier reference-audit checks
 
 - `swift format lint --strict --recursive Sources/SynthesisUI Sources/SynthesisApp Tests/SynthesisUITests`: passed.
 - `./scripts/test.sh`: **51 tests in 6 suites passed**, including existing persistence, world isolation, cancellation and canon approval tests. Five new UI-boundary tests cover images, stale sessions and uncapped record selection. The suite includes the owner’s preserved unfinished rules tests.
@@ -26,4 +34,4 @@ See [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md) for the acceptance ledg
 
 This is a repaired canvas slice and broad visual audit, not acceptance of every feature or exact pixel parity with the reference. Foreground/native pointer interactions, live streaming/Stop, VoiceOver, trackpad, large-world performance and editor crash recovery need deeper verification. Engine PNG export differs from the live DOM cards. Compact fit is an overview, requiring zoom for full text. Timeline still lacks eras/reordering/canon depth; Atlas remains one map with no marker dragging. Runtime image generation is not built. No foreground self-test or paid provider call was made this session.
 
-Next milestone: audit canvas connection/edit/style/export flows, then measure large graph/board behavior and verify streaming cancellation with a controlled transport. Preserve the unfinished core rules-lab edits.
+Next milestone: audit canvas connection/edit/style/export flows, then measure large graph/board behavior and verify streaming cancellation with a controlled transport. Continue the checkpointed rules backend without describing its unfinished UI as complete.
