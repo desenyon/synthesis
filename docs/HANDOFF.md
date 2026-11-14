@@ -2,6 +2,12 @@
 
 For the next agent session. Read `AGENTS.md` first, then this file, then `docs/STATE.md` and `docs/ROADMAP.md`.
 
+## Continuation correction — 2026-11-13
+
+The owner explicitly selected this worktree and Claude’s implementation as the baseline after an older `main` build was opened by mistake. Use `/Users/desenyon/.zeron/worktrees/synthesis/swift-falcon` and this branch; do not port the unmerged `main` SwiftFlow redesign over this canvas.
+
+The existing `dist/Synthesis.app` was opened for owner review and its Excalidraw canvas inspected. The old process was stopped, old bundles retired, and the local database backed up. No new feature verification or provider call was performed during this correction. The pre-existing uncommitted rules-lab changes are preserved and are not included in the review build. Wait for the requested owner review before further feature changes. Run checks in the background; the focus-taking self-test needs a separately agreed review window.
+
 ## Where things stand
 
 Branch `zeron/you-are-an-elite-product-designer-ux` on `github.com/desenyon/synthesis` (public). `main` there is the pre-audit history. Everything described below is committed and pushed unless a line says otherwise.
