@@ -17,6 +17,7 @@ Active checkout: **`/Users/desenyon/Developer/synthesis` on `main`**. The review
 - Previously uncommitted rules files are checkpointed in Git; the eight formatting errors are resolved. Dedicated Rules Lab UI remains incomplete.
 - Main-checkout background capture: 17 engine/persistence/shutdown checks and startup-isolation checks passed; canvas screenshot inspected. One worktree remains.
 - Primary development bundle: `dist/Synthesis.app`. Existing local data is retained, with a private SQLite backup before review launch.
+- Pushed to GitHub `main`, now the default branch. Launched the primary bundle for owner review and visually confirmed the foreground Canvas with existing records, custom cards, connections and tools. No model request; deeper foreground interaction testing remains open.
 
 ## Earlier reference-audit checks
 

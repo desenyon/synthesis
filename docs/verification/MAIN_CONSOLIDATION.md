@@ -24,5 +24,7 @@ Owner instruction: make the reviewed app the primary version, remove other workt
 - `python3 scripts/check-capture-isolation.py dist/Synthesis.app/Contents/MacOS/Synthesis`: passed.
 - `git worktree list --porcelain`: one worktree, `/Users/desenyon/Developer/synthesis`, branch `main`. The former worktree was clean before removal; source snapshot and ignored builds/captures were archived privately first.
 - README, handoff, architecture, state, roadmap and decisions now identify the primary location. AGENTS.md received one operational path clarification, recorded in LEARNINGS.md; protected rules are unchanged.
+- GitHub push succeeded; remote `HEAD` and the repository default branch both resolve to `main`. No force push or release.
+- Launched `/Users/desenyon/Developer/synthesis/dist/Synthesis.app` for owner review. Verified the running executable path and visually inspected the foreground Canvas: existing records, custom entity cards, labeled relationship, floating tools and composer render correctly. Existing local data remains intact. This launch inspection is not a full foreground interaction audit; no model request was made. User-data screenshots were not committed.
 
 The feature audit's remaining gaps still apply. This consolidation does not claim new feature completeness, releases, deployments or live model verification.
