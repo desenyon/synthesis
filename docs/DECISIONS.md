@@ -27,8 +27,40 @@ UI first: pause broader application feature development. Replace the light serif
 
 The owner accepted the graphite foundation and explicitly authorized integration into the real application. This supersedes the UI-study pause: independent persisted assistance mode, Conversation as assisted entry, compact canvas composer with resizable docked companion, actual source-backed records, curated Canvas separate from derived Graph, and shared Library/Timeline/Atlas. Empty boards remain empty. Templates and guided prompts are optional. No model call without deliberate submission; no implicit canon promotion.
 
-## 2026-11-13 — non-disruptive testing and open-source graph engine
+## 2026-11-12 — product audit implementation choices
 
-Owner requirement: verification must not switch away from their current work. Default unattended checks render to a never-ordered native window under prohibited activation, using isolated bundle/DB/preferences and no desktop input. Foreground gesture testing is a separate explicit activity, not a default verification step.
+- **Titled window instead of borderless.** A borderless window had no close, minimise, zoom or full screen and was invisible to native automation. A titled window with full-size content and a transparent title bar keeps the integrated 56-point header the owner asked for while restoring standard behaviour. The traffic lights are re-centred by resizing the title-bar container; AppKit resets them on appearance changes, so `StudioWindow.update()` reapplies the layout. Alternative considered: an empty unified toolbar, rejected because toolbar hit-testing blocks controls drawn beneath it.
+- **Archive, never delete.** Records, conversations, boards and events gain an `archived` flag (migration 0004). Archived rows keep IDs, history, canon snapshots and links, are excluded from lists, search, relationships and the graph, and remain in export. This satisfies the reversible-removal contract without a trash table.
+- **Records open over the current workspace.** `openRecord` no longer changes the destination, so Back returns to Canvas, Graph or wherever the creator was.
+- **One bar per workspace.** The global header merged into `WorkspaceBar` to remove a second 56-point row and the duplicated world name. World identity stays persistent in navigation; the assistance switch stays persistent in every bar.
+- **Superseded UI removed.** The earlier studies (RootView, CanvasDesign and others) were deleted rather than kept compiling; git history is the archive. This reverses the earlier "retained source history" note in ARCHITECTURE.
+- **Graph layout is derived.** Fruchterman–Reingold inside a frame shaped like the workspace, seeded deterministically from sorted record IDs. Positions are not stored; dragging a node is a temporary adjustment.
+- **Verification without taking over the machine.** Captures render the window frame while the app stays behind other windows. Pointer checks post events to the app's own window; because SwiftUI gestures only respond in the key window of the active app, that runner comes forward briefly and reports skipped checks if focus is taken.
 
-Use MIT SwiftFlow as the native graph interaction engine, pinned at 3515701fad73d3c6f8722bd65c22ef0813dc11a0. Compared with Grape (force visualization) and Dagre (layout), it also supplies handles, connection callbacks, selection and viewport behavior. Keep Synthesis's visual components, shared storage and canon approval boundary above the engine. The dependency is vendored for an auditable resource-path patch required by our command-line .app packaging. No upstream algorithm changes. Updates must re-run upstream tests and background capture checks.
+## 2026-11-12 — safe AI depth
+
+- **Proposals ride in the answer text.** The provider adapter streams plain text, so a change set is one fenced JSON block at the end of the answer rather than provider-specific tool calls. This keeps the adapter boundary thin and lets any text model participate. The cost is that a model may ignore or malform the block; malformed blocks are dropped and the prose still shows.
+- **Per-change review, drafts only.** Accepting a proposed change calls the same draft operations a creator uses, with origin `ai-proposed`. There is deliberately no "accept as canon"; canon keeps its own exact-revision review.
+- **Confirmation by ID.** `resolveChange` requires the proposal's ID, as `promote` requires the record's, so the approval boundary is a property of the store API and is covered by a test.
+- **Context is recorded, not just sent.** Every answer stores the records it was given and why, satisfying traceability and making the privacy disclosure concrete.
+- **Mentions are tokens over Markdown.** The stored message keeps `[Title](synthesis://record/id)`; the composer shows a token. Old drafts and transcripts need no migration.
+
+## 2026-11-13 — owner direction: subscription harness by default (protected)
+
+The owner directed that the assistant should not depend on an API key: the default is a local harness signed in with a subscription, with the API still allowed. Implemented as Claude Code (preferred when installed, because it can run with no tools at all) or Codex, with the OpenAI key as a third option. The harness is spawned per message and locked down as described in AI_SETUP. Alternatives considered: the Claude Agent SDK (adds a Node runtime to a native app for no gain over the CLI already installed) and a long-lived harness session (keeps context between turns but makes cancellation, isolation and the Manual-mode guarantee harder to prove). Both harnesses were verified live once; see AI_SETUP.
+
+## 2026-11-13 — owner direction: Canvas built on Excalidraw (protected)
+
+The owner directed that the canvas be built on Excalidraw's open-source engine and customised as needed. This supersedes the earlier "no WebView" implementation note for the Canvas workspace only; the rest of the application stays native SwiftUI/AppKit.
+
+- Uses the published `@excalidraw/excalidraw` package (MIT) rather than a source fork: the component API covers cards, arrows, theming, menus and link handling, and upgrades stay simple. A fork remains possible if deeper engine changes are needed.
+- The bundle is built with Vite and committed, so building the app needs no Node toolchain. Fonts are bundled; the CJK handwriting font is omitted for size.
+- Record cards and relationships are ordinary Excalidraw elements tagged with `customData`, so every engine feature (drawing, shapes, text, images, frames, grouping, alignment, undo) applies to them.
+- Removing a relationship arrow hides it on that board; it does not archive the relationship. This mirrors "removing a card keeps the record".
+- Trade-off accepted: a web view cannot be captured by view caching and is not repainted by WebKit while re-attached in an occluded window, which limits background screenshots (see HANDOFF).
+
+## 2026-11-13 — custom canvas presentation and quiet verification
+
+Owner direction: retain Claude’s active worktree, customize the open-source engine to Synthesis world rules, use the supplied node-workspace reference, add GPT imagery, and keep verification in the background. The published Excalidraw engine remains responsible for scene editing/history. A pointer-transparent DOM presentation follows its actual geometry, rather than duplicating the scene model or replacing the native app. Ports request native relationship review; they never silently establish canon. PNG fidelity is an explicit remaining trade-off.
+
+Bundled GPT-generated map/portrait illustrations are optional local choices. Existing lore and images are not overwritten. Runtime image-provider integration is deferred rather than simulated. Background tests use temporary bundles, fresh databases and a rejecting model transport; foreground self-test is not run while the owner works. No protected instruction was weakened, and AGENTS.md was not changed.

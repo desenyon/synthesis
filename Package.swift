@@ -7,14 +7,12 @@ let package = Package(
     .executable(name: "Synthesis", targets: ["SynthesisApp"]),
     .library(name: "SynthesisCore", targets: ["SynthesisCore"]),
   ],
-  dependencies: [.package(path: "Vendor/SwiftFlow")],
   targets: [
     .systemLibrary(name: "CSQLite"),
     .target(name: "SynthesisCore", dependencies: ["CSQLite"], resources: [.copy("Migrations")]),
     .target(
-      name: "SynthesisUI",
-      dependencies: ["SynthesisCore", .product(name: "SwiftFlow", package: "SwiftFlow")],
-      resources: [.copy("Assets")]),
+      name: "SynthesisUI", dependencies: ["SynthesisCore"],
+      resources: [.copy("Assets"), .copy("CanvasBundle")]),
     .executableTarget(name: "SynthesisApp", dependencies: ["SynthesisUI", "SynthesisCore"]),
     .testTarget(name: "SynthesisCoreTests", dependencies: ["SynthesisCore"]),
     .testTarget(name: "SynthesisUITests", dependencies: ["SynthesisUI", "SynthesisCore"]),

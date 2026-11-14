@@ -1,0 +1,149 @@
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 660ms
+CAPTURE conversation 1440x900, bitmap 2880x1800, 622ms
+CAPTURE canvas 1440x900, bitmap 2880x1800, 1523ms
+CAPTURE canvas-selected 1440x900, bitmap 2880x1800, 2154ms
+CAPTURE companion 1440x900, bitmap 2880x1800, 1076ms
+CAPTURE manual 1440x900, bitmap 2880x1800, 1133ms
+CAPTURE collapsed 1440x900, bitmap 2880x1800, 1705ms
+CAPTURE light 1440x900, bitmap 2880x1800, 1573ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 713ms
+CAPTURE graph-selected 1440x900, bitmap 2880x1800, 900ms
+CAPTURE library 1440x900, bitmap 2880x1800, 45ms
+CAPTURE editor 1440x900, bitmap 2880x1800, 52ms
+CAPTURE timeline 1440x900, bitmap 2880x1800, 39ms
+CAPTURE atlas 1440x900, bitmap 2880x1800, 540ms
+CAPTURE palette 1440x900, bitmap 2880x1800, 1321ms
+CAPTURE light-conversation 1440x900, bitmap 2880x1800, 613ms
+CAPTURE light-library 1440x900, bitmap 2880x1800, 49ms
+CAPTURE light-graph 1440x900, bitmap 2880x1800, 729ms
+CAPTURE light-editor 1440x900, bitmap 2880x1800, 49ms
+CAPTURE manual-conversation 1440x900, bitmap 2880x1800, 52ms
+CAPTURE toast 1440x900, bitmap 2880x1800, 390ms
+CAPTURE empty-conversation 1440x900, bitmap 2880x1800, 897ms
+CAPTURE empty-canvas 1440x900, bitmap 2880x1800, 1450ms
+CAPTURE empty-library 1440x900, bitmap 2880x1800, 39ms
+CAPTURE empty-graph 1440x900, bitmap 2880x1800, 140ms
+CAPTURE empty-timeline 1440x900, bitmap 2880x1800, 101ms
+CAPTURE empty-atlas 1440x900, bitmap 2880x1800, 35ms
+CAPTURE sheet-settings 1440x900, bitmap 2880x1800, 91ms
+CAPTURE sheet-settings panel
+CAPTURE sheet-record 1440x900, bitmap 2880x1800, 92ms
+CAPTURE sheet-record panel
+CAPTURE sheet-canon 1440x900, bitmap 2880x1800, 96ms
+CAPTURE sheet-canon panel
+CAPTURE sheet-history 1440x900, bitmap 2880x1800, 93ms
+CAPTURE sheet-history panel
+CAPTURE sheet-relation 1440x900, bitmap 2880x1800, 767ms
+CAPTURE sheet-relation panel
+CAPTURE conversation-home 1920x1080, bitmap 3840x2160, 973ms
+CAPTURE conversation 1920x1080, bitmap 3840x2160, 1020ms
+CAPTURE canvas 1920x1080, bitmap 3840x2160, 2406ms
+CAPTURE canvas-selected 1920x1080, bitmap 3840x2160, 3423ms
+CAPTURE companion 1920x1080, bitmap 3840x2160, 1728ms
+CAPTURE manual 1920x1080, bitmap 3840x2160, 1823ms
+CAPTURE collapsed 1920x1080, bitmap 3840x2160, 2662ms
+CAPTURE light 1920x1080, bitmap 3840x2160, 2386ms
+CAPTURE graph 1920x1080, bitmap 3840x2160, 1128ms
+CAPTURE graph-selected 1920x1080, bitmap 3840x2160, 1498ms
+CAPTURE library 1920x1080, bitmap 3840x2160, 63ms
+CAPTURE editor 1920x1080, bitmap 3840x2160, 61ms
+CAPTURE timeline 1920x1080, bitmap 3840x2160, 61ms
+CAPTURE atlas 1920x1080, bitmap 3840x2160, 834ms
+CAPTURE palette 1920x1080, bitmap 3840x2160, 2018ms
+CAPTURE light-conversation 1920x1080, bitmap 3840x2160, 967ms
+CAPTURE light-library 1920x1080, bitmap 3840x2160, 70ms
+CAPTURE light-graph 1920x1080, bitmap 3840x2160, 1124ms
+CAPTURE light-editor 1920x1080, bitmap 3840x2160, 68ms
+CAPTURE manual-conversation 1920x1080, bitmap 3840x2160, 69ms
+CAPTURE toast 1920x1080, bitmap 3840x2160, 584ms
+CAPTURE empty-conversation 1920x1080, bitmap 3840x2160, 970ms
+CAPTURE empty-canvas 1920x1080, bitmap 3840x2160, 2206ms
+CAPTURE empty-library 1920x1080, bitmap 3840x2160, 61ms
+CAPTURE empty-graph 1920x1080, bitmap 3840x2160, 230ms
+CAPTURE empty-timeline 1920x1080, bitmap 3840x2160, 128ms
+CAPTURE empty-atlas 1920x1080, bitmap 3840x2160, 51ms
+CAPTURE sheet-settings 1920x1080, bitmap 3840x2160, 143ms
+CAPTURE sheet-settings panel
+CAPTURE sheet-record 1920x1080, bitmap 3840x2160, 149ms
+CAPTURE sheet-record panel
+CAPTURE sheet-canon 1920x1080, bitmap 3840x2160, 145ms
+CAPTURE sheet-canon panel
+CAPTURE sheet-history 1920x1080, bitmap 3840x2160, 146ms
+CAPTURE sheet-history panel
+CAPTURE sheet-relation 1920x1080, bitmap 3840x2160, 1233ms
+CAPTURE sheet-relation panel
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, 386ms
+CAPTURE conversation 1024x768, bitmap 2048x1536, 394ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 911ms
+CAPTURE canvas-selected 1024x768, bitmap 2048x1536, 1327ms
+CAPTURE companion 1024x768, bitmap 2048x1536, 735ms
+CAPTURE manual 1024x768, bitmap 2048x1536, 713ms
+CAPTURE collapsed 1024x768, bitmap 2048x1536, 1061ms
+CAPTURE light 1024x768, bitmap 2048x1536, 911ms
+CAPTURE graph 1024x768, bitmap 2048x1536, 423ms
+CAPTURE graph-selected 1024x768, bitmap 2048x1536, 1272ms
+CAPTURE library 1024x768, bitmap 2048x1536, 31ms
+CAPTURE editor 1024x768, bitmap 2048x1536, 34ms
+CAPTURE timeline 1024x768, bitmap 2048x1536, 29ms
+CAPTURE atlas 1024x768, bitmap 2048x1536, 342ms
+CAPTURE palette 1024x768, bitmap 2048x1536, 854ms
+CAPTURE light-conversation 1024x768, bitmap 2048x1536, 517ms
+CAPTURE light-library 1024x768, bitmap 2048x1536, 35ms
+CAPTURE light-graph 1024x768, bitmap 2048x1536, 487ms
+CAPTURE light-editor 1024x768, bitmap 2048x1536, 28ms
+CAPTURE manual-conversation 1024x768, bitmap 2048x1536, 38ms
+CAPTURE toast 1024x768, bitmap 2048x1536, 251ms
+CAPTURE empty-conversation 1024x768, bitmap 2048x1536, 424ms
+CAPTURE empty-canvas 1024x768, bitmap 2048x1536, 1083ms
+CAPTURE empty-library 1024x768, bitmap 2048x1536, 35ms
+CAPTURE empty-graph 1024x768, bitmap 2048x1536, 114ms
+CAPTURE empty-timeline 1024x768, bitmap 2048x1536, 69ms
+CAPTURE empty-atlas 1024x768, bitmap 2048x1536, 34ms
+CAPTURE sheet-settings 1024x768, bitmap 2048x1536, 67ms
+CAPTURE sheet-settings panel
+CAPTURE sheet-record 1024x768, bitmap 2048x1536, 63ms
+CAPTURE sheet-record panel
+CAPTURE sheet-canon 1024x768, bitmap 2048x1536, 59ms
+CAPTURE sheet-canon panel
+CAPTURE sheet-history 1024x768, bitmap 2048x1536, 60ms
+CAPTURE sheet-history panel
+CAPTURE sheet-relation 1024x768, bitmap 2048x1536, 454ms
+CAPTURE sheet-relation panel
+CAPTURE conversation-home 720x800, bitmap 1440x1600, 383ms
+CAPTURE conversation 720x800, bitmap 1440x1600, 386ms
+CAPTURE canvas 720x800, bitmap 1440x1600, 846ms
+CAPTURE canvas-selected 720x800, bitmap 1440x1600, 1201ms
+CAPTURE companion 720x800, bitmap 1440x1600, 357ms
+CAPTURE manual 720x800, bitmap 1440x1600, 636ms
+CAPTURE collapsed 720x800, bitmap 1440x1600, 916ms
+CAPTURE light 720x800, bitmap 1440x1600, 994ms
+CAPTURE graph 720x800, bitmap 1440x1600, 441ms
+CAPTURE graph-selected 720x800, bitmap 1440x1600, 1266ms
+CAPTURE library 720x800, bitmap 1440x1600, 32ms
+CAPTURE editor 720x800, bitmap 1440x1600, 21ms
+CAPTURE timeline 720x800, bitmap 1440x1600, 21ms
+CAPTURE atlas 720x800, bitmap 1440x1600, 295ms
+CAPTURE palette 720x800, bitmap 1440x1600, 679ms
+CAPTURE light-conversation 720x800, bitmap 1440x1600, 355ms
+CAPTURE light-library 720x800, bitmap 1440x1600, 22ms
+CAPTURE light-graph 720x800, bitmap 1440x1600, 423ms
+CAPTURE light-editor 720x800, bitmap 1440x1600, 20ms
+CAPTURE manual-conversation 720x800, bitmap 1440x1600, 27ms
+CAPTURE toast 720x800, bitmap 1440x1600, 195ms
+CAPTURE empty-conversation 720x800, bitmap 1440x1600, 349ms
+CAPTURE empty-canvas 720x800, bitmap 1440x1600, 840ms
+CAPTURE empty-library 720x800, bitmap 1440x1600, 16ms
+CAPTURE empty-graph 720x800, bitmap 1440x1600, 50ms
+CAPTURE empty-timeline 720x800, bitmap 1440x1600, 32ms
+CAPTURE empty-atlas 720x800, bitmap 1440x1600, 19ms
+CAPTURE sheet-settings 720x800, bitmap 1440x1600, 48ms
+CAPTURE sheet-settings panel
+CAPTURE sheet-record 720x800, bitmap 1440x1600, 44ms
+CAPTURE sheet-record panel
+CAPTURE sheet-canon 720x800, bitmap 1440x1600, 40ms
+CAPTURE sheet-canon panel
+CAPTURE sheet-history 720x800, bitmap 1440x1600, 47ms
+CAPTURE sheet-history panel
+CAPTURE sheet-relation 720x800, bitmap 1440x1600, 410ms
+CAPTURE sheet-relation panel
+Native captures complete: /Users/desenyon/.zeron/worktrees/synthesis/swift-falcon/docs/verification/audit-2026-11-12

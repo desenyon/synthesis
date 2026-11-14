@@ -1,0 +1,8 @@
+Sources/SynthesisCore/AgentEngine.swift:55:10: error: [RemoveLine] remove line break
+Sources/SynthesisCore/Rules.swift:142:1: error: [LineLength] line is too long
+Sources/SynthesisCore/Rules.swift:253:101: error: [AddLines] add 1 line break
+Sources/SynthesisCore/Rules.swift:292:1: error: [LineLength] line is too long
+Sources/SynthesisCore/Rules.swift:298:1: error: [LineLength] line is too long
+Sources/SynthesisCore/Rules.swift:299:1: error: [LineLength] line is too long
+Sources/SynthesisCore/Rules.swift:312:1: error: [LineLength] line is too long
+Sources/SynthesisCore/Portability.swift:76:1: error: [LineLength] line is too long

@@ -1,0 +1,18 @@
+SELFTEST PASS header control under title bar is clickable
+SELFTEST PASS tap gesture on a palette row navigates — Library
+SELFTEST PASS board loads in the canvas engine with record cards and relationship arrows — 4 cards, 3 relationship arrows
+SELFTEST PASS the converted board is saved in the new format and keeps the original layout — 27 elements stored
+SELFTEST PASS dragging a card moves it (pointer events dispatched in the canvas) — Δ(-122, 66) expected (-122, 66)
+SELFTEST PASS relationship arrows stay attached after the move — 3 arrows
+SELFTEST PASS the move is saved to the board
+SELFTEST PASS double-click opens the card's record — The art of remembrance
+SELFTEST PASS closing the record returns to the same canvas
+SELFTEST PASS “Show on canvas” adds the record's card and selects it — 5 cards, selection 1
+SELFTEST PASS the selected card can be referenced in the conversation — [Oren Ashe](synthesis://record/F5BB3CD6-4FB0-4DBC-92BD-EA544E2266B3) 
+SELFTEST PASS artwork attaches to the card and the text moves below it — height 147 → 287
+SELFTEST PASS removing the artwork restores the card
+SELFTEST PASS companion divider drag resizes the panel — width 444
+SELFTEST PASS graph interaction leaves relationships untouched
+SELFTEST PASS typing @ore and pressing Return inserts a reference to Oren Ashe — [Oren Ashe](synthesis://record/F5BB3CD6-4FB0-4DBC-92BD-EA544E2266B3) 
+SELFTEST PASS the message was not sent by that Return
+Interaction self-test passed: 17 checks

@@ -48,7 +48,6 @@ public struct Relation: Identifiable, Codable, Sendable {
   public var sourceID: String
   public var targetID: String
   public var label: String
-  public var state: String? = nil
 }
 public struct WorldEvent: Identifiable, Codable, Sendable {
   public var id: String
@@ -62,6 +61,52 @@ public struct Board: Identifiable, Codable, Sendable {
   public var name: String
   public var kind: String
   public var content: String
+}
+/// A record the assistant was given as context, and why it was chosen.
+public struct ContextSource: Identifiable, Equatable, Sendable {
+  public var record: LoreRecord
+  public var reason: String
+  public var id: String { record.id }
+  public init(record: LoreRecord, reason: String) {
+    self.record = record
+    self.reason = reason
+  }
+}
+/// One staged change inside an AI proposal. Nothing happens until the creator resolves it.
+public struct ProposedChange: Identifiable, Codable, Equatable, Sendable {
+  public var id: String
+  /// `create_record`, `revise_record`, `relate` or `add_event`.
+  public var action: String
+  public var kind: String?
+  public var title: String?
+  public var category: String?
+  public var body: String?
+  /// Target of a revision.
+  public var recordID: String?
+  /// Version of the target when the change was proposed.
+  public var baseVersion: Int?
+  /// A record ID, or `change:<id>` for something created earlier in the same proposal.
+  public var source: String?
+  public var target: String?
+  public var label: String?
+  public var date: String?
+  public var reason: String?
+  public var evidence: [String]
+  /// `pending`, `accepted` or `rejected`.
+  public var status: String
+  /// ID of the record, relationship or event an accepted change produced.
+  public var resultID: String?
+}
+public struct Proposal: Identifiable, Codable, Equatable, Sendable {
+  public var id: String
+  public var worldID: String
+  public var conversationID: String?
+  public var messageID: String?
+  public var summary: String
+  public var changes: [ProposedChange]
+  public var state: String
+  public var createdAt: String
+  public var pending: Int { changes.filter { $0.status == "pending" }.count }
 }
 public enum SynthesisError: LocalizedError {
   case invalid(String)

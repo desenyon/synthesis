@@ -18,7 +18,121 @@ actor CountingTransport: ModelTransport {
     return "A possible idea"
   }
 }
+/// Returns a fixed answer, as a provider would. Used to test what the app does with model output.
+struct ScriptedTransport: ModelTransport {
+  let answer: String
+  func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
+    async throws -> String
+  {
+    await onDelta(answer)
+    return answer
+  }
+}
 @MainActor struct AgentTests {
+  @Test func modelChangeSetIsStagedForReviewAndNeverApplied() async throws {
+    let s = try WorkspaceStore(path: ":memory:")
+    let w = try s.createWorld(name: "Aster")
+    let other = try s.createWorld(name: "Elsewhere")
+    let foreign = try s.createRecord(worldID: other.id, title: "Foreign", kind: "entity")
+    var mira = try s.createRecord(
+      worldID: w.id, title: "Mira Vale", body: "A cartographer.", kind: "entity",
+      category: "Characters")
+    mira = try s.promote(worldID: w.id, id: mira.id, version: mira.version, confirmation: mira.id)
+    let chat = try s.createConversation(worldID: w.id)
+    let answer = """
+      Here is a mentor for Mira.
+
+      ```synthesis-proposal
+      {"summary":"Add Oren Ashe and connect him to Mira","changes":[
+        {"action":"create_record","kind":"entity","title":"Oren Ashe","category":"Characters","body":"Eldest of the keepers.","evidence":["\(mira.id)","not-a-record"]},
+        {"action":"relate","source":"Oren Ashe","target":"\(mira.id)","label":"mentors"},
+        {"action":"revise_record","id":"\(mira.id)","body":"A cartographer trained by Oren Ashe.","reason":"Reflect the mentor"},
+        {"action":"add_event","title":"Oren takes an apprentice","source":"Oren Ashe"},
+        {"action":"revise_record","id":"\(foreign.id)","body":"Cross-world edit"},
+        {"action":"promote_to_canon","id":"\(mira.id)"}
+      ]}
+      ```
+      """
+    let engine = AgentEngine(store: s, transport: ScriptedTransport(answer: answer))
+    try await engine.submit(
+      worldID: w.id, conversationID: chat.id,
+      prompt: "Give [Mira Vale](synthesis://record/\(mira.id)) a mentor", preset: "Canonize"
+    ) { _ in }
+
+    // The transcript keeps the prose; the machine-readable block is not shown as text.
+    let reply = try #require(try s.messages(worldID: w.id, conversationID: chat.id).last)
+    #expect(reply.role == "assistant" && reply.body == "Here is a mentor for Mira.")
+    // The context actually sent is recorded with the answer.
+    let context = try s.messageContext(worldID: w.id, conversationID: chat.id)[reply.id]
+    #expect(context?.first?.record.id == mira.id && context?.first?.reason == "You referenced it")
+
+    // Staged, validated and scoped: foreign and unknown actions are dropped, nothing is applied.
+    var proposal = try #require(try s.proposals(worldID: w.id, conversationID: chat.id).first)
+    #expect(proposal.messageID == reply.id && proposal.state == "pending")
+    #expect(
+      proposal.changes.map(\.action) == ["create_record", "relate", "revise_record", "add_event"])
+    #expect(proposal.changes[0].evidence == [mira.id])
+    #expect(try s.records(worldID: w.id).count == 1 && s.relations(worldID: w.id).isEmpty)
+    #expect(try s.record(worldID: w.id, id: mira.id).state == "canon")
+    #expect(try s.proposals(worldID: other.id).isEmpty)
+
+    // Only an explicit, correctly scoped confirmation can resolve a change.
+    let create = proposal.changes[0]
+    let relate = proposal.changes[1]
+    #expect(throws: Error.self) {
+      try s.resolveChange(
+        worldID: w.id, proposalID: proposal.id, changeID: create.id, accept: true,
+        confirmation: "")
+    }
+    #expect(throws: Error.self) {
+      try s.resolveChange(
+        worldID: other.id, proposalID: proposal.id, changeID: create.id, accept: true,
+        confirmation: proposal.id)
+    }
+    // A change that depends on an unaccepted record explains itself and changes nothing.
+    #expect(throws: Error.self) {
+      try s.resolveChange(
+        worldID: w.id, proposalID: proposal.id, changeID: relate.id, accept: true,
+        confirmation: proposal.id)
+    }
+    #expect(try s.relations(worldID: w.id).isEmpty)
+
+    proposal = try s.resolveChange(
+      worldID: w.id, proposalID: proposal.id, changeID: create.id, accept: true,
+      confirmation: proposal.id)
+    let oren = try s.record(worldID: w.id, id: try #require(proposal.changes[0].resultID))
+    #expect(oren.origin == "ai-proposed" && oren.state == "draft" && oren.canonical == nil)
+    proposal = try s.resolveChange(
+      worldID: w.id, proposalID: proposal.id, changeID: relate.id, accept: true,
+      confirmation: proposal.id)
+    #expect(try s.relations(worldID: w.id).first?.label == "mentors")
+
+    // Accepting a revision makes a draft; the accepted canon snapshot is preserved.
+    proposal = try s.resolveChange(
+      worldID: w.id, proposalID: proposal.id, changeID: proposal.changes[2].id, accept: true,
+      confirmation: proposal.id)
+    let revised = try s.record(worldID: w.id, id: mira.id)
+    #expect(revised.body == "A cartographer trained by Oren Ashe." && revised.state == "draft")
+    #expect(
+      revised.canonical == mira.canonical && revised.canonical?.contains("A cartographer.") == true)
+
+    proposal = try s.resolveChange(
+      worldID: w.id, proposalID: proposal.id, changeID: proposal.changes[3].id, accept: false,
+      confirmation: proposal.id)
+    #expect(proposal.state == "accepted" && proposal.pending == 0)
+    #expect(try s.events(worldID: w.id).isEmpty)
+    // Resolving again is a no-op rather than a duplicate.
+    _ = try s.resolveChange(
+      worldID: w.id, proposalID: proposal.id, changeID: create.id, accept: true,
+      confirmation: proposal.id)
+    #expect(try s.records(worldID: w.id).count == 2)
+  }
+  @Test func streamingTextHidesAnUnfinishedChangeSet() {
+    #expect(ProposalParser.visible("Idea.\n\n```synthesis-proposal\n{\"sum") == "Idea.")
+    #expect(ProposalParser.visible("Plain answer") == "Plain answer")
+    let broken = ProposalParser.split("Text\n```synthesis-proposal\n{not json\n```\nafter")
+    #expect(broken.payload == nil && broken.prose == "Text\n\nafter")
+  }
   @Test func manualModeBlocksTransportAtCoreBoundary() async throws {
     let s = try WorkspaceStore(path: ":memory:")
     let w = try s.createWorld(name: "A")

@@ -1,7 +1,7 @@
 import Foundation
 
 public final class WorkspaceStore {
-  private let db: Database
+  let db: Database
   public init(path: String) throws { db = try Database(path: path) }
   public static var defaultPath: String {
     ProcessInfo.processInfo.environment["SYNTHESIS_DATABASE_PATH"]
@@ -43,6 +43,15 @@ public final class WorkspaceStore {
       [id, name, description, demo ? "1" : "0", now, now])
     return try world(id)
   }
+  public func renameWorld(_ id: String, name: String) throws -> World {
+    _ = try world(id)
+    let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !name.isEmpty, name.count <= 100 else {
+      throw SynthesisError.invalid("Give your world a name of up to 100 characters.")
+    }
+    try db.execute("UPDATE worlds SET name=?,updated_at=? WHERE id=?", [name, timestamp(), id])
+    return try world(id)
+  }
   private func decodeRecord(_ row: [String: String]) -> LoreRecord {
     LoreRecord(
       id: row["id"]!, worldID: row["world_id"]!, title: row["title"]!, body: row["body"]!,
@@ -56,9 +65,30 @@ public final class WorkspaceStore {
   public func records(worldID: String) throws -> [LoreRecord] {
     _ = try world(worldID)
     return try db.rows(
-      "SELECT r.*,d.rtf FROM records r LEFT JOIN rich_documents d ON d.record_id=r.id WHERE r.world_id=? ORDER BY r.updated_at DESC,r.rowid DESC",
+      "SELECT r.*,d.rtf FROM records r LEFT JOIN rich_documents d ON d.record_id=r.id WHERE r.world_id=? AND r.archived=0 ORDER BY r.updated_at DESC,r.rowid DESC",
       [worldID]
     ).map(decodeRecord)
+  }
+  /// Archived records stay resolvable by ID so links, revisions and canon snapshots survive.
+  public func archivedRecords(worldID: String) throws -> [LoreRecord] {
+    _ = try world(worldID)
+    return try db.rows(
+      "SELECT r.*,d.rtf FROM records r LEFT JOIN rich_documents d ON d.record_id=r.id WHERE r.world_id=? AND r.archived=1 ORDER BY r.updated_at DESC,r.rowid DESC",
+      [worldID]
+    ).map(decodeRecord)
+  }
+  public func isArchived(worldID: String, recordID: String) throws -> Bool {
+    try db.rows("SELECT archived FROM records WHERE world_id=? AND id=?", [worldID, recordID])
+      .first?["archived"] == "1"
+  }
+  /// Reversible removal. Content, version, canon snapshot and history are untouched.
+  public func archiveRecord(worldID: String, id: String) throws {
+    _ = try record(worldID: worldID, id: id)
+    try db.execute("UPDATE records SET archived=1 WHERE world_id=? AND id=?", [worldID, id])
+  }
+  public func restoreRecord(worldID: String, id: String) throws {
+    _ = try record(worldID: worldID, id: id)
+    try db.execute("UPDATE records SET archived=0 WHERE world_id=? AND id=?", [worldID, id])
   }
   public func record(worldID: String, id: String) throws -> LoreRecord {
     _ = try world(worldID)
@@ -213,14 +243,15 @@ public final class WorkspaceStore {
     guard !tokens.isEmpty else { return [] }
     let match = tokens.map { "\"\($0)\"*" }.joined(separator: " AND ")
     let ids = try db.rows(
-      "SELECT id FROM records_fts WHERE records_fts MATCH ? AND world_id=? ORDER BY rank LIMIT 50",
-      [match, worldID])
+      "SELECT id FROM records_fts WHERE records_fts MATCH ? AND world_id=? AND id IN (SELECT id FROM records WHERE world_id=? AND archived=0) ORDER BY rank LIMIT 50",
+      [match, worldID, worldID])
     return try ids.map { try record(worldID: worldID, id: $0["id"]!) }
   }
-  public func conversations(worldID: String) throws -> [Conversation] {
+  public func conversations(worldID: String, archived: Bool = false) throws -> [Conversation] {
     _ = try world(worldID)
     return try db.rows(
-      "SELECT * FROM conversations WHERE world_id=? ORDER BY updated_at DESC,rowid DESC", [worldID]
+      "SELECT * FROM conversations WHERE world_id=? AND archived=? ORDER BY updated_at DESC,rowid DESC",
+      [worldID, archived ? "1" : "0"]
     ).map {
       Conversation(
         id: $0["id"]!, worldID: worldID, title: $0["title"]!, updatedAt: $0["updated_at"]!)
@@ -233,7 +264,7 @@ public final class WorkspaceStore {
     let id = UUID().uuidString
     let now = timestamp()
     try db.execute(
-      "INSERT INTO conversations VALUES(?,?,?,?,?)",
+      "INSERT INTO conversations(id,world_id,title,created_at,updated_at) VALUES(?,?,?,?,?)",
       [id, worldID, String(title.prefix(120)), now, now])
     return Conversation(id: id, worldID: worldID, title: String(title.prefix(120)), updatedAt: now)
   }
@@ -246,10 +277,19 @@ public final class WorkspaceStore {
       "UPDATE conversations SET title=?,updated_at=? WHERE id=? AND world_id=?",
       [String(title.prefix(120)), timestamp(), id, worldID])
   }
+  public func setConversationArchived(worldID: String, id: String, archived: Bool) throws {
+    _ = try messages(worldID: worldID, conversationID: id)
+    try db.execute(
+      "UPDATE conversations SET archived=? WHERE id=? AND world_id=?",
+      [archived ? "1" : "0", id, worldID])
+  }
   public func messages(worldID: String, conversationID: String) throws -> [ChatMessage] {
-    guard try conversations(worldID: worldID).contains(where: { $0.id == conversationID }) else {
-      throw SynthesisError.notFound
-    }
+    _ = try world(worldID)
+    guard
+      try !db.rows(
+        "SELECT id FROM conversations WHERE id=? AND world_id=?", [conversationID, worldID]
+      ).isEmpty
+    else { throw SynthesisError.notFound }
     return try db.rows(
       "SELECT * FROM messages WHERE conversation_id=? AND world_id=? ORDER BY rowid",
       [conversationID, worldID]
@@ -276,9 +316,10 @@ public final class WorkspaceStore {
       id: id, worldID: worldID, conversationID: conversationID, role: role, body: body, state: state
     )
   }
-  public func addRelation(worldID: String, source: String, target: String, label: String) throws
-    -> Relation
-  {
+  public func addRelation(
+    worldID: String, source: String, target: String, label: String,
+    origin: String = "user-authored"
+  ) throws -> Relation {
     let a = try record(worldID: worldID, id: source)
     let b = try record(worldID: worldID, id: target)
     guard a.kind == "entity", b.kind == "entity", source != target, !label.isEmpty,
@@ -287,17 +328,18 @@ public final class WorkspaceStore {
     let id = UUID().uuidString
     let now = timestamp()
     try db.execute(
-      "INSERT INTO relationships(id,world_id,source_id,target_id,label,state,origin,created_at,updated_at) VALUES(?,?,?,?,?,'draft','user-authored',?,?)",
-      [id, worldID, source, target, label, now, now])
-    return Relation(id: id, sourceID: source, targetID: target, label: label, state: "draft")
+      "INSERT INTO relationships(id,world_id,source_id,target_id,label,state,origin,created_at,updated_at) VALUES(?,?,?,?,?,'draft',?,?,?)",
+      [id, worldID, source, target, label, origin, now, now])
+    return Relation(id: id, sourceID: source, targetID: target, label: label)
   }
   public func relations(worldID: String) throws -> [Relation] {
     _ = try world(worldID)
-    return try db.rows("SELECT * FROM relationships WHERE world_id=? AND archived=0", [worldID]).map
-    {
+    return try db.rows(
+      "SELECT r.* FROM relationships r JOIN records a ON a.id=r.source_id JOIN records b ON b.id=r.target_id WHERE r.world_id=? AND r.archived=0 AND a.archived=0 AND b.archived=0 ORDER BY r.created_at,r.rowid",
+      [worldID]
+    ).map {
       Relation(
-        id: $0["id"]!, sourceID: $0["source_id"]!, targetID: $0["target_id"]!, label: $0["label"]!,
-        state: $0["state"])
+        id: $0["id"]!, sourceID: $0["source_id"]!, targetID: $0["target_id"]!, label: $0["label"]!)
     }
   }
   public func updateRelation(worldID: String, id: String, label: String) throws {
@@ -360,7 +402,8 @@ public final class WorkspaceStore {
       ])
   }
   public func addEvent(
-    worldID: String, title: String, date: String, source: String, order: Int? = nil
+    worldID: String, title: String, date: String, source: String, order: Int? = nil,
+    origin: String = "user-authored"
   ) throws -> WorldEvent {
     _ = try record(worldID: worldID, id: source)
     guard !title.isEmpty, title.count <= 160, date.count <= 160 else {
@@ -370,20 +413,44 @@ public final class WorkspaceStore {
     let now = timestamp()
     let label = date.isEmpty ? "unknown" : date
     try db.execute(
-      "INSERT INTO events(id,world_id,title,date_label,sort_order,source_id,body,created_at,updated_at) VALUES(?,?,?,?,?,?,'',?,?)",
-      [id, worldID, title, label, order.map(String.init), source, now, now])
+      "INSERT INTO events(id,world_id,title,date_label,sort_order,source_id,body,origin,created_at,updated_at) VALUES(?,?,?,?,?,?,'',?,?,?)",
+      [id, worldID, title, label, order.map(String.init), source, origin, now, now])
     return WorldEvent(id: id, title: title, dateLabel: label, sourceID: source, order: order)
   }
   public func events(worldID: String) throws -> [WorldEvent] {
     _ = try world(worldID)
     return try db.rows(
-      "SELECT * FROM events WHERE world_id=? ORDER BY sort_order IS NULL,sort_order,created_at",
+      "SELECT * FROM events WHERE world_id=? AND archived=0 ORDER BY sort_order IS NULL,sort_order,created_at,rowid",
       [worldID]
     ).map {
       WorldEvent(
         id: $0["id"]!, title: $0["title"]!, dateLabel: $0["date_label"]!,
         sourceID: $0["source_id"]!, order: $0["sort_order"].flatMap(Int.init))
     }
+  }
+  public func updateEvent(
+    worldID: String, id: String, title: String, date: String, source: String, order: Int?
+  ) throws -> WorldEvent {
+    _ = try record(worldID: worldID, id: source)
+    guard try !db.rows("SELECT id FROM events WHERE world_id=? AND id=?", [worldID, id]).isEmpty
+    else { throw SynthesisError.notFound }
+    guard !title.isEmpty, title.count <= 160, date.count <= 160 else {
+      throw SynthesisError.invalid("Give the event a short title and date label.")
+    }
+    let label = date.isEmpty ? "unknown" : date
+    try db.execute(
+      "UPDATE events SET title=?,date_label=?,sort_order=?,source_id=?,updated_at=? WHERE world_id=? AND id=?",
+      [title, label, order.map(String.init), source, timestamp(), worldID, id])
+    return WorldEvent(id: id, title: title, dateLabel: label, sourceID: source, order: order)
+  }
+  /// Reversible removal of a chronology entry; the row and its source reference are kept.
+  public func setEventArchived(worldID: String, id: String, archived: Bool) throws {
+    _ = try world(worldID)
+    guard try !db.rows("SELECT id FROM events WHERE world_id=? AND id=?", [worldID, id]).isEmpty
+    else { throw SynthesisError.notFound }
+    try db.execute(
+      "UPDATE events SET archived=?,updated_at=? WHERE world_id=? AND id=?",
+      [archived ? "1" : "0", timestamp(), worldID, id])
   }
   public func saveBoard(
     worldID: String, id: String? = nil, name: String, kind: String, content: String
@@ -392,23 +459,43 @@ public final class WorkspaceStore {
     guard content.utf8.count <= 12_000_000, ["canvas", "atlas"].contains(kind) else {
       throw SynthesisError.invalid("Workspace is too large or has an unknown type.")
     }
+    guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, name.count <= 120 else {
+      throw SynthesisError.invalid("Give the board a name of up to 120 characters.")
+    }
     if let id {
-      guard try boards(worldID: worldID, kind: kind).contains(where: { $0.id == id }) else {
-        throw SynthesisError.notFound
-      }
+      guard
+        try !db.rows(
+          "SELECT id FROM boards WHERE id=? AND world_id=? AND kind=?", [id, worldID, kind]
+        ).isEmpty
+      else { throw SynthesisError.notFound }
     }
     let actual = id ?? UUID().uuidString
     let now = timestamp()
     try db.execute(
-      "INSERT INTO boards VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,content=excluded.content,updated_at=excluded.updated_at",
+      "INSERT INTO boards(id,world_id,name,content,kind,created_at,updated_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,content=excluded.content,updated_at=excluded.updated_at",
       [actual, worldID, name, content, kind, now, now])
     return Board(id: actual, name: name, kind: kind, content: content)
   }
-  public func boards(worldID: String, kind: String) throws -> [Board] {
+  public func boards(worldID: String, kind: String, archived: Bool = false) throws -> [Board] {
     _ = try world(worldID)
     return try db.rows(
-      "SELECT * FROM boards WHERE world_id=? AND kind=? ORDER BY created_at", [worldID, kind]
+      "SELECT * FROM boards WHERE world_id=? AND kind=? AND archived=? ORDER BY created_at,rowid",
+      [worldID, kind, archived ? "1" : "0"]
     ).map { Board(id: $0["id"]!, name: $0["name"]!, kind: $0["kind"]!, content: $0["content"]!) }
+  }
+  public func setBoardArchived(worldID: String, id: String, archived: Bool) throws {
+    _ = try world(worldID)
+    guard try !db.rows("SELECT id FROM boards WHERE id=? AND world_id=?", [id, worldID]).isEmpty
+    else { throw SynthesisError.notFound }
+    try db.execute(
+      "UPDATE boards SET archived=?,updated_at=? WHERE id=? AND world_id=?",
+      [archived ? "1" : "0", timestamp(), id, worldID])
+  }
+  public func unlinkRecord(worldID: String, source: String, target: String) throws {
+    _ = try world(worldID)
+    try db.execute(
+      "DELETE FROM links WHERE world_id=? AND source_id=? AND target_id=?",
+      [worldID, source, target])
   }
   public func linkRecord(worldID: String, source: String, target: String) throws {
     _ = try record(worldID: worldID, id: source)
@@ -425,8 +512,9 @@ public final class WorkspaceStore {
     _ = try record(worldID: worldID, id: id)
     let rows = try db.rows(
       incoming
-        ? "SELECT source_id AS id FROM links WHERE world_id=? AND target_id=?"
-        : "SELECT target_id AS id FROM links WHERE world_id=? AND source_id=?", [worldID, id])
+        ? "SELECT l.source_id AS id FROM links l JOIN records r ON r.id=l.source_id WHERE l.world_id=? AND l.target_id=? AND r.archived=0 ORDER BY l.created_at,l.rowid"
+        : "SELECT l.target_id AS id FROM links l JOIN records r ON r.id=l.target_id WHERE l.world_id=? AND l.source_id=? AND r.archived=0 ORDER BY l.created_at,l.rowid",
+      [worldID, id])
     return try rows.map { try record(worldID: worldID, id: $0["id"]!) }
   }
   public func metadata(worldID: String, id: String) throws -> (tags: [String], aliases: [String]) {
@@ -462,7 +550,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 2
+      var schemaVersion = 5
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -475,9 +563,20 @@ public final class WorkspaceStore {
       var revisions: [RecordRevision]
       var links: [[String: String]]
       var metadata: [[String: String]]
+      var archivedRecordIDs: [String]
+      var archivedConversationIDs: [String]
+      var archivedBoards: [Board]
+      var archivedEvents: [[String: String]]
+      var proposals: [Proposal]
+      var messageContext: [[String: String]]
+      var rules: [[String: String]]
+      var ruleScenarios: [[String: String]]
     }
-    let chats = try conversations(worldID: id)
-    let pages = try records(worldID: id)
+    // Archived material is exported too: archiving hides, it never discards.
+    let hiddenChats = try conversations(worldID: id, archived: true)
+    let hiddenPages = try archivedRecords(worldID: id)
+    let chats = try conversations(worldID: id) + hiddenChats
+    let pages = try records(worldID: id) + hiddenPages
     let export = try Export(
       world: world(id), records: pages, conversations: chats,
       messages: chats.flatMap { try messages(worldID: id, conversationID: $0.id) },
@@ -489,7 +588,15 @@ public final class WorkspaceStore {
       boards: boards(worldID: id, kind: "canvas") + boards(worldID: id, kind: "atlas"),
       revisions: pages.flatMap { try history(worldID: id, id: $0.id) },
       links: db.rows("SELECT * FROM links WHERE world_id=?", [id]),
-      metadata: db.rows("SELECT id,tags,aliases FROM records WHERE world_id=?", [id]))
+      metadata: db.rows("SELECT id,tags,aliases FROM records WHERE world_id=?", [id]),
+      archivedRecordIDs: hiddenPages.map(\.id), archivedConversationIDs: hiddenChats.map(\.id),
+      archivedBoards: boards(worldID: id, kind: "canvas", archived: true)
+        + boards(worldID: id, kind: "atlas", archived: true),
+      archivedEvents: db.rows("SELECT * FROM events WHERE world_id=? AND archived=1", [id]),
+      proposals: proposals(worldID: id),
+      messageContext: db.rows("SELECT * FROM message_context WHERE world_id=?", [id]),
+      rules: db.rows("SELECT * FROM rules WHERE world_id=?", [id]),
+      ruleScenarios: db.rows("SELECT * FROM rule_scenarios WHERE world_id=?", [id]))
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     return try encoder.encode(export)

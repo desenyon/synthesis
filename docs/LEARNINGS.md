@@ -34,8 +34,42 @@ Independent review found delayed viewport saves could overwrite newer controller
 
 Final inspection found graph edges drawn only inside a Canvas closure were absent after asynchronous state refresh. Moving relationship rendering to state-dependent SwiftUI Paths/labels made actual edges visible in the next capture. Window size alone is insufficient evidence of responsive fit: inspect the companion-open state too. Native CUA could click controls and type, but drag returned `noWindowsAvailable`; retain that verification boundary rather than infer gesture success. No additional AGENTS rule was needed.
 
-## Background checks and engine adoption — 2026-11-13
+## Product audit — 2026-11-12
 
-Observation: previous screenshot startup called makeKeyAndOrderFront and NSApp.activate, interrupting the owner. Owner explicitly requested background tests. Replaced this with prohibited activation and a never-ordered native window, isolated bundle/database/preferences and no Keychain access. Evidence: successful 27-capture run asserting no visibility/key/activation plus an activation observer. Exact AGENTS change: one engineering-standard bullet makes scripts/verify-background.sh the unattended default and requires a separate explicit request for foreground input checks. Validation: 23 app tests, strict lint, optimized native build and inspected hidden captures. Rollback: revert that operational bullet only if the owner changes the testing policy; do not silently restore activating verification.
+Observation 1: a borderless window removed all window controls and made native drag automation fail with `noWindowsAvailable` for two sessions. Evidence: prior STATE and CONNECTED_REVIEW; after switching to a titled full-size-content window the self-test drags cards and the companion divider (13 of 13 checks, `verification/audit-2026-11-12/selftest.log`).
 
-SwiftFlow's generated SwiftPM resource accessor searches the app bundle root; placing bundles there failed codesign with “unsealed contents present in the bundle root.” Vendored a pinned upstream revision with a documented Contents/Resources lookup before the normal Bundle.module fallback. Native captures and 291 upstream tests passed with that patch. Keep package provenance, license and patch scope together.
+Observation 2: posted mouse events reached AppKit views and SwiftUI buttons but not `onTapGesture` or `DragGesture` until the window was key in the active app. Evidence: the same self-test failed four gesture checks with `key=false active=false` and passed them with the window key. A gesture test that runs in a background window proves nothing.
+
+Observation 3: `.fixedSize()` on a menu whose label is a user-entered title made the bar wider than its panel and pushed the companion off-screen. Evidence: `companion` captures before and after; fixed by flexible title menus and `ViewThatFits` bars.
+
+Observation 4: a contact-sheet script that matched `light-*.png` silently showed `light-conversation` under the `light` label, which looked like a rendering bug. Evidence: pass-1 sheets. `scripts/contact-sheets.py` now parses names exactly.
+
+Observation 5: an overlay wider than a 1-point divider did not receive drags, and a handle drawn half outside a card lost hover on its outer half. Hit targets must be real layout, not overhang.
+
+Instruction change: AGENTS.md section 5 gained four bullets — use the shared chrome and tokens; keep the titled window; remove by archiving with Undo; verify UI with `verify-ui.sh` and `selftest-ui.sh`, including the focus caveat. No protected section was edited. Validation: `./scripts/check.sh` passed (32 tests), 148 captures inspected, self-test passed. Rollback: delete those four bullets; nothing else depends on them.
+
+## Canvas on Excalidraw and subscription harness — 2026-11-13
+
+Observation 1: Excalidraw's dark theme is a CSS `invert(93%) hue-rotate(180deg)` on the canvas. Colours written by Synthesis looked wrong until they were stored through the inverse of that filter (`CanvasWeb/src/palette.ts`).
+
+Observation 2: WebKit has no `CanvasRenderingContext2D.filter`, which Excalidraw uses to cancel that inversion for pictures; images appeared as negatives until `canvasFilter.ts` supplied it. Evidence: canvas captures before and after.
+
+Observation 3: view caching cannot capture a `WKWebView`, and `screencapture -l` returned a skewed Stage Manager thumbnail for a background window. The runner now composites `takeSnapshot` into the cached frame. WebKit also does not repaint a web view re-attached in an occluded window, so consecutive canvas captures keep one view.
+
+Observation 4: both harnesses follow the proposal contract when asked to change lore (one live request each). Codex reports its answer in one update; Claude Code streams.
+
+Instruction change: AGENTS.md section 5 gained two bullets (canvas bundle workflow and offline rule; harness default and lock-down). No protected section was edited. Validation: `./scripts/check.sh` (45 tests), canvas captures, live harness test. Rollback: delete those two bullets.
+
+## Reference/engine audit — 2026-11-13
+
+Observed defects: stock mobile chrome returned when the companion narrowed the canvas; an overlay below WebKit's canvas layers was invisible; fading the entire card exposed duplicate engine text; files added before `resetScene` disappeared; card ownership based on the outermost group mixed content after grouping; document-level keyboard events did not reach undo with `handleKeyboardGlobally=false`. Fixes follow observed DOM/engine behavior, not assumptions. Six Node tests, five new native boundary tests and 15 background engine/persistence checks cover the repaired paths. Separate desktop/compact screenshots verify the presentation.
+
+Image generation produced valid PNGs, but duplicating their large base64 into legacy plus converted board payload exceeded the existing 12 MB board bound. Bundled high-quality JPEG derivatives are under 1 MB each, with originals retained outside the repo; saved scene/file checks now pass. Uploaded TIFF/HEIC must be decoded and encoded as PNG rather than merely assigned a PNG MIME label.
+
+Background capture must isolate both database and app bundle. The runner now rejects an absent or already-existing database path, uses a no-model transport, and asserts it is neither active nor key. Build/capture succeeds without opening a foreground window. The capture-startup sentinel test verifies existing data is untouched.
+
+AGENTS.md change: none. These concrete implementation lessons belong here and in the architecture/audit ledger. Rollback uses the individual audit commits; retain image normalization, session guards and user data even if visual presentation is revised.
+
+A final run that opened the illustration sheet first tripped the inactive/non-key assertion. Accessory activation policy alone was insufficient. Non-key/main windows alone did not prevent native sheets activating the app. Prohibited activation suppressed sheet rendering, so it was rejected. Final capture uses accessory/non-key windows and `studioSheet` renders the same content inline only for background snapshots. Production and the explicit foreground self-test keep native modal presentation. A later Manual transition still tripped the focus assertion, so the final runner also blocks application activation requests and makes capture windows mouse-transparent below normal windows. Inline sheet captures prove layout only. The picker also needed a 520-point scaffold to contain both thumbnails plus native sheet padding. Failed capture evidence remains in the local audit logs.
+
+Final shutdown review found that termination waited for a flush but always replied `true`, discarding the new failure result. Window close and Quit now honor `flushCanvas()` success. The embedded engine audit withholds a flush acknowledgement, confirms shutdown is blocked, restores the command and confirms a retry succeeds (17 checks total). Actual foreground Quit/Close interaction remains outside this background pass.

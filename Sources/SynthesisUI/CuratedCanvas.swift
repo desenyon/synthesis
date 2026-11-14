@@ -2,723 +2,487 @@ import AppKit
 import SwiftUI
 import SynthesisCore
 
+/// Canvas workspace: an Excalidraw board with Synthesis record cards and relationship arrows.
+/// Free drawing, shapes, text, images and frames come from the engine; the bar, the sheets and
+/// the optional companion conversation are native.
 struct CuratedCanvas: View {
+  enum Panel: String, Identifiable {
+    case create, library, rename, artwork
+    var id: String { rawValue }
+  }
   @ObservedObject var studio: Studio
-  @StateObject private var board: BoardController
-  @State private var tool = "Select"
-  @State private var createSheet = false
-  @State private var title = ""
-  @State private var bodyText = ""
-  @State private var category = "Characters"
-  @State private var kind = "entity"
-  @State private var connectSource: String?
-  @State private var connectTarget: String?
-  @State private var connectionSheet = false
+  @ObservedObject private var session: CanvasSession
+  @State private var panel: Panel?
+  @State private var formTitle = ""
+  @State private var formBody = ""
+  @State private var formCategory = "Characters"
+  @State private var boardName = ""
+  @State private var pickerQuery = ""
   @State private var edgeLabel = ""
-  @State private var editingRelation: Relation?
-  @State private var editingLocal: Int?
-  @State private var archivedRelation: String?
-  @State private var dragID: String?
-  @State private var drag = CGSize.zero
-  @State private var viewportSize = CGSize(width: 1000, height: 700)
   @State private var companionStart: Double?
-  @State private var showLibrary = false
-  @State private var previousCompanion = false
-  @State private var editingCardID: String?
-  @State private var hoveredEdge: String?
   init(studio: Studio) {
     self.studio = studio
-    _board = StateObject(wrappedValue: BoardController(studio: studio))
+    session = studio.canvas()
   }
+  private var assistantDocked: Bool { studio.mode == .assisted && studio.companionExpanded }
+  private var composerVisible: Bool { studio.mode == .assisted && !studio.companionExpanded }
+
   var body: some View {
     GeometryReader { geo in
+      // A narrow window has no room to dock: the companion takes the workspace instead.
+      let takeover = assistantDocked && geo.size.width < 860
       HStack(spacing: 0) {
-        canvas.frame(maxWidth: .infinity, maxHeight: .infinity)
-        if studio.mode == .assisted && studio.companionExpanded {
-          Rectangle().fill(studio.t.border).frame(width: 5).overlay {
-            Capsule().fill(studio.t.secondary).frame(width: 2, height: 28)
-          }.onHover { if $0 { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() } }
-            .gesture(
-              DragGesture().onChanged { value in
-                if companionStart == nil { companionStart = studio.companionWidth }
-                studio.companionWidth = max(
-                  320, min(460, (companionStart ?? 400) - value.translation.width))
-              }.onEnded { _ in
-                companionStart = nil
-                studio.perform {
-                  try studio.store.setPreference(
-                    "companion-width", value: String(studio.companionWidth))
-                }
-              })
-          ConversationStudio(studio: studio, companion: true).frame(
-            width: geo.size.width < 1000 ? 320 : studio.companionWidth
-          )
-          .transition(.move(edge: .trailing).combined(with: .opacity))
+        if !takeover {
+          VStack(spacing: 0) {
+            bar
+            board
+          }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        if takeover {
+          ConversationStudio(studio: studio, companion: true, docked: false)
+        } else if assistantDocked {
+          companionDivider
+          ConversationStudio(studio: studio, companion: true)
+            .frame(width: geo.size.width < 1000 ? 320 : studio.companionWidth)
+            .transition(.move(edge: .trailing).combined(with: .opacity))
         }
       }
-    }.onAppear {
-      board.load()
-      studio.editorSave = { board.save() }
-      studio.canvasUndo = { board.step(back: $0) }
-      studio.canvasFit = { board.fit(viewportSize) }
+    }
+    .onAppear {
+      if studio.captureHint == "sheet-artwork" { panel = .artwork }
+      session.switchBoard(studio.canvasBoardID)
+      studio.editorSave = nil
+      studio.canvasUndo = { session.command($0 ? "undo" : "redo") }
+      studio.canvasFit = { session.command("fit") }
       if let width = try? studio.store.preference("companion-width"), let value = Double(width) {
         studio.companionWidth = min(460, max(320, value))
       }
-    }.onDisappear { if board.loaded { board.save() } }
-      .sheet(isPresented: $createSheet) { createForm }
-      .sheet(isPresented: $connectionSheet) { connectionForm }
-      .sheet(isPresented: $showLibrary) { libraryPicker }
-  }
-  private var canvas: some View {
-    VStack(spacing: 0) {
-      HStack(spacing: 10) {
-        Image(systemName: "square.on.square").foregroundStyle(studio.t.accent)
-        Menu {
-          ForEach((try? studio.store.boards(worldID: studio.worldID, kind: "canvas")) ?? []) {
-            item in
-            Button(item.name) { if board.save() { studio.canvasBoardID = item.id } }
-          }
-          Button("New board") {
-            studio.perform {
-              guard board.save() else { return }
-              let doc = String(decoding: try JSONEncoder().encode(CanvasDocument()), as: UTF8.self)
-              studio.canvasBoardID = try studio.store.saveBoard(
-                worldID: studio.worldID, name: "Untitled board", kind: "canvas", content: doc
-              ).id
-            }
-          }
-        } label: {
-          Text(board.name).font(.system(size: 15, weight: .medium))
-        }
-        .menuStyle(.borderlessButton).fixedSize()
-        Text("Canvas").font(.system(size: 13)).foregroundStyle(studio.t.secondary)
-        Spacer()
-        if let failure = board.failure {
-          Button(board.loaded ? "Save failed · Retry" : "Could not load · Retry") {
-            if board.loaded { board.save() } else { board.load() }
-          }.foregroundStyle(.orange).help(failure)
-        } else {
-          Text("Saved locally").font(.system(size: 12)).foregroundStyle(studio.t.muted)
-        }
-        if studio.mode == .assisted && !studio.companionExpanded {
-          IconButton(
-            icon: "bubble.left.and.bubble.right", label: "Open companion chat", t: studio.t
-          ) { withAnimation(.easeOut(duration: 0.18)) { studio.companionExpanded = true } }
-        }
-      }.padding(.horizontal, 24).frame(height: 56)
-      GeometryReader { geo in
-        ZStack(alignment: .bottom) {
-          boardSpace(size: geo.size).padding(
-            .bottom, studio.mode == .assisted && !studio.companionExpanded ? 160 : 20)
-          VStack(spacing: 12) {
-            Spacer()
-            if studio.mode == .assisted && !studio.companionExpanded {
-              UnifiedComposer(studio: studio, collapsed: true).frame(maxWidth: 500).padding(
-                .horizontal, 20)
-            }
-            toolbar.padding(.horizontal, 16).padding(.bottom, 14)
-          }
-        }.onAppear {
-          viewportSize = geo.size
-          if board.document.viewport == nil && !board.document.cards.isEmpty { board.fit(geo.size) }
-        }.onChange(of: geo.size) { _, size in
-          viewportSize = size
-          if previousCompanion != studio.companionExpanded {
-            previousCompanion = studio.companionExpanded
-            board.fit(size)
-          }
-        }
-      }
-    }.background(studio.t.background)
-  }
-  private func boardSpace(size: CGSize) -> some View {
-    GeometryReader { area in
-      ZStack {
-        Canvas { context, canvasSize in
-          let gap = 32.0 * board.viewport.zoom
-          for x in stride(
-            from: board.viewport.x.truncatingRemainder(dividingBy: gap), to: canvasSize.width,
-            by: gap)
-          {
-            for y in stride(
-              from: board.viewport.y.truncatingRemainder(dividingBy: gap), to: canvasSize.height,
-              by: gap)
-            {
-              context.fill(
-                Path(ellipseIn: CGRect(x: x, y: y, width: 1, height: 1)),
-                with: .color(studio.t.muted.opacity(0.12)))
-            }
-          }
-          for group in Set(board.document.cards.compactMap(\.group)) {
-            let members = board.document.cards.filter { $0.group == group }
-            let rect = members.reduce(CGRect.null) { result, card in
-              let p = point(card, area.size)
-              return result.union(
-                CGRect(
-                  x: p.x - 170 * board.viewport.zoom, y: p.y - 150 * board.viewport.zoom,
-                  width: 340 * board.viewport.zoom, height: 300 * board.viewport.zoom))
-            }
-            context.fill(
-              Path(roundedRect: rect, cornerRadius: 18), with: .color(studio.t.accent.opacity(0.05))
-            )
-            context.stroke(
-              Path(roundedRect: rect, cornerRadius: 18),
-              with: .color(studio.t.accent.opacity(0.22)), lineWidth: 1)
-          }
-          for edge in visualEdges {
-            guard let a = board.document.cards.first(where: { $0.id == edge.source }),
-              let b = board.document.cards.first(where: { $0.id == edge.target })
-            else { continue }
-            let start = point(a, area.size)
-            let end = point(b, area.size)
-            let active =
-              hoveredEdge == edge.id || board.selection.isEmpty || board.selection.contains(a.id)
-              || board.selection.contains(b.id)
-            var path = Path()
-            path.move(to: start)
-            path.addLine(to: end)
-            context.stroke(
-              path, with: .color(studio.t.accent.opacity(active ? 0.65 : 0.15)),
-              lineWidth: active ? 1.8 : 1)
-            let angle = atan2(end.y - start.y, end.x - start.x)
-            let mid = CGPoint(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2)
-            var arrow = Path()
-            arrow.move(
-              to: CGPoint(x: mid.x - cos(angle - 0.5) * 10, y: mid.y - sin(angle - 0.5) * 10))
-            arrow.addLine(to: mid)
-            arrow.addLine(
-              to: CGPoint(x: mid.x - cos(angle + 0.5) * 10, y: mid.y - sin(angle + 0.5) * 10))
-            context.stroke(
-              arrow, with: .color(studio.t.accent.opacity(active ? 0.8 : 0.2)), lineWidth: 1.8)
-          }
-        }.allowsHitTesting(false)
-        CanvasInputSurface(
-          onPan: board.moveViewport, onZoom: board.zoom, onClick: { board.selection = [] })
-        ForEach(visualEdges) { edge in
-          if let a = board.document.cards.first(where: { $0.id == edge.source }),
-            let b = board.document.cards.first(where: { $0.id == edge.target })
-          {
-            let start = point(a, area.size)
-            let end = point(b, area.size)
-            Button {
-              inspect(edge)
-            } label: {
-              Text(edge.label).font(.system(size: 12, weight: .medium)).foregroundStyle(
-                studio.t.accent
-              ).padding(.horizontal, 9).padding(.vertical, 5)
-                .background(studio.t.background, in: Capsule()).overlay(
-                  Capsule().stroke(studio.t.border, lineWidth: 0.7))
-            }.buttonStyle(.plain).help("Inspect relationship: \(edge.label)")
-              .onHover { hoveredEdge = $0 ? edge.id : nil }
-              .position(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 - 18)
-          }
-        }
-        ForEach(board.document.cards) { card in
-          EntityCanvasCard(
-            studio: studio, card: card, selected: board.selection.contains(card.id),
-            related: isRelated(card), open: { open(card) }, select: { select(card) },
-            connect: { beginConnection(card) }
-          )
-          .frame(width: 300).scaleEffect(board.viewport.zoom).position(point(card, area.size))
-          .offset(
-            tool != "Pan"
-              && (dragID == card.id
-                || (dragID != nil && board.selection.contains(card.id)
-                  && board.selection.contains(dragID!)))
-              ? drag : .zero
-          )
-          .gesture(
-            DragGesture(minimumDistance: 6).onChanged { value in
-              dragID = card.id
-              drag = value.translation
-            }.onEnded { value in
-              let ids = board.selection.contains(card.id) ? board.selection : [card.id]
-              if tool == "Pan" {
-                board.moveViewport(value.translation)
-              } else {
-                board.mutate { doc in
-                  for i in doc.cards.indices where ids.contains(doc.cards[i].id) {
-                    doc.cards[i].x += value.translation.width / board.viewport.zoom
-                    doc.cards[i].y += value.translation.height / board.viewport.zoom
-                  }
-                }
-              }
-              drag = .zero
-              dragID = nil
-            }
-          )
-          .contextMenu {
-            Button("Open content") { open(card) }
-            Button("Select with other nodes") { board.selection.insert(card.id) }
-            Button("Connect to…") { beginConnection(card) }
-            Button("Add artwork…") { board.importImage(cardID: card.id) }
-            Button("Reference in conversation") {
-              if let id = card.recordID {
-                studio.draft += " [\(card.text)](synthesis://record/\(id))"
-              } else {
-                studio.draft += "\nCanvas note: \(card.text)"
-              }
-              studio.persistComposer()
-              if studio.mode == .assisted { studio.companionExpanded = true }
-            }
-            Divider()
-            Button("Remove from board (keep source)") {
-              board.selection = [card.id]
-              board.removeSelection()
-            }
-          }
-        }
-        if board.document.cards.isEmpty && board.loaded {
-          VStack(spacing: 18) {
-            Image(systemName: "square.on.square").font(.system(size: 32, weight: .light))
-              .foregroundStyle(studio.t.accent)
-            Text("A canvas for your connections").font(.system(size: 26, weight: .medium))
-            Text("Bring in your lore, or begin with a loose thought.").font(.system(size: 15))
-              .foregroundStyle(studio.t.secondary)
-            HStack(spacing: 12) {
-              Button("Create an entity") { prepareCreate("entity") }.buttonStyle(
-                QuietButton(t: studio.t, primary: true))
-              Button("Add from library") { showLibrary = true }.buttonStyle(
-                QuietButton(t: studio.t))
-            }
-          }.padding(24)
-        }
-        if let source = connectSource, !connectionSheet {
-          VStack {
-            Text(
-              "Connect \(board.document.cards.first { $0.id == source }?.text ?? "node") · choose another node"
-            )
-            Button("Cancel connection") {
-              connectSource = nil
-              tool = "Select"
-            }
-          }.font(.system(size: 13)).padding(14).background(
-            studio.t.surface, in: RoundedRectangle(cornerRadius: 10)
-          ).frame(maxHeight: .infinity, alignment: .top).padding(.top, 12)
-        }
-      }.offset(tool == "Pan" && dragID != nil ? drag : .zero).clipped().contextMenu {
-        Button("Add note") { prepareCreate("capture") }
-        Button("Add entity") { prepareCreate("entity") }
-        Button("Add from library") { showLibrary = true }
-        Button("Fit to content") { board.fit(area.size) }
+    }
+    .onChange(of: studio.captureNonce) { _, _ in
+      if studio.captureHint == "sheet-artwork" { panel = .artwork }
+    }
+    .onChange(of: studio.canvasBoardID) { _, id in if id != nil { session.switchBoard(id) } }
+    .onChange(of: session.request) { _, request in
+      guard let request else { return }
+      session.request = nil
+      switch request {
+      case "library":
+        pickerQuery = ""
+        panel = .library
+      case "entity": prepareCreate()
+      case "image": session.addImage()
+      case "illustration": panel = .artwork
+      case "export": session.exportImage()
+      case "reference":
+        if studio.mode == .assisted { studio.referenceCanvasSelection() }
+      case "artwork":
+        if let id = session.selection.first { session.chooseArtwork(for: id) }
+      default: break
       }
     }
-  }
-  private var toolbar: some View {
-    HStack(spacing: 12) {
-      HStack(spacing: 2) {
-        control("cursorarrow", "Select nodes · ⌘ click for multiple") {
-          tool = "Select"
-          connectSource = nil
-        }
-        control("hand.draw", "Pan · drag empty canvas or scroll") {
-          tool = "Pan"
-          connectSource = nil
-        }
-        Menu {
-          Button("Note") { prepareCreate("capture") }
-          Button("Entity") { prepareCreate("entity") }
-          Button("Image…") { board.importImage() }
-          Button("From library…") { showLibrary = true }
-          Menu("Start from a template") {
-            ForEach(["Characters", "Power systems", "Places", "Factions"], id: \.self) { type in
-              Button(type) {
-                prepareCreate("entity")
-                category = type
-                bodyText =
-                  type == "Power systems"
-                  ? "Source\n\nCosts\n\nRestrictions\n\nProgression\n\nTechniques"
-                  : "Description\n\nMotivations\n\nConnections"
-              }
+    .studioSheet(item: $panel) { item in
+      switch item {
+      case .create: createForm
+      case .library: libraryPicker
+      case .rename: renameForm
+      case .artwork:
+        ArtworkPicker(
+          t: studio.t,
+          select: { data in
+            if let id = session.selection.first, session.selection.count == 1 {
+              session.setArtwork(data.base64EncodedString(), for: id)
+            } else {
+              session.addImage(data.base64EncodedString())
             }
-          }
-        } label: {
-          Image(systemName: "plus").frame(width: 32, height: 32)
-        }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Add to canvas")
-        control("point.3.connected.trianglepath.dotted", "Connect selected entities") {
-          tool = "Connect"
-          if board.selection.count == 2 {
-            let ids = Array(board.selection)
-            connectSource = ids[0]
-            connectTarget = ids[1]
-            editingRelation = nil
-            editingLocal = nil
-            edgeLabel = ""
-            connectionSheet = true
-          } else {
-            connectSource = board.selection.first
-          }
-        }
-        Divider().frame(height: 20)
-        control("arrow.uturn.backward", "Undo board change") { board.step(back: true) }.disabled(
-          board.past.isEmpty)
-        control("arrow.uturn.forward", "Redo board change") { board.step(back: false) }.disabled(
-          board.future.isEmpty)
-        Menu {
-          Button("Group selection") { board.group() }.disabled(board.selection.count < 2)
-          Button("Align and distribute") { board.align() }.disabled(board.selection.count < 2)
-          Button("Clear selection") { board.selection = [] }
-          Button("Remove selection from board") { board.removeSelection() }.disabled(
-            board.selection.isEmpty)
-          Divider()
-          Button("Arrange nodes") {
-            board.autoLayout()
-            board.fit(viewportSize)
-          }
-          if let archivedRelation {
-            Button("Restore removed relationship") {
-              studio.perform {
-                try studio.store.restoreRelation(worldID: studio.worldID, id: archivedRelation)
-                self.archivedRelation = nil
-                board.refreshRelations()
-              }
-            }
-          }
-        } label: {
-          Image(systemName: "ellipsis").frame(width: 30, height: 32)
-        }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help(
-          "Selection and layout tools")
-      }.padding(4).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 10))
-      Spacer(minLength: 0)
-      HStack(spacing: 2) {
-        control("minus", "Zoom out") { board.zoom(-0.1) }
-        Text("\(Int(board.viewport.zoom*100))%").font(.system(size: 13)).monospacedDigit().frame(
-          width: 42)
-        control("plus", "Zoom in") { board.zoom(0.1) }
-        control("arrow.up.left.and.down.right.and.arrow.up.right.and.down.left", "Fit to content") {
-          board.fit(viewportSize)
-        }
-      }.padding(4).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 10))
+            panel = nil
+          }, close: closePanel)
+      }
+    }
+    .studioSheet(item: $session.connection) { connection in
+      RelationEditor(
+        t: studio.t, title: "Is this a relationship?", source: connection.source.title,
+        target: connection.target.title, label: $edgeLabel,
+        note:
+          "Saving creates a draft relationship that also appears in Graph. Keeping it as an arrow changes nothing in your lore.",
+        suggestions: relationSuggestions,
+        save: { session.saveConnection(connection, label: edgeLabel) },
+        cancel: { session.connection = nil }
+      ).onAppear { edgeLabel = connection.label }
     }
   }
-  private func control(_ icon: String, _ title: String, action: @escaping () -> Void) -> some View {
-    IconButton(icon: icon, label: title, t: studio.t, action: action)
-      .background(
-        (icon == "cursorarrow" && tool == "Select") || (icon == "hand.draw" && tool == "Pan")
-          || (icon == "point.3.connected.trianglepath.dotted" && tool == "Connect")
-          ? studio.t.accentSoft : .clear, in: RoundedRectangle(cornerRadius: 7))
+  private var relationSuggestions: [String] {
+    Array(Set(((try? studio.store.relations(worldID: studio.worldID)) ?? []).map(\.label)))
+      .sorted().prefix(6).map { $0 }
   }
-  private func point(_ card: CanvasCard, _ size: CGSize) -> CGPoint {
-    CGPoint(
-      x: size.width / 2 + card.x * board.viewport.zoom + board.viewport.x,
-      y: size.height / 2 + card.y * board.viewport.zoom + board.viewport.y)
-  }
-  private func isRelated(_ card: CanvasCard) -> Bool {
-    board.selection.isEmpty || board.selection.contains(card.id)
-      || visualEdges.contains {
-        ($0.source == card.id && board.selection.contains($0.target))
-          || ($0.target == card.id && board.selection.contains($0.source))
-      }
-  }
-  private func select(_ card: CanvasCard) {
-    if connectSource != nil || tool == "Connect" {
-      beginConnection(card)
-    } else if NSEvent.modifierFlags.contains(.command) {
-      if board.selection.contains(card.id) {
-        board.selection.remove(card.id)
+
+  // MARK: Bar
+
+  private var bar: some View {
+    WorkspaceBar(studio: studio) {
+      Image(systemName: Destination.canvas.icon).font(.system(size: 14))
+        .foregroundStyle(studio.t.accent).accessibilityHidden(true)
+      PlainMenu(flexible: true) {
+        boardMenu
+      } label: {
+        HStack(spacing: 5) {
+          Text(session.name).font(.system(size: 15, weight: .semibold)).lineLimit(1)
+          Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(studio.t.muted)
+        }.padding(.horizontal, 6).frame(height: 28).hoverFill(studio.t)
+      }.padding(.leading, -4).help("Switch, rename or archive boards")
+      if let failure = session.failure {
+        Label("Not saved", systemImage: "exclamationmark.triangle")
+          .font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.warning).fixedSize()
+          .help(failure)
       } else {
-        board.selection.insert(card.id)
+        Text("Saved").font(.system(size: 12)).foregroundStyle(studio.t.muted).fixedSize()
+          .help("This board is saved on this device")
       }
-    } else {
-      board.selection = [card.id]
+    } trailing: {
+      if studio.mode == .assisted, !session.selection.isEmpty {
+        BarAction(
+          title: session.selection.count == 1
+            ? "Reference" : "Reference \(session.selection.count)",
+          icon: "at", t: studio.t,
+          help:
+            "Mention the selected \(session.selection.count == 1 ? "card" : "cards") in the conversation"
+        ) { withAnimation(.easeOut(duration: 0.18)) { studio.referenceCanvasSelection() } }
+      }
+      PlainMenu {
+        Button("Entity…") { prepareCreate() }
+        Button("From library…") {
+          pickerQuery = ""
+          panel = .library
+        }
+        Button("Image…") { session.addImage() }
+        Button("GPT illustrations…") { panel = .artwork }
+        if let card = session.selection.first, session.selection.count == 1 {
+          Divider()
+          Button(
+            session.selectionWithArt.contains(card)
+              ? "Replace card artwork…" : "Artwork for selected card…"
+          ) {
+            session.chooseArtwork(for: card)
+          }
+          if session.selectionWithArt.contains(card) {
+            Button("Remove card artwork") { session.setArtwork(nil, for: card) }
+          }
+        }
+      } label: {
+        Label("Add", systemImage: "plus").font(.system(size: 13, weight: .medium)).fixedSize()
+          .padding(.horizontal, 10).frame(height: Metric.control)
+          .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
+          .overlay(
+            RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.hairline, lineWidth: 1))
+      }.help("Add records or an image. Draw, write and connect with the tools on the canvas.")
+      IconButton(icon: "viewfinder", label: "Fit everything in view", t: studio.t) {
+        session.command("fit")
+      }
+      if studio.mode == .assisted {
+        IconButton(
+          icon: "sidebar.right",
+          label: studio.companionExpanded ? "Hide companion" : "Open companion conversation",
+          t: studio.t, active: studio.companionExpanded
+        ) { withAnimation(.easeOut(duration: 0.18)) { studio.companionExpanded.toggle() } }
+      }
     }
   }
-  private func open(_ card: CanvasCard) {
-    if let id = card.recordID, let record = studio.records.first(where: { $0.id == id }),
-      board.save()
-    {
-      studio.openRecord(record)
-    } else if card.recordID == nil {
-      editingCardID = card.id
-      title = card.text
-      bodyText = card.text
-      kind = "capture"
-      createSheet = true
+  @ViewBuilder private var boardMenu: some View {
+    let boards = (try? studio.store.boards(worldID: studio.worldID, kind: "canvas")) ?? []
+    ForEach(boards) { item in
+      Button {
+        studio.canvasBoardID = item.id
+        session.switchBoard(item.id)
+      } label: {
+        if item.id == session.boardID {
+          Label(item.name, systemImage: "checkmark")
+        } else {
+          Text(item.name)
+        }
+      }
+    }
+    Divider()
+    Button("New board") { newBoard() }
+    Button("Rename…") {
+      boardName = session.name
+      panel = .rename
+    }
+    Button("Export as PNG…") { session.exportImage() }
+    if session.hiddenCount > 0 {
+      Button(
+        "Show \(session.hiddenCount) hidden relationship\(session.hiddenCount == 1 ? "" : "s")"
+      ) {
+        session.showHiddenRelations()
+      }
+    }
+    Button("Archive board") { archiveBoard() }.disabled(session.boardID == nil)
+    let archived =
+      (try? studio.store.boards(worldID: studio.worldID, kind: "canvas", archived: true)) ?? []
+    if !archived.isEmpty {
+      Menu("Archived boards") {
+        ForEach(archived) { item in
+          Button("Restore “\(item.name)”") {
+            studio.perform {
+              try studio.store.setBoardArchived(
+                worldID: studio.worldID, id: item.id, archived: false)
+              studio.canvasBoardID = item.id
+              session.switchBoard(item.id)
+            }
+          }
+        }
+      }
     }
   }
-  private func beginConnection(_ card: CanvasCard) {
-    if let source = connectSource, source != card.id {
-      connectTarget = card.id
-      editingRelation = nil
-      editingLocal = nil
-      edgeLabel = ""
-      connectionSheet = true
-    } else {
-      connectSource = card.id
-      tool = "Connect"
+  private func newBoard() {
+    studio.perform {
+      let existing = try studio.store.boards(worldID: studio.worldID, kind: "canvas").count
+      let id = try studio.store.saveBoard(
+        worldID: studio.worldID, name: "Untitled board \(existing + 1)", kind: "canvas",
+        content: CanvasBoardContent.empty
+      ).id
+      studio.canvasBoardID = id
+      session.switchBoard(id)
     }
   }
-  private func prepareCreate(_ type: String) {
-    editingCardID = nil
-    title = ""
-    bodyText = ""
-    kind = type
-    createSheet = true
+  private func archiveBoard() {
+    guard let id = session.boardID else { return }
+    let name = session.name
+    Task {
+      await session.flush()
+      studio.perform {
+        try studio.store.setBoardArchived(worldID: studio.worldID, id: id, archived: true)
+        let remaining = try studio.store.boards(worldID: studio.worldID, kind: "canvas")
+        let next =
+          try remaining.first?.id
+          ?? studio.store.saveBoard(
+            worldID: studio.worldID, name: "Untitled board", kind: "canvas",
+            content: CanvasBoardContent.empty
+          ).id
+        studio.canvasBoardID = next
+        session.switchBoard(next)
+        studio.show("Archived board “\(name)”", icon: "archivebox", actionTitle: "Undo") {
+          studio.perform {
+            try studio.store.setBoardArchived(worldID: studio.worldID, id: id, archived: false)
+            studio.canvasBoardID = id
+            session.switchBoard(id)
+          }
+        }
+      }
+    }
+  }
+
+  // MARK: Board
+
+  private var board: some View {
+    GeometryReader { geo in
+      ZStack(alignment: .bottom) {
+        // Transparent: the engine's web view is mounted beneath the workspace by the shell.
+        Color.clear.background(
+          GeometryReader { area in
+            Color.clear.preference(key: CanvasFrameKey.self, value: area.frame(in: .named("shell")))
+          })
+        if !session.loaded && session.failure == nil {
+          ProgressView().controlSize(.small).frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(studio.t.background)
+        }
+        if let failure = session.failure, !session.loaded {
+          EmptyState(
+            icon: "exclamationmark.triangle", title: "This board could not be opened",
+            message: failure, t: studio.t
+          ) { Button("New board") { newBoard() }.buttonStyle(QuietButton(t: studio.t)) }
+          .frame(maxWidth: .infinity, maxHeight: .infinity).background(studio.t.background)
+        }
+        if composerVisible {
+          UnifiedComposer(studio: studio, collapsed: true)
+            .frame(width: min(440, geo.size.width - 40))
+            // Clear of the engine's zoom and undo controls on narrower canvases.
+            .padding(.bottom, 76)
+        }
+      }
+    }
+  }
+  /// A 9-point grab column with a hairline, so the divider is easy to hit and drag.
+  private var companionDivider: some View {
+    Color.clear.frame(width: 9).frame(maxHeight: .infinity)
+      .overlay(Rectangle().fill(studio.t.hairline).frame(width: 1))
+      .contentShape(Rectangle())
+      .onHover { if $0 { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() } }
+      .gesture(
+        DragGesture(minimumDistance: 1, coordinateSpace: .global).onChanged { value in
+          if companionStart == nil { companionStart = studio.companionWidth }
+          studio.companionWidth = max(
+            320, min(460, (companionStart ?? 400) - value.translation.width))
+        }.onEnded { _ in
+          companionStart = nil
+          studio.perform {
+            try studio.store.setPreference("companion-width", value: String(studio.companionWidth))
+          }
+        }
+      )
+      .help("Drag to resize the companion").accessibilityLabel("Resize companion")
+  }
+
+  // MARK: Sheets
+
+  private func closePanel() { panel = nil }
+  private func prepareCreate() {
+    formTitle = ""
+    formBody = ""
+    panel = .create
   }
   private var createForm: some View {
-    VStack(alignment: .leading, spacing: 20) {
-      Text(kind == "entity" ? "Create an entity" : "Capture a thought").font(
-        .system(size: 24, weight: .medium))
-      TextField("Title", text: $title).textFieldStyle(.roundedBorder)
-      if kind == "entity" {
-        Picker("Type", selection: $category) {
-          ForEach(["Characters", "Factions", "Places", "Power systems", "Cosmology"], id: \.self) {
-            Text($0).tag($0)
+    SheetScaffold(
+      title: "New entity", subtitle: "Saved as a draft in your library and placed on this board.",
+      t: studio.t, close: closePanel
+    ) {
+      FormField(label: "Name", placeholder: "Name", text: $formTitle, t: studio.t)
+      VStack(alignment: .leading, spacing: 6) {
+        Text("Type").font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+        FlowLayout(spacing: 6) {
+          ForEach(Vocabulary.categories, id: \.self) { type in
+            FilterChip(title: type, selected: formCategory == type, t: studio.t) {
+              formCategory = type
+            }
           }
         }
       }
-      TextEditor(text: $bodyText).font(.system(size: 15)).frame(height: 160)
-      if let id = editingCardID, let card = board.document.cards.first(where: { $0.id == id }),
-        let data = card.image.flatMap({ Data(base64Encoded: $0) }),
-        let image = ImageCache.image(data)
-      {
-        Image(nsImage: image).resizable().scaledToFit().frame(maxHeight: 180)
+      VStack(alignment: .leading, spacing: 6) {
+        Text("Notes").font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+        TextEditor(text: $formBody).font(.system(size: 14)).scrollContentBackground(.hidden)
+          .padding(8).frame(height: 120)
+          .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
+          .overlay(
+            RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.border, lineWidth: 1))
       }
-      Text(
-        editingCardID == nil
-          ? "Saved as a draft in your world library." : "Changes are saved to this canvas card."
-      ).font(.system(size: 13)).foregroundStyle(
-        studio.t.secondary)
-      HStack {
-        Button("Cancel") { createSheet = false }
-        Spacer()
-        Button(editingCardID == nil ? "Create draft" : "Save card") {
-          if let editingCardID {
-            board.mutate { doc in
-              if let index = doc.cards.firstIndex(where: { $0.id == editingCardID }) {
-                doc.cards[index].text = bodyText.isEmpty ? title : bodyText
-              }
-            }
-          } else {
-            board.create(
-              title: title, body: bodyText, kind: kind,
-              category: kind == "entity" ? category : "Ideas")
-          }
-          if studio.error == nil { createSheet = false }
-        }.disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    } footer: {
+      Spacer()
+      Button("Cancel", action: closePanel).buttonStyle(QuietButton(t: studio.t, role: .ghost))
+      Button("Create draft") {
+        studio.perform {
+          let record = try studio.store.createRecord(
+            worldID: studio.worldID, title: formTitle, body: formBody, kind: "entity",
+            category: formCategory)
+          try studio.reload()
+          session.sync()
+          session.add([record])
+          panel = nil
+        }
+      }.buttonStyle(QuietButton(t: studio.t, primary: true)).keyboardShortcut(.defaultAction)
+        .disabled(formTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
+  }
+  private var renameForm: some View {
+    SheetScaffold(title: "Rename board", t: studio.t, width: 380, close: closePanel) {
+      FormField(placeholder: "Board name", text: $boardName, t: studio.t) {
+        session.rename(boardName)
+        panel = nil
       }
-    }.padding(28).frame(width: 440).background(studio.t.background).foregroundStyle(studio.t.text)
+    } footer: {
+      Spacer()
+      Button("Cancel", action: closePanel).buttonStyle(QuietButton(t: studio.t, role: .ghost))
+      Button("Rename") {
+        session.rename(boardName)
+        panel = nil
+      }.buttonStyle(QuietButton(t: studio.t, primary: true)).keyboardShortcut(.defaultAction)
+        .disabled(boardName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
   }
   private var libraryPicker: some View {
-    VStack(alignment: .leading, spacing: 20) {
-      HStack {
-        Text("Add from your world").font(.system(size: 23, weight: .medium))
-        Spacer()
-        Button("Done") { showLibrary = false }
-      }
+    let matches = studio.records.filter {
+      pickerQuery.isEmpty || $0.title.localizedCaseInsensitiveContains(pickerQuery)
+        || $0.category.localizedCaseInsensitiveContains(pickerQuery)
+    }
+    return SheetScaffold(
+      title: "Add from library", subtitle: "Cards stay linked to their records.", t: studio.t,
+      close: closePanel
+    ) {
+      SearchField(text: $pickerQuery, placeholder: "Filter records", t: studio.t)
       ScrollView {
-        VStack(spacing: 8) {
-          ForEach(studio.records) { record in
+        VStack(spacing: 1) {
+          ForEach(matches) { record in
             Button {
-              board.add(record)
+              session.add([record])
             } label: {
-              HStack {
-                Image(systemName: categoryIcon(record.category))
-                Text(record.title)
+              HStack(spacing: 10) {
+                CategoryTile(record: record, t: studio.t, size: 28)
+                VStack(alignment: .leading, spacing: 1) {
+                  Text(record.title).font(.system(size: 13.5, weight: .medium)).lineLimit(1)
+                  Text(
+                    record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category
+                  )
+                  .font(.system(size: 11.5)).foregroundStyle(studio.t.muted)
+                }
                 Spacer()
-                Image(
-                  systemName: board.document.cards.contains { $0.recordID == record.id }
-                    ? "checkmark" : "plus")
-              }.padding(12)
-            }.buttonStyle(.plain)
+                Image(systemName: "plus").font(.system(size: 12, weight: .medium))
+                  .foregroundStyle(studio.t.secondary)
+              }.padding(.horizontal, 8).frame(height: 44).hoverFill(studio.t)
+            }.buttonStyle(.plain).help("Add to board, or select it if it is already there")
+          }
+          if matches.isEmpty {
+            Text(studio.records.isEmpty ? "Your library is empty." : "No records match.")
+              .font(.system(size: 13)).foregroundStyle(studio.t.secondary).padding(.vertical, 30)
           }
         }
       }.frame(height: 300)
-      if studio.records.isEmpty { Text("Create a document or entity in Library first.") }
-    }.padding(24).frame(width: 440).background(studio.t.background).foregroundStyle(studio.t.text)
-  }
-  private var connectionForm: some View {
-    VStack(alignment: .leading, spacing: 20) {
-      Text(editingRelation != nil || editingLocal != nil ? "Relationship" : "Connect the pieces")
-        .font(.system(size: 24, weight: .medium))
-      Text("\(sourceTitle) → \(targetTitle)").font(.system(size: 15)).foregroundStyle(
-        studio.t.secondary)
-      TextField("Relationship · e.g. guided by", text: $edgeLabel).textFieldStyle(.roundedBorder)
-      Text(
-        realEntityPair
-          ? "A draft entity relationship, shared with Knowledge Graph."
-          : "A board connection. It does not establish a lore relationship."
-      ).font(.system(size: 13)).foregroundStyle(studio.t.secondary)
-      HStack {
-        Button("Cancel") {
-          connectionSheet = false
-          connectSource = nil
-          connectTarget = nil
-          tool = "Select"
-        }
-        if editingRelation != nil || editingLocal != nil { Button("Remove") { removeEdge() } }
-        Spacer()
-        Button("Save relationship") { saveEdge() }.disabled(
-          edgeLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-      }
-    }.padding(28).frame(width: 460).background(studio.t.background).foregroundStyle(studio.t.text)
-  }
-  private var sourceCard: CanvasCard? { board.document.cards.first { $0.id == connectSource } }
-  private var targetCard: CanvasCard? { board.document.cards.first { $0.id == connectTarget } }
-  private var sourceTitle: String {
-    sourceCard.flatMap { card in studio.records.first { $0.id == card.recordID }?.title ?? card.text
-    } ?? "Source"
-  }
-  private var targetTitle: String {
-    targetCard.flatMap { card in studio.records.first { $0.id == card.recordID }?.title ?? card.text
-    } ?? "Target"
-  }
-  private var realEntityPair: Bool {
-    [sourceCard?.recordID, targetCard?.recordID].allSatisfy { id in
-      studio.records.contains { $0.id == id && $0.kind == "entity" }
+    } footer: {
+      Spacer()
+      Button("Done", action: closePanel).buttonStyle(QuietButton(t: studio.t, primary: true))
+        .keyboardShortcut(.defaultAction)
     }
   }
-  private func saveEdge() {
-    studio.perform {
-      if let editingRelation {
-        try studio.store.updateRelation(
-          worldID: studio.worldID, id: editingRelation.id, label: edgeLabel)
-      } else if let editingLocal {
-        board.mutate { $0.edges[editingLocal].label = edgeLabel }
-      } else if realEntityPair, let source = sourceCard?.recordID, let target = targetCard?.recordID
-      {
-        _ = try studio.store.addRelation(
-          worldID: studio.worldID, source: source, target: target, label: edgeLabel)
-      } else if let connectSource, let connectTarget {
-        board.mutate {
-          $0.edges.append(
-            CanvasEdge(label: edgeLabel, source: connectSource, target: connectTarget))
-        }
-      }
-      board.refreshRelations()
-      connectionSheet = false
-      connectSource = nil
-      connectTarget = nil
-      tool = "Select"
-    }
-  }
-  private func removeEdge() {
-    studio.perform {
-      if let editingRelation {
-        try studio.store.archiveRelation(worldID: studio.worldID, id: editingRelation.id)
-        archivedRelation = editingRelation.id
-      } else if let editingLocal {
-        board.mutate { $0.edges.remove(at: editingLocal) }
-      }
-      board.refreshRelations()
-      connectionSheet = false
-      connectSource = nil
-      connectTarget = nil
-    }
-  }
-  private func inspect(_ edge: DisplayEdge) {
-    connectSource = edge.source
-    connectTarget = edge.target
-    edgeLabel = edge.label
-    editingRelation = board.relationships.first { $0.id == edge.id }
-    editingLocal = edge.localIndex
-    connectionSheet = true
-  }
-  private var visualEdges: [DisplayEdge] {
-    var edges = board.relationships.compactMap { relation -> DisplayEdge? in
-      guard let a = board.document.cards.first(where: { $0.recordID == relation.sourceID }),
-        let b = board.document.cards.first(where: { $0.recordID == relation.targetID })
-      else { return nil }
-      return DisplayEdge(id: relation.id, source: a.id, target: b.id, label: relation.label)
-    }
-    edges += board.document.edges.enumerated().map {
-      DisplayEdge(
-        id: "local-\($0.offset)", source: $0.element.source, target: $0.element.target,
-        label: $0.element.label ?? "Board link", localIndex: $0.offset)
-    }
-    return edges
-  }
-}
-struct DisplayEdge: Identifiable {
-  var id: String
-  var source: String
-  var target: String
-  var label: String
-  var localIndex: Int?
 }
 
-struct EntityCanvasCard: View {
-  @ObservedObject var studio: Studio
-  let card: CanvasCard
-  var selected: Bool
-  var related: Bool
-  var open: () -> Void
-  var select: () -> Void
-  var connect: () -> Void
-  @State private var hover = false
-  var record: LoreRecord? { studio.records.first { $0.id == card.recordID } }
-  var semantic: Color {
-    switch record?.category.lowercased() {
-    case "characters": return Color(hex: studio.dark ? 0xD7B899 : 0x866042)
-    case "factions": return Color(hex: studio.dark ? 0xB7B6E0 : 0x70649C)
-    case "power systems": return Color(hex: studio.dark ? 0xD4C48F : 0x807036)
-    default: return studio.t.accent
+/// Label editor shared by Canvas and Graph for relationships.
+struct RelationEditor: View {
+  let t: Theme
+  let title: String
+  let source: String
+  let target: String
+  @Binding var label: String
+  let note: String
+  var suggestions: [String] = []
+  var removable = false
+  var save: () -> Void
+  var remove: () -> Void = {}
+  var cancel: () -> Void
+  var body: some View {
+    SheetScaffold(title: title, t: t, close: cancel) {
+      HStack(spacing: 8) {
+        endpoint(source)
+        Image(systemName: "arrow.right").font(.system(size: 11, weight: .semibold))
+          .foregroundStyle(t.muted)
+        endpoint(target)
+      }
+      FormField(
+        label: "How are they connected?", placeholder: "guided by, rules, born in…", text: $label,
+        t: t, submit: { if valid { save() } })
+      if !suggestions.isEmpty {
+        ScrollView(.horizontal) {
+          HStack(spacing: 6) {
+            ForEach(suggestions, id: \.self) { value in
+              FilterChip(title: value, selected: label == value, t: t) { label = value }
+            }
+          }
+        }.scrollIndicators(.never)
+      }
+      Text(note).font(.system(size: 12.5)).foregroundStyle(t.muted).lineSpacing(2)
+        .fixedSize(horizontal: false, vertical: true)
+    } footer: {
+      if removable {
+        Button("Remove", action: remove).buttonStyle(QuietButton(t: t, role: .danger))
+      }
+      Spacer()
+      Button(removable ? "Cancel" : "Keep as an arrow", action: cancel)
+        .buttonStyle(QuietButton(t: t, role: .ghost))
+      Button("Save", action: save).buttonStyle(QuietButton(t: t, primary: true))
+        .keyboardShortcut(.defaultAction).disabled(!valid)
     }
   }
-  var body: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      if let data = card.image.flatMap({ Data(base64Encoded: $0) }),
-        let image = ImageCache.image(data)
-      {
-        Image(nsImage: image).resizable().scaledToFill().frame(height: 100).clipped()
-      }
-      VStack(alignment: .leading, spacing: 12) {
-        HStack(spacing: 8) {
-          Image(systemName: categoryIcon(record?.category ?? "")).foregroundStyle(semantic)
-          Text(
-            record?.category.isEmpty == false
-              ? record!.category : record?.kind == "capture" ? "Note" : "Reference"
-          ).font(.system(size: 12, weight: .medium)).foregroundStyle(semantic)
-          Spacer()
-          Button(action: open) {
-            Image(systemName: "arrow.up.right").font(.system(size: 13)).foregroundStyle(
-              studio.t.secondary)
-          }.buttonStyle(.plain).help("Open \(record?.title ?? card.text)")
-        }
-        Text(record?.title ?? card.text).font(.system(size: 17, weight: .semibold)).foregroundStyle(
-          studio.t.text
-        ).lineLimit(2)
-        if let record, !record.body.isEmpty {
-          Text(record.body).font(.system(size: 14)).lineSpacing(4).foregroundStyle(
-            studio.t.secondary
-          ).lineLimit(5)
-        }
-        HStack(spacing: 6) {
-          Circle().fill(record?.state == "canon" ? Color(hex: 0x85B69B) : semantic).frame(
-            width: 5, height: 5)
-          Text(record?.state.capitalized ?? "Reference").font(
-            .system(size: 12, weight: .medium))
-          Spacer()
-          if record?.canonical != nil && record?.state != "canon" {
-            Text("Canon preserved").font(.system(size: 11))
-          }
-          Button(action: connect) { Image(systemName: "plus.circle").font(.system(size: 16)) }
-            .buttonStyle(.plain).help("Connect \(record?.title ?? card.text)")
-        }.foregroundStyle(studio.t.secondary).padding(.top, 2)
-      }.padding(18)
-    }.background(studio.t.surface, in: RoundedRectangle(cornerRadius: 12)).clipShape(
-      RoundedRectangle(cornerRadius: 12)
-    )
-    .overlay(
-      RoundedRectangle(cornerRadius: 12).stroke(
-        selected ? semantic : studio.t.border.opacity(hover ? 1 : 0.7),
-        lineWidth: selected ? 1.6 : 0.8)
-    )
-    .shadow(color: .black.opacity(studio.dark ? 0.18 : 0.05), radius: hover ? 16 : 8, y: 4)
-    .opacity(related ? 1 : 0.70).contentShape(RoundedRectangle(cornerRadius: 12))
-    .onTapGesture(count: 2, perform: open).onTapGesture(perform: select)
-    .onHover { value in withAnimation(.easeOut(duration: 0.15)) { hover = value } }
-    .accessibilityElement(children: .contain).accessibilityLabel(record?.title ?? card.text)
-  }
-}
-@MainActor enum ImageCache {
-  static let cache = NSCache<NSData, NSImage>()
-  static func image(_ data: Data) -> NSImage? {
-    let key = data as NSData
-    if let image = cache.object(forKey: key) { return image }
-    guard let image = NSImage(data: data) else { return nil }
-    cache.countLimit = 40
-    cache.setObject(image, forKey: key)
-    return image
+  private var valid: Bool { !label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+  private func endpoint(_ name: String) -> some View {
+    Text(name).font(.system(size: 13, weight: .medium)).lineLimit(1)
+      .padding(.horizontal, 10).frame(height: 28)
+      .background(t.surface, in: RoundedRectangle(cornerRadius: 7))
+      .overlay(RoundedRectangle(cornerRadius: 7).stroke(t.hairline, lineWidth: 1))
   }
 }

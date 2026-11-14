@@ -1,0 +1,13 @@
+CAPTURE conversation 1440x900, bitmap 2880x1800, 651ms
+CAPTURE companion 1440x900, bitmap 2880x1800, 1028ms
+CAPTURE collapsed 1440x900, bitmap 2880x1800, 1685ms
+CAPTURE review 1440x900, bitmap 2880x1800, 47ms
+CAPTURE review-canon 1440x900, bitmap 2880x1800, 50ms
+CAPTURE review-checks 1440x900, bitmap 2880x1800, 48ms
+CAPTURE conversation 1024x768, bitmap 2048x1536, 367ms
+CAPTURE companion 1024x768, bitmap 2048x1536, 691ms
+CAPTURE collapsed 1024x768, bitmap 2048x1536, 1051ms
+CAPTURE review 1024x768, bitmap 2048x1536, 35ms
+CAPTURE review-canon 1024x768, bitmap 2048x1536, 38ms
+CAPTURE review-checks 1024x768, bitmap 2048x1536, 34ms
+Native captures complete: /Users/desenyon/.zeron/worktrees/synthesis/swift-falcon/docs/verification/m3-2026-11-12

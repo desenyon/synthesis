@@ -1,11 +1,45 @@
-# Optional AI connection
+# Connecting the assistant
 
-Open Synthesis → Settings (⌘,). Enter an OpenAI API key and a model ID available to your account, then save. The key goes to macOS Keychain under the application's service identifier. The model name is a local preference. The application does not test the key by making a billable call when saving it.
+The assistant is optional. Every manual tool works without it, and nothing is sent anywhere until you send a message in AI Assisted mode.
 
-Return to AI Assisted and submit a message to invoke the provider. The composer states that this sends your prompt and selected-world context to OpenAI. Choose Create, Develop, Critique, Simulate or Canonize from its menu. These are instruction modes, not autonomous permission grants. Simulations remain hypothetical and Canonize prepares text for review; the model cannot accept canon.
+Open Settings (⌘,) → Assistant and choose how Synthesis reaches a model.
 
-The adapter uses the [Responses API](https://platform.openai.com/docs/api-reference/responses), SSE text streaming and `store:false`. It includes bounded recent records and conversation history with source IDs and canon/draft labels. It is not yet an autonomous tool-calling retrieval agent. Account billing and provider retention policies still apply; `store:false` is not a promise of zero provider retention.
+## Claude Code or Codex — your subscription (default)
 
-No key or model configured: the user message remains in local history and the app displays a connection affordance. Invalid credentials, model access, rate limits or network failures are reported honestly. Stop cancels the request; switching to Manual also invalidates its result and blocks new transport calls in the core. A request already received by the provider cannot be recalled.
+If Claude Code or Codex is installed and signed in on this Mac, Synthesis uses it. No API key is involved and Synthesis never sees your sign-in; it belongs to the harness.
 
-Settings can remove the saved key. Never commit a key, paste it into lore, or distribute it inside a bundle. No live provider call has been made for this implementation's validation; tests use a separate injected transport that is never exposed as working AI in the product.
+- **Claude Code** (recommended when installed): install it, run `claude` in Terminal once and sign in with your Claude subscription.
+- **Codex**: install it, run `codex login` and sign in with your ChatGPT subscription.
+
+"Check sign-in" asks the harness for its own status and sends no message. The optional Model field passes a model name to the harness (`sonnet`, `opus`, `haiku` for Claude Code); leave it empty to use your default.
+
+How each message is run:
+
+| | Claude Code | Codex |
+| - | - | - |
+| Command | `claude -p` (headless) | `codex exec` |
+| Tools | none (`--tools ""`), no MCP servers, no slash commands | read-only sandbox |
+| Your configuration | ignored (`--safe-mode`) | ignored (`--ignore-user-config`, `--ignore-rules`; apps, plugins, browser and computer use disabled) |
+| Working folder | new empty folder, removed afterwards | new empty folder, removed afterwards |
+| Session | not saved (`--no-session-persistence`) | not saved (`--ephemeral`) |
+| Streaming | word by word | one update when the answer is ready |
+
+Claude Code therefore can only read what Synthesis sends and write text. Codex keeps its built-in shell inside a read-only sandbox; it is told not to use it and has an empty folder to work in, but that is an instruction and a sandbox, not the absence of the tool. Prefer Claude Code if that distinction matters to you.
+
+Inherited `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `OPENAI_API_KEY` variables are removed from the harness's environment so a stray key cannot replace your subscription sign-in.
+
+## OpenAI API key
+
+Choose "OpenAI API key", enter a key and a model ID, and save. The key goes to macOS Keychain; the model name is a local preference. Saving makes no request. The adapter uses the Responses API with SSE streaming and `store:false`. Account billing and provider retention policies apply.
+
+## What is sent
+
+The composer always states who receives a message. A request contains your message, the recent conversation, and up to 16 records from the selected world chosen for relevance; the transcript shows exactly which ones under "Read N records from your world". Records from other worlds and archived records are never included.
+
+Modes (Create, Develop, Critique, Simulate, Canonize) are instructions, not permissions. The model cannot accept canon. When it proposes changes they are staged for your review and become drafts only when you accept them.
+
+Stop cancels the request and, for a harness, terminates its process. Switching to Manual does the same and blocks new requests in the core. A request already received by a provider cannot be recalled.
+
+## What has been verified
+
+One live request through each harness on 2026-11-13 (`SYNTHESIS_LIVE_HARNESS=claude-code|codex ./scripts/test.sh --filter LiveHarnessTests`): both answered from world context with record citations and returned a change set that was staged and not applied. The default test suite uses stand-in executables and scripted answers, so it spends no subscription usage. The OpenAI API path has not been called live.

@@ -1,0 +1,48 @@
+CAPTURE sheet-artwork 1440x900, bitmap 1440x900, 191ms
+CAPTURE sheet-artwork content inline; native modal presentation not exercised
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CAPTURE canvas 1440x900, bitmap 1440x900, 149ms
+CAPTURE companion 1440x900, bitmap 1440x900, 125ms
+CAPTURE manual 1440x900, bitmap 1440x900, 86ms
+CAPTURE light 1440x900, bitmap 1440x900, 139ms
+CAPTURE sheet-settings 1440x900, bitmap 1440x900, 77ms
+CAPTURE sheet-settings content inline; native modal presentation not exercised
+CAPTURE sheet-record 1440x900, bitmap 1440x900, 76ms
+CAPTURE sheet-record content inline; native modal presentation not exercised
+CAPTURE sheet-canon 1440x900, bitmap 1440x900, 62ms
+CAPTURE sheet-canon content inline; native modal presentation not exercised
+CAPTURE sheet-history 1440x900, bitmap 1440x900, 65ms
+CAPTURE sheet-history content inline; native modal presentation not exercised
+CAPTURE sheet-relation 1440x900, bitmap 1440x900, 165ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+CAPTURE sheet-artwork 1024x768, bitmap 1024x768, 135ms
+CAPTURE sheet-artwork content inline; native modal presentation not exercised
+CAPTURE canvas 1024x768, bitmap 1024x768, 116ms
+CAPTURE companion 1024x768, bitmap 1024x768, 74ms
+CAPTURE manual 1024x768, bitmap 1024x768, 53ms
+CAPTURE light 1024x768, bitmap 1024x768, 101ms
+CAPTURE sheet-settings 1024x768, bitmap 1024x768, 71ms
+CAPTURE sheet-settings content inline; native modal presentation not exercised
+CAPTURE sheet-record 1024x768, bitmap 1024x768, 63ms
+CAPTURE sheet-record content inline; native modal presentation not exercised
+CAPTURE sheet-canon 1024x768, bitmap 1024x768, 62ms
+CAPTURE sheet-canon content inline; native modal presentation not exercised
+CAPTURE sheet-history 1024x768, bitmap 1024x768, 35ms
+CAPTURE sheet-history content inline; native modal presentation not exercised
+CAPTURE sheet-relation 1024x768, bitmap 1024x768, 112ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+Native captures complete: /Users/desenyon/.zeron/worktrees/synthesis/swift-falcon/test-results/refinement-final-safe

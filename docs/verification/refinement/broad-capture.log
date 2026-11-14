@@ -1,0 +1,94 @@
+CAPTURE conversation-home 1440x900, bitmap 1440x900, 157ms
+CAPTURE conversation 1440x900, bitmap 1440x900, 154ms
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CAPTURE canvas 1440x900, bitmap 1440x900, 153ms
+CAPTURE companion 1440x900, bitmap 1440x900, 120ms
+CAPTURE manual 1440x900, bitmap 1440x900, 102ms
+CAPTURE collapsed 1440x900, bitmap 1440x900, 146ms
+CAPTURE light 1440x900, bitmap 1440x900, 154ms
+CAPTURE graph 1440x900, bitmap 1440x900, 155ms
+CAPTURE graph-selected 1440x900, bitmap 1440x900, 213ms
+CAPTURE library 1440x900, bitmap 1440x900, 78ms
+CAPTURE editor 1440x900, bitmap 1440x900, 60ms
+CAPTURE timeline 1440x900, bitmap 1440x900, 45ms
+CAPTURE atlas 1440x900, bitmap 1440x900, 162ms
+CAPTURE palette 1440x900, bitmap 1440x900, 235ms
+CAPTURE light-conversation 1440x900, bitmap 1440x900, 145ms
+CAPTURE light-library 1440x900, bitmap 1440x900, 72ms
+CAPTURE light-graph 1440x900, bitmap 1440x900, 145ms
+CAPTURE light-editor 1440x900, bitmap 1440x900, 47ms
+CAPTURE manual-conversation 1440x900, bitmap 1440x900, 56ms
+CAPTURE toast 1440x900, bitmap 1440x900, 201ms
+CAPTURE review 1440x900, bitmap 1440x900, 147ms
+CAPTURE review-canon 1440x900, bitmap 1440x900, 137ms
+CAPTURE review-checks 1440x900, bitmap 1440x900, 107ms
+CAPTURE empty-conversation 1440x900, bitmap 1440x900, 576ms
+CAPTURE empty-canvas 1440x900, bitmap 1440x900, 532ms
+CAPTURE empty-library 1440x900, bitmap 1440x900, 135ms
+CAPTURE empty-graph 1440x900, bitmap 1440x900, 335ms
+CAPTURE empty-timeline 1440x900, bitmap 1440x900, 218ms
+CAPTURE empty-atlas 1440x900, bitmap 1440x900, 132ms
+CAPTURE sheet-settings 1440x900, bitmap 1440x900, 70ms
+CAPTURE sheet-settings panel
+CAPTURE sheet-record 1440x900, bitmap 1440x900, 71ms
+CAPTURE sheet-record panel
+CAPTURE sheet-canon 1440x900, bitmap 1440x900, 125ms
+CAPTURE sheet-canon panel
+CAPTURE sheet-history 1440x900, bitmap 1440x900, 74ms
+CAPTURE sheet-history panel
+CAPTURE sheet-relation 1440x900, bitmap 1440x900, 163ms
+CAPTURE sheet-relation panel
+CAPTURE conversation-home 1024x768, bitmap 1024x768, 361ms
+CAPTURE conversation 1024x768, bitmap 1024x768, 254ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 426ms
+CAPTURE companion 1024x768, bitmap 1024x768, 310ms
+CAPTURE manual 1024x768, bitmap 1024x768, 188ms
+CAPTURE collapsed 1024x768, bitmap 1024x768, 309ms
+CAPTURE light 1024x768, bitmap 1024x768, 100ms
+CAPTURE graph 1024x768, bitmap 1024x768, 109ms
+CAPTURE graph-selected 1024x768, bitmap 1024x768, 1082ms
+CAPTURE library 1024x768, bitmap 1024x768, 155ms
+CAPTURE editor 1024x768, bitmap 1024x768, 109ms
+CAPTURE timeline 1024x768, bitmap 1024x768, 106ms
+CAPTURE atlas 1024x768, bitmap 1024x768, 388ms
+CAPTURE palette 1024x768, bitmap 1024x768, 740ms
+CAPTURE light-conversation 1024x768, bitmap 1024x768, 377ms
+CAPTURE light-library 1024x768, bitmap 1024x768, 161ms
+CAPTURE light-graph 1024x768, bitmap 1024x768, 384ms
+CAPTURE light-editor 1024x768, bitmap 1024x768, 126ms
+CAPTURE manual-conversation 1024x768, bitmap 1024x768, 124ms
+CAPTURE toast 1024x768, bitmap 1024x768, 175ms
+CAPTURE review 1024x768, bitmap 1024x768, 118ms
+CAPTURE review-canon 1024x768, bitmap 1024x768, 96ms
+CAPTURE review-checks 1024x768, bitmap 1024x768, 104ms
+CAPTURE empty-conversation 1024x768, bitmap 1024x768, 352ms
+CAPTURE empty-canvas 1024x768, bitmap 1024x768, 383ms
+CAPTURE empty-library 1024x768, bitmap 1024x768, 60ms
+CAPTURE empty-graph 1024x768, bitmap 1024x768, 161ms
+CAPTURE empty-timeline 1024x768, bitmap 1024x768, 149ms
+CAPTURE empty-atlas 1024x768, bitmap 1024x768, 80ms
+CAPTURE sheet-settings 1024x768, bitmap 1024x768, 45ms
+CAPTURE sheet-settings panel
+CAPTURE sheet-record 1024x768, bitmap 1024x768, 53ms
+CAPTURE sheet-record panel
+CAPTURE sheet-canon 1024x768, bitmap 1024x768, 175ms
+CAPTURE sheet-canon panel
+CAPTURE sheet-history 1024x768, bitmap 1024x768, 166ms
+CAPTURE sheet-history panel
+CAPTURE sheet-relation 1024x768, bitmap 1024x768, 200ms
+CAPTURE sheet-relation panel
+Native captures complete: /Users/desenyon/.zeron/worktrees/synthesis/swift-falcon/test-results/refinement-final
