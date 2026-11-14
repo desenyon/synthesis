@@ -394,4 +394,96 @@ struct StoreTests {
     #expect(try s.canonQueue(worldID: w.id).map(\.id) == [rule.id])
   }
 
+  @Test func rulesStayWorldScopedDraftUntilAcceptedAndReversible() throws {
+    let s = try fixture()
+    let w = try s.createWorld(name: "Aster")
+    let other = try s.createWorld(name: "Elsewhere")
+    let art = try s.createRecord(
+      worldID: w.id, title: "Remembrance", body: "", kind: "entity", category: "Power systems")
+    let page = try s.createRecord(worldID: w.id, title: "Notes", body: "")
+    #expect(try s.powerSystems(worldID: w.id).map(\.id) == [art.id])
+    #expect(try s.powerSystems(worldID: other.id).isEmpty)
+    #expect(try s.ruleChecks(worldID: w.id, systemID: art.id).map(\.id) == ["empty"])
+
+    // Rules attach to entities only, and never across worlds.
+    #expect(throws: SynthesisError.self) {
+      try s.addRule(worldID: w.id, systemID: page.id, kind: .cost, title: "Price", body: "")
+    }
+    #expect(throws: SynthesisError.self) {
+      try s.addRule(worldID: other.id, systemID: art.id, kind: .cost, title: "Price", body: "")
+    }
+    #expect(throws: SynthesisError.self) {
+      try s.addRule(worldID: w.id, systemID: art.id, kind: .cost, title: "  ", body: "")
+    }
+
+    let technique = try s.addRule(
+      worldID: w.id, systemID: art.id, kind: .technique, title: "Recall", body: "Relive a day")
+    var cost = try s.addRule(
+      worldID: w.id, systemID: art.id, kind: .cost, title: "A memory", body: "One is lost")
+    #expect(cost.state == "draft" && cost.origin == "user-authored" && cost.accepted == nil)
+    // Grouped by kind in a fixed order, not by when they were written.
+    #expect(try s.rules(worldID: w.id, systemID: art.id).map(\.id) == [cost.id, technique.id])
+    #expect(throws: SynthesisError.self) { try s.rules(worldID: other.id, systemID: art.id) }
+    #expect(throws: SynthesisError.self) { try s.rule(worldID: other.id, id: cost.id) }
+    var checks = try s.ruleChecks(worldID: w.id, systemID: art.id).map(\.id)
+    #expect(checks.contains("no-limit") && checks.contains("no-source"))
+    #expect(!checks.contains("no-cost") && checks.contains("no-scenarios"))
+
+    // Canon needs the rule's own ID, in its own world.
+    #expect(throws: SynthesisError.self) {
+      try s.promoteRule(worldID: w.id, id: cost.id, confirmation: "yes")
+    }
+    #expect(throws: SynthesisError.self) {
+      try s.promoteRule(worldID: other.id, id: cost.id, confirmation: cost.id)
+    }
+    #expect(try s.rule(worldID: w.id, id: cost.id).state == "draft")
+    cost = try s.promoteRule(worldID: w.id, id: cost.id, confirmation: cost.id)
+    #expect(cost.state == "canon" && cost.accepted?.body == "One is lost")
+
+    // Editing returns it to draft and keeps the accepted wording for comparison.
+    cost = try s.updateRule(
+      worldID: w.id, id: cost.id, kind: .cost, title: "A memory", body: "Two are lost")
+    #expect(cost.state == "draft" && cost.accepted?.body == "One is lost")
+    checks = try s.ruleChecks(worldID: w.id, systemID: art.id).map(\.id)
+    #expect(checks.contains("changed-canon"))
+    #expect(throws: SynthesisError.self) {
+      try s.updateRule(worldID: other.id, id: cost.id, kind: .cost, title: "X", body: "")
+    }
+
+    // Scenarios: saved, updated, scoped; an empty verdict is reported.
+    var test = try s.saveScenario(
+      worldID: w.id, systemID: art.id, title: "Recall a stranger's day",
+      situation: "Mira tries to relive a day she never lived.", expectation: "fails")
+    #expect(try s.ruleChecks(worldID: w.id, systemID: art.id).contains { $0.id == "untested" })
+    test = try s.saveScenario(
+      worldID: w.id, systemID: art.id, id: test.id, title: test.title, situation: test.situation,
+      expectation: "fails", verdict: "Fails: nothing states she can.")
+    #expect(try s.scenarios(worldID: w.id, systemID: art.id) == [test])
+    #expect(try !s.ruleChecks(worldID: w.id, systemID: art.id).contains { $0.id == "untested" })
+    #expect(throws: SynthesisError.self) {
+      try s.saveScenario(
+        worldID: w.id, systemID: art.id, title: "Bad", situation: "", expectation: "maybe")
+    }
+    #expect(throws: SynthesisError.self) {
+      try s.setScenarioArchived(worldID: other.id, id: test.id, archived: true)
+    }
+
+    // Rules travel in both exports, labelled with their state.
+    let text = try s.rulesText(worldID: w.id, systemID: art.id)
+    #expect(text.contains("Costs:\n- A memory: Two are lost [draft]"))
+    let file = try #require(
+      try s.exportMarkdown(worldID: w.id).first { $0.path == "Power systems/Remembrance.md" })
+    #expect(file.content.contains("## Rules") && file.content.contains("- Recall: Relive a day"))
+    let json = String(decoding: try s.exportWorld(w.id), as: UTF8.self)
+    #expect(json.contains("\"ruleScenarios\"") && json.contains("Two are lost"))
+    #expect(!String(decoding: try s.exportWorld(other.id), as: UTF8.self).contains("Two are lost"))
+
+    // Archiving hides a rule and can be undone; nothing is deleted.
+    try s.setRuleArchived(worldID: w.id, id: technique.id, archived: true)
+    #expect(try s.rules(worldID: w.id, systemID: art.id).map(\.id) == [cost.id])
+    try s.setRuleArchived(worldID: w.id, id: technique.id, archived: false)
+    #expect(try s.rules(worldID: w.id, systemID: art.id).count == 2)
+    try s.setScenarioArchived(worldID: w.id, id: test.id, archived: true)
+    #expect(try s.scenarios(worldID: w.id, systemID: art.id).isEmpty)
+  }
 }

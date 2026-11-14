@@ -49,8 +49,10 @@ public protocol ModelTransport: Sendable {
         try? JSONSerialization.jsonObject(with: $0) as? [String: Any]
       }
       let accepted = canon?["body"] as? String ?? "none"
-      return
-        "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category), state: \(r.state), version: \(r.version). Working draft: \(String(r.body.prefix(3000))). Accepted canon snapshot: \(String(accepted.prefix(6000)))"
+      // A system's active rules travel with it, labelled draft or canon.
+      let rules = (try? store.rulesText(worldID: worldID, systemID: r.id)) ?? ""
+      return (rules.isEmpty ? "" : "Rules of \(r.title) —\n\(rules)\n")
+        + "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category), state: \(r.state), version: \(r.version). Working draft: \(String(r.body.prefix(3000))). Accepted canon snapshot: \(String(accepted.prefix(6000)))"
     }.joined(separator: "\n\n")
     let instructions = """
       You are Synthesis, a worldbuilding collaborator. Mode: \(preset).

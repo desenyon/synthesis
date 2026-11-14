@@ -73,10 +73,13 @@ extension WorkspaceStore {
         aliases: \(list(record.aliases))
         ---
         """
+      let rules =
+        record.kind == "entity" ? try rulesText(worldID: worldID, systemID: record.id) : ""
       files.append(
         (
           "\(folder)/\(filename(record.title)).md",
           "\(front)\n\n# \(record.title)\n\n\(record.body)\n"
+            + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n")
         )
       )
     }
