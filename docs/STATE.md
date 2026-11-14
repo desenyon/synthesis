@@ -16,8 +16,9 @@ Read [HANDOFF.md](HANDOFF.md) for the working details of the newest pieces and w
 
 - `./scripts/check.sh`: strict lint, 45 tests in 5 suites, optimized build — passed.
 - Canvas captures at 1440×900 and 1024×768 (dark, light, rail, companion, Manual) inspected.
-- `./scripts/selftest-ui.sh`: 10 passed, 2 skipped because the window lost focus (palette tap, card drag). Not a clean run.
+- `./scripts/selftest-ui.sh`: 17 of 17 in one run, including card drag (exact delta, arrows attached, saved), "Show on canvas", referencing selected cards and card artwork.
+- `./scripts/verify-ui.sh docs/verification/latest`: 78 captures at 1440×900 and 1024×768; every canvas state now renders in background captures.
 
 ## Not verified
 
-Card dragging in the new canvas through the self-test; canvas captures after navigating away in a background window; Excalidraw's own tools beyond what the captures show; the streaming UI and Stop against a live harness in the running app; trackpad gestures; large boards and graphs; VoiceOver.
+Excalidraw's own drawing tools beyond what the captures show; the streaming UI and Stop against a live harness in the running app; trackpad gestures; large boards and graphs; VoiceOver.

@@ -76,6 +76,8 @@ export function App() {
     loaded: false,
     applying: false,
     asked: new Set<string>(),
+    pointerLog: [] as string[],
+    selectionKey: "",
     saveTimer: 0,
     analyzeTimer: 0,
     filesKey: "",
@@ -175,14 +177,37 @@ export function App() {
     }
   }, []);
 
+  /// Tells the application which record cards are selected, so its bar can act on them.
+  const reportSelection = useCallback(() => {
+    const s = live.current;
+    if (!s.api || !s.loaded) return;
+    const selected = s.api.getAppState().selectedElementIds ?? {};
+    const elements: El[] = s.api.getSceneElements();
+    const cards = elements.filter((e) => isCard(e) && selected[e.id]);
+    const recordIDs = [...new Set(cards.map((c) => c.customData.recordID as string))];
+    const withArt = recordIDs.filter((id) =>
+      cards.some(
+        (c) =>
+          c.customData.recordID === id &&
+          elements.some((e) => e.type === "image" && e.customData?.role === "art" && e.groupIds?.some((g: string) => c.groupIds?.includes(g))),
+      ),
+    );
+    const key = recordIDs.join(",") + "|" + withArt.join(",");
+    if (key === s.selectionKey) return;
+    s.selectionKey = key;
+    post({ type: "selection", recordIDs, withArt });
+  }, []);
+
   const onChange = useCallback(() => {
     const s = live.current;
-    if (!s.loaded || s.applying) return;
+    if (!s.loaded) return;
+    reportSelection();
+    if (s.applying) return;
     window.clearTimeout(s.saveTimer);
     s.saveTimer = window.setTimeout(save, 350);
     window.clearTimeout(s.analyzeTimer);
     s.analyzeTimer = window.setTimeout(analyse, 200);
-  }, [save, analyse]);
+  }, [save, analyse, reportSelection]);
 
   /** A free spot near the centre of the current view, in scene coordinates. */
   const openSpot = useCallback((offset: number) => {
@@ -332,6 +357,46 @@ export function App() {
         });
         onChange();
       },
+      /** Sets or clears the picture at the top of a record's card. */
+      async setCardArt(recordID: string, base64: string | null) {
+        const all: El[] = api.getSceneElementsIncludingDeleted();
+        const selected = api.getAppState().selectedElementIds ?? {};
+        const rect =
+          all.find((e) => isCard(e) && e.customData.recordID === recordID && selected[e.id]) ??
+          all.find((e) => isCard(e) && e.customData.recordID === recordID);
+        if (!rect) return;
+        const group = rect.groupIds?.[rect.groupIds.length - 1];
+        const isArt = (e: El) => !e.isDeleted && e.type === "image" && e.customData?.role === "art" && e.groupIds?.includes(group);
+        let next = all.map((e) =>
+          isArt(e)
+            ? newElementWith(e, { isDeleted: true })
+            : e.id === rect.id
+              ? // An empty hash makes the next sync lay the text out again around the picture.
+                newElementWith(e, { customData: { ...e.customData, hash: "" } })
+              : e,
+        );
+        if (base64) {
+          const dataURL = `data:${imageMime(base64)};base64,${base64}`;
+          const size = await imageSize(dataURL);
+          const height = Math.min(150, (CARD_WIDTH / size.width) * size.height);
+          const fileId = `file:${randomId()}`;
+          api.addFiles([{ id: fileId, dataURL, mimeType: imageMime(base64), created: Date.now() }]);
+          const art = convertToExcalidrawElements(
+            [{ type: "image", x: rect.x, y: rect.y, width: CARD_WIDTH, height, fileId, status: "saved" } as any],
+            { regenerateIds: true },
+          )[0];
+          const at = next.findIndex((e) => e.id === rect.id);
+          next = [
+            ...next.slice(0, at + 1),
+            { ...art, groupIds: rect.groupIds, frameId: rect.frameId, customData: { synthesis: "part", role: "art" } },
+            ...next.slice(at + 1),
+          ];
+        }
+        api.updateScene({ elements: next, captureUpdate: CaptureUpdateAction.IMMEDIATELY });
+        synchronise();
+        s.selectionKey = "";
+        onChange();
+      },
       /** The creator named a relationship for an arrow they drew. */
       relationSaved(arrowID: string, relation: RelationInfo) {
         s.relations = [...s.relations.filter((r) => r.id !== relation.id), relation];
@@ -407,8 +472,10 @@ export function App() {
       /** For the interaction self-test: where things are on screen right now. */
       probe() {
         const state = api.getAppState();
-        const cards = api.getSceneElements().filter(isCard).map((c: El) => ({
+        const scene: El[] = api.getSceneElements();
+        const cards = scene.filter(isCard).map((c: El) => ({
           recordID: c.customData.recordID,
+          art: scene.some((e) => e.type === "image" && e.customData?.role === "art" && e.groupIds?.some((g: string) => c.groupIds?.includes(g))),
           x: c.x,
           y: c.y,
           width: c.width,
@@ -416,7 +483,56 @@ export function App() {
           clientX: (c.x + c.width / 2 + state.scrollX) * state.zoom.value + state.offsetLeft,
           clientY: (c.y + c.height / 2 + state.scrollY) * state.zoom.value + state.offsetTop,
         }));
-        return JSON.stringify({ cards, zoom: state.zoom.value, relations: api.getSceneElements().filter(isRelation).length });
+        return JSON.stringify({
+          cards,
+          zoom: state.zoom.value,
+          relations: api.getSceneElements().filter(isRelation).length,
+          pointer: s.pointerLog.slice(-8),
+        });
+      },
+      /**
+       * Drags a card by dispatching pointer events inside the page. Used by the self-test,
+       * because WebKit reports no pressed button for mouse drags that are posted to the
+       * window rather than made with a real mouse.
+       */
+      async testDrag(recordID: string, dx: number, dy: number) {
+        const state = api.getAppState();
+        const card = api.getSceneElements().find((e: El) => isCard(e) && e.customData.recordID === recordID);
+        const canvas = document.querySelector("canvas.interactive") as HTMLCanvasElement | null;
+        if (!card || !canvas) return "missing";
+        const x = (card.x + card.width / 2 + state.scrollX) * state.zoom.value + state.offsetLeft;
+        const y = (card.y + 24 + state.scrollY) * state.zoom.value + state.offsetTop;
+        const fire = (target: EventTarget, type: string, cx: number, cy: number, buttons: number) =>
+          target.dispatchEvent(
+            new PointerEvent(type, {
+              bubbles: true, cancelable: true, composed: true, clientX: cx, clientY: cy, pointerId: 1,
+              pointerType: "mouse", isPrimary: true, button: 0, buttons, view: window,
+            }),
+          );
+        const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+        // The person's own pointer may be over the window; keep its events out of this drag.
+        const shield = (event: Event) => {
+          if (event.isTrusted) event.stopImmediatePropagation();
+        };
+        const shielded = ["pointermove", "pointerdown", "pointerup", "mousemove", "mousedown", "mouseup"];
+        for (const type of shielded) window.addEventListener(type, shield, true);
+        try {
+          return await run();
+        } finally {
+          for (const type of shielded) window.removeEventListener(type, shield, true);
+        }
+        async function run() {
+        fire(canvas!, "pointerdown", x, y, 1);
+        await wait(40);
+        for (let step = 1; step <= 10; step += 1) {
+          // Excalidraw handles one move per frame and only when its target is an element.
+          fire(canvas!, "pointermove", x + (dx * step) / 10, y + (dy * step) / 10, 1);
+          await wait(34);
+        }
+        fire(canvas!, "pointerup", x + dx, y + dy, 0);
+        await wait(60);
+        return "done";
+        }
       },
     };
     (window as any).synthesis = bridge;
@@ -435,7 +551,14 @@ export function App() {
       post({ type: "openRecord", id: hit.customData.recordID });
     };
     window.addEventListener("dblclick", openOnDoubleClick, true);
+    // A short trace of pointer activity, read by the interaction self-test.
+    const trace = (event: PointerEvent) => {
+      s.pointerLog.push(`${event.type}:${event.buttons}:${event.isTrusted ? "t" : "s"}`);
+      if (s.pointerLog.length > 40) s.pointerLog.splice(0, 20);
+    };
+    for (const type of ["pointerdown", "pointermove", "pointerup"]) window.addEventListener(type, trace as any, true);
     const settle = () => {
+      reportSelection();
       window.clearTimeout(s.analyzeTimer);
       s.analyzeTimer = window.setTimeout(analyse, 120);
     };
@@ -447,7 +570,7 @@ export function App() {
       window.removeEventListener("pointerup", settle, true);
       window.removeEventListener("keyup", settle, true);
     };
-  }, [api, apply, analyse, onChange, openSpot, serialise, synchronise]);
+  }, [api, apply, analyse, onChange, openSpot, reportSelection, serialise, synchronise]);
 
   return (
     <Excalidraw

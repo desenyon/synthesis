@@ -48,7 +48,6 @@ struct CuratedCanvas: View {
         }
       }
     }
-    .background(studio.t.background)
     .onAppear {
       session.switchBoard(studio.canvasBoardID)
       studio.editorSave = nil
@@ -120,6 +119,15 @@ struct CuratedCanvas: View {
           .help("This board is saved on this device")
       }
     } trailing: {
+      if studio.mode == .assisted, !session.selection.isEmpty {
+        BarAction(
+          title: session.selection.count == 1
+            ? "Reference" : "Reference \(session.selection.count)",
+          icon: "at", t: studio.t,
+          help:
+            "Mention the selected \(session.selection.count == 1 ? "card" : "cards") in the conversation"
+        ) { withAnimation(.easeOut(duration: 0.18)) { studio.referenceCanvasSelection() } }
+      }
       PlainMenu {
         Button("Entity…") { prepareCreate() }
         Button("From library…") {
@@ -127,6 +135,18 @@ struct CuratedCanvas: View {
           panel = .library
         }
         Button("Image…") { session.addImage() }
+        if let card = session.selection.first, session.selection.count == 1 {
+          Divider()
+          Button(
+            session.selectionWithArt.contains(card)
+              ? "Replace card artwork…" : "Artwork for selected card…"
+          ) {
+            session.chooseArtwork(for: card)
+          }
+          if session.selectionWithArt.contains(card) {
+            Button("Remove card artwork") { session.setArtwork(nil, for: card) }
+          }
+        }
       } label: {
         Label("Add", systemImage: "plus").font(.system(size: 13, weight: .medium)).fixedSize()
           .padding(.horizontal, 10).frame(height: Metric.control)
@@ -235,7 +255,11 @@ struct CuratedCanvas: View {
   private var board: some View {
     GeometryReader { geo in
       ZStack(alignment: .bottom) {
-        CanvasWebView(session: session)
+        // Transparent: the engine's web view is mounted beneath the workspace by the shell.
+        Color.clear.background(
+          GeometryReader { area in
+            Color.clear.preference(key: CanvasFrameKey.self, value: area.frame(in: .named("shell")))
+          })
         if !session.loaded && session.failure == nil {
           ProgressView().controlSize(.small).frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(studio.t.background)

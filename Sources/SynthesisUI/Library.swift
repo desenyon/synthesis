@@ -245,6 +245,7 @@ struct RecordRow: View {
               studio.navigate(.chat)
             }
           }
+          Button("Show on canvas") { studio.showOnCanvas(record) }
           Divider()
           Button("Archive") { studio.archive(record) }
         }

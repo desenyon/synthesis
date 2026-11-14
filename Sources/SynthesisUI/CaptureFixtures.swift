@@ -177,12 +177,7 @@ extension Studio {
       palette = true
     default: destination = .canvas
     }
-    // The canvas is web content, and WebKit does not repaint a re-attached web view while the
-    // runner's window is behind others. Consecutive canvas states therefore keep the same view;
-    // returning to the canvas after other screens is covered by the interaction self-test.
-    let canvasStates = ["canvas", "companion", "manual", "collapsed", "light"]
-    let stays = canvasStates.contains(state) && canvasStates.contains(captureHint)
     captureHint = state
-    if !stays { captureNonce += 1 }
+    captureNonce += 1
   }
 }

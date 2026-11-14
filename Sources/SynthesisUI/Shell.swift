@@ -5,6 +5,8 @@ import SynthesisCore
 /// Application shell: integrated header zone, navigation, the active workspace and global overlays.
 public struct ConnectedRoot: View {
   @ObservedObject var studio: Studio
+  @State private var canvasFrame: CGRect?
+  @State private var lastCanvasFrame = CGRect(x: 0, y: 0, width: 900, height: 600)
   public init(studio: Studio) { self.studio = studio }
   public var body: some View {
     GeometryReader { geo in
@@ -16,6 +18,17 @@ public struct ConnectedRoot: View {
       let column: CGFloat = compact ? 0 : (rail ? Metric.rail : Metric.sidebar) + 8
       ZStack(alignment: .topLeading) {
         studio.t.background.ignoresSafeArea()
+        // The canvas engine's web view is mounted here once and never moved. The Canvas
+        // workspace leaves a transparent area above it and reports where that area is; on
+        // every other screen the web view stays in place but hidden.
+        if let session = studio.canvasSession {
+          let frame = canvasFrame ?? lastCanvasFrame
+          CanvasWebView(session: session)
+            .frame(width: max(1, frame.width), height: max(1, frame.height))
+            .position(x: frame.midX, y: frame.midY)
+            .opacity(canvasFrame == nil ? 0 : 1).allowsHitTesting(canvasFrame != nil)
+            .accessibilityHidden(canvasFrame == nil)
+        }
         HStack(spacing: 0) {
           if !compact {
             Sidebar(studio: studio, collapsed: rail).padding(.top, Metric.bar)
@@ -44,6 +57,11 @@ public struct ConnectedRoot: View {
         if studio.palette {
           CommandPalette(studio: studio).transition(.opacity)
         }
+      }
+      .coordinateSpace(name: "shell")
+      .onPreferenceChange(CanvasFrameKey.self) { frame in
+        canvasFrame = frame
+        if let frame { lastCanvasFrame = frame }
       }
       .overlay(alignment: .bottom) { toast }
       .animation(.easeOut(duration: 0.14), value: studio.palette)

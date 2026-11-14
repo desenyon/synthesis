@@ -82,6 +82,10 @@ struct CanvasBoardContent {
   @Published var connection: Connection?
   /// A request raised from the canvas's own menu: `library`, `entity`, `image` or `export`.
   @Published var request: String?
+  /// Records whose cards are selected on the board, and which of those carry artwork.
+  @Published var selection: [String] = []
+  @Published var selectionWithArt: [String] = []
+  private var pendingReveal: [String] = []
   private var worldID = ""
   private var content = CanvasBoardContent()
   private var ready = false
@@ -144,6 +148,8 @@ struct CanvasBoardContent {
       worldID = world
       boardID = board.id
       name = board.name
+      selection = []
+      selectionWithArt = []
       loaded = false
       writable = false
       try studio.store.setPreference("canvas-selected:\(world)", value: board.id)
@@ -221,6 +227,24 @@ struct CanvasBoardContent {
   // MARK: Commands
 
   func add(_ records: [LoreRecord]) { call("addCards", [records.map(\.id)]) }
+  /// Places a record on the open board (or selects its card) and brings it into view. If the
+  /// board is still loading the request waits for it.
+  func reveal(_ record: LoreRecord) {
+    if loaded, worldID == studio.worldID {
+      add([record])
+    } else {
+      pendingReveal.append(record.id)
+    }
+  }
+  /// Chooses a picture for the top of a record's card. It is stored with the board.
+  func chooseArtwork(for recordID: String) {
+    studio.perform {
+      if let image = try pickImage(limit: 4_000_000) { setArtwork(image, for: recordID) }
+    }
+  }
+  func setArtwork(_ base64: String?, for recordID: String) {
+    call("setCardArt", [recordID, base64 ?? NSNull()])
+  }
   func addImage() {
     studio.perform {
       if let image = try pickImage(limit: 4_000_000) { call("addImage", [image]) }
@@ -259,6 +283,15 @@ struct CanvasBoardContent {
     else { return [:] }
     return object
   }
+  /// Drags a card with pointer events dispatched inside the page. For the self-test only:
+  /// WebKit reports no pressed button for mouse drags posted to a window, so a drag cannot
+  /// be driven from outside the web view without a real mouse.
+  func testDrag(recordID: String, dx: Double, dy: Double) async -> Bool {
+    let result = try? await webView.callAsyncJavaScript(
+      "return await window.synthesis.testDrag(id, dx, dy)",
+      arguments: ["id": recordID, "dx": dx, "dy": dy], in: nil, contentWorld: .page)
+    return result as? String == "done"
+  }
   private func call(_ function: String, _ arguments: [Any]) {
     guard let data = try? JSONSerialization.data(withJSONObject: arguments),
       let json = String(data: data, encoding: .utf8)
@@ -278,7 +311,16 @@ struct CanvasBoardContent {
     case "loaded":
       loaded = true
       writable = true
+      selection = []
+      selectionWithArt = []
       store(message, migrated: message["migrated"] as? Bool == true)
+      if !pendingReveal.isEmpty {
+        call("addCards", [pendingReveal])
+        pendingReveal = []
+      }
+    case "selection":
+      selection = message["recordIDs"] as? [String] ?? []
+      selectionWithArt = message["withArt"] as? [String] ?? []
     case "change":
       store(message, migrated: false)
       resumeFlush()
@@ -459,7 +501,15 @@ private final class BundleFiles: NSObject, WKURLSchemeHandler {
   func webView(_ webView: WKWebView, stop task: any WKURLSchemeTask) {}
 }
 
-/// Places the session's long-lived web view in the SwiftUI hierarchy.
+/// Where the Canvas workspace wants the engine to appear, in the shell's coordinate space.
+struct CanvasFrameKey: PreferenceKey {
+  static let defaultValue: CGRect? = nil
+  static func reduce(value: inout CGRect?, nextValue: () -> CGRect?) {
+    value = nextValue() ?? value
+  }
+}
+
+/// Places the session's long-lived web view in the SwiftUI hierarchy. The shell mounts it once.
 struct CanvasWebView: NSViewRepresentable {
   let session: CanvasSession
   func makeNSView(context: Context) -> NSView {

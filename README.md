@@ -36,7 +36,7 @@ Nothing is hard-deleted: removing a record, conversation, board, event or relati
 | ⌘[ | Back from a record |
 | Canvas | Excalidraw's shortcuts: 1–0 tools, V select, H hand, A arrow, ⌫ delete, ⌘Z undo, ⌘D duplicate, ⌘G group |
 
-On Canvas, double-click a card to open its record. Draw an arrow from one entity card to another to propose a relationship.
+On Canvas, double-click a card to open its record. Draw an arrow from one entity card to another to propose a relationship. Select cards and choose Reference to mention them in the conversation; Add ▸ Artwork puts a picture on the selected card. "Show on canvas" in a record's menu finds or places its card.
 
 ## Development checks
 

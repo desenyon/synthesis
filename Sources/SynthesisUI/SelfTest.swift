@@ -131,16 +131,20 @@ extension Studio {
     await refocus()
     if let before = await card("Mira Vale") {
       let zoom = probe["zoom"] as? Double ?? 1
-      await drag(from: before.point, by: CGSize(width: -110, height: 60)) {
-        await snapshot("selftest-card-drag-mid")
-      }
+      let id = records.first { $0.title == "Mira Vale" }?.id ?? ""
+      let dragged = await canvasSession?.testDrag(recordID: id, dx: -110, dy: 60) ?? false
+      await snapshot("selftest-card-drag-end")
       await pause(700)
       let after = await card("Mira Vale")
       let dx = (after?.x ?? before.x) - before.x
       let dy = (after?.y ?? before.y) - before.y
       check(
-        "dragging a card moves it", abs(dx + 110 / zoom) < 6 && abs(dy - 60 / zoom) < 6,
+        "dragging a card moves it (pointer events dispatched in the canvas)",
+        dragged && abs(dx + 110 / zoom) < 6 && abs(dy - 60 / zoom) < 6,
         "Δ(\(Int(dx)), \(Int(dy))) expected (\(Int(-110 / zoom)), \(Int(60 / zoom)))")
+      // Relationship arrows are bound to the card, so they follow it.
+      let arrows = await canvasSession?.probe()["relations"] as? Int ?? 0
+      check("relationship arrows stay attached after the move", arrows >= 3, "\(arrows) arrows")
       let stored = (storedBoard()?.scene?["elements"] as? [[String: Any]])?.first {
         ($0["customData"] as? [String: Any])?["recordID"] as? String
           == records.first { $0.title == "Mira Vale" }?.id
@@ -148,7 +152,6 @@ extension Studio {
       check(
         "the move is saved to the board",
         abs((stored?["x"] as? Double ?? .nan) - (after?.x ?? .infinity)) < 0.5)
-      await snapshot("selftest-card-drag-end")
     } else {
       check("dragging a card moves it", false, "the canvas did not report the card")
     }
@@ -176,6 +179,52 @@ extension Studio {
         "closing the record returns to the same canvas",
         selectedRecord == nil && destination == .canvas && again == 4)
       await snapshot("selftest-canvas-returned")
+    }
+
+    // 5. Canvas actions: show a record on the board, reference the selection, card artwork.
+    if let oren = records.first(where: { $0.title == "Oren Ashe" }) {
+      navigate(.library)
+      await pause(500)
+      showOnCanvas(oren)
+      await pause(1600)
+      let cards = await canvasSession?.probe()["cards"] as? [[String: Any]] ?? []
+      check(
+        "“Show on canvas” adds the record's card and selects it",
+        destination == .canvas && cards.count == 5 && canvasSession?.selection == [oren.id],
+        "\(cards.count) cards, selection \(canvasSession?.selection.count ?? 0)")
+      pendingComposer = nil
+      draft = ""
+      referenceCanvasSelection()
+      check(
+        "the selected card can be referenced in the conversation",
+        draft.contains("[Oren Ashe](synthesis://record/\(oren.id))") && companionExpanded, draft)
+      draft = ""
+      persistComposer()
+      companionExpanded = false
+      await pause(700)
+      let before = cards.first { $0["recordID"] as? String == oren.id }?["height"] as? Double ?? 0
+      if let art = Self.sampleArtwork() {
+        canvasSession?.setArtwork(art.base64EncodedString(), for: oren.id)
+        await pause(1500)
+        let after = (await canvasSession?.probe()["cards"] as? [[String: Any]] ?? []).first {
+          $0["recordID"] as? String == oren.id
+        }
+        check(
+          "artwork attaches to the card and the text moves below it",
+          after?["art"] as? Bool == true && (after?["height"] as? Double ?? 0) > before + 40
+            && canvasSession?.selectionWithArt == [oren.id],
+          "height \(Int(before)) → \(Int(after?["height"] as? Double ?? 0))")
+        await snapshot("selftest-card-artwork")
+        canvasSession?.setArtwork(nil, for: oren.id)
+        await pause(1000)
+        let cleared = (await canvasSession?.probe()["cards"] as? [[String: Any]] ?? []).first {
+          $0["recordID"] as? String == oren.id
+        }
+        check(
+          "removing the artwork restores the card",
+          cleared?["art"] as? Bool == false
+            && abs((cleared?["height"] as? Double ?? 0) - before) < 2)
+      }
     }
 
     await refocus()

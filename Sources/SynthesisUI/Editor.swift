@@ -158,6 +158,7 @@ struct EditorScreen: View {
             }
           }
         }
+        Button("Show on canvas") { if save() { studio.showOnCanvas(record) } }
         Button("Export as Markdown…") { export() }
         Divider()
         Button("Archive") { if save() { studio.archive(record) } }

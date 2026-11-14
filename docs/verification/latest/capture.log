@@ -1,0 +1,79 @@
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 736ms
+CAPTURE conversation 1440x900, bitmap 2880x1800, 746ms
+CAPTURE canvas 1440x900, bitmap 2880x1800, 988ms
+CAPTURE companion 1440x900, bitmap 2880x1800, 460ms
+CAPTURE manual 1440x900, bitmap 2880x1800, 250ms
+CAPTURE collapsed 1440x900, bitmap 2880x1800, 684ms
+CAPTURE light 1440x900, bitmap 2880x1800, 631ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 769ms
+CAPTURE graph-selected 1440x900, bitmap 2880x1800, 981ms
+CAPTURE library 1440x900, bitmap 2880x1800, 180ms
+CAPTURE editor 1440x900, bitmap 2880x1800, 134ms
+CAPTURE timeline 1440x900, bitmap 2880x1800, 133ms
+CAPTURE atlas 1440x900, bitmap 2880x1800, 627ms
+CAPTURE palette 1440x900, bitmap 2880x1800, 1466ms
+CAPTURE light-conversation 1440x900, bitmap 2880x1800, 710ms
+CAPTURE light-library 1440x900, bitmap 2880x1800, 172ms
+CAPTURE light-graph 1440x900, bitmap 2880x1800, 774ms
+CAPTURE light-editor 1440x900, bitmap 2880x1800, 136ms
+CAPTURE manual-conversation 1440x900, bitmap 2880x1800, 136ms
+CAPTURE toast 1440x900, bitmap 2880x1800, 514ms
+CAPTURE review 1440x900, bitmap 2880x1800, 136ms
+CAPTURE review-canon 1440x900, bitmap 2880x1800, 129ms
+CAPTURE review-checks 1440x900, bitmap 2880x1800, 130ms
+CAPTURE empty-conversation 1440x900, bitmap 2880x1800, 683ms
+CAPTURE empty-canvas 1440x900, bitmap 2880x1800, 691ms
+CAPTURE empty-library 1440x900, bitmap 2880x1800, 125ms
+CAPTURE empty-graph 1440x900, bitmap 2880x1800, 227ms
+CAPTURE empty-timeline 1440x900, bitmap 2880x1800, 167ms
+CAPTURE empty-atlas 1440x900, bitmap 2880x1800, 121ms
+CAPTURE sheet-settings 1440x900, bitmap 2880x1800, 226ms
+CAPTURE sheet-settings panel
+CAPTURE sheet-record 1440x900, bitmap 2880x1800, 226ms
+CAPTURE sheet-record panel
+CAPTURE sheet-canon 1440x900, bitmap 2880x1800, 174ms
+CAPTURE sheet-canon panel
+CAPTURE sheet-history 1440x900, bitmap 2880x1800, 173ms
+CAPTURE sheet-history panel
+CAPTURE sheet-relation 1440x900, bitmap 2880x1800, 827ms
+CAPTURE sheet-relation panel
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, 422ms
+CAPTURE conversation 1024x768, bitmap 2048x1536, 418ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 456ms
+CAPTURE companion 1024x768, bitmap 2048x1536, 283ms
+CAPTURE manual 1024x768, bitmap 2048x1536, 166ms
+CAPTURE collapsed 1024x768, bitmap 2048x1536, 411ms
+CAPTURE light 1024x768, bitmap 2048x1536, 420ms
+CAPTURE graph 1024x768, bitmap 2048x1536, 515ms
+CAPTURE graph-selected 1024x768, bitmap 2048x1536, 1333ms
+CAPTURE library 1024x768, bitmap 2048x1536, 116ms
+CAPTURE editor 1024x768, bitmap 2048x1536, 99ms
+CAPTURE timeline 1024x768, bitmap 2048x1536, 88ms
+CAPTURE atlas 1024x768, bitmap 2048x1536, 366ms
+CAPTURE palette 1024x768, bitmap 2048x1536, 869ms
+CAPTURE light-conversation 1024x768, bitmap 2048x1536, 426ms
+CAPTURE light-library 1024x768, bitmap 2048x1536, 115ms
+CAPTURE light-graph 1024x768, bitmap 2048x1536, 471ms
+CAPTURE light-editor 1024x768, bitmap 2048x1536, 93ms
+CAPTURE manual-conversation 1024x768, bitmap 2048x1536, 91ms
+CAPTURE toast 1024x768, bitmap 2048x1536, 326ms
+CAPTURE review 1024x768, bitmap 2048x1536, 86ms
+CAPTURE review-canon 1024x768, bitmap 2048x1536, 83ms
+CAPTURE review-checks 1024x768, bitmap 2048x1536, 84ms
+CAPTURE empty-conversation 1024x768, bitmap 2048x1536, 430ms
+CAPTURE empty-canvas 1024x768, bitmap 2048x1536, 464ms
+CAPTURE empty-library 1024x768, bitmap 2048x1536, 83ms
+CAPTURE empty-graph 1024x768, bitmap 2048x1536, 131ms
+CAPTURE empty-timeline 1024x768, bitmap 2048x1536, 108ms
+CAPTURE empty-atlas 1024x768, bitmap 2048x1536, 86ms
+CAPTURE sheet-settings 1024x768, bitmap 2048x1536, 141ms
+CAPTURE sheet-settings panel
+CAPTURE sheet-record 1024x768, bitmap 2048x1536, 143ms
+CAPTURE sheet-record panel
+CAPTURE sheet-canon 1024x768, bitmap 2048x1536, 114ms
+CAPTURE sheet-canon panel
+CAPTURE sheet-history 1024x768, bitmap 2048x1536, 114ms
+CAPTURE sheet-history panel
+CAPTURE sheet-relation 1024x768, bitmap 2048x1536, 496ms
+CAPTURE sheet-relation panel
+Native captures complete: /Users/desenyon/.zeron/worktrees/synthesis/swift-falcon/docs/verification/latest

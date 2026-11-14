@@ -36,12 +36,12 @@ SYNTHESIS_LIVE_HARNESS=claude-code ./scripts/test.sh --filter LiveHarnessTests  
 
 ## Known gaps, most important first
 
-1. **Canvas drag via the self-test is unconfirmed.** The self-test's "dragging a card moves it" check was skipped twice because another app took focus mid-run; clicking, selecting and double-click-to-open in the web canvas did pass. Rerun `selftest-ui.sh` on an idle machine.
-2. **Background captures of the canvas** only work while the same canvas view stays mounted (WebKit does not repaint a re-attached web view in an occluded window). `empty-canvas` and canvas-after-navigation captures come out blank; the visible-window self-test shows they render. A proper fix is to mount the web view once at the shell level instead of re-parenting it.
-3. **Canvas features not yet rebuilt on the new engine:** "Reference in conversation" from a selected card; adding artwork to an existing card from the app (images can be pasted or added as free elements); a "show on canvas" action from a record.
-4. **Bundle size.** `CanvasBundle` is 8.4 MB including Mermaid diagram chunks and 52 locale files that could be pruned. CJK handwriting font (Xiaolai) is deliberately left out.
-5. **Live model path** is verified for one request per harness only. Streaming UI, Stop, and long answers have not been watched in the running app.
-6. Earlier open items still stand: large boards/graphs unmeasured, no VoiceOver walk-through, trackpad gestures unverified, crash recovery for unsaved editor text.
+1. **Posted mouse drags cannot drive the web canvas.** WebKit reports `buttons: 0` for `mouseDragged` events posted to a window, so the self-test drags cards with pointer events dispatched inside the page (`window.synthesis.testDrag`, which also shields the drag from the person's real pointer). Clicks and double-clicks are still posted as real window events. Excalidraw only handles a move whose target is an HTML element and one move per animation frame; keep that in mind when extending the test.
+2. **Bundle size.** `CanvasBundle` is 8.4 MB including Mermaid diagram chunks and 52 locale files that could be pruned. CJK handwriting font (Xiaolai) is deliberately left out.
+3. **Live model path** is verified for one request per harness only. Streaming UI, Stop, and long answers have not been watched in the running app.
+4. Earlier open items still stand: large boards/graphs unmeasured, no VoiceOver walk-through, trackpad gestures unverified, crash recovery for unsaved editor text.
+
+Resolved since the first handoff: card dragging verified (exact delta, arrows stay attached, move saved); the web view is mounted once in the shell (`ConnectedRoot`) and positioned under a transparent area reported by the Canvas workspace through `CanvasFrameKey`, so it is never re-parented and background captures of every canvas state render; "Reference" for selected cards, card artwork (set, replace, remove) and "Show on canvas" (editor menu, Library row menu) are rebuilt. Self-test: 17 of 17 in one run.
 
 ## Owner direction not yet implemented
 

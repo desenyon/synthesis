@@ -69,6 +69,19 @@ public struct Toast: Identifiable {
   public func flushCanvas() async { await canvasSession?.flush() }
   public var canvasWebView: NSView? { canvasSession?.webView }
   public var canvasLoaded: Bool { canvasSession?.loaded ?? false }
+  /// Opens Canvas with this record's card selected, adding the card if the board lacks it.
+  public func showOnCanvas(_ record: LoreRecord) {
+    guard flushEditor() else { return }
+    navigate(.canvas)
+    canvas().reveal(record)
+  }
+  /// Puts references to the selected canvas cards into the message being written.
+  public func referenceCanvasSelection() {
+    let chosen = (canvasSession?.selection ?? []).compactMap { id in records.first { $0.id == id } }
+    guard !chosen.isEmpty else { return }
+    for record in chosen { reference(record) }
+    if mode == .assisted { companionExpanded = true }
+  }
   public func canvasCommand(_ name: String) { canvasSession?.command(name) }
   /// Record whose canon review should open as soon as its editor appears.
   public var reviewCanon: String?
