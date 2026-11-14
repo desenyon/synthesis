@@ -1,5 +1,7 @@
 # Synthesis
 
+> **Active checkout:** Claude’s redesign lives in `/Users/desenyon/.zeron/worktrees/synthesis/swift-falcon`. This checkout is older. Read [the handoff](docs/HANDOFF.md) before building or continuing.
+
 A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. The graphite shell now connects **Conversation, Canvas, Library, Graph, Timeline and Atlas** to the same saved world.
 
 ```sh
