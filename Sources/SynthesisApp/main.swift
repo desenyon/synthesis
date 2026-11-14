@@ -4,6 +4,20 @@ import SynthesisCore
 import SynthesisUI
 import WebKit
 
+/// Prevent framework focus requests from activating a background verification process.
+final class SynthesisApplication: NSApplication {
+  private var backgroundCapture: Bool {
+    ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil
+      && ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"] == nil
+  }
+  override func activate() {
+    if !backgroundCapture { super.activate() }
+  }
+  override func activate(ignoringOtherApps flag: Bool) {
+    if !backgroundCapture { super.activate(ignoringOtherApps: flag) }
+  }
+}
+
 private struct CaptureTransport: ModelTransport {
   func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
@@ -63,8 +77,11 @@ final class StudioWindow: NSWindow {
       // Set before creating any hosting view: a first-screen sheet can otherwise request focus.
       NSApp.setActivationPolicy(
         capturing && ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"] == nil
-          ? .prohibited : .regular)
+          ? .accessory : .regular)
       if capturing {
+        guard NSApp is SynthesisApplication else {
+          throw SynthesisError.invalid("Background activation guard was not installed.")
+        }
         guard let path = ProcessInfo.processInfo.environment["SYNTHESIS_DATABASE_PATH"],
           !FileManager.default.fileExists(atPath: path)
         else {
@@ -101,6 +118,8 @@ final class StudioWindow: NSWindow {
         Task { await selfTest(directory) }
       } else if let directory = ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] {
         // The capture runner stays in the background and never takes focus from other work.
+        window.ignoresMouseEvents = true
+        window.level = NSWindow.Level(rawValue: NSWindow.Level.normal.rawValue - 1)
         window.orderBack(nil)
         window.layoutTrafficLights()
         Task { await capture(directory) }
@@ -457,11 +476,11 @@ final class StudioWindow: NSWindow {
   }
 }
 MainActor.assumeIsolated {
-  let app = NSApplication.shared
+  let app = SynthesisApplication.shared
   if ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil,
     ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"] == nil
   {
-    app.setActivationPolicy(.prohibited)
+    app.setActivationPolicy(.accessory)
   }
   let delegate = ApplicationDelegate()
   app.delegate = delegate
