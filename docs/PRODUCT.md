@@ -9,3 +9,5 @@ Daily journey: create a world → capture or write a draft → add it to a board
 Removal is always reversible: archive with Undo, restore from Library, conversation history or the board menu.
 
 Current visual contract: one graphite design system with a complete light counterpart, a single bar per workspace, readable sans-serif hierarchy, restrained semantic colours, real entity cards and optional world artwork. No permanent assistant overlay, fake starter lore, decorative edges, analytics or preview-only production labels.
+
+The current canvas uses the owner's node-workspace reference: compact graphite cards with inset image previews, colored relationship ports, curved typed connections and edge-docked tools. Excalidraw provides the editing engine beneath Synthesis presentation. Generated illustrations are optional assets chosen explicitly; images imply no canon. The exact reference match remains under review, and exports currently use engine-rendered card styling.

@@ -59,3 +59,17 @@ Observation 3: view caching cannot capture a `WKWebView`, and `screencapture -l`
 Observation 4: both harnesses follow the proposal contract when asked to change lore (one live request each). Codex reports its answer in one update; Claude Code streams.
 
 Instruction change: AGENTS.md section 5 gained two bullets (canvas bundle workflow and offline rule; harness default and lock-down). No protected section was edited. Validation: `./scripts/check.sh` (45 tests), canvas captures, live harness test. Rollback: delete those two bullets.
+
+## Reference/engine audit — 2026-11-13
+
+Observed defects: stock mobile chrome returned when the companion narrowed the canvas; an overlay below WebKit's canvas layers was invisible; fading the entire card exposed duplicate engine text; files added before `resetScene` disappeared; card ownership based on the outermost group mixed content after grouping; document-level keyboard events did not reach undo with `handleKeyboardGlobally=false`. Fixes follow observed DOM/engine behavior, not assumptions. Six Node tests, five new native boundary tests and 15 background engine/persistence checks cover the repaired paths. Separate desktop/compact screenshots verify the presentation.
+
+Image generation produced valid PNGs, but duplicating their large base64 into legacy plus converted board payload exceeded the existing 12 MB board bound. Bundled high-quality JPEG derivatives are under 1 MB each, with originals retained outside the repo; saved scene/file checks now pass. Uploaded TIFF/HEIC must be decoded and encoded as PNG rather than merely assigned a PNG MIME label.
+
+Background capture must isolate both database and app bundle. The runner now rejects an absent or already-existing database path, uses a no-model transport, and asserts it is neither active nor key. Build/capture succeeds without opening a foreground window. The capture-startup sentinel test verifies existing data is untouched.
+
+AGENTS.md change: none. These concrete implementation lessons belong here and in the architecture/audit ledger. Rollback uses the individual audit commits; retain image normalization, session guards and user data even if visual presentation is revised.
+
+A final run that opened the illustration sheet first tripped the inactive/non-key assertion. Accessory activation policy alone was insufficient. Non-key/main windows alone did not prevent native sheets activating the app. Prohibited activation suppressed sheet rendering, so it was rejected. Final capture uses accessory/non-key windows and `studioSheet` renders the same content inline only for background snapshots. Production and the explicit foreground self-test keep native modal presentation. A later Manual transition still tripped the focus assertion, so the final runner also blocks application activation requests and makes capture windows mouse-transparent below normal windows. Inline sheet captures prove layout only. The picker also needed a 520-point scaffold to contain both thumbnails plus native sheet padding. Failed capture evidence remains in the local audit logs.
+
+Final shutdown review found that termination waited for a flush but always replied `true`, discarding the new failure result. Window close and Quit now honor `flushCanvas()` success. The embedded engine audit withholds a flush acknowledgement, confirms shutdown is blocked, restores the command and confirms a retry succeeds (17 checks total). Actual foreground Quit/Close interaction remains outside this background pass.

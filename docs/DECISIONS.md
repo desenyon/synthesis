@@ -58,3 +58,9 @@ The owner directed that the canvas be built on Excalidraw's open-source engine a
 - Record cards and relationships are ordinary Excalidraw elements tagged with `customData`, so every engine feature (drawing, shapes, text, images, frames, grouping, alignment, undo) applies to them.
 - Removing a relationship arrow hides it on that board; it does not archive the relationship. This mirrors "removing a card keeps the record".
 - Trade-off accepted: a web view cannot be captured by view caching and is not repainted by WebKit while re-attached in an occluded window, which limits background screenshots (see HANDOFF).
+
+## 2026-11-13 — custom canvas presentation and quiet verification
+
+Owner direction: retain Claude’s active worktree, customize the open-source engine to Synthesis world rules, use the supplied node-workspace reference, add GPT imagery, and keep verification in the background. The published Excalidraw engine remains responsible for scene editing/history. A pointer-transparent DOM presentation follows its actual geometry, rather than duplicating the scene model or replacing the native app. Ports request native relationship review; they never silently establish canon. PNG fidelity is an explicit remaining trade-off.
+
+Bundled GPT-generated map/portrait illustrations are optional local choices. Existing lore and images are not overwritten. Runtime image-provider integration is deferred rather than simulated. Background tests use temporary bundles, fresh databases and a rejecting model transport; foreground self-test is not run while the owner works. No protected instruction was weakened, and AGENTS.md was not changed.

@@ -1,71 +1,48 @@
-# Handoff — 2026-11-13
+# Handoff — 2026-11-13 reference and feature audit
 
-For the next agent session. Read `AGENTS.md` first, then this file, then `docs/STATE.md` and `docs/ROADMAP.md`.
+Read `AGENTS.md`, `STATE.md` and `verification/REFINEMENT_AUDIT.md`. Continue in **`/Users/desenyon/.zeron/worktrees/synthesis/swift-falcon`**, branch `zeron/you-are-an-elite-product-designer-ux`. Claude’s `4ab3f73` app is the baseline; do not revive the main-checkout SwiftFlow UI. The owner has now authorized iterative audits and implementation, superseding the earlier request to wait for review.
 
-## Continuation correction — 2026-11-13
+## Preserve these unfinished owner changes
 
-The owner explicitly selected this worktree and Claude’s implementation as the baseline after an older `main` build was opened by mistake. Use `/Users/desenyon/.zeron/worktrees/synthesis/swift-falcon` and this branch; do not port the unmerged `main` SwiftFlow redesign over this canvas.
+These were already dirty before this audit and were not edited or staged by it:
 
-The existing `dist/Synthesis.app` was opened for owner review and its Excalidraw canvas inspected. The old process was stopped, old bundles retired, and the local database backed up. No new feature verification or provider call was performed during this correction. The pre-existing uncommitted rules-lab changes are preserved and are not included in the review build. Wait for the requested owner review before further feature changes. Run checks in the background; the focus-taking self-test needs a separately agreed review window.
+- `Sources/SynthesisCore/{AgentEngine,Portability,WorkspaceStore}.swift`
+- `Tests/SynthesisCoreTests/StoreTests.swift`
+- Untracked `Sources/SynthesisCore/Rules.swift` and `Migrations/0006_rules.sql`
 
-## Where things stand
+They contain the unfinished rules lab. They compile and their tests ran as part of the 51-test suite, but full strict lint reports eight formatting errors in that work. Do not mistake them for committed audit changes or silently discard them. The review binary includes the current working tree, including these files; the audit commits do not.
 
-Branch `zeron/you-are-an-elite-product-designer-ux` on `github.com/desenyon/synthesis` (public). `main` there is the pre-audit history. Everything described below is committed and pushed unless a line says otherwise.
+## Implemented
 
-Done and verified this cycle:
+- `CanvasWeb/src/StudioOverlay.tsx` owns visible custom cards, artwork, ports and tools. Excalidraw remains the scene/gesture/history engine. Card bodies are pointer-transparent. Record actions and connection ports invoke the native bridge. Escape cancels connecting. No fake lore or second scene store.
+- `cards.ts` tracks innermost card groups and updates archived/renamed relationships. `sceneRules.ts` tests pan/zoom transforms, culling, session identity, rotation and group/relationship rules. Card engine parts are transparent during display and restored for export.
+- Both bridge sides scope every load/message with a session ID. Opening another board flushes first; failed acknowledgement stops navigation. A cancellable timeout belongs to one flush. Quit/window-close use the acknowledgement result and keep the app open on failure. Images install after resetting the engine scene. Undo/redo key events go to `.excalidraw`, not `document`.
+- `Artwork.swift` provides two optional GPT illustrations. Source/provenance: `Assets/GENERATED_ARTWORK.md`. New sample worlds use them; existing worlds are unchanged. Atlas replacement offers Undo. Browser images normalize TIFF/HEIC to PNG and enforce input/dimension/output bounds.
+- `RecordPicker.swift` replaces capped menus in editor links, Timeline and Atlas. Timeline actions are visible. Theme/composer surfaces follow the graphite reference.
+- Background verification builds into a temporary bundle, demands a new database and rejects all model requests. Capture windows cannot become key/main, ignore pointer events and stay below ordinary windows. `SynthesisApplication` blocks framework activation requests during background captures. Native sheet presentation can independently activate the app, so `SheetPresentation.swift` renders the same content inline only during background snapshots. Normal use and the explicit foreground runner retain actual modal sheets. The capture check still asserts inactive/non-key state.
 
-1. **Product audit and unified design system** — `docs/verification/AUDIT.md`.
-2. **Safe AI depth** — ranked, recorded context; staged proposals with per-change review; `@` mentions; quick capture; Markdown import/export; Review workspace with a local consistency check.
-3. **Subscription harness by default** — `Sources/SynthesisCore/HarnessTransport.swift`. Claude Code (no tools) or Codex (read-only sandbox), API key optional. Both verified live once. See `docs/AI_SETUP.md`.
-4. **Canvas on the Excalidraw engine** — `CanvasWeb/` (TypeScript source) builds into `Sources/SynthesisUI/CanvasBundle` (committed, served offline through the `synthesis-canvas://` scheme). `Sources/SynthesisUI/CanvasHost.swift` is the native session and bridge; `CuratedCanvas.swift` is the workspace.
+## Builds and evidence
 
-## How the canvas works
-
-- Record cards are ordinary Excalidraw groups: a rectangle carrying `customData {synthesis:"card", recordID, hash}` plus text parts (`role`: category, title, body, state) and optional artwork (`role:"art"`). `CanvasWeb/src/cards.ts` rebuilds the text when the record or theme changes.
-- Stored relationships between entities on a board become bound arrows with `customData {synthesis:"relation", relationID}`. Deleting such an arrow hides it on that board only (`hiddenRelations`); editing its label renames the relationship through the audited store call.
-- An arrow the creator draws between two entity cards raises a "Is this a relationship?" sheet. Saving creates a draft relationship; declining leaves a plain arrow.
-- Excalidraw's dark theme inverts the canvas with a CSS filter, so Synthesis colours are stored pre-inverted (`palette.ts`). WebKit lacks `CanvasRenderingContext2D.filter`, so `canvasFilter.ts` supplies the image un-inversion Excalidraw expects.
-- Board rows store `{format:"excalidraw", scene, hiddenRelations, legacy?}`. Boards in the earlier `CanvasDocument` layout (still used to seed the sample world and Graph's "Copy to canvas") are converted on first open and the original is kept under `legacy`.
-- One `CanvasSession` and web view live for the whole run (`Studio.canvas()`), so edits still save after navigation. Quit waits for a final flush.
-
-To change the canvas: edit `CanvasWeb/src`, then `cd CanvasWeb && npm install && npm run build`, then `./scripts/build.sh release`. Commit the rebuilt `CanvasBundle`.
-
-## Verification commands
+Separate review bundle: `dist/Synthesis-review.app`. It was built, **not opened over the owner’s work**. Do not overwrite or restart their running `dist/Synthesis.app` to test. No foreground self-test, live provider call, release or push occurred.
 
 ```sh
-./scripts/check.sh                                   # strict lint, 45 tests, optimized build
-./scripts/verify-ui.sh docs/verification/latest      # captures, stays in the background
-./scripts/selftest-ui.sh docs/verification/latest    # real pointer/key events; takes focus briefly
-uv run --with pillow python scripts/contact-sheets.py docs/verification/latest --prune
-SYNTHESIS_LIVE_HARNESS=claude-code ./scripts/test.sh --filter LiveHarnessTests   # uses a little subscription quota
+export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
+swift format lint --strict --recursive Sources/SynthesisUI Sources/SynthesisApp Tests/SynthesisUITests
+./scripts/test.sh
+(cd CanvasWeb && npm run typecheck && npm test && npm run build)
+SYNTHESIS_CANVAS_AUDIT=1 SYNTHESIS_CAPTURE_STATES=canvas,companion,light,manual,sheet-artwork SYNTHESIS_CAPTURE_SIZES=1440x900,1024x768 ./scripts/verify-ui.sh test-results/review
+./scripts/build.sh release dist/Synthesis-review.app
+python3 scripts/check-capture-isolation.py dist/Synthesis-review.app/Contents/MacOS/Synthesis
 ```
 
-## Known gaps, most important first
+Observed: scoped lint; 51 native tests; six Node tests; TypeScript/bundle build; optimized native build; 17 WebKit/native-save checks. The 78-image broad sweep (`test-results/refinement-final`) has 20 inspected contact pages. Focused sweeps correct stacking, duplicate text, mobile chrome and picker clipping; final evidence is linked from the audit ledger. Captured conversations/proposals are authored test fixtures, never presented as real model execution. Engine dragging uses internal synthetic pointer events; it is not a physical mouse/trackpad test.
 
-1. **Posted mouse drags cannot drive the web canvas.** WebKit reports `buttons: 0` for `mouseDragged` events posted to a window, so the self-test drags cards with pointer events dispatched inside the page (`window.synthesis.testDrag`, which also shields the drag from the person's real pointer). Clicks and double-clicks are still posted as real window events. Excalidraw only handles a move whose target is an HTML element and one move per animation frame; keep that in mind when extending the test.
-2. **Bundle size.** `CanvasBundle` is 8.4 MB including Mermaid diagram chunks and 52 locale files that could be pruned. CJK handwriting font (Xiaolai) is deliberately left out.
-3. **Live model path** is verified for one request per harness only. Streaming UI, Stop, and long answers have not been watched in the running app.
-4. Earlier open items still stand: large boards/graphs unmeasured, no VoiceOver walk-through, trackpad gestures unverified, crash recovery for unsaved editor text.
+## Continue in this order
 
-Resolved since the first handoff: card dragging verified (exact delta, arrows stay attached, move saved); the web view is mounted once in the shell (`ConnectedRoot`) and positioned under a transparent area reported by the Canvas workspace through `CanvasFrameKey`, so it is never re-parented and background captures of every canvas state render; "Reference" for selected cards, card artwork (set, replace, remove) and "Show on canvas" (editor menu, Library row menu) are rebuilt. Self-test: 17 of 17 in one run.
+1. Canvas connection-port → native relationship review → persistence; arrow relabel/hide/restore; drawing-style panel and keyboard/context menus. Add controlled engine/native checks, not foreground events while the owner works. Inspect curve routing: tightly spaced cards can produce awkward bends with engine binding adjustments. Export retains content but does not yet match DOM materials; resolve this before calling visual parity complete.
+2. Measure and optimize large boards/graphs. Current offscreen culling/indexing is an improvement, not an FPS benchmark. Compact fitted boards show an overview; full card text needs zoom. Derived Graph remains native deterministic force layout, separate from curated Canvas.
+3. Controlled streaming/Stop UI and cancellation races. Do not invoke paid/provider calls without authorization. Earlier Claude evidence records one live request per subscription harness; this audit made none.
+4. Editor crash recovery, long/Unicode content, all record-picker interactions, keyboard/VoiceOver, real trackpad testing during an agreed review window.
+5. Timeline era/reordering/canon behavior and Atlas multiple maps/marker dragging. Runtime image generation is still absent; bundled illustrations must not be described as live generation.
 
-## Owner direction not yet implemented
-
-- The owner shared two visual references on 2026-11-13: a storage card whose segmented bar is made of glowing dot-matrix cells per category, and a glass toggle with a pixel-art moon that dissolves. Both now exist in `Sources/SynthesisUI/PixelComponents.swift`: `WorldComposition` with `DotMatrixBar` heads the Library list, and `PixelThemeToggle` is the appearance switch in the sidebar footer and Settings. Captured and inspected in both themes; the dissolve animation itself has not been watched. The same language could extend to the AI Assisted / Manual switch, the Review counts and a per-world overview — ask the owner before spreading it further.
-- "Develop each feature to the max": next roadmap items are the rules and power-system lab, hypothetical branches, canvas depth, timeline and atlas depth (see `docs/ROADMAP.md`).
-
-## Rules that are easy to break
-
-- Never hard-delete; archive with Undo.
-- Nothing the model produces becomes canon; `resolveChange` and `promote` require the ID as confirmation and the engine must not gain a path to them.
-- The canvas must stay offline: no CDN fonts, no embeds, no network. The content security policy in `CanvasHost.swift` enforces this.
-- The self-test steals focus for a few seconds; do not run it repeatedly while the owner is working.
-- Do not edit protected sections of `AGENTS.md`.
-
-## Prompt to continue
-
-> Continue building Synthesis in this repository. Read `AGENTS.md`, then `docs/HANDOFF.md`, `docs/STATE.md` and `docs/ROADMAP.md`, and check `git status` and `git log --oneline | head`. Work on branch `zeron/you-are-an-elite-product-designer-ux`.
->
-> In order: (1) rerun `./scripts/selftest-ui.sh docs/verification/latest` once and fix anything that fails in the Excalidraw canvas, especially card dragging; (2) mount the canvas web view once at the shell level so it is never re-parented, then confirm background captures of `empty-canvas` render; (3) rebuild the missing canvas actions (reference a selected card in the conversation, attach artwork to a card, "show on canvas" from a record); (4) watch the pixel theme toggle animate in the running app and, if I confirm, carry the dot-matrix and pixel-glass language from `PixelComponents.swift` to the AI Assisted / Manual switch and a world overview; (5) continue the roadmap with the rules and power-system lab, then hypothetical branches.
->
-> Keep every change verified: run `./scripts/check.sh`, capture with `./scripts/verify-ui.sh`, inspect the contact sheets, update `docs/STATE.md`, `docs/ROADMAP.md` and `docs/HANDOFF.md`, commit and push after each working stage. Use the local subscription harness for any model calls and keep them minimal. Before you run low on usage, update `docs/HANDOFF.md` and give me a new continuation prompt.
+AGENTS.md was read and **not changed**. Detailed durable findings are in LEARNINGS.md. Existing historical verification documents describe earlier versions; use the current ledger for current acceptance status.

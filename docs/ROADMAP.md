@@ -7,16 +7,17 @@
 
 - **Subscription harness by default** and **Canvas on the Excalidraw engine** (2026-11-13).
 
-## Active — finish the canvas move
+## Active — reference fidelity and feature audit
 
-1. ~~Confirm card dragging; mount the web view once at the shell level~~ — done 2026-11-13.
-2. ~~Reference in conversation, card artwork, "Show on canvas"~~ — done 2026-11-13.
-3. Prune unused bundle chunks (locales, Mermaid) if size matters.
-4. ~~Owner's visual references~~ — done: `WorldComposition` / `DotMatrixBar` in Library, `PixelThemeToggle` for appearance. Extending the style further waits on the owner.
+- Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).
+- Next: interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Match live/export card appearance; measure large boards and derived graphs.
+- Then: streamed-response/Stop behavior with controlled transport, editor crash recovery, accessibility/trackpad walkthrough, deeper Timeline and Atlas operations.
+- Keep unfinished rules-lab files separate from this audit. Full strict lint is blocked by eight pre-existing formatting errors in that work.
+- Reference parity and complete product acceptance remain open; screenshots alone do not certify all interactions.
 
 ## Then — finish M3
 
-1. Exercise the live provider path once the owner supplies a key and approves the calls: streaming, stop, errors, and whether the model follows the proposal contract. Adjust the prompt from what is observed.
+1. Exercise the live provider path in a controlled test session; request explicit approval before paid calls: streaming, stop, errors, and whether the model follows the proposal contract. Adjust the prompt from what is observed.
 2. ~~Review inbox and local consistency check~~ — done 2026-11-12 as the Review workspace.
 3. Extend the local check: contradictory relationships, timeline ordering conflicts, and tags that differ only by spelling.
 

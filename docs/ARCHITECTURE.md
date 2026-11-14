@@ -25,10 +25,10 @@ Migration 0004 adds `archived` to records, conversations, boards and events. Arc
 
 ## Runtime
 
-Swift package, macOS 14+, SwiftUI presentation with AppKit window/menu integration and NSTextView rich editing. No WebView, Next.js runtime, Rust dependency or hosted service. The installed command-line Swift toolchain builds against macOS 26.5 SDK; scripts avoid the default 27 SDK's unavailable SwiftUI macro plugin. Development bundle is ad-hoc signed.
+Swift package, macOS 14+, SwiftUI presentation with AppKit window/menu integration and NSTextView rich editing. Only Canvas embeds a bundled offline WKWebView; the other workspaces are native. No Next.js runtime, Rust dependency or hosted service. The installed command-line Swift toolchain builds against macOS 26.5 SDK; scripts avoid the default 27 SDK's unavailable SwiftUI macro plugin. Development bundle is ad-hoc signed.
 
 - `SynthesisCore`: SQLite C driver, migrations, domain operations, full-text retrieval, agent cancellation, provider transport and Keychain credentials.
-- `SynthesisUI`: observable Studio state, design system, shell and the six workspaces.
+- `SynthesisUI`: observable Studio state, design system, shell and the seven workspaces.
 - `SynthesisApp`: NSApplication lifecycle, native menu shortcuts, window and screenshot harness.
 - `Tests/SynthesisCoreTests`: disk persistence, world isolation, canon/revision boundary, reversible archive and injected transport tests.
 - `Tests/SynthesisUITests`: Studio navigation and archive, board controller, Markdown, diff, connector and graph layout.
@@ -45,8 +45,20 @@ All domain operations validate local world ownership and membership. FTS5 is wor
 
 Context comes from `WorkspaceStore.contextRecords` (Retrieval.swift): records referenced in the message, full-text matches for its terms, relationship and link neighbours of those, then recent work, capped at 16 and never crossing worlds or including archived records. Each entry carries the reason it was chosen. The list sent is saved in `message_context` with the answer and shown in the transcript. It is single-shot retrieval, not an autonomous tool loop.
 
-A model answer may end with one fenced `synthesis-proposal` JSON block. `ProposalParser` removes it from the transcript; `stageProposal` validates every change against the selected world (unknown IDs, cross-world IDs and unknown actions are dropped) and stores it pending in `proposals`. `resolveChange` applies or dismisses one change and requires the proposal's own ID as confirmation, mirroring `promote`; `AgentEngine` has no path to it. Accepted changes call the ordinary draft operations with origin `ai-proposed`, inside a transaction (the database supports nested transactions through savepoints). Nothing in this path sets canon. No live provider call has been made during implementation.
+A model answer may end with one fenced `synthesis-proposal` JSON block. `ProposalParser` removes it from the transcript; `stageProposal` validates every change against the selected world (unknown IDs, cross-world IDs and unknown actions are dropped) and stores it pending in `proposals`. `resolveChange` applies or dismisses one change and requires the proposal's own ID as confirmation, mirroring `promote`; `AgentEngine` has no path to it. Accepted changes call the ordinary draft operations with origin `ai-proposed`, inside a transaction (the database supports nested transactions through savepoints). Nothing in this path sets canon. Claude’s earlier handoff records one live request per subscription harness. The current refinement audit uses only injected test transports and a capture transport that refuses every request.
 
 ## Data notes
 
 Page references use the world-scoped `links` table; incoming references are queried independently of semantic relationships. Tags and aliases participate in FTS and versioned snapshots. Canvas and atlas serialize typed Codable documents into world-scoped boards; images are bounded base64 inside the local board. World covers are scoped preferences. Exports (schema version 3) include records, conversations, revisions, relationships and their history, events, boards, links and everything archived.
+
+## Canvas presentation and isolation — refinement audit
+
+`StudioOverlay.tsx` draws the user-facing card surfaces, artwork, ports and toolbars over Excalidraw. Card bodies are pointer-transparent; engine elements retain geometry, selection, groups, gestures and undo. Only explicit actions/ports intercept input. Render refreshes are coalesced through `requestAnimationFrame`; offscreen cards are culled and artwork/neighbor lookup is indexed per refresh. This is not a second scene store. `sceneRules.ts` holds tested transforms, rotated hit testing, group ownership and relation/session rules.
+
+Card rectangles/text are transparent engine elements during display; DOM surfaces represent them. Export restores their opacity for engine PNG rendering, which preserves content but differs from live card styling. Optional artwork remains real engine image files. `cards.ts` owns record synchronization and typed relation arrows. Innermost Excalidraw group IDs identify a card, so an outer user-created group cannot merge record content.
+
+Every load carries a unique session ID echoed on bridge messages. Native and web checks reject stale generations; pending save/analyze timers are cancelled on load. Board switching flushes before replacement and stops on a failed acknowledgement. A cancellable timeout belongs to the current flush only. `Studio.flushCanvas()` returns success; both window close and application termination honor it instead of exiting after an unconfirmed save. Scene reset precedes file restoration. Old boards retain their legacy payload; no schema replacement is required.
+
+`Artwork.swift` exposes optional bundled GPT illustrations, with provenance in `Assets/GENERATED_ARTWORK.md`. Atlas replacement is an explicit local action with Undo. `browserImageBase64` bounds inputs and converts TIFF/HEIC into actual PNG for WebKit. `RecordPicker.swift` supplies searchable selections without arbitrary 60/80-record menu limits.
+
+The capture runner uses a fresh explicit database, a transport that always rejects model requests and accessory activation with non-key/non-main, mouse-transparent capture windows below normal window level. `SynthesisApplication` ignores activation requests only for background captures. Background sheet content renders inline through `SheetPresentation.swift`; real AppKit sheet presentation is retained in normal use and the explicit foreground runner. `verify-ui.sh` packages into a temporary bundle, leaving the user's app alone. Native compositing combines the window snapshot with the actual WebKit snapshot. `window.synthesis.audit()` exercises the engine in this isolated fixture; it does not claim physical event or animation performance coverage.
