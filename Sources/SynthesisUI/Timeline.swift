@@ -50,6 +50,7 @@ struct TimelineScreen: View {
       }
     }
     .onAppear { refresh() }
+    .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .studioSheet(isPresented: $composing) { form }
   }
   private func row(_ event: WorldEvent, first: Bool, last: Bool) -> some View {
@@ -161,7 +162,7 @@ struct TimelineScreen: View {
             Text(studio.records.first { $0.id == source }?.title ?? "Choose a record")
               .font(.system(size: 14)).lineLimit(1)
             Spacer()
-            Image(systemName: "chevron.up.chevron.down").font(.system(size: 10))
+            StudioIcon("chevron.up.chevron.down", size: 10)
               .foregroundStyle(studio.t.muted)
           }.padding(.horizontal, 10).frame(width: 416, height: 34)
             .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
@@ -214,7 +215,7 @@ private struct EventCard: View {
               studio.openRecord(source)
             } label: {
               HStack(spacing: 5) {
-                Image(systemName: recordIcon(source)).font(.system(size: 11))
+                StudioIcon(recordIcon(source), size: 11)
                   .foregroundStyle(t.category(source.category))
                 Text(source.title).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
               }.foregroundStyle(t.secondary).padding(.horizontal, 7).frame(height: 24)

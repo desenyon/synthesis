@@ -102,7 +102,7 @@ struct ReviewScreen: View {
               studio.openChat(chat)
             } label: {
               HStack(spacing: 6) {
-                Image(systemName: "bubble.left").font(.system(size: 11))
+                StudioIcon("bubble.left", size: 11)
                 Text(chat.title).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
                 Text(relativeDate(proposal.createdAt)).font(.system(size: 12))
                   .foregroundStyle(studio.t.muted)
@@ -193,7 +193,7 @@ struct ReviewScreen: View {
     let t = studio.t
     let involved = finding.recordIDs.compactMap { id in studio.records.first { $0.id == id } }
     return HStack(alignment: .top, spacing: 12) {
-      Image(systemName: icon(finding.kind)).font(.system(size: 14))
+      StudioIcon(icon(finding.kind), size: 14)
         .foregroundStyle(
           finding.kind == .duplicateName || finding.kind == .orphanedEvent ? t.warning : t.secondary
         )

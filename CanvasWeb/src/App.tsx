@@ -227,8 +227,8 @@ export function App() {
     window.clearTimeout(s.saveTimer);
     s.saveTimer = window.setTimeout(save, 350);
     window.clearTimeout(s.analyzeTimer);
-    s.analyzeTimer = window.setTimeout(analyse, 200);
-  }, [save, analyse, reportSelection]);
+    s.analyzeTimer = window.setTimeout(() => { analyse(); synchronise(); }, 200);
+  }, [save, analyse, reportSelection, synchronise]);
 
   /** A free spot near the centre of the current view, in scene coordinates. */
   const openSpot = useCallback((offset: number) => {
@@ -431,6 +431,16 @@ export function App() {
         s.selectionKey = "";
         onChange();
       },
+      /** Explicitly saving board text creates a shared idea; geometry stays at the same spot. */
+      captureSaved(elementID: string, recordID: string) {
+        const all: El[] = api.getSceneElementsIncludingDeleted();
+        const source = all.find(e => e.id === elementID && !e.isDeleted && e.type === "text" && !e.customData?.synthesis);
+        const record = s.records.get(recordID);
+        if (!source || !record) return;
+        const card = buildCard(record,recordID,source.x,source.y,s.theme,randomId());
+        api.updateScene({elements:[...all.map(e => e.id === elementID ? newElementWith(e,{isDeleted:true}) : e),card.rect,...Object.values(card.parts)],captureUpdate:CaptureUpdateAction.IMMEDIATELY});
+        synchronise(); save();
+      },
       /** The creator named a relationship for an arrow they drew. */
       relationSaved(arrowID: string, relation: RelationInfo) {
         s.relations = [...s.relations.filter((r) => r.id !== relation.id), relation];
@@ -492,6 +502,8 @@ export function App() {
           api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.82, animate: true });
         } else if (name === "flush") {
           window.clearTimeout(s.saveTimer);
+          window.clearTimeout(s.analyzeTimer);
+          analyse(); synchronise();
           if (s.loaded) post({ type: "change", ...serialise(true) });
         }
       },

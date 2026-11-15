@@ -422,6 +422,10 @@ final class StudioWindow: NSWindow {
       try await Task.sleep(for: .milliseconds(200))
       let only = ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_STATES"]?
         .split(separator: ",").map(String.init)
+      let unknown = (only ?? []).filter { !Studio.captureStates.contains($0) }
+      guard unknown.isEmpty else {
+        throw SynthesisError.invalid("Unknown capture states: \(unknown.joined(separator: ", "))")
+      }
       let sizes: [(Int, Int)] =
         ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_SIZES"]?.split(separator: ",")
         .compactMap { value -> (Int, Int)? in

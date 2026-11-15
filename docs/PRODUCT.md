@@ -11,3 +11,9 @@ Removal is always reversible: archive with Undo, restore from Library, conversat
 Current visual contract: one graphite design system with a complete light counterpart, a single bar per workspace, readable sans-serif hierarchy, restrained semantic colours, real entity cards and optional world artwork. No permanent assistant overlay, fake starter lore, decorative edges, analytics or preview-only production labels.
 
 The current canvas uses the owner's node-workspace reference: compact graphite cards with inset image previews, colored relationship ports, curved typed connections and edge-docked tools. Excalidraw provides the editing engine beneath Synthesis presentation. Generated illustrations are optional assets chosen explicitly; images imply no canon. The exact reference match remains under review, and exports currently use engine-rendered card styling.
+
+## Connected studio refinement — 2026-11-15
+
+The assistant is subscription-only (Claude Code / Codex). It receives world records plus a bounded structured index of relationships, chronology and boards. The creator can review proposals to create a board, place linked records, add map markers, link documents and create draft rules, alongside existing lore actions. Accepting a proposal is not canon approval. All manual work remains available with AI off.
+
+Canvas distinguishes board-only text/drawings from Library records. Saving board text as an idea creates a source record and replaces it with a linked card. Relationships are shared with Graph and editable through native inspection. Entity details expose rules for manual addition/editing; the dedicated power-system lab is later work.

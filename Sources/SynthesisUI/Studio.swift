@@ -49,6 +49,8 @@ public struct Toast: Identifiable {
   public let engine: AgentEngine
   @Published public var worlds: [World] = []
   @Published public var worldID = ""
+  @Published public var worldRevision = 0
+  @Published public var reviewingProposal = false
   @Published public var records: [LoreRecord] = []
   @Published public var conversations: [Conversation] = []
   @Published public var messages: [ChatMessage] = []
@@ -112,9 +114,9 @@ public struct Toast: Identifiable {
   @Published public var providerStatus: ProviderStatus?
   @Published public var checkingProvider = false
   @Published public var harnessModels: [ProviderKind: String] = [:]
-  @Published public var modelName = ""
   @Published public var editorSave: (() -> Bool)?
   @Published public var canvasBoardID: String?
+  @Published public var mapBoardID: String?
   @Published public var companionExpanded = false
   @Published public var companionWidth = 400.0
   @Published public var libraryCategory: String?
@@ -143,7 +145,6 @@ public struct Toast: Identifiable {
   }
   public init(store: WorkspaceStore, transport: (any ModelTransport)? = nil) throws {
     self.store = store
-    let configuredModel = try store.preference("model") ?? ""
     // Requests go to whichever provider is selected when they are sent. The transports read
     // the choice from defaults so they stay independent of this observable object.
     let setting: @Sendable (String) -> String = {
@@ -155,15 +156,13 @@ public struct Toast: Identifiable {
         ?? ProviderRouter(
           kind: { ProviderKind(rawValue: setting("Synthesis.provider")) ?? .claudeCode },
           claude: ClaudeCodeTransport(model: { setting("Synthesis.model.claude-code") }),
-          codex: CodexTransport(model: { setting("Synthesis.model.codex") }),
-          openAI: OpenAITransport(model: { setting("Synthesis.model") })))
-    modelName = configuredModel
-    UserDefaults.standard.set(configuredModel, forKey: "Synthesis.model")
-    // Default to a local harness signed in with a subscription; an API key is the fallback.
+          codex: CodexTransport(model: { setting("Synthesis.model.codex") })))
+    // Migrate obsolete API selection to an installed subscription harness.
     provider =
       try store.preference("provider").flatMap(ProviderKind.init(rawValue:))
       ?? (HarnessLocator.find(.claudeCode) != nil
-        ? .claudeCode : (HarnessLocator.find(.codex) != nil ? .codex : .openAI))
+        ? .claudeCode : (HarnessLocator.find(.codex) != nil ? .codex : .claudeCode))
+    try store.setPreference("provider", value: provider.rawValue)
     UserDefaults.standard.set(provider.rawValue, forKey: "Synthesis.provider")
     for kind in [ProviderKind.claudeCode, .codex] {
       let value = try store.preference("model:\(kind.rawValue)") ?? ""
@@ -189,13 +188,9 @@ public struct Toast: Identifiable {
 
   // MARK: Provider
 
-  /// Whether the selected provider can be used at all: a harness that is installed, or a
-  /// stored API key with a model. Sign-in is the harness's own concern and is checked on demand.
+  /// Installation enables setup; every generation rechecks subscription authentication.
   public func refreshProviderAvailability() {
-    switch provider {
-    case .openAI: providerConfigured = ProviderKeychain.configured && !modelName.isEmpty
-    default: providerConfigured = HarnessLocator.find(provider) != nil
-    }
+    providerConfigured = HarnessLocator.find(provider) != nil && providerStatus?.signedIn != false
   }
   public func setProvider(_ kind: ProviderKind) {
     guard kind != provider else { return }
@@ -205,6 +200,7 @@ public struct Toast: Identifiable {
       provider = kind
       UserDefaults.standard.set(kind.rawValue, forKey: "Synthesis.provider")
       providerStatus = nil
+      checkingProvider = false
       refreshProviderAvailability()
     }
   }
@@ -233,6 +229,7 @@ public struct Toast: Identifiable {
     "Sending shares this message and world context with \(provider.recipient)."
   }
   public func reload() throws {
+    defer { worldRevision += 1 }
     worlds = try store.worlds()
     records = try store.records(worldID: worldID)
     conversations = try store.conversations(worldID: worldID)
@@ -255,30 +252,31 @@ public struct Toast: Identifiable {
 
   /// The creator's explicit decision on one staged change. Accepted changes become drafts.
   public func resolve(_ proposal: Proposal, change: ProposedChange, accept: Bool) {
-    perform {
-      _ = try store.resolveChange(
-        worldID: worldID, proposalID: proposal.id, changeID: change.id, accept: accept,
-        confirmation: proposal.id)
-      try reload()
-    }
+    resolve(proposal, changes: [change], accept: accept)
   }
-  /// Resolves every pending change in order, stopping at the first that cannot be applied.
   public func resolveAll(_ proposal: Proposal, accept: Bool) {
-    perform {
-      defer { try? reload() }
-      var applied = 0
-      for change in proposal.changes where change.status == "pending" {
-        _ = try store.resolveChange(
-          worldID: worldID, proposalID: proposal.id, changeID: change.id, accept: accept,
-          confirmation: proposal.id)
-        applied += 1
-      }
-      if applied > 0 {
-        show(
-          accept
-            ? "\(applied) \(applied == 1 ? "change" : "changes") saved as drafts"
-            : "\(applied) \(applied == 1 ? "change" : "changes") dismissed",
-          icon: accept ? "checkmark.circle" : "xmark.circle")
+    resolve(proposal, changes: proposal.changes.filter { $0.status == "pending" }, accept: accept)
+  }
+  private func resolve(_ proposal: Proposal, changes: [ProposedChange], accept: Bool) {
+    guard !reviewingProposal, flushEditor() else { return }
+    let world = worldID
+    reviewingProposal = true
+    Task {
+      defer { reviewingProposal = false }
+      guard await flushCanvas(), world == worldID else { return }
+      perform {
+        defer {
+          try? reload()
+          if accept && changes.contains(where: { $0.action == "place_record" }) {
+            canvasSession?.reloadStoredBoard()
+          }
+        }
+        for change in changes {
+          _ = try store.resolveChange(
+            worldID: world, proposalID: proposal.id, changeID: change.id,
+            accept: accept, confirmation: proposal.id)
+        }
+        show(accept ? "Saved reviewed changes. Canon is unchanged." : "Changes dismissed.")
       }
     }
   }
@@ -381,6 +379,7 @@ public struct Toast: Identifiable {
     perform {
       persistPendingComposer()
       canvasBoardID = nil
+      mapBoardID = nil
       companionExpanded = false
       libraryCategory = nil
       worldID = id
@@ -520,6 +519,9 @@ public struct Toast: Identifiable {
       error = "Keep a message under 30,000 characters. Your text is still here."
       return
     }
+    guard flushEditor() else { return }
+    let activeBoard = destination == .canvas ? canvasSession?.boardID : nil
+    let selectedIDs = destination == .canvas ? (canvasSession?.selection ?? []) : []
     let prompt = draft
     let wid = worldID
     perform {
@@ -541,8 +543,12 @@ public struct Toast: Identifiable {
       running = Task { [weak self] in
         guard let self, !Task.isCancelled, self.requestID == request else { return }
         do {
+          guard await self.flushCanvas(), self.worldID == wid, self.requestID == request else {
+            throw SynthesisError.invalid("Canvas is not saved yet. Retry after the save completes.")
+          }
           try await self.engine.submit(
-            worldID: wid, conversationID: cid, prompt: prompt, preset: chosenPreset
+            worldID: wid, conversationID: cid, prompt: prompt, preset: chosenPreset,
+            boardID: activeBoard, selectedRecordIDs: selectedIDs
           ) { [weak self] output in
             await self?.receive(output, worldID: wid, conversationID: cid, request: request)
           }

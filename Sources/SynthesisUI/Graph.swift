@@ -28,6 +28,7 @@ enum GraphLayout {
     }
     var temperature = long / 8
     for _ in 0..<300 {
+      if Task.isCancelled { break }
       var shift = Array(repeating: CGVector.zero, count: nodes.count)
       for i in nodes.indices {
         for j in nodes.indices where j > i {
@@ -82,6 +83,7 @@ struct RelationshipGraph: View {
   @State private var relationships: [Relation] = []
   @State private var layout: [String: CGPoint] = [:]
   @State private var signature = ""
+  @State private var layoutTask: Task<Void, Never>?
   @State private var query = ""
   @State private var selected: String?
   @State private var hoveredEdge: String?
@@ -167,7 +169,11 @@ struct RelationshipGraph: View {
         panel = .create
       }
     }
-    .onChange(of: studio.records) { _, _ in refresh() }
+    .onChange(of: studio.worldRevision) { _, _ in refresh() }
+    .onDisappear {
+      layoutTask?.cancel()
+      signature = ""
+    }
     .studioSheet(item: $panel) { item in
       switch item {
       case .create: createSheet
@@ -340,7 +346,7 @@ struct RelationshipGraph: View {
       }
     let dim = !neighbour || !matches(entity)
     return VStack(spacing: 7) {
-      Image(systemName: recordIcon(entity)).font(.system(size: 17)).foregroundStyle(tint)
+      StudioIcon(recordIcon(entity), size: 17).foregroundStyle(tint)
         .frame(width: 46, height: 46).background(studio.t.surface, in: Circle())
         .overlay(
           Circle().stroke(tint.opacity(isSelected ? 1 : 0.45), lineWidth: isSelected ? 2 : 1.2)
@@ -428,7 +434,7 @@ struct RelationshipGraph: View {
               selected = other
             } label: {
               HStack(spacing: 6) {
-                Image(systemName: outward ? "arrow.right" : "arrow.left")
+                StudioIcon(outward ? "arrow.right" : "arrow.left")
                   .font(.system(size: 9, weight: .bold)).foregroundStyle(studio.t.muted)
                 Text(relation.label).font(.system(size: 12.5)).foregroundStyle(studio.t.secondary)
                 Text(name(other)).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
@@ -461,10 +467,26 @@ struct RelationshipGraph: View {
         + relationships.map { "\($0.sourceID)>\($0.targetID)" }.sorted().joined(separator: ",")
       if next != signature {
         signature = next
-        layout = GraphLayout.positions(
-          nodes: nodes, edges: relationships.map { ($0.sourceID, $0.targetID) },
-          landscape: landscape)
-        if framed { frame(area, animated: false) }
+        layoutTask?.cancel()
+        let edges = relationships.map { ($0.sourceID, $0.targetID) }
+        if nodes.count <= 80 {
+          layout = GraphLayout.positions(nodes: nodes, edges: edges, landscape: landscape)
+          if framed { frame(area, animated: false) }
+        } else {
+          let worker = Task.detached(priority: .userInitiated) {
+            GraphLayout.positions(nodes: nodes, edges: edges, landscape: landscape)
+          }
+          layoutTask = Task {
+            let result = await withTaskCancellationHandler {
+              await worker.value
+            } onCancel: {
+              worker.cancel()
+            }
+            guard !Task.isCancelled, signature == next else { return }
+            layout = result
+            if framed { frame(area, animated: false) }
+          }
+        }
       }
       if let selected, !nodes.contains(selected) { self.selected = nil }
     }
@@ -532,7 +554,7 @@ struct RelationshipGraph: View {
         HStack {
           Text(name(selection.wrappedValue)).font(.system(size: 14)).lineLimit(1)
           Spacer()
-          Image(systemName: "chevron.up.chevron.down").font(.system(size: 10))
+          StudioIcon("chevron.up.chevron.down", size: 10)
             .foregroundStyle(studio.t.muted)
         }.padding(.horizontal, 10).frame(width: 196, height: 34)
           .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
@@ -556,7 +578,7 @@ struct RelationshipGraph: View {
     return SheetScaffold(title: "New relationship", t: studio.t, close: closePanel) {
       HStack(alignment: .bottom, spacing: 10) {
         picker("From", selection: $source)
-        Image(systemName: "arrow.right").font(.system(size: 11, weight: .semibold))
+        StudioIcon("arrow.right", size: 11)
           .foregroundStyle(studio.t.muted).padding(.bottom, 11)
         picker("To", selection: $target)
       }

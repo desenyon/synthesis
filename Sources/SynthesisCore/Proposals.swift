@@ -1,3 +1,4 @@
+import CoreFoundation
 import Foundation
 
 /// Splits a model answer into prose and an optional machine-readable change set.
@@ -65,13 +66,26 @@ extension WorkspaceStore {
       return trimmed.isEmpty ? nil : String(trimmed.prefix(limit))
     }
     let raw = (payload["changes"] as? [[String: Any]] ?? []).prefix(12)
+    let boards =
+      try boards(worldID: worldID, kind: "canvas") + boards(worldID: worldID, kind: "atlas")
+    var createdBoards: [String: String] = [:]
+    func coordinate(_ item: [String: Any], _ key: String, map: Bool) -> Double? {
+      guard let raw = item[key] else { return map ? 0.5 : 0 }
+      guard let value = raw as? NSNumber, CFGetTypeID(value) != CFBooleanGetTypeID() else {
+        return nil
+      }
+      let number = value.doubleValue
+      return number.isFinite && (map ? (0...1).contains(number) : abs(number) <= 100_000)
+        ? number : nil
+    }
     var changes: [ProposedChange] = []
     var created: [String: String] = [:]  // lowercased title → change reference
     func resolve(_ value: Any?) -> String? {
       guard let name = text(value, limit: 200) else { return nil }
       if known[name] != nil { return name }
       if let reference = created[name.lowercased()] { return reference }
-      return known.values.first { $0.title.caseInsensitiveCompare(name) == .orderedSame }?.id
+      let matches = known.values.filter { $0.title.caseInsensitiveCompare(name) == .orderedSame }
+      return matches.count == 1 ? matches[0].id : nil
     }
     for item in raw {
       let id = UUID().uuidString
@@ -116,6 +130,42 @@ extension WorkspaceStore {
         change.title = title
         change.date = text(item["date"], limit: 160)
         change.source = source
+      case "create_board":
+        guard let title = text(item["title"], limit: 120) else { continue }
+        change.title = title
+        createdBoards[title.lowercased()] = "change:\(id)"
+      case "place_record", "place_marker":
+        let map = change.action == "place_marker"
+        guard let source = resolve(item["source"]), let requested = text(item["board"], limit: 200),
+          let x = coordinate(item, "x", map: map), let y = coordinate(item, "y", map: map)
+        else { continue }
+        let matches = boards.filter {
+          $0.kind == (map ? "atlas" : "canvas") && ($0.id == requested || $0.name == requested)
+        }
+        let boardID =
+          matches.count == 1 ? matches[0].id : (map ? nil : createdBoards[requested.lowercased()])
+        guard let boardID else { continue }
+        change.boardID = boardID
+        change.source = source
+        change.x = x
+        change.y = y
+        change.title = matches.first?.name ?? requested
+      case "link_records":
+        guard let source = resolve(item["source"]), let target = resolve(item["target"]),
+          source != target
+        else { continue }
+        change.source = source
+        change.target = target
+      case "add_rule":
+        guard let source = resolve(item["source"]), let title = text(item["title"], limit: 160),
+          let body = text(item["body"], limit: 100_000),
+          let kind = item["kind"] as? String, WorldRule.Kind(rawValue: kind) != nil
+        else { continue }
+        if let record = known[source], record.kind != "entity" { continue }
+        change.source = source
+        change.title = title
+        change.body = body
+        change.kind = kind
       default: continue
       }
       changes.append(change)
@@ -159,6 +209,14 @@ extension WorkspaceStore {
         return id
       }
       if accept {
+        for reference in [change.recordID, change.source, change.target].compactMap({ $0 }) {
+          let id = try resolved(reference)
+          _ = try record(worldID: worldID, id: id)
+          guard try !isArchived(worldID: worldID, recordID: id) else {
+            throw SynthesisError.invalid(
+              "Restore the archived record before accepting this change.")
+          }
+        }
         switch change.action {
         case "create_record":
           change.resultID = try createRecord(
@@ -167,6 +225,7 @@ extension WorkspaceStore {
           ).id
         case "revise_record":
           let current = try record(worldID: worldID, id: try resolved(change.recordID))
+          guard current.version == change.baseVersion else { throw SynthesisError.stale }
           change.resultID = try saveRecord(
             worldID: worldID, id: current.id, version: current.version,
             title: change.title ?? current.title, body: change.body ?? current.body, rtf: nil
@@ -181,6 +240,34 @@ extension WorkspaceStore {
           change.resultID = try addEvent(
             worldID: worldID, title: change.title ?? "Untitled event", date: change.date ?? "",
             source: try resolved(change.source), origin: "ai-proposed"
+          ).id
+        case "create_board":
+          change.resultID = try saveBoard(
+            worldID: worldID, name: change.title ?? "Untitled board", kind: "canvas",
+            content:
+              #"{"format":"excalidraw","version":1,"scene":{"elements":[],"appState":{}},"hiddenRelations":[]}"#
+          ).id
+        case "place_record":
+          change.resultID = try placeRecord(
+            worldID: worldID, boardID: resolved(change.boardID),
+            recordID: resolved(change.source), x: change.x ?? 0, y: change.y ?? 0
+          ).id
+        case "place_marker":
+          change.resultID = try placeMapMarker(
+            worldID: worldID, boardID: resolved(change.boardID),
+            recordID: resolved(change.source), x: change.x ?? 0.5, y: change.y ?? 0.5
+          ).id
+        case "link_records":
+          try linkRecord(
+            worldID: worldID, source: resolved(change.source), target: resolved(change.target))
+          change.resultID = try resolved(change.source)
+        case "add_rule":
+          guard let kind = WorldRule.Kind(rawValue: change.kind ?? "") else {
+            throw SynthesisError.invalid("Unknown rule kind.")
+          }
+          change.resultID = try addRule(
+            worldID: worldID, systemID: resolved(change.source), kind: kind,
+            title: change.title ?? "Rule", body: change.body ?? "", origin: "ai-proposed"
           ).id
         default: throw SynthesisError.invalid("Unknown proposed change.")
         }

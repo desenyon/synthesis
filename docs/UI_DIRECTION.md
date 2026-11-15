@@ -27,3 +27,7 @@ The accepted graphite foundation, applied as one system. Tokens live in `Theme.s
 ## Behaviour
 
 Short transitions (0.14–0.2 s), no looping animation beyond the system progress indicator, reduced motion respected. Save failures stay visible. Authored capture fixtures are labelled and never presented as model output. No performance claim without a measurement.
+
+### 2026-11-15 refinement
+
+The current shell uses flat neutral charcoal, restrained blue selection, 248-point grouped navigation (64-point rail), real world categories and recent conversations. Lucide replaces SF Symbols and authored Canvas SVG icons; no generated icons. Shared native light/dark tokens remain authoritative. Canvas has compact edge-docked tools, a Synthesis-owned drawing style panel, and smaller filled relationship arrowheads with monotonic tangent routes. The owner design brief remains unmodified. Exact match to the latest mentioned attachment cannot be certified because no file arrived with that message.

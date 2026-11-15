@@ -12,8 +12,10 @@ struct HarnessTests {
       "harness-test-\(UUID().uuidString)")
     try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
     let url = folder.appendingPathComponent("fake")
-    try "#!/bin/sh\nLOG='\(folder.path)'\n\(body)\n".write(
-      to: url, atomically: true, encoding: .utf8)
+    try
+      "#!/bin/sh\nLOG='\(folder.path)'\nif [ \"$1\" = auth ]; then echo '{\"loggedIn\":true,\"authMethod\":\"claude.ai\"}'; exit 0; fi\nif [ \"$1\" = login ]; then echo 'Logged in using ChatGPT'; exit 0; fi\n\(body)\n"
+      .write(
+        to: url, atomically: true, encoding: .utf8)
     try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: url.path)
     return (url.path, folder)
   }
@@ -175,13 +177,71 @@ struct HarnessTests {
       contentsOf: fake.folder.appendingPathComponent("args"), encoding: .utf8)
     for flag in [
       "exec --json", "--sandbox read-only", "--ephemeral", "--ignore-user-config",
-      "--ignore-rules", "--disable apps", "--disable plugins", "--skip-git-repo-check",
+      "--ignore-rules", "--disable shell_tool", "--disable apps", "--disable plugins",
+      "--skip-git-repo-check",
     ] { #expect(arguments.contains(flag), "missing \(flag)") }
     #expect(arguments.contains("synthesis-harness-") && arguments.hasSuffix("-\n"))
     let prompt = try String(
       contentsOf: fake.folder.appendingPathComponent("stdin"), encoding: .utf8)
     #expect(prompt.contains("RULES: answer briefly.") && prompt.contains("Do not run commands"))
     #expect(prompt.contains("The creator's new message:\nWho guards the sea?"))
+  }
+  @Test func failedProcessCannotReturnAPartialAnswerAsSuccess() async throws {
+    let fake = try script(
+      """
+      cat > /dev/null
+      echo '{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"text_delta","text":"Incomplete"}}}'
+      exit 7
+      """)
+    defer { try? FileManager.default.removeItem(at: fake.folder) }
+    await #expect(throws: SynthesisError.self) {
+      _ = try await ClaudeCodeTransport(executable: { fake.path }).generate(request()) { _ in }
+    }
+  }
+  @Test func processDeadlineTerminatesAnUnresponsiveHarness() async throws {
+    let fake = try script("exec sleep 60")
+    defer { try? FileManager.default.removeItem(at: fake.folder) }
+    let started = Date()
+    let result = try await HarnessProcess.run(
+      executable: fake.path, arguments: [], input: "", directory: fake.folder,
+      timeout: .milliseconds(80)
+    ) { _ in }
+    #expect(result.status != 0)
+    #expect(Date().timeIntervalSince(started) < 5)
+  }
+  @Test func apiOnlyHarnessCannotStartGeneration() async throws {
+    let fake = try script("echo generation > \"$LOG/generated\"")
+    defer { try? FileManager.default.removeItem(at: fake.folder) }
+    let url = URL(fileURLWithPath: fake.path)
+    let source = try String(contentsOf: url, encoding: .utf8)
+      .replacingOccurrences(of: "claude.ai", with: "api_key")
+      .replacingOccurrences(of: "using ChatGPT", with: "using an API key")
+    try source.write(to: url, atomically: false, encoding: .utf8)
+    await #expect(throws: SynthesisError.self) {
+      _ = try await ClaudeCodeTransport(executable: { fake.path }).generate(request()) { _ in }
+    }
+    await #expect(throws: SynthesisError.self) {
+      _ = try await CodexTransport(executable: { fake.path }).generate(request()) { _ in }
+    }
+    #expect(
+      !FileManager.default.fileExists(atPath: fake.folder.appendingPathComponent("generated").path))
+  }
+  @Test func apiAuthenticationIsNotASubscription() {
+    #expect(
+      !ProviderStatus.interpret(
+        .claudeCode,
+        output: #"{"loggedIn":true,"authMethod":"api_key"}"#, path: ""
+      ).signedIn)
+    #expect(
+      !ProviderStatus.interpret(
+        .codex,
+        output: "Logged in using an API key", path: ""
+      ).signedIn)
+    #expect(
+      !ProviderStatus.interpret(
+        .codex,
+        output: "Logged in", path: ""
+      ).signedIn)
   }
   @Test func locatorStatusAndRouterFollowTheChosenProvider() async throws {
     let fake = try script("exit 0")
@@ -209,13 +269,12 @@ struct HarnessTests {
     let kind = KindBox()
     let router = ProviderRouter(
       kind: { kind.value }, claude: ScriptedTransport(answer: "from claude"),
-      codex: ScriptedTransport(answer: "from codex"), openAI: ScriptedTransport(answer: "from api"))
+      codex: ScriptedTransport(answer: "from codex"))
     #expect(try await router.generate(request()) { _ in } == "from claude")
     kind.value = .codex
     #expect(try await router.generate(request()) { _ in } == "from codex")
-    kind.value = .openAI
-    #expect(try await router.generate(request()) { _ in } == "from api")
-    #expect(ProviderKind.claudeCode.usesSubscription && !ProviderKind.openAI.usesSubscription)
+    #expect(ProviderKind.allCases == [.claudeCode, .codex])
+    #expect(ProviderKind(rawValue: "openai") == nil)
   }
 }
 /// Opt-in check against the real harnesses. It uses a little subscription quota, so it only

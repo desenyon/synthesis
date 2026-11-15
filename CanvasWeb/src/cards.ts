@@ -5,7 +5,7 @@
 // the record ID; Synthesis rewrites the text whenever the record changes.
 
 import { convertToExcalidrawElements, FONT_FAMILY, newElementWith } from "@excalidraw/excalidraw";
-import { cardGroup, relationDisposition } from "./sceneRules";
+import { cardGroup, relationDisposition, connectionRoute } from "./sceneRules";
 import { categoryColor, palette, type Theme } from "./palette";
 
 export type RecordInfo = {
@@ -238,28 +238,10 @@ export function syncCards(elements: readonly El[], records: Map<string, RecordIn
   return changed ? next : null;
 }
 
-function anchors(a: El, b: El) {
-  const ac = { x: a.x + a.width / 2, y: a.y + a.height / 2 };
-  const bc = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
-  const dx = bc.x - ac.x;
-  const dy = bc.y - ac.y;
-  const gap = 6;
-  if (Math.abs(dx) / ((a.width + b.width) / 2) >= Math.abs(dy) / ((a.height + b.height) / 2)) {
-    return {
-      start: { x: dx >= 0 ? a.x + a.width + gap : a.x - gap, y: ac.y },
-      end: { x: dx >= 0 ? b.x - gap : b.x + b.width + gap, y: bc.y },
-    };
-  }
-  return {
-    start: { x: ac.x, y: dy >= 0 ? a.y + a.height + gap : a.y - gap },
-    end: { x: bc.x, y: dy >= 0 ? b.y - gap : b.y + b.height + gap },
-  };
-}
-
 /** A labelled arrow bound to two card rectangles. Returns the arrow, its label and the rects. */
-export function buildArrow(a: El, b: El, label: string, theme: Theme, customData: Record<string, unknown>): El[] {
+export function buildArrow(a: El, b: El, label: string, theme: Theme, customData: Record<string, unknown>, lane = 0): El[] {
   const p = palette(theme);
-  const { start, end } = anchors(a, b);
+  const { start, end, points } = connectionRoute(a, b, lane);
   const id = `arrow:${Math.random().toString(36).slice(2, 12)}`;
   const made = convertToExcalidrawElements(
     [
@@ -270,17 +252,12 @@ export function buildArrow(a: El, b: El, label: string, theme: Theme, customData
         y: start.y,
         width: Math.abs(end.x - start.x),
         height: Math.abs(end.y - start.y),
-        points: [
-          [0, 0],
-          [(end.x - start.x) * 0.25, (end.y - start.y) * 0.15],
-          [(end.x - start.x) * 0.75, (end.y - start.y) * 0.85],
-          [end.x - start.x, end.y - start.y],
-        ],
+        points,
         strokeColor: p.accent,
         strokeWidth: 1.5,
         roughness: 0,
         roundness: { type: 2 },
-        endArrowhead: "arrow",
+        endArrowhead: "triangle",
         customData,
         ...(label ? { label: { text: label, fontSize: 14, fontFamily: FONT, strokeColor: p.accent } } : {}),
       } as any,
@@ -313,6 +290,13 @@ export function syncRelations(
   theme: Theme,
 ): El[] | null {
   let next: El[] | null = null;
+  const lanes = new Map<string, number>();
+  const pairs = new Map<string, RelationInfo[]>();
+  for (const relation of relations) {
+    const key = [relation.sourceID, relation.targetID].sort().join(":");
+    pairs.set(key, [...(pairs.get(key) ?? []), relation]);
+  }
+  for (const group of pairs.values()) group.sort((a,b) => a.id.localeCompare(b.id)).forEach((r,i) => lanes.set(r.id, (i - (group.length - 1) / 2) * 36));
   const byID = new Map(elements.map(e => [e.id,e]));
   for (const arrow of elements.filter(e => isRelation(e) && !e.isDeleted)) {
     const source = byID.get(arrow.startBinding?.elementId)?.customData?.recordID;
@@ -327,6 +311,18 @@ export function syncRelations(
       next = (next ?? [...elements]).map(e => e.id===arrow.id ? newElementWith(e,{strokeColor:color}) : e.id===label?.id ? newElementWith(e,{text:relation.label,originalText:relation.label,strokeColor:color}) : e);
     }
   }
+  for (const arrow of (next ?? elements).filter(e => isRelation(e) && !e.isDeleted)) {
+    const a = byID.get(arrow.startBinding?.elementId), b = byID.get(arrow.endBinding?.elementId);
+    if (!a || !b || a.angle || b.angle) continue;
+    const lane = lanes.get(arrow.customData.relationID) ?? 0;
+    const routeKey = JSON.stringify([2,a.x,a.y,a.width,a.height,b.x,b.y,b.width,b.height,lane]);
+    if (arrow.customData.routeKey === routeKey) continue;
+    const route = connectionRoute(a,b,lane);
+    const label = arrowLabel(arrow, next ?? elements);
+    next = (next ?? [...elements]).map(e => e.id === arrow.id
+      ? newElementWith(e, {x:route.start.x,y:route.start.y,width:Math.abs(route.end.x-route.start.x),height:Math.abs(route.end.y-route.start.y),points:route.points,roughness:0,roundness:{type:2},endArrowhead:"triangle",strokeWidth:1.5,customData:{...e.customData,routeKey}})
+      : e.id === label?.id ? newElementWith(e,{x:(route.start.x+route.end.x-e.width)/2,y:(route.start.y+route.end.y-e.height)/2+lane}) : e);
+  }
   const current = () => next ?? elements;
   const cardFor = (recordID: string) => current().find((e) => isCard(e) && e.customData.recordID === recordID);
   const drawn = new Set(current().filter((e) => isRelation(e) && !e.isDeleted).map((e) => e.customData.relationID));
@@ -335,7 +331,7 @@ export function syncRelations(
     const a = cardFor(relation.sourceID);
     const b = cardFor(relation.targetID);
     if (!a || !b) continue;
-    const added = buildArrow(a, b, relation.label, theme, { synthesis: "relation", relationID: relation.id });
+    const added = buildArrow(a, b, relation.label, theme, { synthesis: "relation", relationID: relation.id }, lanes.get(relation.id) ?? 0);
     const list = [...current()];
     for (const el of added) {
       const index = list.findIndex((e) => e.id === el.id);

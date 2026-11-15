@@ -62,6 +62,8 @@ struct EditorScreen: View {
   @State private var revisions: [RecordRevision] = []
   @State private var customCategory = false
   @State private var handle = EditorHandle()
+  @State private var editingRule: WorldRule?
+  @State private var ruleSheet = false
   init(studio: Studio, record: LoreRecord) {
     self.studio = studio
     _record = State(initialValue: record)
@@ -76,13 +78,17 @@ struct EditorScreen: View {
         bar
         HStack(spacing: 0) {
           writing.frame(maxWidth: .infinity, maxHeight: .infinity)
-          if studio.inspector && geo.size.width >= 780 {
+          if studio.inspector {
             Rectangle().fill(studio.t.hairline).frame(width: 1)
             RecordInspector(
               studio: studio, record: record, flush: { save() },
               updated: { record = $0 }, review: { if save() { panel = .canon } },
-              history: openHistory
-            ).frame(width: 300)
+              history: openHistory,
+              editRule: { rule in
+                editingRule = rule
+                ruleSheet = true
+              }
+            ).frame(width: min(300, geo.size.width * 0.42))
           }
         }
       }
@@ -97,6 +103,9 @@ struct EditorScreen: View {
       if studio.captureHint == "sheet-history" { openHistory() }
     }
     .onDisappear { saving?.cancel() }
+    .studioSheet(isPresented: $ruleSheet) {
+      RecordRuleEditor(studio: studio, record: record, existing: editingRule) { ruleSheet = false }
+    }
     .studioSheet(item: $panel) { item in
       switch item {
       case .history: historySheet
@@ -114,7 +123,7 @@ struct EditorScreen: View {
         studio.closeRecord()
       } label: {
         HStack(spacing: 5) {
-          Image(systemName: "chevron.left").font(.system(size: 11, weight: .semibold))
+          StudioIcon("chevron.left", size: 11)
           Text(origin).font(.system(size: 13.5, weight: .medium))
         }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
           .hoverFill(studio.t)
@@ -175,7 +184,7 @@ struct EditorScreen: View {
   private var writing: some View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(spacing: 8) {
-        Label(Vocabulary.kindLabel(record.kind), systemImage: recordIcon(record))
+        StudioLabel(Vocabulary.kindLabel(record.kind), icon: recordIcon(record))
           .font(.system(size: 12.5, weight: .medium))
           .foregroundStyle(studio.t.category(category))
         Text("·").foregroundStyle(studio.t.muted)
@@ -240,7 +249,7 @@ struct EditorScreen: View {
             category = name
             changed()
           } label: {
-            if category == name { Label(name, systemImage: "checkmark") } else { Text(name) }
+            if category == name { StudioLabel(name, icon: "checkmark") } else { Text(name) }
           }
         }
         Divider()
@@ -252,7 +261,7 @@ struct EditorScreen: View {
       } label: {
         HStack(spacing: 4) {
           Text(category.isEmpty ? "No category" : category).font(.system(size: 12.5))
-          Image(systemName: "chevron.down").font(.system(size: 8, weight: .semibold))
+          StudioIcon("chevron.down", size: 8)
         }.foregroundStyle(studio.t.secondary).padding(.horizontal, 5).frame(height: 22)
           .hoverFill(studio.t, radius: 5)
       }.padding(.horizontal, -5).help("Change category")
@@ -346,11 +355,11 @@ struct EditorScreen: View {
     ) {
       HStack(spacing: 12) {
         if let accepted, accepted.title != title {
-          Label("Title: “\(accepted.title)” → “\(title)”", systemImage: "textformat")
+          StudioLabel("Title: “\(accepted.title)” → “\(title)”", icon: "textformat")
         }
-        Label("\(added) added", systemImage: "plus").foregroundStyle(studio.t.positive)
+        StudioLabel("\(added) added", icon: "plus").foregroundStyle(studio.t.positive)
         if accepted != nil {
-          Label("\(removed) removed", systemImage: "minus").foregroundStyle(studio.t.danger)
+          StudioLabel("\(removed) removed", icon: "minus").foregroundStyle(studio.t.danger)
         }
         Spacer()
       }.font(.system(size: 12.5, weight: .medium)).foregroundStyle(studio.t.secondary)
@@ -452,10 +461,12 @@ struct RecordInspector: View {
   var updated: (LoreRecord) -> Void
   var review: () -> Void
   var history: () -> Void
+  var editRule: (WorldRule?) -> Void
   @State private var outgoing: [LoreRecord] = []
   @State private var incoming: [LoreRecord] = []
   @State private var relations: [Relation] = []
   @State private var events: [WorldEvent] = []
+  @State private var rules: [WorldRule] = []
   @State private var newTag = ""
   @State private var newAlias = ""
   var body: some View {
@@ -507,13 +518,36 @@ struct RecordInspector: View {
               .buttonStyle(QuietButton(t: t, role: .ghost)).padding(.leading, -12)
           }
         }
+        if record.kind == "entity" {
+          section("Rules") {
+            ForEach(rules) { rule in
+              Button {
+                editRule(rule)
+              } label: {
+                VStack(alignment: .leading, spacing: 5) {
+                  HStack {
+                    Text(rule.kind.title).foregroundStyle(t.secondary)
+                    Spacer()
+                    StateBadge(state: rule.state, t: t)
+                  }.font(.system(size: 12))
+                  Text(rule.title).font(.system(size: 13, weight: .medium))
+                  Text(rule.body).font(.system(size: 13)).foregroundStyle(t.secondary).lineLimit(3)
+                }.frame(maxWidth: .infinity, alignment: .leading).padding(8).hoverFill(t)
+              }.buttonStyle(.plain).help("Edit rule as draft")
+            }
+            Button("Add rule") {
+              editRule(nil)
+            }
+            .buttonStyle(QuietButton(t: t, role: .ghost))
+          }
+        }
         section("Links") {
           if outgoing.isEmpty { hint("Link this to a character, place or another page.") }
           ForEach(outgoing) { linkRow($0, prefix: nil, removable: true) }
           Button {
             linkPicker = true
           } label: {
-            Label("Add link", systemImage: "plus").font(.system(size: 12.5, weight: .medium))
+            StudioLabel("Add link", icon: "plus").font(.system(size: 12.5, weight: .medium))
               .foregroundStyle(t.accent).padding(.horizontal, 8).frame(height: 26).hoverFill(t)
           }.buttonStyle(.plain).padding(.leading, -8)
             .popover(isPresented: $linkPicker) {
@@ -551,8 +585,12 @@ struct RecordInspector: View {
       }.padding(18)
     }
     .background(studio.t.sidebar.opacity(0.45))
-    .onAppear(perform: load)
+    .onAppear {
+      load()
+      if studio.captureHint == "sheet-rule" { editRule(nil) }
+    }
     .onChange(of: record.version) { _, _ in load() }
+    .onChange(of: studio.worldRevision) { _, _ in load() }
     .accessibilityElement(children: .contain).accessibilityLabel("Record details")
   }
   private var statusNote: String {
@@ -585,7 +623,7 @@ struct RecordInspector: View {
         if flush() { studio.openRecord(linked) }
       } label: {
         HStack(spacing: 8) {
-          Image(systemName: recordIcon(linked)).font(.system(size: 11.5))
+          StudioIcon(recordIcon(linked), size: 11.5)
             .foregroundStyle(studio.t.category(linked.category)).frame(width: 16)
           VStack(alignment: .leading, spacing: 1) {
             if let prefix {
@@ -620,7 +658,7 @@ struct RecordInspector: View {
               Button {
                 commit(values.filter { $0 != value })
               } label: {
-                Image(systemName: "xmark").font(.system(size: 8, weight: .bold))
+                StudioIcon("xmark", size: 8)
                   .foregroundStyle(studio.t.muted)
               }.buttonStyle(.plain).accessibilityLabel("Remove \(value)")
             }.padding(.leading, 9).padding(.trailing, 7).frame(height: 24)
@@ -660,6 +698,7 @@ struct RecordInspector: View {
   }
   private func load() {
     studio.perform {
+      rules = try studio.store.rules(worldID: studio.worldID, systemID: record.id)
       outgoing = try studio.store.linkedRecords(worldID: studio.worldID, id: record.id)
       incoming = try studio.store.linkedRecords(
         worldID: studio.worldID, id: record.id, incoming: true)
@@ -707,5 +746,60 @@ struct FlowLayout: Layout {
       widest = max(widest, x - spacing)
     }
     return (CGSize(width: widest, height: y + rowHeight), points)
+  }
+}
+
+/// Manual and proposed rules share the same records and draft boundary.
+private struct RecordRuleEditor: View {
+  @ObservedObject var studio: Studio
+  let record: LoreRecord
+  let existing: WorldRule?
+  var close: () -> Void
+  @State private var title = ""
+  @State private var bodyText = ""
+  @State private var kind: WorldRule.Kind = .limit
+  var body: some View {
+    SheetScaffold(
+      title: existing == nil ? "Add a rule" : "Edit rule",
+      subtitle: "Rules of \(record.title). Saving keeps this a draft.", t: studio.t, width: 520,
+      close: close
+    ) {
+      Picker("Kind", selection: $kind) {
+        ForEach(WorldRule.Kind.allCases, id: \.self) { Text($0.title).tag($0) }
+      }
+      FormField(
+        label: "Title", placeholder: "A constraint, cost or technique", text: $title, t: studio.t)
+      TextEditor(text: $bodyText).font(.system(size: 15)).scrollContentBackground(.hidden)
+        .padding(10).frame(height: 180).background(
+          studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius)
+        )
+        .accessibilityLabel("Rule description")
+    } footer: {
+      Spacer()
+      Button("Cancel", action: close).buttonStyle(QuietButton(t: studio.t))
+      Button("Save draft") {
+        studio.perform {
+          if let existing {
+            let current = try studio.store.rule(worldID: record.worldID, id: existing.id)
+            guard current == existing else { throw SynthesisError.stale }
+            _ = try studio.store.updateRule(
+              worldID: record.worldID, id: existing.id, kind: kind, title: title, body: bodyText)
+          } else {
+            _ = try studio.store.addRule(
+              worldID: record.worldID, systemID: record.id, kind: kind, title: title, body: bodyText
+            )
+          }
+          try studio.reload()
+          close()
+        }
+      }.buttonStyle(QuietButton(t: studio.t, primary: true))
+        .disabled(
+          title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || bodyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }.onAppear {
+      title = existing?.title ?? ""
+      bodyText = existing?.body ?? ""
+      kind = existing?.kind ?? .limit
+    }
   }
 }

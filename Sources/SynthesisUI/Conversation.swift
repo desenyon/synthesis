@@ -38,7 +38,7 @@ struct ConversationStudio: View {
 
   private var bar: some View {
     WorkspaceBar(studio: studio, global: !companion, inset: !companion || !docked) {
-      Image(systemName: "bubble.left").font(.system(size: 14)).foregroundStyle(studio.t.accent)
+      StudioIcon("bubble.left", size: 14).foregroundStyle(studio.t.accent)
         .accessibilityHidden(true)
       if let chat = studio.conversations.first(where: { $0.id == studio.conversationID }) {
         PlainMenu(flexible: true) {
@@ -50,7 +50,7 @@ struct ConversationStudio: View {
         } label: {
           HStack(spacing: 5) {
             Text(chat.title).font(.system(size: 15, weight: .semibold)).lineLimit(1)
-            Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold))
+            StudioIcon("chevron.down", size: 9)
               .foregroundStyle(studio.t.muted)
           }.padding(.horizontal, 6).frame(height: 28).hoverFill(studio.t)
         }.padding(.leading, -4).help("Rename or archive this conversation")
@@ -138,7 +138,7 @@ struct ConversationStudio: View {
               studio.preset = mode.name
             } label: {
               HStack(spacing: 6) {
-                Image(systemName: mode.icon).font(.system(size: 12))
+                StudioIcon(mode.icon, size: 12)
                 Text(mode.name).font(.system(size: 13, weight: .medium))
               }.padding(.horizontal, 11).frame(height: 30)
                 .foregroundStyle(selected ? studio.t.accent : studio.t.secondary)
@@ -160,7 +160,7 @@ struct ConversationStudio: View {
   @ViewBuilder private var references: some View {
     if studio.records.isEmpty {
       HStack(spacing: 10) {
-        Image(systemName: "tray").foregroundStyle(studio.t.muted)
+        StudioIcon("tray").foregroundStyle(studio.t.muted)
         Text("Your library is empty. Anything you save from a conversation becomes a draft there.")
           .font(.system(size: 13)).foregroundStyle(studio.t.secondary)
           .fixedSize(horizontal: false, vertical: true)
@@ -185,7 +185,7 @@ struct ConversationStudio: View {
                   ).font(.system(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
                 }
                 Spacer(minLength: 4)
-                Image(systemName: "at").font(.system(size: 11)).foregroundStyle(studio.t.muted)
+                StudioIcon("at", size: 11).foregroundStyle(studio.t.muted)
               }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
                 .background(studio.t.surface.opacity(0.55), in: RoundedRectangle(cornerRadius: 10))
                 .hoverFill(studio.t, radius: 10)
@@ -198,7 +198,7 @@ struct ConversationStudio: View {
   }
   private var manualNotice: some View {
     HStack(spacing: 10) {
-      Image(systemName: "hand.raised").foregroundStyle(studio.t.muted)
+      StudioIcon("hand.raised").foregroundStyle(studio.t.muted)
       Text("Manual · no model requests").font(.system(size: 13)).foregroundStyle(studio.t.secondary)
       Spacer()
       Button("Switch to AI Assisted") { studio.setMode(.assisted) }
@@ -228,7 +228,7 @@ struct ConversationStudio: View {
                 // A change set arrives as JSON at the end; show prose, not the raw block.
                 MarkdownContent(text: ProposalParser.visible(studio.streamed), t: studio.t)
                 if studio.streamed.contains(ProposalParser.fence) {
-                  Label("Preparing changes for your review…", systemImage: "square.stack.3d.up")
+                  StudioLabel("Preparing changes for your review…", icon: "square.stack.3d.up")
                     .font(.system(size: 13)).foregroundStyle(studio.t.secondary)
                 }
               }
@@ -293,7 +293,7 @@ struct ChatRow: View {
   }
   private var notice: some View {
     HStack(alignment: .firstTextBaseline, spacing: 10) {
-      Image(systemName: "exclamationmark.circle").foregroundStyle(studio.t.warning)
+      StudioIcon("exclamationmark.circle").foregroundStyle(studio.t.warning)
       Text(message.body).font(.system(size: 13)).foregroundStyle(studio.t.secondary)
         .fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
@@ -307,7 +307,7 @@ struct ChatRow: View {
     let sample = message.state == "imported-example"
     return VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 8) {
-        SynthesisGlyph().stroke(studio.t.accent, lineWidth: 1.3).frame(width: 15, height: 15)
+        StudioIcon("sparkles", size: 15).foregroundStyle(studio.t.accent)
         Text(sample ? "Imported example" : "Synthesis").font(.system(size: 13, weight: .semibold))
         Text(sample ? "Authored sample · not a model response" : "Suggestion · not canon")
           .font(.system(size: 12)).foregroundStyle(studio.t.muted)
@@ -341,9 +341,9 @@ struct ChatRow: View {
     Button(action: run) {
       Group {
         if narrow {
-          Image(systemName: icon).frame(width: 16)
+          StudioIcon(icon).frame(width: 16)
         } else {
-          Label(title, systemImage: icon).fixedSize()
+          StudioLabel(title, icon: icon).fixedSize()
         }
       }.font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.muted)
         .padding(.horizontal, 8).frame(height: 26).hoverFill(studio.t, radius: 6)
@@ -464,17 +464,16 @@ struct UnifiedComposer: View {
   @ViewBuilder private var disclosure: some View {
     HStack(spacing: 5) {
       if studio.providerConfigured {
-        Image(systemName: "arrow.up.forward").font(.system(size: 10))
+        StudioIcon("arrow.up.forward", size: 10)
         Text(
           collapsed || companion
-            ? "Sent to \(studio.provider.usesSubscription ? studio.provider.title : "OpenAI") with world context."
+            ? "Sent to \(studio.provider.title) with world context."
             : studio.providerDisclosure
         ).help(studio.providerDisclosure)
       } else {
-        Image(systemName: "bolt.slash").font(.system(size: 10))
+        StudioIcon("bolt.slash", size: 10)
         Text(
-          studio.provider.usesSubscription
-            ? "\(studio.provider.title) was not found on this Mac." : "No model connected.")
+          "Connect your \(studio.provider.title) subscription.")
         Button("Set up") { studio.sheet = .settings }.buttonStyle(.plain)
           .foregroundStyle(studio.t.accent)
         if !collapsed && !companion { Text("Messages are kept locally until then.") }
@@ -505,7 +504,7 @@ struct UnifiedComposer: View {
       }
     } label: {
       HStack(spacing: 4) {
-        Image(systemName: "at").font(.system(size: 13))
+        StudioIcon("at", size: 13)
         if !collapsed { Text("Lore").font(.system(size: 13, weight: .medium)) }
       }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
         .hoverFill(studio.t)
@@ -589,10 +588,10 @@ struct UnifiedComposer: View {
       }
     } label: {
       HStack(spacing: 5) {
-        Image(systemName: Vocabulary.modes.first { $0.name == studio.preset }?.icon ?? "sparkles")
+        StudioIcon(Vocabulary.modes.first { $0.name == studio.preset }?.icon ?? "sparkles")
           .font(.system(size: 12))
         Text(studio.preset).font(.system(size: 13, weight: .medium))
-        Image(systemName: "chevron.down").font(.system(size: 8, weight: .semibold))
+        StudioIcon("chevron.down", size: 8)
       }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
         .hoverFill(studio.t)
     }.help("Assistant mode: \(studio.preset)")
@@ -601,7 +600,7 @@ struct UnifiedComposer: View {
     Button {
       if studio.busy { studio.stop() } else { send() }
     } label: {
-      Image(systemName: studio.busy ? "stop.fill" : "arrow.up")
+      StudioIcon(studio.busy ? "stop.fill" : "arrow.up")
         .font(.system(size: 13, weight: .semibold)).frame(width: 30, height: 30)
         .foregroundStyle(empty && !studio.busy ? studio.t.muted : studio.t.onAccent)
         .background(

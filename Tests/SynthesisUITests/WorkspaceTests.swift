@@ -197,7 +197,7 @@ import Testing
     #expect(MentionCodec.query(in: "@one\ntwo" as NSString, caret: 8) == nil)
     #expect(MentionCodec.query(in: "no mention" as NSString, caret: 10) == nil)
   }
-  @Test func studioResolvesProposalsOnlyThroughExplicitActionsAndKeepsCanon() throws {
+  @Test func studioResolvesProposalsOnlyThroughExplicitActionsAndKeepsCanon() async throws {
     let store = try WorkspaceStore(path: ":memory:")
     let studio = try Studio(store: store)
     var rule = try store.createRecord(worldID: studio.worldID, title: "Rule", body: "One moon")
@@ -225,16 +225,18 @@ import Testing
     #expect(studio.name(for: "change:\(proposal.changes[0].id)", in: proposal) == "The Pale Moon")
 
     studio.resolve(proposal, change: proposal.changes[1], accept: false)
+    while studio.reviewingProposal { await Task.yield() }
     #expect(studio.proposals[message.id]?.pending == 1)
     #expect(try store.record(worldID: studio.worldID, id: rule.id).state == "canon")
 
     studio.resolveAll(try #require(studio.proposals[message.id]), accept: true)
+    while studio.reviewingProposal { await Task.yield() }
     let resolved = try #require(studio.proposals[message.id])
     #expect(resolved.pending == 0 && resolved.state == "accepted")
     let moon = try #require(studio.records.first { $0.title == "The Pale Moon" })
     #expect(moon.origin == "ai-proposed" && moon.state == "draft")
     #expect(try store.record(worldID: studio.worldID, id: rule.id).body == "One moon")
-    #expect(studio.toast?.message == "1 change saved as drafts")
+    #expect(studio.toast?.message == "Saved reviewed changes. Canon is unchanged.")
     #expect(studio.pendingProposals.isEmpty && studio.reviewCount == 0)
     // Editing an accepted record puts it in the canon queue until it is reviewed.
     _ = try store.saveRecord(

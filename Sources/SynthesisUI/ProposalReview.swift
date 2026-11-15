@@ -12,7 +12,7 @@ struct ProposalCard: View {
     let t = studio.t
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .firstTextBaseline, spacing: 9) {
-        Image(systemName: "square.stack.3d.up").font(.system(size: 13)).foregroundStyle(t.accent)
+        StudioIcon("square.stack.3d.up", size: 13).foregroundStyle(t.accent)
         VStack(alignment: .leading, spacing: 2) {
           Text("Proposed changes").font(.system(size: 13.5, weight: .semibold))
           Text(proposal.summary).font(.system(size: 13)).foregroundStyle(t.secondary)
@@ -37,7 +37,7 @@ struct ProposalCard: View {
         : AnyLayout(HStackLayout(spacing: 8))
       layout {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-          Image(systemName: "lock.shield").font(.system(size: 11)).foregroundStyle(t.muted)
+          StudioIcon("lock.shield", size: 11).foregroundStyle(t.muted)
           Text("Accepted changes are saved as drafts. Nothing becomes canon here.")
             .font(.system(size: 12)).foregroundStyle(t.muted)
             .fixedSize(horizontal: false, vertical: true)
@@ -58,6 +58,7 @@ struct ProposalCard: View {
     .overlay(RoundedRectangle(cornerRadius: Metric.cardRadius).stroke(t.hairline, lineWidth: 1))
     .accessibilityElement(children: .contain)
     .accessibilityLabel("Proposed changes: \(proposal.summary)")
+    .disabled(studio.reviewingProposal)
   }
   private func describe(_ change: ProposedChange) -> (icon: String, kind: String, title: String) {
     switch change.action {
@@ -74,6 +75,19 @@ struct ProposalCard: View {
         "arrow.triangle.branch", "Relationship",
         "\(studio.name(for: change.source, in: proposal)) — \(change.label ?? "") → \(studio.name(for: change.target, in: proposal))"
       )
+    case "create_board": return ("rectangle.on.rectangle", "New canvas", change.title ?? "Board")
+    case "place_record", "place_marker":
+      return (
+        change.action == "place_marker" ? "map" : "rectangle.on.rectangle",
+        change.action == "place_marker" ? "Place on map" : "Place or move card",
+        "\(studio.name(for: change.source, in: proposal)) → \(change.title ?? "Board") · (\(change.x ?? 0), \(change.y ?? 0))"
+      )
+    case "link_records":
+      return (
+        "link", "Link records",
+        "\(studio.name(for: change.source, in: proposal)) → \(studio.name(for: change.target, in: proposal))"
+      )
+    case "add_rule": return ("bolt", "New rule · \(change.kind ?? "")", change.title ?? "Rule")
     default:
       return (
         "calendar", "Event",
@@ -86,10 +100,10 @@ struct ProposalCard: View {
     let info = describe(change)
     let open = expanded.contains(change.id)
     let current = studio.records.first { $0.id == change.recordID }
-    let detail = change.action == "create_record" || change.action == "revise_record"
+    let detail = ["create_record", "revise_record", "add_rule"].contains(change.action)
     return VStack(alignment: .leading, spacing: 8) {
       HStack(alignment: .top, spacing: 10) {
-        Image(systemName: info.icon).font(.system(size: 12.5))
+        StudioIcon(info.icon, size: 12.5)
           .foregroundStyle(t.category(change.category ?? "")).frame(width: 18).padding(.top, 2)
         VStack(alignment: .leading, spacing: 3) {
           Text(info.kind).font(.system(size: 11.5, weight: .medium)).foregroundStyle(t.muted)
@@ -102,9 +116,9 @@ struct ProposalCard: View {
           if change.action == "revise_record", let current,
             current.version != change.baseVersion, change.status == "pending"
           {
-            Label(
+            StudioLabel(
               "This record changed after the proposal was made.",
-              systemImage: "exclamationmark.triangle"
+              icon: "exclamationmark.triangle"
             )
             .font(.system(size: 12)).foregroundStyle(t.warning)
           }
@@ -113,7 +127,7 @@ struct ProposalCard: View {
               if open { expanded.remove(change.id) } else { expanded.insert(change.id) }
             } label: {
               HStack(spacing: 4) {
-                Image(systemName: open ? "chevron.down" : "chevron.right")
+                StudioIcon(open ? "chevron.down" : "chevron.right")
                   .font(.system(size: 8, weight: .bold))
                 Text(
                   open
@@ -141,7 +155,7 @@ struct ProposalCard: View {
               Button {
                 studio.openRecord(record)
               } label: {
-                Label(record.title, systemImage: recordIcon(record))
+                StudioLabel(record.title, icon: recordIcon(record))
                   .font(.system(size: 11.5, weight: .medium)).lineLimit(1)
                   .foregroundStyle(t.secondary).padding(.horizontal, 7).frame(height: 22)
                   .background(t.background.opacity(0.6), in: Capsule())
@@ -159,8 +173,30 @@ struct ProposalCard: View {
     switch change.status {
     case "accepted":
       HStack(spacing: 8) {
-        Label("Saved as draft", systemImage: "checkmark").font(.system(size: 12, weight: .medium))
+        StudioLabel("Saved", icon: "checkmark").font(.system(size: 12, weight: .medium))
           .foregroundStyle(t.positive).fixedSize()
+        if ["create_board", "place_record"].contains(change.action), let id = change.resultID {
+          Button("Open canvas") {
+            studio.canvasBoardID = id
+            studio.navigate(.canvas)
+          }.buttonStyle(QuietButton(t: t, role: .ghost))
+        }
+        if change.action == "place_marker", let id = change.resultID {
+          Button("Open atlas") {
+            studio.mapBoardID = id
+            studio.navigate(.atlas)
+          }.buttonStyle(QuietButton(t: t, role: .ghost))
+        }
+        let ruleSource =
+          proposal.changes.first { "change:\($0.id)" == change.source }?.resultID ?? change.source
+        if change.action == "add_rule",
+          let record = studio.records.first(where: { $0.id == ruleSource })
+        {
+          Button("Open rules") {
+            studio.inspector = true
+            studio.openRecord(record)
+          }.buttonStyle(QuietButton(t: t, role: .ghost))
+        }
         if let record = studio.records.first(where: {
           $0.id == change.resultID && change.action != "relate" && change.action != "add_event"
         }) {
@@ -178,7 +214,12 @@ struct ProposalCard: View {
         }.buttonStyle(QuietButton(t: t, role: .ghost))
         Button("Accept") { studio.resolve(proposal, change: change, accept: true) }
           .buttonStyle(QuietButton(t: t, primary: true))
-          .help("Save this change as a draft")
+          .help("Save this reviewed change")
+          .disabled(
+            change.action == "revise_record"
+              && studio.records.first(where: { $0.id == change.recordID })?.version
+                != change.baseVersion
+          )
       }
     }
   }
@@ -227,7 +268,7 @@ struct ContextDisclosure: View {
         withAnimation(.easeOut(duration: 0.14)) { open.toggle() }
       } label: {
         HStack(spacing: 5) {
-          Image(systemName: open ? "chevron.down" : "chevron.right")
+          StudioIcon(open ? "chevron.down" : "chevron.right")
             .font(.system(size: 8, weight: .bold))
           Text("Read \(sources.count) \(sources.count == 1 ? "record" : "records") from your world")
             .font(.system(size: 12, weight: .medium))
@@ -242,7 +283,7 @@ struct ContextDisclosure: View {
               studio.openRecord(source.record)
             } label: {
               HStack(spacing: 8) {
-                Image(systemName: recordIcon(source.record)).font(.system(size: 11.5))
+                StudioIcon(recordIcon(source.record), size: 11.5)
                   .foregroundStyle(t.category(source.record.category)).frame(width: 16)
                 Text(source.record.title).font(.system(size: 13, weight: .medium)).lineLimit(1)
                 Text(source.reason).font(.system(size: 12)).foregroundStyle(t.muted)

@@ -1,17 +1,15 @@
 import Foundation
 
 /// How Synthesis reaches a model. The default is a local agent harness that the creator has
-/// already signed in to with their subscription; an API key is the alternative.
+/// already signed in to with their subscription. There is no direct API transport.
 public enum ProviderKind: String, CaseIterable, Sendable, Identifiable {
   case claudeCode = "claude-code"
   case codex
-  case openAI = "openai"
   public var id: String { rawValue }
   public var title: String {
     switch self {
     case .claudeCode: return "Claude Code"
     case .codex: return "Codex"
-    case .openAI: return "OpenAI API key"
     }
   }
   /// Who receives the message and world context when this provider is used.
@@ -19,15 +17,12 @@ public enum ProviderKind: String, CaseIterable, Sendable, Identifiable {
     switch self {
     case .claudeCode: return "Anthropic, through Claude Code on this Mac"
     case .codex: return "OpenAI, through Codex on this Mac"
-    case .openAI: return "OpenAI"
     }
   }
-  public var usesSubscription: Bool { self != .openAI }
-  var executableName: String? {
+  var executableName: String {
     switch self {
     case .claudeCode: return "claude"
     case .codex: return "codex"
-    case .openAI: return nil
     }
   }
 }
@@ -55,7 +50,7 @@ public enum HarnessLocator {
     paths.map { "\($0)/\(name)" }.first { FileManager.default.isExecutableFile(atPath: $0) }
   }
   public static func find(_ kind: ProviderKind) -> String? {
-    kind.executableName.flatMap { find($0) }
+    find(kind.executableName)
   }
 }
 
@@ -64,6 +59,7 @@ public enum HarnessLocator {
 enum HarnessProcess {
   static func run(
     executable: String, arguments: [String], input: String, directory: URL,
+    timeout: Duration = .seconds(180),
     onLine: @escaping @Sendable (String) async throws -> Void
   ) async throws -> (status: Int32, errors: String) {
     let process = Process()
@@ -73,7 +69,11 @@ enum HarnessProcess {
     var environment = ProcessInfo.processInfo.environment
     environment["PATH"] = HarnessLocator.searchPaths().joined(separator: ":")
     // Never let an inherited API key silently replace the creator's subscription sign-in.
-    for key in ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "OPENAI_API_KEY", "CLAUDECODE"] {
+    for key in [
+      "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "OPENAI_API_KEY", "OPENAI_BASE_URL",
+      "ANTHROPIC_BASE_URL", "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX",
+      "CLAUDE_CODE_USE_FOUNDRY", "CLAUDECODE",
+    ] {
       environment.removeValue(forKey: key)
     }
     process.environment = environment
@@ -83,7 +83,19 @@ enum HarnessProcess {
     process.standardInput = stdin
     process.standardOutput = stdout
     process.standardError = stderr
+    let exits = AsyncStream<Int32> { continuation in
+      process.terminationHandler = { completed in
+        continuation.yield(completed.terminationStatus)
+        continuation.finish()
+      }
+    }
+    try Task.checkCancellation()
     try process.run()
+    let deadline = Task {
+      try? await Task.sleep(for: timeout)
+      if !Task.isCancelled { Self.stop(process) }
+    }
+    defer { deadline.cancel() }
     return try await withTaskCancellationHandler {
       async let errors: Data = Task.detached {
         stderr.fileHandleForReading.readDataToEndOfFile()
@@ -98,15 +110,26 @@ enum HarnessProcess {
           try await onLine(line)
         }
       } catch {
-        process.terminate()
+        Self.stop(process)
         throw error
       }
-      process.waitUntilExit()
+      var status: Int32 = -1
+      for await value in exits {
+        status = value
+        break
+      }
       try Task.checkCancellation()
       let text = String(decoding: await errors, as: UTF8.self)
-      return (process.terminationStatus, String(text.suffix(600)))
+      return (status, String(text.suffix(600)))
     } onCancel: {
-      process.terminate()
+      Self.stop(process)
+    }
+  }
+  private static func stop(_ process: Process) {
+    guard process.isRunning else { return }
+    process.terminate()
+    DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+      if process.isRunning { kill(process.processIdentifier, SIGKILL) }
     }
   }
   /// Empty scratch directory so the harness has no project files to read.
@@ -187,6 +210,11 @@ public struct ClaudeCodeTransport: ModelTransport {
     async throws -> String
   {
     guard let path = executable() else { throw SynthesisError.unavailable }
+    let signIn = await ProviderStatus.check(.claudeCode, executable: path)
+    try Task.checkCancellation()
+    guard signIn.signedIn else {
+      throw SynthesisError.invalid("Subscription sign-in required. " + signIn.detail)
+    }
     let directory = try HarnessProcess.scratch()
     defer { try? FileManager.default.removeItem(at: directory) }
     let rules = directory.appendingPathComponent("system.txt")
@@ -213,7 +241,7 @@ public struct ClaudeCodeTransport: ModelTransport {
     }
     if let failure = await state.failure { throw SynthesisError.invalid(Self.explain(failure)) }
     let answer = await state.answer
-    guard outcome.status == 0 || !answer.isEmpty else {
+    guard outcome.status == 0 else {
       throw SynthesisError.invalid(
         Self.explain(outcome.errors.isEmpty ? "exit \(outcome.status)" : outcome.errors))
     }
@@ -269,12 +297,18 @@ public struct CodexTransport: ModelTransport {
     async throws -> String
   {
     guard let path = executable() else { throw SynthesisError.unavailable }
+    let signIn = await ProviderStatus.check(.codex, executable: path)
+    try Task.checkCancellation()
+    guard signIn.signedIn else {
+      throw SynthesisError.invalid("Subscription sign-in required. " + signIn.detail)
+    }
     let directory = try HarnessProcess.scratch()
     defer { try? FileManager.default.removeItem(at: directory) }
     var arguments = [
       "exec", "--json", "--sandbox", "read-only", "--skip-git-repo-check", "--ephemeral",
       "--ignore-user-config", "--ignore-rules", "--disable", "apps", "--disable", "plugins",
-      "--disable", "browser_use", "--disable", "computer_use", "-C", directory.path,
+      "--disable", "browser_use", "--disable", "computer_use", "--disable", "shell_tool", "-C",
+      directory.path,
     ]
     let chosen = model().trimmingCharacters(in: .whitespacesAndNewlines)
     if !chosen.isEmpty { arguments += ["-m", chosen] }
@@ -324,15 +358,13 @@ public struct ProviderRouter: ModelTransport {
   public let kind: @Sendable () -> ProviderKind
   public let claude: any ModelTransport
   public let codex: any ModelTransport
-  public let openAI: any ModelTransport
   public init(
     kind: @escaping @Sendable () -> ProviderKind, claude: any ModelTransport,
-    codex: any ModelTransport, openAI: any ModelTransport
+    codex: any ModelTransport
   ) {
     self.kind = kind
     self.claude = claude
     self.codex = codex
-    self.openAI = openAI
   }
   public func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
@@ -340,7 +372,6 @@ public struct ProviderRouter: ModelTransport {
     switch kind() {
     case .claudeCode: return try await claude.generate(request, onDelta: onDelta)
     case .codex: return try await codex.generate(request, onDelta: onDelta)
-    case .openAI: return try await openAI.generate(request, onDelta: onDelta)
     }
   }
 }
@@ -351,23 +382,29 @@ public struct ProviderStatus: Equatable, Sendable {
   public var signedIn: Bool
   public var detail: String
   public static func check(_ kind: ProviderKind) async -> ProviderStatus {
-    guard let name = kind.executableName else {
-      return ProviderStatus(
-        installed: true, signedIn: ProviderKeychain.configured,
-        detail: ProviderKeychain.configured ? "API key stored in Keychain" : "No API key stored")
-    }
-    guard let path = HarnessLocator.find(name) else {
+    guard let path = HarnessLocator.find(kind) else {
       return ProviderStatus(
         installed: false, signedIn: false, detail: "\(kind.title) is not installed on this Mac")
     }
+    return await check(kind, executable: path)
+  }
+  public static func check(_ kind: ProviderKind, executable path: String) async -> ProviderStatus {
     let output = OutputBuffer()
-    let directory = (try? HarnessProcess.scratch()) ?? FileManager.default.temporaryDirectory
+    guard let directory = try? HarnessProcess.scratch() else {
+      return ProviderStatus(
+        installed: true, signedIn: false, detail: "Cannot create a private sign-in check folder.")
+    }
     defer { try? FileManager.default.removeItem(at: directory) }
     let result = try? await HarnessProcess.run(
       executable: path, arguments: kind == .claudeCode ? ["auth", "status"] : ["login", "status"],
-      input: "", directory: directory
+      input: "", directory: directory, timeout: .seconds(8)
     ) { line in await output.add(line) }
     let text = await output.text + (result?.errors ?? "")
+    guard result?.status == 0 else {
+      return ProviderStatus(
+        installed: true, signedIn: false,
+        detail: "Sign-in check failed. Open \(kind.title) and sign in with your subscription.")
+    }
     return interpret(kind, output: text, path: path)
   }
   /// Reads the harness's own status output.
@@ -377,7 +414,8 @@ public struct ProviderStatus: Equatable, Sendable {
     if kind == .claudeCode,
       let object = (try? JSONSerialization.jsonObject(with: Data(output.utf8))) as? [String: Any]
     {
-      let signedIn = object["loggedIn"] as? Bool ?? false
+      let signedIn =
+        object["loggedIn"] as? Bool == true && object["authMethod"] as? String == "claude.ai"
       let plan = (object["subscriptionType"] as? String).map { " · \($0.capitalized) plan" } ?? ""
       let method = object["authMethod"] as? String ?? ""
       return ProviderStatus(
@@ -387,7 +425,9 @@ public struct ProviderStatus: Equatable, Sendable {
           : "Not signed in — run `claude` in Terminal")
     }
     let lower = output.lowercased()
-    let signedIn = lower.contains("logged in") && !lower.contains("not logged in")
+    let signedIn =
+      lower.contains("logged in") && lower.contains("chatgpt") && !lower.contains("not logged in")
+      && !lower.contains("api key")
     return ProviderStatus(
       installed: true, signedIn: signedIn,
       detail: signedIn

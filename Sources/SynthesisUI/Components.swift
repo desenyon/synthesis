@@ -68,7 +68,7 @@ struct IconButton: View {
   @Environment(\.isEnabled) private var enabled
   var body: some View {
     Button(action: action) {
-      Image(systemName: icon).font(.system(size: size * 0.5, weight: .regular))
+      StudioIcon(icon, size: size * 0.5)
         .foregroundStyle(active ? t.accent : (hover ? t.text : t.secondary))
         .frame(width: size, height: size)
         .background(
@@ -103,7 +103,7 @@ struct IconMenu<Items: View>: View {
   @State private var hover = false
   var body: some View {
     PlainMenu(items: items) {
-      Image(systemName: icon).font(.system(size: size * 0.5))
+      StudioIcon(icon, size: size * 0.5)
         .foregroundStyle(hover ? t.text : t.secondary).frame(width: size, height: size)
         .background(hover ? t.hover : .clear, in: RoundedRectangle(cornerRadius: 7))
         .contentShape(RoundedRectangle(cornerRadius: 7))
@@ -157,7 +157,7 @@ struct CategoryTile: View {
   var size: CGFloat = 32
   var body: some View {
     let tint = t.category(record.category)
-    Image(systemName: recordIcon(record)).font(.system(size: size * 0.44))
+    StudioIcon(recordIcon(record), size: size * 0.44)
       .foregroundStyle(tint).frame(width: size, height: size)
       .background(tint.opacity(t.dark ? 0.14 : 0.1), in: RoundedRectangle(cornerRadius: 8))
       .accessibilityHidden(true)
@@ -204,13 +204,13 @@ struct SearchField: View {
   let t: Theme
   var body: some View {
     HStack(spacing: 7) {
-      Image(systemName: "magnifyingglass").font(.system(size: 12)).foregroundStyle(t.muted)
+      StudioIcon("magnifyingglass", size: 12).foregroundStyle(t.muted)
       TextField(placeholder, text: $text).textFieldStyle(.plain).font(.system(size: 13))
       if !text.isEmpty {
         Button {
           text = ""
         } label: {
-          Image(systemName: "xmark.circle.fill").font(.system(size: 12)).foregroundStyle(t.muted)
+          StudioIcon("xmark.circle.fill", size: 12).foregroundStyle(t.muted)
         }.buttonStyle(.plain).help("Clear").accessibilityLabel("Clear search")
       }
     }.padding(.horizontal, 9).frame(height: Metric.control)
@@ -254,7 +254,7 @@ struct EmptyState<Actions: View>: View {
   @ViewBuilder var actions: () -> Actions
   var body: some View {
     VStack(spacing: 14) {
-      Image(systemName: icon).font(.system(size: 26, weight: .light)).foregroundStyle(t.accent)
+      StudioIcon(icon, size: 26).foregroundStyle(t.accent)
         .frame(width: 56, height: 56).background(t.accentSoft.opacity(0.6), in: Circle())
         .accessibilityHidden(true)
       VStack(spacing: 6) {
@@ -346,7 +346,7 @@ struct BarTitle: View {
   @Environment(\.barCompact) private var compact
   var body: some View {
     HStack(spacing: 9) {
-      Image(systemName: icon).font(.system(size: 14)).foregroundStyle(t.accent)
+      StudioIcon(icon, size: 14).foregroundStyle(t.accent)
         .accessibilityHidden(true)
       Text(title).font(.system(size: 15, weight: .semibold)).lineLimit(1).fixedSize()
       if let detail, !detail.isEmpty, !compact {
@@ -368,9 +368,9 @@ struct BarAction: View {
   var body: some View {
     Button(action: action) {
       if compact {
-        Image(systemName: icon).font(.system(size: 13, weight: .medium)).frame(width: 14)
+        StudioIcon(icon, size: 13).frame(width: 14)
       } else {
-        Label(title, systemImage: icon)
+        StudioLabel(title, icon: icon)
       }
     }.buttonStyle(QuietButton(t: t, primary: primary)).help(help ?? title)
       .accessibilityLabel(title)
@@ -453,26 +453,6 @@ struct SheetScaffold<Content: View, Footer: View>: View {
 
 // MARK: Brand and window helpers
 
-struct SynthesisGlyph: Shape {
-  func path(in r: CGRect) -> Path {
-    var p = Path()
-    let w = r.width
-    let h = r.height
-    p.move(to: CGPoint(x: w * 0.1, y: h * 0.35))
-    p.addLine(to: CGPoint(x: w * 0.5, y: h * 0.1))
-    p.addLine(to: CGPoint(x: w * 0.9, y: h * 0.35))
-    p.addLine(to: CGPoint(x: w * 0.5, y: h * 0.6))
-    p.closeSubpath()
-    p.move(to: CGPoint(x: w * 0.1, y: h * 0.65))
-    p.addLine(to: CGPoint(x: w * 0.5, y: h * 0.9))
-    p.addLine(to: CGPoint(x: w * 0.9, y: h * 0.65))
-    p.move(to: CGPoint(x: w * 0.1, y: h * 0.5))
-    p.addLine(to: CGPoint(x: w * 0.5, y: h * 0.75))
-    p.addLine(to: CGPoint(x: w * 0.9, y: h * 0.5))
-    return p
-  }
-}
-
 /// Lets an empty region of the integrated header move the window and zoom on double-click.
 struct WindowDragArea: NSViewRepresentable {
   func makeNSView(context: Context) -> NSView { DragHandle() }
@@ -488,23 +468,26 @@ struct WindowDragArea: NSViewRepresentable {
   }
 }
 
+struct AppearanceButton: View {
+  @ObservedObject var studio: Studio
+  var body: some View {
+    IconButton(
+      icon: studio.dark ? "sun" : "moon",
+      label: studio.dark ? "Switch to light appearance" : "Switch to dark appearance", t: studio.t,
+      size: 32
+    ) {
+      withAnimation(.easeOut(duration: 0.18)) { studio.toggleTheme() }
+    }
+  }
+}
 struct WorldEmblem: View {
   let t: Theme
   var radius: CGFloat = 8
   var body: some View {
-    ZStack {
-      RoundedRectangle(cornerRadius: radius).fill(t.accentSoft)
-      Canvas { context, size in
-        for i in 0..<4 {
-          var path = Path()
-          path.move(to: CGPoint(x: -4, y: size.height * 0.4 + Double(i) * size.height * 0.14))
-          path.addQuadCurve(
-            to: CGPoint(x: size.width + 4, y: size.height * 0.62 + Double(i) * size.height * 0.1),
-            control: CGPoint(x: size.width * 0.4, y: -size.height * 0.3 + Double(i) * 6))
-          context.stroke(path, with: .color(t.accent.opacity(0.5)), lineWidth: 1)
-        }
-      }.clipShape(RoundedRectangle(cornerRadius: radius))
-    }.accessibilityHidden(true)
+    StudioIcon("globe", size: 19).foregroundStyle(t.accent)
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .background(t.accentSoft, in: RoundedRectangle(cornerRadius: radius)).accessibilityHidden(
+        true)
   }
 }
 

@@ -22,7 +22,7 @@ struct CommandPalette: View {
       studio.t.scrim.ignoresSafeArea().onTapGesture { close() }
       VStack(spacing: 0) {
         HStack(spacing: 10) {
-          Image(systemName: "magnifyingglass").font(.system(size: 15))
+          StudioIcon("magnifyingglass", size: 15)
             .foregroundStyle(studio.t.muted)
           TextField("Search your world or run a command", text: $query)
             .textFieldStyle(.plain).font(.system(size: 16)).focused($focused)
@@ -95,7 +95,7 @@ struct CommandPalette: View {
   }
   private func row(_ item: Item, selected: Bool) -> some View {
     HStack(spacing: 11) {
-      Image(systemName: item.icon).font(.system(size: 13.5))
+      StudioIcon(item.icon, size: 13.5)
         .foregroundStyle(item.tint ?? studio.t.secondary).frame(width: 22)
       Text(item.title).font(.system(size: 14)).lineLimit(1)
       Spacer(minLength: 12)

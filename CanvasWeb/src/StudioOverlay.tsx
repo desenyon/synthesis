@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { MousePointer2, Hand, Plus, ContactRound, StickyNote, Image as ImageIcon, GitBranch, Frame, Pencil, Square, Minus, Scan, Undo2, Redo2, ArrowUpRight, AtSign, X, SlidersHorizontal, Library, FilePlus2, FileText, type LucideIcon } from 'lucide-react';
+import { CaptureUpdateAction, newElementWith } from '@excalidraw/excalidraw';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { isCard, type RecordInfo, type RelationInfo } from './cards';
 import { cardFrame, visibleFrame } from './sceneRules';
-import type { Theme } from './palette';
+import { palette, type Theme } from './palette';
 type Props = {
     api: any;
     theme: Theme;
@@ -10,20 +12,14 @@ type Props = {
     relations: () => RelationInfo[];
     post: (message: Record<string, unknown>) => void;
 };
-const icons: Record<string, ReactNode> = {
-    select: <path d="m5 3 14 9-7 1-3 7Z"/>, hand: <><path d="M8 12V6a2 2 0 0 1 4 0v5-7a2 2 0 0 1 4 0v8-5a2 2 0 0 1 4 0v9c0 5-9 7-12 3l-4-5a2 2 0 0 1 3-3l1 1"/></>,
-    plus: <path d="M12 5v14M5 12h14"/>, entity: <><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M9 8h6M9 12h6M9 16h3"/></>,
-    note: <><path d="M14 3H5v18h14V8Z M14 3v6h6M9 13h6M9 17h4"/></>, image: <><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1"/><path d="m4 17 6-6 4 4 3-3 4 5"/></>,
-    connect: <><circle cx="5" cy="17" r="2"/><circle cx="19" cy="7" r="2"/><path d="M7 17c9 0 1-10 10-10"/></>, frame: <><rect x="5" y="5" width="14" height="14" rx="1"/><path d="M5 2v20M19 2v20M2 5h20M2 19h20"/></>,
-    draw: <><path d="m4 16 12-12 4 4-12 12-5 1Z M14 6l4 4"/></>, shape: <rect x="4" y="4" width="16" height="16" rx="3"/>,
-    minus: <path d="M5 12h14"/>, fit: <><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/><rect x="8" y="8" width="8" height="8" rx="1"/></>,
-    undo: <><path d="m8 4-5 5 5 5M4 9h10a6 6 0 1 1 0 12"/></>, redo: <><path d="m16 4 5 5-5 5M20 9H10a6 6 0 1 0 0 12"/></>,
-    open: <><path d="M14 3h7v7M21 3 10 14M10 4H4v16h16v-6"/></>, reference: <><circle cx="12" cy="12" r="4"/><path d="M16 8v7c6 2 7-12-3-12a9 9 0 1 0 4 17"/></>,
-    close: <path d="m6 6 12 12M6 18 18 6"/>, settings: <><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></>, library: <><rect x="4" y="3" width="5" height="18" rx="1"/><path d="M12 3h4l4 17-4 1Z"/></>,
-};
-function Icon({ name }: {
-    name: string;
-}) { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icons[name] ?? icons.entity}</svg>; }
+const icons: Record<string, LucideIcon> = { select: MousePointer2, hand: Hand, plus: Plus, entity: ContactRound,
+    note: StickyNote, image: ImageIcon, connect: GitBranch, frame: Frame, draw: Pencil, shape: Square,
+    minus: Minus, fit: Scan, undo: Undo2, redo: Redo2, open: ArrowUpRight, reference: AtSign,
+    close: X, settings: SlidersHorizontal, library: Library, capture: FilePlus2 };
+function Icon({ name }: { name: string }) {
+    const Glyph = icons[name] ?? FileText;
+    return <Glyph size={17} strokeWidth={1.6} aria-hidden="true"/>;
+}
 function Tool({ label, icon, active = false, disabled = false, action }: {
     label: string;
     icon: string;
@@ -52,7 +48,7 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
         setConnecting(null);
         setStyles(false);
     } }; window.addEventListener('keydown', cancel); return () => window.removeEventListener('keydown', cancel); }, []);
-    useEffect(() => { document.documentElement.classList.toggle('show-canvas-style', styles); return () => document.documentElement.classList.remove('show-canvas-style'); }, [styles]);
+
     if (!view)
         return null;
     const { state, elements, files } = view;
@@ -74,6 +70,15 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
     const chooseTool = (type: string) => { setConnecting(null); api.setActiveTool({ type }); };
     const command = (name: string) => (window as any).synthesis?.command(name);
     const active = state.activeTool?.type;
+    const selectedDrawing = elements.filter((e:any) => state.selectedElementIds[e.id] && !e.customData?.synthesis);
+    const note = selectedDrawing.length === 1 && selectedDrawing[0].type === 'text' ? selectedDrawing[0] : null;
+    const selectedRelation = elements.find((e:any) => state.selectedElementIds[e.id] && e.customData?.synthesis === 'relation');
+    const storedRelation = relations().find(r => r.id === selectedRelation?.customData.relationID);
+    const style = (property: string, value: unknown) => {
+      const key = 'currentItem' + property[0].toUpperCase() + property.slice(1);
+      api.updateScene({ elements: elements.map((e:any) => selectedDrawing.includes(e) ? newElementWith(e, {[property]:value}) : e),
+        appState:{[key]:value}, captureUpdate:CaptureUpdateAction.IMMEDIATELY });
+    };
     const connect = (id: string) => {
         if (!connecting) {
             setConnecting(id);
@@ -113,7 +118,7 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
      <Tool label="Add entity" icon="entity" action={() => post({ type: 'request', action: 'entity' })}/>
      <Tool label="Add from library" icon="library" action={() => post({ type: 'request', action: 'library' })}/>
      <span className="tool-separator"/>
-     <Tool label="Write a note · T" icon="note" active={active === 'text'} action={() => chooseTool('text')}/>
+     <Tool label="Capture an idea in Library" icon="note" action={() => post({type:'request',action:'note'})}/>
      <Tool label="Add image" icon="image" action={() => post({ type: 'request', action: 'image' })}/>
    </div>
    <div className="studio-drawing-bar glass" role="toolbar" aria-label="Canvas tools">
@@ -122,10 +127,10 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
      <span className="tool-separator"/>
      <Tool label="Connect · A" icon="connect" active={active === 'arrow'} action={() => chooseTool('arrow')}/>
      <Tool label="Shape · R" icon="shape" active={active === 'rectangle'} action={() => chooseTool('rectangle')}/>
-     <Tool label="Draw · P" icon="draw" active={active === 'freedraw'} action={() => chooseTool('freedraw')}/>
+     <Tool label="Board text · T" icon="note" active={active === 'text'} action={() => chooseTool('text')}/><Tool label="Draw · P" icon="draw" active={active === 'freedraw'} action={() => chooseTool('freedraw')}/>
      <Tool label="Group in a frame · F" icon="frame" active={active === 'frame'} action={() => chooseTool('frame')}/>
      <span className="tool-separator"/>
-     <Tool label="Drawing style" icon="settings" active={styles} disabled={!Object.keys(state.selectedElementIds).length && ["selection", "hand"].includes(active)} action={() => { setStyles(v => !v); api.updateScene({appState:{openMenu:styles?null:"shape"}}); }}/>
+     <Tool label="Drawing style" icon="settings" active={styles} disabled={!Object.keys(state.selectedElementIds).length && ["selection", "hand"].includes(active)} action={() => setStyles(v => !v)}/>
    </div>
    <div className="studio-viewport glass" role="toolbar" aria-label="Canvas viewport">
      <Tool label="Undo · ⌘Z" icon="undo" action={() => command('undo')}/><Tool label="Redo · ⇧⌘Z" icon="redo" action={() => command('redo')}/>
@@ -133,8 +138,18 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
      <button className="zoom-label" title="Reset zoom to 100%" onClick={() => command('resetZoom')}>{Math.round(state.zoom.value * 100)}%</button>
      <Tool label="Zoom in" icon="plus" action={() => command('zoomIn')}/><Tool label="Fit to content" icon="fit" action={() => command('fit')}/>
    </div>
+   {styles && <section className="studio-style glass" aria-label="Drawing appearance"><header>Drawing appearance<Tool label="Close appearance" icon="close" action={() => setStyles(false)}/></header>
+     {chosen.length ? <p>Record cards follow your world. Open the record to edit its content.</p> : <>
+       <span>Stroke</span><div className="style-options">{[palette(theme).text,palette(theme).accent,palette(theme).positive,palette(theme).categories.characters].map((color,i) => <button key={color} title={['Neutral','Blue','Green','Warm'][i]} aria-label={['Neutral stroke','Blue stroke','Green stroke','Warm stroke'][i]} style={{background:theme==='dark'?['#eff0f2','#aec7ef','#8fc3a6','#d7b899'][i]:color}} onClick={()=>style('strokeColor',color)}/>)}</div>
+       <span>Weight</span><div className="style-options">{[1,2,4].map(w=><button key={w} onClick={()=>style('strokeWidth',w)}>{w}px</button>)}</div>
+       <span>Line</span><div className="style-options">{['solid','dashed','dotted'].map(v=><button key={v} onClick={()=>style('strokeStyle',v)}>{v}</button>)}</div>
+       <span>Fill</span><div className="style-options"><button onClick={()=>style('backgroundColor','transparent')}>None</button><button onClick={()=>style('backgroundColor',palette(theme).surface)}>Surface</button></div>
+     </>}
+   </section>}
+   {note && <div className="studio-selection glass"><span>Board text · not in Library</span><button className="text-action" onClick={()=>post({type:'captureText',elementID:note.id,body:note.originalText ?? note.text})}>Save as idea <Icon name="capture"/></button></div>}
+   {storedRelation && <div className="studio-selection glass"><span>{recordMap.get(storedRelation.sourceID)?.title} → {recordMap.get(storedRelation.targetID)?.title}</span><button className="text-action" onClick={()=>post({type:'inspectRelation',relationID:storedRelation.id})}>{storedRelation.label}<Icon name="open"/></button></div>}
    {connecting && <div className="studio-connect-hint glass" role="status"><span className="signal-dot"/>Choose another entity’s port to describe the relationship<Tool icon="close" label="Cancel connection · Escape" action={() => setConnecting(null)}/></div>}
    {chosen.length > 0 && !connecting && <div className="studio-selection glass"><span>{chosen.length === 1 ? recordMap.get(chosen[0].customData.recordID)?.title : `${chosen.length} records`}</span>{assisted && <Tool label="Reference in conversation" icon="reference" action={() => post({ type: 'request', action: 'reference' })}/>}{chosen.length === 1 && <Tool label="Attach artwork" icon="image" action={() => post({ type: 'request', action: 'artwork' })}/>}</div>}
-   {cards.length === 0 && elements.length === 0 && <div className="studio-empty"><span className="empty-orbit">◇</span><h1>Room for a universe.</h1><p>Place your first record. Follow the connections.</p><button onClick={() => post({ type: 'request', action: 'entity' })}>Create an entity <span>↗</span></button></div>}
+   {cards.length === 0 && elements.length === 0 && <div className="studio-empty"><span className="empty-orbit"><Frame size={34} strokeWidth={1}/></span><h1>Room for a universe.</h1><p>Place your first record. Follow the connections.</p><button onClick={() => post({ type: 'request', action: 'entity' })}>Create an entity <ArrowUpRight size={16}/></button></div>}
  </div>;
 }

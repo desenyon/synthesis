@@ -12,7 +12,7 @@ extension Studio {
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
     "empty-graph", "empty-timeline", "empty-atlas", "sheet-settings", "sheet-record",
-    "sheet-canon", "sheet-history", "sheet-relation",
+    "sheet-canon", "sheet-history", "sheet-relation", "sheet-rule",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -170,9 +170,10 @@ extension Studio {
     case "review", "review-canon", "review-checks": destination = .review
     case "timeline", "empty-timeline": destination = .timeline
     case "atlas", "empty-atlas": destination = .atlas
-    case "editor", "light-editor":
+    case "editor", "light-editor", "sheet-rule":
       destination = .library
       selectedRecord = records.first { $0.title == "Mira Vale" }
+      if state == "sheet-rule" { inspector = true }
     case "palette":
       destination = .chat
       palette = true

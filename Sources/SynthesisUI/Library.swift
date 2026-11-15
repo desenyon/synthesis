@@ -92,7 +92,7 @@ struct LibraryScreen: View {
               order = item
             } label: {
               if order == item {
-                Label(item.rawValue, systemImage: "checkmark")
+                StudioLabel(item.rawValue, icon: "checkmark")
               } else {
                 Text(item.rawValue)
               }
@@ -100,7 +100,7 @@ struct LibraryScreen: View {
           }
         } label: {
           HStack(spacing: 5) {
-            Image(systemName: "arrow.up.arrow.down").font(.system(size: 10.5))
+            StudioIcon("arrow.up.arrow.down", size: 10.5)
             Text(order.rawValue).font(.system(size: 12.5))
           }.foregroundStyle(studio.t.secondary).padding(.horizontal, 8).frame(height: 26)
             .hoverFill(studio.t)
@@ -112,10 +112,6 @@ struct LibraryScreen: View {
       } else {
         ScrollView {
           LazyVStack(spacing: 1) {
-            if filter == .all, studio.libraryCategory == nil, query.isEmpty {
-              WorldComposition(studio: studio).padding(.horizontal, 8).padding(.top, 6)
-                .padding(.bottom, 12)
-            }
             ForEach(rows) { record in
               RecordRow(studio: studio, record: record, archived: filter == .archived) {
                 refreshArchive()

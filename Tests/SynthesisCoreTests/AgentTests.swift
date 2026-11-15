@@ -127,6 +127,27 @@ struct ScriptedTransport: ModelTransport {
       confirmation: proposal.id)
     #expect(try s.records(worldID: w.id).count == 2)
   }
+  @Test func staleProposalCannotOverwriteNewWriting() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Revision boundary")
+    let record = try store.createRecord(worldID: world.id, title: "Law", body: "Original")
+    let proposal = try #require(
+      try store.stageProposal(
+        worldID: world.id, conversationID: nil, messageID: nil,
+        payload: [
+          "changes": [["action": "revise_record", "id": record.id, "body": "AI replacement"]]
+        ]))
+    _ = try store.saveRecord(
+      worldID: world.id, id: record.id, version: record.version,
+      title: record.title, body: "New writing", rtf: nil)
+    #expect(throws: SynthesisError.self) {
+      try store.resolveChange(
+        worldID: world.id, proposalID: proposal.id,
+        changeID: proposal.changes[0].id, accept: true, confirmation: proposal.id)
+    }
+    #expect(try store.record(worldID: world.id, id: record.id).body == "New writing")
+    #expect(try store.proposal(worldID: world.id, id: proposal.id).pending == 1)
+  }
   @Test func streamingTextHidesAnUnfinishedChangeSet() {
     #expect(ProposalParser.visible("Idea.\n\n```synthesis-proposal\n{\"sum") == "Idea.")
     #expect(ProposalParser.visible("Plain answer") == "Plain answer")

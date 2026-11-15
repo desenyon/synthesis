@@ -14,6 +14,7 @@ struct CuratedCanvas: View {
   @ObservedObject private var session: CanvasSession
   @State private var panel: Panel?
   @State private var formTitle = ""
+  @State private var formKind = "entity"
   @State private var formBody = ""
   @State private var formCategory = "Characters"
   @State private var boardName = ""
@@ -69,7 +70,12 @@ struct CuratedCanvas: View {
       case "library":
         pickerQuery = ""
         panel = .library
-      case "entity": prepareCreate()
+      case "entity":
+        formKind = "entity"
+        prepareCreate()
+      case "note":
+        formKind = "capture"
+        prepareCreate()
       case "image": session.addImage()
       case "illustration": panel = .artwork
       case "export": session.exportImage()
@@ -109,6 +115,41 @@ struct CuratedCanvas: View {
         cancel: { session.connection = nil }
       ).onAppear { edgeLabel = connection.label }
     }
+    .studioSheet(item: $session.editingRelation) { relation in
+      RelationEditor(
+        t: studio.t, title: "World relationship",
+        source: studio.records.first { $0.id == relation.sourceID }?.title ?? "Unavailable",
+        target: studio.records.first { $0.id == relation.targetID }?.title ?? "Unavailable",
+        label: $edgeLabel,
+        note: "This relationship is shared by Graph, Canvas and the assistant's world context.",
+        suggestions: relationSuggestions, removable: true,
+        save: {
+          studio.perform {
+            try studio.store.updateRelation(
+              worldID: studio.worldID, id: relation.id, label: edgeLabel)
+            try studio.reload()
+            session.sync()
+            session.editingRelation = nil
+          }
+        },
+        remove: {
+          studio.perform {
+            let world = studio.worldID
+            try studio.store.archiveRelation(worldID: world, id: relation.id)
+            try studio.reload()
+            session.sync()
+            session.editingRelation = nil
+            studio.show("Relationship archived", icon: "archivebox", actionTitle: "Undo") {
+              studio.perform {
+                try studio.store.restoreRelation(worldID: world, id: relation.id)
+                try studio.reload()
+                session.sync()
+              }
+            }
+          }
+        }, cancel: { session.editingRelation = nil }
+      ).onAppear { edgeLabel = relation.label }
+    }
   }
   private var relationSuggestions: [String] {
     Array(Set(((try? studio.store.relations(worldID: studio.worldID)) ?? []).map(\.label)))
@@ -119,19 +160,19 @@ struct CuratedCanvas: View {
 
   private var bar: some View {
     WorkspaceBar(studio: studio) {
-      Image(systemName: Destination.canvas.icon).font(.system(size: 14))
+      StudioIcon(Destination.canvas.icon, size: 14)
         .foregroundStyle(studio.t.accent).accessibilityHidden(true)
       PlainMenu(flexible: true) {
         boardMenu
       } label: {
         HStack(spacing: 5) {
           Text(session.name).font(.system(size: 15, weight: .semibold)).lineLimit(1)
-          Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold))
+          StudioIcon("chevron.down", size: 9)
             .foregroundStyle(studio.t.muted)
         }.padding(.horizontal, 6).frame(height: 28).hoverFill(studio.t)
       }.padding(.leading, -4).help("Switch, rename or archive boards")
       if let failure = session.failure {
-        Label("Not saved", systemImage: "exclamationmark.triangle")
+        StudioLabel("Not saved", icon: "exclamationmark.triangle")
           .font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.warning).fixedSize()
           .help(failure)
       } else {
@@ -169,7 +210,7 @@ struct CuratedCanvas: View {
           }
         }
       } label: {
-        Label("Add", systemImage: "plus").font(.system(size: 13, weight: .medium)).fixedSize()
+        StudioLabel("Add", icon: "plus").font(.system(size: 13, weight: .medium)).fixedSize()
           .padding(.horizontal, 10).frame(height: Metric.control)
           .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
           .overlay(
@@ -195,7 +236,7 @@ struct CuratedCanvas: View {
         session.switchBoard(item.id)
       } label: {
         if item.id == session.boardID {
-          Label(item.name, systemImage: "checkmark")
+          StudioLabel(item.name, icon: "checkmark")
         } else {
           Text(item.name)
         }
@@ -332,16 +373,19 @@ struct CuratedCanvas: View {
   }
   private var createForm: some View {
     SheetScaffold(
-      title: "New entity", subtitle: "Saved as a draft in your library and placed on this board.",
+      title: formKind == "capture" ? "Capture an idea" : "New entity",
+      subtitle: "Saved in your library and placed on this board.",
       t: studio.t, close: closePanel
     ) {
       FormField(label: "Name", placeholder: "Name", text: $formTitle, t: studio.t)
-      VStack(alignment: .leading, spacing: 6) {
-        Text("Type").font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
-        FlowLayout(spacing: 6) {
-          ForEach(Vocabulary.categories, id: \.self) { type in
-            FilterChip(title: type, selected: formCategory == type, t: studio.t) {
-              formCategory = type
+      if formKind == "entity" {
+        VStack(alignment: .leading, spacing: 6) {
+          Text("Type").font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+          FlowLayout(spacing: 6) {
+            ForEach(Vocabulary.categories, id: \.self) { type in
+              FilterChip(title: type, selected: formCategory == type, t: studio.t) {
+                formCategory = type
+              }
             }
           }
         }
@@ -360,15 +404,17 @@ struct CuratedCanvas: View {
       Button("Create draft") {
         studio.perform {
           let record = try studio.store.createRecord(
-            worldID: studio.worldID, title: formTitle, body: formBody, kind: "entity",
-            category: formCategory)
+            worldID: studio.worldID, title: formTitle, body: formBody, kind: formKind,
+            category: formKind == "entity" ? formCategory : "")
           try studio.reload()
           session.sync()
           session.add([record])
           panel = nil
         }
       }.buttonStyle(QuietButton(t: studio.t, primary: true)).keyboardShortcut(.defaultAction)
-        .disabled(formTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        .disabled(
+          formTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && formBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
     }
   }
   private var renameForm: some View {
@@ -413,7 +459,7 @@ struct CuratedCanvas: View {
                   .font(.system(size: 11.5)).foregroundStyle(studio.t.muted)
                 }
                 Spacer()
-                Image(systemName: "plus").font(.system(size: 12, weight: .medium))
+                StudioIcon("plus", size: 12)
                   .foregroundStyle(studio.t.secondary)
               }.padding(.horizontal, 8).frame(height: 44).hoverFill(studio.t)
             }.buttonStyle(.plain).help("Add to board, or select it if it is already there")
@@ -449,7 +495,7 @@ struct RelationEditor: View {
     SheetScaffold(title: title, t: t, close: cancel) {
       HStack(spacing: 8) {
         endpoint(source)
-        Image(systemName: "arrow.right").font(.system(size: 11, weight: .semibold))
+        StudioIcon("arrow.right", size: 11)
           .foregroundStyle(t.muted)
         endpoint(target)
       }

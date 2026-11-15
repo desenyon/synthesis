@@ -1,38 +1,29 @@
-# Current state — 2026-11-13
+# Current state — 2026-11-15
 
-Active checkout: **`/Users/desenyon/Developer/synthesis` on `main`**. The reviewed Claude-based implementation is now the primary app. The owner authorized consolidation, removal of other worktrees, a GitHub push/default-branch update and a foreground launch for review. No release or provider call. See [MAIN_CONSOLIDATION](verification/MAIN_CONSOLIDATION.md).
+Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`. Native SwiftUI/AppKit + SQLite; Canvas alone uses the bundled offline Excalidraw engine. Development only, no release. The owner’s untracked `docs/DESIGN_AGENT_BRIEF.md` is preserved and is not part of the agent commit.
 
-## Implemented in this audit
+## This implementation
 
-- Custom Synthesis canvas presentation over the real, offline Excalidraw engine: graphite record cards, semantic ports, artwork, selection, contextual actions, edge tools and zoom/undo controls. Stock default desktop and mobile chrome is hidden. Real records and relationships drive the view; no fake lore is introduced.
-- Board-generation guards on both bridge sides; flush before switching; save timeouts remain visible and abort switching or shutdown. Cancelled timeout tasks cannot fail a later save. Files restore after scene reset. Relationship rename/archive and nested groups synchronize correctly. Rotated record hit testing follows the visible card.
-- Two optional GPT-generated illustrations, selectable in Canvas and Atlas. Only newly created demo worlds use them automatically. Existing worlds/images are untouched. Map replacement offers Undo. TIFF/HEIC imports become real browser-readable PNG data.
-- Searchable, uncapped record pickers for editor links, Atlas and Timeline. Timeline actions stay discoverable. Shared dark tokens and composer surfaces match the supplied reference direction; light remains available.
-- Background verification builds an isolated app bundle/database, blocks model requests, checks that it never becomes active/key, and rejects missing/existing database paths before window construction. The owner’s running bundle is untouched.
+- Direct API transport, Keychain configuration and API settings removed. Claude Code / Codex subscriptions only. Authentication is checked before generation; API-only login is rejected. Manual cancels and blocks model work in the native core. Harness exits are awaited asynchronously, with bounded timeouts and termination escalation.
+- Fixed stale proposal revisions overwriting newer writing. Ambiguous titles require stable IDs; archived source records cannot be changed through a pending proposal.
+- Added bounded structured agent context for actual relationship tuples, events, board membership and positions, alongside source-backed lore retrieval. Reviewed operations now cover canvas creation, card placement/movement, existing-map markers, record links and draft rules. Existing canon approval remains separate.
+- Live Canvas flushes before reviewed writes and reloads afterwards. A background integration check proves a reviewed placement appears in the actual Excalidraw scene. Existing images, unrelated shapes, outer groups and hidden relationships survive.
+- Canvas has explicit Library capture, save-board-text-as-idea, a shared relationship inspector, and a Synthesis-owned drawing-style panel. Rule drafts can be read, added and edited in entity details. Graph and Atlas refresh on domain changes; large Graph layouts no longer run on the UI thread.
+- New grouped sidebar, world lenses and conversation history; shared neutral charcoal/light tokens; upstream Lucide throughout authored native/web controls. Removed SF Symbol rendering and hand-drawn UI icon components. Compact editor details no longer silently disappear.
+- Retired unused `legacy/web`, standalone `docs/design` previews, old API/placeholder and pixel-art components. Git preserves source history; ignored legacy files are archived outside the repository. No user lore or database was removed.
 
-## Consolidation verification
+## Verification
 
-- `./scripts/check.sh` passes on the consolidated checkout: full strict lint, 51 tests in six suites and optimized native build.
-- `cd CanvasWeb && npm run typecheck && npm test && npm run build`: passes, six tests.
-- Previously uncommitted rules files are checkpointed in Git; the eight formatting errors are resolved. Dedicated Rules Lab UI remains incomplete.
-- Main-checkout background capture: 17 engine/persistence/shutdown checks and startup-isolation checks passed; canvas screenshot inspected. One worktree remains.
-- Primary development bundle: `dist/Synthesis.app`. Existing local data is retained, with a private SQLite backup before review launch.
-- Pushed to GitHub `main`, now the default branch. Launched the primary bundle for owner review and visually confirmed the foreground Canvas with existing records, custom cards, connections and tools. No model request; deeper foreground interaction testing remains open.
+- `./scripts/check.sh`: strict Swift formatting, **61 native tests / 7 suites**, optimized native development build passed. One intermediate overlapping build was invalidated by a source edit; the subsequent isolated full run passed.
+- `cd CanvasWeb && npm run typecheck && npm test && npm run build`: TypeScript, **7 Node tests**, bundled production assets passed. Initial invocation from the repository root failed because the package is in CanvasWeb; the correct invocation passed.
+- `python3 scripts/check-capture-isolation.py dist/Synthesis.app/Contents/MacOS/Synthesis`: passed absent/existing database refusal.
+- Background `verify-ui.sh`: **18 engine/native integration checks** passed, including reviewed placement -> live engine, drag/undo/redo, relationship updates, image persistence, Manual controls and save-failure shutdown protection.
+- 24 captures at 1440×900 and 1024×768 in `test-results/overhaul-final` cover Conversation home/thread, Canvas/companion/Manual/collapsed/light, Graph, Editor/light, settings and rule-sheet state. These are authored fixtures, not model output. Sheets render inline; native modal interaction is not verified. An initial rule-sheet capture at compact width exposed the missing inspector and led to a correction.
+- Ten corrected-state captures and two final arrow captures were then inspected; compact details/rule-sheet layout and direction markers are corrected. The canonical app was reopened with existing data and live Canvas records were verified through accessibility. The general desktop screenshot omits remote WebKit pixels; use the engine-composited background evidence for rendering.
+- See [INTEGRATION_OVERHAUL](INTEGRATION_OVERHAUL.md) for final visual follow-up and remaining acceptance limits. Automated testing stays in the background; no foreground pointer self-test or live model request was run.
 
-## Earlier reference-audit checks
+## Not complete
 
-- `swift format lint --strict --recursive Sources/SynthesisUI Sources/SynthesisApp Tests/SynthesisUITests`: passed.
-- `./scripts/test.sh`: **51 tests in 6 suites passed**, including existing persistence, world isolation, cancellation and canon approval tests. Five new UI-boundary tests cover images, stale sessions and uncapped record selection. The suite includes the owner’s preserved unfinished rules tests.
-- `cd CanvasWeb && npm run typecheck && npm test && npm run build`: passed; **6 Node tests**.
-- `SYNTHESIS_CANVAS_AUDIT=1 ./scripts/verify-ui.sh …`: **17 WebKit/native persistence checks passed**. Internal pointer events prove engine drag/undo/redo, not physical mouse/trackpad behavior.
-- Broad background sweep: **78 captures** at 1440×900 and 1024×768 in `test-results/refinement-final`; all 20 contact pages inspected. Focused captures corrected overlay stacking, duplicate text, body clipping and stock mobile chrome. Final 20 affected-state/sheet-content captures (five inspected contact pages): `test-results/refinement-final-safe`.
-- Separate optimized development bundle: `dist/Synthesis-review.app`. Capture startup isolation checked with `scripts/check-capture-isolation.py`.
-- Full `./scripts/check.sh` stopped at **eight pre-existing formatting errors** in unfinished `Rules.swift`, `AgentEngine.swift`, `Portability.swift`; those edits were preserved. It is not a passing full-project check.
+This is a substantial integration repair and UI foundation pass, not an audit of every feature or exact parity with a missing latest attachment. Full autonomous tool loops, retained world-index snapshots, dense-board obstacle routing, export/live card parity, large-world benchmarks, physical trackpad/VoiceOver, crash recovery and deeper Timeline/Atlas interactions remain open. Rules Lab/scenario UI and rule canon review are not complete. Runtime image generation is absent; existing bundled illustrations remain optional.
 
-See [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md) for the acceptance ledger and [HANDOFF](HANDOFF.md) for continuation details.
-
-## Still open
-
-This is a repaired canvas slice and broad visual audit, not acceptance of every feature or exact pixel parity with the reference. Foreground/native pointer interactions, live streaming/Stop, VoiceOver, trackpad, large-world performance and editor crash recovery need deeper verification. Engine PNG export differs from the live DOM cards. Compact fit is an overview, requiring zoom for full text. Timeline still lacks eras/reordering/canon depth; Atlas remains one map with no marker dragging. Runtime image generation is not built. No foreground self-test or paid provider call was made this session.
-
-Next milestone: audit canvas connection/edit/style/export flows, then measure large graph/board behavior and verify streaming cancellation with a controlled transport. Continue the checkpointed rules backend without describing its unfinished UI as complete.
+Next: verify live subscription behavior with the new CLI flags in an explicitly authorized session; retain structured context traces; audit connection creation/style/capture actions through actual pointer input; then dense-board routing and large-world performance. Keep the existing native/engine boundary and user data.

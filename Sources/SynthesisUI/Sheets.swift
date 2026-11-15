@@ -7,7 +7,6 @@ struct StudioSheet: View {
   @State private var name = ""
   @State private var kind = "lore"
   @State private var category = ""
-  @State private var key = ""
   @State private var model = ""
   @State private var worldName = ""
   @State private var saved = false
@@ -17,8 +16,7 @@ struct StudioSheet: View {
     _kind = State(initialValue: studio.newRecordKind)
     _category = State(initialValue: studio.libraryCategory ?? "")
     _model = State(
-      initialValue: studio.provider.usesSubscription
-        ? (studio.harnessModels[studio.provider] ?? "") : studio.modelName)
+      initialValue: studio.harnessModels[studio.provider] ?? "")
     _worldName = State(initialValue: studio.world?.name ?? "")
     let target = studio.renameTarget ?? studio.conversationID
     _name = State(
@@ -74,7 +72,7 @@ struct StudioSheet: View {
             kind = item.0
           } label: {
             VStack(alignment: .leading, spacing: 6) {
-              Image(systemName: item.2).font(.system(size: 15))
+              StudioIcon(item.2, size: 15)
                 .foregroundStyle(kind == item.0 ? studio.t.accent : studio.t.secondary)
               Text(item.1).font(.system(size: 13.5, weight: .medium))
               Text(item.3).font(.system(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(2)
@@ -169,7 +167,7 @@ struct StudioSheet: View {
           group("Assistant") { assistant }
           group("Appearance") {
             settingRow("Theme", studio.dark ? "Dark" : "Light") {
-              PixelThemeToggle(studio: studio, thumb: 30)
+              AppearanceButton(studio: studio)
             }
           }
           group("This world") {
@@ -227,8 +225,7 @@ struct StudioSheet: View {
       Button("Done", action: close).buttonStyle(QuietButton(t: studio.t, primary: true))
     }
   }
-  /// Provider choice. A local harness signed in with a subscription is the default; an API
-  /// key is available for those who prefer it. Synthesis never sees harness credentials.
+  /// Subscription connections remain owned by the installed harness; no keys enter Synthesis.
   @ViewBuilder private var assistant: some View {
     let t = studio.t
     Text(
@@ -240,24 +237,22 @@ struct StudioSheet: View {
         let selected = studio.provider == kind
         Button {
           studio.setProvider(kind)
-          if kind.usesSubscription { studio.checkProvider() }
+          studio.checkProvider()
         } label: {
           HStack(spacing: 10) {
-            Image(systemName: selected ? "largecircle.fill.circle" : "circle")
+            StudioIcon(selected ? "largecircle.fill.circle" : "circle")
               .font(.system(size: 14)).foregroundStyle(selected ? t.accent : t.muted)
             VStack(alignment: .leading, spacing: 2) {
               Text(kind.title).font(.system(size: 13.5, weight: .medium))
               Text(
                 kind == .claudeCode
                   ? "Uses your Claude subscription through the Claude Code app on this Mac"
-                  : kind == .codex
-                    ? "Uses your ChatGPT subscription through Codex on this Mac"
-                    : "Pay-as-you-go with your own key, kept in macOS Keychain"
+                  : "Uses your ChatGPT subscription through Codex on this Mac"
               ).font(.system(size: 12)).foregroundStyle(t.muted)
                 .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 8)
-            if kind.usesSubscription && HarnessLocator.find(kind) == nil {
+            if HarnessLocator.find(kind) == nil {
               Text("Not installed").font(.system(size: 11.5, weight: .medium))
                 .foregroundStyle(t.muted)
             } else if kind == ProviderKind.allCases.first(where: { HarnessLocator.find($0) != nil })
@@ -278,7 +273,7 @@ struct StudioSheet: View {
         }.buttonStyle(.plain).accessibilityAddTraits(selected ? .isSelected : [])
       }
     }
-    if studio.provider.usesSubscription { harness } else { apiKey }
+    harness
   }
   @ViewBuilder private var harness: some View {
     let t = studio.t
@@ -325,61 +320,9 @@ struct StudioSheet: View {
           .disabled(
             model.trimmingCharacters(in: .whitespaces) == (studio.harnessModels[kind] ?? ""))
       }.onChange(of: studio.provider) { _, value in
-        model = value.usesSubscription ? (studio.harnessModels[value] ?? "") : studio.modelName
+        model = studio.harnessModels[value] ?? ""
         saved = false
       }
-    }
-  }
-  @ViewBuilder private var apiKey: some View {
-    let t = studio.t
-    HStack(spacing: 8) {
-      Circle().fill(studio.providerConfigured ? t.positive : t.muted).frame(width: 7, height: 7)
-      Text(
-        studio.providerConfigured ? "Connected to OpenAI · \(studio.modelName)" : "No key connected"
-      ).font(.system(size: 13, weight: .medium))
-    }
-    FormField(
-      label: "API key · kept in macOS Keychain",
-      placeholder: ProviderKeychain.configured
-        ? "Stored — leave blank to keep it" : "OpenAI API key",
-      text: $key, t: t, secure: true)
-    FormField(
-      label: "Model ID", placeholder: "A model available to your account", text: $model, t: t)
-    HStack(spacing: 8) {
-      Button("Save connection") { saveConnection() }
-        .buttonStyle(QuietButton(t: t, primary: true))
-        .disabled(
-          model.trimmingCharacters(in: .whitespaces).isEmpty
-            || (key.isEmpty && !ProviderKeychain.configured))
-      if ProviderKeychain.configured {
-        Button("Remove key") {
-          studio.stop()
-          studio.perform {
-            try ProviderKeychain.remove()
-            studio.refreshProviderAvailability()
-            saved = false
-          }
-        }.buttonStyle(QuietButton(t: t, role: .danger))
-      }
-      if saved {
-        Label("Saved. No request was made.", systemImage: "checkmark")
-          .font(.system(size: 12.5)).foregroundStyle(t.positive)
-      }
-    }.onChange(of: studio.provider) { _, value in
-      model = value.usesSubscription ? (studio.harnessModels[value] ?? "") : studio.modelName
-      saved = false
-    }
-  }
-  private func saveConnection() {
-    studio.perform {
-      if !key.isEmpty { try ProviderKeychain.save(key) }
-      let value = model.trimmingCharacters(in: .whitespacesAndNewlines)
-      try studio.store.setPreference("model", value: value)
-      studio.modelName = value
-      UserDefaults.standard.set(value, forKey: "Synthesis.model")
-      studio.refreshProviderAvailability()
-      key = ""
-      saved = true
     }
   }
 }

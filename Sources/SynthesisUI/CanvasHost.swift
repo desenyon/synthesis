@@ -86,6 +86,8 @@ struct CanvasBoardContent {
   @Published var loaded = false
   @Published var hiddenCount = 0
   @Published var connection: Connection?
+  @Published var editingRelation: Relation?
+  private var capturedElements: Set<String> = []
   /// A request raised from the canvas's own menu: `library`, `entity`, `image` or `export`.
   @Published var request: String?
   /// Records whose cards are selected on the board, and which of those carry artwork.
@@ -176,6 +178,7 @@ struct CanvasBoardContent {
       name = board.name
       selection = []
       selectionWithArt = []
+      capturedElements = []
       loaded = false
       writable = false
       try studio.store.setPreference("canvas-selected:\(world)", value: board.id)
@@ -240,6 +243,13 @@ struct CanvasBoardContent {
     ((try? studio.store.relations(worldID: studio.worldID)) ?? []).map {
       ["id": $0.id, "sourceID": $0.sourceID, "targetID": $0.targetID, "label": $0.label]
     }
+  }
+  /// Called only after a confirmed flush and a reviewed domain write.
+  func reloadStoredBoard() {
+    guard worldID == studio.worldID, let id = boardID else { return }
+    loaded = false
+    writable = false
+    openBoard(boardID: id)
   }
   func sync() {
     guard loaded, worldID == studio.worldID else { return }
@@ -339,6 +349,45 @@ struct CanvasBoardContent {
     checks.append(
       recovered
         ? "PASS confirmed retry clears canvas save failure" : "FAIL canvas save did not recover")
+    // Exercise the complete reviewed proposal -> persisted board -> live engine path.
+    let before = await probe()
+    if let card = (before["cards"] as? [[String: Any]])?.first,
+      let recordID = card["recordID"] as? String, let x = card["x"] as? Double,
+      let y = card["y"] as? Double, let boardID,
+      let proposal = try studio.store.stageProposal(
+        worldID: worldID, conversationID: nil, messageID: nil,
+        payload: [
+          "changes": [
+            [
+              "action": "place_record", "source": recordID,
+              "board": boardID, "x": x + 36, "y": y + 20,
+            ]
+          ]
+        ])
+    {
+      studio.resolve(proposal, change: proposal.changes[0], accept: true)
+      let deadline = Date().addingTimeInterval(5)
+      while studio.reviewingProposal || !loaded, Date() < deadline {
+        try await Task.sleep(for: .milliseconds(50))
+      }
+      let after = await probe()
+      let moved = (after["cards"] as? [[String: Any]])?.first {
+        $0["recordID"] as? String == recordID
+      }
+      checks.append(
+        moved?["x"] as? Double == x + 36 && moved?["y"] as? Double == y + 20
+          ? "PASS reviewed placement reaches the live engine"
+          : "FAIL reviewed placement did not reach the live engine")
+      await flush()
+      _ = try studio.store.placeRecord(
+        worldID: worldID, boardID: boardID, recordID: recordID, x: x, y: y)
+      reloadStoredBoard()
+      let restoreDeadline = Date().addingTimeInterval(5)
+      while !loaded, Date() < restoreDeadline { try await Task.sleep(for: .milliseconds(50)) }
+      studio.toast = nil
+    } else {
+      checks.append("FAIL missing linked card for reviewed placement audit")
+    }
     return checks
   }
   /// Where cards are on screen, for the interaction self-test.
@@ -402,6 +451,24 @@ struct CanvasBoardContent {
       } else {
         studio.show("This card’s record is archived. Restore it from Library.", icon: "archivebox")
       }
+    case "captureText":
+      guard let id = message["elementID"] as? String, let body = message["body"] as? String,
+        !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, body.count <= 100_000,
+        !capturedElements.contains(id)
+      else { return }
+      studio.perform {
+        let record = try studio.store.createRecord(
+          worldID: worldID,
+          title: String(body.prefix(60)), body: body, kind: "capture")
+        capturedElements.insert(id)
+        try studio.reload()
+        sync()
+        call("captureSaved", [id, record.id])
+        studio.show("Idea saved in Library and linked to this board.", icon: "lightbulb")
+      }
+    case "inspectRelation":
+      guard let id = message["relationID"] as? String else { return }
+      editingRelation = (try? studio.store.relations(worldID: worldID))?.first { $0.id == id }
     case "connect":
       guard let arrow = message["arrowID"] as? String,
         let source = studio.records.first(where: { $0.id == message["source"] as? String }),
@@ -414,6 +481,7 @@ struct CanvasBoardContent {
       else { return }
       do {
         try studio.store.updateRelation(worldID: worldID, id: id, label: label)
+        try studio.reload()
       } catch {
         let stored = (try? studio.store.relations(worldID: worldID))?.first { $0.id == id }
         call("relabelRejected", [id, stored?.label ?? label])
@@ -466,6 +534,7 @@ struct CanvasBoardContent {
           ],
         ])
       self.connection = nil
+      try studio.reload()
     }
   }
   private func save(png base64: String) {

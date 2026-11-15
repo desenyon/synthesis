@@ -68,3 +68,11 @@ Bundled GPT-generated map/portrait illustrations are optional local choices. Exi
 ## 2026-11-13 — primary checkout and GitHub main (owner-protected)
 
 The owner explicitly selected the reviewed implementation as the main product, requested removal of other worktrees, authorized pushing to GitHub and requested the app be started for review. The canonical source/launch location is now `/Users/desenyon/Developer/synthesis` on `main`, with `dist/Synthesis.app`. GitHub's default branch is `main`. The merge retains both branch histories but takes the reviewed source tree; it does not resurrect the superseded SwiftFlow frontend. Unfinished rules files are checkpointed rather than discarded. Recovery archives and user data stay local; no release or deployment is requested.
+
+## 2026-11-15 — subscription-only and connected workspace (owner protected)
+
+The owner explicitly removed the direct API option, superseding the earlier optional API decision. Claude Code and Codex subscription sign-in are the only model paths. The application may validate proposed domain actions and apply them only after UI review; the harness receives no general application or shell write authority. Canon approval remains separate.
+
+The owner also requested removal of unused code. `legacy/web`, `docs/design`, the obsolete API adapter, placeholder file and old pixel-art components were retired. Source history remains in Git; local ignored legacy files/previews were moved to `~/Library/Application Support/Synthesis/Development Archives/retired-scaffolds-20261115/`. No user world data was removed.
+
+Use upstream Lucide 1.73.0 consistently for authored UI; retain the Excalidraw package as the OSS editing engine and build the Synthesis domain bridge/presentation around its public APIs. This avoids a large engine fork while adding real Library, relationship, board and agent actions. The new graphite sidebar and shared theme follow the available owner reference/design brief. No new attachment arrived with the latest request, so exact parity with it is not a verified claim.

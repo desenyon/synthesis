@@ -5,16 +5,16 @@ import SynthesisCore
 /// so the light and dark themes stay complete counterparts.
 public struct Theme {
   public let dark: Bool
-  public var background: Color { Color(hex: dark ? 0x141617 : 0xF8F9FB) }
-  public var sidebar: Color { Color(hex: dark ? 0x1B1D1E : 0xF0F2F5) }
-  public var surface: Color { Color(hex: dark ? 0x232525 : 0xFFFFFF) }
-  public var secondarySurface: Color { Color(hex: dark ? 0x2D302F : 0xECEFF3) }
-  public var text: Color { Color(hex: dark ? 0xECEBED : 0x20232B) }
-  public var secondary: Color { Color(hex: dark ? 0xBEC5CE : 0x5C6573) }
-  public var muted: Color { Color(hex: dark ? 0x929CAA : 0x7D8593) }
-  public var border: Color { Color(hex: dark ? 0x3A3E3D : 0xDCE1E8) }
-  public var accent: Color { Color(hex: dark ? 0xB7D4C1 : 0x3B637F) }
-  public var accentSoft: Color { Color(hex: dark ? 0x29362F : 0xE3ECF3) }
+  public var background: Color { Color(hex: dark ? 0x191A1C : 0xF8F9FB) }
+  public var sidebar: Color { Color(hex: dark ? 0x141517 : 0xF0F2F5) }
+  public var surface: Color { Color(hex: dark ? 0x222427 : 0xFFFFFF) }
+  public var secondarySurface: Color { Color(hex: dark ? 0x2B2E33 : 0xECEFF3) }
+  public var text: Color { Color(hex: dark ? 0xEFF0F2 : 0x20232B) }
+  public var secondary: Color { Color(hex: dark ? 0xB6BBC5 : 0x5C6573) }
+  public var muted: Color { Color(hex: dark ? 0x8F96A3 : 0x7D8593) }
+  public var border: Color { Color(hex: dark ? 0x34373D : 0xDCE1E8) }
+  public var accent: Color { Color(hex: dark ? 0xAEC7EF : 0x456B9D) }
+  public var accentSoft: Color { Color(hex: dark ? 0x252D3B : 0xE3ECF3) }
   /// Text or icon colour placed on a filled accent control.
   public var onAccent: Color { dark ? Color(hex: 0x14181C) : .white }
   public var hover: Color { text.opacity(dark ? 0.06 : 0.05) }
@@ -57,8 +57,8 @@ extension Color {
 /// Shared geometry. Radii and control heights are deliberately few.
 enum Metric {
   static let bar: CGFloat = 56
-  static let sidebar: CGFloat = 220
-  static let rail: CGFloat = 56
+  static let sidebar: CGFloat = 248
+  static let rail: CGFloat = 64
   static let control: CGFloat = 30
   static let radius: CGFloat = 8
   static let cardRadius: CGFloat = 12

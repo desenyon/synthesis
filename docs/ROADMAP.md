@@ -9,12 +9,13 @@
 
 - **Subscription harness by default** and **Canvas on the Excalidraw engine** (2026-11-13).
 
-## Active — reference fidelity and feature audit
+## Active — connected studio audit and UI overhaul
 
 - Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).
-- Next: interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Match live/export card appearance; measure large boards and derived graphs.
+- Implemented 2026-11-15: subscription-only authentication, stale-revision rejection, structured world context, reviewed spatial/link/rule actions, source-aware Canvas capture/relationship controls, Lucide icons and grouped navigation. Current evidence/limits: [INTEGRATION_OVERHAUL](INTEGRATION_OVERHAUL.md).
+- Next: persist the full world-index trace and test a live subscription run with the updated flags; expand interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Match live/export card appearance; measure large boards and derived graphs.
 - Then: streamed-response/Stop behavior with controlled transport, editor crash recovery, accessibility/trackpad walkthrough, deeper Timeline and Atlas operations.
-- Rules backend is checkpointed and its formatting errors are resolved. Dedicated Rules Lab UI remains incomplete.
+- Rules now have manual add/edit draft controls in entity details and a reviewed agent action. Dedicated Rules Lab, scenario UI and rule canon review remain incomplete.
 - Reference parity and complete product acceptance remain open; screenshots alone do not certify all interactions.
 
 ## Then — finish M3

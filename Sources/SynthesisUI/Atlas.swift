@@ -28,7 +28,7 @@ struct AtlasScreen: View {
           Button {
             markerPicker = true
           } label: {
-            Label("Place marker", systemImage: "mappin.and.ellipse")
+            StudioLabel("Place marker", icon: "mappin.and.ellipse")
               .font(.system(size: 13, weight: .medium)).foregroundStyle(studio.t.onAccent)
               .padding(.horizontal, 12).frame(height: Metric.control)
               .background(studio.t.accent, in: RoundedRectangle(cornerRadius: Metric.radius))
@@ -78,15 +78,25 @@ struct AtlasScreen: View {
     }
     .onAppear {
       studio.editorSave = { persist() }
-      do {
-        if let board = try studio.store.boards(worldID: studio.worldID, kind: "atlas").first {
-          boardID = board.id
-          map = try JSONDecoder().decode(AtlasDocument.self, from: Data(board.content.utf8))
-        }
-      } catch {
-        loadFailed = true
-        studio.error = error.localizedDescription
+      loadMap()
+    }
+    .onChange(of: studio.worldRevision) { _, _ in loadMap() }
+    .onChange(of: studio.mapBoardID) { _, _ in loadMap() }
+  }
+  private func loadMap() {
+    do {
+      let boards = try studio.store.boards(worldID: studio.worldID, kind: "atlas")
+      if let board = boards.first(where: { $0.id == studio.mapBoardID }) ?? boards.first {
+        boardID = board.id
+        map = try JSONDecoder().decode(AtlasDocument.self, from: Data(board.content.utf8))
+      } else {
+        boardID = nil
+        map = AtlasDocument()
       }
+      loadFailed = false
+    } catch {
+      loadFailed = true
+      studio.error = error.localizedDescription
     }
   }
   private func mapView(_ image: NSImage, size: CGSize) -> some View {
@@ -150,7 +160,7 @@ struct AtlasScreen: View {
       VStack {
         if let id = placing {
           HStack(spacing: 10) {
-            Image(systemName: "mappin.and.ellipse").foregroundStyle(studio.t.accent)
+            StudioIcon("mappin.and.ellipse").foregroundStyle(studio.t.accent)
             Text(
               "Click the map to place “\(studio.records.first { $0.id == id }?.title ?? "record")”"
             )
@@ -192,7 +202,7 @@ struct AtlasScreen: View {
     let active = selected == marker.recordID
     let tint = record.map { studio.t.category($0.category) } ?? studio.t.muted
     return VStack(spacing: 3) {
-      Image(systemName: "mappin.circle.fill").font(.system(size: active ? 28 : 24))
+      StudioIcon("mappin.circle.fill", size: active ? 28 : 24)
         .symbolRenderingMode(.palette).foregroundStyle(Color.white, tint)
         .shadow(color: .black.opacity(0.35), radius: 3, y: 1)
       Text(record?.title ?? "Archived record").font(.system(size: 11.5, weight: .medium))

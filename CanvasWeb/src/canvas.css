@@ -62,15 +62,12 @@ body,
 }
 
 /* Excalidraw owns gestures/history. Synthesis owns the visible workspace. */
-.synthesis-board{position:relative;width:100%;height:100%;background:#101213 radial-gradient(#ffffff0b .8px,transparent .8px);background-size:24px 24px}
+.synthesis-board{position:relative;width:100%;height:100%;background:#191a1c radial-gradient(#ffffff0b .8px,transparent .8px);background-size:24px 24px}
 .synthesis-board.light{background-color:#f5f6f7;background-image:radial-gradient(#20252e14 .8px,transparent .8px)}
-.synthesis-board .excalidraw{background:transparent;--color-primary:#b2c8bf;--color-primary-light:#28342e}
+.synthesis-board .excalidraw{background:transparent;--color-primary:#aec7ef;--color-primary-light:#252d3b}
 .synthesis-board .excalidraw .App-menu_top,.synthesis-board .excalidraw .layer-ui__wrapper__footer,.synthesis-board .excalidraw .HintViewer,.synthesis-board .excalidraw .main-menu-trigger{display:none!important}
 .synthesis-board .excalidraw .App-menu__left{display:none!important}
-.show-canvas-style .synthesis-board .excalidraw .App-menu_top{display:flex!important;pointer-events:none}
-.show-canvas-style .synthesis-board .excalidraw .App-menu_top>:not(.App-menu__left){display:none!important}
-.show-canvas-style .synthesis-board .excalidraw .App-menu__left{display:flex!important;pointer-events:auto;position:absolute;top:76px;left:18px;max-height:calc(100% - 160px);overflow:auto}
-.studio-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;font:14px/1.45 -apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;color:#eceeed;--glass:#232525;--line:#ffffff14;--quiet:#b2b8b5;--ink:#eceeed;--field:#171919;--hover:#ffffff0c}
+.studio-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;font:14px/1.45 -apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;color:#eceeed;--glass:#242629;--line:#ffffff14;--quiet:#b6bbc5;--ink:#eff0f2;--field:#1a1c20;--hover:#ffffff0c}
 .studio-overlay.light{--glass:#fff;--line:#1d24211a;--quiet:#5e6963;--ink:#232b26;--field:#f2f4f3;--hover:#20392a09;color:var(--ink)}
 .studio-card-layer{position:absolute;inset:0;pointer-events:none}
 .studio-record{position:absolute;box-sizing:border-box;transform-origin:center center;border:1px solid var(--line);border-radius:17px;background:linear-gradient(150deg,#ffffff07,transparent 50%),var(--glass);box-shadow:0 2px 2px #00000016,0 12px 28px #00000022,inset 0 1px #ffffff0b;display:flex;flex-direction:column;pointer-events:none;transition:box-shadow 180ms,border-color 180ms,opacity 150ms}
@@ -103,12 +100,20 @@ body,
 @media(prefers-reduced-motion:reduce){.studio-overlay *{animation:none!important;transition:none!important}}
 /* Establish one stacking context above both engine canvas layers. */
 .studio-overlay{z-index:5}
-.show-canvas-style .excalidraw .layer-ui__wrapper{z-index:6}
 /* Excalidraw has a separate mobile chrome path when the companion narrows the board. */
 .synthesis-board .excalidraw .App-toolbar-container,
 .synthesis-board .excalidraw .App-menu_bottom,
 .synthesis-board .excalidraw .App-bottom-bar,
 .synthesis-board .excalidraw .mobile-misc-tools-container{display:none!important}
-.show-canvas-style .synthesis-board .excalidraw .App-menu_bottom,
-.show-canvas-style .synthesis-board .excalidraw .App-bottom-bar{display:flex!important;pointer-events:auto}
-.show-canvas-style .synthesis-board .excalidraw .App-bottom-bar footer{display:none!important}
+
+/* Shared studio controls, without the upstream stock style inspector. */
+.studio-style{position:absolute;right:72px;top:50%;transform:translateY(-50%);width:220px;padding:14px;pointer-events:auto;font-size:12px;color:var(--quiet)}
+.studio-style header{display:flex;align-items:center;justify-content:space-between;color:var(--ink);font-weight:600;margin-bottom:10px}
+.studio-style>span{display:block;margin:12px 0 7px}.studio-style p{line-height:1.5}
+.style-options{display:flex;gap:6px}.style-options button{min-width:26px;min-height:26px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit;cursor:pointer;padding:4px 8px}
+.style-options button:hover{outline:1px solid var(--quiet)}
+.text-action{display:flex;align-items:center;gap:7px;background:transparent;border:0;color:var(--ink);font:inherit;font-weight:500;cursor:pointer;white-space:nowrap;padding:7px}
+.text-action:hover{background:var(--hover);border-radius:6px}
+.studio-empty>button{display:inline-flex;align-items:center;gap:10px}
+.studio-record{border-radius:12px}.record-copy h2{font-weight:600}
+.studio-drawing-bar{border-radius:12px}.studio-add-bar{border-radius:10px}
