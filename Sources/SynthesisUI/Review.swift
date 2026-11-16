@@ -242,7 +242,7 @@ struct ReviewScreen: View {
           PlainMenu {
             ForEach(involved) { record in
               Button(
-                "\(record.title) · \(record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category)"
+                "\(record.title) · \(record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : Vocabulary.displayCategory(record.category))"
               ) { studio.openRecord(record) }
             }
           } label: {

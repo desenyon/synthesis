@@ -176,8 +176,10 @@ struct AtlasScreen: View {
               CategoryTile(record: record, t: studio.t, size: 30)
               VStack(alignment: .leading, spacing: 2) {
                 Text(record.title).font(.studio(size: 13.5, weight: .semibold)).lineLimit(1)
-                Text(record.body.isEmpty ? record.category : record.body)
-                  .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+                Text(
+                  record.body.isEmpty ? Vocabulary.displayCategory(record.category) : record.body
+                )
+                .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
               }.frame(maxWidth: 240, alignment: .leading)
               Button("Open") { studio.openRecord(record) }
                 .buttonStyle(QuietButton(t: studio.t))

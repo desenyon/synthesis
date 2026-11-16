@@ -76,6 +76,10 @@ enum Vocabulary {
     ("Simulate", "play.circle", "Explore a what-if with stated assumptions."),
     ("Canonize", "checkmark.seal", "Prepare a change for you to review and accept."),
   ]
+  /// Display vocabulary only: imported and saved categories are never rewritten.
+  static func displayCategory(_ value: String) -> String {
+    value == "Factions" ? "Systems" : value
+  }
   static func matchesCategory(_ value: String, _ category: String) -> Bool {
     value == category || (category == "Systems" && value == "Factions")
   }

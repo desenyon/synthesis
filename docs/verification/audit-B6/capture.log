@@ -1,0 +1,9 @@
+CAPTURE graph-selected 1440x900, bitmap 2880x1800, 1287ms
+CAPTURE library 1440x900, bitmap 2880x1800, 516ms
+CAPTURE editor 1440x900, bitmap 2880x1800, 528ms
+CAPTURE palette 1440x900, bitmap 2880x1800, 1308ms
+CAPTURE graph-selected 1024x768, bitmap 2048x1536, 1397ms
+CAPTURE library 1024x768, bitmap 2048x1536, 354ms
+CAPTURE editor 1024x768, bitmap 2048x1536, 350ms
+CAPTURE palette 1024x768, bitmap 2048x1536, 819ms
+Native captures complete: /private/tmp/synthesis-b6

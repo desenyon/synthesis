@@ -196,7 +196,9 @@ struct CommandPalette: View {
         Item(
           id: "record-\(record.id)", section: query.isEmpty ? "Recent" : "Lore",
           icon: recordIcon(record), title: record.title,
-          detail: [record.category, Vocabulary.stateLabel(record.state)].filter { !$0.isEmpty }
+          detail: [
+            Vocabulary.displayCategory(record.category), Vocabulary.stateLabel(record.state),
+          ].filter { !$0.isEmpty }
             .joined(separator: " · "), tint: t.category(record.category)
         ) { studio.openRecord(record) })
     }

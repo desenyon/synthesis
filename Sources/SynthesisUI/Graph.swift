@@ -406,7 +406,9 @@ struct RelationshipGraph: View {
     }
     .help(entity.title)
     .accessibilityElement(children: .combine)
-    .accessibilityLabel("\(entity.category.isEmpty ? "Entity" : entity.category): \(entity.title)")
+    .accessibilityLabel(
+      "\(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category)): \(entity.title)"
+    )
     .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
   }
   @ViewBuilder private func detail(_ entity: LoreRecord, docked: Bool) -> some View {
@@ -427,7 +429,8 @@ struct RelationshipGraph: View {
           Text(entity.title).font(.studio(size: 15, weight: .semibold)).lineLimit(2)
           HStack(spacing: 8) {
             if !entity.category.isEmpty {
-              Text(entity.category).font(.studio(size: 12)).foregroundStyle(studio.t.muted)
+              Text(Vocabulary.displayCategory(entity.category)).font(.studio(size: 12))
+                .foregroundStyle(studio.t.muted)
             }
             StateBadge(state: entity.state, t: studio.t)
           }

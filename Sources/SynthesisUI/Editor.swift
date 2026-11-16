@@ -293,13 +293,19 @@ struct EditorScreen: View {
     } else {
       PlainMenu {
         let known = Vocabulary.categories + ["Ideas"]
-        let extra = Set(studio.records.map(\.category)).subtracting(known).filter { !$0.isEmpty }
+        let extra = Set(studio.records.map { Vocabulary.displayCategory($0.category) }).subtracting(
+          known
+        ).filter { !$0.isEmpty }
         ForEach(known + extra.sorted(), id: \.self) { name in
           Button {
             category = name
             changed()
           } label: {
-            if category == name { StudioLabel(name, icon: "checkmark") } else { Text(name) }
+            if Vocabulary.matchesCategory(category, name) {
+              StudioLabel(name, icon: "checkmark")
+            } else {
+              Text(name)
+            }
           }
         }
         Divider()
@@ -310,7 +316,8 @@ struct EditorScreen: View {
         Button("Custom…") { customCategory = true }
       } label: {
         HStack(spacing: 4) {
-          Text(category.isEmpty ? "No category" : category).font(.studio(size: 12.5))
+          Text(category.isEmpty ? "No category" : Vocabulary.displayCategory(category)).font(
+            .studio(size: 12.5))
           StudioIcon("chevron.down", size: 8)
         }.foregroundStyle(studio.t.secondary).padding(.horizontal, 5).frame(height: 22)
           .hoverFill(studio.t, radius: 5)

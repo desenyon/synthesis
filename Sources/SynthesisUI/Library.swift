@@ -217,7 +217,8 @@ struct RecordRow: View {
     {
       return "Section of \(parent.title)"
     }
-    return record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category
+    return record.category.isEmpty
+      ? Vocabulary.kindLabel(record.kind) : Vocabulary.displayCategory(record.category)
   }
   var body: some View {
     Button {

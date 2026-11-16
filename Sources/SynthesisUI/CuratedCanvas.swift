@@ -464,7 +464,9 @@ struct CuratedCanvas: View {
                 VStack(alignment: .leading, spacing: 1) {
                   Text(record.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
                   Text(
-                    record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category
+                    record.category.isEmpty
+                      ? Vocabulary.kindLabel(record.kind)
+                      : Vocabulary.displayCategory(record.category)
                   )
                   .font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
                 }

@@ -193,7 +193,8 @@ struct ConversationStudio: View {
                   Text(record.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
                   Text(
                     record.body.isEmpty
-                      ? record.category : record.body.replacingOccurrences(of: "\n", with: " ")
+                      ? Vocabulary.displayCategory(record.category)
+                      : record.body.replacingOccurrences(of: "\n", with: " ")
                   ).font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
                 }
                 Spacer(minLength: 4)
@@ -530,8 +531,11 @@ struct UnifiedComposer: View {
             CategoryTile(record: record, t: studio.t, size: 24)
             Text(record.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
             Spacer(minLength: 12)
-            Text(record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category)
-              .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+            Text(
+              record.category.isEmpty
+                ? Vocabulary.kindLabel(record.kind) : Vocabulary.displayCategory(record.category)
+            )
+            .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
           }.padding(.horizontal, 8).frame(height: 34)
             .background(
               offset == mentionIndex ? studio.t.secondarySurface : .clear,
@@ -572,7 +576,7 @@ struct UnifiedComposer: View {
   }
   private var referenceGroups: [(String, [LoreRecord])] {
     let grouped = Dictionary(grouping: studio.records.prefix(60)) {
-      $0.category.isEmpty ? "Uncategorised" : $0.category
+      $0.category.isEmpty ? "Uncategorised" : Vocabulary.displayCategory($0.category)
     }
     return grouped.keys.sorted().map { ($0, grouped[$0] ?? []) }
   }

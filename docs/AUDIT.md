@@ -157,7 +157,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B6. Add `Vocabulary.displayCategory` in `Sources/SynthesisUI/Theme.swift` mapping the stored category "Factions" to "Systems" for display only. Apply it to every place a record's category string is shown (grep `record.category` in `Sources/SynthesisUI`). Do not rewrite stored categories. Capture `library,editor,graph-selected,palette`.
 
-- [ ] done
+- [x] done — see verification/audit-B6.
 
 ### B7. Editor Markdown export is lossy — Medium, confirmed in code
 

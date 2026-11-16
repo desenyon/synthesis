@@ -34,7 +34,9 @@ struct SearchableRecordPicker: View {
                 VStack(alignment: .leading, spacing: 2) {
                   Text(record.title).font(.studio(size: 14, weight: .medium)).lineLimit(1)
                   Text(
-                    record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category
+                    record.category.isEmpty
+                      ? Vocabulary.kindLabel(record.kind)
+                      : Vocabulary.displayCategory(record.category)
                   )
                   .font(.studio(size: 12)).foregroundStyle(t.secondary).lineLimit(1)
                 }
