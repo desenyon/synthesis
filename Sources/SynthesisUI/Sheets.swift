@@ -51,24 +51,19 @@ struct StudioSheet: View {
       HStack {
         Text("Start creating").font(.studio(size: 14, weight: .medium))
         Spacer()
-        Button("AI Assisted") { studio.setMode(.assisted) }
-          .buttonStyle(QuietButton(t: studio.t, primary: studio.mode == .assisted))
-        Button("Manual") { studio.setMode(.manual) }
-          .buttonStyle(QuietButton(t: studio.t, primary: studio.mode == .manual))
+        ModeSwitch(studio: studio)
       }
       HStack {
         Text("Appearance").font(.studio(size: 14, weight: .medium))
         Spacer()
-        AppearanceButton(studio: studio)
+        AppearanceSwitch(studio: studio)
       }
       if studio.mode == .assisted {
-        assistant
+        VStack(alignment: .leading, spacing: 12) {
+          SectionLabel(title: "Assistant", t: studio.t)
+          assistant
+        }
       }
-      Text(
-        "Nothing is generated automatically. Image generation is not available in this build; requested image generation will use your subscription allowance when connected."
-      )
-      .font(.studio(size: 12)).foregroundStyle(studio.t.secondary).fixedSize(
-        horizontal: false, vertical: true)
     } footer: {
       Spacer()
       Button("Start creating") {
@@ -224,7 +219,13 @@ struct StudioSheet: View {
   private var settingsContents: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 20) {
-        group("Application · Assistant") { assistant }
+        group("Application · Assistant") {
+          assistant
+          Text(
+            "Nothing is generated automatically. Image generation is not available in this build; requested image generation will use your subscription allowance when connected."
+          ).font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
         group("Application · Appearance") {
           settingRow("Theme") {
             AppearanceSwitch(studio: studio)
@@ -379,7 +380,7 @@ struct StudioSheet: View {
           : "Synthesis starts Codex for each message in a read-only sandbox and an empty folder, without your Codex config, rules, apps or plugins. Your sign-in stays inside Codex."
     ).font(.studio(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(3)
       .fixedSize(horizontal: false, vertical: true)
-    if installed {
+    if installed && sheet != .onboarding {
       HStack(alignment: .bottom, spacing: 8) {
         FormField(
           label: "Model (optional)",

@@ -98,3 +98,7 @@ Kept Review badge scoped to pending proposals plus canon decisions and added a p
 ### Audit B11 — completed
 
 Replaced the three vendor-specific illustration labels with Sample illustrations and the requested bundled AI-generated artwork/canon disclosure. Updated matching README wording. ./scripts/check.sh passed (84 tests / 19 suites, strict lint and optimized build). Captured empty-atlas/sheet-artwork at both sizes and inspected both contact sheets; labels fit and the image picker remains opaque over Canvas. Evidence: `docs/verification/audit-B11`.
+
+### Audit C6 — completed
+
+Onboarding retains world name, assistance mode, labeled appearance and provider/sign-in choices. Added the Assistant heading, removed model editing and the image-generation note from onboarding, and kept them in Settings. Assistance/appearance reuse the shared segmented controls. ./scripts/check.sh passed (84 tests / 19 suites, strict lint and optimized build). Captured onboarding plus Settings at both sizes and inspected both contact sheets; onboarding fits at 1024x768 and advanced fields remain in Settings. Evidence: `docs/verification/audit-C6`.

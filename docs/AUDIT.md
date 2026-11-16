@@ -282,7 +282,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT C6. In the onboarding sheet in `Sources/SynthesisUI/Sheets.swift` keep world name, assistance mode, appearance and provider choice with sign-in check. Add an "Assistant" label above the provider text. Remove the model field and the image-generation note from onboarding (they stay in Settings). Capture `onboarding` at both sizes.
 
-- [ ] done
+- [x] done — see verification/audit-C6.
 
 ### C7. Compact sidebar clipping — Low
 

@@ -1,0 +1,5 @@
+CAPTURE settings 1440x900, bitmap 2880x1800, 127ms
+CAPTURE onboarding 1440x900, bitmap 2880x1800, 837ms
+CAPTURE settings 1024x768, bitmap 2048x1536, 86ms
+CAPTURE onboarding 1024x768, bitmap 2048x1536, 529ms
+Native captures complete: /private/tmp/synthesis-c6
