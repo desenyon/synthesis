@@ -28,7 +28,7 @@ Nothing is hard-deleted: removing a record, conversation, board, event or relati
 
 Use the world menu → **All worlds** to browse, search, create or open a world. **Save world file** exports a portable `.synthesis` snapshot; opening it creates an independent copy with fresh identifiers and preserved internal links. It includes rich text, images, boards, conversations, proposals, rules and history. The live copy stays in the local SQLite database: saving an archive is an explicit snapshot, not continuous folder synchronization. Files are private world data; they contain no provider credentials.
 
-Markdown, JSON and image-only exports are available from Settings and the File menu. Settings is a full workspace with application and current-world controls. The setup flow appears only for a fresh installation. Codex is recommended; an existing provider choice is preserved. Runtime image generation is not implemented; no image usage occurs automatically.
+Markdown, JSON and image-only exports are available from Settings and the File menu. Settings is a full workspace with application and current-world controls; a searchable refinement is in progress. Typed writing/navigation preferences and portable world creation defaults are implemented underneath it. The setup flow appears only for a fresh installation. Codex is recommended; an existing provider choice is preserved. Runtime image generation is not implemented; no image usage occurs automatically.
 
 Every content workspace has the shared contextual composer in Assisted mode. Expand it to read the conversation alongside the current page. The open record is included as context. Manual removes these controls and blocks requests in the core.
 

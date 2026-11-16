@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import SynthesisCore
 
 /// Converts between the stored message text, where a lore reference is a Markdown link
 /// `[Title](synthesis://record/<id>)`, and the composer's display, where it is one styled token.
@@ -75,6 +76,7 @@ enum MentionCodec {
 }
 
 final class ComposerTextView: NSTextView {
+  var sendShortcut = SendShortcut.enter
   var onSubmit: (() -> Void)?
   /// Returns true when a mention list is open and consumed the key.
   var onMentionKey: ((MentionKey) -> Bool)?
@@ -103,8 +105,16 @@ final class ComposerTextView: NSTextView {
         }
       if let key, onMentionKey?(key) == true { return }
     }
-    if event.keyCode == 36 && !event.modifierFlags.contains(.shift) && !hasMarkedText() {
-      onSubmit?()
+    if event.keyCode == 36 && !hasMarkedText() {
+      let modifiers = event.modifierFlags
+      if !modifiers.contains(.shift) && !modifiers.contains(.option)
+        && !modifiers.contains(.control)
+        && (sendShortcut == .enter || modifiers.contains(.command))
+      {
+        onSubmit?()
+      } else {
+        insertNewline(nil)
+      }
       return
     }
     super.keyDown(with: event)
@@ -133,6 +143,7 @@ struct ComposerInput: NSViewRepresentable {
   var accent: Color = .accentColor
   var accentSoft: Color = .clear
   var autofocus = false
+  var sendShortcut = SendShortcut.enter
   var handle: ComposerHandle?
   var onHeight: (CGFloat) -> Void = { _ in }
   /// The text after `@` while a mention is being typed, or nil.
@@ -199,6 +210,7 @@ struct ComposerInput: NSViewRepresentable {
     editor.placeholderColor = NSColor(placeholderColor)
     editor.placeholder = placeholder
     editor.onSubmit = submit
+    editor.sendShortcut = sendShortcut
     editor.onMentionKey = onMentionKey
     editor.needsDisplay = true
     coordinator.measure(editor)
@@ -349,6 +361,7 @@ struct RichDocumentEditor: NSViewRepresentable {
   let rtf: String?
   let t: Theme
   let reloadToken: Int
+  var preferences = StudioPreferences()
   var handle: EditorHandle?
   var changed: (String, String?) -> Void
   func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -364,7 +377,7 @@ struct RichDocumentEditor: NSViewRepresentable {
     view.importsGraphics = false
     view.allowsUndo = true
     view.drawsBackground = false
-    view.font = .systemFont(ofSize: 16)
+    view.font = StudioTypography.native(size: CGFloat(preferences.bodySize))
     view.textColor = NSColor(t.text)
     view.insertionPointColor = NSColor(t.accent)
     view.textContainerInset = NSSize(width: 0, height: 10)
@@ -397,12 +410,14 @@ struct RichDocumentEditor: NSViewRepresentable {
         NSAttributedString(
           string: body,
           attributes: [
-            .font: StudioTypography.native(size: 16), .foregroundColor: NSColor(t.text),
+            .font: StudioTypography.native(size: CGFloat(preferences.bodySize)),
+            .foregroundColor: NSColor(t.text),
             .paragraphStyle: paragraph,
           ]))
     }
     view.typingAttributes = [
-      .font: StudioTypography.native(size: 16), .foregroundColor: NSColor(t.text),
+      .font: StudioTypography.native(size: CGFloat(preferences.bodySize)),
+      .foregroundColor: NSColor(t.text),
       .paragraphStyle: paragraph,
     ]
     view.textColor = NSColor(t.text)
@@ -420,6 +435,11 @@ struct RichDocumentEditor: NSViewRepresentable {
     }
     view.textColor = NSColor(t.text)
     view.insertionPointColor = NSColor(t.accent)
+    view.isContinuousSpellCheckingEnabled = preferences.spellCheck
+    view.isAutomaticSpellingCorrectionEnabled = false
+    view.isAutomaticQuoteSubstitutionEnabled = preferences.smartQuotes
+    view.isAutomaticDashSubstitutionEnabled = preferences.smartDashes
+    view.isAutomaticLinkDetectionEnabled = preferences.automaticLinks
   }
   final class Coordinator: NSObject, NSTextViewDelegate {
     var parent: RichDocumentEditor

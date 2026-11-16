@@ -440,7 +440,8 @@ struct UnifiedComposer: View {
         placeholder: companion
           ? "Ask about your world…" : "Write freely, or ask about your world…",
         color: studio.t.text, placeholderColor: studio.t.muted, accent: studio.t.accent,
-        accentSoft: studio.t.accentSoft, autofocus: !companion, handle: handle,
+        accentSoft: studio.t.accentSoft, autofocus: !companion,
+        sendShortcut: studio.preferences.sendShortcut, handle: handle,
         onHeight: { inputHeight = $0 }, onMention: updateMention, onMentionKey: mentionKey,
         submit: send
       ).frame(height: min(190, max(companion ? 26 : 48, inputHeight)))
@@ -451,7 +452,10 @@ struct UnifiedComposer: View {
         modeMenu
         Spacer(minLength: 0)
         if !companion && !empty {
-          Text("↵ send  ·  ⇧↵ new line").font(.studio(size: 11.5))
+          Text(
+            studio.preferences.sendShortcut == .enter
+              ? "↵ send  ·  ⇧↵ new line" : "⌘↵ send  ·  ↵ new line"
+          ).font(.studio(size: 11.5))
             .foregroundStyle(studio.t.muted).padding(.trailing, 6)
         }
         sendButton
@@ -466,7 +470,8 @@ struct UnifiedComposer: View {
         placeholder: studio.selectedRecord.map { "Ask about \($0.title)…" }
           ?? "Ask about this \(studio.destination.rawValue.lowercased())…", color: studio.t.text,
         placeholderColor: studio.t.muted, accent: studio.t.accent,
-        accentSoft: studio.t.accentSoft, handle: handle, onHeight: { inputHeight = $0 },
+        accentSoft: studio.t.accentSoft, sendShortcut: studio.preferences.sendShortcut,
+        handle: handle, onHeight: { inputHeight = $0 },
         onMention: updateMention, onMentionKey: mentionKey, submit: send
       ).frame(height: min(96, max(26, inputHeight))).padding(.bottom, 2)
       IconButton(icon: "sidebar.right", label: "Open the companion conversation", t: studio.t) {

@@ -232,10 +232,12 @@ struct RecordRow: View {
               .foregroundStyle(studio.t.text).lineLimit(1)
 
           }
-          Text(
-            record.body.isEmpty
-              ? "Empty" : record.body.replacingOccurrences(of: "\n", with: " ")
-          ).font(.studio(size: 12.5)).foregroundStyle(studio.t.muted).lineLimit(1)
+          if studio.preferences.libraryPreviews {
+            Text(
+              record.body.isEmpty
+                ? "Empty" : record.body.replacingOccurrences(of: "\n", with: " ")
+            ).font(.studio(size: 12.5)).foregroundStyle(studio.t.muted).lineLimit(1)
+          }
         }
         Spacer(minLength: 16)
         Text(categoryLabel)
@@ -250,7 +252,8 @@ struct RecordRow: View {
           Text(relativeDate(record.updatedAt)).font(.studio(size: 12)).monospacedDigit()
             .foregroundStyle(studio.t.muted).frame(width: 72, alignment: .trailing)
         }
-      }.padding(.horizontal, 10).frame(height: 54).hoverFill(studio.t, radius: 9)
+      }.padding(.horizontal, 10).frame(height: studio.preferences.libraryPreviews ? 54 : 44)
+        .hoverFill(studio.t, radius: 9)
     }.buttonStyle(.plain)
       .contextMenu {
         if archived {

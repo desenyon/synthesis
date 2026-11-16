@@ -132,6 +132,8 @@ public struct Toast: Identifiable {
   @Published public var libraryCategory: String?
   @Published public var newRecordKind = "lore"
   @Published public var inspector = true
+  @Published public var preferences = StudioPreferences()
+  @Published public var worldDefaults = WorldPreferences()
   /// Set only by the isolated capture runner so a screenshot can show a selected state.
   @Published public var captureHint = ""
   /// Bumped by the capture runner to rebuild the workspace for each screenshot.
@@ -183,14 +185,20 @@ public struct Toast: Identifiable {
     if worlds.isEmpty { worlds = [try store.createWorld(name: "My world")] }
     let last = try store.preference("world")
     worldID = worlds.first { $0.id == last }?.id ?? worlds[0].id
+    preferences = try store.studioPreferences()
+    worldDefaults = try store.worldPreferences(worldID: worldID)
+    preset = worldDefaults.chatMode
     worldCover = Self.cover(store: store, worldID: worldID)
     mode = WorkspaceMode(rawValue: try store.preference("mode") ?? "assisted") ?? .assisted
     dark = try store.preference("theme") != "light"
     collapsed = try store.preference("sidebar") == "collapsed"
     inspector = try store.preference("inspector") != "hidden"
+    let savedDestination = try store.preference("destination").flatMap(Destination.init(rawValue:))
     destination =
-      try store.preference("destination").flatMap(Destination.init(rawValue:))
+      Destination(rawValue: preferences.launchWorkspace)
+      ?? savedDestination
       ?? (mode == .manual ? .canvas : .chat)
+    if mode == .manual && destination == .chat { destination = .library }
     draft = try store.preference("composer:\(worldID)") ?? ""
     refreshProviderAvailability()
     try reload()
@@ -360,16 +368,38 @@ public struct Toast: Identifiable {
     }
   }
   public func toggleTheme() {
-    dark.toggle()
-    perform { try store.setPreference("theme", value: dark ? "dark" : "light") }
+    perform {
+      try store.setPreference("theme", value: dark ? "light" : "dark")
+      dark.toggle()
+    }
   }
   public func toggleSidebar() {
-    collapsed.toggle()
-    perform { try store.setPreference("sidebar", value: collapsed ? "collapsed" : "expanded") }
+    perform {
+      try store.setPreference("sidebar", value: collapsed ? "expanded" : "collapsed")
+      collapsed.toggle()
+    }
   }
   public func toggleInspector() {
-    inspector.toggle()
-    perform { try store.setPreference("inspector", value: inspector ? "shown" : "hidden") }
+    perform {
+      try store.setPreference("inspector", value: inspector ? "hidden" : "shown")
+      inspector.toggle()
+    }
+  }
+  public func updatePreferences(_ change: (inout StudioPreferences) -> Void) {
+    var next = preferences
+    change(&next)
+    perform {
+      try store.setStudioPreferences(next)
+      preferences = next.validated
+    }
+  }
+  public func updateWorldDefaults(_ change: (inout WorldPreferences) -> Void) {
+    var next = worldDefaults
+    change(&next)
+    perform {
+      try store.setWorldPreferences(worldID: worldID, value: next)
+      worldDefaults = next.validated
+    }
   }
   public func flushEditor() -> Bool { editorSave?() ?? true }
   public func navigate(_ value: Destination) {
@@ -406,7 +436,10 @@ public struct Toast: Identifiable {
       mapBoardID = nil
       companionExpanded = false
       libraryCategory = nil
+      let nextDefaults = try store.worldPreferences(worldID: id)
       worldID = id
+      worldDefaults = nextDefaults
+      preset = nextDefaults.chatMode
       worldCover = Self.cover(store: store, worldID: id)
       conversationID = nil
       selectedRecord = nil
@@ -419,6 +452,7 @@ public struct Toast: Identifiable {
   public func newChat(keepWorkspace: Bool = false) {
     guard flushEditor() else { return }
     stop()
+    preset = worldDefaults.chatMode
     if !keepWorkspace {
       selectedRecord = nil
       editorSave = nil

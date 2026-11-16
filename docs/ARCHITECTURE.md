@@ -67,7 +67,7 @@ The capture runner uses a fresh explicit database, a transport that always rejec
 
 ## Preserved rules backend
 
-The previously unfinished core work is now checkpointed: migration 0006 adds world-scoped `rules` and `rule_scenarios`. `Rules.swift` supports rule/scenario storage, explicit rule approval, accepted wording, reversible archive and local structural checks. Rules are included with selected records in assistant context and Markdown export; JSON export schema 6 retains rules and scenarios. The dedicated UI is unfinished and is not claimed as a completed workspace.
+The previously unfinished core work is now checkpointed: migration 0006 adds world-scoped `rules` and `rule_scenarios`. `Rules.swift` supports rule/scenario storage, explicit rule approval, accepted wording, reversible archive and local structural checks. Rules are included with selected records in assistant context and Markdown export; JSON export schema 7 retains rules and scenarios. The dedicated UI is unfinished and is not claimed as a completed workspace.
 
 ## Connected action and presentation changes — 2026-11-15
 
@@ -81,7 +81,7 @@ Canvas still uses the published OSS engine rather than a fork. Synthesis owns th
 
 ## Portable worlds and chronology — 2026-11-15
 
-`WorldArchive.swift` exports `.synthesis` format version 2: allowlisted world tables plus cover/composer preferences. Import accepts v1/v2, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 6 includes chronology, including archived lanes.
+`WorldArchive.swift` exports `.synthesis` format version 4: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v4, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 7 includes chronology, including archived lanes.
 
 Migration 0007 adds nested chronology lanes (branch/period) and event placements. Events retain actual source records and free-form dates. A grouping is not a canon branch: no speculative merge or inheritance is implied. Reviewed agent actions can create a branch/period and assign new events to existing lanes. Request context includes lane IDs and memberships.
 
@@ -90,3 +90,5 @@ The shared companion resizes non-Canvas workspaces and includes the open record 
 World-scoped FTS now returns complete matched records in one query rather than fetching each result separately. Library and quick-open cache query results across hover/selection redraws.
 
 Markdown export now shares `Portability.recordMarkdown` between world files and `exportRecordMarkdown`. Single-record exports embed sections and local anchors. `MarkdownText` decodes native RTF with AppKit and maps editor headings, emphasis, underline and links; plain Markdown is preserved verbatim, and mismatched/invalid RTF falls back to the stored text. `.synthesis` remains the lossless archive for exact rich formatting.
+
+`Preferences.swift` stores validated device presentation preferences separately from per-world creation defaults. Missing or malformed device values fall back safely; world identity updates are transactional. Device/provider settings are excluded from portable archives.

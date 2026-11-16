@@ -106,3 +106,7 @@ Onboarding retains world name, assistance mode, labeled appearance and provider/
 ### Audit C7 — completed
 
 Added a shared 16 pt bottom fade driven by measured content/viewport bounds, disappearing when no content remains below. Sidebar footer uses a full-width one-pixel theme hairline. ./scripts/check.sh passed (84 tests / 19 suites, strict lint and optimized development build). Captured conversation/library at 1024x768 and 1440x900 and inspected both contact sheets; compact navigation stays scrollable and the footer separator is consistent. No foreground scroll gesture was exercised. Evidence: `docs/verification/audit-C7`.
+
+### Settings iteration — preference foundation
+
+Added 12 typed device preferences and two world creation defaults, connected to native editor/composer/navigation/Library behavior. World defaults round-trip in v4 archives; older imports remain supported. Added seven tests for restart persistence, normalization, world isolation, export privacy/import rollback, atomic identity changes, launch defaults and native key behavior. Fixed a Swift throwing-coalescence compile error, then `./scripts/check.sh` passed (91 tests / 21 suites, lint, optimized build). Inspected editor/Library background contact sheet at 1440×900. Replacement Settings controls follow in the next stage. Evidence: `verification/settings-foundation`.

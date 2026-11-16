@@ -17,7 +17,7 @@ struct StudioSheet: View {
     self.studio = studio
     self.sheet = sheet
     _kind = State(initialValue: studio.newRecordKind)
-    _category = State(initialValue: studio.libraryCategory ?? "")
+    _category = State(initialValue: studio.libraryCategory ?? studio.worldDefaults.entityCategory)
     _model = State(
       initialValue: studio.harnessModels[studio.provider] ?? "")
     _worldName = State(initialValue: studio.world?.name ?? "")

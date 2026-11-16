@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 3
+  var version = 4
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -32,7 +32,7 @@ extension WorkspaceStore {
       }
     }
     var preferences: [String: String] = [:]
-    for key in ["world-cover", "composer"] {
+    for key in ["world-cover", "composer", "world-defaults"] {
       preferences[key] = try preference("\(key):\(worldID)")
     }
     let encoder = JSONEncoder()
@@ -52,13 +52,13 @@ extension WorkspaceStore {
       archive.tables["chronology_placements"] = []
     }
     if [1, 2].contains(archive.version) { archive.tables["record_sections"] = [] }
-    guard archive.format == "dev.synthesis.world", [1, 2, 3].contains(archive.version),
+    guard archive.format == "dev.synthesis.world", [1, 2, 3, 4].contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
       UUID(uuidString: oldWorld) != nil,
       archive.tables.values.reduce(0, { $0 + $1.count }) <= 100_000,
-      Set(archive.preferences.keys).isSubset(of: ["world-cover", "composer"])
+      Set(archive.preferences.keys).isSubset(of: ["world-cover", "composer", "world-defaults"])
     else { throw SynthesisError.invalid("This is not a supported Synthesis world file.") }
     var ids: [String: String] = [:]
     for table in Self.archiveTables {
@@ -126,7 +126,13 @@ extension WorkspaceStore {
         ).isEmpty
       else { throw SynthesisError.invalid("The world file contains invalid entity sections.") }
       for (key, value) in archive.preferences {
-        try setPreference("\(key):\(newWorld)", value: key == "world-cover" ? value : remap(value))
+        if key == "world-defaults" {
+          let defaults = try JSONDecoder().decode(WorldPreferences.self, from: Data(value.utf8))
+          try setWorldPreferences(worldID: newWorld, value: defaults)
+        } else {
+          try setPreference(
+            "\(key):\(newWorld)", value: key == "world-cover" ? value : remap(value))
+        }
       }
       return try world(newWorld)
     }

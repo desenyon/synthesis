@@ -227,23 +227,26 @@ struct Sidebar: View {
                     t: studio.t, title: category, icon: categoryIcon(category),
                     selected: studio.destination == .library && studio.libraryCategory == category
                       && studio.selectedRecord == nil,
-                    collapsed: false, trailing: count > 0 ? "\(count)" : nil,
+                    collapsed: false,
+                    trailing: studio.preferences.sidebarCounts && count > 0 ? "\(count)" : nil,
                     tint: studio.t.category(category)
                   ) { studio.openLens(category) }
                 }
               }
             }
-            VStack(spacing: 4) {
-              disclosure("Conversations", expanded: $chatsExpanded)
-              if chatsExpanded {
-                ForEach(studio.conversations.prefix(12)) { chat in
-                  ConversationRow(studio: studio, chat: chat)
-                }
-                if studio.conversations.isEmpty {
-                  Text("Your conversations will live here.").font(.studio(size: 12))
-                    .foregroundStyle(studio.t.muted)
-                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 10)
-                    .padding(.vertical, 7)
+            if studio.preferences.recentChats > 0 {
+              VStack(spacing: 4) {
+                disclosure("Conversations", expanded: $chatsExpanded)
+                if chatsExpanded {
+                  ForEach(studio.conversations.prefix(studio.preferences.recentChats)) { chat in
+                    ConversationRow(studio: studio, chat: chat)
+                  }
+                  if studio.conversations.isEmpty {
+                    Text("Your conversations will live here.").font(.studio(size: 12))
+                      .foregroundStyle(studio.t.muted)
+                      .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 10)
+                      .padding(.vertical, 7)
+                  }
                 }
               }
             }

@@ -247,22 +247,26 @@ struct EditorScreen: View {
         Rectangle().fill(studio.t.hairline).frame(width: 1, height: 16).padding(.horizontal, 5)
         styleButton("Heading", size: 22, bold: true)
         styleButton("Subheading", size: 18, bold: true)
-        styleButton("Body", size: 16, bold: false)
+        styleButton("Body", size: CGFloat(studio.preferences.bodySize), bold: false)
         Spacer()
-        Text("\(bodyText.split { $0.isWhitespace || $0.isNewline }.count) words")
-          .font(.studio(size: 12)).monospacedDigit().foregroundStyle(studio.t.muted)
+        if studio.preferences.wordCount {
+          Text("\(bodyText.split { $0.isWhitespace || $0.isNewline }.count) words")
+            .font(.studio(size: 12)).monospacedDigit().foregroundStyle(studio.t.muted)
+        }
       }.padding(.top, 14).padding(.bottom, 8)
         .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
       RichDocumentEditor(
         id: record.id, body: bodyText, rtf: richText, t: studio.t, reloadToken: reloadToken,
-        handle: handle
+        preferences: studio.preferences, handle: handle
       ) { text, rtf in
         bodyText = text
         richText = rtf
         changed()
       }.frame(maxHeight: .infinity)
-    }.padding(.horizontal, 36).padding(.top, 18).frame(maxWidth: 780)
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }.padding(.horizontal, 36).padding(.top, 18).frame(
+      maxWidth: CGFloat(studio.preferences.readingWidth)
+    )
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
   private func styleButton(_ name: String, size: CGFloat, bold: Bool) -> some View {
     Button {

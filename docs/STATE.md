@@ -2,6 +2,12 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`. Build/open `dist/Synthesis.app` here. SwiftUI/AppKit + SQLite and the offline Excalidraw Canvas. Development only; no release or deployment. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` is preserved and excluded from commits.
 
+## Settings iteration — preference foundation
+
+Typed device preferences now drive writing size/width, spelling and substitutions, word counts, Library summaries, sidebar counts/history limits, launch destination and composer send keys. Per-world entity/chat defaults are isolated and portable in `.synthesis` v4 (v1–v3 imports supported). The replacement Settings UI is next; these new controls are not yet exposed there.
+
+`./scripts/check.sh` passed: strict lint, **91 tests in 21 suites**, optimized development build. Two 1440×900 background captures (editor/Library) were inspected; defaults retain their existing appearance. Evidence: `verification/settings-foundation`. No live provider calls or foreground interactions.
+
 ## Audit repair pass
 
 Worked in the exact [AUDIT](AUDIT.md) master order, with one commit and push per item. [PROGRESS](PROGRESS.md) records commands, outcomes and limits; evidence is in `docs/verification/audit-<item>`.
@@ -32,7 +38,7 @@ Worked in the exact [AUDIT](AUDIT.md) master order, with one commit and push per
 
 ## Existing capabilities and limits
 
-Connected documents, entities, links, typed relationships, conversations, draft proposals, explicit canon approval, reversible archive, world-scoped search and Manual cancellation remain. Sections use migration 0008 and portable `.synthesis` v3 / JSON schema 7; older world imports remain supported. Nested chronology branches/periods organize events but do not branch or merge canon. The full request and future feature gaps remain in [NEXT_PASS](NEXT_PASS.md).
+Connected documents, entities, links, typed relationships, conversations, draft proposals, explicit canon approval, reversible archive, world-scoped search and Manual cancellation remain. Sections use migration 0008 and portable `.synthesis` v4 / JSON schema 7; older world imports remain supported. Nested chronology branches/periods organize events but do not branch or merge canon. The full request and future feature gaps remain in [NEXT_PASS](NEXT_PASS.md).
 
 On-demand subscription image generation, lore-coherent editable map geometry/hierarchy, dedicated power-system/cosmology studios, richer world preferences and exhaustive large-board, accessibility and trackpad coverage remain incomplete. PNG output does not reproduce every DOM card decoration. Dependency evidence in [DEPENDENCIES](DEPENDENCIES.md) is from the earlier scoped audit, not a new security audit in this repair pass.
 
