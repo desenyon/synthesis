@@ -38,6 +38,71 @@ struct BottomOverflowFade: ViewModifier {
   }
 }
 
+/// Open, aligned preference rows. Small windows stack controls beneath their labels.
+struct PreferenceRow<Control: View>: View {
+  let title: String
+  var detail: String = ""
+  let t: Theme
+  @ViewBuilder var control: () -> Control
+  private var label: some View {
+    VStack(alignment: .leading, spacing: 4) {
+      Text(title).font(.studio(size: 14, weight: .medium)).foregroundStyle(t.text)
+      if !detail.isEmpty {
+        Text(detail).font(.studio(size: 12.5)).foregroundStyle(t.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+    }.frame(maxWidth: .infinity, alignment: .leading)
+  }
+  var body: some View {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 24) {
+        label.frame(minWidth: 200)
+        control().fixedSize(horizontal: true, vertical: false)
+      }
+      VStack(alignment: .leading, spacing: 12) {
+        label
+        control()
+      }
+    }.padding(.vertical, 16)
+      .overlay(alignment: .bottom) { t.hairline.frame(height: 1) }
+  }
+}
+
+struct PreferenceMenu<Value: Hashable>: View {
+  let title: String
+  @Binding var value: Value
+  let options: [(Value, String)]
+  let t: Theme
+  var body: some View {
+    PlainMenu {
+      ForEach(options.indices, id: \.self) { i in
+        Button {
+          value = options[i].0
+        } label: {
+          if options[i].0 == value {
+            Label {
+              Text(options[i].1)
+            } icon: {
+              StudioIcon("checkmark", size: 13)
+            }
+          } else {
+            Text(options[i].1)
+          }
+        }
+      }
+    } label: {
+      HStack(spacing: 8) {
+        Text(options.first { $0.0 == value }?.1 ?? title).lineLimit(1)
+        Spacer(minLength: 4)
+        StudioIcon("chevron.up.chevron.down", size: 12).foregroundStyle(t.secondary)
+      }.font(.studio(size: 13, weight: .medium)).foregroundStyle(t.text)
+        .padding(.horizontal, 12).frame(width: 176, height: 34)
+        .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
+        .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.hairline, lineWidth: 1))
+    }.accessibilityLabel(title)
+  }
+}
+
 // MARK: Buttons
 
 /// Text button used across bars, sheets and empty states.
@@ -262,6 +327,7 @@ struct FormTextArea: View {
   var placeholder: String
   @Binding var text: String
   var t: Theme
+  var height: CGFloat = 180
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
       Text(label).font(.studio(size: 12.5, weight: .medium)).foregroundStyle(t.secondary)
@@ -273,7 +339,7 @@ struct FormTextArea: View {
               .accessibilityHidden(true)
           }
         }
-        .padding(10).frame(height: 180)
+        .padding(10).frame(height: height)
         .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
         .accessibilityLabel(label)
     }
@@ -285,20 +351,14 @@ struct FormField: View {
   var placeholder: String
   @Binding var text: String
   let t: Theme
-  var secure = false
   var submit: () -> Void = {}
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
       if let label {
         Text(label).font(.studio(size: 12, weight: .medium)).foregroundStyle(t.secondary)
       }
-      Group {
-        if secure {
-          SecureField(placeholder, text: $text)
-        } else {
-          TextField(placeholder, text: $text)
-        }
-      }.textFieldStyle(.plain).font(.studio(size: 14)).onSubmit(submit)
+      TextField(placeholder, text: $text)
+        .textFieldStyle(.plain).font(.studio(size: 14)).onSubmit(submit)
         .padding(.horizontal, 10).frame(height: 34)
         .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
         .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.border, lineWidth: 1))

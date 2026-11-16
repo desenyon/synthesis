@@ -147,7 +147,7 @@ public struct Toast: Identifiable {
   private var requestID = UUID()
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
-    case settings, world, document, rename, onboarding
+    case world, document, rename, onboarding
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
@@ -234,6 +234,15 @@ public struct Toast: Identifiable {
       checkingProvider = false
       refreshProviderAvailability()
     }
+  }
+  @Published var settingsSection = SettingsSection.general
+  @Published var settingsQuery = ""
+  @Published var assistantSettingsExpanded = false
+  func openAssistantSettings() {
+    settingsSection = .assistant
+    settingsQuery = ""
+    sheet = nil
+    navigate(.settings)
   }
   public func setHarnessModel(_ value: String, for kind: ProviderKind) {
     let model = value.trimmingCharacters(in: .whitespacesAndNewlines)

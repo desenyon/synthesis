@@ -227,11 +227,8 @@ struct RecordRow: View {
       HStack(spacing: 12) {
         CategoryTile(record: record, t: studio.t, size: 34)
         VStack(alignment: .leading, spacing: 3) {
-          HStack(spacing: 7) {
-            Text(record.title).font(.studio(size: 14, weight: .medium))
-              .foregroundStyle(studio.t.text).lineLimit(1)
-
-          }
+          Text(record.title).font(.studio(size: 14, weight: .medium))
+            .foregroundStyle(studio.t.text).lineLimit(1)
           if studio.preferences.libraryPreviews {
             Text(
               record.body.isEmpty

@@ -63,4 +63,69 @@ import Testing
     try enter(.command)
     #expect(sent == 2)
   }
+
+  @Test func writingPreferencesConfigureNativeEditorWithoutReformattingRichText() throws {
+    var preferences = StudioPreferences()
+    preferences.bodySize = 20
+    preferences.spellCheck = true
+    preferences.smartQuotes = false
+    preferences.smartDashes = false
+    preferences.automaticLinks = false
+    var editor = RichDocumentEditor(
+      id: "test", body: "A thought", rtf: nil, t: Theme(dark: true), reloadToken: 0,
+      preferences: preferences, changed: { _, _ in })
+    let view = NSTextView()
+    editor.install(view)
+    editor.configureWriting(view)
+    #expect(view.isContinuousSpellCheckingEnabled)
+    #expect(!view.isAutomaticSpellingCorrectionEnabled)
+    #expect(!view.isAutomaticQuoteSubstitutionEnabled && !view.isAutomaticDashSubstitutionEnabled)
+    #expect(!view.isAutomaticLinkDetectionEnabled)
+    #expect(
+      (view.textStorage?.attribute(.font, at: 0, effectiveRange: nil) as? NSFont)?.pointSize == 20)
+    let original = NSAttributedString(
+      string: "A title", attributes: [.font: NSFont.boldSystemFont(ofSize: 28)])
+    let data = try original.data(
+      from: NSRange(location: 0, length: original.length),
+      documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf])
+    editor = RichDocumentEditor(
+      id: "rich", body: "A title", rtf: data.base64EncodedString(), t: Theme(dark: true),
+      reloadToken: 0, preferences: preferences, changed: { _, _ in })
+    editor.install(view)
+    #expect(view.string == "A title")
+    #expect(
+      (view.textStorage?.attribute(.font, at: 0, effectiveRange: nil) as? NSFont)?.pointSize == 28)
+    editor.preferences = StudioPreferences()
+    editor.configureWriting(view)
+    #expect(!view.isContinuousSpellCheckingEnabled && view.isAutomaticQuoteSubstitutionEnabled)
+    #expect(view.isAutomaticDashSubstitutionEnabled && view.isAutomaticLinkDetectionEnabled)
+    #expect(
+      (view.textStorage?.attribute(.font, at: 0, effectiveRange: nil) as? NSFont)?.pointSize == 28)
+  }
+
+  @Test func settingsSearchFindsActualControlsAcrossSections() {
+    #expect(
+      Set(SettingsItem.matching(" EXPORT ", section: .writing))
+        == Set([.portable, .markdown, .json, .images]))
+    #expect(SettingsItem.matching("spell", section: .general) == [.spelling])
+    #expect(SettingsItem.matching("model", section: .data) == [.assistance, .connection])
+    #expect(SettingsItem.matching("font", section: .assistant) == [.textSize])
+    #expect(SettingsItem.matching("unicorn", section: .general).isEmpty)
+    for section in SettingsSection.allCases {
+      #expect(SettingsItem.matching("  ", section: section).allSatisfy { $0.section == section })
+    }
+    for item in SettingsItem.allCases {
+      #expect(SettingsItem.matching(item.title, section: .general).contains(item))
+    }
+  }
+
+  @Test func providerSelectionAndSettingsNavigationDoNotStartChecksOrGeneration() throws {
+    let studio = try Studio(store: WorkspaceStore(path: ":memory:"))
+    studio.setMode(.manual)
+    studio.setProvider(.claudeCode)
+    studio.openAssistantSettings()
+    #expect(studio.destination == .settings && studio.settingsSection == .assistant)
+    #expect(studio.mode == .manual && !studio.checkingProvider && studio.providerStatus == nil)
+    #expect(studio.sheet == nil)
+  }
 }

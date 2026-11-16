@@ -11,11 +11,16 @@ extension Studio {
     "palette", "light-conversation", "light-library", "light-graph", "light-editor",
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
-    "empty-graph", "empty-timeline", "empty-atlas", "sheet-settings", "sheet-record",
+    "empty-graph", "empty-timeline", "empty-atlas", "sheet-record",
     "worlds", "settings", "onboarding", "library-companion",
     "sheet-canon", "sheet-history", "sheet-relation", "sheet-rule",
     "sections", "light-sections", "manual-sections", "sections-companion", "sections-empty",
     "sheet-section", "section-editor",
+    "settings-writing", "settings-assistant", "settings-world", "settings-data",
+    "settings-search", "settings-no-results", "light-settings", "light-settings-writing",
+    "settings-assistant-details",
+    "manual-settings", "settings-collapsed", "settings-model-search", "preferences-editor",
+    "preferences-library",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -150,6 +155,20 @@ extension Studio {
           content: String(decoding: try JSONEncoder().encode(document), as: UTF8.self))
       }
     }
+    updatePreferences { $0 = StudioPreferences() }
+    if state.hasPrefix("preferences-") {
+      updatePreferences {
+        $0.bodySize = 20
+        $0.readingWidth = 640
+        $0.wordCount = false
+        $0.libraryPreviews = false
+        $0.sidebarCounts = false
+        $0.recentChats = 0
+      }
+    }
+    settingsSection = .general
+    settingsQuery = ""
+    assistantSettingsExpanded = state == "settings-assistant-details"
     recordSectionTabs = [:]
     selectedRecord = nil
     palette = false
@@ -158,7 +177,7 @@ extension Studio {
     stop()
     setMode(state.hasPrefix("manual") ? .manual : .assisted)
     dark = !state.hasPrefix("light")
-    collapsed = state == "collapsed"
+    collapsed = ["collapsed", "settings-collapsed"].contains(state)
     inspector = true
     libraryCategory = nil
     canvasBoardID = board.isEmpty ? nil : board
@@ -172,19 +191,41 @@ extension Studio {
     case "conversation-home", "conversation", "light-conversation", "manual-conversation",
       "empty-conversation":
       destination = .chat
-    case "library", "light-library", "empty-library": destination = .library
+    case "library", "light-library", "empty-library", "preferences-library": destination = .library
     case "toast":
       destination = .library
       show("Archived “Oren Ashe”", icon: "archivebox", actionTitle: "Undo") {}
     case "worlds": destination = .worlds
-    case "settings": destination = .settings
+    case "settings", "light-settings", "settings-collapsed": destination = .settings
+    case "manual-settings":
+      destination = .settings
+      settingsSection = .assistant
+    case "settings-writing", "light-settings-writing":
+      destination = .settings
+      settingsSection = .writing
+    case "settings-assistant", "settings-assistant-details":
+      destination = .settings
+      settingsSection = .assistant
+    case "settings-world":
+      destination = .settings
+      settingsSection = .world
+    case "settings-data":
+      destination = .settings
+      settingsSection = .data
+    case "settings-search":
+      destination = .settings
+      settingsQuery = "export"
+    case "settings-no-results":
+      destination = .settings
+      settingsQuery = "unicorn"
+    case "settings-model-search":
+      destination = .settings
+      settingsQuery = "model"
+      assistantSettingsExpanded = true
     case "library-companion": destination = .library
     case "onboarding":
       destination = .chat
       sheet = .onboarding
-    case "sheet-settings":
-      destination = .library
-      sheet = .settings
     case "sheet-record":
       destination = .library
       newRecordKind = "entity"
@@ -212,8 +253,9 @@ extension Studio {
       inspector = false
       selectedRecord = records.first { $0.title == "Oren Ashe" }
       if let id = selectedRecord?.id { recordSectionTabs[id] = true }
-    case "editor", "light-editor", "sheet-rule":
+    case "editor", "light-editor", "sheet-rule", "preferences-editor":
       destination = .library
+      if state == "preferences-editor" { inspector = false }
       selectedRecord = records.first {
         $0.title == (state == "sheet-rule" ? "The art of remembrance" : "Mira Vale")
       }

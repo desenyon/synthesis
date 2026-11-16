@@ -133,7 +133,7 @@ final class ComposerTextView: NSTextView {
   }
 }
 
-/// Message input. Return sends, Shift-Return inserts a line. Lore references appear as tokens
+/// Message input honors the saved send shortcut. Shift-Return inserts a line. References appear as tokens
 /// and are stored as Markdown links. Reports its content height and any `@query` being typed.
 struct ComposerInput: NSViewRepresentable {
   @Binding var text: String
@@ -386,8 +386,7 @@ struct RichDocumentEditor: NSViewRepresentable {
     view.autoresizingMask = [.width]
     view.textContainer?.widthTracksTextView = true
     view.delegate = context.coordinator
-    view.isAutomaticQuoteSubstitutionEnabled = true
-    view.isAutomaticLinkDetectionEnabled = true
+    configureWriting(view)
     view.setAccessibilityLabel("Document body")
     install(view)
     handle?.view = view
@@ -400,7 +399,7 @@ struct RichDocumentEditor: NSViewRepresentable {
     style.paragraphSpacing = 12
     return style
   }
-  private func install(_ view: NSTextView) {
+  func install(_ view: NSTextView) {
     if let rtf, let data = Data(base64Encoded: rtf),
       let attributed = NSAttributedString(rtf: data, documentAttributes: nil)
     {
@@ -435,6 +434,9 @@ struct RichDocumentEditor: NSViewRepresentable {
     }
     view.textColor = NSColor(t.text)
     view.insertionPointColor = NSColor(t.accent)
+    configureWriting(view)
+  }
+  func configureWriting(_ view: NSTextView) {
     view.isContinuousSpellCheckingEnabled = preferences.spellCheck
     view.isAutomaticSpellingCorrectionEnabled = false
     view.isAutomaticQuoteSubstitutionEnabled = preferences.smartQuotes

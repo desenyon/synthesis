@@ -19,3 +19,25 @@ Persist typed, validated writing/workspace preferences: body size for unformatte
 Verify defaults and invalid stored values, restart persistence, world isolation, portable defaults, send-key behavior and actual native editor configuration. Capture every section, search/results/empty, light and compact variants with isolated background data; inspect contact sheets and fix observed defects. Native file dialogs and live provider calls remain outside background verification.
 
 Design audit method: adapted from **unslop** by [Damir Sokolovsky](https://heydamir.design/unslop), CC BY 4.0. The implementation uses Synthesis's native design system.
+
+## Controls and scope
+
+Open Settings from navigation or ⌘,. Search works across all sections; terms such as font, export and model find their corresponding controls. Searching for model or privacy opens connection details. Narrow windows use a section menu.
+
+| Section | Controls | Scope |
+| --- | --- | --- |
+| General | Light/dark; expanded navigation; category counts; 0/5/12/20 recent chats; launch workspace; Library text previews | This Mac |
+| Writing | 14/16/18/20 pt body text; 640/780/960 pt reading width; spellcheck; smart quotes; smart dashes; web-link detection; word count | This Mac |
+| Assistant | Assisted/Manual; Codex/Claude Code; explicit sign-in check; optional model; Return or Command–Return to send | This Mac |
+| This world | Name and description; cover; custom new-entity type; new-chat mode | Selected world; included in portable archive |
+| Data | Import Markdown/text; open world file; export `.synthesis`, Markdown, JSON or images; open sample world | Selected world, or a fresh world on import |
+
+Writing size affects unformatted documents and the Body formatting action, not saved rich-text font sizes. Spellcheck never enables automatic correction. Shift–Return adds a line in either send mode; entity mention selection and IME composition keep priority. A Manual launch preference cannot land on a disabled conversation: it opens Library instead.
+
+Name/description save together; model and custom type have explicit Save controls. Other preferences save as changed. Changing worlds resets world fields to that world's data. A provider selection does not run a check; Check sign-in only requests subscription status. AI generation remains blocked in Manual by the core.
+
+The obsolete Settings sheet, duplicated provider cards, unused saved-state flag and unused secure-field branch were removed. Onboarding shares the connection control without advanced model/privacy sections. No foreground UI automation or paid generation is part of this iteration.
+
+## Verification
+
+Final `./scripts/check.sh`: strict Swift lint, 94 tests in 21 suites, optimized ad-hoc development app. Tests cover restart persistence, invalid values, world isolation, archive privacy/rollback, identity transactions, launch defaults, native send keys and text configuration/RTF preservation, search and Manual/provider selection. Final 40 background captures were inspected across 1440×900, 1024×768 and 720×800; evidence in `verification/settings-refinement`. Native menus/file dialogs, foreground gestures/focus traversal and live provider calls remain unverified in this pass.

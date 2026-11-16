@@ -139,7 +139,7 @@ public struct ConnectedRoot: View {
       case .atlas: AtlasScreen(studio: studio)
       case .review: ReviewScreen(studio: studio)
       case .worlds: WorldsScreen(studio: studio)
-      case .settings: StudioSheet(studio: studio, sheet: .settings, embedded: true)
+      case .settings: SettingsScreen(studio: studio)
       }
     }
   }

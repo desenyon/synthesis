@@ -1,0 +1,7 @@
+CAPTURE settings 720x800, bitmap 1440x1600, 111ms
+CAPTURE settings-world 720x800, bitmap 1440x1600, 71ms
+CAPTURE settings-search 720x800, bitmap 1440x1600, 31ms
+CAPTURE settings-assistant-details 720x800, bitmap 1440x1600, 64ms
+CAPTURE manual-settings 720x800, bitmap 1440x1600, 20ms
+CAPTURE preferences-library 720x800, bitmap 1440x1600, 248ms
+Native captures complete: /private/tmp/synthesis-settings-compact

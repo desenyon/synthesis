@@ -2,11 +2,16 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`. Build/open `dist/Synthesis.app` here. SwiftUI/AppKit + SQLite and the offline Excalidraw Canvas. Development only; no release or deployment. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` is preserved and excluded from commits.
 
-## Settings iteration — preference foundation
+## Settings refinement
 
-Typed device preferences now drive writing size/width, spelling and substitutions, word counts, Library summaries, sidebar counts/history limits, launch destination and composer send keys. Per-world entity/chat defaults are isolated and portable in `.synthesis` v4 (v1–v3 imports supported). The replacement Settings UI is next; these new controls are not yet exposed there.
+Settings is now one searchable native workspace: General, Writing, Assistant, This world and Data. Compact windows use a section menu; provider details are collapsed by default. Chat setup links open Assistant settings. Onboarding shares the connection control; the obsolete Settings modal/provider cards and unused secure-field branch are removed.
 
-`./scripts/check.sh` passed: strict lint, **91 tests in 21 suites**, optimized development build. Two 1440×900 background captures (editor/Library) were inspected; defaults retain their existing appearance. Evidence: `verification/settings-foundation`. No live provider calls or foreground interactions.
+- Twelve validated device preferences control writing size/width, spelling and substitutions, word counts, Library summaries, sidebar counts/history limits, launch destination and send keys. Existing rich formatting survives size changes.
+- Two per-world defaults set the initial entity type and conversation mode. They round-trip in `.synthesis` v4; v1–v3 imports remain supported. Device/provider settings stay excluded.
+- World name/description save atomically. New record accepts custom entity types. Data gives each import/export format an explained action.
+- Provider selection makes no implicit status check or generation request. Manual/canon safeguards remain unchanged.
+
+`./scripts/check.sh` passed on final source: strict lint, **94 tests in 21 suites**, optimized ad-hoc development build. **40 final background captures** were inspected in contact sheets: 17 states each at 1440×900 and 1024×768, plus six at 720×800. Coverage includes every section, provider disclosure, search/results/empty, Manual, collapsed navigation, light theme, onboarding, custom entity creation and changed preferences in editor/Library. Evidence: `verification/settings-refinement`. Native file dialogs, live provider calls, keyboard-focus traversal and physical pointer/scroll interaction were not exercised; background captures do not certify those. The earlier preference foundation passed 91 tests and two inspected editor/Library captures, committed and pushed as `6819302`.
 
 ## Audit repair pass
 
@@ -25,7 +30,7 @@ Worked in the exact [AUDIT](AUDIT.md) master order, with one commit and push per
 - Canvas Fit reserves measured composer and toolbar space. Cards show one category and an explicit state; PNG labels share that wording. Sheet capture compositing protects panel bounds from WebKit pixels.
 - An empty world can create its first Timeline event and a source draft in one transaction. The required source constraint remains intact.
 - Record and world Markdown exports share metadata and native rich-text conversion. Entity export includes sections and local anchors; filenames are sanitized with an Untitled fallback.
-- Worlds shows saved covers, descriptions, counts, activity timestamps and the current-world marker. Description is editable. Settings orders world details, import and four export formats consistently, with a shared Light/Dark switch. Onboarding keeps model editing and the image note in Settings. Review explains the decisions badge and separates local check counts. Sample illustration copy is provider-neutral.
+- Worlds shows saved covers, descriptions, counts, activity timestamps and the current-world marker. Description is editable. The earlier audit grouped Settings world/import/export controls; the new searchable Settings refinement above supersedes that layout. Onboarding keeps model editing and the image note in Settings. Review explains the decisions badge and separates local check counts. Sample illustration copy is provider-neutral.
 
 ## Verification observed
 
@@ -40,6 +45,6 @@ Worked in the exact [AUDIT](AUDIT.md) master order, with one commit and push per
 
 Connected documents, entities, links, typed relationships, conversations, draft proposals, explicit canon approval, reversible archive, world-scoped search and Manual cancellation remain. Sections use migration 0008 and portable `.synthesis` v4 / JSON schema 7; older world imports remain supported. Nested chronology branches/periods organize events but do not branch or merge canon. The full request and future feature gaps remain in [NEXT_PASS](NEXT_PASS.md).
 
-On-demand subscription image generation, lore-coherent editable map geometry/hierarchy, dedicated power-system/cosmology studios, richer world preferences and exhaustive large-board, accessibility and trackpad coverage remain incomplete. PNG output does not reproduce every DOM card decoration. Dependency evidence in [DEPENDENCIES](DEPENDENCIES.md) is from the earlier scoped audit, not a new security audit in this repair pass.
+On-demand subscription image generation, lore-coherent editable map geometry/hierarchy, dedicated power-system/cosmology studios, exhaustive large-board, accessibility and trackpad coverage remain incomplete. PNG output does not reproduce every DOM card decoration. Dependency evidence in [DEPENDENCIES](DEPENDENCIES.md) is from the earlier scoped audit, not a new security audit in this repair pass.
 
-Next: finish A2's live dark/light check when native capture is available; run the opt-in modal Escape check when foreground testing will not interrupt the owner. Keep C2/C3 excluded until explicitly approved, then continue the owner-prioritized feature ledger. AGENTS.md unchanged.
+Next: expand preference interaction coverage and writing recovery, then finish A2's live dark/light check when native capture is available; run the opt-in modal Escape check when foreground testing will not interrupt the owner. Keep C2/C3 excluded until explicitly approved, then continue the owner-prioritized feature ledger. AGENTS.md unchanged.

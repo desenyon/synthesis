@@ -310,7 +310,7 @@ struct ChatRow: View {
       Text(message.body).font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
         .fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
-      Button("Model settings") { studio.sheet = .settings }.buttonStyle(.plain)
+      Button("Model settings") { studio.openAssistantSettings() }.buttonStyle(.plain)
         .font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
     }.padding(.horizontal, 14).padding(.vertical, 11)
       .background(studio.t.surface.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
@@ -489,7 +489,7 @@ struct UnifiedComposer: View {
         StudioIcon("bolt.slash", size: 10)
         Text(
           "Connect your \(studio.provider.title) subscription.")
-        Button("Set up") { studio.sheet = .settings }.buttonStyle(.plain)
+        Button("Set up") { studio.openAssistantSettings() }.buttonStyle(.plain)
           .foregroundStyle(studio.t.accent)
         if !collapsed && !companion { Text("Messages are kept locally until then.") }
       }

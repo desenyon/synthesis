@@ -101,3 +101,10 @@ The 1024×768 contact sheet exposed a clipped non-Canvas companion: only Canvas 
 ## 2026-11-15 — Audit D2 capture compositing
 
 Adding an opaque black inline sheet did not fix the artwork capture: the WebKit compositor treated every pixel matching the canvas backdrop as transparent, including the sheet. The failing intermediate contact sheet exposed this. CaptureSheetAnchor now reports the actual panel bounds to the compositor; those pixels are protected and the canvas receives the scrim. All eight sheet states were recaptured at both sizes and inspected after the change. The real-modal self-test is separate and remains opt-in because it takes focus. AGENTS.md unchanged; this is a capture implementation lesson, not evidence of live modal interaction.
+
+## 2026-11-15 — scoped settings and preserved writing
+
+- Observation: a font preference must not overwrite formatting in saved RTF. The native test installs a 28 pt title, changes writing preferences, and verifies that title remains 28 pt while unformatted writing uses 20 pt.
+- Evidence: `PreferenceBehaviorTests.writingPreferencesConfigureNativeEditorWithoutReformattingRichText`; final 94-test run and changed-preference captures in `verification/settings-refinement`.
+- World defaults and device defaults need distinct export scope. Archive tests verify portable defaults, old-version imports, exclusion of device/provider values and rollback for malformed world defaults.
+- No AGENTS.md change: existing data-integrity and native-verification rules already cover these practices. Rollback is a normal commit revert; no schema migration or destructive data changes were introduced.

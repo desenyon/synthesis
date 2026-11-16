@@ -1,0 +1,37 @@
+CAPTURE sheet-record 1440x900, bitmap 2880x1800, 736ms
+CAPTURE sheet-record content inline; native modal presentation not exercised
+CAPTURE settings 1440x900, bitmap 2880x1800, 152ms
+CAPTURE onboarding 1440x900, bitmap 2880x1800, 808ms
+CAPTURE settings-writing 1440x900, bitmap 2880x1800, 197ms
+CAPTURE settings-assistant 1440x900, bitmap 2880x1800, 50ms
+CAPTURE settings-world 1440x900, bitmap 2880x1800, 129ms
+CAPTURE settings-data 1440x900, bitmap 2880x1800, 70ms
+CAPTURE settings-search 1440x900, bitmap 2880x1800, 58ms
+CAPTURE settings-no-results 1440x900, bitmap 2880x1800, 67ms
+CAPTURE light-settings 1440x900, bitmap 2880x1800, 151ms
+CAPTURE light-settings-writing 1440x900, bitmap 2880x1800, 185ms
+CAPTURE settings-assistant-details 1440x900, bitmap 2880x1800, 96ms
+CAPTURE manual-settings 1440x900, bitmap 2880x1800, 72ms
+CAPTURE settings-collapsed 1440x900, bitmap 2880x1800, 157ms
+CAPTURE settings-model-search 1440x900, bitmap 2880x1800, 94ms
+CAPTURE preferences-editor 1440x900, bitmap 2880x1800, 508ms
+CAPTURE preferences-library 1440x900, bitmap 2880x1800, 505ms
+CAPTURE sheet-record 1024x768, bitmap 2048x1536, 471ms
+CAPTURE sheet-record content inline; native modal presentation not exercised
+CAPTURE settings 1024x768, bitmap 2048x1536, 114ms
+CAPTURE onboarding 1024x768, bitmap 2048x1536, 522ms
+CAPTURE settings-writing 1024x768, bitmap 2048x1536, 149ms
+CAPTURE settings-assistant 1024x768, bitmap 2048x1536, 47ms
+CAPTURE settings-world 1024x768, bitmap 2048x1536, 95ms
+CAPTURE settings-data 1024x768, bitmap 2048x1536, 59ms
+CAPTURE settings-search 1024x768, bitmap 2048x1536, 49ms
+CAPTURE settings-no-results 1024x768, bitmap 2048x1536, 56ms
+CAPTURE light-settings 1024x768, bitmap 2048x1536, 106ms
+CAPTURE light-settings-writing 1024x768, bitmap 2048x1536, 149ms
+CAPTURE settings-assistant-details 1024x768, bitmap 2048x1536, 78ms
+CAPTURE manual-settings 1024x768, bitmap 2048x1536, 49ms
+CAPTURE settings-collapsed 1024x768, bitmap 2048x1536, 99ms
+CAPTURE settings-model-search 1024x768, bitmap 2048x1536, 76ms
+CAPTURE preferences-editor 1024x768, bitmap 2048x1536, 336ms
+CAPTURE preferences-library 1024x768, bitmap 2048x1536, 337ms
+Native captures complete: /private/tmp/synthesis-settings-final

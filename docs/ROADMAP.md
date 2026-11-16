@@ -11,6 +11,8 @@
 
 ## Active — connected studio audit and UI overhaul
 
+- Settings refinement (2026-11-15): searchable sections and typed writing/navigation preferences, with portable per-world entity/chat defaults. Final verification is recorded in [STATE](STATE.md); no additional theme or composer overhaul is implied.
+
 - Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).
 - Implemented 2026-11-15: subscription-only authentication, stale-revision rejection, structured world context, reviewed spatial/link/rule actions, source-aware Canvas capture/relationship controls, Phosphor icons and grouped navigation. Current evidence/limits: [INTEGRATION_OVERHAUL](INTEGRATION_OVERHAUL.md).
 - Next: persist the full world-index trace and test a live subscription run with the updated flags; expand interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Match live/export card appearance; measure large boards and derived graphs.

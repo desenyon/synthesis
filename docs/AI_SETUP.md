@@ -8,10 +8,10 @@ Open Settings (⌘,) → Assistant and choose how Synthesis reaches a model.
 
 If Claude Code or Codex is installed and signed in on this Mac, Synthesis uses it. No API key is involved and Synthesis never sees your sign-in; it belongs to the harness.
 
-- **Claude Code** (recommended when installed): install it, run `claude` in Terminal once and sign in with your Claude subscription.
-- **Codex**: install it, run `codex login` and sign in with your ChatGPT subscription.
+- **Codex** (recommended): install it, run `codex login` and sign in with your ChatGPT subscription.
+- **Claude Code**: install it, run `claude` in Terminal once and sign in with your Claude subscription.
 
-"Check sign-in" asks the harness for its own status and sends no message. The optional Model field passes a model name to the harness (`sonnet`, `opus`, `haiku` for Claude Code); leave it empty to use your default.
+"Check sign-in" asks the harness for its own status and sends no message. Choosing a provider does not start a status check or a model request. Expand **Model & connection details** for the optional Model field, which passes a model name to the harness (`sonnet`, `opus`, `haiku` for Claude Code); leave it empty to use your default.
 
 How each message is run:
 
@@ -30,7 +30,7 @@ Inherited `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `OPENAI_API_KEY` varia
 
 ## Subscription authentication only
 
-Direct API configuration and transport are removed. A saved preference for the retired API provider migrates to an installed subscription harness, or Claude Code if neither is installed. Old Keychain entries are not read or deleted.
+Direct API configuration and transport are removed. A saved preference for the retired API provider migrates to Codex; a valid existing subscription provider selection is preserved. Old Keychain entries are not read or deleted.
 
 Before every generation, the native adapter checks subscription sign-in. Claude must report `authMethod: claude.ai`; Codex must report ChatGPT sign-in. API-only authentication is refused. Status checks time out after 8 seconds; generation processes after 180 seconds. Stop or Manual terminates the process; process exit is awaited asynchronously so it cannot block the UI executor.
 

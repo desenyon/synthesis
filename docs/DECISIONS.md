@@ -84,3 +84,9 @@ Use upstream Lucide 1.73.0 consistently for authored UI; retain the Excalidraw p
 - Keep canon distinctions in review and editing, while removing decorative draft/provider badges from browsing surfaces. Shared assistance lives with content and remains optional.
 - Systems is the navigation umbrella for factions/clans/sects. Older Factions categories remain intact and are included in that lens.
 - Chronology branches/periods are saved organizational structures, not automatic alternate-canon simulations. Requested image generation remains a separate, explicit-use future integration; text harness calls disable Codex image generation.
+
+## 2026-11-15 — searchable Settings and scoped preferences
+
+The owner requested simpler Settings plus more functional controls. Use five searchable sections in the native workspace instead of the long nested form. Compact windows use a section menu. Onboarding shares the provider control; selecting a provider starts neither authentication checks nor generation. Chat setup links open Assistant settings, removing the obsolete Settings modal.
+
+Store validated device presentation preferences separately from per-world creation defaults. World defaults travel in `.synthesis` v4; v1–v3 imports remain supported, and device/provider preferences remain excluded. Writing size applies to unformatted content and the Body style, preserving stored rich formatting. Identity fields save together transactionally. No canon, provider-safety, C2 or C3 boundary changes.

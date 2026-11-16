@@ -4,6 +4,8 @@ Audit date: 2026-11-15, `main` after commit `3efed30` plus the entity-sections w
 
 Repair status: **19 items completed**. A2 is implemented but awaiting its required live inspection (macOS capture error -3812). C2/C3 are unapproved and unchanged. D2's foreground modal test was added but not run; its background capture fixes were verified. Per-item evidence and limitations are in [PROGRESS.md](PROGRESS.md) and [STATE.md](STATE.md).
 
+Later owner-requested Settings refinement replaces the C5 long form with searchable sections. The obsolete Settings modal and its `sheet-settings` capture are retired; current evidence is recorded in [STATE](STATE.md). Historical per-item capture evidence below is preserved. C2/C3 remain excluded.
+
 ## How this was produced
 
 - Built the real app and rendered all 47 capture states at 1440×900 and 1024×768 with `./scripts/verify-ui.sh` (94 screenshots, isolated database, sample world "Aster" and an empty world).
