@@ -147,22 +147,9 @@ struct EditorScreen: View {
   private var origin: String { studio.libraryCategory ?? studio.destination.rawValue }
   private var bar: some View {
     WorkspaceBar(studio: studio) {
-      Button {
+      RecordBreadcrumb(origin: origin, title: title, status: status, t: studio.t) {
         studio.closeRecord()
-      } label: {
-        HStack(spacing: 5) {
-          StudioIcon("chevron.left", size: 11)
-          Text(origin).font(.studio(size: 13.5, weight: .medium))
-        }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
-          .hoverFill(studio.t)
-      }.buttonStyle(.plain).padding(.leading, -6).help("Back to \(origin)")
-        .keyboardShortcut("[", modifiers: .command)
-      Text("/").foregroundStyle(studio.t.muted.opacity(0.6))
-      Text(title.isEmpty ? "Untitled" : title).font(.studio(size: 13.5, weight: .medium))
-        .lineLimit(1).layoutPriority(-1)
-      Text(status).font(.studio(size: 12)).lineLimit(1)
-        .foregroundStyle(status.contains("Not saved") ? studio.t.danger : studio.t.muted)
-        .padding(.leading, 4)
+      }.layoutPriority(1)
     } trailing: {
       if record.state == "canon" {
         StateBadge(state: "canon", t: studio.t).padding(.horizontal, 6)

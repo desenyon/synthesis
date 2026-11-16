@@ -380,6 +380,39 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
   }
 }
 
+/// Reads the bar's compact environment inside its row, after layout chooses a variant.
+struct RecordBreadcrumb: View {
+  let origin: String
+  let title: String
+  let status: String
+  let t: Theme
+  var back: () -> Void
+  @Environment(\.barCompact) private var compact
+  var body: some View {
+    HStack(spacing: 8) {
+      Button(action: back) {
+        HStack(spacing: 5) {
+          StudioIcon("chevron.left", size: 11)
+          if !compact { Text(origin).font(.studio(size: 13.5, weight: .medium)) }
+        }.foregroundStyle(t.secondary).padding(.horizontal, 7).frame(height: 28)
+          .hoverFill(t)
+      }.buttonStyle(.plain).padding(.leading, -6).help("Back to \(origin)")
+        .accessibilityLabel("Back to \(origin)").keyboardShortcut("[", modifiers: .command)
+      if !compact { Text("/").foregroundStyle(t.muted.opacity(0.6)) }
+      Text(title.isEmpty ? "Untitled" : title).font(.studio(size: 13.5, weight: .medium))
+        .lineLimit(1).layoutPriority(1)
+      if compact {
+        Circle().fill(status.contains("Not saved") ? t.danger : t.muted)
+          .frame(width: 5, height: 5).help(status).accessibilityLabel(status)
+      } else {
+        Text(status).font(.studio(size: 12)).lineLimit(1)
+          .foregroundStyle(status.contains("Not saved") ? t.danger : t.muted)
+          .padding(.leading, 4)
+      }
+    }
+  }
+}
+
 /// Icon, title and optional detail for the left side of a workspace bar.
 struct BarTitle: View {
   let icon: String

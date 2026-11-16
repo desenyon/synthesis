@@ -260,7 +260,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT C4. In the `bar` of `EditorScreen` (`Editor.swift`) read `barCompact`: when compact, show only the back chevron, hide the "/" and the status text (keep a small saved/unsaved dot with a tooltip), and give the title `layoutPriority(1)`. Capture `sections-companion,editor` at 1024x768 and confirm the record title is readable.
 
-- [ ] done
+- [x] done — see verification/audit-C4.
 
 ### C5. Settings order and controls — Medium
 
