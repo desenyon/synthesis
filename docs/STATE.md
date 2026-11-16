@@ -27,7 +27,7 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`. Build/open `d
 
 [Next-pass ledger](NEXT_PASS.md) preserves the full request. Runtime subscription image generation, lore-coherent map generation/hierarchy, customizable entity subcards, dedicated power-system/cosmology workspaces, richer global/world preferences, timeline zoom and canon branches, full autonomous tools and exhaustive interaction coverage remain incomplete. PNG export works but does not yet reproduce every DOM card decoration.
 
-`npm audit` reports 12 upstream findings (9 high, 1 moderate, 2 low) in the Excalidraw/Mermaid dependency tree. The suggested fix downgrades Excalidraw to 0.17.6, which would break the current integration; no forced downgrade was applied. Offline CSP remains in force, but this is not a claim that those advisories are harmless. Dependency remediation is a separate outstanding audit item.
+Dependency follow-up: `npm audit` now reports **zero findings** after pinning patched lodash-es, KaTeX and Nano ID transitive dependencies, retaining Excalidraw 0.18.1. Canvas typecheck, eight tests, rebuilt offline bundle and 19 background engine checks passed. React 19 / older Radix peer warnings remain; this is not a claim of complete upstream compatibility or a security audit of bundled vendor internals. See [DEPENDENCIES](DEPENDENCIES.md).
 
 Next: review the running studio, then finish explicit-use image transport and editable map geometry as separate verified slices. Preserve canon approval and avoid subscription usage without an explicit user generation action. AGENTS.md unchanged.
 
