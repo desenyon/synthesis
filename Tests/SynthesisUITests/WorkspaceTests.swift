@@ -6,6 +6,21 @@ import Testing
 @testable import SynthesisUI
 
 @MainActor struct WorkspaceTests {
+  @Test func sectionChildrenDoNotInflateCharacterNavigation() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    let parent = try store.createRecord(
+      worldID: studio.worldID, title: "Mira", kind: "entity", category: "Characters")
+    for n in 1...3 {
+      try store.createRecordSection(
+        worldID: studio.worldID, parentID: parent.id, title: "Section \(n)")
+    }
+    try studio.reload()
+    #expect(studio.records.count == 4)
+    #expect(studio.sectionParents.count == 3)
+    #expect(studio.topLevelRecords.filter { $0.category == "Characters" }.count == 1)
+  }
+
   @Test func assistanceModePreservesWorkspaceAndEditorGuard() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let studio = try Studio(store: store)

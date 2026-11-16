@@ -98,7 +98,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B1. Add `sectionMemberships(worldID:)` to `Sources/SynthesisCore/RecordSections.swift` returning active child-ID → parent-ID pairs. Load it in `Studio.reload()` and add `topLevelRecords`. Use it for sidebar category counts, the Library default list and chip counts, and Conversation home suggestions. Add a Library "Sections" filter and show "Section of <parent title>" on section rows. Keep sections in search, palette, mentions and retrieval. Add a core test and a UI test for the count. Capture `library,conversation-home,sections`.
 
-- [ ] done
+- [x] done — see verification/audit-B1.
 
 ### B2. Entities open on the Sections tab — High, confirmed in code
 

@@ -11,6 +11,7 @@ struct LibraryScreen: View {
     case entities = "Entities"
     case ideas = "Ideas"
     case canon = "Canon"
+    case sections = "Sections"
     case archived = "Archived"
   }
   enum Order: String, CaseIterable {
@@ -27,6 +28,7 @@ struct LibraryScreen: View {
   private func belongs(_ record: LoreRecord, to filter: Filter) -> Bool {
     switch filter {
     case .all, .archived: return true
+    case .sections: return studio.sectionParents[record.id] != nil
     case .documents: return record.kind == "lore"
     case .entities: return record.kind == "entity"
     case .ideas: return record.kind == "capture"
@@ -34,7 +36,11 @@ struct LibraryScreen: View {
     }
   }
   private var scoped: [LoreRecord] {
-    let source = filter == .archived ? archived : studio.records
+    let source =
+      filter == .archived
+      ? archived
+      : (filter == .sections || !query.trimmingCharacters(in: .whitespaces).isEmpty
+        ? studio.records : studio.topLevelRecords)
     return source.filter {
       studio.libraryCategory == nil
         || Vocabulary.matchesCategory($0.category, studio.libraryCategory ?? "")
@@ -82,7 +88,11 @@ struct LibraryScreen: View {
               title: item.rawValue,
               count: item == .archived
                 ? archived.count
-                : (item == .all ? nil : studio.records.filter { belongs($0, to: item) }.count),
+                : (item == .all
+                  ? nil
+                  : (item == .sections ? studio.records : studio.topLevelRecords).filter {
+                    belongs($0, to: item)
+                  }.count),
               selected: filter == item, t: studio.t
             ) { filter = item }
           }
@@ -200,6 +210,14 @@ struct RecordRow: View {
   let record: LoreRecord
   var archived = false
   var changed: () -> Void = {}
+  private var categoryLabel: String {
+    if let parentID = studio.sectionParents[record.id],
+      let parent = studio.records.first(where: { $0.id == parentID })
+    {
+      return "Section of \(parent.title)"
+    }
+    return record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category
+  }
   var body: some View {
     Button {
       if !archived { studio.openRecord(record) }
@@ -218,9 +236,9 @@ struct RecordRow: View {
           ).font(.studio(size: 12.5)).foregroundStyle(studio.t.muted).lineLimit(1)
         }
         Spacer(minLength: 16)
-        Text(record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category)
+        Text(categoryLabel)
           .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
-          .frame(width: 110, alignment: .leading)
+          .frame(width: 150, alignment: .leading)
         if archived {
           Button("Restore") {
             studio.restore(recordID: record.id)

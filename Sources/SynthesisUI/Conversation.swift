@@ -170,7 +170,7 @@ struct ConversationStudio: View {
     }
   }
   @ViewBuilder private var references: some View {
-    if studio.records.isEmpty {
+    if studio.topLevelRecords.isEmpty {
       HStack(spacing: 10) {
         StudioIcon("tray").foregroundStyle(studio.t.muted)
         Text("Your library is empty. Anything you save from a conversation becomes a draft there.")
@@ -183,7 +183,7 @@ struct ConversationStudio: View {
         LazyVGrid(
           columns: [GridItem(.adaptive(minimum: 240), spacing: 8)], alignment: .leading, spacing: 8
         ) {
-          ForEach(studio.records.prefix(4)) { record in
+          ForEach(studio.topLevelRecords.prefix(4)) { record in
             Button {
               studio.reference(record)
             } label: {
@@ -500,7 +500,7 @@ struct UnifiedComposer: View {
   }
   private var references: some View {
     PlainMenu {
-      if studio.records.isEmpty {
+      if studio.topLevelRecords.isEmpty {
         Text("Create a record in Library first")
       } else {
         ForEach(referenceGroups, id: \.0) { group in

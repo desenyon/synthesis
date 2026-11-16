@@ -209,7 +209,7 @@ struct Sidebar: View {
               disclosure("World", expanded: $worldExpanded)
               if worldExpanded {
                 ForEach(Vocabulary.categories, id: \.self) { category in
-                  let count = studio.records.filter {
+                  let count = studio.topLevelRecords.filter {
                     Vocabulary.matchesCategory($0.category, category)
                   }.count
                   NavRow(

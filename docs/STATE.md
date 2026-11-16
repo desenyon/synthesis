@@ -44,3 +44,5 @@ Implementation checkpoint: `536b37a`. Final review build compiled from the canon
 ## Audit repair pass
 
 A1 completed and pushed with live theme checks and pixel assertions. A2 implemented and ten captures inspected, but its live check is blocked by macOS capture error -3812; checkbox remains open. Per-item checks and evidence are in PROGRESS.md and verification/audit-*. Next: B1 section hierarchy.
+
+- Audit B1: Active world-scoped section memberships drive top-level navigation, Library counts and Conversation suggestions; Sections filter preserves access and labels parents. Search, mentions and retrieval retain child records. ./scripts/check.sh passed: lint, 80 tests / 17 suites, optimized build. Library, conversation-home and sections captured at both sizes and both contact sheets inspected; sample Characters now shows 2, Library shows 9 top-level items.

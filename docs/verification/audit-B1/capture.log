@@ -1,0 +1,7 @@
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 646ms
+CAPTURE library 1440x900, bitmap 2880x1800, 541ms
+CAPTURE sections 1440x900, bitmap 2880x1800, 550ms
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, 416ms
+CAPTURE library 1024x768, bitmap 2048x1536, 355ms
+CAPTURE sections 1024x768, bitmap 2048x1536, 379ms
+Native captures complete: /private/tmp/synthesis-b1

@@ -11,6 +11,14 @@ public struct RecordSection: Identifiable, Sendable {
 }
 
 extension WorkspaceStore {
+  /// Active memberships in this world only. Archived parents or children are not sections.
+  public func sectionMemberships(worldID: String) throws -> [String: String] {
+    let rows = try db.rows(
+      "SELECT s.record_id,s.parent_id FROM record_sections s JOIN records p ON p.id=s.parent_id AND p.world_id=s.world_id JOIN records r ON r.id=s.record_id AND r.world_id=s.world_id WHERE s.world_id=? AND s.archived=0 AND p.archived=0 AND r.archived=0",
+      [worldID])
+    return Dictionary(uniqueKeysWithValues: rows.map { ($0["record_id"]!, $0["parent_id"]!) })
+  }
+
   public func recordSections(worldID: String, parentID: String, archived: Bool = false) throws
     -> [RecordSection]
   {

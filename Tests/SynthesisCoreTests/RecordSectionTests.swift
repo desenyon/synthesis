@@ -4,6 +4,29 @@ import Testing
 @testable import SynthesisCore
 
 struct RecordSectionTests {
+  @Test func membershipsAreScopedAndOnlyActive() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Sections")
+    let other = try store.createWorld(name: "Other")
+    let parent = try store.createRecord(
+      worldID: world.id, title: "Mira", kind: "entity", category: "Characters")
+    let sections = try (1...3).map {
+      try store.createRecordSection(worldID: world.id, parentID: parent.id, title: "Section \($0)")
+    }
+    let memberships = try store.sectionMemberships(worldID: world.id)
+    #expect(memberships.count == 3)
+    #expect(
+      try store.records(worldID: world.id).filter {
+        memberships[$0.id] == nil && $0.category == "Characters"
+      }.count == 1)
+    #expect(try store.sectionMemberships(worldID: other.id).isEmpty)
+    try store.setRecordSectionArchived(worldID: world.id, id: sections[0].id, archived: true)
+    #expect(try store.sectionMemberships(worldID: world.id)[sections[0].record.id] == nil)
+    #expect(try store.search(worldID: world.id, query: "Section").count == 3)
+    try store.archiveRecord(worldID: world.id, id: parent.id)
+    #expect(try store.sectionMemberships(worldID: world.id).isEmpty)
+  }
+
   @Test func sectionProposalStaysPendingUntilScopedApproval() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Sections")

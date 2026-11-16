@@ -58,6 +58,9 @@ public struct Toast: Identifiable {
   @Published public var worldRevision = 0
   @Published public var reviewingProposal = false
   @Published public var records: [LoreRecord] = []
+  @Published public var sectionParents: [String: String] = [:]
+  public var topLevelRecords: [LoreRecord] { records.filter { sectionParents[$0.id] == nil } }
+
   @Published public var conversations: [Conversation] = []
   @Published public var messages: [ChatMessage] = []
   /// Staged AI change sets for the open conversation, keyed by the message that proposed them.
@@ -250,6 +253,7 @@ public struct Toast: Identifiable {
   public func reload() throws {
     defer { worldRevision += 1 }
     worlds = try store.worlds()
+    sectionParents = try store.sectionMemberships(worldID: worldID)
     records = try store.records(worldID: worldID)
     conversations = try store.conversations(worldID: worldID)
     pendingProposals = try store.proposals(worldID: worldID).filter { $0.pending > 0 }
