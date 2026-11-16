@@ -150,6 +150,7 @@ extension Studio {
           content: String(decoding: try JSONEncoder().encode(document), as: UTF8.self))
       }
     }
+    recordSectionTabs = [:]
     selectedRecord = nil
     palette = false
     sheet = nil
@@ -201,6 +202,7 @@ extension Studio {
       destination = .library
       inspector = false
       selectedRecord = records.first { $0.title == "Mira Vale" }
+      if let id = selectedRecord?.id { recordSectionTabs[id] = true }
       if state == "section-editor", let parent = selectedRecord {
         selectedRecord = try? store.recordSections(worldID: worldID, parentID: parent.id).first?
           .record

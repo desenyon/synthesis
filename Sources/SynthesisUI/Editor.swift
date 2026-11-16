@@ -64,7 +64,11 @@ struct EditorScreen: View {
   @State private var handle = EditorHandle()
   @State private var editingRule: WorldRule?
   @State private var ruleSheet = false
-  @State private var sectionsVisible = true
+  private var sectionsVisible: Bool {
+    get { studio.recordSectionTabs[record.id] ?? false }
+    nonmutating set { studio.recordSectionTabs[record.id] = newValue }
+  }
+  private var sectionCount: Int { studio.sectionParents.values.filter { $0 == record.id }.count }
   @State private var sectionParent: LoreRecord?
   init(studio: Studio, record: LoreRecord) {
     self.studio = studio
@@ -105,11 +109,6 @@ struct EditorScreen: View {
       studio.editorSave = { save() }
       studio.perform {
         sectionParent = try studio.store.sectionParent(worldID: record.worldID, recordID: record.id)
-      }
-      if ["editor", "light-editor", "sheet-rule", "sheet-canon", "sheet-history"].contains(
-        studio.captureHint)
-      {
-        sectionsVisible = false
       }
       if studio.reviewCanon == record.id {
         studio.reviewCanon = nil
@@ -213,7 +212,7 @@ struct EditorScreen: View {
       FilterChip(title: "Overview", selected: !sectionsVisible, t: studio.t) {
         if save() { sectionsVisible = false }
       }
-      FilterChip(title: "Sections", selected: sectionsVisible, t: studio.t) {
+      FilterChip(title: "Sections", count: sectionCount, selected: sectionsVisible, t: studio.t) {
         if save() { sectionsVisible = true }
       }
       Spacer()

@@ -14,14 +14,6 @@ struct RecordSectionsPage: View {
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 24) {
-        VStack(alignment: .leading, spacing: 10) {
-          Text(parent.title).font(.studio(size: 30, weight: .semibold)).tracking(-0.4)
-            .fixedSize(horizontal: false, vertical: true)
-          if !parent.body.isEmpty {
-            Text(parent.body).font(.studio(size: 15)).foregroundStyle(studio.t.secondary)
-              .lineSpacing(4).lineLimit(4).textSelection(.enabled)
-          }
-        }
         HStack {
           Text("Sections").font(.studio(size: 16, weight: .semibold))
           Text("\(sections.count)").font(.studio(size: 12)).foregroundStyle(studio.t.secondary)

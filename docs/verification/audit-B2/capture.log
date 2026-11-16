@@ -1,0 +1,7 @@
+CAPTURE editor 1440x900, bitmap 2880x1800, 533ms
+CAPTURE sections 1440x900, bitmap 2880x1800, 530ms
+CAPTURE light-sections 1440x900, bitmap 2880x1800, 614ms
+CAPTURE editor 1024x768, bitmap 2048x1536, 370ms
+CAPTURE sections 1024x768, bitmap 2048x1536, 346ms
+CAPTURE light-sections 1024x768, bitmap 2048x1536, 349ms
+Native captures complete: /private/tmp/synthesis-b2

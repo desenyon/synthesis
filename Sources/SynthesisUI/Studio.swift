@@ -58,6 +58,7 @@ public struct Toast: Identifiable {
   @Published public var worldRevision = 0
   @Published public var reviewingProposal = false
   @Published public var records: [LoreRecord] = []
+  @Published public var recordSectionTabs: [String: Bool] = [:]
   @Published public var sectionParents: [String: String] = [:]
   public var topLevelRecords: [LoreRecord] { records.filter { sectionParents[$0.id] == nil } }
 

@@ -109,7 +109,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B2. In `Sources/SynthesisUI/Editor.swift` default `sectionsVisible` to false and remember the chosen tab per record ID in `Studio` for the session. Remove the capture-hint special case that forces Overview. In `RecordSections.swift` drop the repeated parent title and body excerpt at the top of `RecordSectionsPage`. Pass the section count to the "Sections" `FilterChip`. Update capture fixtures so `sections*` states select the Sections tab explicitly. Capture `editor,sections,light-sections`.
 
-- [ ] done
+- [x] done — see verification/audit-B2.
 
 ### B3. Timeline needs a record before an event — High, seen in `empty-timeline`
 
