@@ -379,11 +379,14 @@ struct EditorScreen: View {
     }
   }
   private func export() {
-    let panel = NSSavePanel()
-    panel.nameFieldStringValue = "\(title).md"
-    if panel.runModal() == .OK, let url = panel.url {
-      studio.perform {
-        try "# \(title)\n\n\(bodyText)".write(to: url, atomically: true, encoding: .utf8)
+    guard save() else { return }
+    studio.perform {
+      let document = try studio.store.exportRecordMarkdown(
+        worldID: record.worldID, recordID: record.id)
+      let panel = NSSavePanel()
+      panel.nameFieldStringValue = document.filename
+      if panel.runModal() == .OK, let url = panel.url {
+        try document.content.write(to: url, atomically: true, encoding: .utf8)
         studio.show("Exported \(url.lastPathComponent)", icon: "square.and.arrow.up")
       }
     }

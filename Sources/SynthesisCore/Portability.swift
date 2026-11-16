@@ -28,6 +28,67 @@ extension WorkspaceStore {
         : String(
           title.prefix(160)), body: body, kind: "lore", origin: "imported")
   }
+  /// Shared safe basename for a single export and the world's unique filenames.
+  public static func markdownFilename(_ title: String) -> String {
+    let cleaned = String(
+      title.map { $0.isLetter || $0.isNumber || $0 == " " || $0 == "-" ? $0 : "-" }
+    )
+    .trimmingCharacters(in: .whitespacesAndNewlines)
+    return "\(cleaned.isEmpty ? "Untitled" : cleaned).md"
+  }
+
+  /// One portable document, including an entity's active sections as local anchors.
+  public func exportRecordMarkdown(worldID: String, recordID: String) throws -> (
+    filename: String, content: String
+  ) {
+    let record = try record(worldID: worldID, id: recordID)
+    let sections = try recordSections(worldID: worldID, parentID: recordID)
+    var content = try recordMarkdown(worldID: worldID, record: record)
+    if !sections.isEmpty {
+      content += "\n## Sections\n\n"
+      content +=
+        sections.map {
+          "- [\(MarkdownText.escape($0.record.title))](#section-\($0.record.id)) · \($0.record.state)"
+        }.joined(separator: "\n") + "\n"
+      for section in sections {
+        content += "\n<a id=\"section-\(section.record.id)\"></a>\n\n"
+        content += try recordMarkdown(worldID: worldID, record: section.record, embedded: true)
+      }
+    }
+    return (Self.markdownFilename(record.title), content)
+  }
+
+  private func recordMarkdown(worldID: String, record: LoreRecord, embedded: Bool = false) throws
+    -> String
+  {
+    func json<T: Encodable>(_ value: T) -> String {
+      String(decoding: (try? JSONEncoder().encode(value)) ?? Data(), as: UTF8.self)
+    }
+    let front = """
+      ---
+      id: \(record.id)
+      kind: \(record.kind)
+      category: \(json(record.category))
+      state: \(record.state)
+      origin: \(record.origin)
+      version: \(record.version)
+      updated: \(record.updatedAt)
+      tags: \(json(record.tags ?? []))
+      aliases: \(json(record.aliases ?? []))
+      ---
+      """
+    let rules = record.kind == "entity" ? try rulesText(worldID: worldID, systemID: record.id) : ""
+    let title = record.title.trimmingCharacters(in: .whitespacesAndNewlines)
+    let heading =
+      "\(embedded ? "###" : "#") \(MarkdownText.escape(title.isEmpty ? "Untitled" : title))\n\n"
+    let metadata =
+      embedded
+      ? "> \(record.state) · \(record.origin) · \(record.id)\n\n"
+      : front + "\n\n"
+    return metadata + heading + MarkdownText.body(record) + "\n"
+      + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n")
+  }
+
   /// One Markdown file per record with front matter, plus relationship and timeline indexes.
   /// Paths are relative; names are sanitised and made unique.
   public func exportMarkdown(worldID: String) throws -> [(path: String, content: String)] {
@@ -36,9 +97,7 @@ extension WorkspaceStore {
     let titles = Dictionary(uniqueKeysWithValues: pages.map { ($0.id, $0.title) })
     var used = Set<String>()
     func filename(_ title: String) -> String {
-      let cleaned = title.map { $0.isLetter || $0.isNumber || $0 == " " || $0 == "-" ? $0 : "-" }
-      var base = String(cleaned).trimmingCharacters(in: .whitespaces)
-      if base.isEmpty { base = "untitled" }
+      let base = (Self.markdownFilename(title) as NSString).deletingPathExtension
       var name = base
       var counter = 2
       while !used.insert(name.lowercased()).inserted {
@@ -46,11 +105,6 @@ extension WorkspaceStore {
         counter += 1
       }
       return name
-    }
-    func list(_ values: [String]?) -> String {
-      "["
-        + (values ?? []).map { "\"\($0.replacingOccurrences(of: "\"", with: "'"))\"" }.joined(
-          separator: ", ") + "]"
     }
     var paths: [String: String] = [:]
     for record in pages {
@@ -75,21 +129,6 @@ extension WorkspaceStore {
     }
     var files: [(String, String)] = []
     for record in pages {
-      let front = """
-        ---
-        id: \(record.id)
-        kind: \(record.kind)
-        category: "\(record.category)"
-        state: \(record.state)
-        origin: \(record.origin)
-        version: \(record.version)
-        updated: \(record.updatedAt)
-        tags: \(list(record.tags))
-        aliases: \(list(record.aliases))
-        ---
-        """
-      let rules =
-        record.kind == "entity" ? try rulesText(worldID: worldID, systemID: record.id) : ""
       let sections = try recordSections(worldID: worldID, parentID: record.id)
       let sectionIndex =
         sections.isEmpty
@@ -104,8 +143,7 @@ extension WorkspaceStore {
       files.append(
         (
           paths[record.id]!,
-          "\(front)\n\n# \(record.title)\n\n\(record.body)\n"
-            + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n") + sectionIndex
+          try recordMarkdown(worldID: worldID, record: record) + sectionIndex
         )
       )
     }

@@ -168,7 +168,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B7. Replace the body of `export()` in `Sources/SynthesisUI/Editor.swift` with a call into the per-record Markdown writer used by world export in `Sources/SynthesisCore/Portability.swift` (expose one public function if needed). Use the existing path sanitizer for the default file name and fall back to "Untitled". For an entity, append its sections. Add a core test for an untitled record and a title containing "/".
 
-- [ ] done
+- [x] done — see verification/audit-B7.
 
 ### B8. Worlds dashboard is thin — Medium, seen in `worlds`
 

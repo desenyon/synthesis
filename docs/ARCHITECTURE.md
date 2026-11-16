@@ -88,3 +88,5 @@ Migration 0007 adds nested chronology lanes (branch/period) and event placements
 The shared companion resizes non-Canvas workspaces and includes the open record in retrieval. Canvas keeps its own movable composer/dock. The native shell must remain transparent over the mounted WKWebView. Engine-composited captures cannot detect native occlusion; live on-screen inspection verified this correction.
 
 World-scoped FTS now returns complete matched records in one query rather than fetching each result separately. Library and quick-open cache query results across hover/selection redraws.
+
+Markdown export now shares `Portability.recordMarkdown` between world files and `exportRecordMarkdown`. Single-record exports embed sections and local anchors. `MarkdownText` decodes native RTF with AppKit and maps editor headings, emphasis, underline and links; plain Markdown is preserved verbatim, and mismatched/invalid RTF falls back to the stored text. `.synthesis` remains the lossless archive for exact rich formatting.
