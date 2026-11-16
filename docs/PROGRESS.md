@@ -94,3 +94,7 @@ Opaque inline panels now have a shared theme surface, hairline and shadow. Fixed
 ### Audit B10 — completed
 
 Kept Review badge scoped to pending proposals plus canon decisions and added a pluralized breakdown tooltip on its navigation row. Checks now uses a muted count even when selected. ./scripts/check.sh passed (84 tests / 19 suites, strict lint and optimized build). Captured review/review-checks at both sizes and inspected both contact sheets. Hover tooltip wiring was inspected in source; no live pointer tooltip check was run. Evidence: `docs/verification/audit-B10`.
+
+### Audit B11 — completed
+
+Replaced the three vendor-specific illustration labels with Sample illustrations and the requested bundled AI-generated artwork/canon disclosure. Updated matching README wording. ./scripts/check.sh passed (84 tests / 19 suites, strict lint and optimized build). Captured empty-atlas/sheet-artwork at both sizes and inspected both contact sheets; labels fit and the image picker remains opaque over Canvas. Evidence: `docs/verification/audit-B11`.

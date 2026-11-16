@@ -62,7 +62,7 @@ struct AtlasScreen: View {
           ) {
             Button("Choose a map image…") { upload() }
               .buttonStyle(QuietButton(t: studio.t, primary: true))
-            Button("Choose a GPT illustration…") { artworkPicker = true }
+            Button("Sample illustrations…") { artworkPicker = true }
               .buttonStyle(QuietButton(t: studio.t))
           }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }

@@ -201,7 +201,7 @@ struct CuratedCanvas: View {
           panel = .library
         }
         Button("Image…") { session.addImage() }
-        Button("GPT illustrations…") { panel = .artwork }
+        Button("Sample illustrations…") { panel = .artwork }
         if let card = session.selection.first, session.selection.count == 1 {
           Divider()
           Button(

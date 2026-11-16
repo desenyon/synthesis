@@ -212,7 +212,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B11. Replace the three "GPT" strings in `Atlas.swift`, `CuratedCanvas.swift` and `Artwork.swift` with "Sample illustrations…" and "Bundled sample artwork, AI-generated. Choosing one does not establish canon." Capture `empty-atlas,sheet-artwork`.
 
-- [ ] done
+- [x] done — see verification/audit-B11.
 
 ---
 

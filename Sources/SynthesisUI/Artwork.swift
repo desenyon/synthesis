@@ -29,7 +29,7 @@ struct ArtworkPicker: View {
     SheetScaffold(
       title: "Illustration library",
       subtitle:
-        "GPT-generated artwork. Choose an image for this world; it does not establish canon.",
+        "Bundled sample artwork, AI-generated. Choosing one does not establish canon.",
       t: t, width: 520, close: close
     ) {
       HStack(alignment: .top, spacing: 12) {
