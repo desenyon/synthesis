@@ -196,6 +196,7 @@ struct SectionLabel: View {
 struct FilterChip: View {
   let title: String
   var count: Int?
+  var mutedCount = false
   let selected: Bool
   let t: Theme
   var action: () -> Void
@@ -206,7 +207,7 @@ struct FilterChip: View {
         Text(title).font(.studio(size: 12.5, weight: .medium))
         if let count {
           Text("\(count)").font(.studio(size: 11.5)).monospacedDigit()
-            .foregroundStyle(selected ? t.accent.opacity(0.8) : t.muted)
+            .foregroundStyle(selected && !mutedCount ? t.accent.opacity(0.8) : t.muted)
         }
       }.padding(.horizontal, 11).frame(height: 26)
         .foregroundStyle(selected ? t.accent : t.secondary)

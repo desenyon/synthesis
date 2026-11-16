@@ -270,10 +270,17 @@ struct Sidebar: View {
             && studio.selectedRecord == nil,
           collapsed: collapsed,
           trailing: item == .review && studio.reviewCount > 0 ? "\(studio.reviewCount)" : nil,
-          badge: item == .review && studio.reviewCount > 0
+          badge: item == .review && studio.reviewCount > 0,
+          help: item == .review ? reviewBreakdown : nil
         ) { studio.navigate(item) }
       }
     }
+  }
+  private var reviewBreakdown: String {
+    let proposals = studio.pendingProposals.count
+    let canon = studio.canonQueue.count
+    return "\(proposals) \(proposals == 1 ? "proposal" : "proposals") · "
+      + "\(canon) \(canon == 1 ? "canon review" : "canon reviews")"
   }
   private func disclosure(_ title: String, expanded: Binding<Bool>) -> some View {
     Button {
@@ -339,6 +346,7 @@ struct NavRow: View {
   var tint: Color?
   /// Shows the trailing value as an attention count, also on the collapsed rail.
   var badge = false
+  var help: String?
   var action: () -> Void
   @State private var hover = false
   var body: some View {
@@ -367,7 +375,7 @@ struct NavRow: View {
           in: RoundedRectangle(cornerRadius: 7)
         )
         .contentShape(RoundedRectangle(cornerRadius: 7))
-    }.buttonStyle(.plain).onHover { hover = $0 }.help(collapsed ? title : "")
+    }.buttonStyle(.plain).onHover { hover = $0 }.help(help ?? (collapsed ? title : ""))
       .overlay(alignment: .topTrailing) {
         if collapsed && badge {
           Circle().fill(t.accent).frame(width: 7, height: 7).padding(7)

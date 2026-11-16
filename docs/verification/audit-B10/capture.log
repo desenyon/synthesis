@@ -1,0 +1,5 @@
+CAPTURE review 1440x900, bitmap 2880x1800, 527ms
+CAPTURE review-checks 1440x900, bitmap 2880x1800, 518ms
+CAPTURE review 1024x768, bitmap 2048x1536, 348ms
+CAPTURE review-checks 1024x768, bitmap 2048x1536, 338ms
+Native captures complete: /private/tmp/synthesis-b10

@@ -49,7 +49,10 @@ struct ReviewScreen: View {
         FilterChip(title: "Canon", count: queue.count, selected: tab == .canon, t: studio.t) {
           tab = .canon
         }
-        FilterChip(title: "Checks", count: findings.count, selected: tab == .checks, t: studio.t) {
+        FilterChip(
+          title: "Checks", count: findings.count, mutedCount: true, selected: tab == .checks,
+          t: studio.t
+        ) {
           tab = .checks
         }
         Spacer()

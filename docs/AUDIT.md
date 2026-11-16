@@ -201,7 +201,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B10. In `Shell.swift` add a help tooltip to the Review row that breaks down `reviewCount`. In `Review.swift` render the Checks chip count in the muted style used for non-actionable counts.
 
-- [ ] done
+- [x] done — see verification/audit-B10.
 
 ### B11. Vendor name in copy — Low
 
