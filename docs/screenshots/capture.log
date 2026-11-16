@@ -1,0 +1,7 @@
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 618ms
+CAPTURE canvas 1440x900, bitmap 2880x1800, 668ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 1051ms
+CAPTURE editor 1440x900, bitmap 2880x1800, 502ms
+CAPTURE atlas 1440x900, bitmap 2880x1800, 983ms
+CAPTURE settings 1440x900, bitmap 2880x1800, 156ms
+Native captures complete: /private/tmp/synthesis-readme-screenshots

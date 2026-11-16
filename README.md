@@ -2,6 +2,39 @@
 
 A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Conversation, Canvas, Library, Graph, Timeline, Atlas, Review and Worlds** are views of one saved world, sharing one design system.
 
+![Synthesis Canvas with linked character, system and place cards in the Aster sample world](docs/screenshots/canvas.png)
+
+*Canvas — arrange real world records and explore their relationships.*
+
+<details>
+<summary>More app screenshots: Conversation, editor, Graph, Atlas and Settings</summary>
+
+**Conversation** — start with a thought and reference existing lore.
+
+![Conversation home with creative modes, lore references and a multiline composer](docs/screenshots/conversation-home.png)
+
+**Editor** — write with linked records, sections and explicit canon review.
+
+![Mira Vale's document editor with tags, aliases and relationship navigation](docs/screenshots/editor.png)
+
+**Graph** — explore relationships derived from the same saved world.
+
+![Knowledge Graph showing seven entities connected by labeled relationships](docs/screenshots/graph.png)
+
+**Atlas** — place linked locations on a map. This example uses bundled sample artwork.
+
+![Atlas displaying a sample map with linked markers for the Glass Sea, Tidekeepers and Drowned City](docs/screenshots/atlas.png)
+
+**Settings** — searchable preferences for writing, navigation, assistance and each world.
+
+![Redesigned Settings workspace with section navigation, search and General controls](docs/screenshots/settings.png)
+
+</details>
+
+Screenshots show the actual native development app with the **Aster sample world**, captured at 1440×900. [Capture notes and refresh command](docs/screenshots/README.md).
+
+## Run locally
+
 ```sh
 export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
 ./scripts/build.sh release

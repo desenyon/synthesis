@@ -2,6 +2,10 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`. Build/open `dist/Synthesis.app` here. SwiftUI/AppKit + SQLite and the offline Excalidraw Canvas. Development only; no release or deployment. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` is preserved and excluded from commits.
 
+## README screenshots
+
+The README now shows the native Canvas and an expandable five-view gallery. Six fresh 1440×900 captures from `0148d8a` were inspected; image paths and PNG dimensions validated. Capture assets, provenance and regeneration steps live in `docs/screenshots`. Documentation/assets only; the capture build passed, with no new runtime changes or test-suite rerun.
+
 ## Settings refinement
 
 Settings is now one searchable native workspace: General, Writing, Assistant, This world and Data. Compact windows use a section menu; provider details are collapsed by default. Chat setup links open Assistant settings. Onboarding shares the connection control; the obsolete Settings modal/provider cards and unused secure-field branch are removed.
