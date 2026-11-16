@@ -16,8 +16,7 @@ extension View {
       overlay {
         if let value = item.wrappedValue {
           Color.black.opacity(0.35).ignoresSafeArea()
-          content(value).clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.3), radius: 30)
+          CaptureSheetPanel { content(value) }
         }
       }
     } else {
@@ -32,8 +31,7 @@ extension View {
       overlay {
         if isPresented.wrappedValue {
           Color.black.opacity(0.35).ignoresSafeArea()
-          content().clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.3), radius: 30)
+          CaptureSheetPanel { content() }
         }
       }
     } else {

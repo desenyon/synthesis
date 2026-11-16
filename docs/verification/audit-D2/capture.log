@@ -1,0 +1,33 @@
+CAPTURE sheet-artwork 1440x900, bitmap 2880x1800, 905ms
+CAPTURE sheet-artwork content inline; native modal presentation not exercised
+CAPTURE sheet-settings 1440x900, bitmap 2880x1800, 760ms
+CAPTURE sheet-settings content inline; native modal presentation not exercised
+CAPTURE sheet-record 1440x900, bitmap 2880x1800, 710ms
+CAPTURE sheet-record content inline; native modal presentation not exercised
+CAPTURE sheet-canon 1440x900, bitmap 2880x1800, 712ms
+CAPTURE sheet-canon content inline; native modal presentation not exercised
+CAPTURE sheet-history 1440x900, bitmap 2880x1800, 709ms
+CAPTURE sheet-history content inline; native modal presentation not exercised
+CAPTURE sheet-relation 1440x900, bitmap 2880x1800, 1271ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+CAPTURE sheet-rule 1440x900, bitmap 2880x1800, 750ms
+CAPTURE sheet-rule content inline; native modal presentation not exercised
+CAPTURE sheet-section 1440x900, bitmap 2880x1800, 748ms
+CAPTURE sheet-section content inline; native modal presentation not exercised
+CAPTURE sheet-artwork 1024x768, bitmap 2048x1536, 552ms
+CAPTURE sheet-artwork content inline; native modal presentation not exercised
+CAPTURE sheet-settings 1024x768, bitmap 2048x1536, 505ms
+CAPTURE sheet-settings content inline; native modal presentation not exercised
+CAPTURE sheet-record 1024x768, bitmap 2048x1536, 465ms
+CAPTURE sheet-record content inline; native modal presentation not exercised
+CAPTURE sheet-canon 1024x768, bitmap 2048x1536, 461ms
+CAPTURE sheet-canon content inline; native modal presentation not exercised
+CAPTURE sheet-history 1024x768, bitmap 2048x1536, 459ms
+CAPTURE sheet-history content inline; native modal presentation not exercised
+CAPTURE sheet-relation 1024x768, bitmap 2048x1536, 799ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+CAPTURE sheet-rule 1024x768, bitmap 2048x1536, 491ms
+CAPTURE sheet-rule content inline; native modal presentation not exercised
+CAPTURE sheet-section 1024x768, bitmap 2048x1536, 517ms
+CAPTURE sheet-section content inline; native modal presentation not exercised
+Native captures complete: /private/tmp/synthesis-d2

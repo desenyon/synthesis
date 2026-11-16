@@ -529,6 +529,30 @@ struct AppearanceSwitch: View {
 
 // MARK: Sheets
 
+/// Background captures use the real sheet content on an opaque, theme-matched modal surface.
+struct CaptureSheetPanel<Content: View>: View {
+  @ViewBuilder var content: () -> Content
+  @Environment(\.colorScheme) private var colorScheme
+  var body: some View {
+    let t = Theme(dark: colorScheme == .dark)
+    content().background(t.background, in: RoundedRectangle(cornerRadius: 14))
+      .background(CaptureSheetAnchor())
+      .clipShape(RoundedRectangle(cornerRadius: 14))
+      .overlay(RoundedRectangle(cornerRadius: 14).stroke(t.hairline, lineWidth: 1))
+      .shadow(color: .black.opacity(0.3), radius: 30)
+  }
+}
+
+/// Marks the real panel bounds so WebKit snapshot compositing cannot overwrite opaque black.
+private struct CaptureSheetAnchor: NSViewRepresentable {
+  func makeNSView(context: Context) -> NSView {
+    let view = NSView()
+    view.identifier = NSUserInterfaceItemIdentifier("synthesis.capture-sheet")
+    return view
+  }
+  func updateNSView(_ view: NSView, context: Context) {}
+}
+
 struct SheetScaffold<Content: View, Footer: View>: View {
   let title: String
   var subtitle: String?

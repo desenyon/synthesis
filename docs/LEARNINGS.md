@@ -97,3 +97,7 @@ The connected shell applied an opaque `Theme.background` to the workspace above 
 ## 2026-11-15 — Compact companion and provider recommendation
 
 The 1024×768 contact sheet exposed a clipped non-Canvas companion: only Canvas previously collapsed the global sidebar when docking chat. Apply the same width policy to all content workspaces, with conversation takeover below the usable split width. The Settings capture also exposed an old installed-first “Recommended” badge conflicting with the new Codex label. Recommendation now uses the explicit product preference. Recapture corrected screens; no AGENTS.md change.
+
+## 2026-11-15 — Audit D2 capture compositing
+
+Adding an opaque black inline sheet did not fix the artwork capture: the WebKit compositor treated every pixel matching the canvas backdrop as transparent, including the sheet. The failing intermediate contact sheet exposed this. CaptureSheetAnchor now reports the actual panel bounds to the compositor; those pixels are protected and the canvas receives the scrim. All eight sheet states were recaptured at both sizes and inspected after the change. The real-modal self-test is separate and remains opt-in because it takes focus. AGENTS.md unchanged; this is a capture implementation lesson, not evidence of live modal interaction.

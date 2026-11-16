@@ -319,7 +319,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT D2. In `Sources/SynthesisUI/SheetPresentation.swift` make the inline capture presentation draw the sheet on an opaque `t.background` rounded panel with hairline border and shadow over a scrim. Add a self-test step in `SelfTest.swift` that opens the New record sheet as a real modal and dismisses it with Escape. Capture all `sheet-*` states.
 
-- [ ] done
+- [x] done — see verification/audit-D2.
 
 ---
 

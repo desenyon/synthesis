@@ -40,15 +40,16 @@ extension Studio {
       mouse(.leftMouseUp, CGPoint(x: from.x + delta.width, y: from.y + delta.height))
       await pause(600)
     }
-    func key(_ code: UInt16, _ characters: String) async {
+    func key(_ code: UInt16, _ characters: String, target: NSWindow? = nil) async {
+      let receiver = target ?? window
       for type in [NSEvent.EventType.keyDown, .keyUp] {
         if let event = NSEvent.keyEvent(
           with: type, location: .zero, modifierFlags: [],
-          timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: window.windowNumber,
+          timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: receiver.windowNumber,
           context: nil, characters: characters, charactersIgnoringModifiers: characters,
           isARepeat: false, keyCode: code)
         {
-          window.sendEvent(event)
+          receiver.sendEvent(event)
         }
       }
       await pause(450)
@@ -74,7 +75,8 @@ extension Studio {
     // elsewhere mid-run, say so instead of reporting a product failure.
     var focusLost = false
     func check(_ name: String, _ passed: Bool, _ detail: String = "") {
-      let focused = NSApp.isActive && window.isKeyWindow
+      let focused =
+        NSApp.isActive && (window.isKeyWindow || window.attachedSheet?.isKeyWindow == true)
       if !focused { focusLost = true }
       let verdict = passed ? "PASS" : (focusLost ? "SKIP (window lost focus)" : "FAIL")
       log.append("\(verdict) \(name)\(detail.isEmpty ? "" : " — \(detail)")")
@@ -107,6 +109,21 @@ extension Studio {
     await click(CGPoint(x: size.width / 2, y: 96 + 52 + 8 + 26 + 34 * 2 + 17))
     check("tap gesture on a palette row navigates", destination == .library, destination.rawValue)
     palette = false
+
+    // 1c. Exercise AppKit modal presentation, not the background capture's inline panel.
+    navigate(.library)
+    newRecordKind = "lore"
+    sheet = .document
+    await pause(700)
+    let recordModal = window.attachedSheet
+    check("New record opens a real modal sheet", recordModal?.isVisible == true)
+    await snapshot("selftest-new-record-sheet")
+    if let recordModal { await key(53, "\u{1b}", target: recordModal) }
+    check("Escape dismisses the New record modal", sheet == nil && window.attachedSheet == nil)
+    // Keep later tests independent if dismissal failed.
+    sheet = nil
+    await pause(350)
+
     navigate(.canvas)
     await pause(900)
 

@@ -349,6 +349,10 @@ final class StudioWindow: NSWindow {
           _ = try? await self.shot(
             frameView, to: folder.appendingPathComponent("\(name).png"), web: true)
         }
+        if let sheetView = self.window.attachedSheet?.contentView {
+          _ = try? self.snapshot(
+            sheetView, to: folder.appendingPathComponent("\(name)-modal.png"))
+        }
       }
       for line in lines { print("SELFTEST \(line)") }
       if lines.contains(where: { $0.hasPrefix("FAIL") }) {
@@ -411,18 +415,34 @@ final class StudioWindow: NSWindow {
     // The backdrop colour is read from a corner of the canvas area, which no overlay covers.
     let key = base + (top + 3) * bitmap.bytesPerRow + (left + 3) * 4
     let backdrop = (key[0], key[1], key[2])
+    // A sheet can share the canvas backdrop colour. Protect its actual bounds instead of
+    // treating those opaque pixels as holes, and apply the inline sheet's scrim to the web layer.
+    func sheetRects(in view: NSView) -> [CGRect] {
+      if view.identifier?.rawValue == "synthesis.capture-sheet" {
+        let bounds = view.convert(view.bounds, to: frameView)
+        return [
+          CGRect(
+            x: bounds.minX * scale, y: (frameView.bounds.height - bounds.maxY) * scale,
+            width: bounds.width * scale, height: bounds.height * scale)
+        ]
+      }
+      return view.subviews.flatMap { sheetRects(in: $0) }
+    }
+    let panels = sheetRects(in: frameView)
+    let scrim = panels.isEmpty ? 1.0 : 0.65
     for y in 0..<height where top + y < bitmap.pixelsHigh {
       let row = base + (top + y) * bitmap.bytesPerRow
       let from = source + y * layer.bytesPerRow
       for x in 0..<width where left + x < bitmap.pixelsWide {
+        if panels.contains(where: { $0.contains(CGPoint(x: left + x, y: top + y)) }) { continue }
         let pixel = row + (left + x) * 4
         if abs(Int(pixel[0]) - Int(backdrop.0)) < 3, abs(Int(pixel[1]) - Int(backdrop.1)) < 3,
           abs(Int(pixel[2]) - Int(backdrop.2)) < 3
         {
           let web = from + x * 4
-          pixel[0] = web[0]
-          pixel[1] = web[1]
-          pixel[2] = web[2]
+          pixel[0] = UInt8(Double(web[0]) * scrim)
+          pixel[1] = UInt8(Double(web[1]) * scrim)
+          pixel[2] = UInt8(Double(web[2]) * scrim)
           pixel[3] = 255
         }
       }
