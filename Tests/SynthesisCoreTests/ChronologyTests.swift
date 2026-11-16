@@ -4,6 +4,25 @@ import Testing
 @testable import SynthesisCore
 
 struct ChronologyTests {
+  @Test func emptyWorldEventCreatesDraftSourceAtomically() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "A beginning")
+    let event = try store.saveChronologyEvent(
+      worldID: world.id, id: nil, title: "The first dawn", date: "", source: nil, order: nil,
+      laneID: nil)
+    let source = try store.record(worldID: world.id, id: event.sourceID)
+    #expect(source.title == event.title && source.kind == "lore" && source.state == "draft")
+    #expect(source.canonical == nil && event.dateLabel == "unknown")
+    #expect(try store.records(worldID: world.id).count == 1)
+    #expect(throws: (any Error).self) {
+      try store.saveChronologyEvent(
+        worldID: world.id, id: "missing-event", title: "Must roll back", date: "", source: nil,
+        order: nil, laneID: nil)
+    }
+    #expect(try store.records(worldID: world.id).count == 1)
+    #expect(try store.events(worldID: world.id).count == 1)
+  }
+
   @Test func branchesPeriodsAndSourcedEventsSurvivePortableRoundTrip() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "History")

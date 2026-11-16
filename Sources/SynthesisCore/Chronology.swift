@@ -65,7 +65,7 @@ extension WorkspaceStore {
   /// Source edits and chronology assignment share a transaction. A period is descriptive,
   /// never an inferred calendar. Branch membership does not promote an event into canon.
   public func saveChronologyEvent(
-    worldID: String, id: String?, title: String, date: String, source: String, order: Int?,
+    worldID: String, id: String?, title: String, date: String, source: String?, order: Int?,
     laneID: String?, origin: String = "user-authored"
   ) throws -> WorldEvent {
     try db.transaction {
@@ -74,6 +74,12 @@ extension WorkspaceStore {
           throw SynthesisError.notFound
         }
       }
+      // The schema requires a source. A new event can create its draft atomically.
+      let source =
+        try source
+        ?? createRecord(
+          worldID: worldID, title: title, kind: "lore", category: "History", origin: origin
+        ).id
       let event: WorldEvent
       if let id {
         event = try updateEvent(

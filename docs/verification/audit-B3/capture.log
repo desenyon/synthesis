@@ -1,0 +1,5 @@
+CAPTURE timeline 1440x900, bitmap 2880x1800, 559ms
+CAPTURE empty-timeline 1440x900, bitmap 2880x1800, 511ms
+CAPTURE timeline 1024x768, bitmap 2048x1536, 346ms
+CAPTURE empty-timeline 1024x768, bitmap 2048x1536, 341ms
+Native captures complete: /private/tmp/synthesis-b3

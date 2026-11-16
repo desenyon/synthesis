@@ -122,7 +122,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B3. Inspect the events table in `Sources/SynthesisCore/Migrations` and `Chronology.swift`. If the source column is nullable, let the event sheet in `Sources/SynthesisUI/Timeline.swift` save with no source and show a "No source" chip. Otherwise add a sheet option that creates a draft lore record named after the event and the event in one transaction. Enable the "Event" bar action in an empty world and change the empty state to "New event". Add a core test. Capture `empty-timeline,timeline`.
 
-- [ ] done
+- [x] done — see verification/audit-B3.
 
 ### B4. Canvas composer covers cards — High, seen in `canvas`, `collapsed`
 

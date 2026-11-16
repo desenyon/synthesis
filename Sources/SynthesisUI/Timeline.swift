@@ -18,6 +18,7 @@ struct TimelineScreen: View {
   @State private var query = ""
   @State private var editing: WorldEvent?
   @State private var composing = false
+  @State private var newSource = false
   @State private var title = ""
   @State private var date = ""
   @State private var order = ""
@@ -53,9 +54,8 @@ struct TimelineScreen: View {
           .frame(minWidth: 120, idealWidth: 220, maxWidth: 220)
         BarAction(
           title: "Event", icon: "plus", t: studio.t, primary: true,
-          help: studio.records.isEmpty
-            ? "Create a record first; every event cites its source" : "Add an event"
-        ) { begin(nil) }.disabled(studio.records.isEmpty)
+          help: "Add an event, using existing lore or a new draft document"
+        ) { begin(nil) }
       }
       ContentHeader {
         Menu {
@@ -152,15 +152,6 @@ struct TimelineScreen: View {
         icon: "magnifyingglass", title: "No events match",
         message: "Nothing on the timeline matches “\(query)”.", t: studio.t
       ) { Button("Clear search") { query = "" }.buttonStyle(QuietButton(t: studio.t)) }
-    } else if studio.records.isEmpty {
-      EmptyState(
-        icon: Destination.timeline.icon, title: "No history yet",
-        message: "Events cite a record as their source. Create a document or entity first.",
-        t: studio.t
-      ) {
-        Button("New record") { studio.sheet = .document }
-          .buttonStyle(QuietButton(t: studio.t, primary: true))
-      }
     } else {
       EmptyState(
         icon: Destination.timeline.icon, title: "No history yet",
@@ -168,7 +159,7 @@ struct TimelineScreen: View {
           "Add the moments that shaped this world. Dates can stay vague or unknown — order is optional.",
         t: studio.t
       ) {
-        Button("Add an event") { begin(nil) }.buttonStyle(QuietButton(t: studio.t, primary: true))
+        Button("New event") { begin(nil) }.buttonStyle(QuietButton(t: studio.t, primary: true))
       }
     }
   }
@@ -179,6 +170,7 @@ struct TimelineScreen: View {
     date = event.map { $0.dateLabel == "unknown" ? "" : $0.dateLabel } ?? ""
     order = event?.order.map(String.init) ?? ""
     source = event?.sourceID ?? studio.records.first?.id ?? ""
+    newSource = event == nil && studio.records.isEmpty
     composing = true
   }
   private func remove(_ event: WorldEvent) {
@@ -196,14 +188,16 @@ struct TimelineScreen: View {
   private func closeForm() { composing = false }
   private var form: some View {
     let valid =
-      !title.trimmingCharacters(in: .whitespaces).isEmpty && !source.isEmpty
+      !title.trimmingCharacters(in: .whitespaces).isEmpty && (newSource || !source.isEmpty)
       && (order.isEmpty || Int(order) != nil)
     let save = {
       studio.perform {
         let name = title.trimmingCharacters(in: .whitespacesAndNewlines)
         _ = try studio.store.saveChronologyEvent(
-          worldID: studio.worldID, id: editing?.id, title: name, date: date, source: source,
+          worldID: studio.worldID, id: editing?.id, title: name, date: date,
+          source: newSource ? nil : source,
           order: Int(order), laneID: eventLane.isEmpty ? nil : eventLane)
+        try studio.reload()
         composing = false
         refresh()
       }
@@ -223,29 +217,36 @@ struct TimelineScreen: View {
         Text("Unassigned").tag("")
         ForEach(lanes) { lane in Text(lane.name).tag(lane.id) }
       }
-      VStack(alignment: .leading, spacing: 6) {
-        Text("Source record").font(.studio(size: 12, weight: .medium))
-          .foregroundStyle(studio.t.secondary)
-        Button {
-          sourcePicker = true
-        } label: {
-          HStack {
-            Text(studio.records.first { $0.id == source }?.title ?? "Choose a record")
-              .font(.studio(size: 14)).lineLimit(1)
-            Spacer()
-            StudioIcon("chevron.up.chevron.down", size: 10)
-              .foregroundStyle(studio.t.muted)
-          }.padding(.horizontal, 10).frame(width: 416, height: 34)
-            .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
-            .overlay(
-              RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.border, lineWidth: 1))
-        }.buttonStyle(.plain)
-          .popover(isPresented: $sourcePicker) {
-            SearchableRecordPicker(records: studio.records, t: studio.t) { record in
-              source = record.id
-              sourcePicker = false
+      Toggle("Write a new document for this event", isOn: $newSource)
+        .font(.studio(size: 13.5)).tint(studio.t.accent)
+      if newSource {
+        Text("A draft named after the event will be added to Library when you save.")
+          .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
+      } else {
+        VStack(alignment: .leading, spacing: 6) {
+          Text("Source record").font(.studio(size: 12, weight: .medium))
+            .foregroundStyle(studio.t.secondary)
+          Button {
+            sourcePicker = true
+          } label: {
+            HStack {
+              Text(studio.records.first { $0.id == source }?.title ?? "Choose a record")
+                .font(.studio(size: 14)).lineLimit(1)
+              Spacer()
+              StudioIcon("chevron.up.chevron.down", size: 10)
+                .foregroundStyle(studio.t.muted)
+            }.padding(.horizontal, 10).frame(width: 416, height: 34)
+              .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
+              .overlay(
+                RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.border, lineWidth: 1))
+          }.buttonStyle(.plain)
+            .popover(isPresented: $sourcePicker) {
+              SearchableRecordPicker(records: studio.records, t: studio.t) { record in
+                source = record.id
+                sourcePicker = false
+              }
             }
-          }
+        }
       }
       Text(
         order.isEmpty || Int(order) != nil
