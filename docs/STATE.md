@@ -38,5 +38,9 @@ Implementation checkpoint: `536b37a`. Final review build compiled from the canon
 
 - Entity sections are implemented: migration 0008, ordered child lore records with their own history and canon review, Overview / Sections tabs, create, open, reorder, remove with Undo, reviewed `add_section` proposals, and membership preserved in `.synthesis` v3, JSON schema 7 and Markdown export.
 - Checks observed: `./scripts/check.sh` passed with **78 tests / 17 suites**; **47 states × 2 sizes** captured and inspected.
-- The same review produced [AUDIT.md](AUDIT.md): 22 open defects with fix prompts. The critical ones are the sidebar and Canvas bar rendering in the wrong theme (seen in background captures; confirm in the running window) and section records counted as top-level Library items. **None are fixed yet.**
-- Next: work through AUDIT.md in its listed order, starting with A1 and A2.
+- The same review produced [AUDIT.md](AUDIT.md): 22 open defects with fix prompts. The critical ones are the sidebar and Canvas bar rendering in the wrong theme (seen in background captures; confirm in the running window) and section records counted as top-level Library items. The audit ledger below tracks the current repair pass.
+- Active repair order: the master prompt in AUDIT.md; C2/C3 remain excluded.
+
+## Audit repair pass
+
+A1 completed and pushed with live theme checks and pixel assertions. A2 implemented and ten captures inspected, but its live check is blocked by macOS capture error -3812; checkbox remains open. Per-item checks and evidence are in PROGRESS.md and verification/audit-*. Next: B1 section hierarchy.

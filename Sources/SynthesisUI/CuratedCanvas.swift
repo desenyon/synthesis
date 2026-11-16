@@ -226,7 +226,7 @@ struct CuratedCanvas: View {
           t: studio.t, active: studio.companionExpanded
         ) { withAnimation(.easeOut(duration: 0.18)) { studio.companionExpanded.toggle() } }
       }
-    }
+    }.background(studio.t.background)
   }
   @ViewBuilder private var boardMenu: some View {
     let boards = (try? studio.store.boards(worldID: studio.worldID, kind: "canvas")) ?? []
@@ -344,7 +344,7 @@ struct CuratedCanvas: View {
   }
   /// A 9-point grab column with a hairline, so the divider is easy to hit and drag.
   private var companionDivider: some View {
-    Color.clear.frame(width: 9).frame(maxHeight: .infinity)
+    studio.t.background.frame(width: 9).frame(maxHeight: .infinity)
       .overlay(Rectangle().fill(studio.t.hairline).frame(width: 1))
       .contentShape(Rectangle())
       .onHover { if $0 { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() } }

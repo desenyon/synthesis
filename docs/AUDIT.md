@@ -76,7 +76,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT A2. In `Sources/SynthesisUI/CuratedCanvas.swift` give the Canvas `WorkspaceBar` an opaque `studio.t.background` so only the board area that publishes `CanvasFrameKey` stays clear. Do not change the clear workspace background in `Shell.swift` for the board itself. Confirm the engine receives the theme before first paint. Capture `canvas,empty-canvas,collapsed,companion,light` at both sizes and confirm the bar matches the theme and the board title is readable.
 
-- [ ] done
+- [ ] live verification pending — implemented; ten background captures inspected. macOS capture fails with SCStreamErrorDomain -3812. See verification/audit-A2.
 
 ---
 

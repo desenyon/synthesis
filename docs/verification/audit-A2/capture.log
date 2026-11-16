@@ -1,0 +1,11 @@
+CAPTURE canvas 1440x900, bitmap 2880x1800, 704ms
+CAPTURE companion 1440x900, bitmap 2880x1800, 442ms
+CAPTURE collapsed 1440x900, bitmap 2880x1800, 753ms
+CAPTURE light 1440x900, bitmap 2880x1800, 633ms
+CAPTURE empty-canvas 1440x900, bitmap 2880x1800, 687ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 445ms
+CAPTURE companion 1024x768, bitmap 2048x1536, 301ms
+CAPTURE collapsed 1024x768, bitmap 2048x1536, 465ms
+CAPTURE light 1024x768, bitmap 2048x1536, 399ms
+CAPTURE empty-canvas 1024x768, bitmap 2048x1536, 419ms
+Native captures complete: /private/tmp/synthesis-a2

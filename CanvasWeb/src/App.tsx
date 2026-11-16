@@ -70,14 +70,17 @@ function imageSize(dataURL: string): Promise<{ width: number; height: number }> 
   });
 }
 
+// Native supplies this before any paint; subsequent switches use the bridge.
+const initialTheme: Theme = new URLSearchParams(window.location.search).get("theme") === "light" ? "light" : "dark";
+
 export function App() {
   const [api, setApi] = useState<Api>(null);
   const [assisted, setAssisted] = useState(true);
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>(initialTheme);
   const [name, setName] = useState("Board");
   const live = useRef({
     api: null as Api,
-    theme: "dark" as Theme,
+    theme: initialTheme,
     records: new Map<string, RecordInfo>(),
     relations: [] as RelationInfo[],
     hidden: new Set<string>(),

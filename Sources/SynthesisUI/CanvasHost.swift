@@ -130,7 +130,10 @@ struct CanvasBoardContent {
         unsafeBitCast(method, to: Setter.self)(webView, selector, false)
       }
     }
-    webView.load(URLRequest(url: URL(string: "\(Self.scheme)://app/index.html")!))
+    // The first React render must already use the native theme, before the bridge is ready.
+    let initialTheme = studio.dark ? "dark" : "light"
+    webView.load(
+      URLRequest(url: URL(string: "\(Self.scheme)://app/index.html?theme=\(initialTheme)")!))
     // Cards follow their records, and the canvas follows the theme.
     studio.$records.dropFirst().debounce(for: .milliseconds(120), scheduler: RunLoop.main)
       .sink { [weak self] _ in self?.sync() }.store(in: &observers)
