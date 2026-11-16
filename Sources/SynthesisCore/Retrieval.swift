@@ -37,6 +37,17 @@ extension WorkspaceStore {
       result.append(ContextSource(record: record, reason: reason))
     }
     for id in Self.referencedRecordIDs(in: prompt) { add(id, "You referenced it") }
+    // Referenced entity sections precede incidental search/recent matches. Each is a cited
+    // record with its own draft/canon state, never injected as part of the parent's canon.
+    for anchor in result.map(\.record) {
+      if anchor.kind == "entity" {
+        for section in try recordSections(worldID: worldID, parentID: anchor.id) {
+          add(section.record.id, "Section of \(anchor.title)")
+        }
+      } else if let parent = try sectionParent(worldID: worldID, recordID: anchor.id) {
+        add(parent.id, "Parent entity")
+      }
+    }
     let plain = prompt.replacingOccurrences(
       of: #"\]\(synthesis://record/[^)]*\)"#, with: " ", options: .regularExpression)
     let tokens = plain.lowercased().components(separatedBy: CharacterSet.alphanumerics.inverted)

@@ -70,7 +70,7 @@ public protocol ModelTransport: Sendable {
       When the creator asks you to add or change lore, or in Canonize mode, you may end your answer with ONE fenced block for their review:
       ```synthesis-proposal
       {"summary":"one sentence","changes":[
-        {"action":"create_record","kind":"entity|lore|capture","title":"…","category":"Characters|Factions|Places|Power systems|Cosmology","body":"…","evidence":["record ID"]},
+        {"action":"create_record","kind":"entity|lore|capture","title":"…","category":"Characters|Systems|Places|Power systems|Cosmology","body":"…","evidence":["record ID"]},
         {"action":"revise_record","id":"record ID","body":"the complete new text","reason":"…"},
         {"action":"relate","source":"record ID or title created above","target":"…","label":"short verb phrase"},
         {"action":"add_event","title":"…","date":"the world's own wording, or omit if unknown","source":"record ID or title created above"},
@@ -80,11 +80,13 @@ public protocol ModelTransport: Sendable {
         {"action":"place_record","board":"supplied board ID or new board name","source":"record ID or new title","x":0,"y":0},
         {"action":"place_marker","board":"atlas board ID","source":"record ID","x":0.5,"y":0.5},
         {"action":"link_records","source":"record ID or new title","target":"record ID or new title"},
+        {"action":"add_section","source":"parent entity ID or newly proposed entity title","title":"section title","body":"…"},
         {"action":"add_rule","source":"system entity ID","kind":"source|cost|limit|progression|technique|exception","title":"…","body":"…"}
       ]}
       ```
       Use only supplied record IDs. At most 12 changes. Every change is a draft the creator may accept or reject one by one; nothing in the block is applied by you, and none of it is canon.
       add_event may include lane with an existing chronology ID. New branches and periods must be accepted before referencing their IDs in later changes.
+      add_section creates an independently revisioned draft lore record on an entity page. Section membership is in the world index. Revise a section using revise_record with its record ID; never imply its parent is canon because a section is. Sections can organize character notes, organization structure, places, techniques or cosmology without a mandatory template.
       place_record places or moves the record's card on that board. Canvas coordinates are points; use 380 horizontal and 300 vertical spacing. Markers use normalized 0–1 coordinates on an existing map. A note is a create_record with kind capture, followed by place_record. link_records creates a navigable reference; relate creates a typed entity relationship visible in Graph and Canvas. Use only available actions; you cannot draw arbitrary images, delete content, approve proposals, or access files. Clearly explain unsupported requests.
       Workspace index is bounded DATA; totals show omitted items. Never infer complete coverage:
       \(workspace)

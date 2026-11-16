@@ -52,7 +52,7 @@ extension WorkspaceStore {
         + (values ?? []).map { "\"\($0.replacingOccurrences(of: "\"", with: "'"))\"" }.joined(
           separator: ", ") + "]"
     }
-    var files: [(String, String)] = []
+    var paths: [String: String] = [:]
     for record in pages {
       let folder: String
       switch record.kind {
@@ -64,6 +64,17 @@ extension WorkspaceStore {
       let safeFolder = String(
         folder.map { $0.isLetter || $0.isNumber || $0 == " " || $0 == "-" ? $0 : "-" }
       ).trimmingCharacters(in: .whitespaces)
+      paths[record.id] =
+        "\(safeFolder.isEmpty ? "Records" : safeFolder)/\(filename(record.title)).md"
+    }
+    func markdownLabel(_ title: String) -> String {
+      title.replacingOccurrences(of: "\\", with: "\\\\")
+        .replacingOccurrences(of: "[", with: "\\[")
+        .replacingOccurrences(of: "]", with: "\\]")
+        .replacingOccurrences(of: "\n", with: " ")
+    }
+    var files: [(String, String)] = []
+    for record in pages {
       let front = """
         ---
         id: \(record.id)
@@ -79,11 +90,22 @@ extension WorkspaceStore {
         """
       let rules =
         record.kind == "entity" ? try rulesText(worldID: worldID, systemID: record.id) : ""
+      let sections = try recordSections(worldID: worldID, parentID: record.id)
+      let sectionIndex =
+        sections.isEmpty
+        ? ""
+        : "\n## Sections\n\n"
+          + sections.map {
+            let relative = "../" + (paths[$0.record.id] ?? "")
+            let url =
+              relative.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? relative
+            return "- [\(markdownLabel($0.record.title))](\(url)) · \($0.record.state)"
+          }.joined(separator: "\n") + "\n"
       files.append(
         (
-          "\(safeFolder.isEmpty ? "Records" : safeFolder)/\(filename(record.title)).md",
+          paths[record.id]!,
           "\(front)\n\n# \(record.title)\n\n\(record.body)\n"
-            + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n")
+            + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n") + sectionIndex
         )
       )
     }

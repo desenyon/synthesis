@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 2
+  var version = 3
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -14,7 +14,7 @@ extension WorkspaceStore {
     "worlds", "records", "rich_documents", "revisions", "native_revisions", "links",
     "relationships", "relationship_history", "events", "conversations", "messages",
     "proposals", "message_context", "boards", "rules", "rule_scenarios", "chronology_lanes",
-    "chronology_placements",
+    "chronology_placements", "record_sections",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
     _ = try world(worldID)
@@ -51,7 +51,8 @@ extension WorkspaceStore {
       archive.tables["chronology_lanes"] = []
       archive.tables["chronology_placements"] = []
     }
-    guard archive.format == "dev.synthesis.world", [1, 2].contains(archive.version),
+    if [1, 2].contains(archive.version) { archive.tables["record_sections"] = [] }
+    guard archive.format == "dev.synthesis.world", [1, 2, 3].contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -116,6 +117,14 @@ extension WorkspaceStore {
         }
       }
       let newWorld = ids[oldWorld]!
+      // Membership is presentation data, but must still obey the entity -> lore contract.
+      // Validate imports as well as interactive writes to prevent recursive/cyclic pages.
+      guard
+        try db.rows(
+          "SELECT s.id FROM record_sections s JOIN records p ON p.id=s.parent_id JOIN records r ON r.id=s.record_id WHERE s.world_id=? AND (p.kind!='entity' OR r.kind!='lore') LIMIT 1",
+          [newWorld]
+        ).isEmpty
+      else { throw SynthesisError.invalid("The world file contains invalid entity sections.") }
       for (key, value) in archive.preferences {
         try setPreference("\(key):\(newWorld)", value: key == "world-cover" ? value : remap(value))
       }

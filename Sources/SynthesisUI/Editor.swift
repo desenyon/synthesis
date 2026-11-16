@@ -64,6 +64,8 @@ struct EditorScreen: View {
   @State private var handle = EditorHandle()
   @State private var editingRule: WorldRule?
   @State private var ruleSheet = false
+  @State private var sectionsVisible = true
+  @State private var sectionParent: LoreRecord?
   init(studio: Studio, record: LoreRecord) {
     self.studio = studio
     _record = State(initialValue: record)
@@ -76,8 +78,14 @@ struct EditorScreen: View {
     GeometryReader { geo in
       VStack(spacing: 0) {
         bar
+        if record.kind == "entity" { entityTabs }
         HStack(spacing: 0) {
-          writing.frame(maxWidth: .infinity, maxHeight: .infinity)
+          if record.kind == "entity" && sectionsVisible {
+            RecordSectionsPage(studio: studio, parent: record)
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
+          } else {
+            writing.frame(maxWidth: .infinity, maxHeight: .infinity)
+          }
           if studio.inspector {
             Rectangle().fill(studio.t.hairline).frame(width: 1)
             RecordInspector(
@@ -95,6 +103,14 @@ struct EditorScreen: View {
     }
     .onAppear {
       studio.editorSave = { save() }
+      studio.perform {
+        sectionParent = try studio.store.sectionParent(worldID: record.worldID, recordID: record.id)
+      }
+      if ["editor", "light-editor", "sheet-rule", "sheet-canon", "sheet-history"].contains(
+        studio.captureHint)
+      {
+        sectionsVisible = false
+      }
       if studio.reviewCanon == record.id {
         studio.reviewCanon = nil
         panel = .canon
@@ -103,6 +119,19 @@ struct EditorScreen: View {
       if studio.captureHint == "sheet-history" { openHistory() }
     }
     .onDisappear { saving?.cancel() }
+    .onChange(of: studio.worldRevision) { _, _ in
+      // A reviewed agent revision may land while this record is open. Refresh clean editors;
+      // never replace unsaved typing. The version check still rejects conflicting saves.
+      guard !dirty, let latest = studio.records.first(where: { $0.id == record.id }),
+        latest != record
+      else { return }
+      record = latest
+      title = latest.title
+      bodyText = latest.body
+      richText = latest.rtf
+      category = latest.category
+      reloadToken += 1
+    }
     .studioSheet(isPresented: $ruleSheet) {
       RecordRuleEditor(studio: studio, record: record, existing: editingRule) { ruleSheet = false }
     }
@@ -179,10 +208,32 @@ struct EditorScreen: View {
     }
   }
 
+  private var entityTabs: some View {
+    HStack(spacing: 6) {
+      FilterChip(title: "Overview", selected: !sectionsVisible, t: studio.t) {
+        if save() { sectionsVisible = false }
+      }
+      FilterChip(title: "Sections", selected: sectionsVisible, t: studio.t) {
+        if save() { sectionsVisible = true }
+      }
+      Spacer()
+    }.padding(.horizontal, 28).padding(.vertical, 10)
+      .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
+  }
+
   // MARK: Writing
 
   private var writing: some View {
     VStack(alignment: .leading, spacing: 0) {
+      if let parent = sectionParent {
+        Button {
+          if save() { studio.openRecord(parent) }
+        } label: {
+          StudioLabel("Back to \(parent.title)", icon: "arrow.left")
+            .font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.accent).lineLimit(
+              1)
+        }.buttonStyle(.plain).padding(.bottom, 14)
+      }
       HStack(spacing: 8) {
         StudioLabel(Vocabulary.kindLabel(record.kind), icon: recordIcon(record))
           .font(.studio(size: 12.5, weight: .medium))

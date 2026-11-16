@@ -92,6 +92,11 @@ struct ProposalCard: View {
         "link", "Link records",
         "\(studio.name(for: change.source, in: proposal)) → \(studio.name(for: change.target, in: proposal))"
       )
+    case "add_section":
+      return (
+        "doc.text", "Section of \(studio.name(for: change.source, in: proposal))",
+        change.title ?? "Section"
+      )
     case "add_rule": return ("bolt", "New rule · \(change.kind ?? "")", change.title ?? "Rule")
     default:
       return (
@@ -105,8 +110,10 @@ struct ProposalCard: View {
     let info = describe(change)
     let open = expanded.contains(change.id)
     let current = studio.records.first { $0.id == change.recordID }
-    let detail = ["create_record", "revise_record", "add_rule", "create_branch", "create_period"]
-      .contains(change.action)
+    let detail = [
+      "create_record", "revise_record", "add_rule", "add_section", "create_branch", "create_period",
+    ]
+    .contains(change.action)
     return VStack(alignment: .leading, spacing: 8) {
       HStack(alignment: .top, spacing: 10) {
         StudioIcon(info.icon, size: 12.5)

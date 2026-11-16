@@ -14,6 +14,8 @@ extension Studio {
     "empty-graph", "empty-timeline", "empty-atlas", "sheet-settings", "sheet-record",
     "worlds", "settings", "onboarding", "library-companion",
     "sheet-canon", "sheet-history", "sheet-relation", "sheet-rule",
+    "sections", "light-sections", "manual-sections", "sections-companion", "empty-sections",
+    "sheet-section", "section-editor",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -32,6 +34,23 @@ extension Studio {
       let sea = records.first(where: { $0.title == "The Glass Sea" }),
       let city = records.first(where: { $0.title == "The Drowned City" })
     else { throw SynthesisError.notFound }
+    if try store.recordSections(worldID: worldID, parentID: mira.id).isEmpty {
+      try store.createRecordSection(
+        worldID: worldID, parentID: mira.id, title: "What she is searching for",
+        body:
+          "Mira keeps a map of every place her sister once described. One coastline is missing from all the tide ledgers. She wants to find it before the next crossing."
+      )
+      try store.createRecordSection(
+        worldID: worldID, parentID: mira.id, title: "A borrowed craft",
+        body:
+          "She learned to map by following the Tidekeepers. Her charts preserve landmarks, but not the memories surrendered to reach them.\n\nThe boundary between a faithful map and a comforting fiction remains an open question."
+      )
+      try store.createRecordSection(
+        worldID: worldID, parentID: mira.id, title: "Unanswered questions",
+        body:
+          "What would she refuse to forget?\nWho taught her to distrust a finished map?\nWhat happens when two charts disagree?"
+      )
+    }
     // One accepted record so canon and draft states are both visible in captures.
     _ = try store.promote(
       worldID: worldID, id: sea.id, version: sea.version, confirmation: sea.id)
@@ -142,7 +161,7 @@ extension Studio {
     inspector = true
     libraryCategory = nil
     canvasBoardID = board.isEmpty ? nil : board
-    companionExpanded = state == "companion" || state == "library-companion"
+    companionExpanded = ["companion", "library-companion", "sections-companion"].contains(state)
     companionWidth = 400
     draft = ""
     preset = "Create"
@@ -177,6 +196,19 @@ extension Studio {
     case "review", "review-canon", "review-checks": destination = .review
     case "timeline", "empty-timeline": destination = .timeline
     case "atlas", "empty-atlas": destination = .atlas
+    case "sections", "light-sections", "manual-sections", "sections-companion", "sheet-section",
+      "section-editor":
+      destination = .library
+      inspector = false
+      selectedRecord = records.first { $0.title == "Mira Vale" }
+      if state == "section-editor", let parent = selectedRecord {
+        selectedRecord = try? store.recordSections(worldID: worldID, parentID: parent.id).first?
+          .record
+      }
+    case "empty-sections":
+      destination = .library
+      inspector = false
+      selectedRecord = records.first { $0.title == "The art of remembrance" }
     case "editor", "light-editor", "sheet-rule":
       destination = .library
       selectedRecord = records.first { $0.title == "Mira Vale" }

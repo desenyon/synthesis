@@ -52,7 +52,7 @@ public final class WorkspaceStore {
     try db.execute("UPDATE worlds SET name=?,updated_at=? WHERE id=?", [name, timestamp(), id])
     return try world(id)
   }
-  private func decodeRecord(_ row: [String: String]) -> LoreRecord {
+  func decodeRecord(_ row: [String: String]) -> LoreRecord {
     LoreRecord(
       id: row["id"]!, worldID: row["world_id"]!, title: row["title"]!, body: row["body"]!,
       kind: row["kind"]!, category: row["category"]!, state: row["state"]!, origin: row["origin"]!,
@@ -550,7 +550,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 6
+      var schemaVersion = 7
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -573,6 +573,7 @@ public final class WorkspaceStore {
       var ruleScenarios: [[String: String]]
       var chronology: [[String: String]]
       var chronologyPlacements: [[String: String]]
+      var recordSections: [[String: String]]
     }
     // Archived material is exported too: archiving hides, it never discards.
     let hiddenChats = try conversations(worldID: id, archived: true)
@@ -600,7 +601,9 @@ public final class WorkspaceStore {
       rules: db.rows("SELECT * FROM rules WHERE world_id=?", [id]),
       ruleScenarios: db.rows("SELECT * FROM rule_scenarios WHERE world_id=?", [id]),
       chronology: db.rows("SELECT * FROM chronology_lanes WHERE world_id=?", [id]),
-      chronologyPlacements: db.rows("SELECT * FROM chronology_placements WHERE world_id=?", [id]))
+      chronologyPlacements: db.rows("SELECT * FROM chronology_placements WHERE world_id=?", [id]),
+      recordSections: db.rows(
+        "SELECT * FROM record_sections WHERE world_id=? ORDER BY parent_id,position", [id]))
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     return try encoder.encode(export)

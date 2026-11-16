@@ -171,6 +171,19 @@ extension WorkspaceStore {
         else { continue }
         change.source = source
         change.target = target
+      case "add_section":
+        guard let source = resolve(item["source"]), let title = text(item["title"], limit: 160),
+          let body = text(item["body"], limit: 100_000)
+        else { continue }
+        if let parent = known[source], parent.kind != "entity" { continue }
+        if source.hasPrefix("change:"),
+          changes.first(where: { "change:\($0.id)" == source })?.kind != "entity"
+        {
+          continue
+        }
+        change.source = source
+        change.title = title
+        change.body = body
       case "add_rule":
         guard let source = resolve(item["source"]), let title = text(item["title"], limit: 160),
           let body = text(item["body"], limit: 100_000),
@@ -284,6 +297,11 @@ extension WorkspaceStore {
           try linkRecord(
             worldID: worldID, source: resolved(change.source), target: resolved(change.target))
           change.resultID = try resolved(change.source)
+        case "add_section":
+          change.resultID = try createRecordSection(
+            worldID: worldID, parentID: resolved(change.source),
+            title: change.title ?? "Section", body: change.body ?? "", origin: "ai-proposed"
+          ).record.id
         case "add_rule":
           guard let kind = WorldRule.Kind(rawValue: change.kind ?? "") else {
             throw SynthesisError.invalid("Unknown rule kind.")

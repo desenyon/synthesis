@@ -147,6 +147,9 @@ extension WorkspaceStore {
       "records": records.prefix(100).map {
         ["id": $0.id, "title": $0.title, "kind": $0.kind, "state": $0.state]
       },
+      "sections": try db.rows(
+        "SELECT s.parent_id AS parent,s.record_id AS record,s.position FROM record_sections s JOIN records p ON p.id=s.parent_id AND p.world_id=s.world_id JOIN records r ON r.id=s.record_id AND r.world_id=s.world_id WHERE s.world_id=? AND s.archived=0 AND p.archived=0 AND r.archived=0 ORDER BY s.parent_id,s.position LIMIT 100",
+        [worldID]),
       "relationships": relations.prefix(100).map {
         ["id": $0.id, "source": $0.sourceID, "target": $0.targetID, "label": $0.label]
       },
