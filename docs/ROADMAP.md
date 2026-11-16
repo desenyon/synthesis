@@ -12,7 +12,7 @@
 ## Active — connected studio audit and UI overhaul
 
 - Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).
-- Implemented 2026-11-15: subscription-only authentication, stale-revision rejection, structured world context, reviewed spatial/link/rule actions, source-aware Canvas capture/relationship controls, Lucide icons and grouped navigation. Current evidence/limits: [INTEGRATION_OVERHAUL](INTEGRATION_OVERHAUL.md).
+- Implemented 2026-11-15: subscription-only authentication, stale-revision rejection, structured world context, reviewed spatial/link/rule actions, source-aware Canvas capture/relationship controls, Phosphor icons and grouped navigation. Current evidence/limits: [INTEGRATION_OVERHAUL](INTEGRATION_OVERHAUL.md).
 - Next: persist the full world-index trace and test a live subscription run with the updated flags; expand interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Match live/export card appearance; measure large boards and derived graphs.
 - Then: streamed-response/Stop behavior with controlled transport, editor crash recovery, accessibility/trackpad walkthrough, deeper Timeline and Atlas operations.
 - Rules now have manual add/edit draft controls in entity details and a reviewed agent action. Dedicated Rules Lab, scenario UI and rule canon review remain incomplete.
@@ -35,6 +35,12 @@ No releases or public deployment.
 
 ## 2026-11-15 owner refinement checkpoint
 
-Implemented: black/native-glass + Phosphor/Inter, shared contextual assistant, portable world snapshots/import, Worlds, first-run setup and full-page settings, query caching, Review search/sort, reverse relationships and close-node routing, nested timeline periods/branches with reviewed AI creation. Verification and limits: [STATE](STATE.md). This supersedes the earlier Lucide/graphite presentation choice.
+Implemented: black workspace + Phosphor/Inter (the audit replaced adaptive sidebar glass with an opaque theme surface), shared contextual assistant, portable world snapshots/import, Worlds, first-run setup and full-page settings, query caching, Review search/sort, reverse relationships and close-node routing, nested timeline periods/branches with reviewed AI creation. Verification and limits: [STATE](STATE.md). This supersedes the earlier Lucide/graphite presentation choice.
 
-Next acceptance gates: explicit-use subscription image artifacts; reusable editable map geography and place-map hierarchy; customizable entity sections; power-system/cosmology studios; deeper world preferences. Excalidraw/Mermaid dependency advisories are cleared by tested scoped overrides; keep these pins under review as upstream packages update. Chronology grouping is implemented; branching canon remains a separate milestone.
+Next acceptance gates: explicit-use subscription image artifacts; reusable editable map geography and place-map hierarchy; power-system/cosmology studios; deeper world preferences. Excalidraw/Mermaid dependency advisories are cleared by tested scoped overrides; keep these pins under review as upstream packages update. Chronology grouping is implemented; branching canon remains a separate milestone.
+
+## 2026-11-15 audit repair checkpoint
+
+19 items in the owner's master audit are completed with individual check/capture/commit/push evidence. A2 remains open for live Canvas dark/light inspection after a macOS capture failure. C2/C3 remain unapproved. D2's opaque sheet capture is repaired and the real-modal Escape test is added, but its foreground execution remains opt-in. See [STATE](STATE.md) and [PROGRESS](PROGRESS.md).
+
+Entity sections, empty-world event creation, rich Markdown/section export, world summaries and description editing are implemented. Next verification work is the A2 live check and native modal test, followed by the feature ledger above; these audit fixes do not establish complete interaction coverage.

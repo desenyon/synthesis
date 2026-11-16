@@ -168,11 +168,22 @@ public struct ConnectedRoot: View {
   }
 }
 
+private struct SidebarContentBottomKey: PreferenceKey {
+  static let defaultValue: CGFloat = 0
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+private struct SidebarViewportHeightKey: PreferenceKey {
+  static let defaultValue: CGFloat = 0
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
 struct Sidebar: View {
   @ObservedObject var studio: Studio
   let collapsed: Bool
   @State private var worldExpanded = true
   @State private var chatsExpanded = true
+  @State private var contentBottom: CGFloat = 0
+  @State private var viewportHeight: CGFloat = 0
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       worldSwitcher.padding(.horizontal, 12).padding(.top, 6).padding(.bottom, 18)
@@ -238,7 +249,25 @@ struct Sidebar: View {
             }
           }
         }.padding(.horizontal, 12).padding(.bottom, 18)
-      }.scrollIndicators(.never)
+          .background {
+            GeometryReader { geometry in
+              Color.clear.preference(
+                key: SidebarContentBottomKey.self,
+                value: geometry.frame(in: .named("sidebarScroll")).maxY)
+            }
+          }
+      }.coordinateSpace(name: "sidebarScroll")
+        .background {
+          GeometryReader { geometry in
+            Color.clear.preference(key: SidebarViewportHeightKey.self, value: geometry.size.height)
+          }
+        }
+        .onPreferenceChange(SidebarContentBottomKey.self) { contentBottom = $0 }
+        .onPreferenceChange(SidebarViewportHeightKey.self) { viewportHeight = $0 }
+        .modifier(
+          BottomOverflowFade(active: viewportHeight > 0 && contentBottom > viewportHeight + 1)
+        )
+        .scrollIndicators(.never)
       VStack(spacing: 8) {
         HStack(spacing: 0) {
           NavRow(
@@ -249,7 +278,7 @@ struct Sidebar: View {
         }
       }.padding(12).padding(.top, 8)
         .overlay(alignment: .top) {
-          Rectangle().fill(studio.t.hairline).frame(height: 1).padding(.horizontal, 20)
+          Rectangle().fill(studio.t.hairline).frame(height: 1)
         }
     }
     .frame(width: collapsed ? Metric.rail : Metric.sidebar).frame(maxHeight: .infinity)

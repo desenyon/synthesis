@@ -102,3 +102,7 @@ Replaced the three vendor-specific illustration labels with Sample illustrations
 ### Audit C6 — completed
 
 Onboarding retains world name, assistance mode, labeled appearance and provider/sign-in choices. Added the Assistant heading, removed model editing and the image-generation note from onboarding, and kept them in Settings. Assistance/appearance reuse the shared segmented controls. ./scripts/check.sh passed (84 tests / 19 suites, strict lint and optimized build). Captured onboarding plus Settings at both sizes and inspected both contact sheets; onboarding fits at 1024x768 and advanced fields remain in Settings. Evidence: `docs/verification/audit-C6`.
+
+### Audit C7 — completed
+
+Added a shared 16 pt bottom fade driven by measured content/viewport bounds, disappearing when no content remains below. Sidebar footer uses a full-width one-pixel theme hairline. ./scripts/check.sh passed (84 tests / 19 suites, strict lint and optimized development build). Captured conversation/library at 1024x768 and 1440x900 and inspected both contact sheets; compact navigation stays scrollable and the footer separator is consistent. No foreground scroll gesture was exercised. Evidence: `docs/verification/audit-C7`.

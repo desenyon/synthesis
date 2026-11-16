@@ -2,6 +2,8 @@
 
 Audit date: 2026-11-15, `main` after commit `3efed30` plus the entity-sections work.
 
+Repair status: **19 items completed**. A2 is implemented but awaiting its required live inspection (macOS capture error -3812). C2/C3 are unapproved and unchanged. D2's foreground modal test was added but not run; its background capture fixes were verified. Per-item evidence and limitations are in [PROGRESS.md](PROGRESS.md) and [STATE.md](STATE.md).
+
 ## How this was produced
 
 - Built the real app and rendered all 47 capture states at 1440×900 and 1024×768 with `./scripts/verify-ui.sh` (94 screenshots, isolated database, sample world "Aster" and an empty world).
@@ -238,7 +240,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT C2 (owner approved lifting the dark palette). In `Sources/SynthesisUI/Theme.swift` set dark `background` 0x0B0B0D, `sidebar` 0x111113, `surface` 0x17171A, `secondarySurface` 0x1F1F23, `border` 0x2E2E33 and dark `hairline` opacity 1.0. Mirror the values in `CanvasWeb/src/palette.ts` and `canvas.css`, rebuild the bundle, and record the decision in `docs/DECISIONS.md`. Capture every dark state and check card edges are visible against the page.
 
-- [ ] done
+- [ ] not approved — intentionally unchanged
 
 ### C3. The composer is everywhere — Medium, needs your call
 
@@ -249,7 +251,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT C3 (owner approved). In `Shell.swift` replace the always-open collapsed `UnifiedComposer` inset on Library, Graph, Timeline, Atlas, Review and records with a 36pt pill button at the bottom trailing corner that expands into the existing compact composer on click or ⌘J and collapses on Escape when empty. Show the provider disclosure only while expanded. Keep Manual mode hiding it. Update the toast offset. Capture `library,editor,graph,timeline,review`.
 
-- [ ] done
+- [ ] not approved — intentionally unchanged
 
 ### C4. Editor bar collapses at 1024 with the companion — Medium
 
@@ -293,7 +295,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT C7. In `Sidebar` (`Shell.swift`) add a 16pt bottom fade mask to the scroll view when content overflows, and make the footer divider a full-width 1px `hairline`. Capture `conversation,library` at 1024x768.
 
-- [ ] done
+- [x] done — see verification/audit-C7.
 
 ---
 

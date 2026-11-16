@@ -1,0 +1,5 @@
+CAPTURE conversation 1440x900, bitmap 2880x1800, 640ms
+CAPTURE library 1440x900, bitmap 2880x1800, 530ms
+CAPTURE conversation 1024x768, bitmap 2048x1536, 400ms
+CAPTURE library 1024x768, bitmap 2048x1536, 388ms
+Native captures complete: /private/tmp/synthesis-c7

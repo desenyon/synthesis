@@ -22,6 +22,22 @@ struct ContentHeader<Content: View>: View {
   }
 }
 
+/// A scroll cue that disappears once the remaining content is visible.
+struct BottomOverflowFade: ViewModifier {
+  let active: Bool
+  func body(content: Content) -> some View {
+    content.mask {
+      VStack(spacing: 0) {
+        Rectangle().fill(.black)
+        if active {
+          LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+            .frame(height: 16)
+        }
+      }
+    }
+  }
+}
+
 // MARK: Buttons
 
 /// Text button used across bars, sheets and empty states.
