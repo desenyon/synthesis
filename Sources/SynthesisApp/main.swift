@@ -102,6 +102,7 @@ final class StudioWindow: NSWindow {
       window.isMovableByWindowBackground = false
       window.minSize = NSSize(width: 520, height: 520)
       window.delegate = self
+      window.appearance = NSAppearance(named: studio.dark ? .darkAqua : .aqua)
       window.backgroundColor = NSColor(studio.t.background)
       window.isReleasedWhenClosed = false
       window.contentView = NSHostingView(rootView: ConnectedRoot(studio: studio))
@@ -146,6 +147,7 @@ final class StudioWindow: NSWindow {
   func windowDidExitFullScreen(_ notification: Notification) { window.layoutTrafficLights() }
   func windowDidBecomeKey(_ notification: Notification) {
     window.layoutTrafficLights()
+    window.appearance = NSAppearance(named: studio.dark ? .darkAqua : .aqua)
     window.backgroundColor = NSColor(studio.t.background)
   }
   func windowShouldClose(_ sender: NSWindow) -> Bool {
@@ -312,6 +314,7 @@ final class StudioWindow: NSWindow {
   @objc func toggleMode() { studio.setMode(studio.mode == .assisted ? .manual : .assisted) }
   @objc func toggleTheme() {
     studio.toggleTheme()
+    window.appearance = NSAppearance(named: studio.dark ? .darkAqua : .aqua)
     window.backgroundColor = NSColor(studio.t.background)
   }
 
@@ -448,6 +451,7 @@ final class StudioWindow: NSWindow {
           window.setContentSize(NSSize(width: width, height: height))
           studio.configureConnectedCapture(
             state, board: fixture.board, conversation: fixture.conversation)
+          window.appearance = NSAppearance(named: studio.dark ? .darkAqua : .aqua)
           window.backgroundColor = NSColor(studio.t.background)
           window.layoutTrafficLights()
           try await Task.sleep(for: .milliseconds(700))

@@ -1,0 +1,9 @@
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 741ms
+CAPTURE sheet-artwork 1440x900, bitmap 2880x1800, 925ms
+CAPTURE sheet-artwork content inline; native modal presentation not exercised
+CAPTURE light 1440x900, bitmap 2880x1800, 624ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 1061ms
+CAPTURE editor 1440x900, bitmap 2880x1800, 532ms
+CAPTURE timeline 1440x900, bitmap 2880x1800, 529ms
+CAPTURE light-editor 1440x900, bitmap 2880x1800, 541ms
+Native captures complete: /private/tmp/synthesis-a1

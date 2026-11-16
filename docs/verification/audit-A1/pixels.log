@@ -1,0 +1,7 @@
+PASS conversation-home-1440x900.png: dark sidebar luminance [5.0, 5.0, 5.0]
+PASS editor-1440x900.png: dark sidebar luminance [5.0, 5.0, 5.0]
+PASS graph-1440x900.png: dark sidebar luminance [5.0, 5.0, 5.0]
+PASS light-1440x900.png: light sidebar luminance [241.79139999999998, 241.79139999999998, 241.79139999999998]
+PASS light-editor-1440x900.png: light sidebar luminance [241.79139999999998, 241.79139999999998, 241.79139999999998]
+PASS sheet-artwork-1440x900.png: dark sidebar luminance [5.0, 5.0, 5.0]
+PASS timeline-1440x900.png: dark sidebar luminance [5.0, 5.0, 5.0]

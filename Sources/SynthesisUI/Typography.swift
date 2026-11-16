@@ -39,20 +39,11 @@ extension Font {
   }
 }
 
-/// Native sidebar material with an opaque accessibility fallback.
+/// Deterministic sidebar surface. Native adaptive glass can invert against desktop content.
 struct NavigationGlass: View {
   let theme: Theme
-  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
   var body: some View {
-    if reduceTransparency {
-      theme.sidebar
-    } else if #available(macOS 26.0, *) {
-      Rectangle().fill(Color.clear)
-        .glassEffect(.regular.tint(theme.sidebar.opacity(0.75)), in: Rectangle())
-    } else {
-      Rectangle().fill(.ultraThinMaterial)
-        .overlay(theme.sidebar.opacity(theme.dark ? 0.76 : 0.62))
-        .overlay(alignment: .trailing) { theme.text.opacity(0.06).frame(width: 1) }
-    }
+    theme.sidebar
+      .overlay(alignment: .trailing) { theme.hairline.frame(width: 1) }
   }
 }

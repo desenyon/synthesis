@@ -63,7 +63,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT A1. In `Sources/SynthesisUI/Typography.swift` replace the `glassEffect` and `ultraThinMaterial` branches of `NavigationGlass` with an opaque `theme.sidebar` fill plus the existing 1px trailing hairline (or an `NSVisualEffectView` with an explicit `appearance` taken from the theme). In `Sources/SynthesisApp/main.swift` set `window.appearance` to `.darkAqua`/`.aqua` from `studio.dark` everywhere `window.backgroundColor` is assigned. Capture `conversation-home,editor,graph,timeline,light,light-editor,sheet-artwork` at 1440x900 and confirm the sidebar matches the theme in every one, with readable labels. Then toggle the theme three times in the running app and confirm the sidebar follows each time.
 
-- [ ] done
+- [x] done — opaque theme surface, explicit native appearance; see verification/audit-A1.
 
 ### A2. Canvas top bar is transparent — Critical, capture-only
 
