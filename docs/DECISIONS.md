@@ -76,3 +76,11 @@ The owner explicitly removed the direct API option, superseding the earlier opti
 The owner also requested removal of unused code. `legacy/web`, `docs/design`, the obsolete API adapter, placeholder file and old pixel-art components were retired. Source history remains in Git; local ignored legacy files/previews were moved to `~/Library/Application Support/Synthesis/Development Archives/retired-scaffolds-20261115/`. No user world data was removed.
 
 Use upstream Lucide 1.73.0 consistently for authored UI; retain the Excalidraw package as the OSS editing engine and build the Synthesis domain bridge/presentation around its public APIs. This avoids a large engine fork while adding real Library, relationship, board and agent actions. The new graphite sidebar and shared theme follow the available owner reference/design brief. No new attachment arrived with the latest request, so exact parity with it is not a verified claim.
+
+## 2026-11-15 — Owner's next studio pass (supersedes the previous icon/color choice)
+
+- Owner direction: pure black, restrained glass navigation, a better font and a new OSS icon family. Use Phosphor and locally bundled Inter consistently. Keep system window controls native. Capitalize Synthesis and place collapse after the brand.
+- Portable worlds use a versioned JSON-based `.synthesis` snapshot, imported as an independent copy. Keep SQLite as the working database. Automatic filesystem synchronization and file associations are not implemented.
+- Keep canon distinctions in review and editing, while removing decorative draft/provider badges from browsing surfaces. Shared assistance lives with content and remains optional.
+- Systems is the navigation umbrella for factions/clans/sects. Older Factions categories remain intact and are included in that lens.
+- Chronology branches/periods are saved organizational structures, not automatic alternate-canon simulations. Requested image generation remains a separate, explicit-use future integration; text harness calls disable Codex image generation.

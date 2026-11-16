@@ -49,3 +49,15 @@ test('connection routes leave the correct card face and separate parallel relati
     assert.equal(reverse.end.x, 306);
     assert.ok(reverse.points.every(p => p.every(Number.isFinite)));
 });
+
+test('overlapping cards route above the content rather than folding into it', async () => {
+    const { connectionRoute } = await import('../src/sceneRules.ts');
+    const a = { x: 0, y: 0, width: 300, height: 180 };
+    for (const x of [0, 50, 290, 320]) {
+        const route = connectionRoute(a, {...a,x}, 0);
+        assert.ok(route.points.every(p => p.every(Number.isFinite)));
+        assert.ok(route.points.every(p => p[1]+route.start.y < 0));
+        assert.ok(Math.hypot(route.end.x-route.start.x,route.end.y-route.start.y)>0);
+        assert.ok(Math.min(...route.points.map(p=>p[1]+route.start.y)) < -50);
+    }
+});

@@ -14,8 +14,19 @@ struct ReviewScreen: View {
   @State private var findings: [WorldFinding] = []
   @State private var dismissed = 0
   @State private var chosen = false
+  @State private var query = ""
+  @State private var oldestFirst = false
+  private var filteredProposals: [Proposal] {
+    studio.pendingProposals.filter {
+      query.isEmpty || $0.summary.localizedCaseInsensitiveContains(query)
+        || $0.changes.contains { ($0.title ?? "").localizedCaseInsensitiveContains(query) }
+    }
+    .sorted { oldestFirst ? $0.createdAt < $1.createdAt : $0.createdAt > $1.createdAt }
+  }
   var body: some View {
-    let queue = studio.canonQueue
+    let queue = studio.canonQueue.filter {
+      query.isEmpty || $0.title.localizedCaseInsensitiveContains(query)
+    }
     VStack(spacing: 0) {
       WorkspaceBar(studio: studio) {
         BarTitle(
@@ -23,7 +34,12 @@ struct ReviewScreen: View {
           detail: studio.reviewCount == 0 && findings.isEmpty
             ? "Nothing waiting" : "Your decisions, in one place", t: studio.t)
       } trailing: {
-        EmptyView()
+        SearchField(text: $query, placeholder: "Find a change", t: studio.t).frame(maxWidth: 210)
+        IconButton(
+          icon: "arrow.up.arrow.down",
+          label: oldestFirst ? "Oldest first; switch to newest" : "Newest first; switch to oldest",
+          t: studio.t
+        ) { oldestFirst.toggle() }
       }
       HStack(spacing: 6) {
         FilterChip(
@@ -72,7 +88,7 @@ struct ReviewScreen: View {
     dismissed = (try? studio.store.dismissedCheckCount(worldID: studio.worldID)) ?? 0
   }
   private func intro(_ text: String) -> some View {
-    Text(text).font(.system(size: 13)).foregroundStyle(studio.t.secondary).lineSpacing(3)
+    Text(text).font(.studio(size: 13)).foregroundStyle(studio.t.secondary).lineSpacing(3)
       .fixedSize(horizontal: false, vertical: true)
   }
 
@@ -95,7 +111,7 @@ struct ReviewScreen: View {
       intro(
         "Changes the assistant has suggested. Accepting saves a draft; canon is decided separately."
       )
-      ForEach(studio.pendingProposals) { proposal in
+      ForEach(filteredProposals) { proposal in
         VStack(alignment: .leading, spacing: 8) {
           if let chat = studio.conversations.first(where: { $0.id == proposal.conversationID }) {
             Button {
@@ -103,8 +119,8 @@ struct ReviewScreen: View {
             } label: {
               HStack(spacing: 6) {
                 StudioIcon("bubble.left", size: 11)
-                Text(chat.title).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
-                Text(relativeDate(proposal.createdAt)).font(.system(size: 12))
+                Text(chat.title).font(.studio(size: 12.5, weight: .medium)).lineLimit(1)
+                Text(relativeDate(proposal.createdAt)).font(.studio(size: 12))
                   .foregroundStyle(studio.t.muted)
               }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 24)
                 .hoverFill(studio.t, radius: 6)
@@ -135,9 +151,9 @@ struct ReviewScreen: View {
           HStack(spacing: 12) {
             CategoryTile(record: record, t: studio.t, size: 34)
             VStack(alignment: .leading, spacing: 3) {
-              Text(record.title).font(.system(size: 14, weight: .medium)).lineLimit(1)
+              Text(record.title).font(.studio(size: 14, weight: .medium)).lineLimit(1)
               Text("Draft changed \(relativeDate(record.updatedAt).lowercased()) · canon preserved")
-                .font(.system(size: 12.5)).foregroundStyle(studio.t.muted).lineLimit(1)
+                .font(.studio(size: 12.5)).foregroundStyle(studio.t.muted).lineLimit(1)
             }
             Spacer(minLength: 12)
             Button("Open") { studio.openRecord(record) }
@@ -181,11 +197,16 @@ struct ReviewScreen: View {
         "Observations from a local check of this world. No model is involved, and nothing changes unless you choose an action."
       )
       VStack(spacing: 1) {
-        ForEach(findings) { finding in row(finding) }
+        ForEach(
+          findings.filter {
+            query.isEmpty || $0.title.localizedCaseInsensitiveContains(query)
+              || $0.detail.localizedCaseInsensitiveContains(query)
+          }
+        ) { finding in row(finding) }
       }.padding(.horizontal, -10)
       if dismissed > 0 {
         Button("Show \(dismissed) dismissed") { restore() }.buttonStyle(.plain)
-          .font(.system(size: 12.5, weight: .medium)).foregroundStyle(studio.t.accent)
+          .font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.accent)
       }
     }
   }
@@ -199,9 +220,9 @@ struct ReviewScreen: View {
         )
         .frame(width: 34, height: 34).background(t.surface, in: RoundedRectangle(cornerRadius: 8))
       VStack(alignment: .leading, spacing: 3) {
-        Text(finding.title).font(.system(size: 14, weight: .medium))
+        Text(finding.title).font(.studio(size: 14, weight: .medium))
           .fixedSize(horizontal: false, vertical: true)
-        Text(finding.detail).font(.system(size: 12.5)).foregroundStyle(t.muted)
+        Text(finding.detail).font(.studio(size: 12.5)).foregroundStyle(t.muted)
           .fixedSize(horizontal: false, vertical: true)
       }
       Spacer(minLength: 12)
@@ -224,7 +245,7 @@ struct ReviewScreen: View {
               ) { studio.openRecord(record) }
             }
           } label: {
-            Text("Open…").font(.system(size: 13, weight: .medium)).padding(.horizontal, 12)
+            Text("Open…").font(.studio(size: 13, weight: .medium)).padding(.horizontal, 12)
               .frame(height: Metric.control)
               .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
               .overlay(

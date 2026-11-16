@@ -89,3 +89,11 @@ Observed: a proposal placement could update stored JSON without proving the visi
 Visual findings: compact editor Details silently hid the inspector; a long sidebar action wrapped; cubic control points interpreted as scene vertices caused arrow hooks. Corrected compact details, shortened the label, and sampled cubic paths. Initial capture state names were silently ignored; unknown states now fail the capture run instead of creating false coverage.
 
 AGENTS changes (operational section 5 only): replaced the stale instruction to preserve legacy/web/previews with their owner-authorized retirement; replaced optional API wording with subscription-only Claude/Codex and authentication checks. Evidence: explicit owner request, deleted unused adapter/scaffold, passing subscription regressions and build. Protected canon/privacy rules are unchanged. Rollback: restore the two prior operational lines only if implementation/product scope is explicitly reverted; use Git history for retired code, not copied preview apps. Validation: full strict formatting/native tests/optimized build and Canvas checks; current counts in STATE.
+
+## 2026-11-15 — Canvas native occlusion
+
+The connected shell applied an opaque `Theme.background` to the workspace above the permanently mounted WKWebView. Its accessibility tree and engine snapshot remained intact while native rendering was covered. The earlier conclusion that the blank live view was only a capture limitation was unsupported. The shell now leaves the Canvas area transparent. Engine-composited captures remain useful for card rendering but do not verify native occlusion or pointer delivery. Live native verification is required before closing this issue. No protected instruction was changed.
+
+## 2026-11-15 — Compact companion and provider recommendation
+
+The 1024×768 contact sheet exposed a clipped non-Canvas companion: only Canvas previously collapsed the global sidebar when docking chat. Apply the same width policy to all content workspaces, with conversation takeover below the usable split width. The Settings capture also exposed an old installed-first “Recommended” badge conflicting with the new Codex label. Recommendation now uses the explicit product preference. Recapture corrected screens; no AGENTS.md change.

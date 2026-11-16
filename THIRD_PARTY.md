@@ -16,6 +16,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 The bundle in `Sources/SynthesisUI/CanvasBundle` also contains Excalidraw's dependencies and its bundled fonts (Excalifont, Nunito, Virgil, Cascadia, Comic Shanns, Liberation Sans, Lilita One, Assistant) under their respective open licences; see `CanvasWeb/node_modules/*/LICENSE` after `npm install`.
 
-## Lucide 1.73.0
+## Phosphor
 
-Authored native UI uses the upstream `lucide-static` icon font, bundled at `Sources/SynthesisUI/Assets/Icons/lucide.ttf`. The associated ISC license is in `Assets/Icons/LICENSE`; semantic aliases are in `aliases.json` and `StudioIcon.swift`. Canvas uses `lucide-react` at the same exact version. Source: https://github.com/lucide-icons/lucide . To update, update both pinned packages in CanvasWeb, copy the upstream static font/license, regenerate glyph mappings from that release's `font/lucide.css`, and rebuild/reinspect both renderers. Do not substitute generated or hand-drawn artwork.
+Native controls bundle the regular Phosphor 2.1.2 font from `@phosphor-icons/web`, under MIT. Canvas uses `@phosphor-icons/react` 2.1.10. Source: https://github.com/phosphor-icons . The font and full license are in `Sources/SynthesisUI/Assets/Icons`; `aliases.json` records semantic mappings. Updating the font requires regenerating codepoints from that version's `src/regular/style.css` and checking both renderers. No generated icons.
+
+## Inter
+
+Native typography bundles Inter 4.1 Regular, Medium, SemiBold and Bold under SIL Open Font License 1.1, with the full license in `Sources/SynthesisUI/Assets/Fonts/LICENSE.txt`. Source: https://github.com/rsms/inter . Canvas uses the offline `@fontsource/inter` 5.3.0 package. Fonts load from the application bundle, never a CDN. Existing user-rich-text formatting is preserved.

@@ -5,15 +5,15 @@ import SynthesisCore
 /// so the light and dark themes stay complete counterparts.
 public struct Theme {
   public let dark: Bool
-  public var background: Color { Color(hex: dark ? 0x191A1C : 0xF8F9FB) }
-  public var sidebar: Color { Color(hex: dark ? 0x141517 : 0xF0F2F5) }
-  public var surface: Color { Color(hex: dark ? 0x222427 : 0xFFFFFF) }
-  public var secondarySurface: Color { Color(hex: dark ? 0x2B2E33 : 0xECEFF3) }
-  public var text: Color { Color(hex: dark ? 0xEFF0F2 : 0x20232B) }
+  public var background: Color { Color(hex: dark ? 0x000000 : 0xF8F9FB) }
+  public var sidebar: Color { Color(hex: dark ? 0x050505 : 0xF0F2F5) }
+  public var surface: Color { Color(hex: dark ? 0x111111 : 0xFFFFFF) }
+  public var secondarySurface: Color { Color(hex: dark ? 0x1B1B1B : 0xECEFF3) }
+  public var text: Color { Color(hex: dark ? 0xE6E9EF : 0x20232B) }
   public var secondary: Color { Color(hex: dark ? 0xB6BBC5 : 0x5C6573) }
   public var muted: Color { Color(hex: dark ? 0x8F96A3 : 0x7D8593) }
-  public var border: Color { Color(hex: dark ? 0x34373D : 0xDCE1E8) }
-  public var accent: Color { Color(hex: dark ? 0xAEC7EF : 0x456B9D) }
+  public var border: Color { Color(hex: dark ? 0x2A2A2A : 0xDCE1E8) }
+  public var accent: Color { Color(hex: dark ? 0xA9C7FF : 0x456B9D) }
   public var accentSoft: Color { Color(hex: dark ? 0x252D3B : 0xE3ECF3) }
   /// Text or icon colour placed on a filled accent control.
   public var onAccent: Color { dark ? Color(hex: 0x14181C) : .white }
@@ -30,7 +30,7 @@ public struct Theme {
   public func category(_ name: String) -> Color {
     switch name.lowercased() {
     case "characters": return Color(hex: dark ? 0xD7B899 : 0x866042)
-    case "factions": return Color(hex: dark ? 0xB7B6E0 : 0x655A96)
+    case "factions", "systems": return Color(hex: dark ? 0xB7B6E0 : 0x655A96)
     case "places": return Color(hex: dark ? 0x9CC7B5 : 0x3B7461)
     case "power systems": return Color(hex: dark ? 0xD4C48F : 0x7A6A2E)
     case "cosmology": return Color(hex: dark ? 0xC9A9D6 : 0x7B5391)
@@ -68,7 +68,7 @@ enum Metric {
 }
 
 enum Vocabulary {
-  static let categories = ["Characters", "Factions", "Places", "Power systems", "Cosmology"]
+  static let categories = ["Characters", "Systems", "Places", "Power systems", "Cosmology"]
   static let modes: [(name: String, icon: String, summary: String)] = [
     ("Create", "sparkles", "Brainstorm freely. Everything stays a suggestion."),
     ("Develop", "arrow.up.right.circle", "Deepen an existing idea within its constraints."),
@@ -76,6 +76,9 @@ enum Vocabulary {
     ("Simulate", "play.circle", "Explore a what-if with stated assumptions."),
     ("Canonize", "checkmark.seal", "Prepare a change for you to review and accept."),
   ]
+  static func matchesCategory(_ value: String, _ category: String) -> Bool {
+    value == category || (category == "Systems" && value == "Factions")
+  }
   static func kindLabel(_ kind: String) -> String {
     switch kind {
     case "entity": return "Entity"
@@ -104,7 +107,7 @@ enum Vocabulary {
 func categoryIcon(_ category: String) -> String {
   switch category.lowercased() {
   case "characters": return "person"
-  case "factions": return "flag"
+  case "factions", "systems": return "flag"
   case "places": return "mappin.and.ellipse"
   case "power systems": return "bolt"
   case "cosmology": return "sparkles"

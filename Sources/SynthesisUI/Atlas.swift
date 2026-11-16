@@ -29,7 +29,7 @@ struct AtlasScreen: View {
             markerPicker = true
           } label: {
             StudioLabel("Place marker", icon: "mappin.and.ellipse")
-              .font(.system(size: 13, weight: .medium)).foregroundStyle(studio.t.onAccent)
+              .font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.onAccent)
               .padding(.horizontal, 12).frame(height: Metric.control)
               .background(studio.t.accent, in: RoundedRectangle(cornerRadius: Metric.radius))
           }.buttonStyle(.plain).disabled(studio.records.isEmpty)
@@ -164,9 +164,9 @@ struct AtlasScreen: View {
             Text(
               "Click the map to place “\(studio.records.first { $0.id == id }?.title ?? "record")”"
             )
-            .font(.system(size: 13))
+            .font(.studio(size: 13))
             Button("Cancel") { placing = nil }.buttonStyle(.plain)
-              .font(.system(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
+              .font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
           }.padding(.horizontal, 14).frame(height: 36).floatingPanel(studio.t)
         }
         Spacer()
@@ -175,9 +175,9 @@ struct AtlasScreen: View {
             HStack(spacing: 10) {
               CategoryTile(record: record, t: studio.t, size: 30)
               VStack(alignment: .leading, spacing: 2) {
-                Text(record.title).font(.system(size: 13.5, weight: .semibold)).lineLimit(1)
+                Text(record.title).font(.studio(size: 13.5, weight: .semibold)).lineLimit(1)
                 Text(record.body.isEmpty ? record.category : record.body)
-                  .font(.system(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+                  .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
               }.frame(maxWidth: 240, alignment: .leading)
               Button("Open") { studio.openRecord(record) }
                 .buttonStyle(QuietButton(t: studio.t))
@@ -205,7 +205,7 @@ struct AtlasScreen: View {
       StudioIcon("mappin.circle.fill", size: active ? 28 : 24)
         .symbolRenderingMode(.palette).foregroundStyle(Color.white, tint)
         .shadow(color: .black.opacity(0.35), radius: 3, y: 1)
-      Text(record?.title ?? "Archived record").font(.system(size: 11.5, weight: .medium))
+      Text(record?.title ?? "Archived record").font(.studio(size: 11.5, weight: .medium))
         .lineLimit(1).padding(.horizontal, 6).frame(height: 18)
         .background(studio.t.surface.opacity(0.92), in: Capsule())
         .overlay(Capsule().stroke(active ? tint : studio.t.hairline, lineWidth: 1))

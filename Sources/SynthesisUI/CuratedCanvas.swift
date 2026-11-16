@@ -166,17 +166,17 @@ struct CuratedCanvas: View {
         boardMenu
       } label: {
         HStack(spacing: 5) {
-          Text(session.name).font(.system(size: 15, weight: .semibold)).lineLimit(1)
+          Text(session.name).font(.studio(size: 15, weight: .semibold)).lineLimit(1)
           StudioIcon("chevron.down", size: 9)
             .foregroundStyle(studio.t.muted)
         }.padding(.horizontal, 6).frame(height: 28).hoverFill(studio.t)
       }.padding(.leading, -4).help("Switch, rename or archive boards")
       if let failure = session.failure {
         StudioLabel("Not saved", icon: "exclamationmark.triangle")
-          .font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.warning).fixedSize()
+          .font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.warning).fixedSize()
           .help(failure)
       } else {
-        Text("Saved").font(.system(size: 12)).foregroundStyle(studio.t.muted).fixedSize()
+        Text("Saved").font(.studio(size: 12)).foregroundStyle(studio.t.muted).fixedSize()
           .help("This board is saved on this device")
       }
     } trailing: {
@@ -210,7 +210,7 @@ struct CuratedCanvas: View {
           }
         }
       } label: {
-        StudioLabel("Add", icon: "plus").font(.system(size: 13, weight: .medium)).fixedSize()
+        StudioLabel("Add", icon: "plus").font(.studio(size: 13, weight: .medium)).fixedSize()
           .padding(.horizontal, 10).frame(height: Metric.control)
           .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
           .overlay(
@@ -380,7 +380,7 @@ struct CuratedCanvas: View {
       FormField(label: "Name", placeholder: "Name", text: $formTitle, t: studio.t)
       if formKind == "entity" {
         VStack(alignment: .leading, spacing: 6) {
-          Text("Type").font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+          Text("Type").font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
           FlowLayout(spacing: 6) {
             ForEach(Vocabulary.categories, id: \.self) { type in
               FilterChip(title: type, selected: formCategory == type, t: studio.t) {
@@ -391,8 +391,8 @@ struct CuratedCanvas: View {
         }
       }
       VStack(alignment: .leading, spacing: 6) {
-        Text("Notes").font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
-        TextEditor(text: $formBody).font(.system(size: 14)).scrollContentBackground(.hidden)
+        Text("Notes").font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+        TextEditor(text: $formBody).font(.studio(size: 14)).scrollContentBackground(.hidden)
           .padding(8).frame(height: 120)
           .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
           .overlay(
@@ -452,11 +452,11 @@ struct CuratedCanvas: View {
               HStack(spacing: 10) {
                 CategoryTile(record: record, t: studio.t, size: 28)
                 VStack(alignment: .leading, spacing: 1) {
-                  Text(record.title).font(.system(size: 13.5, weight: .medium)).lineLimit(1)
+                  Text(record.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
                   Text(
                     record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category
                   )
-                  .font(.system(size: 11.5)).foregroundStyle(studio.t.muted)
+                  .font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
                 }
                 Spacer()
                 StudioIcon("plus", size: 12)
@@ -466,7 +466,7 @@ struct CuratedCanvas: View {
           }
           if matches.isEmpty {
             Text(studio.records.isEmpty ? "Your library is empty." : "No records match.")
-              .font(.system(size: 13)).foregroundStyle(studio.t.secondary).padding(.vertical, 30)
+              .font(.studio(size: 13)).foregroundStyle(studio.t.secondary).padding(.vertical, 30)
           }
         }
       }.frame(height: 300)
@@ -511,7 +511,7 @@ struct RelationEditor: View {
           }
         }.scrollIndicators(.never)
       }
-      Text(note).font(.system(size: 12.5)).foregroundStyle(t.muted).lineSpacing(2)
+      Text(note).font(.studio(size: 12.5)).foregroundStyle(t.muted).lineSpacing(2)
         .fixedSize(horizontal: false, vertical: true)
     } footer: {
       if removable {
@@ -526,7 +526,7 @@ struct RelationEditor: View {
   }
   private var valid: Bool { !label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
   private func endpoint(_ name: String) -> some View {
-    Text(name).font(.system(size: 13, weight: .medium)).lineLimit(1)
+    Text(name).font(.studio(size: 13, weight: .medium)).lineLimit(1)
       .padding(.horizontal, 10).frame(height: 28)
       .background(t.surface, in: RoundedRectangle(cornerRadius: 7))
       .overlay(RoundedRectangle(cornerRadius: 7).stroke(t.hairline, lineWidth: 1))

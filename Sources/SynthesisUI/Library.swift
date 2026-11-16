@@ -19,6 +19,7 @@ struct LibraryScreen: View {
   }
   @ObservedObject var studio: Studio
   @State private var query = ""
+  @State private var indexed = Set<String>()
   @State private var filter = Filter.all
   @State private var order = Order.recent
   @State private var archived: [LoreRecord] = []
@@ -34,14 +35,15 @@ struct LibraryScreen: View {
   }
   private var scoped: [LoreRecord] {
     let source = filter == .archived ? archived : studio.records
-    return source.filter { studio.libraryCategory == nil || $0.category == studio.libraryCategory }
+    return source.filter {
+      studio.libraryCategory == nil
+        || Vocabulary.matchesCategory($0.category, studio.libraryCategory ?? "")
+    }
   }
   private var visible: [LoreRecord] {
     var result = scoped.filter { belongs($0, to: filter) }
     let text = query.trimmingCharacters(in: .whitespaces)
     if !text.isEmpty {
-      let indexed = Set(
-        ((try? studio.store.search(worldID: studio.worldID, query: text)) ?? []).map(\.id))
       result = result.filter {
         indexed.contains($0.id) || $0.title.localizedCaseInsensitiveContains(text)
           || $0.category.localizedCaseInsensitiveContains(text)
@@ -62,7 +64,7 @@ struct LibraryScreen: View {
           detail: "\(rows.count) \(rows.count == 1 ? "item" : "items")", t: studio.t)
         if studio.libraryCategory != nil {
           Button("Show all") { studio.openLens(nil) }.buttonStyle(.plain)
-            .font(.system(size: 12.5, weight: .medium)).foregroundStyle(studio.t.accent)
+            .font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.accent)
             .padding(.leading, 4)
         }
       } trailing: {
@@ -101,7 +103,7 @@ struct LibraryScreen: View {
         } label: {
           HStack(spacing: 5) {
             StudioIcon("arrow.up.arrow.down", size: 10.5)
-            Text(order.rawValue).font(.system(size: 12.5))
+            Text(order.rawValue).font(.studio(size: 12.5))
           }.foregroundStyle(studio.t.secondary).padding(.horizontal, 8).frame(height: 26)
             .hoverFill(studio.t)
         }.help("Sort order")
@@ -123,7 +125,11 @@ struct LibraryScreen: View {
       }
     }
     .onAppear { refreshArchive() }
-    .onChange(of: studio.records) { _, _ in refreshArchive() }
+    .onChange(of: studio.records) { _, _ in
+      refreshArchive()
+      refreshSearch()
+    }
+    .onChange(of: query) { _, _ in refreshSearch() }
     .dropDestination(for: URL.self) { urls, _ in
       // Dropped Markdown or text files become imported drafts.
       let files = urls.filter {
@@ -133,6 +139,10 @@ struct LibraryScreen: View {
       studio.importDocuments(files)
       return true
     }
+  }
+  private func refreshSearch() {
+    indexed = Set(
+      ((try? studio.store.search(worldID: studio.worldID, query: query)) ?? []).map(\.id))
   }
   private func refreshArchive() {
     archived = (try? studio.store.archivedRecords(worldID: studio.worldID)) ?? []
@@ -198,31 +208,26 @@ struct RecordRow: View {
         CategoryTile(record: record, t: studio.t, size: 34)
         VStack(alignment: .leading, spacing: 3) {
           HStack(spacing: 7) {
-            Text(record.title).font(.system(size: 14, weight: .medium))
+            Text(record.title).font(.studio(size: 14, weight: .medium))
               .foregroundStyle(studio.t.text).lineLimit(1)
-            if record.origin == "ai-proposed" {
-              Text("AI-proposed").font(.system(size: 11, weight: .medium))
-                .foregroundStyle(studio.t.muted).padding(.horizontal, 6).frame(height: 17)
-                .overlay(Capsule().stroke(studio.t.hairline, lineWidth: 1))
-            }
+
           }
           Text(
             record.body.isEmpty
               ? "Empty" : record.body.replacingOccurrences(of: "\n", with: " ")
-          ).font(.system(size: 12.5)).foregroundStyle(studio.t.muted).lineLimit(1)
+          ).font(.studio(size: 12.5)).foregroundStyle(studio.t.muted).lineLimit(1)
         }
         Spacer(minLength: 16)
         Text(record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category)
-          .font(.system(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+          .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
           .frame(width: 110, alignment: .leading)
-        StateBadge(state: record.state, t: studio.t).frame(width: 96, alignment: .leading)
         if archived {
           Button("Restore") {
             studio.restore(recordID: record.id)
             changed()
           }.buttonStyle(QuietButton(t: studio.t))
         } else {
-          Text(relativeDate(record.updatedAt)).font(.system(size: 12)).monospacedDigit()
+          Text(relativeDate(record.updatedAt)).font(.studio(size: 12)).monospacedDigit()
             .foregroundStyle(studio.t.muted).frame(width: 72, alignment: .trailing)
         }
       }.padding(.horizontal, 10).frame(height: 54).hoverFill(studio.t, radius: 9)

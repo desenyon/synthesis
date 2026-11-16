@@ -47,3 +47,7 @@ Keep the native SwiftUI/AppKit app and offline Excalidraw engine. Replace author
 | Atlas/Timeline | marker proposal persistence; source records preserved | multi-map navigation depth, marker dragging, eras and ordering |
 
 This is not complete product acceptance or a claim to match the latest missing attachment exactly. Free drawing remains board-only until explicitly saved as a record. The assistant operates through the listed reviewed domain actions; it cannot control every arbitrary engine gesture or silently establish canon.
+
+## Correction and follow-up — 2026-11-15
+
+The earlier “remote WebKit pixels omitted” explanation did **not** establish that the native Canvas was visible. A later source audit found an opaque workspace background covering the WKWebView. Removing it restored actual native-window Canvas rendering, confirmed through a live screen capture and native Fit action. Engine-composited capture remains useful but cannot validate native occlusion. See STATE.md for the new Phosphor/Inter, black/glass, shared chat, portability and chronology checkpoint and its separate verification limits.

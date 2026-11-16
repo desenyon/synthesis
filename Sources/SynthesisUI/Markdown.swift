@@ -165,15 +165,15 @@ struct MarkdownContent: View {
       ).padding(.top, level <= 2 ? 6 : 2).textSelection(.enabled)
         .frame(maxWidth: .infinity, alignment: .leading).accessibilityAddTraits(.isHeader)
     case .paragraph(let text):
-      Text(inline(text)).font(.system(size: size)).lineSpacing(5).textSelection(.enabled)
+      Text(inline(text)).font(.studio(size: size)).lineSpacing(5).textSelection(.enabled)
         .frame(maxWidth: .infinity, alignment: .leading)
     case .list(_, let items):
       VStack(alignment: .leading, spacing: 6) {
         ForEach(Array(items.enumerated()), id: \.offset) { _, item in
           HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(item.marker).font(.system(size: size)).monospacedDigit()
+            Text(item.marker).font(.studio(size: size)).monospacedDigit()
               .foregroundStyle(t.muted).frame(minWidth: 14, alignment: .trailing)
-            Text(inline(item.text)).font(.system(size: size)).lineSpacing(5)
+            Text(inline(item.text)).font(.studio(size: size)).lineSpacing(5)
               .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
           }.padding(.leading, CGFloat(item.indent) * 18)
         }
@@ -181,13 +181,13 @@ struct MarkdownContent: View {
     case .quote(let text):
       HStack(alignment: .top, spacing: 12) {
         RoundedRectangle(cornerRadius: 1.5).fill(t.accent.opacity(0.6)).frame(width: 3)
-        Text(inline(text)).font(.system(size: size)).lineSpacing(5)
+        Text(inline(text)).font(.studio(size: size)).lineSpacing(5)
           .foregroundStyle(t.secondary).textSelection(.enabled)
           .frame(maxWidth: .infinity, alignment: .leading)
       }.fixedSize(horizontal: false, vertical: true)
     case .code(let code):
       ScrollView(.horizontal) {
-        Text(code).font(.system(size: size - 2, design: .monospaced)).lineSpacing(3)
+        Text(code).font(.studio(size: size - 2, design: .monospaced)).lineSpacing(3)
           .textSelection(.enabled).padding(14)
       }.frame(maxWidth: .infinity, alignment: .leading)
         .background(t.surface, in: RoundedRectangle(cornerRadius: 10))
@@ -205,7 +205,7 @@ struct MarkdownContent: View {
         GridRow {
           ForEach(0..<columns, id: \.self) { column in
             Text(inline(column < row.count ? row[column] : ""))
-              .font(.system(size: size - 1, weight: index == 0 ? .semibold : .regular))
+              .font(.studio(size: size - 1, weight: index == 0 ? .semibold : .regular))
               .foregroundStyle(index == 0 ? t.secondary : t.text).textSelection(.enabled)
               .lineSpacing(3).padding(.horizontal, 14).padding(.vertical, 9)
               .frame(maxWidth: .infinity, alignment: .leading)

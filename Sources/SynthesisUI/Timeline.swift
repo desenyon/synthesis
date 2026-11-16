@@ -5,6 +5,15 @@ import SynthesisCore
 /// optional position and never invents calendar precision.
 struct TimelineScreen: View {
   @ObservedObject var studio: Studio
+  @State private var lanes: [ChronologyLane] = []
+  @State private var placements: [String: String] = [:]
+  @State private var selectedLane = ""
+  @State private var eventLane = ""
+  @State private var creatingLane = false
+  @State private var laneName = ""
+  @State private var laneKind = "period"
+  @State private var laneStart = ""
+  @State private var laneEnd = ""
   @State private var events: [WorldEvent] = []
   @State private var query = ""
   @State private var editing: WorldEvent?
@@ -16,9 +25,21 @@ struct TimelineScreen: View {
   @State private var sourcePicker = false
   private var filtered: [WorldEvent] {
     events.filter {
-      query.isEmpty || $0.dateLabel.localizedCaseInsensitiveContains(query)
-        || $0.title.localizedCaseInsensitiveContains(query)
+      (selectedLane.isEmpty || placements[$0.id] == selectedLane
+        || descendants.contains(placements[$0.id] ?? ""))
+        && (query.isEmpty || $0.dateLabel.localizedCaseInsensitiveContains(query)
+          || $0.title.localizedCaseInsensitiveContains(query))
     }
+  }
+  private var descendants: Set<String> {
+    guard !selectedLane.isEmpty else { return [] }
+    var ids: Set<String> = [selectedLane]
+    for _ in 0..<lanes.count {
+      let next = Set(lanes.filter { $0.parentID.map(ids.contains) ?? false }.map(\.id))
+      if next.isSubset(of: ids) { break }
+      ids.formUnion(next)
+    }
+    return ids
   }
   var body: some View {
     let rows = filtered
@@ -36,6 +57,54 @@ struct TimelineScreen: View {
             ? "Create a record first; every event cites its source" : "Add an event"
         ) { begin(nil) }.disabled(studio.records.isEmpty)
       }
+      HStack(spacing: 10) {
+        Menu {
+          Button("All history") { selectedLane = "" }
+          ForEach(lanes) { lane in
+            Button("\(lane.kind == "branch" ? "Branch" : "Period") · \(lane.name)") {
+              selectedLane = lane.id
+            }
+          }
+        } label: {
+          Text(lanes.first { $0.id == selectedLane }?.name ?? "All history").font(
+            .studio(size: 13, weight: .medium))
+        }.frame(maxWidth: 260)
+        if let lane = lanes.first(where: { $0.id == selectedLane }) {
+          Text([lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — ")).font(
+            .studio(size: 12)
+          ).foregroundStyle(studio.t.secondary)
+          IconButton(icon: "archivebox", label: "Archive branch or period", t: studio.t) {
+            studio.perform {
+              try studio.store.setChronologyLaneArchived(
+                worldID: studio.worldID, id: lane.id, archived: true)
+              selectedLane = ""
+              refresh()
+              studio.show("Archived \(lane.name)", actionTitle: "Undo") {
+                studio.perform {
+                  try studio.store.setChronologyLaneArchived(
+                    worldID: studio.worldID, id: lane.id, archived: false)
+                  refresh()
+                }
+              }
+            }
+          }
+        }
+        Spacer()
+        Button("New branch") {
+          laneKind = "branch"
+          laneName = ""
+          laneStart = ""
+          laneEnd = ""
+          creatingLane = true
+        }.buttonStyle(QuietButton(t: studio.t))
+        Button("New period") {
+          laneKind = "period"
+          laneName = ""
+          laneStart = ""
+          laneEnd = ""
+          creatingLane = true
+        }.buttonStyle(QuietButton(t: studio.t))
+      }.padding(.horizontal, 20).padding(.vertical, 10)
       if rows.isEmpty {
         empty.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
@@ -52,13 +121,14 @@ struct TimelineScreen: View {
     .onAppear { refresh() }
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .studioSheet(isPresented: $composing) { form }
+    .studioSheet(isPresented: $creatingLane) { laneForm }
   }
   private func row(_ event: WorldEvent, first: Bool, last: Bool) -> some View {
     let sourceRecord = studio.records.first { $0.id == event.sourceID }
     let unknown = event.dateLabel == "unknown"
     return HStack(alignment: .top, spacing: 16) {
       Text(unknown ? "Date unknown" : event.dateLabel)
-        .font(.system(size: 12.5, weight: .medium))
+        .font(.studio(size: 12.5, weight: .medium))
         .foregroundStyle(unknown ? studio.t.muted : studio.t.accent)
         .multilineTextAlignment(.trailing).frame(width: 132, alignment: .trailing)
         .padding(.top, 15)
@@ -102,6 +172,7 @@ struct TimelineScreen: View {
     }
   }
   private func begin(_ event: WorldEvent?) {
+    eventLane = event.flatMap { placements[$0.id] } ?? selectedLane
     editing = event
     title = event?.title ?? ""
     date = event.map { $0.dateLabel == "unknown" ? "" : $0.dateLabel } ?? ""
@@ -129,14 +200,9 @@ struct TimelineScreen: View {
     let save = {
       studio.perform {
         let name = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let editing {
-          _ = try studio.store.updateEvent(
-            worldID: studio.worldID, id: editing.id, title: name, date: date, source: source,
-            order: Int(order))
-        } else {
-          _ = try studio.store.addEvent(
-            worldID: studio.worldID, title: name, date: date, source: source, order: Int(order))
-        }
+        _ = try studio.store.saveChronologyEvent(
+          worldID: studio.worldID, id: editing?.id, title: name, date: date, source: source,
+          order: Int(order), laneID: eventLane.isEmpty ? nil : eventLane)
         composing = false
         refresh()
       }
@@ -152,15 +218,19 @@ struct TimelineScreen: View {
         FormField(label: "Position", placeholder: "Optional", text: $order, t: studio.t)
           .frame(width: 110)
       }
+      Picker("Branch or period", selection: $eventLane) {
+        Text("Unassigned").tag("")
+        ForEach(lanes) { lane in Text(lane.name).tag(lane.id) }
+      }
       VStack(alignment: .leading, spacing: 6) {
-        Text("Source record").font(.system(size: 12, weight: .medium))
+        Text("Source record").font(.studio(size: 12, weight: .medium))
           .foregroundStyle(studio.t.secondary)
         Button {
           sourcePicker = true
         } label: {
           HStack {
             Text(studio.records.first { $0.id == source }?.title ?? "Choose a record")
-              .font(.system(size: 14)).lineLimit(1)
+              .font(.studio(size: 14)).lineLimit(1)
             Spacer()
             StudioIcon("chevron.up.chevron.down", size: 10)
               .foregroundStyle(studio.t.muted)
@@ -180,7 +250,7 @@ struct TimelineScreen: View {
         order.isEmpty || Int(order) != nil
           ? "“When” keeps your world’s own wording. Position is a whole number used only to order events; lower comes first."
           : "Position must be a whole number, or empty."
-      ).font(.system(size: 12.5))
+      ).font(.studio(size: 12.5))
         .foregroundStyle(order.isEmpty || Int(order) != nil ? studio.t.muted : studio.t.danger)
         .lineSpacing(2).fixedSize(horizontal: false, vertical: true)
     } footer: {
@@ -191,8 +261,49 @@ struct TimelineScreen: View {
         .disabled(!valid)
     }
   }
+  private func closeLane() { creatingLane = false }
+  private var laneForm: some View {
+    SheetScaffold(
+      title: laneKind == "branch" ? "New history branch" : "New period",
+      subtitle: "Keep your world's own chronology. Dates can stay uncertain.", t: studio.t,
+      close: closeLane
+    ) {
+      FormField(
+        label: "Name",
+        placeholder: laneKind == "branch" ? "An alternate history" : "Age of the first kingdoms",
+        text: $laneName, t: studio.t)
+      if laneKind == "period" {
+        FormField(
+          label: "Beginning", placeholder: "Optional date or era", text: $laneStart, t: studio.t)
+        FormField(
+          label: "End", placeholder: "Optional; may still be ongoing", text: $laneEnd, t: studio.t)
+      }
+      Text(
+        selectedLane.isEmpty
+          ? "Created at the root of your history." : "Created inside the selected branch or period."
+      )
+      .font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+    } footer: {
+      Spacer()
+      Button("Create") {
+        studio.perform {
+          let lane = try studio.store.createChronologyLane(
+            worldID: studio.worldID, name: laneName, kind: laneKind,
+            parentID: selectedLane.isEmpty ? nil : selectedLane, start: laneStart, end: laneEnd)
+          selectedLane = lane.id
+          creatingLane = false
+          refresh()
+        }
+      }.buttonStyle(QuietButton(t: studio.t, primary: true)).disabled(
+        laneName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
+  }
   private func refresh() {
-    studio.perform { events = try studio.store.events(worldID: studio.worldID) }
+    studio.perform {
+      events = try studio.store.events(worldID: studio.worldID)
+      lanes = try studio.store.chronologyLanes(worldID: studio.worldID)
+      placements = try studio.store.chronologyPlacements(worldID: studio.worldID)
+    }
   }
 }
 
@@ -207,7 +318,7 @@ private struct EventCard: View {
     let t = studio.t
     HStack(alignment: .top, spacing: 10) {
       VStack(alignment: .leading, spacing: 8) {
-        Text(event.title).font(.system(size: 16, weight: .semibold))
+        Text(event.title).font(.studio(size: 16, weight: .semibold))
           .fixedSize(horizontal: false, vertical: true)
         HStack(spacing: 10) {
           if let source {
@@ -217,13 +328,13 @@ private struct EventCard: View {
               HStack(spacing: 5) {
                 StudioIcon(recordIcon(source), size: 11)
                   .foregroundStyle(t.category(source.category))
-                Text(source.title).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
+                Text(source.title).font(.studio(size: 12.5, weight: .medium)).lineLimit(1)
               }.foregroundStyle(t.secondary).padding(.horizontal, 7).frame(height: 24)
                 .background(t.background.opacity(0.6), in: RoundedRectangle(cornerRadius: 6))
                 .hoverFill(t, radius: 6)
             }.buttonStyle(.plain).help("Open the source record")
           } else {
-            Text("Source archived").font(.system(size: 12.5)).foregroundStyle(t.muted)
+            Text("Source archived").font(.studio(size: 12.5)).foregroundStyle(t.muted)
           }
           StateBadge(state: "draft", t: t)
         }

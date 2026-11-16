@@ -1,6 +1,6 @@
 # Synthesis
 
-A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Conversation, Canvas, Library, Graph, Timeline, Atlas and Review** are views of one saved world, sharing one design system.
+A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Conversation, Canvas, Library, Graph, Timeline, Atlas, Review and Worlds** are views of one saved world, sharing one design system.
 
 ```sh
 export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
@@ -16,13 +16,21 @@ Requires macOS 14+ and Swift 6 Command Line Tools. The canvas bundle is committe
 
 - **Conversation** is the assisted entry point. Pick a mode (Create, Develop, Critique, Simulate, Canonize) and type `@` to reference lore. Each answer shows which records were read. When the assistant proposes changes they arrive as a review card: accept or dismiss each record, revision, relationship, event, rule, link or spatial placement; accepted ones become drafts. Chats persist and can be renamed or archived. Without a configured provider the app says so and keeps your message.
 - **AI Assisted / Manual** sits in every workspace bar and is independent of navigation. Manual persists, cancels active work and blocks provider requests in the native core. Every other tool keeps working.
-- **Canvas** runs on the [Excalidraw](https://github.com/excalidraw/excalidraw) engine: draw freely, add shapes, text, images and frames, and place record cards that stay linked to your library. Relationships between entities appear as labelled arrows, and an arrow you draw between two entity cards can become a relationship. It works offline; nothing is loaded from the network. Synthesis supplies the visible graphite cards, colored connection ports, image previews and compact toolbars; Excalidraw supplies gestures and history. A compact composer expands into a resizable docked companion that shares the conversation.
+- **Canvas** runs on the [Excalidraw](https://github.com/excalidraw/excalidraw) engine: draw freely, add shapes, text, images and frames, and place record cards that stay linked to your library. Relationships between entities appear as labelled arrows, and an arrow you draw between two entity cards can become a relationship. It works offline; nothing is loaded from the network. Synthesis supplies the visible world-record cards, colored connection ports, image previews and compact toolbars; Excalidraw supplies gestures and history. A compact composer expands into a resizable docked companion that shares the conversation.
 - **Graph** draws itself from entity relationships. Select an entity for its details, edit relationships, or copy a neighbourhood into an editable board.
 - **Library** holds every document, entity and idea with full-text search, filters and an archive. The editor has rich text, a details inspector (tags, aliases, links, relationships, timeline) and canon review as a line diff.
-- **Timeline** orders sourced events with free-form dates. **Atlas** pins records to a map image you supply or explicitly choose from the bundled GPT illustration library. Replacing a map offers Undo.
+- **Timeline** orders sourced events with free-form dates, nested branches and periods. Branches organize alternate histories; they do not duplicate or merge canon. **Atlas** pins records to a map image you supply or explicitly choose from the bundled GPT illustration library. Replacing a map offers Undo.
 - **Review** gathers what is waiting on you: AI proposals from every conversation, drafts that have moved past accepted canon, and a local consistency check (clashing names, unlinked mentions, unconnected entities) that needs no model.
 
 Nothing is hard-deleted: removing a record, conversation, board, event or relationship archives it and offers Undo. No AI output becomes canon without your explicit acceptance of an exact revision.
+
+## Worlds and setup
+
+Use the world menu → **All worlds** to browse, search, create or open a world. **Save world file** exports a portable `.synthesis` snapshot; opening it creates an independent copy with fresh identifiers and preserved internal links. It includes rich text, images, boards, conversations, proposals, rules and history. The live copy stays in the local SQLite database: saving an archive is an explicit snapshot, not continuous folder synchronization. Files are private world data; they contain no provider credentials.
+
+Markdown, JSON and image-only exports are available from Settings and the File menu. Settings is a full workspace with application and current-world controls. The setup flow appears only for a fresh installation. Codex is recommended; an existing provider choice is preserved. Runtime image generation is not implemented; no image usage occurs automatically.
+
+Every content workspace has the shared contextual composer in Assisted mode. Expand it to read the conversation alongside the current page. The open record is included as context. Manual removes these controls and blocks requests in the core.
 
 ## Keys
 
@@ -30,6 +38,8 @@ Nothing is hard-deleted: removing a record, conversation, board, event or relati
 | - | - |
 | ⌘K | Search and commands |
 | ⌘1 – ⌘7 | Conversation, Canvas, Library, Graph, Timeline, Atlas, Review |
+| ⌘O / ⇧⌘S | Open / save a portable world snapshot |
+| ⌘8 / ⌘9 | Worlds / Settings |
 | ⌘N / ⇧⌘N | New record / new conversation |
 | ⇧⌘I | Import Markdown or text files |
 | @ in a message | Reference lore; ↑↓ choose, ↵ insert |
@@ -38,7 +48,7 @@ Nothing is hard-deleted: removing a record, conversation, board, event or relati
 | ⌘[ | Back from a record |
 | Canvas | Excalidraw's shortcuts: 1–0 tools, V select, H hand, A arrow, ⌫ delete, ⌘Z undo, ⌘D duplicate, ⌘G group |
 
-The sidebar groups workspaces, world categories and real conversation history. Authored controls use bundled Lucide icons in both native views and Canvas. The Graph shares stored relationships with Canvas, but keeps its own derived layout.
+The sidebar groups workspaces, world categories and real conversation history. Authored controls use bundled Phosphor icons and Inter typography in both native views and Canvas. The Graph shares stored relationships with Canvas, but keeps its own derived layout.
 
 On Canvas, double-click a card to open its record. Draw an arrow from one entity card to another to propose a relationship. Select cards and choose Reference to mention them in the conversation; Add ▸ Artwork puts a picture on the selected card. "Show on canvas" in a record's menu finds or places its card. Board text is explicitly board-only until you select **Save as idea**, which creates a linked Library record. Selecting a relationship opens its shared native inspector. The assistant can propose a new board, card placement or an Atlas marker; approval flushes and reloads the live scene without discarding other drawings.
 

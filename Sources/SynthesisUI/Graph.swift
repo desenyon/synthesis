@@ -96,6 +96,8 @@ struct RelationshipGraph: View {
   @State private var source = ""
   @State private var target = ""
   @State private var label = ""
+  @State private var inverseLabel = ""
+  @State private var twoWay = false
   @State private var editing: Relation?
   @State private var framed = false
   private var entities: [LoreRecord] { studio.records.filter { $0.kind == "entity" } }
@@ -201,11 +203,25 @@ struct RelationshipGraph: View {
     let a = point(edge.sourceID, size)
     let b = point(edge.targetID, size)
     let distance = max(1, hypot(b.x - a.x, b.y - a.y))
-    let unit = CGVector(dx: (b.x - a.x) / distance, dy: (b.y - a.y) / distance)
+    let unit =
+      distance <= 1
+      ? CGVector(dx: 1, dy: 0) : CGVector(dx: (b.x - a.x) / distance, dy: (b.y - a.y) / distance)
     // Keep a stable normal for both directions of a pair so opposite edges bow apart.
     let flip: Double = edge.sourceID < edge.targetID ? 1 : -1
     let normal = CGVector(dx: -unit.dy * flip, dy: unit.dx * flip)
     let lane = lanes[edge.id] ?? 0
+    if distance < 90 {
+      let start = CGPoint(
+        x: a.x + normal.dx * 30 - unit.dx * 10, y: a.y + normal.dy * 30 - unit.dy * 10)
+      let end = CGPoint(
+        x: b.x + normal.dx * 32 + unit.dx * 10, y: b.y + normal.dy * 32 + unit.dy * 10)
+      return (
+        start,
+        CGPoint(
+          x: (a.x + b.x) / 2 + normal.dx * (105 + abs(lane) * 2),
+          y: (a.y + b.y) / 2 + normal.dy * (105 + abs(lane) * 2)), end
+      )
+    }
     let start = CGPoint(x: a.x + unit.dx * 27, y: a.y + unit.dy * 27)
     let end = CGPoint(x: b.x - unit.dx * 30, y: b.y - unit.dy * 30)
     let control = CGPoint(
@@ -278,7 +294,7 @@ struct RelationshipGraph: View {
               label = edge.label
               panel = .edit
             } label: {
-              Text(edge.label).font(.system(size: 12, weight: .medium)).lineLimit(1)
+              Text(edge.label).font(.studio(size: 12, weight: .medium)).lineLimit(1)
                 .foregroundStyle(strong ? studio.t.accent : studio.t.muted)
                 .padding(.horizontal, 8).frame(height: 22)
                 .background(studio.t.background, in: Capsule())
@@ -297,7 +313,7 @@ struct RelationshipGraph: View {
         ForEach(nodes) { entity in node(entity, size: geo.size) }
         if relationships.isEmpty {
           Text("Connect two entities to draw the first relationship.")
-            .font(.system(size: 13)).foregroundStyle(studio.t.secondary)
+            .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
             .padding(.horizontal, 14).frame(height: 34).floatingPanel(studio.t)
             .frame(maxHeight: .infinity, alignment: .top).padding(.top, 14)
         }
@@ -353,7 +369,7 @@ struct RelationshipGraph: View {
         )
         .shadow(color: studio.t.shadow.opacity(0.4), radius: 6, y: 2)
       // The backing hugs the text so it never hides a neighbouring relationship label.
-      Text(entity.title).font(.system(size: 13, weight: .medium)).lineLimit(2)
+      Text(entity.title).font(.studio(size: 13, weight: .medium)).lineLimit(2)
         .multilineTextAlignment(.center).padding(.horizontal, 4).padding(.vertical, 1)
         .background(studio.t.background.opacity(0.85), in: RoundedRectangle(cornerRadius: 4))
         .frame(width: 140)
@@ -408,10 +424,10 @@ struct RelationshipGraph: View {
       HStack(alignment: .top, spacing: 10) {
         CategoryTile(record: entity, t: studio.t, size: 32)
         VStack(alignment: .leading, spacing: 3) {
-          Text(entity.title).font(.system(size: 15, weight: .semibold)).lineLimit(2)
+          Text(entity.title).font(.studio(size: 15, weight: .semibold)).lineLimit(2)
           HStack(spacing: 8) {
             if !entity.category.isEmpty {
-              Text(entity.category).font(.system(size: 12)).foregroundStyle(studio.t.muted)
+              Text(entity.category).font(.studio(size: 12)).foregroundStyle(studio.t.muted)
             }
             StateBadge(state: entity.state, t: studio.t)
           }
@@ -422,7 +438,7 @@ struct RelationshipGraph: View {
         }
       }
       if !entity.body.isEmpty {
-        Text(entity.body).font(.system(size: 13)).lineSpacing(3).foregroundStyle(studio.t.secondary)
+        Text(entity.body).font(.studio(size: 13)).lineSpacing(3).foregroundStyle(studio.t.secondary)
           .lineLimit(4).fixedSize(horizontal: false, vertical: true)
       }
       if !related.isEmpty {
@@ -435,9 +451,9 @@ struct RelationshipGraph: View {
             } label: {
               HStack(spacing: 6) {
                 StudioIcon(outward ? "arrow.right" : "arrow.left")
-                  .font(.system(size: 9, weight: .bold)).foregroundStyle(studio.t.muted)
-                Text(relation.label).font(.system(size: 12.5)).foregroundStyle(studio.t.secondary)
-                Text(name(other)).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
+                  .font(.studio(size: 9, weight: .bold)).foregroundStyle(studio.t.muted)
+                Text(relation.label).font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
+                Text(name(other)).font(.studio(size: 12.5, weight: .medium)).lineLimit(1)
                 Spacer(minLength: 0)
               }.padding(.horizontal, 7).frame(height: 26).hoverFill(studio.t, radius: 6)
             }.buttonStyle(.plain)
@@ -547,12 +563,12 @@ struct RelationshipGraph: View {
   }
   private func picker(_ title: String, selection: Binding<String>) -> some View {
     VStack(alignment: .leading, spacing: 6) {
-      Text(title).font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+      Text(title).font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
       PlainMenu {
         ForEach(entities) { entity in Button(entity.title) { selection.wrappedValue = entity.id } }
       } label: {
         HStack {
-          Text(name(selection.wrappedValue)).font(.system(size: 14)).lineLimit(1)
+          Text(name(selection.wrappedValue)).font(.studio(size: 14)).lineLimit(1)
           Spacer()
           StudioIcon("chevron.up.chevron.down", size: 10)
             .foregroundStyle(studio.t.muted)
@@ -565,12 +581,15 @@ struct RelationshipGraph: View {
   }
   private func closePanel() { panel = nil }
   private var createSheet: some View {
-    let valid = source != target && !label.trimmingCharacters(in: .whitespaces).isEmpty
+    let valid =
+      source != target && !label.trimmingCharacters(in: .whitespaces).isEmpty
+      && (!twoWay || !inverseLabel.trimmingCharacters(in: .whitespaces).isEmpty)
     let save = {
       studio.perform {
-        _ = try studio.store.addRelation(
+        try studio.store.addRelationshipPair(
           worldID: studio.worldID, source: source, target: target,
-          label: label.trimmingCharacters(in: .whitespacesAndNewlines))
+          label: label, inverse: twoWay ? inverseLabel : nil)
+        try studio.reload()
         panel = nil
         refresh()
       }
@@ -585,6 +604,13 @@ struct RelationshipGraph: View {
       FormField(
         label: "How are they connected?", placeholder: "guided by, rules, born in…", text: $label,
         t: studio.t, submit: { if valid { save() } })
+      Toggle("Also describe the reverse relationship", isOn: $twoWay).toggleStyle(.checkbox)
+        .font(.studio(size: 13))
+      if twoWay {
+        FormField(
+          label: "From \(name(target)) to \(name(source))",
+          placeholder: "mentored by, belongs to, protects…", text: $inverseLabel, t: studio.t)
+      }
       if !suggestions.isEmpty {
         ScrollView(.horizontal) {
           HStack(spacing: 6) {
@@ -594,7 +620,7 @@ struct RelationshipGraph: View {
           }
         }.scrollIndicators(.never)
       }
-      Text("Saved as a draft relationship. It is not canon.").font(.system(size: 12.5))
+      Text("Saved as a draft relationship. It is not canon.").font(.studio(size: 12.5))
         .foregroundStyle(studio.t.muted)
     } footer: {
       Spacer()

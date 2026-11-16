@@ -4,13 +4,15 @@ import SynthesisCore
 struct StudioSheet: View {
   @ObservedObject var studio: Studio
   let sheet: Studio.Sheet
+  var embedded = false
   @State private var name = ""
   @State private var kind = "lore"
   @State private var category = ""
   @State private var model = ""
   @State private var worldName = ""
   @State private var saved = false
-  init(studio: Studio, sheet: Studio.Sheet) {
+  init(studio: Studio, sheet: Studio.Sheet, embedded: Bool = false) {
+    self.embedded = embedded
     self.studio = studio
     self.sheet = sheet
     _kind = State(initialValue: studio.newRecordKind)
@@ -32,7 +34,46 @@ struct StudioSheet: View {
       case .document: document
       case .rename: rename
       case .settings: settings
+      case .onboarding: onboarding
       }
+    }
+  }
+  private func finishSetup() { studio.completeOnboarding() }
+  private var onboarding: some View {
+    SheetScaffold(
+      title: "Welcome to Synthesis",
+      subtitle: "Your universe, your way. You can change these choices in Settings.", t: studio.t,
+      width: 560, close: finishSetup
+    ) {
+      FormField(label: "Your first world", placeholder: "World name", text: $worldName, t: studio.t)
+      HStack {
+        Text("Start creating").font(.studio(size: 14, weight: .medium))
+        Spacer()
+        Button("AI Assisted") { studio.setMode(.assisted) }
+          .buttonStyle(QuietButton(t: studio.t, primary: studio.mode == .assisted))
+        Button("Manual") { studio.setMode(.manual) }
+          .buttonStyle(QuietButton(t: studio.t, primary: studio.mode == .manual))
+      }
+      HStack {
+        Text("Appearance").font(.studio(size: 14, weight: .medium))
+        Spacer()
+        AppearanceButton(studio: studio)
+      }
+      if studio.mode == .assisted {
+        assistant
+      }
+      Text(
+        "Nothing is generated automatically. Image generation is not available in this build; requested image generation will use your subscription allowance when connected."
+      )
+      .font(.studio(size: 12)).foregroundStyle(studio.t.secondary).fixedSize(
+        horizontal: false, vertical: true)
+    } footer: {
+      Spacer()
+      Button("Start creating") {
+        studio.renameWorld(worldName)
+        if studio.error == nil { studio.completeOnboarding() }
+      }.buttonStyle(QuietButton(t: studio.t, primary: true)).keyboardShortcut(.defaultAction)
+        .disabled(worldName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
     }
   }
   private var world: some View {
@@ -74,8 +115,8 @@ struct StudioSheet: View {
             VStack(alignment: .leading, spacing: 6) {
               StudioIcon(item.2, size: 15)
                 .foregroundStyle(kind == item.0 ? studio.t.accent : studio.t.secondary)
-              Text(item.1).font(.system(size: 13.5, weight: .medium))
-              Text(item.3).font(.system(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(2)
+              Text(item.1).font(.studio(size: 13.5, weight: .medium))
+              Text(item.3).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(2)
                 .multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
             }.padding(10).frame(maxWidth: .infinity, alignment: .topLeading).frame(height: 96)
               .background(
@@ -95,7 +136,7 @@ struct StudioSheet: View {
         t: studio.t, submit: create)
       if kind == "entity" {
         VStack(alignment: .leading, spacing: 6) {
-          Text("Type").font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+          Text("Type").font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
           FlowLayout(spacing: 6) {
             ForEach(Vocabulary.categories, id: \.self) { item in
               FilterChip(title: item, selected: category == item, t: studio.t) {
@@ -150,9 +191,9 @@ struct StudioSheet: View {
   ) -> some View {
     HStack(spacing: 12) {
       VStack(alignment: .leading, spacing: 2) {
-        Text(title).font(.system(size: 13.5, weight: .medium))
+        Text(title).font(.studio(size: 13.5, weight: .medium))
         if let detail {
-          Text(detail).font(.system(size: 12)).foregroundStyle(studio.t.muted)
+          Text(detail).font(.studio(size: 12)).foregroundStyle(studio.t.muted)
             .fixedSize(horizontal: false, vertical: true)
         }
       }
@@ -160,69 +201,89 @@ struct StudioSheet: View {
       trailing()
     }
   }
-  private var settings: some View {
-    SheetScaffold(title: "Settings", t: studio.t, width: 520, close: close) {
-      ScrollView {
-        VStack(alignment: .leading, spacing: 20) {
-          group("Assistant") { assistant }
-          group("Appearance") {
-            settingRow("Theme", studio.dark ? "Dark" : "Light") {
-              AppearanceButton(studio: studio)
+  @ViewBuilder private var settings: some View {
+    if embedded {
+      VStack(spacing: 0) {
+        WorkspaceBar(studio: studio) {
+          Text("Settings").font(.studio(size: 15, weight: .semibold))
+        } trailing: {
+        }
+        settingsContents.padding(.horizontal, 32).padding(.vertical, 20)
+          .frame(maxWidth: 900).frame(maxWidth: .infinity)
+      }
+    } else {
+      SheetScaffold(title: "Settings", t: studio.t, width: 600, close: close) {
+        settingsContents.frame(maxHeight: 520)
+      } footer: {
+        Spacer()
+        Button("Done", action: close).buttonStyle(QuietButton(t: studio.t, primary: true))
+      }
+    }
+  }
+  private var settingsContents: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 20) {
+        group("Application · Assistant") { assistant }
+        group("Application · Appearance") {
+          settingRow("Theme", studio.dark ? "Dark" : "Light") {
+            AppearanceButton(studio: studio)
+          }
+        }
+        group("This world") {
+          settingRow("Images", "Export the saved artwork from this world's boards and cover.") {
+            Button("Export images…") { studio.exportWorldImages() }.buttonStyle(
+              QuietButton(t: studio.t))
+          }
+          HStack(alignment: .bottom, spacing: 8) {
+            FormField(label: "Name", placeholder: "World name", text: $worldName, t: studio.t) {
+              studio.renameWorld(worldName)
+            }
+            Button("Rename") { studio.renameWorld(worldName) }
+              .buttonStyle(QuietButton(t: studio.t)).padding(.bottom, 2)
+              .disabled(
+                worldName.trimmingCharacters(in: .whitespaces).isEmpty
+                  || worldName == studio.world?.name)
+          }
+          settingRow("Cover image", "Optional. Stored on this device only.") {
+            WorldBadge(studio: studio, radius: 6).frame(width: 30, height: 30)
+            Button("Choose…") { studio.chooseWorldCover() }.buttonStyle(QuietButton(t: studio.t))
+            if studio.worldCover != nil {
+              Button("Remove") { studio.removeWorldCover() }
+                .buttonStyle(QuietButton(t: studio.t, role: .ghost))
             }
           }
-          group("This world") {
-            HStack(alignment: .bottom, spacing: 8) {
-              FormField(label: "Name", placeholder: "World name", text: $worldName, t: studio.t) {
-                studio.renameWorld(worldName)
-              }
-              Button("Rename") { studio.renameWorld(worldName) }
-                .buttonStyle(QuietButton(t: studio.t)).padding(.bottom, 2)
-                .disabled(
-                  worldName.trimmingCharacters(in: .whitespaces).isEmpty
-                    || worldName == studio.world?.name)
-            }
-            settingRow("Cover image", "Optional. Stored on this device only.") {
-              WorldBadge(studio: studio, radius: 6).frame(width: 30, height: 30)
-              Button("Choose…") { studio.chooseWorldCover() }.buttonStyle(QuietButton(t: studio.t))
-              if studio.worldCover != nil {
-                Button("Remove") { studio.removeWorldCover() }
-                  .buttonStyle(QuietButton(t: studio.t, role: .ghost))
-              }
-            }
+          settingRow(
+            "Export",
+            "Markdown: one readable file per record. JSON: everything, including history, proposals and the archive."
+          ) {
+            Button("World file…") { studio.savePortableWorld() }.buttonStyle(
+              QuietButton(t: studio.t))
+            Button("Markdown…") { studio.exportMarkdown() }.buttonStyle(QuietButton(t: studio.t))
+            Button("JSON…") { studio.exportWorld() }.buttonStyle(QuietButton(t: studio.t))
+          }
+          settingRow(
+            "Import", "Markdown or text files become draft documents marked as imported."
+          ) {
+            Button("Choose files…") {
+              studio.sheet = nil
+              studio.importDocuments()
+            }.buttonStyle(QuietButton(t: studio.t))
+          }
+        }
+        if !studio.worlds.contains(where: { $0.demo }) {
+          group("Sample") {
             settingRow(
-              "Export",
-              "Markdown: one readable file per record. JSON: everything, including history, proposals and the archive."
+              "Aster, a sample universe",
+              "A clearly labelled world to explore. Your own worlds are not changed."
             ) {
-              Button("Markdown…") { studio.exportMarkdown() }.buttonStyle(QuietButton(t: studio.t))
-              Button("JSON…") { studio.exportWorld() }.buttonStyle(QuietButton(t: studio.t))
-            }
-            settingRow(
-              "Import", "Markdown or text files become draft documents marked as imported."
-            ) {
-              Button("Choose files…") {
-                studio.sheet = nil
-                studio.importDocuments()
+              Button("Open sample") {
+                studio.loadSample()
+                close()
               }.buttonStyle(QuietButton(t: studio.t))
             }
           }
-          if !studio.worlds.contains(where: { $0.demo }) {
-            group("Sample") {
-              settingRow(
-                "Aster, a sample universe",
-                "A clearly labelled world to explore. Your own worlds are not changed."
-              ) {
-                Button("Open sample") {
-                  studio.loadSample()
-                  close()
-                }.buttonStyle(QuietButton(t: studio.t))
-              }
-            }
-          }
-        }.padding(.bottom, 4)
-      }.frame(maxHeight: 520)
-    } footer: {
-      Spacer()
-      Button("Done", action: close).buttonStyle(QuietButton(t: studio.t, primary: true))
+        }
+      }.padding(.bottom, 4)
     }
   }
   /// Subscription connections remain owned by the installed harness; no keys enter Synthesis.
@@ -230,7 +291,7 @@ struct StudioSheet: View {
     let t = studio.t
     Text(
       "Optional — every manual tool works without it. A request is made only when you send a message."
-    ).font(.system(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(3)
+    ).font(.studio(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(3)
       .fixedSize(horizontal: false, vertical: true)
     VStack(spacing: 6) {
       ForEach(ProviderKind.allCases) { kind in
@@ -241,23 +302,23 @@ struct StudioSheet: View {
         } label: {
           HStack(spacing: 10) {
             StudioIcon(selected ? "largecircle.fill.circle" : "circle")
-              .font(.system(size: 14)).foregroundStyle(selected ? t.accent : t.muted)
+              .font(.studio(size: 14)).foregroundStyle(selected ? t.accent : t.muted)
             VStack(alignment: .leading, spacing: 2) {
-              Text(kind.title).font(.system(size: 13.5, weight: .medium))
+              Text(kind.title).font(
+                .studio(size: 13.5, weight: .medium))
               Text(
                 kind == .claudeCode
                   ? "Uses your Claude subscription through the Claude Code app on this Mac"
                   : "Uses your ChatGPT subscription through Codex on this Mac"
-              ).font(.system(size: 12)).foregroundStyle(t.muted)
+              ).font(.studio(size: 12)).foregroundStyle(t.muted)
                 .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 8)
             if HarnessLocator.find(kind) == nil {
-              Text("Not installed").font(.system(size: 11.5, weight: .medium))
+              Text("Not installed").font(.studio(size: 11.5, weight: .medium))
                 .foregroundStyle(t.muted)
-            } else if kind == ProviderKind.allCases.first(where: { HarnessLocator.find($0) != nil })
-            {
-              Text("Recommended").font(.system(size: 11.5, weight: .medium))
+            } else if kind == .codex {
+              Text("Recommended").font(.studio(size: 11.5, weight: .medium))
                 .foregroundStyle(t.accent)
             }
           }.padding(10).frame(maxWidth: .infinity, alignment: .leading)
@@ -289,7 +350,7 @@ struct StudioSheet: View {
         !installed
           ? "\(kind.title) was not found"
           : (studio.providerStatus?.detail ?? "Installed · sign-in not checked yet")
-      ).font(.system(size: 13, weight: .medium)).fixedSize(horizontal: false, vertical: true)
+      ).font(.studio(size: 13, weight: .medium)).fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
       if installed {
         Button(studio.checkingProvider ? "Checking…" : "Check sign-in") { studio.checkProvider() }
@@ -303,7 +364,7 @@ struct StudioSheet: View {
         : kind == .claudeCode
           ? "Synthesis starts Claude Code for each message with all tools, plugins and settings files turned off, in an empty folder. It can only read what you send and write text. Your sign-in stays inside Claude Code."
           : "Synthesis starts Codex for each message in a read-only sandbox and an empty folder, without your Codex config, rules, apps or plugins. Your sign-in stays inside Codex."
-    ).font(.system(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(3)
+    ).font(.studio(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(3)
       .fixedSize(horizontal: false, vertical: true)
     if installed {
       HStack(alignment: .bottom, spacing: 8) {

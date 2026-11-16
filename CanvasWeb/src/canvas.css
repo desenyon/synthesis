@@ -20,7 +20,7 @@ body,
   --color-brand-active: #2a495e;
   --color-surface-primary-container: #e3ecf3;
   --color-on-primary-container: #2a495e;
-  --ui-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --ui-font: Inter, sans-serif;
   --default-border-radius: 8px;
   --border-radius-lg: 10px;
 }
@@ -62,12 +62,12 @@ body,
 }
 
 /* Excalidraw owns gestures/history. Synthesis owns the visible workspace. */
-.synthesis-board{position:relative;width:100%;height:100%;background:#191a1c radial-gradient(#ffffff0b .8px,transparent .8px);background-size:24px 24px}
+.synthesis-board{position:relative;width:100%;height:100%;background:#000000 radial-gradient(#ffffff0b .8px,transparent .8px);background-size:24px 24px}
 .synthesis-board.light{background-color:#f5f6f7;background-image:radial-gradient(#20252e14 .8px,transparent .8px)}
 .synthesis-board .excalidraw{background:transparent;--color-primary:#aec7ef;--color-primary-light:#252d3b}
 .synthesis-board .excalidraw .App-menu_top,.synthesis-board .excalidraw .layer-ui__wrapper__footer,.synthesis-board .excalidraw .HintViewer,.synthesis-board .excalidraw .main-menu-trigger{display:none!important}
 .synthesis-board .excalidraw .App-menu__left{display:none!important}
-.studio-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;font:14px/1.45 -apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;color:#eceeed;--glass:#242629;--line:#ffffff14;--quiet:#b6bbc5;--ink:#eff0f2;--field:#1a1c20;--hover:#ffffff0c}
+.studio-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;font:14px/1.45 -apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;color:#eceeed;--glass:#111111;--line:#ffffff14;--quiet:#b6bbc5;--ink:#eff0f2;--field:#090909;--hover:#ffffff0c}
 .studio-overlay.light{--glass:#fff;--line:#1d24211a;--quiet:#5e6963;--ink:#232b26;--field:#f2f4f3;--hover:#20392a09;color:var(--ink)}
 .studio-card-layer{position:absolute;inset:0;pointer-events:none}
 .studio-record{position:absolute;box-sizing:border-box;transform-origin:center center;border:1px solid var(--line);border-radius:17px;background:linear-gradient(150deg,#ffffff07,transparent 50%),var(--glass);box-shadow:0 2px 2px #00000016,0 12px 28px #00000022,inset 0 1px #ffffff0b;display:flex;flex-direction:column;pointer-events:none;transition:box-shadow 180ms,border-color 180ms,opacity 150ms}
@@ -117,3 +117,6 @@ body,
 .studio-empty>button{display:inline-flex;align-items:center;gap:10px}
 .studio-record{border-radius:12px}.record-copy h2{font-weight:600}
 .studio-drawing-bar{border-radius:12px}.studio-add-bar{border-radius:10px}
+
+/* Shared, offline studio typography. */
+.studio-overlay, .studio-overlay button, .studio-overlay input { font-family: Inter, sans-serif; }

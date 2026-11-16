@@ -32,11 +32,11 @@ struct SearchableRecordPicker: View {
               HStack(spacing: 10) {
                 CategoryTile(record: record, t: t, size: 28)
                 VStack(alignment: .leading, spacing: 2) {
-                  Text(record.title).font(.system(size: 14, weight: .medium)).lineLimit(1)
+                  Text(record.title).font(.studio(size: 14, weight: .medium)).lineLimit(1)
                   Text(
                     record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category
                   )
-                  .font(.system(size: 12)).foregroundStyle(t.secondary).lineLimit(1)
+                  .font(.studio(size: 12)).foregroundStyle(t.secondary).lineLimit(1)
                 }
                 Spacer(minLength: 0)
               }.padding(8).contentShape(Rectangle()).hoverFill(t)
@@ -44,11 +44,11 @@ struct SearchableRecordPicker: View {
           }
           if matches.isEmpty {
             Text(records.isEmpty ? "No available records." : "No matching records.")
-              .font(.system(size: 13)).foregroundStyle(t.secondary).padding(.vertical, 24)
+              .font(.studio(size: 13)).foregroundStyle(t.secondary).padding(.vertical, 24)
           }
         }
       }.frame(height: 250)
-      Text("\(matches.count) records").font(.system(size: 11)).foregroundStyle(t.secondary)
+      Text("\(matches.count) records").font(.studio(size: 11)).foregroundStyle(t.secondary)
     }.padding(14).frame(width: 330).background(t.background).foregroundStyle(t.text)
   }
 }

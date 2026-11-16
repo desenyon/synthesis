@@ -258,7 +258,18 @@ struct CanvasBoardContent {
 
   // MARK: Commands
 
-  func add(_ records: [LoreRecord]) { call("addCards", [records.map(\.id)]) }
+  func add(_ records: [LoreRecord]) {
+    let ids = records.filter { $0.worldID == worldID }.map(\.id)
+    guard !ids.isEmpty else { return }
+    guard loaded else {
+      pendingReveal.append(contentsOf: ids)
+      return
+    }
+    // A newly saved entity may not exist in the engine's last record snapshot yet.
+    // WebKit queues these calls in order; sync the shared model before placing its card.
+    sync()
+    call("addCards", [ids])
+  }
   /// Places a record on the open board (or selects its card) and brings it into view. If the
   /// board is still loading the request waits for it.
   func reveal(_ record: LoreRecord) {
@@ -435,6 +446,7 @@ struct CanvasBoardContent {
       selectionWithArt = []
       store(message, migrated: message["migrated"] as? Bool == true)
       if !pendingReveal.isEmpty {
+        sync()
         call("addCards", [pendingReveal])
         pendingReveal = []
       }
@@ -494,6 +506,8 @@ struct CanvasBoardContent {
         icon: "eye.slash")
     case "request":
       request = message["action"] as? String
+    case "exportFailed":
+      studio.error = message["message"] as? String ?? "This board could not be exported."
     case "exported":
       save(png: message["data"] as? String ?? "")
     default: break

@@ -5,6 +5,7 @@ import SynthesisCore
 struct CommandPalette: View {
   @ObservedObject var studio: Studio
   @State private var query = ""
+  @State private var indexed: [LoreRecord] = []
   @State private var index = 0
   @FocusState private var focused: Bool
   struct Item: Identifiable {
@@ -25,7 +26,7 @@ struct CommandPalette: View {
           StudioIcon("magnifyingglass", size: 15)
             .foregroundStyle(studio.t.muted)
           TextField("Search your world or run a command", text: $query)
-            .textFieldStyle(.plain).font(.system(size: 16)).focused($focused)
+            .textFieldStyle(.plain).font(.studio(size: 16)).focused($focused)
             .onSubmit { run(items) }
             .onKeyPress(.downArrow) {
               index = min(items.count - 1, index + 1)
@@ -39,7 +40,7 @@ struct CommandPalette: View {
               close()
               return .handled
             }
-          Text("esc").font(.system(size: 11, weight: .medium)).foregroundStyle(studio.t.muted)
+          Text("esc").font(.studio(size: 11, weight: .medium)).foregroundStyle(studio.t.muted)
             .padding(.horizontal, 6).padding(.vertical, 3)
             .background(studio.t.secondarySurface, in: RoundedRectangle(cornerRadius: 5))
         }.padding(.horizontal, 16).frame(height: 52)
@@ -60,7 +61,7 @@ struct CommandPalette: View {
                   }
               }
               if items.isEmpty {
-                Text("Nothing matches “\(query)”.").font(.system(size: 13))
+                Text("Nothing matches “\(query)”.").font(.studio(size: 13))
                   .foregroundStyle(studio.t.secondary).frame(maxWidth: .infinity)
                   .padding(.vertical, 28)
               }
@@ -75,7 +76,7 @@ struct CommandPalette: View {
           hint("↑↓", "Navigate")
           hint("↵", "Open")
           Spacer()
-          Text(studio.world?.name ?? "").font(.system(size: 11.5)).foregroundStyle(studio.t.muted)
+          Text(studio.world?.name ?? "").font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
         }.padding(.horizontal, 14).frame(height: 34)
       }
       .frame(width: 600).floatingPanel(studio.t, radius: Metric.panelRadius)
@@ -83,23 +84,26 @@ struct CommandPalette: View {
       .accessibilityElement(children: .contain).accessibilityLabel("Search and commands")
     }
     .onAppear { focused = true }
-    .onChange(of: query) { _, _ in index = 0 }
+    .onChange(of: query) { _, _ in
+      index = 0
+      indexed = (try? studio.store.search(worldID: studio.worldID, query: query)) ?? []
+    }
   }
   private func hint(_ key: String, _ label: String) -> some View {
     HStack(spacing: 5) {
-      Text(key).font(.system(size: 11, weight: .medium)).padding(.horizontal, 5)
+      Text(key).font(.studio(size: 11, weight: .medium)).padding(.horizontal, 5)
         .padding(.vertical, 2)
         .background(studio.t.secondarySurface, in: RoundedRectangle(cornerRadius: 4))
-      Text(label).font(.system(size: 11.5))
+      Text(label).font(.studio(size: 11.5))
     }.foregroundStyle(studio.t.muted)
   }
   private func row(_ item: Item, selected: Bool) -> some View {
     HStack(spacing: 11) {
       StudioIcon(item.icon, size: 13.5)
         .foregroundStyle(item.tint ?? studio.t.secondary).frame(width: 22)
-      Text(item.title).font(.system(size: 14)).lineLimit(1)
+      Text(item.title).font(.studio(size: 14)).lineLimit(1)
       Spacer(minLength: 12)
-      Text(item.detail).font(.system(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+      Text(item.detail).font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
     }.padding(.horizontal, 10).frame(height: 34)
       .background(
         selected ? studio.t.secondarySurface : .clear, in: RoundedRectangle(cornerRadius: 7)
@@ -184,7 +188,6 @@ struct CommandPalette: View {
     if query.trimmingCharacters(in: .whitespaces).isEmpty {
       found = Array(studio.records.prefix(5))
     } else {
-      let indexed = (try? studio.store.search(worldID: studio.worldID, query: query)) ?? []
       let titled = studio.records.filter { $0.title.localizedCaseInsensitiveContains(query) }
       found = Array((titled + indexed.filter { r in !titled.contains { $0.id == r.id } }).prefix(8))
     }
@@ -224,7 +227,7 @@ struct CommandPalette: View {
         studio.dark ? "Use light appearance" : "Use dark appearance",
         studio.dark ? "sun.max" : "moon", "", { studio.toggleTheme() }
       ),
-      ("Open settings", "gearshape", "⌘,", { studio.sheet = .settings }),
+      ("Open settings", "gearshape", "⌘,", { studio.navigate(.settings) }),
       (
         "Import Markdown or text files…", "square.and.arrow.down", "⇧⌘I",
         { studio.importDocuments() }

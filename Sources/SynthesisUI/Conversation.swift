@@ -49,13 +49,13 @@ struct ConversationStudio: View {
           Button("Archive conversation") { studio.archive(chat) }
         } label: {
           HStack(spacing: 5) {
-            Text(chat.title).font(.system(size: 15, weight: .semibold)).lineLimit(1)
+            Text(chat.title).font(.studio(size: 15, weight: .semibold)).lineLimit(1)
             StudioIcon("chevron.down", size: 9)
               .foregroundStyle(studio.t.muted)
           }.padding(.horizontal, 6).frame(height: 28).hoverFill(studio.t)
         }.padding(.leading, -4).help("Rename or archive this conversation")
       } else {
-        Text("New conversation").font(.system(size: 15, weight: .semibold)).lineLimit(1)
+        Text("New conversation").font(.studio(size: 15, weight: .semibold)).lineLimit(1)
       }
     } trailing: {
       IconMenu(icon: "clock.arrow.circlepath", label: "Conversation history", t: studio.t) {
@@ -94,33 +94,45 @@ struct ConversationStudio: View {
     VStack(alignment: .leading, spacing: 26) {
       if companion {
         VStack(alignment: .leading, spacing: 8) {
-          Text("Think alongside your canvas").font(.system(size: 19, weight: .semibold))
+          Text("Think alongside your world").font(.studio(size: 19, weight: .semibold))
           Text(
             studio.mode == .assisted
               ? "Reference a card, develop a connection or ask a question. This is the same conversation you see in the Conversation workspace."
               : "Manual is on, so nothing is sent. Earlier conversations stay readable."
-          ).font(.system(size: 14)).lineSpacing(4).foregroundStyle(studio.t.secondary)
+          ).font(.studio(size: 14)).lineSpacing(4).foregroundStyle(studio.t.secondary)
             .fixedSize(horizontal: false, vertical: true)
         }
       } else {
         VStack(alignment: .leading, spacing: 12) {
           HStack(spacing: 9) {
             WorldBadge(studio: studio, radius: 6).frame(width: 24, height: 24)
-            Text(studio.world?.name ?? "Your world").font(.system(size: 13, weight: .medium))
+            Text(studio.world?.name ?? "Your world").font(.studio(size: 13, weight: .medium))
               .foregroundStyle(studio.t.secondary)
           }
           Text(
             studio.mode == .assisted
               ? "Give your next idea room." : "Conversation is paused in Manual."
-          ).font(.system(size: narrow ? 26 : 32, weight: .semibold)).tracking(-0.5)
+          ).font(.studio(size: narrow ? 26 : 32, weight: .semibold)).tracking(-0.5)
           Text(
             studio.mode == .assisted
               ? "Explore a possibility, question a rule, or paste a whole page of thoughts. Nothing here becomes canon unless you accept it."
               : "No model requests are made. Earlier conversations stay readable, and every other workspace keeps working."
-          ).font(.system(size: 15)).lineSpacing(5).foregroundStyle(studio.t.secondary)
+          ).font(.studio(size: 15)).lineSpacing(5).foregroundStyle(studio.t.secondary)
             .fixedSize(horizontal: false, vertical: true)
         }
         if studio.mode == .assisted {
+          HStack(spacing: 24) {
+            Button {
+              studio.navigate(.library)
+            } label: {
+              Text("\(studio.records.count) records").font(.studio(size: 13, weight: .medium))
+            }.buttonStyle(.plain)
+            Button {
+              studio.navigate(.review)
+            } label: {
+              Text("\(studio.reviewCount) awaiting review").font(.studio(size: 13, weight: .medium))
+            }.buttonStyle(.plain)
+          }.foregroundStyle(studio.t.secondary)
           modePicker
           references
         }
@@ -139,7 +151,7 @@ struct ConversationStudio: View {
             } label: {
               HStack(spacing: 6) {
                 StudioIcon(mode.icon, size: 12)
-                Text(mode.name).font(.system(size: 13, weight: .medium))
+                Text(mode.name).font(.studio(size: 13, weight: .medium))
               }.padding(.horizontal, 11).frame(height: 30)
                 .foregroundStyle(selected ? studio.t.accent : studio.t.secondary)
                 .background(
@@ -154,7 +166,7 @@ struct ConversationStudio: View {
         }
       }.scrollIndicators(.never)
       Text(Vocabulary.modes.first { $0.name == studio.preset }?.summary ?? "")
-        .font(.system(size: 13)).foregroundStyle(studio.t.muted)
+        .font(.studio(size: 13)).foregroundStyle(studio.t.muted)
     }
   }
   @ViewBuilder private var references: some View {
@@ -162,7 +174,7 @@ struct ConversationStudio: View {
       HStack(spacing: 10) {
         StudioIcon("tray").foregroundStyle(studio.t.muted)
         Text("Your library is empty. Anything you save from a conversation becomes a draft there.")
-          .font(.system(size: 13)).foregroundStyle(studio.t.secondary)
+          .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
     } else {
@@ -178,11 +190,11 @@ struct ConversationStudio: View {
               HStack(spacing: 10) {
                 CategoryTile(record: record, t: studio.t, size: 30)
                 VStack(alignment: .leading, spacing: 2) {
-                  Text(record.title).font(.system(size: 13.5, weight: .medium)).lineLimit(1)
+                  Text(record.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
                   Text(
                     record.body.isEmpty
                       ? record.category : record.body.replacingOccurrences(of: "\n", with: " ")
-                  ).font(.system(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+                  ).font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
                 }
                 Spacer(minLength: 4)
                 StudioIcon("at", size: 11).foregroundStyle(studio.t.muted)
@@ -199,7 +211,7 @@ struct ConversationStudio: View {
   private var manualNotice: some View {
     HStack(spacing: 10) {
       StudioIcon("hand.raised").foregroundStyle(studio.t.muted)
-      Text("Manual · no model requests").font(.system(size: 13)).foregroundStyle(studio.t.secondary)
+      Text("Manual · no model requests").font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
       Spacer()
       Button("Switch to AI Assisted") { studio.setMode(.assisted) }
         .buttonStyle(QuietButton(t: studio.t))
@@ -222,14 +234,14 @@ struct ConversationStudio: View {
               HStack(spacing: 8) {
                 ProgressView().controlSize(.small)
                 Text(studio.streamed.isEmpty ? "Waiting for the model…" : "Writing…")
-                  .font(.system(size: 13)).foregroundStyle(studio.t.secondary)
+                  .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
               }
               if !studio.streamed.isEmpty {
                 // A change set arrives as JSON at the end; show prose, not the raw block.
                 MarkdownContent(text: ProposalParser.visible(studio.streamed), t: studio.t)
                 if studio.streamed.contains(ProposalParser.fence) {
                   StudioLabel("Preparing changes for your review…", icon: "square.stack.3d.up")
-                    .font(.system(size: 13)).foregroundStyle(studio.t.secondary)
+                    .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
                 }
               }
             }
@@ -286,7 +298,7 @@ struct ChatRow: View {
           ?? AttributedString(message.body)
       )
       .environment(\.openURL, recordLinkAction(studio)).tint(studio.t.accent)
-      .font(.system(size: 15)).lineSpacing(5).textSelection(.enabled)
+      .font(.studio(size: 15)).lineSpacing(5).textSelection(.enabled)
       .padding(.horizontal, 15).padding(.vertical, 11)
       .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
     }.accessibilityElement(children: .combine).accessibilityLabel("You: \(message.body)")
@@ -294,11 +306,11 @@ struct ChatRow: View {
   private var notice: some View {
     HStack(alignment: .firstTextBaseline, spacing: 10) {
       StudioIcon("exclamationmark.circle").foregroundStyle(studio.t.warning)
-      Text(message.body).font(.system(size: 13)).foregroundStyle(studio.t.secondary)
+      Text(message.body).font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
         .fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
       Button("Model settings") { studio.sheet = .settings }.buttonStyle(.plain)
-        .font(.system(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
+        .font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
     }.padding(.horizontal, 14).padding(.vertical, 11)
       .background(studio.t.surface.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
       .overlay(RoundedRectangle(cornerRadius: 10).stroke(studio.t.hairline, lineWidth: 1))
@@ -308,9 +320,9 @@ struct ChatRow: View {
     return VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 8) {
         StudioIcon("sparkles", size: 15).foregroundStyle(studio.t.accent)
-        Text(sample ? "Imported example" : "Synthesis").font(.system(size: 13, weight: .semibold))
+        Text(sample ? "Imported example" : "Synthesis").font(.studio(size: 13, weight: .semibold))
         Text(sample ? "Authored sample · not a model response" : "Suggestion · not canon")
-          .font(.system(size: 12)).foregroundStyle(studio.t.muted)
+          .font(.studio(size: 12)).foregroundStyle(studio.t.muted)
       }
       MarkdownContent(text: message.body, t: studio.t)
         .environment(\.openURL, recordLinkAction(studio))
@@ -345,7 +357,7 @@ struct ChatRow: View {
         } else {
           StudioLabel(title, icon: icon).fixedSize()
         }
-      }.font(.system(size: 12, weight: .medium)).foregroundStyle(studio.t.muted)
+      }.font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.muted)
         .padding(.horizontal, 8).frame(height: 26).hoverFill(studio.t, radius: 6)
     }.buttonStyle(.plain).accessibilityLabel(title)
       .help(title == "Copy" || title == "Copied" ? "Copy the text" : "\(title) for your review")
@@ -425,7 +437,7 @@ struct UnifiedComposer: View {
       ComposerInput(
         text: $text,
         placeholder: companion
-          ? "Ask about this canvas…" : "Write freely, or ask about your world…",
+          ? "Ask about your world…" : "Write freely, or ask about your world…",
         color: studio.t.text, placeholderColor: studio.t.muted, accent: studio.t.accent,
         accentSoft: studio.t.accentSoft, autofocus: !companion, handle: handle,
         onHeight: { inputHeight = $0 }, onMention: updateMention, onMentionKey: mentionKey,
@@ -438,7 +450,7 @@ struct UnifiedComposer: View {
         modeMenu
         Spacer(minLength: 0)
         if !companion && !empty {
-          Text("↵ send  ·  ⇧↵ new line").font(.system(size: 11.5))
+          Text("↵ send  ·  ⇧↵ new line").font(.studio(size: 11.5))
             .foregroundStyle(studio.t.muted).padding(.trailing, 6)
         }
         sendButton
@@ -449,7 +461,9 @@ struct UnifiedComposer: View {
     HStack(alignment: .bottom, spacing: 4) {
       references.padding(.bottom, 1)
       ComposerInput(
-        text: $text, placeholder: "Ask about this canvas…", color: studio.t.text,
+        text: $text,
+        placeholder: studio.selectedRecord.map { "Ask about \($0.title)…" }
+          ?? "Ask about this \(studio.destination.rawValue.lowercased())…", color: studio.t.text,
         placeholderColor: studio.t.muted, accent: studio.t.accent,
         accentSoft: studio.t.accentSoft, handle: handle, onHeight: { inputHeight = $0 },
         onMention: updateMention, onMentionKey: mentionKey, submit: send
@@ -464,12 +478,7 @@ struct UnifiedComposer: View {
   @ViewBuilder private var disclosure: some View {
     HStack(spacing: 5) {
       if studio.providerConfigured {
-        StudioIcon("arrow.up.forward", size: 10)
-        Text(
-          collapsed || companion
-            ? "Sent to \(studio.provider.title) with world context."
-            : studio.providerDisclosure
-        ).help(studio.providerDisclosure)
+        Text("Shares world context with your AI provider").help(studio.providerDisclosure)
       } else {
         StudioIcon("bolt.slash", size: 10)
         Text(
@@ -478,7 +487,7 @@ struct UnifiedComposer: View {
           .foregroundStyle(studio.t.accent)
         if !collapsed && !companion { Text("Messages are kept locally until then.") }
       }
-    }.font(.system(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(1)
+    }.font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(1)
       .frame(maxWidth: .infinity, alignment: collapsed ? .center : .leading)
       .padding(.horizontal, 6)
   }
@@ -505,7 +514,7 @@ struct UnifiedComposer: View {
     } label: {
       HStack(spacing: 4) {
         StudioIcon("at", size: 13)
-        if !collapsed { Text("Lore").font(.system(size: 13, weight: .medium)) }
+        if !collapsed { Text("Lore").font(.studio(size: 13, weight: .medium)) }
       }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
         .hoverFill(studio.t)
     }.help("Reference a record from this world — or type @ in your message")
@@ -519,10 +528,10 @@ struct UnifiedComposer: View {
         } label: {
           HStack(spacing: 9) {
             CategoryTile(record: record, t: studio.t, size: 24)
-            Text(record.title).font(.system(size: 13.5, weight: .medium)).lineLimit(1)
+            Text(record.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
             Spacer(minLength: 12)
             Text(record.category.isEmpty ? Vocabulary.kindLabel(record.kind) : record.category)
-              .font(.system(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+              .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
           }.padding(.horizontal, 8).frame(height: 34)
             .background(
               offset == mentionIndex ? studio.t.secondarySurface : .clear,
@@ -532,9 +541,9 @@ struct UnifiedComposer: View {
         }.buttonStyle(.plain).onHover { if $0 { mentionIndex = offset } }
       }
       HStack(spacing: 10) {
-        Text("↑↓ choose").font(.system(size: 11))
-        Text("↵ insert").font(.system(size: 11))
-        Text("esc close").font(.system(size: 11))
+        Text("↑↓ choose").font(.studio(size: 11))
+        Text("↵ insert").font(.studio(size: 11))
+        Text("esc close").font(.studio(size: 11))
       }.foregroundStyle(studio.t.muted).padding(.horizontal, 8).padding(.top, 5).padding(.bottom, 2)
     }.padding(6).frame(width: 320).floatingPanel(studio.t)
       .accessibilityElement(children: .contain).accessibilityLabel("Lore suggestions")
@@ -589,8 +598,8 @@ struct UnifiedComposer: View {
     } label: {
       HStack(spacing: 5) {
         StudioIcon(Vocabulary.modes.first { $0.name == studio.preset }?.icon ?? "sparkles")
-          .font(.system(size: 12))
-        Text(studio.preset).font(.system(size: 13, weight: .medium))
+          .font(.studio(size: 12))
+        Text(studio.preset).font(.studio(size: 13, weight: .medium))
         StudioIcon("chevron.down", size: 8)
       }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
         .hoverFill(studio.t)
@@ -601,7 +610,7 @@ struct UnifiedComposer: View {
       if studio.busy { studio.stop() } else { send() }
     } label: {
       StudioIcon(studio.busy ? "stop.fill" : "arrow.up")
-        .font(.system(size: 13, weight: .semibold)).frame(width: 30, height: 30)
+        .font(.studio(size: 13, weight: .semibold)).frame(width: 30, height: 30)
         .foregroundStyle(empty && !studio.busy ? studio.t.muted : studio.t.onAccent)
         .background(
           empty && !studio.busy ? studio.t.secondarySurface : studio.t.accent, in: Circle())

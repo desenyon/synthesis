@@ -307,7 +307,8 @@ public struct CodexTransport: ModelTransport {
     var arguments = [
       "exec", "--json", "--sandbox", "read-only", "--skip-git-repo-check", "--ephemeral",
       "--ignore-user-config", "--ignore-rules", "--disable", "apps", "--disable", "plugins",
-      "--disable", "browser_use", "--disable", "computer_use", "--disable", "shell_tool", "-C",
+      "--disable", "browser_use", "--disable", "computer_use", "--disable", "shell_tool",
+      "--disable", "image_generation", "-C",
       directory.path,
     ]
     let chosen = model().trimmingCharacters(in: .whitespacesAndNewlines)

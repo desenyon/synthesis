@@ -10,6 +10,8 @@ public enum Destination: String, CaseIterable, Identifiable {
   case timeline = "Timeline"
   case atlas = "Atlas"
   case review = "Review"
+  case worlds = "Worlds"
+  case settings = "Settings"
   public var id: String { rawValue }
   var icon: String {
     switch self {
@@ -20,6 +22,8 @@ public enum Destination: String, CaseIterable, Identifiable {
     case .timeline: return "calendar.day.timeline.left"
     case .atlas: return "map"
     case .review: return "checkmark.seal"
+    case .worlds: return "globe"
+    case .settings: return "gearshape"
     }
   }
   var summary: String {
@@ -31,6 +35,8 @@ public enum Destination: String, CaseIterable, Identifiable {
     case .timeline: return "Events in order"
     case .atlas: return "Places on your map"
     case .review: return "Proposals, canon and checks"
+    case .worlds: return "Open, save and organize your universes"
+    case .settings: return "Application and world preferences"
     }
   }
 }
@@ -135,7 +141,7 @@ public struct Toast: Identifiable {
   private var requestID = UUID()
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
-    case settings, world, document, rename
+    case settings, world, document, rename, onboarding
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
@@ -160,8 +166,7 @@ public struct Toast: Identifiable {
     // Migrate obsolete API selection to an installed subscription harness.
     provider =
       try store.preference("provider").flatMap(ProviderKind.init(rawValue:))
-      ?? (HarnessLocator.find(.claudeCode) != nil
-        ? .claudeCode : (HarnessLocator.find(.codex) != nil ? .codex : .claudeCode))
+      ?? .codex
     try store.setPreference("provider", value: provider.rawValue)
     UserDefaults.standard.set(provider.rawValue, forKey: "Synthesis.provider")
     for kind in [ProviderKind.claudeCode, .codex] {
@@ -170,6 +175,7 @@ public struct Toast: Identifiable {
       UserDefaults.standard.set(value, forKey: "Synthesis.model.\(kind.rawValue)")
     }
     worlds = try store.worlds()
+    let firstLaunch = worlds.isEmpty
     if worlds.isEmpty { worlds = [try store.createWorld(name: "My world")] }
     let last = try store.preference("world")
     worldID = worlds.first { $0.id == last }?.id ?? worlds[0].id
@@ -184,6 +190,19 @@ public struct Toast: Identifiable {
     draft = try store.preference("composer:\(worldID)") ?? ""
     refreshProviderAvailability()
     try reload()
+    if try store.preference("onboarding-completed") == nil {
+      if firstLaunch && ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] == nil {
+        sheet = .onboarding
+      } else {
+        try store.setPreference("onboarding-completed", value: "1")
+      }
+    }
+  }
+  public func completeOnboarding() {
+    perform {
+      try store.setPreference("onboarding-completed", value: "1")
+      sheet = nil
+    }
   }
 
   // MARK: Provider
@@ -521,7 +540,9 @@ public struct Toast: Identifiable {
     }
     guard flushEditor() else { return }
     let activeBoard = destination == .canvas ? canvasSession?.boardID : nil
-    let selectedIDs = destination == .canvas ? (canvasSession?.selection ?? []) : []
+    let selectedIDs =
+      selectedRecord.map { [$0.id] }
+      ?? (destination == .canvas ? (canvasSession?.selection ?? []) : [])
     let prompt = draft
     let wid = worldID
     perform {

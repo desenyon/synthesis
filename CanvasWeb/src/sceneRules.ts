@@ -54,8 +54,24 @@ export function connectionRoute(a: { x: number; y: number; width: number; height
     const bc = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
     const horizontal = Math.abs(bc.x - ac.x) / ((a.width + b.width) / 2) >= Math.abs(bc.y - ac.y) / ((a.height + b.height) / 2);
     const direction = (horizontal ? bc.x - ac.x : bc.y - ac.y) >= 0 ? 1 : -1;
-    const start = horizontal ? { x: ac.x + direction * (a.width / 2 + 6), y: ac.y } : { x: ac.x, y: ac.y + direction * (a.height / 2 + 6) };
-    const end = horizontal ? { x: bc.x - direction * (b.width / 2 + 6), y: bc.y } : { x: bc.x, y: bc.y - direction * (b.height / 2 + 6) };
+    let start = horizontal ? { x: ac.x + direction * (a.width / 2 + 6), y: ac.y } : { x: ac.x, y: ac.y + direction * (a.height / 2 + 6) };
+    let end = horizontal ? { x: bc.x - direction * (b.width / 2 + 6), y: bc.y } : { x: bc.x, y: bc.y - direction * (b.height / 2 + 6) };
+    const gap = (horizontal ? end.x - start.x : end.y - start.y) * direction;
+    if (gap < 36) {
+        // Closely packed or overlapping cards connect around their outside boundary.
+        // Facing-port tangents reverse direction in this case and form an illegible knot.
+        const coincident = Math.abs(ac.x - bc.x) < 24;
+        start = { x: ac.x - (coincident ? a.width / 4 : 0), y: a.y - 6 };
+        end = { x: bc.x + (coincident ? b.width / 4 : 0), y: b.y - 6 };
+        const top = Math.min(a.y, b.y) - 90 - Math.abs(lane) * 2;
+        const dx = end.x - start.x, dy = end.y - start.y;
+        const points: [number, number][] = Array.from({length: 17}, (_, i): [number, number] => {
+            const t = i / 16, u = 1 - t;
+            return [3*u*t*t*dx + t*t*t*dx,
+                3*u*u*t*(top-start.y) + 3*u*t*t*(top-start.y) + t*t*t*dy];
+        }).filter((p,i) => i === 0 || i === 16 || Math.hypot(dx-p[0],dy-p[1]) >= 24);
+        return {start,end,points};
+    }
     const dx = end.x - start.x, dy = end.y - start.y;
     // Keep the intermediate points monotonic even when two cards are close. A fixed
     // minimum tangent makes Excalidraw's interpolated path double back into a hook.

@@ -12,6 +12,7 @@ extension Studio {
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
     "empty-graph", "empty-timeline", "empty-atlas", "sheet-settings", "sheet-record",
+    "worlds", "settings", "onboarding", "library-companion",
     "sheet-canon", "sheet-history", "sheet-relation", "sheet-rule",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
@@ -141,7 +142,7 @@ extension Studio {
     inspector = true
     libraryCategory = nil
     canvasBoardID = board.isEmpty ? nil : board
-    companionExpanded = state == "companion"
+    companionExpanded = state == "companion" || state == "library-companion"
     companionWidth = 400
     draft = ""
     preset = "Create"
@@ -155,6 +156,12 @@ extension Studio {
     case "toast":
       destination = .library
       show("Archived “Oren Ashe”", icon: "archivebox", actionTitle: "Undo") {}
+    case "worlds": destination = .worlds
+    case "settings": destination = .settings
+    case "library-companion": destination = .library
+    case "onboarding":
+      destination = .chat
+      sheet = .onboarding
     case "sheet-settings":
       destination = .library
       sheet = .settings

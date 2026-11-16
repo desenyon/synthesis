@@ -508,18 +508,26 @@ export function App() {
         }
       },
       async exportImage() {
-        const elements = api.getSceneElements().map((e:El)=>["card","part"].includes(e.customData?.synthesis)?{...e,opacity:100}:e);
-        if (!elements.length) return post({ type: "exported", data: "" });
-        const blob = await exportToBlob({
-          elements,
-          appState: { ...api.getAppState(), exportBackground: true, exportWithDarkMode: s.theme === "dark" },
-          files: api.getFiles(),
-          mimeType: "image/png",
-          exportPadding: 32,
-        });
-        const reader = new FileReader();
-        reader.onload = () => post({ type: "exported", data: String(reader.result).split(",")[1] ?? "" });
-        reader.readAsDataURL(blob);
+        try {
+          if (!s.loaded) throw new Error("Wait for this board to finish loading, then export again.");
+          synchronise();
+          const elements = api.getSceneElements().map((e:El)=>["card","part"].includes(e.customData?.synthesis)?{...e,opacity:100}:e);
+          if (!elements.length) throw new Error("Add something to the board before exporting an image.");
+          const blob = await exportToBlob({
+            elements, appState: { ...api.getAppState(), exportBackground: true, exportWithDarkMode: s.theme === "dark" },
+            files: api.getFiles(), mimeType: "image/png", exportPadding: 32,
+          });
+          const data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+            reader.onerror = () => reject(new Error("The exported image could not be read."));
+            reader.readAsDataURL(blob);
+          });
+          if (!data) throw new Error("The board image was empty. Please retry.");
+          post({ type: "exported", data });
+        } catch (error) {
+          post({ type: "exportFailed", message: error instanceof Error ? error.message : "This board could not be exported." });
+        }
       },
       /** Deterministic, isolated WebKit integration checks. Never calls a model. */
       async audit() {
@@ -576,6 +584,11 @@ export function App() {
         bridge.setAssistance(true); await wait();
         check("assisted mode restores contextual reference",!!document.querySelector('[aria-label="Reference in conversation"]'));
         await bridge.load(original);
+        try {
+          const blob = await exportToBlob({elements:api.getSceneElements().map((e:El)=>["card","part"].includes(e.customData?.synthesis)?{...e,opacity:100}:e),appState:{...api.getAppState(),exportBackground:true},files:api.getFiles(),mimeType:"image/png"});
+          const signature = new Uint8Array(await blob.slice(0,8).arrayBuffer());
+          check("board export produces a real PNG",blob.size>100 && signature[0]===137 && signature[1]===80 && signature[2]===78 && signature[3]===71);
+        } catch { check("board export produces a real PNG",false); }
         return results;
       },
       /** For the interaction self-test: where things are on screen right now. */

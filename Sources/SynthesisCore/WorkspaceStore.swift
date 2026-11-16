@@ -242,10 +242,10 @@ public final class WorkspaceStore {
     }.prefix(20)
     guard !tokens.isEmpty else { return [] }
     let match = tokens.map { "\"\($0)\"*" }.joined(separator: " AND ")
-    let ids = try db.rows(
-      "SELECT id FROM records_fts WHERE records_fts MATCH ? AND world_id=? AND id IN (SELECT id FROM records WHERE world_id=? AND archived=0) ORDER BY rank LIMIT 50",
-      [match, worldID, worldID])
-    return try ids.map { try record(worldID: worldID, id: $0["id"]!) }
+    return try db.rows(
+      "SELECT r.*,d.rtf FROM records_fts JOIN records r ON r.id=records_fts.id LEFT JOIN rich_documents d ON d.record_id=r.id WHERE records_fts MATCH ? AND records_fts.world_id=? AND r.world_id=? AND r.archived=0 ORDER BY records_fts.rank LIMIT 50",
+      [match, worldID, worldID]
+    ).map(decodeRecord)
   }
   public func conversations(worldID: String, archived: Bool = false) throws -> [Conversation] {
     _ = try world(worldID)
@@ -550,7 +550,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 5
+      var schemaVersion = 6
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -571,6 +571,8 @@ public final class WorkspaceStore {
       var messageContext: [[String: String]]
       var rules: [[String: String]]
       var ruleScenarios: [[String: String]]
+      var chronology: [[String: String]]
+      var chronologyPlacements: [[String: String]]
     }
     // Archived material is exported too: archiving hides, it never discards.
     let hiddenChats = try conversations(worldID: id, archived: true)
@@ -596,7 +598,9 @@ public final class WorkspaceStore {
       proposals: proposals(worldID: id),
       messageContext: db.rows("SELECT * FROM message_context WHERE world_id=?", [id]),
       rules: db.rows("SELECT * FROM rules WHERE world_id=?", [id]),
-      ruleScenarios: db.rows("SELECT * FROM rule_scenarios WHERE world_id=?", [id]))
+      ruleScenarios: db.rows("SELECT * FROM rule_scenarios WHERE world_id=?", [id]),
+      chronology: db.rows("SELECT * FROM chronology_lanes WHERE world_id=?", [id]),
+      chronologyPlacements: db.rows("SELECT * FROM chronology_placements WHERE world_id=?", [id]))
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     return try encoder.encode(export)

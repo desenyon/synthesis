@@ -27,7 +27,7 @@ struct QuietButton: ButtonStyle {
     @State private var hover = false
     @Environment(\.isEnabled) private var enabled
     var body: some View {
-      configuration.label.font(.system(size: 13, weight: .medium)).lineLimit(1)
+      configuration.label.font(.studio(size: 13, weight: .medium)).lineLimit(1)
         .fixedSize(horizontal: true, vertical: false)
         .padding(.horizontal, 12).frame(height: Metric.control)
         .foregroundStyle(foreground)
@@ -144,7 +144,7 @@ struct StateBadge: View {
   var body: some View {
     HStack(spacing: 5) {
       Circle().fill(t.state(state)).frame(width: 6, height: 6)
-      Text(Vocabulary.stateLabel(state)).font(.system(size: 12, weight: .medium))
+      Text(Vocabulary.stateLabel(state)).font(.studio(size: 12, weight: .medium))
         .foregroundStyle(state == "canon" ? t.positive : t.secondary)
     }.accessibilityElement(children: .combine)
       .accessibilityLabel("State: \(Vocabulary.stateLabel(state))")
@@ -168,7 +168,7 @@ struct SectionLabel: View {
   let title: String
   let t: Theme
   var body: some View {
-    Text(title).font(.system(size: 11, weight: .semibold)).tracking(0.3)
+    Text(title).font(.studio(size: 11, weight: .semibold)).tracking(0.3)
       .foregroundStyle(t.muted).frame(maxWidth: .infinity, alignment: .leading)
   }
 }
@@ -183,9 +183,9 @@ struct FilterChip: View {
   var body: some View {
     Button(action: action) {
       HStack(spacing: 6) {
-        Text(title).font(.system(size: 12.5, weight: .medium))
+        Text(title).font(.studio(size: 12.5, weight: .medium))
         if let count {
-          Text("\(count)").font(.system(size: 11.5)).monospacedDigit()
+          Text("\(count)").font(.studio(size: 11.5)).monospacedDigit()
             .foregroundStyle(selected ? t.accent.opacity(0.8) : t.muted)
         }
       }.padding(.horizontal, 11).frame(height: 26)
@@ -205,7 +205,7 @@ struct SearchField: View {
   var body: some View {
     HStack(spacing: 7) {
       StudioIcon("magnifyingglass", size: 12).foregroundStyle(t.muted)
-      TextField(placeholder, text: $text).textFieldStyle(.plain).font(.system(size: 13))
+      TextField(placeholder, text: $text).textFieldStyle(.plain).font(.studio(size: 13))
       if !text.isEmpty {
         Button {
           text = ""
@@ -230,7 +230,7 @@ struct FormField: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
       if let label {
-        Text(label).font(.system(size: 12, weight: .medium)).foregroundStyle(t.secondary)
+        Text(label).font(.studio(size: 12, weight: .medium)).foregroundStyle(t.secondary)
       }
       Group {
         if secure {
@@ -238,7 +238,7 @@ struct FormField: View {
         } else {
           TextField(placeholder, text: $text)
         }
-      }.textFieldStyle(.plain).font(.system(size: 14)).onSubmit(submit)
+      }.textFieldStyle(.plain).font(.studio(size: 14)).onSubmit(submit)
         .padding(.horizontal, 10).frame(height: 34)
         .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
         .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.border, lineWidth: 1))
@@ -258,8 +258,8 @@ struct EmptyState<Actions: View>: View {
         .frame(width: 56, height: 56).background(t.accentSoft.opacity(0.6), in: Circle())
         .accessibilityHidden(true)
       VStack(spacing: 6) {
-        Text(title).font(.system(size: 18, weight: .semibold))
-        Text(message).font(.system(size: 14)).foregroundStyle(t.secondary)
+        Text(title).font(.studio(size: 18, weight: .semibold))
+        Text(message).font(.studio(size: 14)).foregroundStyle(t.secondary)
           .multilineTextAlignment(.center).lineSpacing(3).fixedSize(
             horizontal: false, vertical: true)
       }
@@ -277,7 +277,7 @@ struct ZoomControls: View {
   var body: some View {
     HStack(spacing: 2) {
       IconButton(icon: "minus", label: "Zoom out", t: t, action: zoomOut)
-      Text("\(Int((zoom * 100).rounded()))%").font(.system(size: 12, weight: .medium))
+      Text("\(Int((zoom * 100).rounded()))%").font(.studio(size: 12, weight: .medium))
         .monospacedDigit().foregroundStyle(t.secondary).frame(width: 42)
       IconButton(icon: "plus", label: "Zoom in", t: t, action: zoomIn)
       Rectangle().fill(t.hairline).frame(width: 1, height: 16).padding(.horizontal, 2)
@@ -348,9 +348,9 @@ struct BarTitle: View {
     HStack(spacing: 9) {
       StudioIcon(icon, size: 14).foregroundStyle(t.accent)
         .accessibilityHidden(true)
-      Text(title).font(.system(size: 15, weight: .semibold)).lineLimit(1).fixedSize()
+      Text(title).font(.studio(size: 15, weight: .semibold)).lineLimit(1).fixedSize()
       if let detail, !detail.isEmpty, !compact {
-        Text(detail).font(.system(size: 13)).foregroundStyle(t.muted).lineLimit(1)
+        Text(detail).font(.studio(size: 13)).foregroundStyle(t.muted).lineLimit(1)
       }
     }.accessibilityElement(children: .combine).accessibilityAddTraits(.isHeader)
   }
@@ -400,7 +400,7 @@ struct ModeSwitch: View {
           Circle().fill(selected ? studio.t.accent : studio.t.muted.opacity(0.6))
             .frame(width: 6, height: 6)
         }
-        Text(label).font(.system(size: 12.5, weight: .medium)).lineLimit(1).fixedSize()
+        Text(label).font(.studio(size: 12.5, weight: .medium)).lineLimit(1).fixedSize()
       }.padding(.horizontal, 10).frame(height: 24)
         .foregroundStyle(selected ? studio.t.text : studio.t.muted)
         .background {
@@ -435,9 +435,9 @@ struct SheetScaffold<Content: View, Footer: View>: View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .top) {
         VStack(alignment: .leading, spacing: 5) {
-          Text(title).font(.system(size: 17, weight: .semibold))
+          Text(title).font(.studio(size: 17, weight: .semibold))
           if let subtitle {
-            Text(subtitle).font(.system(size: 13)).foregroundStyle(t.secondary)
+            Text(subtitle).font(.studio(size: 13)).foregroundStyle(t.secondary)
               .lineSpacing(2).fixedSize(horizontal: false, vertical: true)
           }
         }

@@ -487,3 +487,26 @@ struct StoreTests {
     #expect(try s.scenarios(worldID: w.id, systemID: art.id).isEmpty)
   }
 }
+
+struct SearchScaleTests {
+  @Test func indexedSearchRemainsWorldScopedAtScale() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Large world")
+    let other = try store.createWorld(name: "Private world")
+    try store.db.transaction {
+      for i in 0..<2000 {
+        _ = try store.createRecord(
+          worldID: world.id, title: "Chronicle \(i)",
+          body: "A navigator from the northern archipelago keeps the winter records.")
+      }
+    }
+    _ = try store.createRecord(worldID: other.id, title: "Private navigator", body: "A navigator")
+    let start = ContinuousClock.now
+    for _ in 0..<20 {
+      let result = try store.search(worldID: world.id, query: "navigator archipelago")
+      #expect(result.count == 50)
+      #expect(result.allSatisfy { $0.worldID == world.id })
+    }
+    print("Search benchmark: 20 indexed queries over 2,000 records: \(start.duration(to: .now))")
+  }
+}

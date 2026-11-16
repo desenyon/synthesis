@@ -315,7 +315,7 @@ export function syncRelations(
     const a = byID.get(arrow.startBinding?.elementId), b = byID.get(arrow.endBinding?.elementId);
     if (!a || !b || a.angle || b.angle) continue;
     const lane = lanes.get(arrow.customData.relationID) ?? 0;
-    const routeKey = JSON.stringify([2,a.x,a.y,a.width,a.height,b.x,b.y,b.width,b.height,lane]);
+    const routeKey = JSON.stringify([3,a.x,a.y,a.width,a.height,b.x,b.y,b.width,b.height,lane]);
     if (arrow.customData.routeKey === routeKey) continue;
     const route = connectionRoute(a,b,lane);
     const label = arrowLabel(arrow, next ?? elements);

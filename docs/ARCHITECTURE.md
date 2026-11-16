@@ -51,7 +51,7 @@ A model answer may end with one fenced `synthesis-proposal` JSON block. `Proposa
 
 ## Data notes
 
-Page references use the world-scoped `links` table; incoming references are queried independently of semantic relationships. Tags and aliases participate in FTS and versioned snapshots. Canvas and atlas serialize typed Codable documents into world-scoped boards; images are bounded base64 inside the local board. World covers are scoped preferences. Exports (schema version 5) include records, conversations, revisions, relationships and their history, events, boards, links and everything archived.
+Page references use the world-scoped `links` table; incoming references are queried independently of semantic relationships. Tags and aliases participate in FTS and versioned snapshots. Canvas and atlas serialize typed Codable documents into world-scoped boards; images are bounded base64 inside the local board. World covers are scoped preferences. Exports (schema version 6) include records, conversations, revisions, relationships and their history, events, boards, links and everything archived.
 
 ## Canvas presentation and isolation — refinement audit
 
@@ -67,7 +67,7 @@ The capture runner uses a fresh explicit database, a transport that always rejec
 
 ## Preserved rules backend
 
-The previously unfinished core work is now checkpointed: migration 0006 adds world-scoped `rules` and `rule_scenarios`. `Rules.swift` supports rule/scenario storage, explicit rule approval, accepted wording, reversible archive and local structural checks. Rules are included with selected records in assistant context and Markdown export; JSON export schema 5 retains rules and scenarios. The dedicated UI is unfinished and is not claimed as a completed workspace.
+The previously unfinished core work is now checkpointed: migration 0006 adds world-scoped `rules` and `rule_scenarios`. `Rules.swift` supports rule/scenario storage, explicit rule approval, accepted wording, reversible archive and local structural checks. Rules are included with selected records in assistant context and Markdown export; JSON export schema 6 retains rules and scenarios. The dedicated UI is unfinished and is not claimed as a completed workspace.
 
 ## Connected action and presentation changes — 2026-11-15
 
@@ -75,6 +75,16 @@ The previously unfinished core work is now checkpointed: migration 0006 adds wor
 
 The assistant receives `workspaceContext` in addition to retrieved lore: bounded record identities, relationship tuples, chronology, boards and placements, including total counts indicating truncation. No image bytes are sent. The source list is persisted; the index snapshot itself still needs a trace table. The action contract now includes board creation, spatial placements, record links and draft rules. Accepting revisions checks `baseVersion`; ambiguous record titles must be resolved by ID. Canon never changes through this contract.
 
-`StudioIcon.swift` maps semantic identifiers to a bundled upstream Lucide font; Canvas uses `lucide-react` from the same pinned 1.73.0 release. `Assets/Icons/aliases.json` records the mapping. Native SF Symbols and custom hand-drawn UI icons are removed. System-owned chrome and engine-owned context menus are outside this icon layer. Navigation is 248 points expanded / 64 collapsed, grouped into workspaces, exploration, world lenses and conversations. Dark/light colors remain shared tokens.
+`StudioIcon.swift` maps semantic identifiers to the bundled upstream Phosphor regular font. Canvas uses `@phosphor-icons/react`; alias mappings and licenses are committed. Inter is bundled in native OTF and web font assets. `Typography.swift` centralizes native fonts and the translucent sidebar material with a reduce-transparency fallback. Dark uses a pure-black workspace; light remains supported.
 
 Canvas still uses the published OSS engine rather than a fork. Synthesis owns the card presentation, relationship routes, source actions and drawing-style panel; the engine owns scene operations, pointer gestures, selection, history and serialization. `Save as idea` explicitly converts board text into a Library capture and linked card. Shared relationship inspection uses native domain edits. Rules are readable/addable/editable as drafts in entity details; the larger Rules Lab is not complete.
+
+## Portable worlds and chronology — 2026-11-15
+
+`WorldArchive.swift` exports `.synthesis` format version 2: allowlisted world tables plus cover/composer preferences. Import accepts v1/v2, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 6 includes chronology, including archived lanes.
+
+Migration 0007 adds nested chronology lanes (branch/period) and event placements. Events retain actual source records and free-form dates. A grouping is not a canon branch: no speculative merge or inheritance is implied. Reviewed agent actions can create a branch/period and assign new events to existing lanes. Request context includes lane IDs and memberships.
+
+The shared companion resizes non-Canvas workspaces and includes the open record in retrieval. Canvas keeps its own movable composer/dock. The native shell must remain transparent over the mounted WKWebView. Engine-composited captures cannot detect native occlusion; live on-screen inspection verified this correction.
+
+World-scoped FTS now returns complete matched records in one query rather than fetching each result separately. Library and quick-open cache query results across hover/selection redraws.

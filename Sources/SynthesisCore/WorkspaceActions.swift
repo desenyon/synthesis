@@ -141,6 +141,8 @@ extension WorkspaceStore {
       }
     let relations = try relations(worldID: worldID)
     let events = try events(worldID: worldID)
+    let lanes = try chronologyLanes(worldID: worldID)
+    let placements = try chronologyPlacements(worldID: worldID)
     let object: [String: Any] = [
       "records": records.prefix(100).map {
         ["id": $0.id, "title": $0.title, "kind": $0.kind, "state": $0.state]
@@ -148,6 +150,13 @@ extension WorkspaceStore {
       "relationships": relations.prefix(100).map {
         ["id": $0.id, "source": $0.sourceID, "target": $0.targetID, "label": $0.label]
       },
+      "chronology": lanes.prefix(60).map {
+        [
+          "id": $0.id, "name": $0.name, "kind": $0.kind, "parent": $0.parentID ?? "",
+          "start": $0.start, "end": $0.end,
+        ]
+      },
+      "eventPlacement": placements.filter { key, _ in events.prefix(60).contains { $0.id == key } },
       "events": events.prefix(60).map {
         ["id": $0.id, "title": $0.title, "date": $0.dateLabel, "source": $0.sourceID]
       },

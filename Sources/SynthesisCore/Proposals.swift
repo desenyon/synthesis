@@ -69,6 +69,7 @@ extension WorkspaceStore {
     let boards =
       try boards(worldID: worldID, kind: "canvas") + boards(worldID: worldID, kind: "atlas")
     var createdBoards: [String: String] = [:]
+    let lanes = try chronologyLanes(worldID: worldID)
     func coordinate(_ item: [String: Any], _ key: String, map: Bool) -> Double? {
       guard let raw = item[key] else { return map ? 0.5 : 0 }
       guard let value = raw as? NSNumber, CFGetTypeID(value) != CFBooleanGetTypeID() else {
@@ -124,7 +125,21 @@ extension WorkspaceStore {
         change.source = source
         change.target = target
         change.label = label
+      case "create_branch", "create_period":
+        guard let title = text(item["title"], limit: 160) else { continue }
+        change.title = title
+        change.date = text(item["date"], limit: 160)
+        change.endDate = text(item["endDate"], limit: 160)
+        change.body = text(item["body"], limit: 30_000)
+        if let lane = item["lane"] as? String {
+          guard lanes.contains(where: { $0.id == lane }) else { continue }
+          change.laneID = lane
+        }
       case "add_event":
+        if let lane = item["lane"] as? String {
+          guard lanes.contains(where: { $0.id == lane }) else { continue }
+          change.laneID = lane
+        }
         guard let title = text(item["title"], limit: 160), let source = resolve(item["source"])
         else { continue }
         change.title = title
@@ -236,10 +251,18 @@ extension WorkspaceStore {
             target: try resolved(change.target), label: change.label ?? "related to",
             origin: "ai-proposed"
           ).id
+        case "create_branch", "create_period":
+          change.resultID = try createChronologyLane(
+            worldID: worldID, name: change.title ?? "Untitled",
+            kind: change.action == "create_branch" ? "branch" : "period", parentID: change.laneID,
+            start: change.date ?? "", end: change.endDate ?? "", notes: change.body ?? ""
+          ).id
         case "add_event":
-          change.resultID = try addEvent(
-            worldID: worldID, title: change.title ?? "Untitled event", date: change.date ?? "",
-            source: try resolved(change.source), origin: "ai-proposed"
+          change.resultID = try saveChronologyEvent(
+            worldID: worldID, id: nil, title: change.title ?? "Untitled event",
+            date: change.date ?? "",
+            source: try resolved(change.source), order: nil, laneID: change.laneID,
+            origin: "ai-proposed"
           ).id
         case "create_board":
           change.resultID = try saveBoard(

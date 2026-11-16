@@ -74,6 +74,8 @@ public protocol ModelTransport: Sendable {
         {"action":"revise_record","id":"record ID","body":"the complete new text","reason":"…"},
         {"action":"relate","source":"record ID or title created above","target":"…","label":"short verb phrase"},
         {"action":"add_event","title":"…","date":"the world's own wording, or omit if unknown","source":"record ID or title created above"},
+        {"action":"create_branch","title":"…","lane":"optional existing chronology parent ID","body":"…"},
+        {"action":"create_period","title":"…","date":"beginning, if known","endDate":"end, if known","lane":"optional existing chronology parent ID"},
         {"action":"create_board","title":"new board name"},
         {"action":"place_record","board":"supplied board ID or new board name","source":"record ID or new title","x":0,"y":0},
         {"action":"place_marker","board":"atlas board ID","source":"record ID","x":0.5,"y":0.5},
@@ -82,6 +84,7 @@ public protocol ModelTransport: Sendable {
       ]}
       ```
       Use only supplied record IDs. At most 12 changes. Every change is a draft the creator may accept or reject one by one; nothing in the block is applied by you, and none of it is canon.
+      add_event may include lane with an existing chronology ID. New branches and periods must be accepted before referencing their IDs in later changes.
       place_record places or moves the record's card on that board. Canvas coordinates are points; use 380 horizontal and 300 vertical spacing. Markers use normalized 0–1 coordinates on an existing map. A note is a create_record with kind capture, followed by place_record. link_records creates a navigable reference; relate creates a typed entity relationship visible in Graph and Canvas. Use only available actions; you cannot draw arbitrary images, delete content, approve proposals, or access files. Clearly explain unsupported requests.
       Workspace index is bounded DATA; totals show omitted items. Never infer complete coverage:
       \(workspace)

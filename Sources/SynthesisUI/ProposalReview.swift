@@ -14,15 +14,15 @@ struct ProposalCard: View {
       HStack(alignment: .firstTextBaseline, spacing: 9) {
         StudioIcon("square.stack.3d.up", size: 13).foregroundStyle(t.accent)
         VStack(alignment: .leading, spacing: 2) {
-          Text("Proposed changes").font(.system(size: 13.5, weight: .semibold))
-          Text(proposal.summary).font(.system(size: 13)).foregroundStyle(t.secondary)
+          Text("Proposed changes").font(.studio(size: 13.5, weight: .semibold))
+          Text(proposal.summary).font(.studio(size: 13)).foregroundStyle(t.secondary)
             .fixedSize(horizontal: false, vertical: true)
         }
         Spacer(minLength: 8)
         Text(
           proposal.pending == 0
             ? "Reviewed" : "\(proposal.pending) to review"
-        ).font(.system(size: 12, weight: .medium)).fixedSize()
+        ).font(.studio(size: 12, weight: .medium)).fixedSize()
           .foregroundStyle(proposal.pending == 0 ? t.muted : t.accent)
       }.padding(.horizontal, 14).padding(.vertical, 12)
       ForEach(proposal.changes) { change in
@@ -39,7 +39,7 @@ struct ProposalCard: View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
           StudioIcon("lock.shield", size: 11).foregroundStyle(t.muted)
           Text("Accepted changes are saved as drafts. Nothing becomes canon here.")
-            .font(.system(size: 12)).foregroundStyle(t.muted)
+            .font(.studio(size: 12)).foregroundStyle(t.muted)
             .fixedSize(horizontal: false, vertical: true)
         }
         if !narrow { Spacer(minLength: 8) }
@@ -75,6 +75,11 @@ struct ProposalCard: View {
         "arrow.triangle.branch", "Relationship",
         "\(studio.name(for: change.source, in: proposal)) — \(change.label ?? "") → \(studio.name(for: change.target, in: proposal))"
       )
+    case "create_branch", "create_period":
+      return (
+        "calendar", change.action == "create_branch" ? "New history branch" : "New period",
+        "\(change.title ?? "Untitled") · \(change.date ?? "") — \(change.endDate ?? "")"
+      )
     case "create_board": return ("rectangle.on.rectangle", "New canvas", change.title ?? "Board")
     case "place_record", "place_marker":
       return (
@@ -100,17 +105,18 @@ struct ProposalCard: View {
     let info = describe(change)
     let open = expanded.contains(change.id)
     let current = studio.records.first { $0.id == change.recordID }
-    let detail = ["create_record", "revise_record", "add_rule"].contains(change.action)
+    let detail = ["create_record", "revise_record", "add_rule", "create_branch", "create_period"]
+      .contains(change.action)
     return VStack(alignment: .leading, spacing: 8) {
       HStack(alignment: .top, spacing: 10) {
         StudioIcon(info.icon, size: 12.5)
           .foregroundStyle(t.category(change.category ?? "")).frame(width: 18).padding(.top, 2)
         VStack(alignment: .leading, spacing: 3) {
-          Text(info.kind).font(.system(size: 11.5, weight: .medium)).foregroundStyle(t.muted)
-          Text(info.title).font(.system(size: 14, weight: .medium))
+          Text(info.kind).font(.studio(size: 11.5, weight: .medium)).foregroundStyle(t.muted)
+          Text(info.title).font(.studio(size: 14, weight: .medium))
             .fixedSize(horizontal: false, vertical: true)
           if let reason = change.reason {
-            Text(reason).font(.system(size: 12.5)).foregroundStyle(t.secondary)
+            Text(reason).font(.studio(size: 12.5)).foregroundStyle(t.secondary)
               .fixedSize(horizontal: false, vertical: true)
           }
           if change.action == "revise_record", let current,
@@ -120,7 +126,7 @@ struct ProposalCard: View {
               "This record changed after the proposal was made.",
               icon: "exclamationmark.triangle"
             )
-            .font(.system(size: 12)).foregroundStyle(t.warning)
+            .font(.studio(size: 12)).foregroundStyle(t.warning)
           }
           if detail, let text = change.body, !text.isEmpty {
             Button {
@@ -128,12 +134,12 @@ struct ProposalCard: View {
             } label: {
               HStack(spacing: 4) {
                 StudioIcon(open ? "chevron.down" : "chevron.right")
-                  .font(.system(size: 8, weight: .bold))
+                  .font(.studio(size: 8, weight: .bold))
                 Text(
                   open
                     ? "Hide"
                     : (change.action == "revise_record" ? "Show what changes" : "Show text")
-                ).font(.system(size: 12, weight: .medium))
+                ).font(.studio(size: 12, weight: .medium))
               }.foregroundStyle(t.accent)
             }.buttonStyle(.plain)
           }
@@ -148,7 +154,7 @@ struct ProposalCard: View {
       }
       if !change.evidence.isEmpty {
         FlowLayout(spacing: 6) {
-          Text("Based on").font(.system(size: 11.5)).foregroundStyle(t.muted)
+          Text("Based on").font(.studio(size: 11.5)).foregroundStyle(t.muted)
             .frame(height: 22)
           ForEach(change.evidence, id: \.self) { id in
             if let record = studio.records.first(where: { $0.id == id }) {
@@ -156,7 +162,7 @@ struct ProposalCard: View {
                 studio.openRecord(record)
               } label: {
                 StudioLabel(record.title, icon: recordIcon(record))
-                  .font(.system(size: 11.5, weight: .medium)).lineLimit(1)
+                  .font(.studio(size: 11.5, weight: .medium)).lineLimit(1)
                   .foregroundStyle(t.secondary).padding(.horizontal, 7).frame(height: 22)
                   .background(t.background.opacity(0.6), in: Capsule())
                   .overlay(Capsule().stroke(t.hairline, lineWidth: 1))
@@ -173,13 +179,17 @@ struct ProposalCard: View {
     switch change.status {
     case "accepted":
       HStack(spacing: 8) {
-        StudioLabel("Saved", icon: "checkmark").font(.system(size: 12, weight: .medium))
+        StudioLabel("Saved", icon: "checkmark").font(.studio(size: 12, weight: .medium))
           .foregroundStyle(t.positive).fixedSize()
         if ["create_board", "place_record"].contains(change.action), let id = change.resultID {
           Button("Open canvas") {
             studio.canvasBoardID = id
             studio.navigate(.canvas)
           }.buttonStyle(QuietButton(t: t, role: .ghost))
+        }
+        if ["create_branch", "create_period", "add_event"].contains(change.action) {
+          Button("Open timeline") { studio.navigate(.timeline) }.buttonStyle(
+            QuietButton(t: t, role: .ghost))
         }
         if change.action == "place_marker", let id = change.resultID {
           Button("Open atlas") {
@@ -205,7 +215,7 @@ struct ProposalCard: View {
         }
       }
     case "rejected":
-      Text("Dismissed").font(.system(size: 12, weight: .medium)).foregroundStyle(t.muted)
+      Text("Dismissed").font(.studio(size: 12, weight: .medium)).foregroundStyle(t.muted)
         .fixedSize()
     default:
       HStack(spacing: 6) {
@@ -236,10 +246,10 @@ struct ProposalCard: View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
           if old != nil {
             Text(line.kind == .added ? "+" : (line.kind == .removed ? "−" : " "))
-              .font(.system(size: 12, weight: .semibold, design: .monospaced))
+              .font(.studio(size: 12, weight: .semibold, design: .monospaced))
               .foregroundStyle(tint ?? .clear).frame(width: 10)
           }
-          Text(line.text.isEmpty ? " " : line.text).font(.system(size: 13)).lineSpacing(3)
+          Text(line.text.isEmpty ? " " : line.text).font(.studio(size: 13)).lineSpacing(3)
             .foregroundStyle(line.kind == .same ? t.secondary : t.text)
             .strikethrough(line.kind == .removed, color: t.danger.opacity(0.6))
             .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
@@ -247,7 +257,7 @@ struct ProposalCard: View {
           .background((tint ?? .clear).opacity(tint == nil ? 0 : 0.12))
       }
       if lines.count > 60 {
-        Text("… \(lines.count - 60) more lines").font(.system(size: 12)).foregroundStyle(t.muted)
+        Text("… \(lines.count - 60) more lines").font(.studio(size: 12)).foregroundStyle(t.muted)
           .padding(.horizontal, 10).padding(.vertical, 4)
       }
     }.padding(.vertical, 6)
@@ -269,9 +279,9 @@ struct ContextDisclosure: View {
       } label: {
         HStack(spacing: 5) {
           StudioIcon(open ? "chevron.down" : "chevron.right")
-            .font(.system(size: 8, weight: .bold))
+            .font(.studio(size: 8, weight: .bold))
           Text("Read \(sources.count) \(sources.count == 1 ? "record" : "records") from your world")
-            .font(.system(size: 12, weight: .medium))
+            .font(.studio(size: 12, weight: .medium))
         }.foregroundStyle(t.muted).padding(.horizontal, 8).frame(height: 26)
           .hoverFill(t, radius: 6)
       }.buttonStyle(.plain).padding(.leading, -8)
@@ -285,8 +295,8 @@ struct ContextDisclosure: View {
               HStack(spacing: 8) {
                 StudioIcon(recordIcon(source.record), size: 11.5)
                   .foregroundStyle(t.category(source.record.category)).frame(width: 16)
-                Text(source.record.title).font(.system(size: 13, weight: .medium)).lineLimit(1)
-                Text(source.reason).font(.system(size: 12)).foregroundStyle(t.muted)
+                Text(source.record.title).font(.studio(size: 13, weight: .medium)).lineLimit(1)
+                Text(source.reason).font(.studio(size: 12)).foregroundStyle(t.muted)
                   .lineLimit(1)
                 Spacer(minLength: 0)
                 StateBadge(state: source.record.state, t: t)

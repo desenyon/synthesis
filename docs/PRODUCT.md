@@ -17,3 +17,7 @@ The current canvas uses the owner's node-workspace reference: compact graphite c
 The assistant is subscription-only (Claude Code / Codex). It receives world records plus a bounded structured index of relationships, chronology and boards. The creator can review proposals to create a board, place linked records, add map markers, link documents and create draft rules, alongside existing lore actions. Accepting a proposal is not canon approval. All manual work remains available with AI off.
 
 Canvas distinguishes board-only text/drawings from Library records. Saving board text as an idea creates a source record and replaces it with a linked card. Relationships are shared with Graph and editable through native inspection. Entity details expose rules for manual addition/editing; the dedicated power-system lab is later work.
+
+## Studio refinement, 2026-11-15
+
+The world menu opens a Worlds workspace; users can search world names, create worlds, save portable snapshots and reopen independent copies. First-install setup is separate from full-page application/current-world settings. Content workspaces share optional contextual conversation. Systems encompasses factions and other organizations without imposing a taxonomy. Timeline now supports nested periods and branches with sourced events and explicit reviewed agent creation. These groupings do not constitute branching canon. Runtime image generation, living entity schemas, power-system canvas and coherent generated maps remain unfinished requirements, tracked in NEXT_PASS.md.

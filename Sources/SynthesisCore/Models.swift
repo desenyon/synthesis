@@ -96,6 +96,8 @@ public struct ProposedChange: Identifiable, Codable, Equatable, Sendable {
   public var status: String
   /// ID of the record, relationship or event an accepted change produced.
   public var resultID: String?
+  public var laneID: String? = nil
+  public var endDate: String? = nil
   public var boardID: String? = nil
   public var x: Double? = nil
   public var y: Double? = nil

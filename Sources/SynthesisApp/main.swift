@@ -216,6 +216,11 @@ final class StudioWindow: NSWindow {
       withTitle: "Quit Synthesis", action: #selector(NSApplication.terminate(_:)),
       keyEquivalent: "q")
     let file = submenu(main, "File")
+    item(file, "All Worlds", #selector(allWorlds))
+    item(file, "New World…", #selector(newWorld))
+    item(file, "Open World File…", #selector(openWorldFile), "o")
+    item(file, "Save World File…", #selector(saveWorldFile), "s", [.command, .shift])
+    file.addItem(.separator())
     item(file, "New Record…", #selector(newItem), "n")
     item(file, "New Conversation", #selector(newConversation), "n", [.command, .shift])
     file.addItem(.separator())
@@ -224,6 +229,7 @@ final class StudioWindow: NSWindow {
     item(file, "Import Markdown or Text…", #selector(importFiles), "i", [.command, .shift])
     item(file, "Export World as Markdown…", #selector(exportMarkdown))
     item(file, "Export World as JSON…", #selector(exportJSON))
+    item(file, "Export World Images…", #selector(exportImages))
     file.addItem(.separator())
     item(file, "Close Window", #selector(closeWindow), "w")
     let edit = submenu(main, "Edit")
@@ -282,7 +288,12 @@ final class StudioWindow: NSWindow {
       NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: nil)
     }
   }
-  @objc func settings() { studio.sheet = .settings }
+  @objc func settings() { studio.navigate(.settings) }
+  @objc func allWorlds() { studio.navigate(.worlds) }
+  @objc func newWorld() { studio.sheet = .world }
+  @objc func openWorldFile() { studio.openPortableWorld() }
+  @objc func saveWorldFile() { studio.savePortableWorld() }
+  @objc func exportImages() { studio.exportWorldImages() }
   @objc func search() { studio.palette.toggle() }
   @objc func closeWindow() { window.performClose(nil) }
   @objc func newItem() {

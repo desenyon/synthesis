@@ -124,15 +124,15 @@ struct EditorScreen: View {
       } label: {
         HStack(spacing: 5) {
           StudioIcon("chevron.left", size: 11)
-          Text(origin).font(.system(size: 13.5, weight: .medium))
+          Text(origin).font(.studio(size: 13.5, weight: .medium))
         }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
           .hoverFill(studio.t)
       }.buttonStyle(.plain).padding(.leading, -6).help("Back to \(origin)")
         .keyboardShortcut("[", modifiers: .command)
       Text("/").foregroundStyle(studio.t.muted.opacity(0.6))
-      Text(title.isEmpty ? "Untitled" : title).font(.system(size: 13.5, weight: .medium))
+      Text(title.isEmpty ? "Untitled" : title).font(.studio(size: 13.5, weight: .medium))
         .lineLimit(1).layoutPriority(-1)
-      Text(status).font(.system(size: 12)).lineLimit(1)
+      Text(status).font(.studio(size: 12)).lineLimit(1)
         .foregroundStyle(status.contains("Not saved") ? studio.t.danger : studio.t.muted)
         .padding(.leading, 4)
     } trailing: {
@@ -185,19 +185,19 @@ struct EditorScreen: View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(spacing: 8) {
         StudioLabel(Vocabulary.kindLabel(record.kind), icon: recordIcon(record))
-          .font(.system(size: 12.5, weight: .medium))
+          .font(.studio(size: 12.5, weight: .medium))
           .foregroundStyle(studio.t.category(category))
         Text("·").foregroundStyle(studio.t.muted)
         categoryMenu
         if record.origin != "user-authored" {
           Text("·").foregroundStyle(studio.t.muted)
-          Text(Vocabulary.originLabel(record.origin)).font(.system(size: 12.5))
+          Text(Vocabulary.originLabel(record.origin)).font(.studio(size: 12.5))
             .foregroundStyle(studio.t.muted)
             .help("Origin of this record. It is a draft until you accept it as canon.")
         }
       }.padding(.bottom, 10)
       TextField("Untitled", text: $title, axis: .vertical)
-        .font(.system(size: 30, weight: .semibold)).tracking(-0.4).textFieldStyle(.plain)
+        .font(.studio(size: 30, weight: .semibold)).tracking(-0.4).textFieldStyle(.plain)
         .onChange(of: title) { _, _ in changed() }.accessibilityLabel("Title")
       HStack(spacing: 2) {
         IconButton(icon: "bold", label: "Bold · ⌘B", t: studio.t) { handle.send("toggleBoldface:") }
@@ -213,7 +213,7 @@ struct EditorScreen: View {
         styleButton("Body", size: 16, bold: false)
         Spacer()
         Text("\(bodyText.split { $0.isWhitespace || $0.isNewline }.count) words")
-          .font(.system(size: 12)).monospacedDigit().foregroundStyle(studio.t.muted)
+          .font(.studio(size: 12)).monospacedDigit().foregroundStyle(studio.t.muted)
       }.padding(.top, 14).padding(.bottom, 8)
         .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
       RichDocumentEditor(
@@ -231,13 +231,13 @@ struct EditorScreen: View {
     Button {
       handle.heading(size, bold: bold)
     } label: {
-      Text(name).font(.system(size: 12.5, weight: .medium)).foregroundStyle(studio.t.secondary)
+      Text(name).font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.secondary)
         .padding(.horizontal, 8).frame(height: 28).hoverFill(studio.t)
     }.buttonStyle(.plain).help("Make the current paragraph \(name.lowercased())")
   }
   @ViewBuilder private var categoryMenu: some View {
     if customCategory {
-      TextField("Category", text: $category).textFieldStyle(.plain).font(.system(size: 12.5))
+      TextField("Category", text: $category).textFieldStyle(.plain).font(.studio(size: 12.5))
         .frame(width: 160).onChange(of: category) { _, _ in changed() }
         .onSubmit { customCategory = false }
     } else {
@@ -260,7 +260,7 @@ struct EditorScreen: View {
         Button("Custom…") { customCategory = true }
       } label: {
         HStack(spacing: 4) {
-          Text(category.isEmpty ? "No category" : category).font(.system(size: 12.5))
+          Text(category.isEmpty ? "No category" : category).font(.studio(size: 12.5))
           StudioIcon("chevron.down", size: 8)
         }.foregroundStyle(studio.t.secondary).padding(.horizontal, 5).frame(height: 22)
           .hoverFill(studio.t, radius: 5)
@@ -362,7 +362,7 @@ struct EditorScreen: View {
           StudioLabel("\(removed) removed", icon: "minus").foregroundStyle(studio.t.danger)
         }
         Spacer()
-      }.font(.system(size: 12.5, weight: .medium)).foregroundStyle(studio.t.secondary)
+      }.font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.secondary)
       ScrollView {
         VStack(alignment: .leading, spacing: 0) {
           ForEach(Array(diff.enumerated()), id: \.offset) { _, line in
@@ -379,7 +379,7 @@ struct EditorScreen: View {
       Text(
         "Only you can accept canon. Earlier versions, including the current canon, stay in history."
       )
-      .font(.system(size: 12.5)).foregroundStyle(studio.t.muted)
+      .font(.studio(size: 12.5)).foregroundStyle(studio.t.muted)
       .fixedSize(horizontal: false, vertical: true)
     } footer: {
       Spacer()
@@ -401,9 +401,9 @@ struct EditorScreen: View {
       line.kind == .added ? studio.t.positive : (line.kind == .removed ? studio.t.danger : nil)
     return HStack(alignment: .firstTextBaseline, spacing: 8) {
       Text(line.kind == .added ? "+" : (line.kind == .removed ? "−" : " "))
-        .font(.system(size: 13, weight: .semibold, design: .monospaced))
+        .font(.studio(size: 13, weight: .semibold, design: .monospaced))
         .foregroundStyle(tint ?? .clear).frame(width: 12)
-      Text(line.text.isEmpty ? " " : line.text).font(.system(size: 13.5)).lineSpacing(3)
+      Text(line.text.isEmpty ? " " : line.text).font(.studio(size: 13.5)).lineSpacing(3)
         .foregroundStyle(line.kind == .same ? studio.t.secondary : studio.t.text)
         .strikethrough(line.kind == .removed, color: studio.t.danger.opacity(0.6))
         .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
@@ -422,19 +422,19 @@ struct EditorScreen: View {
             HStack(alignment: .top, spacing: 12) {
               VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
-                  Text("Revision \(revision.version)").font(.system(size: 13.5, weight: .medium))
+                  Text("Revision \(revision.version)").font(.studio(size: 13.5, weight: .medium))
                   StateBadge(state: revision.snapshot.state, t: studio.t)
-                  Text(relativeDate(revision.createdAt)).font(.system(size: 12))
+                  Text(relativeDate(revision.createdAt)).font(.studio(size: 12))
                     .foregroundStyle(studio.t.muted)
                   if revision.version == record.version {
-                    Text("Current").font(.system(size: 11.5, weight: .medium))
+                    Text("Current").font(.studio(size: 11.5, weight: .medium))
                       .foregroundStyle(studio.t.accent)
                   }
                 }
                 Text(
                   revision.snapshot.body.isEmpty
                     ? "Empty" : revision.snapshot.body.replacingOccurrences(of: "\n", with: " ")
-                ).font(.system(size: 12.5)).foregroundStyle(studio.t.secondary).lineLimit(2)
+                ).font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary).lineLimit(2)
               }
               Spacer(minLength: 8)
               if revision.version != record.version {
@@ -477,10 +477,10 @@ struct RecordInspector: View {
           HStack(spacing: 8) {
             StateBadge(state: record.state, t: t)
             Spacer()
-            Text("Revision \(record.version)").font(.system(size: 12)).monospacedDigit()
+            Text("Revision \(record.version)").font(.studio(size: 12)).monospacedDigit()
               .foregroundStyle(t.muted)
           }
-          Text(statusNote).font(.system(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(2)
+          Text(statusNote).font(.studio(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(2)
             .fixedSize(horizontal: false, vertical: true)
           HStack(spacing: 6) {
             if record.state != "canon" && record.kind != "capture" {
@@ -529,9 +529,9 @@ struct RecordInspector: View {
                     Text(rule.kind.title).foregroundStyle(t.secondary)
                     Spacer()
                     StateBadge(state: rule.state, t: t)
-                  }.font(.system(size: 12))
-                  Text(rule.title).font(.system(size: 13, weight: .medium))
-                  Text(rule.body).font(.system(size: 13)).foregroundStyle(t.secondary).lineLimit(3)
+                  }.font(.studio(size: 12))
+                  Text(rule.title).font(.studio(size: 13, weight: .medium))
+                  Text(rule.body).font(.studio(size: 13)).foregroundStyle(t.secondary).lineLimit(3)
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(8).hoverFill(t)
               }.buttonStyle(.plain).help("Edit rule as draft")
             }
@@ -547,7 +547,7 @@ struct RecordInspector: View {
           Button {
             linkPicker = true
           } label: {
-            StudioLabel("Add link", icon: "plus").font(.system(size: 12.5, weight: .medium))
+            StudioLabel("Add link", icon: "plus").font(.studio(size: 12.5, weight: .medium))
               .foregroundStyle(t.accent).padding(.horizontal, 8).frame(height: 26).hoverFill(t)
           }.buttonStyle(.plain).padding(.leading, -8)
             .popover(isPresented: $linkPicker) {
@@ -573,9 +573,9 @@ struct RecordInspector: View {
                 studio.navigate(.timeline)
               } label: {
                 VStack(alignment: .leading, spacing: 2) {
-                  Text(event.title).font(.system(size: 13, weight: .medium)).lineLimit(1)
+                  Text(event.title).font(.studio(size: 13, weight: .medium)).lineLimit(1)
                   Text(event.dateLabel == "unknown" ? "Date unknown" : event.dateLabel)
-                    .font(.system(size: 12)).foregroundStyle(t.muted)
+                    .font(.studio(size: 12)).foregroundStyle(t.muted)
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 8)
                   .padding(.vertical, 5).hoverFill(t)
               }.buttonStyle(.plain).padding(.horizontal, -8)
@@ -614,7 +614,7 @@ struct RecordInspector: View {
     }
   }
   private func hint(_ text: String) -> some View {
-    Text(text).font(.system(size: 12.5)).foregroundStyle(studio.t.muted).lineSpacing(2)
+    Text(text).font(.studio(size: 12.5)).foregroundStyle(studio.t.muted).lineSpacing(2)
       .fixedSize(horizontal: false, vertical: true)
   }
   private func linkRow(_ linked: LoreRecord, prefix: String?, removable: Bool) -> some View {
@@ -627,9 +627,9 @@ struct RecordInspector: View {
             .foregroundStyle(studio.t.category(linked.category)).frame(width: 16)
           VStack(alignment: .leading, spacing: 1) {
             if let prefix {
-              Text(prefix).font(.system(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(1)
+              Text(prefix).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(1)
             }
-            Text(linked.title).font(.system(size: 13, weight: .medium)).lineLimit(1)
+            Text(linked.title).font(.studio(size: 13, weight: .medium)).lineLimit(1)
           }
           Spacer(minLength: 0)
         }.padding(.horizontal, 8).padding(.vertical, 5).hoverFill(studio.t)
@@ -654,7 +654,7 @@ struct RecordInspector: View {
         FlowLayout(spacing: 6) {
           ForEach(values, id: \.self) { value in
             HStack(spacing: 4) {
-              Text(value).font(.system(size: 12.5))
+              Text(value).font(.studio(size: 12.5))
               Button {
                 commit(values.filter { $0 != value })
               } label: {
@@ -667,7 +667,7 @@ struct RecordInspector: View {
           }
         }
       }
-      TextField(placeholder, text: text).textFieldStyle(.plain).font(.system(size: 12.5))
+      TextField(placeholder, text: text).textFieldStyle(.plain).font(.studio(size: 12.5))
         .onSubmit {
           let value = text.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines)
           guard !value.isEmpty else { return }
@@ -769,7 +769,7 @@ private struct RecordRuleEditor: View {
       }
       FormField(
         label: "Title", placeholder: "A constraint, cost or technique", text: $title, t: studio.t)
-      TextEditor(text: $bodyText).font(.system(size: 15)).scrollContentBackground(.hidden)
+      TextEditor(text: $bodyText).font(.studio(size: 15)).scrollContentBackground(.hidden)
         .padding(10).frame(height: 180).background(
           studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius)
         )

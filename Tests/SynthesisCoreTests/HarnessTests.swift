@@ -177,7 +177,8 @@ struct HarnessTests {
       contentsOf: fake.folder.appendingPathComponent("args"), encoding: .utf8)
     for flag in [
       "exec --json", "--sandbox read-only", "--ephemeral", "--ignore-user-config",
-      "--ignore-rules", "--disable shell_tool", "--disable apps", "--disable plugins",
+      "--ignore-rules", "--disable shell_tool", "--disable image_generation", "--disable apps",
+      "--disable plugins",
       "--skip-git-repo-check",
     ] { #expect(arguments.contains(flag), "missing \(flag)") }
     #expect(arguments.contains("synthesis-harness-") && arguments.hasSuffix("-\n"))

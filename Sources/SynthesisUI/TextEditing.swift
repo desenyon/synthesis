@@ -87,7 +87,7 @@ final class ComposerTextView: NSTextView {
       (placeholder as NSString).draw(
         at: NSPoint(x: textContainerInset.width + 5, y: textContainerInset.height),
         withAttributes: [
-          .font: font ?? NSFont.systemFont(ofSize: 15), .foregroundColor: placeholderColor,
+          .font: font ?? StudioTypography.native(size: 15), .foregroundColor: placeholderColor,
         ])
     }
   }
@@ -144,7 +144,7 @@ struct ComposerInput: NSViewRepresentable {
     let paragraph = NSMutableParagraphStyle()
     paragraph.lineSpacing = 3
     return [
-      .font: NSFont.systemFont(ofSize: 15), .foregroundColor: NSColor(color),
+      .font: StudioTypography.native(size: 15), .foregroundColor: NSColor(color),
       .paragraphStyle: paragraph,
     ]
   }
@@ -330,7 +330,7 @@ struct ComposerInput: NSViewRepresentable {
     guard let view, let storage = view.textStorage else { return }
     let range = (view.string as NSString).paragraphRange(for: view.selectedRange())
     let font =
-      bold ? NSFont.systemFont(ofSize: size, weight: .semibold) : NSFont.systemFont(ofSize: size)
+      StudioTypography.native(size: size, bold: bold)
     guard view.shouldChangeText(in: range, replacementString: nil) else { return }
     storage.addAttribute(.font, value: font, range: range)
     view.didChangeText()
@@ -397,12 +397,12 @@ struct RichDocumentEditor: NSViewRepresentable {
         NSAttributedString(
           string: body,
           attributes: [
-            .font: NSFont.systemFont(ofSize: 16), .foregroundColor: NSColor(t.text),
+            .font: StudioTypography.native(size: 16), .foregroundColor: NSColor(t.text),
             .paragraphStyle: paragraph,
           ]))
     }
     view.typingAttributes = [
-      .font: NSFont.systemFont(ofSize: 16), .foregroundColor: NSColor(t.text),
+      .font: StudioTypography.native(size: 16), .foregroundColor: NSColor(t.text),
       .paragraphStyle: paragraph,
     ]
     view.textColor = NSColor(t.text)

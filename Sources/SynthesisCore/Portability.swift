@@ -60,6 +60,10 @@ extension WorkspaceStore {
       case "capture": folder = "Ideas"
       default: folder = "Documents"
       }
+      // Categories are editable/imported text, never filesystem paths.
+      let safeFolder = String(
+        folder.map { $0.isLetter || $0.isNumber || $0 == " " || $0 == "-" ? $0 : "-" }
+      ).trimmingCharacters(in: .whitespaces)
       let front = """
         ---
         id: \(record.id)
@@ -77,7 +81,7 @@ extension WorkspaceStore {
         record.kind == "entity" ? try rulesText(worldID: worldID, systemID: record.id) : ""
       files.append(
         (
-          "\(folder)/\(filename(record.title)).md",
+          "\(safeFolder.isEmpty ? "Records" : safeFolder)/\(filename(record.title)).md",
           "\(front)\n\n# \(record.title)\n\n\(record.body)\n"
             + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n")
         )

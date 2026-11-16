@@ -32,3 +32,9 @@
 - Measured large-board and large-graph pass; accessibility walk-through; crash recovery for unsaved text.
 
 No releases or public deployment.
+
+## 2026-11-15 owner refinement checkpoint
+
+Implemented: black/native-glass + Phosphor/Inter, shared contextual assistant, portable world snapshots/import, Worlds, first-run setup and full-page settings, query caching, Review search/sort, reverse relationships and close-node routing, nested timeline periods/branches with reviewed AI creation. Verification and limits: [STATE](STATE.md). This supersedes the earlier Lucide/graphite presentation choice.
+
+Next acceptance gates: explicit-use subscription image artifacts; reusable editable map geography and place-map hierarchy; customizable entity sections; power-system/cosmology studios; deeper world preferences. Address the Excalidraw/Mermaid dependency advisories without silently downgrading or replacing the engine. Chronology grouping is implemented; branching canon remains a separate milestone.

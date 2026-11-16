@@ -312,3 +312,20 @@ import Testing
   }
 
 }
+
+@MainActor struct OnboardingTests {
+  @Test func setupOnlyAppearsForANewInstallationAndExistingProviderChoiceSurvives() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let first = try Studio(store: store)
+    #expect(first.sheet == .onboarding)
+    #expect(first.provider == .codex)
+    first.completeOnboarding()
+    first.setProvider(.claudeCode)
+    let reopened = try Studio(store: store)
+    #expect(reopened.sheet == nil)
+    #expect(reopened.provider == .claudeCode)
+    let existing = try WorkspaceStore(path: ":memory:")
+    _ = try existing.createWorld(name: "Existing work")
+    #expect(try Studio(store: existing).sheet == nil)
+  }
+}

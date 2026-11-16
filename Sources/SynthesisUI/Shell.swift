@@ -13,7 +13,8 @@ public struct ConnectedRoot: View {
       let compact = geo.size.width < 760
       let rail =
         studio.collapsed
-        || (geo.size.width < 1180 && studio.companionExpanded && studio.destination == .canvas
+        || (geo.size.width < 1180 && studio.companionExpanded
+          && ![.chat, .worlds, .settings].contains(studio.destination)
           && studio.selectedRecord == nil)
       let column: CGFloat = compact ? 0 : (rail ? Metric.rail : Metric.sidebar)
       ZStack(alignment: .topLeading) {
@@ -36,7 +37,12 @@ public struct ConnectedRoot: View {
           }
           workspace.id("\(studio.worldID)#\(studio.captureNonce)")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(studio.t.background)
+            // Canvas is mounted underneath this native layout. An opaque background
+            // here hides the entire engine while its accessibility tree stays alive.
+            .background(
+              studio.destination == .canvas && studio.selectedRecord == nil
+                ? Color.clear : studio.t.background
+            )
             .overlay(alignment: .leading) {
               Rectangle().fill(studio.t.hairline).frame(width: 1).allowsHitTesting(false)
             }
@@ -44,14 +50,14 @@ public struct ConnectedRoot: View {
         }
         HStack(spacing: 0) {
           Color.clear.frame(width: 84, height: 1)
+          if !rail && !compact {
+            Text("Synthesis").font(.studio(size: 14, weight: .semibold))
+              .foregroundStyle(studio.t.text).padding(.trailing, 10)
+          }
           IconButton(icon: "sidebar.left", label: "Toggle navigation · ⌘\\", t: studio.t) {
             withAnimation(.easeInOut(duration: 0.18)) {
               if compact { studio.mobileNavigation.toggle() } else { studio.toggleSidebar() }
             }
-          }
-          if !rail && !compact {
-            Text("synthesis").font(.system(size: 12, weight: .semibold)).tracking(0.4)
-              .foregroundStyle(studio.t.secondary).padding(.leading, 8)
           }
         }.frame(height: Metric.bar)
         if compact && studio.mobileNavigation {
@@ -91,6 +97,36 @@ public struct ConnectedRoot: View {
     }
   }
   @ViewBuilder private var workspace: some View {
+    if [.canvas, .worlds, .settings].contains(studio.destination) && studio.selectedRecord == nil {
+      content
+    } else if studio.destination == .chat && studio.selectedRecord == nil {
+      content
+    } else {
+      GeometryReader { geometry in
+        HStack(spacing: 0) {
+          if geometry.size.width < 760 && studio.mode == .assisted && studio.companionExpanded {
+            ConversationStudio(studio: studio, companion: true, docked: false)
+          } else {
+            content.frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
+              .safeAreaInset(edge: .bottom, spacing: 0) {
+                if studio.mode == .assisted && !studio.companionExpanded {
+                  UnifiedComposer(studio: studio, companion: true, collapsed: true)
+                    .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
+                    .frame(maxWidth: .infinity).background(studio.t.background)
+                }
+              }
+            if studio.mode == .assisted && studio.companionExpanded {
+              Rectangle().fill(studio.t.hairline).frame(width: 1)
+              ConversationStudio(studio: studio, companion: true)
+                .frame(width: min(420, max(300, geometry.size.width * 0.4)))
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
+          }
+        }
+      }
+    }
+  }
+  @ViewBuilder private var content: some View {
     if let record = studio.selectedRecord {
       EditorScreen(studio: studio, record: record).id(record.id)
     } else {
@@ -102,6 +138,8 @@ public struct ConnectedRoot: View {
       case .timeline: TimelineScreen(studio: studio)
       case .atlas: AtlasScreen(studio: studio)
       case .review: ReviewScreen(studio: studio)
+      case .worlds: WorldsScreen(studio: studio)
+      case .settings: StudioSheet(studio: studio, sheet: .settings, embedded: true)
       }
     }
   }
@@ -109,12 +147,12 @@ public struct ConnectedRoot: View {
     if let toast = studio.toast {
       HStack(spacing: 10) {
         StudioIcon(toast.icon).foregroundStyle(studio.t.accent)
-        Text(toast.message).font(.system(size: 13)).lineLimit(2)
+        Text(toast.message).font(.studio(size: 13)).lineLimit(2)
         if let title = toast.actionTitle, let action = toast.action {
           Button(title) {
             action()
             studio.toast = nil
-          }.buttonStyle(.plain).font(.system(size: 13, weight: .semibold))
+          }.buttonStyle(.plain).font(.studio(size: 13, weight: .semibold))
             .foregroundStyle(studio.t.accent)
         }
         IconButton(icon: "xmark", label: "Dismiss", t: studio.t, size: 22) { studio.toast = nil }
@@ -150,9 +188,9 @@ struct Sidebar: View {
           } label: {
             HStack(spacing: 9) {
               StudioIcon("square.and.pencil", size: 15)
-              Text("New chat").font(.system(size: 13, weight: .medium)).lineLimit(1)
+              Text("New chat").font(.studio(size: 13, weight: .medium)).lineLimit(1)
               Spacer(minLength: 0)
-              Text("⇧⌘N").font(.system(size: 11)).foregroundStyle(studio.t.muted)
+              Text("⇧⌘N").font(.studio(size: 11)).foregroundStyle(studio.t.muted)
             }.padding(.horizontal, 11).frame(height: 36)
               .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 8))
               .overlay(RoundedRectangle(cornerRadius: 8).stroke(studio.t.hairline, lineWidth: 1))
@@ -171,7 +209,9 @@ struct Sidebar: View {
               disclosure("World", expanded: $worldExpanded)
               if worldExpanded {
                 ForEach(Vocabulary.categories, id: \.self) { category in
-                  let count = studio.records.filter { $0.category == category }.count
+                  let count = studio.records.filter {
+                    Vocabulary.matchesCategory($0.category, category)
+                  }.count
                   NavRow(
                     t: studio.t, title: category, icon: categoryIcon(category),
                     selected: studio.destination == .library && studio.libraryCategory == category
@@ -189,7 +229,7 @@ struct Sidebar: View {
                   ConversationRow(studio: studio, chat: chat)
                 }
                 if studio.conversations.isEmpty {
-                  Text("Your conversations will live here.").font(.system(size: 12))
+                  Text("Your conversations will live here.").font(.studio(size: 12))
                     .foregroundStyle(studio.t.muted)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 10)
                     .padding(.vertical, 7)
@@ -200,21 +240,11 @@ struct Sidebar: View {
         }.padding(.horizontal, 12).padding(.bottom, 18)
       }.scrollIndicators(.never)
       VStack(spacing: 8) {
-        if !collapsed {
-          HStack(spacing: 8) {
-            Circle().fill(studio.mode == .manual ? studio.t.muted : studio.t.positive).frame(
-              width: 5, height: 5)
-            Text(
-              studio.mode == .manual ? "Manual workspace" : studio.provider.title + " subscription"
-            )
-            .font(.system(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(1)
-            Spacer(minLength: 0)
-          }.padding(.horizontal, 10)
-        }
         HStack(spacing: 0) {
           NavRow(
-            t: studio.t, title: "Settings", icon: "gearshape", selected: false, collapsed: collapsed
-          ) { studio.sheet = .settings }
+            t: studio.t, title: "Settings", icon: "gearshape",
+            selected: studio.destination == .settings, collapsed: collapsed
+          ) { studio.navigate(.settings) }
           if !collapsed { AppearanceButton(studio: studio) }
         }
       }.padding(12).padding(.top, 8)
@@ -223,13 +253,13 @@ struct Sidebar: View {
         }
     }
     .frame(width: collapsed ? Metric.rail : Metric.sidebar).frame(maxHeight: .infinity)
-    .background(studio.t.sidebar)
+    .background { NavigationGlass(theme: studio.t) }
     .accessibilityElement(children: .contain).accessibilityLabel("Navigation")
   }
   private func section(_ title: String, items: [Destination]) -> some View {
     VStack(spacing: 3) {
       if !collapsed {
-        Text(title.uppercased()).font(.system(size: 10.5, weight: .semibold)).tracking(1.1)
+        Text(title).font(.studio(size: 12, weight: .medium))
           .foregroundStyle(studio.t.muted).frame(maxWidth: .infinity, alignment: .leading)
           .padding(.horizontal, 10).padding(.bottom, 5)
       }
@@ -250,7 +280,7 @@ struct Sidebar: View {
       withAnimation(.easeInOut(duration: 0.18)) { expanded.wrappedValue.toggle() }
     } label: {
       HStack(spacing: 6) {
-        Text(title.uppercased()).font(.system(size: 10.5, weight: .semibold)).tracking(1.1)
+        Text(title).font(.studio(size: 12, weight: .medium))
         Spacer()
         StudioIcon(expanded.wrappedValue ? "chevron.down" : "chevron.right", size: 12)
       }.foregroundStyle(studio.t.muted).padding(.horizontal, 10).frame(height: 24).contentShape(
@@ -272,6 +302,9 @@ struct Sidebar: View {
         }
       }
       Divider()
+      Button("All worlds…") { studio.navigate(.worlds) }
+      Button("Open world file…") { studio.openPortableWorld() }
+      Button("Save world file…") { studio.savePortableWorld() }
       Button("New world…") { studio.sheet = .world }
       if !studio.worlds.contains(where: { $0.demo }) {
         Button("Open sample world") { studio.loadSample() }
@@ -281,7 +314,7 @@ struct Sidebar: View {
         WorldBadge(studio: studio, radius: 8).frame(width: 32, height: 32)
         if !collapsed {
           VStack(alignment: .leading, spacing: 3) {
-            Text(studio.world?.name ?? "World").font(.system(size: 14, weight: .semibold))
+            Text(studio.world?.name ?? "World").font(.studio(size: 14, weight: .semibold))
               .lineLimit(1)
             Text(studio.world?.demo == true ? "Sample universe" : "World workspace").font(
               .system(size: 11.5)
@@ -315,15 +348,15 @@ struct NavRow: View {
           .foregroundStyle(selected ? (tint ?? t.accent) : (tint?.opacity(0.85) ?? t.secondary))
           .frame(width: 20)
         if !collapsed {
-          Text(title).font(.system(size: 13, weight: selected ? .medium : .regular))
+          Text(title).font(.studio(size: 13, weight: selected ? .medium : .regular))
             .lineLimit(1)
           Spacer(minLength: 0)
           if let trailing, badge {
-            Text(trailing).font(.system(size: 11, weight: .semibold)).monospacedDigit()
+            Text(trailing).font(.studio(size: 11, weight: .semibold)).monospacedDigit()
               .foregroundStyle(t.accent).padding(.horizontal, 6).frame(minWidth: 18, minHeight: 18)
               .background(t.accentSoft, in: Capsule())
           } else if let trailing {
-            Text(trailing).font(.system(size: 11.5)).monospacedDigit()
+            Text(trailing).font(.studio(size: 11.5)).monospacedDigit()
               .foregroundStyle(t.muted.opacity(trailing.hasPrefix("⌘") ? (hover ? 1 : 0) : 1))
           }
         }
@@ -358,7 +391,7 @@ struct ConversationRow: View {
       } label: {
         HStack(spacing: 8) {
           StudioIcon("bubble.left", size: 13).foregroundStyle(studio.t.muted)
-          Text(chat.title).font(.system(size: 13, weight: selected ? .medium : .regular))
+          Text(chat.title).font(.studio(size: 13, weight: selected ? .medium : .regular))
             .lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
         }.padding(.leading, 10).frame(height: 32).contentShape(Rectangle())
       }.buttonStyle(.plain)

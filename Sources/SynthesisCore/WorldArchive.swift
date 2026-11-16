@@ -1,0 +1,125 @@
+import Foundation
+
+/// Portable, versioned world snapshot. Preferences are explicitly allowlisted: never auth,
+/// provider settings, device paths, or other worlds. SQLite remains the live working copy.
+struct WorldArchive: Codable {
+  var format = "dev.synthesis.world"
+  var version = 2
+  var tables: [String: [[String: String]]]
+  var preferences: [String: String]
+}
+
+extension WorkspaceStore {
+  private static let archiveTables = [
+    "worlds", "records", "rich_documents", "revisions", "native_revisions", "links",
+    "relationships", "relationship_history", "events", "conversations", "messages",
+    "proposals", "message_context", "boards", "rules", "rule_scenarios", "chronology_lanes",
+    "chronology_placements",
+  ]
+  public func exportWorldArchive(worldID: String) throws -> Data {
+    _ = try world(worldID)
+    var tables: [String: [[String: String]]] = [:]
+    for table in Self.archiveTables {
+      if table == "worlds" {
+        tables[table] = try db.rows("SELECT * FROM worlds WHERE id=?", [worldID])
+      } else if table == "rich_documents" {
+        tables[table] = try db.rows(
+          "SELECT * FROM rich_documents WHERE record_id IN (SELECT id FROM records WHERE world_id=?)",
+          [worldID])
+      } else {
+        tables[table] = try db.rows(
+          "SELECT * FROM \(table) WHERE world_id=? ORDER BY rowid", [worldID])
+      }
+    }
+    var preferences: [String: String] = [:]
+    for key in ["world-cover", "composer"] {
+      preferences[key] = try preference("\(key):\(worldID)")
+    }
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    return try encoder.encode(WorldArchive(tables: tables, preferences: preferences))
+  }
+
+  /// Imports an independent copy, even if this snapshot was exported from this installation.
+  /// Fresh IDs prevent cross-world links. Everything rolls back if validation or a write fails.
+  public func importWorldArchive(_ data: Data) throws -> World {
+    guard data.count <= 200_000_000 else {
+      throw SynthesisError.invalid("This world file exceeds 200 MB.")
+    }
+    var archive = try JSONDecoder().decode(WorldArchive.self, from: data)
+    if archive.version == 1 {
+      archive.tables["chronology_lanes"] = []
+      archive.tables["chronology_placements"] = []
+    }
+    guard archive.format == "dev.synthesis.world", [1, 2].contains(archive.version),
+      Set(archive.tables.keys) == Set(Self.archiveTables),
+      archive.tables["worlds"]?.count == 1,
+      let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
+      UUID(uuidString: oldWorld) != nil,
+      archive.tables.values.reduce(0, { $0 + $1.count }) <= 100_000,
+      Set(archive.preferences.keys).isSubset(of: ["world-cover", "composer"])
+    else { throw SynthesisError.invalid("This is not a supported Synthesis world file.") }
+    var ids: [String: String] = [:]
+    for table in Self.archiveTables {
+      let columns = Set(try db.rows("PRAGMA table_info(\(table))").compactMap { $0["name"] })
+      for row in archive.tables[table] ?? [] {
+        guard !row.isEmpty, Set(row.keys).isSubset(of: columns),
+          table == "worlds" || table == "rich_documents" || row["world_id"] == oldWorld
+        else {
+          throw SynthesisError.invalid("The world file contains invalid or mixed-world records.")
+        }
+        if let id = row["id"] {
+          guard UUID(uuidString: id) != nil, ids[id] == nil else {
+            throw SynthesisError.invalid(
+              "The world file contains invalid or duplicate identifiers.")
+          }
+          ids[id] = UUID().uuidString
+        }
+      }
+    }
+    func remap(_ text: String) -> String {
+      // UUID matches are replaced in one pass, including references inside JSON and links.
+      let pattern = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"
+      guard let regex = try? NSRegularExpression(pattern: pattern) else { return text }
+      let result = NSMutableString(string: text)
+      for match in regex.matches(in: text, range: NSRange(location: 0, length: result.length))
+        .reversed()
+      {
+        let id = result.substring(with: match.range)
+        if let replacement = ids[id] {
+          result.replaceCharacters(in: match.range, with: replacement)
+        }
+      }
+      return result as String
+    }
+    return try db.transaction {
+      for table in Self.archiveTables {
+        for source in archive.tables[table] ?? [] {
+          var row = source.mapValues(remap)
+          // Reject external references even on tables whose historical schema lacks FKs.
+          for (key, value) in source where key.hasSuffix("_id") && key != "owner_id" {
+            guard ids[value] != nil else {
+              throw SynthesisError.invalid("The world file references content outside this world.")
+            }
+          }
+          if table == "worlds" { row["owner_id"] = "local" }
+          if table == "rich_documents", let raw = source["rtf"],
+            let bytes = Data(base64Encoded: raw), let text = String(data: bytes, encoding: .utf8)
+          {
+            row["rtf"] = Data(remap(text).utf8).base64EncodedString()
+          }
+          let columns = row.keys.sorted()
+          let placeholders = columns.map { _ in "?" }.joined(separator: ",")
+          try db.execute(
+            "INSERT INTO \(table)(\(columns.joined(separator: ","))) VALUES(\(placeholders))",
+            columns.map { row[$0] })
+        }
+      }
+      let newWorld = ids[oldWorld]!
+      for (key, value) in archive.preferences {
+        try setPreference("\(key):\(newWorld)", value: key == "world-cover" ? value : remap(value))
+      }
+      return try world(newWorld)
+    }
+  }
+}
