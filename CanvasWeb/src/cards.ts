@@ -59,13 +59,15 @@ export function wrap(text: string, size: number, maxWidth: number, maxLines: num
   return lines.join("\n");
 }
 
-function kindLabel(record: RecordInfo): string {
-  if (record.category) return record.category;
+export function kindLabel(record: RecordInfo): string {
+  if (record.category) return record.category === "Factions" ? "Systems" : record.category;
   return record.kind === "entity" ? "Entity" : record.kind === "capture" ? "Idea" : "Document";
 }
+export function stateName(record: RecordInfo): string {
+  return record.state === "canon" ? "Canon" : record.state === "idea" ? "Idea" : record.state === "hypothetical" ? "Hypothetical" : "Draft";
+}
 function stateLabel(record: RecordInfo): string {
-  const state =
-    record.state === "canon" ? "Canon" : record.state === "idea" ? "Idea" : record.state === "hypothetical" ? "Hypothetical" : "Draft";
+  const state = stateName(record);
   return (
     `● ${state}` +
     (record.canonKept && record.state !== "canon" ? "  ·  canon kept" : "") +

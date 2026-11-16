@@ -1,0 +1,5 @@
+CAPTURE canvas 1440x900, bitmap 2880x1800, 666ms
+CAPTURE light 1440x900, bitmap 2880x1800, 620ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 420ms
+CAPTURE light 1024x768, bitmap 2048x1536, 371ms
+Native captures complete: /private/tmp/synthesis-b5

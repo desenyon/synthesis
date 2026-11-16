@@ -146,7 +146,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B5. In `CanvasWeb/src/StudioOverlay.tsx` show the category once in the card kicker, normalized with the same Factions→Systems rule, and replace the footer's category with the record state using `.record-state`. Mirror the wording in `CanvasWeb/src/cards.ts` so PNG export matches. Rebuild the bundle and capture `canvas,light`.
 
-- [ ] done
+- [x] done — see verification/audit-B5.
 
 ### B6. "Factions" vs "Systems" — Medium, confirmed
 

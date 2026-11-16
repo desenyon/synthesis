@@ -1,7 +1,7 @@
 import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound, Note as StickyNote, Image as ImageIcon, GitBranch, BoundingBox as Frame, Pencil, Square, Minus, CornersOut as Scan, ArrowCounterClockwise as Undo2, ArrowClockwise as Redo2, ArrowUpRight, At as AtSign, X, SlidersHorizontal, Books as Library, FilePlus as FilePlus2, FileText, type Icon as LucideIcon } from '@phosphor-icons/react';
 import { CaptureUpdateAction, newElementWith } from '@excalidraw/excalidraw';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { isCard, type RecordInfo, type RelationInfo } from './cards';
+import { isCard, kindLabel, stateName, type RecordInfo, type RelationInfo } from './cards';
 import { cardFrame, visibleFrame } from './sceneRules';
 import { palette, type Theme } from './palette';
 type Props = {
@@ -105,10 +105,10 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
             const related = chosen.length === 0 || neighbours.has(card.customData.recordID);
             const color = tones[record?.category.toLowerCase() ?? ''] ?? '#9bbfdd';
             return <article key={card.id} className={`studio-record ${selected ? 'is-selected' : ''} ${related ? '' : 'is-unrelated'} ${artURL ? 'has-art' : ''}`} style={{ '--record-accent': color, left: bounds.x + (bounds.width - card.width) / 2, top: bounds.y + (bounds.height - card.height) / 2, width: card.width, height: card.height, transform: `scale(${bounds.zoom}) rotate(${card.angle ?? 0}rad)` } as CSSProperties}>
-         <div className="record-kicker"><i />{record?.category || record?.kind || 'Archived record'}<span>{record?.kind === 'entity' ? 'Entity' : 'Record'}</span></div>
+         <div className="record-kicker"><i />{record ? kindLabel(record) : 'Archived record'}</div>
          {artURL && <img className="record-art" src={artURL} alt="" style={{ height: Math.min(art.height, card.height - 90) }} draggable={false}/>}
          <div className="record-copy"><h2>{record?.title ?? 'Archived record'}</h2><p>{record?.body || 'Open this record to begin writing.'}</p></div>
-         <footer><span>{relations().filter(r => r.sourceID === record?.id || r.targetID === record?.id).length} connections</span><span>{record?.category === 'Factions' ? 'Systems' : record?.category}</span></footer>
+         <footer><span>{relations().filter(r => r.sourceID === record?.id || r.targetID === record?.id).length} connections</span><span className={`record-state ${record?.state === 'canon' ? 'is-canon' : ''}`}><i />{record ? stateName(record) : 'Archived'}</span></footer>
          <div className="record-actions"><Tool label="Open record" icon="open" action={() => post({ type: 'openRecord', id: card.customData.recordID })}/></div>
          {record?.kind === 'entity' && ['in', 'out'].map(side => <button key={side} type="button" className={`record-port ${side} ${connecting === record.id ? 'connecting' : ''}`} title={connecting ? 'Connect to this entity' : 'Connect this entity'} aria-label={`${connecting ? 'Connect to' : 'Connect from'} ${record.title}`} onClick={() => connect(record.id)}/>)}
        </article>;
