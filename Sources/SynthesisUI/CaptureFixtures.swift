@@ -213,7 +213,9 @@ extension Studio {
       selectedRecord = records.first { $0.title == "The art of remembrance" }
     case "editor", "light-editor", "sheet-rule":
       destination = .library
-      selectedRecord = records.first { $0.title == "Mira Vale" }
+      selectedRecord = records.first {
+        $0.title == (state == "sheet-rule" ? "The art of remembrance" : "Mira Vale")
+      }
       if state == "sheet-rule" { inspector = true }
     case "palette":
       destination = .chat

@@ -578,7 +578,10 @@ struct RecordInspector: View {
               .buttonStyle(QuietButton(t: t, role: .ghost)).padding(.leading, -12)
           }
         }
-        if record.kind == "entity" {
+        if record.kind == "entity",
+          ["Power systems", "Cosmology", "Systems", "Factions"].contains(record.category)
+            || !rules.isEmpty
+        {
           section("Rules") {
             ForEach(rules) { rule in
               Button {
@@ -829,11 +832,9 @@ private struct RecordRuleEditor: View {
       }
       FormField(
         label: "Title", placeholder: "A constraint, cost or technique", text: $title, t: studio.t)
-      TextEditor(text: $bodyText).font(.studio(size: 15)).scrollContentBackground(.hidden)
-        .padding(10).frame(height: 180).background(
-          studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius)
-        )
-        .accessibilityLabel("Rule description")
+      FormTextArea(
+        label: "Rule", placeholder: "Describe how this rule works and where it applies.",
+        text: $bodyText, t: studio.t)
     } footer: {
       Spacer()
       Button("Cancel", action: close).buttonStyle(QuietButton(t: studio.t))

@@ -1,0 +1,7 @@
+CAPTURE editor 1440x900, bitmap 2880x1800, 568ms
+CAPTURE sheet-rule 1440x900, bitmap 2880x1800, 679ms
+CAPTURE sheet-rule content inline; native modal presentation not exercised
+CAPTURE editor 1024x768, bitmap 2048x1536, 362ms
+CAPTURE sheet-rule 1024x768, bitmap 2048x1536, 441ms
+CAPTURE sheet-rule content inline; native modal presentation not exercised
+Native captures complete: /private/tmp/synthesis-b9

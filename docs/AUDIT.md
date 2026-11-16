@@ -190,7 +190,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B9. In the record inspector in `Sources/SynthesisUI/Editor.swift` show the Rules group only when the record's category is Power systems, Cosmology, Systems/Factions, or it already has rules. In `RecordRuleEditor` add a visible "Rule" label and an accessibility label to the text editor. Capture `sheet-rule,editor`.
 
-- [ ] done
+- [x] done — see verification/audit-B9.
 
 ### B10. Review badge does not match the tabs — Low
 

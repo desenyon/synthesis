@@ -240,6 +240,29 @@ struct SearchField: View {
 }
 
 /// Form field with the application surface instead of the system bezel.
+struct FormTextArea: View {
+  var label: String
+  var placeholder: String
+  @Binding var text: String
+  var t: Theme
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text(label).font(.studio(size: 12.5, weight: .medium)).foregroundStyle(t.secondary)
+      TextEditor(text: $text).font(.studio(size: 15)).scrollContentBackground(.hidden)
+        .overlay(alignment: .topLeading) {
+          if text.isEmpty {
+            Text(placeholder).font(.studio(size: 15)).foregroundStyle(t.muted)
+              .padding(.horizontal, 5).padding(.top, 1).allowsHitTesting(false)
+              .accessibilityHidden(true)
+          }
+        }
+        .padding(10).frame(height: 180)
+        .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
+        .accessibilityLabel(label)
+    }
+  }
+}
+
 struct FormField: View {
   var label: String?
   var placeholder: String
