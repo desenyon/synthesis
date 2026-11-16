@@ -308,7 +308,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT D1. In `Sources/SynthesisUI/CaptureFixtures.swift` rename the `empty-sections` state to `sections-empty`, keep the sample world, select "Oren Ashe" and open the Sections tab. Update the state list in `Studio.captureStates`. Capture it and confirm the "Make room for the details" empty card is shown.
 
-- [ ] done
+- [x] done — see verification/audit-D1.
 
 ### D2. Sheets are not verified as real sheets — Medium
 

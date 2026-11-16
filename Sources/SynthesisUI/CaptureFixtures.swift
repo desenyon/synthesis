@@ -14,7 +14,7 @@ extension Studio {
     "empty-graph", "empty-timeline", "empty-atlas", "sheet-settings", "sheet-record",
     "worlds", "settings", "onboarding", "library-companion",
     "sheet-canon", "sheet-history", "sheet-relation", "sheet-rule",
-    "sections", "light-sections", "manual-sections", "sections-companion", "empty-sections",
+    "sections", "light-sections", "manual-sections", "sections-companion", "sections-empty",
     "sheet-section", "section-editor",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
@@ -207,10 +207,11 @@ extension Studio {
         selectedRecord = try? store.recordSections(worldID: worldID, parentID: parent.id).first?
           .record
       }
-    case "empty-sections":
+    case "sections-empty":
       destination = .library
       inspector = false
-      selectedRecord = records.first { $0.title == "The art of remembrance" }
+      selectedRecord = records.first { $0.title == "Oren Ashe" }
+      if let id = selectedRecord?.id { recordSectionTabs[id] = true }
     case "editor", "light-editor", "sheet-rule":
       destination = .library
       selectedRecord = records.first {
