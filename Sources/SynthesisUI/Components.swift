@@ -2,6 +2,26 @@ import AppKit
 import SwiftUI
 import SynthesisCore
 
+/// One shared reading edge for content browsers, their filters and section headings.
+struct ContentColumn<Content: View>: View {
+  @ViewBuilder var content: () -> Content
+  var body: some View {
+    VStack(alignment: .leading, spacing: 0, content: content)
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .padding(.horizontal, 28)
+      .frame(maxWidth: 880)
+      .frame(maxWidth: .infinity)
+  }
+}
+
+struct ContentHeader<Content: View>: View {
+  @ViewBuilder var content: () -> Content
+  var body: some View {
+    ContentColumn { HStack(spacing: 8, content: content) }
+      .padding(.vertical, 10)
+  }
+}
+
 // MARK: Buttons
 
 /// Text button used across bars, sheets and empty states.

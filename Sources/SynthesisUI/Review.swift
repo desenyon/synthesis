@@ -41,7 +41,7 @@ struct ReviewScreen: View {
           t: studio.t
         ) { oldestFirst.toggle() }
       }
-      HStack(spacing: 6) {
+      ContentHeader {
         FilterChip(
           title: "Proposals", count: studio.pendingProposals.count, selected: tab == .proposals,
           t: studio.t
@@ -53,17 +53,18 @@ struct ReviewScreen: View {
           tab = .checks
         }
         Spacer()
-      }.padding(.horizontal, 20).padding(.bottom, 10)
+      }
       Rectangle().fill(studio.t.hairline).frame(height: 1)
       ScrollView {
-        VStack(alignment: .leading, spacing: 14) {
-          switch tab {
-          case .proposals: proposals
-          case .canon: canon(queue)
-          case .checks: checks
-          }
-        }.padding(.horizontal, 24).padding(.vertical, 18).frame(maxWidth: 820, alignment: .leading)
-          .frame(maxWidth: .infinity)
+        ContentColumn {
+          VStack(alignment: .leading, spacing: 14) {
+            switch tab {
+            case .proposals: proposals
+            case .canon: canon(queue)
+            case .checks: checks
+            }
+          }.padding(.vertical, 18)
+        }
       }
     }
     .onAppear {

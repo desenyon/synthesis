@@ -208,7 +208,7 @@ struct EditorScreen: View {
   }
 
   private var entityTabs: some View {
-    HStack(spacing: 6) {
+    ContentHeader {
       FilterChip(title: "Overview", selected: !sectionsVisible, t: studio.t) {
         if save() { sectionsVisible = false }
       }
@@ -216,8 +216,8 @@ struct EditorScreen: View {
         if save() { sectionsVisible = true }
       }
       Spacer()
-    }.padding(.horizontal, 28).padding(.vertical, 10)
-      .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
+    }
+    .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
   }
 
   // MARK: Writing

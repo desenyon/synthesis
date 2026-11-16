@@ -57,7 +57,7 @@ struct TimelineScreen: View {
             ? "Create a record first; every event cites its source" : "Add an event"
         ) { begin(nil) }.disabled(studio.records.isEmpty)
       }
-      HStack(spacing: 10) {
+      ContentHeader {
         Menu {
           Button("All history") { selectedLane = "" }
           ForEach(lanes) { lane in
@@ -68,7 +68,7 @@ struct TimelineScreen: View {
         } label: {
           Text(lanes.first { $0.id == selectedLane }?.name ?? "All history").font(
             .studio(size: 13, weight: .medium))
-        }.frame(maxWidth: 260)
+        }.frame(maxWidth: 260, alignment: .leading)
         if let lane = lanes.first(where: { $0.id == selectedLane }) {
           Text([lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — ")).font(
             .studio(size: 12)
@@ -104,17 +104,18 @@ struct TimelineScreen: View {
           laneEnd = ""
           creatingLane = true
         }.buttonStyle(QuietButton(t: studio.t))
-      }.padding(.horizontal, 20).padding(.vertical, 10)
+      }
       if rows.isEmpty {
         empty.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
         ScrollView {
-          VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(rows.enumerated()), id: \.element.id) { index, event in
-              row(event, first: index == 0, last: index == rows.count - 1)
-            }
-          }.padding(.vertical, 20).padding(.horizontal, 28).frame(maxWidth: 760)
-            .frame(maxWidth: .infinity)
+          ContentColumn {
+            VStack(alignment: .leading, spacing: 0) {
+              ForEach(Array(rows.enumerated()), id: \.element.id) { index, event in
+                row(event, first: index == 0, last: index == rows.count - 1)
+              }
+            }.padding(.vertical, 20)
+          }
         }
       }
     }

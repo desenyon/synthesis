@@ -62,67 +62,70 @@ struct WorldsScreen: View {
           QuietButton(t: studio.t, primary: true))
       }
       ScrollView {
-        VStack(alignment: .leading, spacing: 26) {
-          VStack(alignment: .leading, spacing: 8) {
-            Text("A place for every universe.").font(.studio(size: 30, weight: .semibold)).tracking(
-              -0.8)
-            Text("Open a world, pick up a thought, or take your work with you.")
-              .font(.studio(size: 15)).foregroundStyle(studio.t.secondary)
-          }
-          FormField(placeholder: "Find a world…", text: $query, t: studio.t)
-          LazyVGrid(columns: [GridItem(.adaptive(minimum: 260), spacing: 16)], spacing: 16) {
-            ForEach(worlds) { world in
-              VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                  StudioIcon("globe", size: 26).foregroundStyle(studio.t.accent)
-                  Spacer()
-                  if world.demo {
-                    Text("Sample").font(.studio(size: 12)).foregroundStyle(studio.t.muted)
-                  }
-                  PlainMenu {
-                    Button("Save world file…") {
-                      studio.switchWorld(world.id)
-                      studio.savePortableWorld()
-                    }
-                    Button("Export Markdown…") {
-                      studio.switchWorld(world.id)
-                      studio.exportMarkdown()
-                    }
-                    Button("Export JSON…") {
-                      studio.switchWorld(world.id)
-                      studio.exportWorld()
-                    }
-                  } label: {
-                    StudioIcon("ellipsis").frame(width: 28, height: 28)
-                  }
-                }
-                Button {
-                  studio.switchWorld(world.id)
-                  studio.navigate(studio.mode == .manual ? .library : .chat)
-                } label: {
-                  VStack(alignment: .leading, spacing: 8) {
-                    Text(world.name).font(.studio(size: 20, weight: .semibold)).lineLimit(2)
-                    Text(
-                      world.description.isEmpty
-                        ? "An open world of possibilities." : world.description
-                    )
-                    .font(.studio(size: 14)).foregroundStyle(studio.t.secondary).lineLimit(3)
-                    HStack {
-                      Text(world.id == studio.worldID ? "Continue creating" : "Open world")
-                      Spacer()
-                      StudioIcon("arrow.up.forward")
-                    }.font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
-                      .padding(.top, 12)
-                  }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
-                }.buttonStyle(.plain)
-              }.padding(22).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(studio.t.hairline))
+        ContentColumn {
+          VStack(alignment: .leading, spacing: 26) {
+            VStack(alignment: .leading, spacing: 8) {
+              Text("A place for every universe.").font(.studio(size: 30, weight: .semibold))
+                .tracking(
+                  -0.8)
+              Text("Open a world, pick up a thought, or take your work with you.")
+                .font(.studio(size: 15)).foregroundStyle(studio.t.secondary)
             }
-          }
-          if worlds.isEmpty {
-            Text("No worlds match your search.").foregroundStyle(studio.t.secondary)
-          }
-        }.padding(32).frame(maxWidth: 1100).frame(maxWidth: .infinity)
+            FormField(placeholder: "Find a world…", text: $query, t: studio.t)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 260), spacing: 16)], spacing: 16) {
+              ForEach(worlds) { world in
+                VStack(alignment: .leading, spacing: 16) {
+                  HStack {
+                    StudioIcon("globe", size: 26).foregroundStyle(studio.t.accent)
+                    Spacer()
+                    if world.demo {
+                      Text("Sample").font(.studio(size: 12)).foregroundStyle(studio.t.muted)
+                    }
+                    PlainMenu {
+                      Button("Save world file…") {
+                        studio.switchWorld(world.id)
+                        studio.savePortableWorld()
+                      }
+                      Button("Export Markdown…") {
+                        studio.switchWorld(world.id)
+                        studio.exportMarkdown()
+                      }
+                      Button("Export JSON…") {
+                        studio.switchWorld(world.id)
+                        studio.exportWorld()
+                      }
+                    } label: {
+                      StudioIcon("ellipsis").frame(width: 28, height: 28)
+                    }
+                  }
+                  Button {
+                    studio.switchWorld(world.id)
+                    studio.navigate(studio.mode == .manual ? .library : .chat)
+                  } label: {
+                    VStack(alignment: .leading, spacing: 8) {
+                      Text(world.name).font(.studio(size: 20, weight: .semibold)).lineLimit(2)
+                      Text(
+                        world.description.isEmpty
+                          ? "An open world of possibilities." : world.description
+                      )
+                      .font(.studio(size: 14)).foregroundStyle(studio.t.secondary).lineLimit(3)
+                      HStack {
+                        Text(world.id == studio.worldID ? "Continue creating" : "Open world")
+                        Spacer()
+                        StudioIcon("arrow.up.forward")
+                      }.font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
+                        .padding(.top, 12)
+                    }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
+                  }.buttonStyle(.plain)
+                }.padding(22).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
+                  .overlay(RoundedRectangle(cornerRadius: 16).stroke(studio.t.hairline))
+              }
+            }
+            if worlds.isEmpty {
+              Text("No worlds match your search.").foregroundStyle(studio.t.secondary)
+            }
+          }.padding(.vertical, 28)
+        }
       }
     }
   }

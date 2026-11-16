@@ -13,52 +13,54 @@ struct RecordSectionsPage: View {
 
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 24) {
-        HStack {
-          Text("Sections").font(.studio(size: 16, weight: .semibold))
-          Text("\(sections.count)").font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
-          Spacer()
-          Button {
-            creating = true
-          } label: {
-            StudioLabel("Add section", icon: "plus")
+      ContentColumn {
+        VStack(alignment: .leading, spacing: 24) {
+          HStack {
+            Text("Sections").font(.studio(size: 16, weight: .semibold))
+            Text("\(sections.count)").font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+            Spacer()
+            Button {
+              creating = true
+            } label: {
+              StudioLabel("Add section", icon: "plus")
+            }
+            .buttonStyle(QuietButton(t: studio.t))
           }
-          .buttonStyle(QuietButton(t: studio.t))
-        }
-        if sections.isEmpty {
-          VStack(alignment: .leading, spacing: 8) {
-            Text("Make room for the details").font(.studio(size: 18, weight: .medium))
-            Text(
-              "Add a history, a motive, a tradition — or a section entirely your own. Your writing stays in Overview."
-            )
-            .font(.studio(size: 14)).foregroundStyle(studio.t.secondary).lineSpacing(4)
-          }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
-            .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
-        } else {
-          LazyVStack(spacing: 12) {
-            ForEach(Array(sections.enumerated()), id: \.element.id) { index, section in
-              card(section, index: index)
+          if sections.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+              Text("Make room for the details").font(.studio(size: 18, weight: .medium))
+              Text(
+                "Add a history, a motive, a tradition — or a section entirely your own. Your writing stays in Overview."
+              )
+              .font(.studio(size: 14)).foregroundStyle(studio.t.secondary).lineSpacing(4)
+            }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
+              .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
+          } else {
+            LazyVStack(spacing: 12) {
+              ForEach(Array(sections.enumerated()), id: \.element.id) { index, section in
+                card(section, index: index)
+              }
             }
           }
-        }
-        if !removed.isEmpty {
-          DisclosureGroup(isExpanded: $showRemoved) {
-            VStack(spacing: 6) {
-              ForEach(removed) { section in
-                HStack {
-                  Text(section.record.title).lineLimit(1)
-                  Spacer()
-                  Button("Restore") { archive(section, value: false) }
-                    .buttonStyle(QuietButton(t: studio.t, role: .ghost))
-                }.font(.studio(size: 13)).padding(.vertical, 3)
-              }
-            }.padding(.top, 8)
-          } label: {
-            Text("Removed sections · \(removed.count)").font(.studio(size: 13))
-              .foregroundStyle(studio.t.secondary)
-          }.tint(studio.t.secondary)
-        }
-      }.padding(28).frame(maxWidth: 840).frame(maxWidth: .infinity)
+          if !removed.isEmpty {
+            DisclosureGroup(isExpanded: $showRemoved) {
+              VStack(spacing: 6) {
+                ForEach(removed) { section in
+                  HStack {
+                    Text(section.record.title).lineLimit(1)
+                    Spacer()
+                    Button("Restore") { archive(section, value: false) }
+                      .buttonStyle(QuietButton(t: studio.t, role: .ghost))
+                  }.font(.studio(size: 13)).padding(.vertical, 3)
+                }
+              }.padding(.top, 8)
+            } label: {
+              Text("Removed sections · \(removed.count)").font(.studio(size: 13))
+                .foregroundStyle(studio.t.secondary)
+            }.tint(studio.t.secondary)
+          }
+        }.padding(.vertical, 28)
+      }
     }
     .onAppear {
       load()

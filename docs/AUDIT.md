@@ -227,7 +227,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT C1. Add `ContentColumn` (max width 880, horizontal padding 28, centred) to `Sources/SynthesisUI/Components.swift`. Put the filter-chip row and the list of `LibraryScreen` inside it; do the same for `ReviewScreen`, `TimelineScreen` (the "All history" menu, New branch/New period and the event list on one edge), `RecordSectionsPage`, Settings and `WorldsScreen`. Remove the per-screen `frame(maxWidth: 1040/840/780)` values. Capture `library,review,review-checks,timeline,sections,settings,worlds` at both sizes and check one shared left edge per screen.
 
-- [ ] done
+- [x] done — see verification/audit-C1.
 
 ### C2. Dark theme has no depth — High, needs your call
 

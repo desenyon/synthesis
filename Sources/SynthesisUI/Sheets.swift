@@ -208,8 +208,7 @@ struct StudioSheet: View {
           Text("Settings").font(.studio(size: 15, weight: .semibold))
         } trailing: {
         }
-        settingsContents.padding(.horizontal, 32).padding(.vertical, 20)
-          .frame(maxWidth: 900).frame(maxWidth: .infinity)
+        ContentColumn { settingsContents }.padding(.vertical, 20)
       }
     } else {
       SheetScaffold(title: "Settings", t: studio.t, width: 600, close: close) {

@@ -81,7 +81,7 @@ struct LibraryScreen: View {
           studio.sheet = .document
         }
       }
-      HStack(spacing: 6) {
+      ContentHeader {
         ForEach(Filter.allCases, id: \.self) { item in
           if item != .archived || !archived.isEmpty || filter == .archived {
             FilterChip(
@@ -117,20 +117,21 @@ struct LibraryScreen: View {
           }.foregroundStyle(studio.t.secondary).padding(.horizontal, 8).frame(height: 26)
             .hoverFill(studio.t)
         }.help("Sort order")
-      }.padding(.horizontal, 20).padding(.bottom, 10)
+      }
       Rectangle().fill(studio.t.hairline).frame(height: 1)
       if rows.isEmpty {
         emptyState.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
         ScrollView {
-          LazyVStack(spacing: 1) {
-            ForEach(rows) { record in
-              RecordRow(studio: studio, record: record, archived: filter == .archived) {
-                refreshArchive()
+          ContentColumn {
+            LazyVStack(spacing: 1) {
+              ForEach(rows) { record in
+                RecordRow(studio: studio, record: record, archived: filter == .archived) {
+                  refreshArchive()
+                }.padding(.horizontal, -10)
               }
-            }
-          }.padding(.horizontal, 12).padding(.vertical, 8)
-            .frame(maxWidth: 1040).frame(maxWidth: .infinity)
+            }.padding(.vertical, 8)
+          }
         }
       }
     }

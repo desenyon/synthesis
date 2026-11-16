@@ -1,0 +1,15 @@
+CAPTURE library 1440x900, bitmap 2880x1800, 590ms
+CAPTURE timeline 1440x900, bitmap 2880x1800, 514ms
+CAPTURE review 1440x900, bitmap 2880x1800, 625ms
+CAPTURE review-checks 1440x900, bitmap 2880x1800, 540ms
+CAPTURE worlds 1440x900, bitmap 2880x1800, 71ms
+CAPTURE settings 1440x900, bitmap 2880x1800, 112ms
+CAPTURE sections 1440x900, bitmap 2880x1800, 519ms
+CAPTURE library 1024x768, bitmap 2048x1536, 373ms
+CAPTURE timeline 1024x768, bitmap 2048x1536, 372ms
+CAPTURE review 1024x768, bitmap 2048x1536, 487ms
+CAPTURE review-checks 1024x768, bitmap 2048x1536, 343ms
+CAPTURE worlds 1024x768, bitmap 2048x1536, 47ms
+CAPTURE settings 1024x768, bitmap 2048x1536, 102ms
+CAPTURE sections 1024x768, bitmap 2048x1536, 397ms
+Native captures complete: /private/tmp/synthesis-c1
