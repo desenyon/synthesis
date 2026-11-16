@@ -41,7 +41,9 @@ function post(message: Record<string, unknown>) {
 
 type LegacyCard = { id: string; text: string; recordID?: string; image?: string; x: number; y: number; group?: string };
 type LegacyEdge = { label?: string; source: string; target: string };
+type FitInsets = { top: number; right: number; bottom: number; left: number };
 type LoadPayload = {
+  fitInsets?: FitInsets;
   sessionID: string;
   assisted: boolean;
   name: string;
@@ -81,6 +83,7 @@ export function App() {
   const live = useRef({
     api: null as Api,
     theme: initialTheme,
+    fitInsets: { top: 76, right: 80, bottom: 176, left: 32 } as FitInsets,
     records: new Map<string, RecordInfo>(),
     relations: [] as RelationInfo[],
     hidden: new Set<string>(),
@@ -271,6 +274,7 @@ export function App() {
         s.selectionKey = "";
         s.loaded = false;
         s.theme = payload.theme;
+        if (payload.fitInsets) s.fitInsets = payload.fitInsets;
         s.records = new Map(payload.records.map((r) => [r.id, r]));
         s.relations = payload.relations;
         s.hidden = new Set(payload.hiddenRelations);
@@ -325,7 +329,7 @@ export function App() {
         s.loaded = true;
         synchronise();
         if (fit && api.getSceneElements().length) {
-          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.82, animate: false });
+          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.94, canvasOffsets: s.fitInsets, animate: false });
         }
         post({ type: "loaded", migrated: Boolean(payload.legacy && !payload.scene), ...serialise(true) });
       },
@@ -489,7 +493,9 @@ export function App() {
         synchronise();
         onChange();
       },
-      command(name: string) {
+      setFitInsets(insets: FitInsets) { s.fitInsets = insets; },
+      command(name: string, insets?: FitInsets) {
+        if (insets) s.fitInsets = insets;
         const key = (k: string, extra: Record<string, unknown> = {}) =>
           document.querySelector(".excalidraw")?.dispatchEvent(new KeyboardEvent("keydown", { key: k, code: `Key${k.toUpperCase()}`, metaKey: true, bubbles: true, ...extra }));
         if (name === "undo") key("z");
@@ -502,7 +508,7 @@ export function App() {
           api.updateScene({appState: {zoom: {value: zoom}, scrollX: state.scrollX + state.width / 2 * (1/zoom - 1/old), scrollY: state.scrollY + state.height / 2 * (1/zoom - 1/old)}, captureUpdate: CaptureUpdateAction.NEVER});
         }
         else if (name === "fit" && api.getSceneElements().length) {
-          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.82, animate: true });
+          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.94, canvasOffsets: s.fitInsets, animate: true, duration: 180 });
         } else if (name === "flush") {
           window.clearTimeout(s.saveTimer);
           window.clearTimeout(s.analyzeTimer);
@@ -537,11 +543,19 @@ export function App() {
         const results: string[] = [];
         const check = (name: string, ok: boolean) => results.push(`${ok ? "PASS" : "FAIL"} ${name}`);
         const wait = () => new Promise(resolve => setTimeout(resolve, 100));
-        const original: LoadPayload = structuredClone({sessionID:activeSession,assisted:true,name,theme:s.theme,
+        const original: LoadPayload = structuredClone({sessionID:activeSession,assisted:true,name,theme:s.theme,fitInsets:s.fitInsets,
           scene:serialise(true).scene as any,legacy:null,hiddenRelations:[...s.hidden],records:[...s.records.values()],relations:s.relations.map(r=>({...r}))});
         const card = api.getSceneElements().find(isCard);
         if (!card) return ["FAIL fixture has no card"];
         await wait();
+        bridge.command("fit");
+        await new Promise(resolve => setTimeout(resolve, 300));
+        const fitState = api.getAppState(), fitBounds = getCommonBounds(api.getSceneElements());
+        const screen = [ (fitBounds[0]+fitState.scrollX)*fitState.zoom.value,
+          (fitBounds[1]+fitState.scrollY)*fitState.zoom.value,
+          (fitBounds[2]+fitState.scrollX)*fitState.zoom.value,
+          (fitBounds[3]+fitState.scrollY)*fitState.zoom.value ];
+        check("fit clears native composer and toolbars", screen[0] >= s.fitInsets.left - 1 && screen[1] >= s.fitInsets.top - 1 && screen[2] <= fitState.width - s.fitInsets.right + 1 && screen[3] <= fitState.height - s.fitInsets.bottom + 1);
         const stockToolbar = document.querySelector(".App-menu_top");
         check("custom toolbar replaces stock controls", !stockToolbar || getComputedStyle(stockToolbar).display === "none");
         check("custom cards paint above engine", Number(getComputedStyle(document.querySelector(".studio-overlay")!).zIndex) > 2 && document.querySelectorAll(".studio-record").length > 0);

@@ -133,7 +133,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B4. Find the fit call in `Sources/SynthesisUI/CanvasHost.swift` and its handler in `CanvasWeb/src/App.tsx`. Add padding parameters (top, right, bottom, left) and have native pass the collapsed composer's height plus 24pt at the bottom, 76pt top and 80pt right. Rebuild the bundle with `cd CanvasWeb && npm run typecheck && npm test && npm run build`. Capture `canvas,collapsed,manual` and confirm no card sits under the composer or toolbars.
 
-- [ ] done
+- [x] done — see verification/audit-B4.
 
 ### B5. Canvas cards repeat the category — Medium, confirmed in code
 

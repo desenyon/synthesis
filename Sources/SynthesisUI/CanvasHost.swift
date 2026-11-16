@@ -96,6 +96,18 @@ struct CanvasBoardContent {
   private var pendingReveal: [String] = []
   private var worldID = ""
   private var content = CanvasBoardContent()
+  private var composerHeight: CGFloat = 76
+  private var fitInsets: [String: Double] {
+    [
+      "top": 76, "right": 80, "left": 32,
+      "bottom": studio.mode == .assisted && !studio.companionExpanded
+        ? Double(composerHeight) + 24 + 76 : 76,
+    ]
+  }
+  func updateFitInsets(composerHeight: CGFloat? = nil) {
+    if let composerHeight { self.composerHeight = composerHeight }
+    call("setFitInsets", [fitInsets])
+  }
   private var ready = false
   private var openRequestID = UUID()
   private var loadID = UUID().uuidString
@@ -218,7 +230,7 @@ struct CanvasBoardContent {
     pendingLoad = false
     var payload: [String: Any] = [
       "sessionID": loadID, "assisted": studio.mode == .assisted, "name": name,
-      "theme": studio.dark ? "dark" : "light",
+      "theme": studio.dark ? "dark" : "light", "fitInsets": fitInsets,
       "hiddenRelations": content.hiddenRelations, "records": recordPayload(),
       "relations": relationPayload(),
     ]
@@ -297,7 +309,9 @@ struct CanvasBoardContent {
     }
   }
   func addImage(_ base64: String) { call("addImage", [base64]) }
-  func command(_ name: String) { call("command", [name]) }
+  func command(_ name: String) {
+    call("command", name == "fit" ? [name, fitInsets] : [name])
+  }
   func showHiddenRelations() {
     content.hiddenRelations = []
     hiddenCount = 0

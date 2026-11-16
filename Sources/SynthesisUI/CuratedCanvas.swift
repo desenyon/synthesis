@@ -62,6 +62,11 @@ struct CuratedCanvas: View {
     .onChange(of: studio.captureNonce) { _, _ in
       if studio.captureHint == "sheet-artwork" { panel = .artwork }
     }
+    .onChange(of: studio.mode) { _, _ in session.updateFitInsets() }
+    .onChange(of: studio.companionExpanded) { _, _ in session.updateFitInsets() }
+    .onPreferenceChange(CanvasComposerHeightKey.self) {
+      session.updateFitInsets(composerHeight: $0)
+    }
     .onChange(of: studio.canvasBoardID) { _, id in if id != nil { session.switchBoard(id) } }
     .onChange(of: session.request) { _, request in
       guard let request else { return }
@@ -336,6 +341,11 @@ struct CuratedCanvas: View {
         if composerVisible {
           UnifiedComposer(studio: studio, collapsed: true)
             .frame(width: min(440, geo.size.width - 40))
+            .background(
+              GeometryReader { area in
+                Color.clear.preference(key: CanvasComposerHeightKey.self, value: area.size.height)
+              }
+            )
             // Clear of the engine's zoom and undo controls on narrower canvases.
             .padding(.bottom, 76)
         }
@@ -531,4 +541,9 @@ struct RelationEditor: View {
       .background(t.surface, in: RoundedRectangle(cornerRadius: 7))
       .overlay(RoundedRectangle(cornerRadius: 7).stroke(t.hairline, lineWidth: 1))
   }
+}
+
+private struct CanvasComposerHeightKey: PreferenceKey {
+  static let defaultValue: CGFloat = 76
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
