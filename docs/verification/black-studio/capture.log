@@ -1,0 +1,13 @@
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 606ms
+CAPTURE canvas 1440x900, bitmap 2880x1800, 637ms
+CAPTURE worlds 1440x900, bitmap 2880x1800, 74ms
+CAPTURE settings 1440x900, bitmap 2880x1800, 130ms
+CAPTURE onboarding 1440x900, bitmap 2880x1800, 754ms
+CAPTURE library-companion 1440x900, bitmap 2880x1800, 311ms
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, 371ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 412ms
+CAPTURE worlds 1024x768, bitmap 2048x1536, 54ms
+CAPTURE settings 1024x768, bitmap 2048x1536, 99ms
+CAPTURE onboarding 1024x768, bitmap 2048x1536, 478ms
+CAPTURE library-companion 1024x768, bitmap 2048x1536, 248ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/black-studio

@@ -1,0 +1,43 @@
+[0/1] Planning build
+Building for production...
+[0/3] Copying CanvasBundle
+[1/3] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.13s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.PABuES/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.PABuES/Synthesis-Verification.app (development, ad-hoc signed; not a release).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.PABuES/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 619ms
+CAPTURE canvas 1440x900, bitmap 2880x1800, 695ms
+CAPTURE companion 1440x900, bitmap 2880x1800, 421ms
+CAPTURE manual 1440x900, bitmap 2880x1800, 261ms
+CAPTURE collapsed 1440x900, bitmap 2880x1800, 643ms
+CAPTURE light 1440x900, bitmap 2880x1800, 591ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 1060ms
+CAPTURE library 1440x900, bitmap 2880x1800, 529ms
+CAPTURE editor 1440x900, bitmap 2880x1800, 508ms
+CAPTURE timeline 1440x900, bitmap 2880x1800, 526ms
+CAPTURE review 1440x900, bitmap 2880x1800, 522ms
+CAPTURE worlds 1440x900, bitmap 2880x1800, 69ms
+CAPTURE settings 1440x900, bitmap 2880x1800, 143ms
+CAPTURE onboarding 1440x900, bitmap 2880x1800, 771ms
+CAPTURE library-companion 1440x900, bitmap 2880x1800, 307ms
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, 390ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 418ms
+CAPTURE companion 1024x768, bitmap 2048x1536, 299ms
+CAPTURE manual 1024x768, bitmap 2048x1536, 155ms
+CAPTURE collapsed 1024x768, bitmap 2048x1536, 432ms
+CAPTURE light 1024x768, bitmap 2048x1536, 396ms
+CAPTURE graph 1024x768, bitmap 2048x1536, 639ms
+CAPTURE library 1024x768, bitmap 2048x1536, 352ms
+CAPTURE editor 1024x768, bitmap 2048x1536, 347ms
+CAPTURE timeline 1024x768, bitmap 2048x1536, 339ms
+CAPTURE review 1024x768, bitmap 2048x1536, 348ms
+CAPTURE worlds 1024x768, bitmap 2048x1536, 74ms
+CAPTURE settings 1024x768, bitmap 2048x1536, 114ms
+CAPTURE onboarding 1024x768, bitmap 2048x1536, 493ms
+CAPTURE library-companion 1024x768, bitmap 2048x1536, 226ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/black-studio
+Native captures: docs/verification/black-studio
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py 'docs/verification/black-studio' [--prune]
