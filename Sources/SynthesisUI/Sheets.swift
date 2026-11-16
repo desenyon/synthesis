@@ -10,6 +10,7 @@ struct StudioSheet: View {
   @State private var category = ""
   @State private var model = ""
   @State private var worldName = ""
+  @State private var worldDescription = ""
   @State private var saved = false
   init(studio: Studio, sheet: Studio.Sheet, embedded: Bool = false) {
     self.embedded = embedded
@@ -20,6 +21,7 @@ struct StudioSheet: View {
     _model = State(
       initialValue: studio.harnessModels[studio.provider] ?? "")
     _worldName = State(initialValue: studio.world?.name ?? "")
+    _worldDescription = State(initialValue: studio.world?.description ?? "")
     let target = studio.renameTarget ?? studio.conversationID
     _name = State(
       initialValue: sheet == .rename
@@ -242,6 +244,20 @@ struct StudioSheet: View {
               .disabled(
                 worldName.trimmingCharacters(in: .whitespaces).isEmpty
                   || worldName == studio.world?.name)
+          }
+          HStack(alignment: .bottom, spacing: 8) {
+            FormField(
+              label: "Description", placeholder: "What makes this world yours",
+              text: $worldDescription, t: studio.t)
+            Button("Save") {
+              studio.perform {
+                try studio.store.setWorldDescription(
+                  worldID: studio.worldID, description: worldDescription)
+                try studio.reload()
+                worldDescription = studio.world?.description ?? ""
+              }
+            }.buttonStyle(QuietButton(t: studio.t)).padding(.bottom, 2)
+              .disabled(worldDescription == studio.world?.description)
           }
           settingRow("Cover image", "Optional. Stored on this device only.") {
             WorldBadge(studio: studio, radius: 6).frame(width: 30, height: 30)

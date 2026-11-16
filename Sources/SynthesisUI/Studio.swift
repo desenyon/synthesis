@@ -657,7 +657,7 @@ public struct Toast: Identifiable {
 
   // MARK: World
 
-  private static func cover(store: WorkspaceStore, worldID: String) -> NSImage? {
+  static func cover(store: WorkspaceStore, worldID: String) -> NSImage? {
     guard let value = try? store.preference("world-cover:\(worldID)"),
       let data = Data(base64Encoded: value)
     else { return nil }

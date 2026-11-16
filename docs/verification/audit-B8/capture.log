@@ -1,0 +1,5 @@
+CAPTURE worlds 1440x900, bitmap 2880x1800, 74ms
+CAPTURE settings 1440x900, bitmap 2880x1800, 153ms
+CAPTURE worlds 1024x768, bitmap 2048x1536, 74ms
+CAPTURE settings 1024x768, bitmap 2048x1536, 106ms
+Native captures complete: /private/tmp/synthesis-b8

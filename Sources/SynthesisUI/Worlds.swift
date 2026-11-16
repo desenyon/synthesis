@@ -46,11 +46,13 @@ extension Studio {
 struct WorldsScreen: View {
   @ObservedObject var studio: Studio
   @State private var query = ""
+  @State private var summaries: [String: WorldSummary] = [:]
+  @State private var covers: [String: NSImage] = [:]
   private var worlds: [World] {
     studio.worlds.filter {
       query.isEmpty || $0.name.localizedCaseInsensitiveContains(query)
         || $0.description.localizedCaseInsensitiveContains(query)
-    }
+    }.sorted { $0.id == studio.worldID && $1.id != studio.worldID }
   }
   var body: some View {
     VStack(spacing: 0) {
@@ -72,12 +74,25 @@ struct WorldsScreen: View {
                 .font(.studio(size: 15)).foregroundStyle(studio.t.secondary)
             }
             FormField(placeholder: "Find a world…", text: $query, t: studio.t)
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 260), spacing: 16)], spacing: 16) {
+            LazyVGrid(
+              columns: [GridItem(.adaptive(minimum: 260), spacing: 16, alignment: .top)],
+              spacing: 16
+            ) {
               ForEach(worlds) { world in
                 VStack(alignment: .leading, spacing: 16) {
+                  if let cover = covers[world.id] {
+                    Color.clear.aspectRatio(16.0 / 9, contentMode: .fit)
+                      .overlay { Image(nsImage: cover).resizable().scaledToFill() }
+                      .clipShape(RoundedRectangle(cornerRadius: 10))
+                      .accessibilityLabel("Cover of \(world.name)")
+                  }
                   HStack {
                     StudioIcon("globe", size: 26).foregroundStyle(studio.t.accent)
                     Spacer()
+                    if world.id == studio.worldID {
+                      Text("Current").font(.studio(size: 12, weight: .medium)).foregroundStyle(
+                        studio.t.accent)
+                    }
                     if world.demo {
                       Text("Sample").font(.studio(size: 12)).foregroundStyle(studio.t.muted)
                     }
@@ -104,11 +119,17 @@ struct WorldsScreen: View {
                   } label: {
                     VStack(alignment: .leading, spacing: 8) {
                       Text(world.name).font(.studio(size: 20, weight: .semibold)).lineLimit(2)
-                      Text(
-                        world.description.isEmpty
-                          ? "An open world of possibilities." : world.description
-                      )
-                      .font(.studio(size: 14)).foregroundStyle(studio.t.secondary).lineLimit(3)
+                      if !world.description.isEmpty {
+                        Text(world.description).font(.studio(size: 14)).foregroundStyle(
+                          studio.t.secondary
+                        ).lineLimit(3)
+                      }
+                      if let summary = summaries[world.id] {
+                        Text("\(summary.records) records · \(summary.conversations) conversations")
+                          .font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
+                        Text("Updated \(relativeDate(summary.updatedAt).lowercased())")
+                          .font(.studio(size: 12)).foregroundStyle(studio.t.muted)
+                      }
                       HStack {
                         Text(world.id == studio.worldID ? "Continue creating" : "Open world")
                         Spacer()
@@ -127,6 +148,17 @@ struct WorldsScreen: View {
           }.padding(.vertical, 28)
         }
       }
+    }
+    .onAppear { refresh() }
+    .onChange(of: studio.worldRevision) { _, _ in refresh() }
+  }
+  private func refresh() {
+    studio.perform {
+      summaries = try studio.store.worldSummaries()
+      covers = Dictionary(
+        uniqueKeysWithValues: studio.worlds.compactMap { world in
+          Studio.cover(store: studio.store, worldID: world.id).map { (world.id, $0) }
+        })
     }
   }
 }

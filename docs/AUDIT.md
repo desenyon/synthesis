@@ -179,7 +179,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT B8. In `Sources/SynthesisUI/Worlds.swift` render each world's cover image as a 16:9 card header when it has one, show "N records · updated <relative>" instead of the canned description, show the real description when set, and mark the open world. Add a store query for per-world counts. Add an editable description to the "This world" group in `Sheets.swift` settings. Capture `worlds,settings` at both sizes.
 
-- [ ] done
+- [x] done — see verification/audit-B8.
 
 ### B9. Rules on every entity — Medium, seen in `sheet-rule`
 
