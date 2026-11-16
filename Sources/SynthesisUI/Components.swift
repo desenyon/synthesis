@@ -453,47 +453,77 @@ struct BarAction: View {
   }
 }
 
+/// Shared segmented control for assistance and appearance; changes use the owner's action.
+struct SegmentedSwitch<Value: Hashable>: View {
+  struct Choice {
+    let value: Value
+    let title: String
+    var help: String = ""
+    var indicator = false
+  }
+  let choices: [Choice]
+  let selected: Value
+  let label: String
+  let t: Theme
+  var select: (Value) -> Void
+  @Namespace private var space
+  var body: some View {
+    HStack(spacing: 2) {
+      ForEach(choices, id: \.value) { choice in
+        let active = selected == choice.value
+        Button {
+          withAnimation(.easeOut(duration: 0.16)) { select(choice.value) }
+        } label: {
+          HStack(spacing: 6) {
+            if choice.indicator {
+              Circle().fill(active ? t.accent : t.muted.opacity(0.6))
+                .frame(width: 6, height: 6)
+            }
+            Text(choice.title).font(.studio(size: 12.5, weight: .medium)).lineLimit(1).fixedSize()
+          }.padding(.horizontal, 10).frame(height: 24)
+            .foregroundStyle(active ? t.text : t.muted)
+            .background {
+              if active {
+                RoundedRectangle(cornerRadius: 7).fill(t.secondarySurface)
+                  .matchedGeometryEffect(id: "selection", in: space)
+              }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 7))
+        }.buttonStyle(.plain).help(choice.help.isEmpty ? choice.title : choice.help)
+          .accessibilityLabel(choice.title).accessibilityAddTraits(active ? .isSelected : [])
+      }
+    }.padding(2).background(t.surface, in: RoundedRectangle(cornerRadius: 9))
+      .overlay(RoundedRectangle(cornerRadius: 9).stroke(t.hairline, lineWidth: 1))
+      .accessibilityElement(children: .contain).accessibilityLabel(label)
+  }
+}
+
 /// Persistent AI Assisted / Manual control. Independent of navigation.
 struct ModeSwitch: View {
   @ObservedObject var studio: Studio
-  @Namespace private var space
   var compact = false
   var body: some View {
-    HStack(spacing: 2) {
-      segment(.assisted, compact ? "AI" : "AI Assisted")
-      segment(.manual, "Manual")
-    }.padding(2).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 9))
-      .overlay(RoundedRectangle(cornerRadius: 9).stroke(studio.t.hairline, lineWidth: 1))
-      .accessibilityElement(children: .contain).accessibilityLabel("Assistance mode")
+    SegmentedSwitch(
+      choices: [
+        .init(
+          value: WorkspaceMode.assisted, title: compact ? "AI" : "AI Assisted",
+          help: "AI Assisted: the assistant is available when you send a message", indicator: true),
+        .init(
+          value: .manual, title: "Manual",
+          help: "Manual: no model requests. Every creative tool keeps working."),
+      ], selected: studio.mode, label: "Assistance mode", t: studio.t, select: studio.setMode)
   }
-  private func segment(_ mode: WorkspaceMode, _ label: String) -> some View {
-    let selected = studio.mode == mode
-    return Button {
-      withAnimation(.easeOut(duration: 0.16)) { studio.setMode(mode) }
-    } label: {
-      HStack(spacing: 6) {
-        if mode == .assisted {
-          Circle().fill(selected ? studio.t.accent : studio.t.muted.opacity(0.6))
-            .frame(width: 6, height: 6)
-        }
-        Text(label).font(.studio(size: 12.5, weight: .medium)).lineLimit(1).fixedSize()
-      }.padding(.horizontal, 10).frame(height: 24)
-        .foregroundStyle(selected ? studio.t.text : studio.t.muted)
-        .background {
-          if selected {
-            RoundedRectangle(cornerRadius: 7).fill(studio.t.secondarySurface)
-              .matchedGeometryEffect(id: "mode", in: space)
-          }
-        }
-        .contentShape(RoundedRectangle(cornerRadius: 7))
-    }.buttonStyle(.plain)
-      .help(
-        mode == .assisted
-          ? "AI Assisted: the assistant is available when you send a message"
-          : "Manual: no model requests. Every creative tool keeps working."
-      )
-      .accessibilityLabel(mode == .assisted ? "AI Assisted" : "Manual — no model calls")
-      .accessibilityAddTraits(selected ? .isSelected : [])
+}
+
+struct AppearanceSwitch: View {
+  @ObservedObject var studio: Studio
+  var body: some View {
+    SegmentedSwitch(
+      choices: [.init(value: false, title: "Light"), .init(value: true, title: "Dark")],
+      selected: studio.dark, label: "Appearance", t: studio.t
+    ) { dark in
+      if studio.dark != dark { studio.toggleTheme() }
+    }
   }
 }
 

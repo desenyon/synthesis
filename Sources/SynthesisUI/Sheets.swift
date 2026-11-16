@@ -226,15 +226,11 @@ struct StudioSheet: View {
       VStack(alignment: .leading, spacing: 20) {
         group("Application · Assistant") { assistant }
         group("Application · Appearance") {
-          settingRow("Theme", studio.dark ? "Dark" : "Light") {
-            AppearanceButton(studio: studio)
+          settingRow("Theme") {
+            AppearanceSwitch(studio: studio)
           }
         }
         group("This world") {
-          settingRow("Images", "Export the saved artwork from this world's boards and cover.") {
-            Button("Export images…") { studio.exportWorldImages() }.buttonStyle(
-              QuietButton(t: studio.t))
-          }
           HStack(alignment: .bottom, spacing: 8) {
             FormField(label: "Name", placeholder: "World name", text: $worldName, t: studio.t) {
               studio.renameWorld(worldName)
@@ -268,21 +264,23 @@ struct StudioSheet: View {
             }
           }
           settingRow(
-            "Export",
-            "Markdown: one readable file per record. JSON: everything, including history, proposals and the archive."
-          ) {
-            Button("World file…") { studio.savePortableWorld() }.buttonStyle(
-              QuietButton(t: studio.t))
-            Button("Markdown…") { studio.exportMarkdown() }.buttonStyle(QuietButton(t: studio.t))
-            Button("JSON…") { studio.exportWorld() }.buttonStyle(QuietButton(t: studio.t))
-          }
-          settingRow(
             "Import", "Markdown or text files become draft documents marked as imported."
           ) {
             Button("Choose files…") {
               studio.sheet = nil
               studio.importDocuments()
             }.buttonStyle(QuietButton(t: studio.t))
+          }
+          settingRow("Export") {
+            Button("World file…") { studio.savePortableWorld() }.buttonStyle(
+              QuietButton(t: studio.t)
+            ).help("Save a portable world with its complete history")
+            Button("Markdown…") { studio.exportMarkdown() }.buttonStyle(QuietButton(t: studio.t))
+              .help("One readable file per record")
+            Button("JSON…") { studio.exportWorld() }.buttonStyle(QuietButton(t: studio.t))
+              .help("All world data, including history, proposals and the archive")
+            Button("Images…") { studio.exportWorldImages() }.buttonStyle(QuietButton(t: studio.t))
+              .help("Saved artwork from this world's boards and cover")
           }
         }
         if !studio.worlds.contains(where: { $0.demo }) {

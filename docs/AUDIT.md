@@ -271,7 +271,7 @@ Every prompt assumes this preamble (it is included in the master prompt; add it 
 **Prompt:**
 > Fix AUDIT C5. In the settings content in `Sources/SynthesisUI/Sheets.swift` reorder "This world" to Name, Description, Cover image, Import, Export, with all four export buttons on the Export row. Replace the theme icon with a Light/Dark segmented control extracted from `ModeSwitch` into a reusable `SegmentedSwitch` in `Components.swift`. Capture `settings,sheet-settings` at both sizes.
 
-- [ ] done
+- [x] done — see verification/audit-C5.
 
 ### C6. Onboarding noise — Low
 

@@ -1,0 +1,7 @@
+CAPTURE sheet-settings 1440x900, bitmap 2880x1800, 705ms
+CAPTURE sheet-settings content inline; native modal presentation not exercised
+CAPTURE settings 1440x900, bitmap 2880x1800, 131ms
+CAPTURE sheet-settings 1024x768, bitmap 2048x1536, 554ms
+CAPTURE sheet-settings content inline; native modal presentation not exercised
+CAPTURE settings 1024x768, bitmap 2048x1536, 105ms
+Native captures complete: /private/tmp/synthesis-c5
