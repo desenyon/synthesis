@@ -13,7 +13,7 @@ Write freely, connect everything, and let an assistant help without ever rewriti
 
 [Download](https://github.com/desenyon/synthesis/releases/latest) · [Features](#features) · [Build from source](#build-from-source) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-![Synthesis Canvas with linked character, system and place cards in the Aster sample world](docs/screenshots/canvas.png)
+![Synthesis World assistant composer with attached lore and history from the Aster sample world](docs/screenshots/composer.png)
 
 </div>
 
@@ -31,7 +31,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 | | |
 | --- | --- |
-| **Conversation**: think with an assistant grounded in your world. Reference lore with `@`; every answer shows what it read, and suggested changes arrive as a review card. | **Canvas**: an offline [Excalidraw](https://github.com/excalidraw/excalidraw) board where record cards stay linked to your library and relationships draw themselves. |
+| **Conversation**: attach lore, boards, maps and history; inspect context before sending. Explore ideas or propose reviewable changes, with `@` references and control over what the assistant reads. | **Canvas**: an offline [Excalidraw](https://github.com/excalidraw/excalidraw) board where record cards stay linked to your library and relationships draw themselves. |
 | ![Conversation with a proposal card](docs/screenshots/conversation.png) | ![Canvas in light mode](docs/screenshots/canvas-light.png) |
 | **Graph**: the relationship network, laid out automatically from stored data. Copy any neighbourhood onto a board. | **Library and editor**: rich text, tags, aliases, links, sections and a details inspector, with canon review as a line diff. |
 | ![Graph of entities and relationships](docs/screenshots/graph.png) | ![Record editor with inspector](docs/screenshots/editor.png) |
@@ -45,6 +45,14 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 <details>
 <summary>More screenshots</summary>
 
+**Inspect context before sending**
+
+![Local context inspector showing attached sources, scope and conversation-history controls](docs/screenshots/composer-context.png)
+
+**Canvas with real relationships**
+
+![Linked character, system and place cards in the Aster sample world](docs/screenshots/canvas.png)
+
 **What-if changes in Review**
 
 ![Changes from a what-if world awaiting review](docs/screenshots/what-if-review.png)
@@ -55,7 +63,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 </details>
 
-Screenshots are the real app with the bundled **Aster** sample world at 1440×900. [How they are captured](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. The composer and context controls show **unreleased main** work after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
 
 ## Install
 
@@ -81,6 +89,8 @@ Your data lives in `~/Library/Application Support/Synthesis/synthesis.sqlite`. S
 ## Assistant setup
 
 Synthesis talks to **Codex** (ChatGPT subscription) or **Claude Code** (Claude subscription) installed on your Mac. There are no API keys to enter: sign in to the CLI once (`codex login`, or run `claude`), then pick it in **Settings → Assistant**. Each request runs in an empty scratch folder with tools, file access and your CLI configuration disabled. Manual mode blocks every request in the core. Details: [AI setup](docs/AI_SETUP.md).
+
+In the composer, **+** attaches real world context and **World context** previews the excerpts and index locally. **Explore** cannot stage changes; **Propose** sends validated draft operations to Review. Restricted scopes omit earlier chat messages, and explicit canon approval remains separate. [Composer guide](docs/COMPOSER_CONTEXT.md).
 
 ## Keyboard shortcuts
 

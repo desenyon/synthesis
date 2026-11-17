@@ -17,6 +17,75 @@ actor RecordingResponse: ModelTransport {
 }
 
 @MainActor struct ConversationFlowTests {
+  @Test func disappearingComposerCannotOverwriteANewerSharedDraft() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store, transport: RecordingResponse())
+    let world = studio.worldID
+    studio.draft = "Original"
+    #expect(studio.commitComposer(text: "Typing", worldID: world, replacing: "Original"))
+    #expect(try store.preference("composer:\(world)") == "Typing")
+    studio.draft = "Newer draft from another action"
+    #expect(!studio.commitComposer(text: "Old component text", worldID: world, replacing: "Typing"))
+    #expect(studio.draft == "Newer draft from another action")
+    studio.pendingComposer = (world, "Stale debounce", "Typing")
+    studio.persistPendingComposer()
+    #expect(studio.draft == "Newer draft from another action")
+    #expect(try store.preference("composer:\(world)") == studio.draft)
+    #expect(studio.pendingComposer == nil)
+    #expect(
+      !studio.commitComposer(text: "Foreign draft", worldID: "elsewhere", replacing: studio.draft))
+  }
+  @Test func composerPermissionsAndAttachmentsFollowTheirUniverseWithoutRequests() async throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let transport = RecordingResponse()
+    let studio = try Studio(store: store, transport: transport)
+    let first = studio.worldID
+    let record = try store.createRecord(worldID: first, title: "Pinned lighthouse")
+    let other = try store.createWorld(name: "Elsewhere")
+    try studio.reload()
+    studio.updateContext {
+      $0.recordIDs = [record.id]
+      $0.scope = .attachments
+      $0.intent = .explore
+    }
+    studio.navigate(.timeline)
+    #expect(studio.composerAttachments.map(\.key) == [record.id])
+    studio.switchWorld(other.id)
+    #expect(studio.composerAttachments.isEmpty)
+    studio.switchWorld(first)
+    #expect(studio.contextOptions.scope == .attachments)
+    #expect(studio.contextOptions.intent == .explore)
+    #expect(studio.composerAttachments.map(\.key) == [record.id])
+    let restored = try Studio(store: store, transport: transport)
+    #expect(restored.contextOptions == studio.contextOptions)
+    #expect(await transport.requests.isEmpty)
+  }
+
+  @Test func restrictedComposerSendUsesPreviewAndPreservesOptionsAfterSending() async throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let transport = RecordingResponse()
+    let studio = try Studio(store: store, transport: transport)
+    let selected = try store.createRecord(
+      worldID: studio.worldID, title: "Chosen source", body: "Relevant words")
+    try store.createRecord(worldID: studio.worldID, title: "OMITTED_RECORD", body: "PRIVATE_BODY")
+    try studio.reload()
+    studio.updateContext {
+      $0.recordIDs = [selected.id]
+      $0.scope = .attachments
+      $0.intent = .explore
+    }
+    studio.draft = "Explore the harbor"
+    let preview = try studio.previewContext(prompt: studio.draft)
+    studio.send()
+    try await finish(studio)
+    let request = try #require(await transport.requests.last)
+    #expect(request.instructions.contains(preview.lore))
+    #expect(request.instructions.contains(preview.workspace))
+    #expect(!request.instructions.contains("OMITTED_RECORD"))
+    #expect(request.instructions.contains("Explore only"))
+    #expect(studio.contextOptions.recordIDs == [selected.id])
+    #expect(studio.draft.isEmpty)
+  }
   @Test func verificationProviderSettingsCannotChangeAnotherStudioOrHostDefaults() throws {
     let keys = ["Synthesis.provider", "Synthesis.model.codex", "Synthesis.model.claude-code"]
     let before = keys.map { UserDefaults.standard.string(forKey: $0) }

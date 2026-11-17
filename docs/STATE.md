@@ -2,6 +2,16 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. 0.0.x versions are published as full GitHub releases (owner instruction); v0.0.3 is the latest. Licensed GPL-3.0. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits.
 
+## Latest — shared composer and context (unreleased)
+
+Implemented the supplied World assistant reference in the actual native app: expanding input, real removable lore/map/board/history chips, Explore/Propose, canon explanation and local context inspection. Full Conversation, floating companions and compact workspace bars use the same composer and per-world persisted choices. The sidebar and navigation model are unchanged. [Usage and scope](COMPOSER_CONTEXT.md).
+
+One core context builder serves preview and Send. Exclusions filter the world index as well as record excerpts; restricted scope omits earlier conversation messages. Explore discards proposal blocks regardless of model behavior. Attached boards/history are prioritized before index bounds; archived exclusions survive Undo; unreadable preferences restore restricted access. Selected entities retain their sections and graph neighbours. Screenshot iteration also exposed and fixed a stale composer overwriting a newer shared draft on disappearance.
+
+Verified `./scripts/check.sh`: **174 tests / 41 suites**, strict Swift format lint and optimized ad-hoc build. **32 final native captures** at 1440×900 and 1024×768 inspected in both contact sheets, covering attached/context/browser/overflow/expanded composers, dark/light, active/loading chat, Manual, companions and compact Graph/editor bars. README now includes the new composer/context and refreshed conversation screenshot, explicitly labelled as main after 0.0.3. [Evidence](verification/composer-context/README.md).
+
+No new release, live provider request, foreground pointer/keyboard test or restart of the owner's app. The current build is `dist/Synthesis.app`. Captures verify rendering, not animation pacing, native popover interaction or VoiceOver. Context filtering is record-level, not redaction of secrets repeated in allowed prose. Historical full context snapshots, typed fact/provenance foundations, temporal world projections and the larger expansion brief remain open; see ROADMAP. AGENTS.md unchanged.
+
 ## Release 0.0.3 and repository organisation (2026-11-16)
 
 [v0.0.3](https://github.com/desenyon/synthesis/releases/tag/v0.0.3) is published as the latest full release from `cc4ff853e133014fbfdf551b43739f60286295dc`, with the Apple Silicon ZIP, SHA256SUMS, LICENSE and THIRD_PARTY notices. GitHub's ZIP digest matches the tested archive: `9eaa1965ce47c328c4533ae027888499da516eecbc3dd59a1a96d7cd4f45244d`. The extracted archive passed `codesign --verify --deep --strict`, matched the checked binary byte for byte, reported 0.0.3, and rendered four capture states. v0.0.1 and v0.0.2 were converted from pre-releases to full releases with refreshed notes. CI (GitHub Actions: Canvas on Ubuntu, lint/tests/build on a macOS 26 runner) passed on that commit.

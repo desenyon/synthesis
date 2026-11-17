@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "composer-attached", "light-composer-attached", "composer-context", "light-composer-context",
+    "composer-browser", "composer-overflow", "composer-expanded",
     "sidebar-long", "light-sidebar-long", "sidebar-history", "sidebar-folded",
     "sidebar-opaque", "light-sidebar-opaque", "empty-sidebar", "light-collapsed",
     "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
@@ -295,9 +297,35 @@ extension Studio {
     companionWidth = 400
     draft = ""
     preset = "Create"
+    updateContext { $0 = AssistantContextOptions() }
     conversationID = state.hasSuffix("conversation-home") ? nil : conversation
     perform { try reload() }
     switch state {
+    case "composer-attached", "light-composer-attached", "composer-context",
+      "light-composer-context",
+      "composer-browser", "composer-overflow", "composer-expanded":
+      destination = .chat
+      conversationID = nil
+      draft = "What changes if the Glass Sea begins freezing?"
+      perform {
+        var lane = try store.chronologyLanes(worldID: worldID).first { $0.name == "Year 60" }
+        if lane == nil {
+          lane = try store.createChronologyLane(
+            worldID: worldID, name: "Year 60", kind: "period", start: "Year 60")
+        }
+        updateContext {
+          $0.intent = .explore
+          $0.recordIDs = records.filter { ["The Glass Sea", "Tidekeepers"].contains($0.title) }.map(
+            \.id)
+          $0.laneIDs = lane.map { [$0.id] } ?? []
+          if state.hasSuffix("composer-context") { $0.scope = .attachments }
+          if state == "composer-overflow" {
+            $0.recordIDs = Array(records.prefix(12).map(\.id))
+            $0.boardIDs = contextBoards.map(\.id)
+          }
+        }
+        try reload()
+      }
     case "conversation-interrupted":
       destination = .chat
       perform {

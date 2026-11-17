@@ -131,7 +131,7 @@ import Testing
     let studio = try Studio(store: store)
     let original = studio.worldID
     let other = try store.createWorld(name: "Other")
-    studio.pendingComposer = (original, "Last keystrokes")
+    studio.pendingComposer = (original, "Last keystrokes", studio.draft)
     studio.switchWorld(other.id)
     #expect(try store.preference("composer:\(original)") == "Last keystrokes")
     #expect(studio.draft.isEmpty)

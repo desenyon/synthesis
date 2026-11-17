@@ -171,3 +171,10 @@ func relativeDate(_ iso: String) -> String {
     Calendar.current.isDate(date, equalTo: Date(), toGranularity: .year) ? "MMM d" : "MMM d, yyyy"
   return formatter.string(from: date)
 }
+
+/// Shared full/companion composer geometry. Compact workspace bars use the smaller radius.
+enum ComposerMetric {
+  static let radius: CGFloat = 22
+  static let compactRadius: CGFloat = 18
+  static let inset: CGFloat = 16
+}

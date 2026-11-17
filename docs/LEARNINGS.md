@@ -152,3 +152,9 @@ AGENTS.md operational patch (section 5, verification bullet): "For live-window c
 ## 2026-11-16 — release wording
 
 Observation: the owner asked that 0.0.1–0.0.3 be full GitHub releases rather than pre-releases, and chose GPL-3.0. AGENTS.md section 5 replaces "Owner-authorized development prereleases begin at 0.0.1; public product launch remains 1.0. Do not imply prereleases are production-ready." with "Owner-authorized 0.0.x versions are published as full GitHub releases (owner instruction, 2026-11-16); the public 1.0 launch remains later. Do not describe 0.0.x builds as production-ready. The project is licensed GPL-3.0." Evidence: the owner's request in this session. No protected rule changed. Rollback: restore the earlier sentence if the owner withdraws the instruction.
+
+## 2026-11-16 — request restrictions and composer handoff
+
+Observed: filtering a previously bounded workspace index lost older explicit attachments; pruning archived exclusions silently re-enabled earlier conversation context; recomputing a truncated placement total hid omitted entries. Separate regressions failed before the fixes and pass in the 174-test final suite. Filter and prioritize before bounds, preserve restriction identities through archive/Undo, and retain actual totals. Invalid preference decoding must not silently expand request access.
+
+The native 1024×768 capture also showed a typed draft replaced by a placeholder. A disappearing composer could persist its old local text after a new shared draft was assigned. Saves and pending debounces now compare against the shared value last observed; the regression and repeated capture pass. Evidence: `verification/composer-context`. These details belong in the core contracts/tests and this ledger; no AGENTS.md change was needed. Rollback: revert the composer/context slice together; preserve the world database and existing migration history.

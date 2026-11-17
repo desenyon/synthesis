@@ -1,4 +1,4 @@
-# Handoff — 2026-11-16, release 0.0.3
+# Handoff — 2026-11-16, composer work after 0.0.3
 
 Start here when picking up Synthesis.
 
@@ -13,7 +13,7 @@ Start here when picking up Synthesis.
 
 1. [AGENTS.md](../AGENTS.md): the product contract and protected rules (canon approval, archive-not-delete, privacy, verification honesty).
 2. [STATE](STATE.md): what is verified, with exact checks.
-3. [NEXT_PASS](NEXT_PASS.md) and [ROADMAP](ROADMAP.md): what remains.
+3. [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md), [NEXT_PASS](NEXT_PASS.md) and [ROADMAP](ROADMAP.md): latest expansion brief, implemented slice and what remains.
 4. [ARCHITECTURE](ARCHITECTURE.md): modules, migrations (0001–0013), portable format v7, JSON schema 10.
 
 ## Current shape
@@ -22,19 +22,23 @@ Native SwiftUI/AppKit app over SQLite, with the Canvas on an embedded offline Ex
 
 0.0.3 added what-if worlds with reviewed merge-back, technique trees, Atlas regions, Timeline views and reordering, extended Review checks, crash recovery, `.synthesis` Finder integration and explicit-click Codex image generation.
 
+Unreleased on main: the supplied World assistant composer reference is implemented across full chat, companions and compact bars. Real lore/map/board/history attachments, local context inspection, per-world persisted scope/exclusions and Explore versus Propose use one core request builder. Restricted context withholds previous messages. Explore discards model proposal blocks in the core; Propose retains explicit review. No API credentials or broader agent filesystem access were introduced. [Usage and boundaries](COMPOSER_CONTEXT.md).
+
 ## How to verify
 
 ```sh
-./scripts/check.sh                       # lint, 158 tests, optimized build
+./scripts/check.sh                       # strict lint, native tests, optimized build
 ./scripts/verify-ui.sh /tmp/captures     # background captures of every state
 ./scripts/selftest-ui.sh /tmp/selftest   # 19 real pointer/key checks; takes focus briefly
 cd CanvasWeb && npm test && npm run typecheck
 ```
 
-For live-window checks use an isolated instance (`SYNTHESIS_DATABASE_PATH` in a temp folder) and capture with `screencapture -l` while it is frontmost; Stage Manager shrinks unfocused windows.
+Use background captures while the owner works. Foreground self-tests and live-window walkthroughs take focus and need an isolated/authorized session. For those checks use an isolated instance (`SYNTHESIS_DATABASE_PATH` in a temp folder) and capture with `screencapture -l` while it is frontmost; Stage Manager shrinks unfocused windows.
 
 ## Open work
 
+- Continue the expansion brief in bounded slices: typed entity attributes/facts and provenance first, then shared temporal projections and richer operations. The 394-item brief is a roadmap, not a claim of implemented functionality. Preserve the approved sidebar and subscription-only boundary.
+- The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.
 - Not built: three-way text merge for what-ifs, drag-to-reorder events, assistant proposals for technique requirements and regions, cosmology-specific tools, continuous file sync, notarized distribution.

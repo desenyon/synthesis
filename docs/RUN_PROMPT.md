@@ -2,11 +2,13 @@
 
 Copy this to a coding agent working in this repository.
 
-> Work in `/Users/desenyon/Developer/synthesis` on `main`. Read `AGENTS.md`, then `docs/HANDOFF.md`, `docs/STATE.md`, `docs/NEXT_PASS.md` and `docs/ROADMAP.md`. Synthesis is a native SwiftUI/AppKit + SQLite worldbuilding studio with an offline Excalidraw Canvas; the assistant runs only through the creator's Codex or Claude Code subscription.
+> Work in `/Users/desenyon/Developer/synthesis` on `main`. Read `AGENTS.md`, then `docs/HANDOFF.md`, `docs/STATE.md`, `docs/COMPOSER_CONTEXT.md`, `docs/NEXT_PASS.md` and `docs/ROADMAP.md`. Synthesis is a native SwiftUI/AppKit + SQLite worldbuilding studio with an offline Excalidraw Canvas; the assistant runs only through the creator's Codex or Claude Code subscription.
 >
 > Pick the next unfinished item from the "Open work" list in `docs/HANDOFF.md` (skip anything that needs owner approval, such as a live paid model request or the C2 palette change, unless I approve it). Build it as a complete vertical slice: persistence with an additive migration if needed, core logic with tests, UI built from `Theme.swift` and `Components.swift`, empty and error states, and portability in `.synthesis` and JSON exports.
 >
 > Keep the protected rules: nothing becomes canon without an explicit creator action; removal archives with Undo; data stays local and world-scoped; no network access outside the subscription harness; every visible control works or says it is unavailable.
+>
+> The shared composer/context slice is on main after 0.0.3. Preserve its core-enforced Explore/Propose choice and record exclusions through archive/restore. Continue with typed entity attributes/facts and provenance, followed by temporal projections. Do not expand the latest brief into hundreds of isolated UI controls or introduce hosted API-key settings. Keep tests in the background while I work; do not run the foreground self-test or spend subscription allowance without authorization.
 >
 > After each slice: run `./scripts/check.sh`; capture affected states with `./scripts/verify-ui.sh <dir>` and inspect the contact sheets from `scripts/contact-sheets.py`; fix what the captures show; add a dated entry to `docs/PROGRESS.md` with the checks you actually ran; update `docs/STATE.md`, the relevant feature guide and `CHANGELOG.md` (Unreleased); commit with a clear message and push. Do not publish a release unless I ask. Leave the untracked `docs/DESIGN_AGENT_BRIEF.md` alone.
 >

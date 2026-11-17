@@ -1,0 +1,85 @@
+[0/1] Planning build
+Building for debugging...
+[0/5] Write sources
+[1/5] Write swift-version--1AB21518FC5DEDBE.txt
+[3/5] Compiling SynthesisCoreTests AssistantContextTests.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:14:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 12 |       worldID: world.id, parentID: entity.id, title: "Childhood", body: "Grew up at sea")
+ 13 |     let neighbor = try store.createRecord(worldID: world.id, title: "Harbor", kind: "entity")
+ 14 |     try store.addRelation(worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 15 |     for index in 0..<20 {
+ 16 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:16:17: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 14 |     try store.addRelation(worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 15 |     for index in 0..<20 {
+ 16 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+    |                 `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 17 |     }
+ 18 |     var options = AssistantContextOptions()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:70:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 68 |     let hidden = try store.createRecord(
+ 69 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 70 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 71 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 72 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:72:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 70 |     try store.addRelation(
+ 71 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 72 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 73 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 74 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:105:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+103 |     let world = try store.createWorld(name: "Many boards")
+104 |     for index in 0..<27 {
+105 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+106 |     }
+107 |     let boards = try store.assistantBoards(worldID: world.id)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:187:17: warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+185 |     let world = try store.createWorld(name: "Many histories")
+186 |     for index in 0..<65 {
+187 |       try store.createChronologyLane(worldID: world.id, name: "Period \(index)", kind: "period")
+    |                 `- warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+188 |     }
+189 |     let lane = try #require(store.chronologyLanes(worldID: world.id).last)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[4/5] Emitting module SynthesisCoreTests
+[4/6] Write Objects.LinkFileList
+[5/6] Linking SynthesisPackageTests
+Build complete! (1.60s)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite AssistantContextTests started.
+◇ Test worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() started.
+✘ Test worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() recorded an issue at AssistantContextTests.swift:26:7: Expectation failed: ids.contains(section.record.id)
+↳ ids.contains(section.record.id) → false
+↳   ids → ["68A3D8F5-A576-4792-8A46-BFDC54B902D9", "F69BBB45-4050-4BD4-825B-9CCDD81FCF7E", "C10069CB-42B0-4534-BED6-16237FDABD5C", "1AD7BE51-8148-4B43-9AE6-B036725A9405", "0D778AC1-C5D8-4A5E-89D6-2FFE6FDED223", "DA43291D-19CB-4A2F-9178-FFE0FC543BA6", "45547CF1-720E-4CBC-9000-A72A2D7C5BE5", "5C1688B6-F838-4333-9114-CD2E215C3DAA", "3678D2F9-8AC9-45E1-8822-6430180276EC", "9430EFCA-032B-4334-B0BC-1569E45801CC", "72C39D81-592B-44AE-818F-03810DAAA037", "0BE67479-D12E-4886-9D8A-58C96745441C", "97D8441C-EF5C-4856-BDD3-F8EF9266CB0B", "F36D1EB5-86B2-4D42-B967-97A14F19BD41", "3D02B676-FCDF-4E58-A166-DC2CEC466D74", "EBF92FA5-A104-4742-BD13-5401072C3D10"]
+↳   section.record.id → "C679344D-E2A8-475F-B7E5-DF2320CEE126"
+✘ Test worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() recorded an issue at AssistantContextTests.swift:27:7: Expectation failed: ids.contains(neighbor.id)
+↳ ids.contains(neighbor.id) → false
+↳   ids → ["68A3D8F5-A576-4792-8A46-BFDC54B902D9", "F69BBB45-4050-4BD4-825B-9CCDD81FCF7E", "C10069CB-42B0-4534-BED6-16237FDABD5C", "1AD7BE51-8148-4B43-9AE6-B036725A9405", "0D778AC1-C5D8-4A5E-89D6-2FFE6FDED223", "DA43291D-19CB-4A2F-9178-FFE0FC543BA6", "45547CF1-720E-4CBC-9000-A72A2D7C5BE5", "5C1688B6-F838-4333-9114-CD2E215C3DAA", "3678D2F9-8AC9-45E1-8822-6430180276EC", "9430EFCA-032B-4334-B0BC-1569E45801CC", "72C39D81-592B-44AE-818F-03810DAAA037", "0BE67479-D12E-4886-9D8A-58C96745441C", "97D8441C-EF5C-4856-BDD3-F8EF9266CB0B", "F36D1EB5-86B2-4D42-B967-97A14F19BD41", "3D02B676-FCDF-4E58-A166-DC2CEC466D74", "EBF92FA5-A104-4742-BD13-5401072C3D10"]
+↳   neighbor.id → "E1B4899C-E6F7-4B6F-81F9-A10BB767168A"
+✘ Test worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() recorded an issue at AssistantContextTests.swift:26:7: Expectation failed: ids.contains(section.record.id)
+↳ ids.contains(section.record.id) → false
+↳   ids → ["68A3D8F5-A576-4792-8A46-BFDC54B902D9", "F69BBB45-4050-4BD4-825B-9CCDD81FCF7E", "C10069CB-42B0-4534-BED6-16237FDABD5C", "1AD7BE51-8148-4B43-9AE6-B036725A9405", "0D778AC1-C5D8-4A5E-89D6-2FFE6FDED223", "DA43291D-19CB-4A2F-9178-FFE0FC543BA6", "45547CF1-720E-4CBC-9000-A72A2D7C5BE5", "5C1688B6-F838-4333-9114-CD2E215C3DAA", "3678D2F9-8AC9-45E1-8822-6430180276EC", "9430EFCA-032B-4334-B0BC-1569E45801CC", "72C39D81-592B-44AE-818F-03810DAAA037", "0BE67479-D12E-4886-9D8A-58C96745441C", "97D8441C-EF5C-4856-BDD3-F8EF9266CB0B", "F36D1EB5-86B2-4D42-B967-97A14F19BD41", "3D02B676-FCDF-4E58-A166-DC2CEC466D74", "EBF92FA5-A104-4742-BD13-5401072C3D10"]
+↳   section.record.id → "C679344D-E2A8-475F-B7E5-DF2320CEE126"
+✘ Test worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() recorded an issue at AssistantContextTests.swift:27:7: Expectation failed: ids.contains(neighbor.id)
+↳ ids.contains(neighbor.id) → false
+↳   ids → ["68A3D8F5-A576-4792-8A46-BFDC54B902D9", "F69BBB45-4050-4BD4-825B-9CCDD81FCF7E", "C10069CB-42B0-4534-BED6-16237FDABD5C", "1AD7BE51-8148-4B43-9AE6-B036725A9405", "0D778AC1-C5D8-4A5E-89D6-2FFE6FDED223", "DA43291D-19CB-4A2F-9178-FFE0FC543BA6", "45547CF1-720E-4CBC-9000-A72A2D7C5BE5", "5C1688B6-F838-4333-9114-CD2E215C3DAA", "3678D2F9-8AC9-45E1-8822-6430180276EC", "9430EFCA-032B-4334-B0BC-1569E45801CC", "72C39D81-592B-44AE-818F-03810DAAA037", "0BE67479-D12E-4886-9D8A-58C96745441C", "97D8441C-EF5C-4856-BDD3-F8EF9266CB0B", "F36D1EB5-86B2-4D42-B967-97A14F19BD41", "3D02B676-FCDF-4E58-A166-DC2CEC466D74", "EBF92FA5-A104-4742-BD13-5401072C3D10"]
+↳   neighbor.id → "E1B4899C-E6F7-4B6F-81F9-A10BB767168A"
+✘ Test worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() failed after 0.029 seconds with 4 issues.
+�warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+� Suite AssistantContextTests failed after 0.030 seconds with 4 issues.
+✘ Test run with 1 test in 1 suite failed after 0.030 seconds with 4 issues.
+Note: Some test targets reported failures:
+  - SynthesisPackageTests (Swift Testing)

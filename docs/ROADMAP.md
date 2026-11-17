@@ -1,5 +1,17 @@
 # Roadmap
 
+## Current — expansion brief, connected slices
+
+The owner's 2026-11-16 expansion brief describes 394 improvements and explicitly prioritizes shared foundations over simultaneous feature expansion. Keep the approved native shell and subscription-only/canon safeguards.
+
+- **Implemented on main, unreleased:** reference-guided shared composer, world-scoped attachments, local request preview, scope/exclusions and core-enforced Explore/Propose. Details and verification: [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md), [STATE](STATE.md).
+- **Next:** typed entity attributes/facts with provenance, revision history, world isolation and portable export. Connect the same fields to the editor, agent proposals and Graph inspection before expanding UI vocabulary.
+- **Following:** shared temporal validity and world-state queries across Timeline, Atlas and Graph; richer multi-step proposal previews; live Canvas components; geography layers and chronology dependencies.
+- **Later:** small reproducible rule simulations with explicit assumptions, three-way branch merges, modules and collaboration. These are planned, not capabilities claimed by the composer work.
+- Preserve the existing command palette, rich editor, reviewed operations, technique trees, Atlas regions and what-if worlds while extending them. Context is single-shot retrieval; autonomous multi-step tool execution and immutable request snapshots remain open.
+
+No new release is authorized for this slice. Foreground composer/VoiceOver/animation walkthroughs remain separate from background capture and state tests.
+
 ## Done
 
 - **Main consolidation** (2026-11-13): reviewed implementation is primary in `/Users/desenyon/Developer/synthesis`; source history and unfinished rules work preserved.

@@ -1,0 +1,95 @@
+[0/1] Planning build
+Building for debugging...
+[0/5] Write sources
+[1/5] Write swift-version--1AB21518FC5DEDBE.txt
+[3/5] Compiling SynthesisCoreTests AssistantContextTests.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:47:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 45 |     let hidden = try store.createRecord(
+ 46 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 47 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 48 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 49 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:49:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 47 |     try store.addRelation(
+ 48 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 49 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 50 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 51 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:82:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+ 80 |     let world = try store.createWorld(name: "Many boards")
+ 81 |     for index in 0..<27 {
+ 82 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+ 83 |     }
+ 84 |     let boards = try store.assistantBoards(worldID: world.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[4/5] Emitting module SynthesisCoreTests
+[4/6] Write Objects.LinkFileList
+[5/6] Linking SynthesisPackageTests
+Build complete! (2.03s)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite AssistantContextTests started.
+◇ Test boardAttachmentsShareLinkedLoreNotImageBytes() started.
+◇ Test archivedExclusionsSurviveReloadAndRestoreWithoutReintroducingHistory() started.
+◇ Test contextChoicesPersistPerWorldAndPinnedRecordsCannotSilentlyOverflow() started.
+◇ Test exclusionsRemoveIndexRulesRelationsAndPriorConversation() started.
+◇ Test truncatedBoardPlacementsRetainTheirActualTotal() started.
+◇ Test explicitlyAttachedOldBoardsAreNotLostBehindTheIndexLimit() started.
+◇ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() started.
+◇ Test archivedAttachmentsArePrunedOnReloadButRejectedAtSubmission() started.
+◇ Test attachmentsOnlyDoesNotFallBackToRecentLoreOrForeignIDs() started.
+◇ Test exploreCannotStageEvenWhenTheModelIgnoresTheInstruction() started.
+◇ Test attachedHistoryIncludesDescendantsAndExclusionsStillWin() started.
+✘ Test archivedExclusionsSurviveReloadAndRestoreWithoutReintroducingHistory() recorded an issue at AssistantContextTests.swift:104:5: Expectation failed: restored.excludedRecordIDs == [record.id]
+↳ restored.excludedRecordIDs == [record.id] → false
+↳   restored.excludedRecordIDs → []
+↳   [record.id] → ["7CB34109-DFEA-4741-91C4-A13156A16B87"]
+✘ Test archivedExclusionsSurviveReloadAndRestoreWithoutReintroducingHistory() recorded an issue at AssistantContextTests.swift:105:5: Expectation failed: try !store.assistantContext(worldID: world.id, prompt: "Hello", options: restored).includesHistory
+↳ try !store.assistantContext(worldID: world.id, prompt: "Hello", options: restored).includesHistory → <not evaluated>
+✘ Test archivedExclusionsSurviveReloadAndRestoreWithoutReintroducingHistory() recorded an issue at AssistantContextTests.swift:110:5: Expectation failed: afterUndo.sources.isEmpty
+↳ afterUndo.sources.isEmpty → false
+↳   afterUndo.sources → [SynthesisCore.ContextSource(record: SynthesisCore.LoreRecord(id: "7CB34109-DFEA-4741-91C4-A13156A16B87", worldID: "D21BA1BB-1964-402A-9B55-555355511ED6", title: "Private lore", body: "", kind: "lore", category: "", state: "draft", origin: "user-authored", version: 1, canonical: nil, rtf: nil, updatedAt: "2026-11-17T07:25:42Z", tags: Optional([]), aliases: Optional([])), reason: "Matches your message")]
+↳   isEmpty → false
+✘ Test archivedExclusionsSurviveReloadAndRestoreWithoutReintroducingHistory() recorded an issue at AssistantContextTests.swift:111:5: Expectation failed: !afterUndo.includesHistory
+↳ !afterUndo.includesHistory → true
+↳   afterUndo.includesHistory → false
+↳     afterUndo → AssistantContext(sources: [SynthesisCore.ContextSource(record: SynthesisCore.LoreRecord(id: "7CB34109-DFEA-4741-91C4-A13156A16B87", worldID: "D21BA1BB-1964-402A-9B55-555355511ED6", title: "Private lore", body: "", kind: "lore", category: "", state: "draft", origin: "user-authored", version: 1, canonical: nil, rtf: nil, updatedAt: "2026-11-17T07:25:42Z", tags: Optional([]), aliases: Optional([])), reason: "Matches your message")], workspace: "{\"activeChronologyLane\":\"\",\"boards\":[],\"chronology\":[],\"components\":[],\"eventPlacement\":{},\"events\":[],\"records\":[{\"id\":\"7CB34109-DFEA-4741-91C4-A13156A16B87\",\"kind\":\"lore\",\"state\":\"draft\",\"title\":\"Private lore\"}],\"relationships\":[],\"rules\":[],\"scenarios\":[],\"sections\":[],\"totals\":{\"boards\":0,\"events\":0,\"records\":1,\"relationships\":0}}", lore: "Record 7CB34109-DFEA-4741-91C4-A13156A16B87, title: Private lore, kind: lore, category: , state: draft, version: 1. Working draft: . Accepted canon snapshot: none", includesHistory: true, eligibleCount: 1, selectedIDs: [])
+↳       sources → [SynthesisCore.ContextSource(record: SynthesisCore.LoreRecord(id: "7CB34109-DFEA-4741-91C4-A13156A16B87", worldID: "D21BA1BB-1964-402A-9B55-555355511ED6", title: "Private lore", body: "", kind: "lore", category: "", state: "draft", origin: "user-authored", version: 1, canonical: nil, rtf: nil, updatedAt: "2026-11-17T07:25:42Z", tags: Optional([]), aliases: Optional([])), reason: "Matches your message")]
+↳       workspace → "{"activeChronologyLane":"","boards":[],"chronology":[],"components":[],"eventPlacement":{},"events":[],"records":[{"id":"7CB34109-DFEA-4741-91C4-A13156A16B87","kind":"lore","state":"draft","title":"Private lore"}],"relationships":[],"rules":[],"scenarios":[],"sections":[],"totals":{"boards":0,"events":0,"records":1,"relationships":0}}"
+↳       lore → "Record 7CB34109-DFEA-4741-91C4-A13156A16B87, title: Private lore, kind: lore, category: , state: draft, version: 1. Working draft: . Accepted canon snapshot: none"
+↳       includesHistory → true
+↳       eligibleCount → 1
+↳       selectedIDs → []
+↳     includesHistory → true
+✔ Test archivedAttachmentsArePrunedOnReloadButRejectedAtSubmission() passed after 0.036 seconds.
+✘ Test archivedExclusionsSurviveReloadAndRestoreWithoutReintroducingHistory() failed after 0.036 seconds with 4 issues.
+✘ Test explicitlyAttachedOldBoardsAreNotLostBehindTheIndexLimit() recorded an issue at AssistantContextTests.swift:91:7: Expectation failed: context.workspace.contains(last.id)
+↳ context.workspace.contains(last.id) → false
+↳   context.workspace → "{"activeChronologyLane":"","boards":[{"active":false,"hasImage":false,"id":"8651D574-29FA-4DD0-8974-43561A871635","kind":"canvas","name":"Board 0","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"C40222DA-B88F-4ADF-B299-95F19EE6BD2D","kind":"canvas","name":"Board 1","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"F96A8CEB-369C-483A-B8F9-9A43E690D10A","kind":"canvas","name":"Board 2","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"DEEABDDE-917D-4F5E-891F-AFB06801E31D","kind":"canvas","name":"Board 3","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"C10F1B24-9E4B-4E3C-B121-E399B896BF9C","kind":"canvas","name":"Board 4","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"F513864C-DEB4-46D1-A41E-44ED49EC472D","kind":"canvas","name":"Board 5","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"7D41C873-4212-4456-8BF9-CB8C1D72D573","kind":"canvas","name":"Board 6","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"5721E174-CBD7-4534-A489-96CF702180DE","kind":"canvas","name":"Board 7","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"D76F0E93-620E-4DE3-87ED-E255EB8A610E","kind":"canvas","name":"Board 8","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"39B82ACC-B6F1-44FD-9EB3-620980C74693","kind":"canvas","name":"Board 9","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"F19B6CE2-4442-49DF-AD6F-B30F9D8EBA9B","kind":"canvas","name":"Board 10","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"962EA5BB-3408-4282-BE2B-A52779C90D36","kind":"canvas","name":"Board 11","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"651D8373-7BA3-4B91-9FE3-47A6B8C8BECE","kind":"canvas","name":"Board 12","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"8F5CC020-544D-414F-AABC-3A18A54091AE","kind":"canvas","name":"Board 13","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"48F8A20B-3ACC-4F79-806B-98F132865429","kind":"canvas","name":"Board 14","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"244B906E-9D7E-4A02-8A72-1222F551B10E","kind":"canvas","name":"Board 15","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"98F13999-7warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+4FE-46A0-B8C4-E53B38D14D5C","kind":"canvas","name":"Board 16","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"02717806-7312-45F1-AEB5-A8D8EEA3C036","kind":"canvas","name":"Board 17","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"7D9F139D-FB2A-44F5-8C83-2D3BD6306359","kind":"canvas","name":"Board 18","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"710ABE91-D2E0-4028-94F7-9454243E1374","kind":"canvas","name":"Board 19","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"6606F341-8DC4-4775-A3B7-3E99130AFE68","kind":"canvas","name":"Board 20","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"C9D4C4C5-D797-4648-B909-78EAF905D3E0","kind":"canvas","name":"Board 21","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"D09B6E26-04D3-484C-B4E4-C75923412269","kind":"canvas","name":"Board 22","parentMap":"","place":"","placements":[],"totalPlacements":0},{"active":false,"hasImage":false,"id":"221100BE-1D3E-4FE1-91A2-282735D524C9","kind":"canvas","name":"Board 23","parentMap":"","place":"","placements":[],"totalPlacements":0}],"chronology":[],"components":[],"eventPlacement":{},"events":[],"records":[],"relationships":[],"rules":[],"scenarios":[],"sections":[],"totals":{"boards":27,"events":0,"records":0,"relationships":0}}"
+↳   last.id → "EB4D7CA3-C56C-418A-9704-7972D162AE4B"
+✘ Test truncatedBoardPlacementsRetainTheirActualTotal() recorded an issue at AssistantContextTests.swift:128:5: Expectation failed: item["totalPlacements"] as? Int == 90
+↳ item["totalPlacements"] as? Int == 90 → false
+↳   item["totalPlacements"] as? Int → 80
+↳     some → 80
+↳     some → 90
+✔ Test boardAttachmentsShareLinkedLoreNotImageBytes() passed after 0.077 seconds.
+✔ Test attachedHistoryIncludesDescendantsAndExclusionsStillWin() passed after 0.083 seconds.
+✔ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() passed after 0.083 seconds.
+✔ Test contextChoicesPersistPerWorldAndPinnedRecordsCannotSilentlyOverflow() passed after 0.083 seconds.
+✘ Test truncatedBoardPlacementsRetainTheirActualTotal() failed after 0.083 seconds with 1 issue.
+✘ Test explicitlyAttachedOldBoardsAreNotLostBehindTheIndexLimit() failed after 0.083 seconds with 1 issue.
+✔ Test exploreCannotStageEvenWhenTheModelIgnoresTheInstruction() passed after 0.083 seconds.
+✔ Test attachmentsOnlyDoesNotFallBackToRecentLoreOrForeignIDs() passed after 0.083 seconds.
+✔ Test exclusionsRemoveIndexRulesRelationsAndPriorConversation() passed after 0.084 seconds.
+✘ Suite AssistantContextTests failed after 0.084 seconds with 6 issues.
+✘ Test run with 11 tests in 1 suite failed after 0.085 seconds with 6 issues.
+Note: Some test targets reported failures:
+  - SynthesisPackageTests (Swift Testing)

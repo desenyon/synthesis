@@ -1,0 +1,43 @@
+# World assistant composer and context
+
+First implementation slice of the owner's 394-item expansion brief. Keep the native app, existing navigation, subscription harness, data and canon boundary. No new release is requested.
+
+The supplied reference guides the shared composer: quiet World assistant heading, roomy expanding input, removable context chips, Explore/Propose choice, Canon protected disclosure and World context inspection. Full Conversation, companion and compact workspace bars share the same persisted state. Do not copy the reference's illustrative badge or hardcoded lore.
+
+## Behavior contract
+
+- Attach real records, maps, boards and history branches/periods by stable world-scoped IDs. Text/Markdown import and inline mentions remain available.
+- World context selects relevant lore; Attachments only limits retrieval to attached or selected records and records represented on attached boards/history. Explicit exclusions win over all automatic sources. Context size bounds full record excerpts, not subscription cost or model reasoning.
+- Preview locally, with no model call: source names/reasons/excerpts, structured workspace data, truncation limits and whether prior messages are included. The send path uses the same builder and revalidates against current data.
+- Restricted context omits prior conversation messages to avoid reintroducing excluded lore. This is record-level filtering, not redaction of mentions inside allowed text or the creator's own prompt.
+- Explore produces prose only; any model proposal block is discarded with an explanatory notice. Propose retains validated, reviewable draft operations. Neither can alter canon.
+- Context choices persist per world and survive workspace switches/restart. Manual remains enforced at the core boundary. Tests use stand-in transports; no new live subscription request is authorized.
+
+## Use it
+
+1. Open Conversation or any workspace companion. The compact bar opens the same conversation; the expand control gives the full composer more writing space.
+2. Choose **+ → Attach lore, map, Canvas or history**. Search the real records or switch tabs. Chips remain attached to this world until removed; `@` still inserts an inline reference. Maps/boards attach their linked lore and metadata, not their images.
+3. Open **World context**. Choose **Attachments only** for a restricted request, or retain World context to retrieve related sections and neighbours. Inspect source reasons, exact excerpts and the structured index. Exclude a record here or in the attachment browser; **Include** restores its eligibility.
+4. Choose **Explore** for discussion without staging edits. Choose **Propose** for validated draft operations that appear in Review. Create/Develop/Critique/Simulate/Canonize still control the assistant's approach; they cannot override Explore or canon approval.
+5. Send explicitly. Return/Shift-Return follows the existing shortcut preference; Stop cancels the active request. Navigation and context previews make no provider calls.
+
+The default remains Propose with World context for compatibility with existing conversations. Context preferences belong to this device/world and are not exported as lore. Archiving excluded records preserves their exclusion and the restriction on earlier chat history. If saved context preferences become unreadable, access falls back to Explore/Attachments-only with workspace selection and history off; choose new settings explicitly to broaden it.
+
+Excerpt limits are 8/16/32 records. The workspace index additionally contains bounded identities and structured metadata; inspect it to see exactly what is eligible. Explicit record attachments exceeding the chosen limit block Send with an actionable error. Board/history membership may exceed the excerpt limit; board placement totals and the preview's source counts identify partial coverage. Filtering cannot remove a secret repeated in allowed prose or a new typed message.
+
+## Verification
+
+`./scripts/check.sh` passed **174 tests in 41 suites**, strict lint and optimized build. New regressions cover exclusions, attachments-only scope, board/history membership and index limits, archive/foreign IDs, disk persistence, preview/send parity, Explore enforcement, selected entity neighbours and stale draft writes. Existing Manual/canon/Propose coverage remains green.
+
+**32 final background native captures** were inspected at 1440×900 and 1024×768, including dark/light, full/compact/companion, attachments, context inspection, overflow and expanded writing. A missing icon, misleading history checkbox and stale-draft overwrite found during iteration were corrected and recaptured. [Evidence](verification/composer-context/README.md). No live model call, foreground interaction or animation/VoiceOver claim; capture-only popover content uses the same native panel without activating a real popover.
+
+## Next expansion phases
+
+1. Shared world foundations: typed attributes/facts, provenance, temporal validity and validated commands.
+2. Conversation operations and context, then adaptive entity editing and contextual inspectors.
+3. Unified temporal projections across Graph, Atlas, Timeline and conversation.
+4. Queryable Graph and richer live Canvas components; geographic layers and chronology dependencies.
+5. Explicit rule-driven simulations with separate reproducible state.
+6. Three-way branch merging, extensible modules and later collaboration/publishing.
+
+The brief's hosted API credentials do not supersede the protected subscription-only direction. New simulations, multiplayer, arbitrary executable UI and a global palette overhaul are not implied by this first slice. Preserve the accepted sidebar while implementing its composer reference.

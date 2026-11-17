@@ -4,7 +4,18 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+- Shared World assistant composer with expandable writing space, removable context chips and matching full, companion and compact layouts.
+- Real record, Canvas, Atlas and history attachments; a local context inspector showing source reasons, excerpts and structured workspace data before Send.
+- Per-world Explore/Propose, World/Attachments-only scope, record exclusions, selection/history controls and 8/16/32-record excerpt limits. These are device-local request preferences, not exported lore.
+- Explore enforced in the core: model proposal blocks are discarded with a notice. Propose still stages draft changes for explicit review; neither mode changes canon.
+
+### Fixed
+- Restricted context filters indexed rules, relationships and placements as well as retrieved records, and withholds prior messages that could reintroduce excluded lore.
+- Exclusions survive archive/Undo; unreadable saved context preferences restore restricted access instead of silently broadening it.
+- Attached boards/history receive priority before index limits. Truncated board placements retain their real total count.
+- Selected and attached entity context retains relevant sections and graph neighbours in World scope.
+- Disappearing composers and stale draft debounces cannot overwrite a newer shared draft.
 
 ## [0.0.3] — 2026-11-16
 

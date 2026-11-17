@@ -1,7 +1,7 @@
 import Foundation
 
-/// World-scoped context selection for a conversation turn. The assistant only ever sees what
-/// this returns, and the same list is stored with the answer so the creator can inspect it.
+/// World-scoped record ranking. AssistantContext combines these excerpts with the permitted
+/// workspace index; source IDs and selection reasons are retained with each answer.
 extension WorkspaceStore {
   static let stopwords: Set<String> = [
     "the", "and", "for", "that", "this", "with", "from", "have", "what", "when", "where", "who",
@@ -24,10 +24,12 @@ extension WorkspaceStore {
   }
   /// Records to share with the model for `prompt`, most relevant first:
   /// explicit references, full-text matches, their graph and link neighbours, then recent work.
-  public func contextRecords(worldID: String, prompt: String, limit: Int = 16) throws
+  public func contextRecords(
+    worldID: String, prompt: String, limit: Int = 16, allowedIDs: Set<String>? = nil
+  ) throws
     -> [ContextSource]
   {
-    let all = try records(worldID: worldID)
+    let all = try records(worldID: worldID).filter { allowedIDs?.contains($0.id) ?? true }
     guard !all.isEmpty else { return [] }
     let byID = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
     var result: [ContextSource] = []

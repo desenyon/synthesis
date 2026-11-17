@@ -117,6 +117,9 @@ public struct Toast: Identifiable {
   @Published public var mobileNavigation = false
   @Published public var draft = ""
   @Published public var preset = "Create"
+  @Published public var contextOptions = AssistantContextOptions()
+  @Published public var contextBoards: [Board] = []
+  @Published public var contextLanes: [ChronologyLane] = []
   @Published public var busy = false
   @Published public var activity: [AgentActivity] = []
   @Published public var streamed = ""
@@ -169,7 +172,7 @@ public struct Toast: Identifiable {
   @Published public var captureNonce = 0
   /// Conversation the rename sheet edits; defaults to the open conversation.
   public var renameTarget: String?
-  var pendingComposer: (world: String, text: String)?
+  var pendingComposer: (world: String, text: String, base: String)?
   public var canvasUndo: ((Bool) -> Void)?
   public var canvasFit: (() -> Void)?
   private var running: Task<Void, Never>?
@@ -276,6 +279,7 @@ public struct Toast: Identifiable {
       ?? (mode == .manual ? .canvas : .chat)
     if mode == .manual && destination == .chat { destination = .library }
     draft = try store.preference("composer:\(worldID)") ?? ""
+    contextOptions = try store.assistantContextOptions(worldID: worldID)
     refreshProviderAvailability()
     try reload()
     if try store.preference("onboarding-completed") == nil {
@@ -351,6 +355,9 @@ public struct Toast: Identifiable {
     branch = try store.branchInfo(worldID: worldID)
     branchParents = try store.branchParents()
     records = try store.records(worldID: worldID)
+    contextBoards = try store.assistantBoards(worldID: worldID)
+    contextLanes = try store.chronologyLanes(worldID: worldID)
+    contextOptions = try store.assistantContextOptions(worldID: worldID)
     conversations = try store.conversations(worldID: worldID)
     pendingProposals = try store.proposals(worldID: worldID).filter { $0.pending > 0 }
     if let conversationID {
@@ -457,11 +464,22 @@ public struct Toast: Identifiable {
     }
   }
   public func persistPendingComposer() {
-    if let pendingComposer, pendingComposer.world == worldID {
+    if let pendingComposer, pendingComposer.world == worldID, pendingComposer.base == draft {
       draft = pendingComposer.text
-      self.pendingComposer = nil
     }
+    pendingComposer = nil
     persistComposer()
+  }
+  /// A disappearing view/debounce may only save over the shared draft it last observed.
+  @discardableResult func commitComposer(text: String, worldID: String, replacing base: String)
+    -> Bool
+  {
+    guard worldID == self.worldID, draft == base else { return false }
+    if pendingComposer?.world == worldID, pendingComposer?.text == text { pendingComposer = nil }
+    guard draft != text else { return true }
+    draft = text
+    persistComposer()
+    return true
   }
   public func persistComposer() {
     perform { try store.setPreference("composer:\(worldID)", value: draft) }
@@ -711,6 +729,7 @@ public struct Toast: Identifiable {
     guard !busy, let index = messages.firstIndex(where: { $0.id == messageID }),
       let prompt = messages[..<index].last(where: { $0.role == "user" })?.body
     else { return }
+    persistPendingComposer()
     if draft.isEmpty {
       draft = prompt
     } else if draft != prompt && !draft.hasPrefix(prompt + "\n\n") {
@@ -751,6 +770,23 @@ public struct Toast: Identifiable {
       }
     }
   }
+  /// All composer forms share these world-local settings; no model request is made here.
+  public func updateContext(_ update: (inout AssistantContextOptions) -> Void) {
+    var next = contextOptions
+    update(&next)
+    perform {
+      try store.setAssistantContextOptions(worldID: worldID, options: next)
+      contextOptions = next
+    }
+  }
+  public func previewContext(prompt: String) throws -> AssistantContext {
+    try store.assistantContext(
+      worldID: worldID, prompt: prompt, options: contextOptions,
+      selectedRecordIDs: contextualRecordIDs,
+      boardID: destination == .canvas
+        ? canvasSession?.boardID : (destination == .atlas ? mapBoardID : nil),
+      chronologyLaneID: destination == .timeline ? timelineLaneID : nil)
+  }
   public func send(keepWorkspace: Bool = false) {
     guard mode == .assisted, !busy, !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     else { return }
@@ -770,11 +806,13 @@ public struct Toast: Identifiable {
     let prompt = draft
     let wid = worldID
     perform {
+      _ = try previewContext(prompt: prompt)
       if conversationID == nil {
         conversationID = try store.createConversation(worldID: worldID).id
       }
       let cid = conversationID!
       let chosenPreset = preset
+      let chosenContext = contextOptions
       let request = UUID()
       requestID = request
       busy = true
@@ -796,7 +834,7 @@ public struct Toast: Identifiable {
           try await self.engine.submit(
             worldID: wid, conversationID: cid, prompt: prompt, preset: chosenPreset,
             boardID: activeBoard, selectedRecordIDs: selectedIDs, workspaceName: workspaceName,
-            chronologyLaneID: laneID,
+            chronologyLaneID: laneID, contextOptions: chosenContext,
             onActivity: { [weak self] step in
               guard let self, self.requestID == request, self.worldID == wid,
                 self.conversationID == cid, self.mode == .assisted
@@ -855,8 +893,8 @@ public struct Toast: Identifiable {
   /// Appends a lore reference to the composer draft.
   public func reference(_ record: LoreRecord) {
     let link = "[\(record.title)](synthesis://record/\(record.id))"
-    let base = pendingComposer?.world == worldID ? pendingComposer!.text : draft
-    pendingComposer = nil
+    persistPendingComposer()
+    let base = draft
     draft =
       base.isEmpty || base.hasSuffix(" ") || base.hasSuffix("\n")
       ? base + link + " "

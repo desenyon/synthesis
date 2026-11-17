@@ -1,0 +1,55 @@
+[0/1] Planning build
+Building for debugging...
+[0/5] Write sources
+[1/5] Write swift-version--1AB21518FC5DEDBE.txt
+[3/5] Compiling SynthesisCoreTests AssistantContextTests.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:47:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 45 |     let hidden = try store.createRecord(
+ 46 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 47 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 48 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 49 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:49:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 47 |     try store.addRelation(
+ 48 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 49 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 50 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 51 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:82:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+ 80 |     let world = try store.createWorld(name: "Many boards")
+ 81 |     for index in 0..<27 {
+ 82 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+ 83 |     }
+ 84 |     let boards = try store.assistantBoards(worldID: world.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[4/5] Emitting module SynthesisCoreTests
+[4/6] Write Objects.LinkFileList
+[5/6] Linking SynthesisPackageTests
+Build complete! (1.55s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite AssistantContextTests started.
+◇ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() started.
+✘ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() recorded an issue at AssistantContextTests.swift:12:5: Expectation failed: restored.scope == .attachments
+↳ restored.scope == .attachments → false
+↳   restored.scope → .world
+✘ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() recorded an issue at AssistantContextTests.swift:13:5: Expectation failed: restored.intent == .explore
+↳ restored.intent == .explore → false
+↳   restored.intent → .propose
+✘ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() recorded an issue at AssistantContextTests.swift:14:5: Expectation failed: !restored.includeSelection && !restored.includeHistory
+↳ !restored.includeSelection && !restored.includeHistory → false
+↳   !restored.includeSelection → false
+↳   !restored.includeHistory → <not evaluated>
+✘ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() failed after 0.013 seconds with 3 issues.
+✘ Suite AssistantContextTests failed after 0.013 seconds with 3 issues.
+✘ Test run with 1 test in 1 suite failed after 0.013 seconds with 3 issues.
+Note: Some test targets reported failures:
+  - SynthesisPackageTests (Swift Testing)

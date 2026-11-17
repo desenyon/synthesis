@@ -109,13 +109,20 @@ extension WorkspaceStore {
 
   /// Bounded structured context, without image bytes, credentials or foreign-world content.
   public func workspaceContext(
-    worldID: String, boardID: String? = nil, chronologyLaneID: String? = nil
+    worldID: String, boardID: String? = nil, chronologyLaneID: String? = nil,
+    allowedRecordIDs: Set<String>? = nil, includedBoardIDs: Set<String>? = nil,
+    includedLaneIDs: Set<String>? = nil, preferredBoardIDs: Set<String> = [],
+    preferredLaneIDs: Set<String> = []
   ) throws -> String {
-    let records = try records(worldID: worldID)
+    let records = try records(worldID: worldID).filter { allowedRecordIDs?.contains($0.id) ?? true }
     let known = Set(records.map(\.id))
     let allBoards =
-      try boards(worldID: worldID, kind: "canvas") + boards(worldID: worldID, kind: "atlas")
-    let boards = allBoards.sorted { ($0.id == boardID ? 0 : 1) < ($1.id == boardID ? 0 : 1) }
+      try (boards(worldID: worldID, kind: "canvas") + boards(worldID: worldID, kind: "atlas"))
+      .filter { includedBoardIDs?.contains($0.id) ?? true }
+    func boardPriority(_ board: Board) -> Int {
+      board.id == boardID ? 0 : preferredBoardIDs.contains(board.id) ? 1 : 2
+    }
+    let boards = allBoards.sorted { boardPriority($0) < boardPriority($1) }
       .prefix(24).map { board -> [String: Any] in
         let object =
           (try? JSONSerialization.jsonObject(with: Data(board.content.utf8))) as? [String: Any]
@@ -144,9 +151,16 @@ extension WorkspaceStore {
           "hasImage": object["image"] as? String != nil,
         ]
       }
-    let relations = try relations(worldID: worldID)
-    let events = try events(worldID: worldID)
-    let lanes = try chronologyLanes(worldID: worldID)
+    let relations = try relations(worldID: worldID).filter {
+      known.contains($0.sourceID) && known.contains($0.targetID)
+    }
+    let events = try events(worldID: worldID).filter { known.contains($0.sourceID) }
+    func lanePriority(_ lane: ChronologyLane) -> Int {
+      lane.id == chronologyLaneID ? 0 : preferredLaneIDs.contains(lane.id) ? 1 : 2
+    }
+    let lanes = try chronologyLanes(worldID: worldID).filter {
+      includedLaneIDs?.contains($0.id) ?? true
+    }.sorted { lanePriority($0) < lanePriority($1) }
     if let chronologyLaneID, !lanes.contains(where: { $0.id == chronologyLaneID }) {
       throw SynthesisError.notFound
     }
@@ -157,15 +171,22 @@ extension WorkspaceStore {
         ["id": $0.id, "title": $0.title, "kind": $0.kind, "state": $0.state]
       },
       "sections": try db.rows(
-        "SELECT s.parent_id AS parent,s.record_id AS record,s.position FROM record_sections s JOIN records p ON p.id=s.parent_id AND p.world_id=s.world_id JOIN records r ON r.id=s.record_id AND r.world_id=s.world_id WHERE s.world_id=? AND s.archived=0 AND p.archived=0 AND r.archived=0 ORDER BY s.parent_id,s.position LIMIT 100",
-        [worldID]),
+        "SELECT s.parent_id AS parent,s.record_id AS record,s.position FROM record_sections s JOIN records p ON p.id=s.parent_id AND p.world_id=s.world_id JOIN records r ON r.id=s.record_id AND r.world_id=s.world_id WHERE s.world_id=? AND s.archived=0 AND p.archived=0 AND r.archived=0 ORDER BY s.parent_id,s.position",
+        [worldID]
+      ).filter { known.contains($0["parent"] ?? "") && known.contains($0["record"] ?? "") }.prefix(
+        100
+      ).map { $0 },
       "rules": try db.rows(
-        "SELECT r.id,r.system_id AS system,r.kind,r.title,r.body,r.state FROM rules r JOIN records p ON p.id=r.system_id AND p.world_id=r.world_id WHERE r.world_id=? AND r.archived=0 AND p.archived=0 ORDER BY r.position LIMIT 80",
-        [worldID]),
+        "SELECT r.id,r.system_id AS system,r.kind,r.title,r.body,r.state FROM rules r JOIN records p ON p.id=r.system_id AND p.world_id=r.world_id WHERE r.world_id=? AND r.archived=0 AND p.archived=0 ORDER BY r.position",
+        [worldID]
+      ).filter { known.contains($0["system"] ?? "") }.prefix(80).map { $0 },
       "scenarios": try db.rows(
-        "SELECT s.id,s.system_id AS system,s.title,s.situation,s.expectation,s.verdict FROM rule_scenarios s JOIN records r ON r.id=s.system_id AND r.world_id=s.world_id WHERE s.world_id=? AND s.archived=0 AND r.archived=0 ORDER BY s.created_at LIMIT 60",
-        [worldID]),
-      "components": try creativeComponents(worldID: worldID).prefix(80).map {
+        "SELECT s.id,s.system_id AS system,s.title,s.situation,s.expectation,s.verdict FROM rule_scenarios s JOIN records r ON r.id=s.system_id AND r.world_id=s.world_id WHERE s.world_id=? AND s.archived=0 AND r.archived=0 ORDER BY s.created_at",
+        [worldID]
+      ).filter { known.contains($0["system"] ?? "") }.prefix(60).map { $0 },
+      "components": try creativeComponents(worldID: worldID).filter {
+        known.contains($0.record.id) && ($0.parentID.map(known.contains) ?? true)
+      }.prefix(80).map {
         [
           "id": $0.id, "record": $0.record.id, "parent": $0.parentID ?? "",
           "scope": $0.scope.rawValue, "kind": $0.kind.rawValue,
