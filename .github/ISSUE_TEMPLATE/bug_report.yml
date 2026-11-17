@@ -1,0 +1,44 @@
+name: Bug report
+description: Something in Synthesis does not work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting. Please do not paste private lore you would not want public; a short made-up example is fine.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open Timeline\n2. Choose By era\n3. ..."
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Synthesis version
+      description: Synthesis → About, or the release you downloaded.
+      placeholder: "0.0.3"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac
+      placeholder: "macOS 26.1, MacBook Air M3"
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Assistance mode
+      options: ["AI Assisted (Codex)", "AI Assisted (Claude Code)", "Manual", "Not relevant"]
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or logs
+      description: Drag images here. Remove anything private first.

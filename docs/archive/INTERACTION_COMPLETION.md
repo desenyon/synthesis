@@ -41,6 +41,6 @@ Ticks above describe implemented behavior with the recorded code, test and settl
 - Privacy/live: per-instance provider/model caches cannot alter another app or shared defaults; unchanged least-privilege harness flags plus isolation tests; one approved real Codex fixture request passed in 9.312s, with cited prose and two staged changes. Nothing applied. No further live calls.
 - Scope still incomplete: subscription image generation, full editable/coherent map geometry, spatial techniques/cosmology simulation and canon branch merging. Native foreground input/VoiceOver, live-CLI Stop and large-board performance are not certified.
 
-Detailed logs, before/after and contact sheets: [interaction-0.0.2](verification/interaction-0.0.2/README.md). Prior audit A2's physical requirement and unapproved C2/C3 are not ticked by this work.
+Detailed logs, before/after and contact sheets: [interaction-0.0.2](../verification/interaction-0.0.2/README.md). Prior audit A2's physical requirement and unapproved C2/C3 are not ticked by this work.
 
 Published [v0.0.2](https://github.com/desenyon/synthesis/releases/tag/v0.0.2) from `2b792637553ed6d940b0f9d5d4540a6b2b7694a8` after extracted-artifact verification. GitHub asset digest matches the tested ZIP; v0.0.1 remains unchanged.

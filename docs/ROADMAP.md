@@ -23,7 +23,7 @@
 - Settings refinement (2026-11-15): searchable sections and typed writing/navigation preferences, with portable per-world entity/chat defaults. Final verification is recorded in [STATE](STATE.md); no additional theme or composer overhaul is implied.
 
 - Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).
-- Implemented 2026-11-15: subscription-only authentication, stale-revision rejection, structured world context, reviewed spatial/link/rule actions, source-aware Canvas capture/relationship controls, Phosphor icons and grouped navigation. Current evidence/limits: [INTEGRATION_OVERHAUL](INTEGRATION_OVERHAUL.md).
+- Implemented 2026-11-15: subscription-only authentication, stale-revision rejection, structured world context, reviewed spatial/link/rule actions, source-aware Canvas capture/relationship controls, Phosphor icons and grouped navigation. Current evidence/limits: [INTEGRATION_OVERHAUL](archive/INTEGRATION_OVERHAUL.md).
 - Next: persist the full world-index trace; the isolated Codex run with updated flags now passes; expand interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Measure large boards and derived graphs; live/export card content now shares the Synthesis presentation.
 - Controlled-transport Stop/recovery is covered. Next: editor crash recovery, accessibility/trackpad walkthrough, deeper Timeline and Atlas operations.
 - Mechanics is available on every entity: kind-filtered rules, scenarios, explicit canon review and restorable snapshots. Agent rule revisions are stale-checked; proposed scenarios leave conclusions to the creator. Spatial technique trees and automatic simulations remain incomplete.
@@ -46,7 +46,7 @@ Owner-directed native sidebar refinement preserves the existing routes and state
 - Canvas depth (resize, snapping, named groups); Timeline reordering and canon state for events; richer Atlas layers and draggable markers; named map hierarchy and click-to-move markers are implemented.
 - Measured large-world pass and crash recovery done 2026-11-16; VoiceOver walk-through and in-WebKit dense-board rendering remain.
 
-Owner-authorized development prereleases begin at 0.0.1. The public product launch remains 1.0; no public deployment is implied.
+Owner-authorized 0.0.x versions are full GitHub releases (0.0.1–0.0.3 published). The public product launch remains 1.0.
 
 ## 2026-11-15 owner refinement checkpoint
 

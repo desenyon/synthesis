@@ -113,3 +113,9 @@ The owner's follow-up requested horizontal compaction without another redesign a
 ## 2026-11-16 — follow-up development checkpoint
 
 Keep v0.0.1 and its binary intact. Package the verified interaction follow-up as v0.0.2 under the owner's authorization for development prereleases. Native contextual chat floats above secondary workspaces while the Canvas companion remains docked (or takes over a compact workspace). Edits to existing chronology/map/relationship structures go through typed proposals and captured metadata, not executable model UI or unrestricted tools. No new canon permissions, provider credentials or automatic model calls are introduced.
+
+## 2026-11-16 — License and release status (owner-protected)
+
+- **GPL-3.0.** The owner chose GPL-3.0 over MIT, Apache-2.0 and all-rights-reserved. Bundled components (Excalidraw, Dagre, Phosphor: MIT; Inter: OFL) are compatible and keep their own notices in THIRD_PARTY.md, which ships with every release.
+- **0.0.x are full releases.** v0.0.1 and v0.0.2 were published as GitHub pre-releases; the owner asked for 0.0.1, 0.0.2 and 0.0.3 to be full releases. They remain early versions: ad-hoc signed, not notarized, tested on the development Mac. 1.0 stays the public launch.
+- Repository organisation: superseded plans and prompts moved to `docs/archive/`; a docs index, changelog, contributing, security and conduct files, issue/PR templates, CI and Dependabot were added.

@@ -1,7 +1,27 @@
-# App screenshots
+# Screenshots
 
-Refreshed 2026-11-16 for 0.0.2: eight actual native screenshots at 1440×900, inspected in contact sheets. Sidebar is 284pt. These captures use isolated Aster sample data, not the owner's worlds. Artwork is bundled sample imagery; no runtime image generation is implied.
+The README images, refreshed 2026-11-16 for 0.0.3 from the real app with the bundled Aster sample world, at 1440×900 and scaled to 1600 px wide.
 
-Current evidence and commands: [0.0.2 verification](../verification/interaction-0.0.2/README.md). States: conversation-home, canvas, editor, graph, mechanics, atlas-linked (saved as atlas.png), timeline and settings. Capture via `SYNTHESIS_CAPTURE_STATES=... SYNTHESIS_CAPTURE_SIZES=1440x900 ./scripts/verify-ui.sh /tmp/synthesis-shots`, then `uv run --with pillow python scripts/contact-sheets.py /tmp/synthesis-shots` and inspect before copying. Bitmap backing scale depends on the capture display; viewport dimensions remain explicit in capture.log.
+| File | Capture state |
+| --- | --- |
+| `canvas.png`, `canvas-light.png` | `canvas`, `light` |
+| `conversation.png` | `conversation` |
+| `graph.png` | `graph` |
+| `editor.png` | `editor` |
+| `technique-tree.png` | `mechanics-tree` |
+| `timeline.png` | `timeline-overview` |
+| `atlas.png` | `atlas-regions` |
+| `review-checks.png` | `review-checks` |
+| `what-if-review.png` | `review-what-if` |
+| `settings.png` | `settings` |
 
-Background captures establish appearance, not physical interaction, live subscription behavior or generated imagery.
+To refresh:
+
+```sh
+SYNTHESIS_CAPTURE_STATES=canvas,light,conversation,graph,editor,mechanics-tree,timeline-overview,atlas-regions,review-checks,review-what-if,settings \
+SYNTHESIS_CAPTURE_SIZES=1440x900 ./scripts/verify-ui.sh /tmp/synthesis-shots
+uv run --with pillow python scripts/contact-sheets.py /tmp/synthesis-shots   # inspect before copying
+sips -Z 1600 /tmp/synthesis-shots/canvas-1440x900.png --out docs/screenshots/canvas.png
+```
+
+Captures run in the background against an isolated database and never touch your worlds. The sample artwork is bundled and AI-generated.

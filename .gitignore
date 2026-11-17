@@ -1,15 +1,20 @@
-node_modules/
-.next/
-.env*
-!.env.example
-data/
-*.tsbuildinfo
-playwright-report/
-test-results/
-.superpowers/
-.DS_Store
+# Build output
 .build/
 .swiftpm/
 dist/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# Local data and verification scratch
 *.sqlite*
+data/
+test-results/
+
+# Environment
+.env*
+!.env.example
+
+# macOS
 .DS_Store

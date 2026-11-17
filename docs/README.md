@@ -1,0 +1,40 @@
+# Synthesis documentation
+
+## Using Synthesis
+
+| Guide | What it covers |
+| --- | --- |
+| [AI setup](AI_SETUP.md) | Connecting Codex or Claude Code, privacy boundaries, Manual mode, illustration generation |
+| [Mechanics](MECHANICS.md) | Rules, scenarios, canon review, history and technique trees |
+| [Atlas](ATLAS.md) | Named maps, place hierarchy, markers and regions |
+| [Creative components](CREATIVE_COMPONENTS.md) | Notes, facts, checklists and progression tracks |
+| [Settings](SETTINGS.md) | What each preference does and where it is stored |
+
+## Understanding the project
+
+| Document | Purpose |
+| --- | --- |
+| [Product](PRODUCT.md) | Product specification and user journeys |
+| [Architecture](ARCHITECTURE.md) | Stack, modules, data flow, schema and migrations |
+| [Decisions](DECISIONS.md) | Significant decisions with alternatives; owner-protected decisions are marked |
+| [Design direction](UI_DIRECTION.md) and [Sidebar](SIDEBAR.md) | The design system and navigation |
+| [AI activity components](AI_COMPONENTS.md) | Native chat activity rows |
+| [Performance](PERFORMANCE.md) | Measurements on large worlds |
+| [Dependencies](DEPENDENCIES.md) | Canvas dependency maintenance |
+
+## Working on it
+
+| Document | Purpose |
+| --- | --- |
+| [State](STATE.md) | Latest verified status, checks run and known gaps |
+| [Roadmap](ROADMAP.md) | Milestones and what comes next |
+| [Next pass](NEXT_PASS.md) | Owner request ledger: done and remaining scope |
+| [Handoff](HANDOFF.md) | Start here when picking the work up |
+| [Run prompt](RUN_PROMPT.md) | Prompt for a coding agent continuing the work |
+| [Progress](PROGRESS.md) | Dated log of each verified slice |
+| [Audit](AUDIT.md) | The UI audit and the status of each item |
+| [Learnings](LEARNINGS.md) | Operational lessons and the AGENTS.md change ledger |
+| [Releases](releases/) | Notes for each release (also in the [changelog](../CHANGELOG.md)) |
+| [Screenshots](screenshots/README.md) | README images and how to refresh them |
+
+Verification evidence (captures, logs, contact sheets) lives in [verification/](verification/README.md). Superseded plans are kept in [archive/](archive/README.md).

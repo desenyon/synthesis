@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  canvas:
+    name: Canvas (TypeScript)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: CanvasWeb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: CanvasWeb/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  native:
+    name: Native app (Swift)
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Lint
+        run: swift format lint --strict --recursive Sources Tests Package.swift
+      - name: Test
+        run: ./scripts/test.sh
+      - name: Build
+        run: ./scripts/build.sh release

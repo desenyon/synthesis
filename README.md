@@ -1,128 +1,123 @@
+<div align="center">
+
 # Synthesis
 
-A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. Development prerelease [0.0.2](https://github.com/desenyon/synthesis/releases/tag/v0.0.2) ([release notes](docs/releases/0.0.2.md)). **Conversation, Canvas, Library, Graph, Timeline, Atlas, Review and Worlds** are views of one saved world, sharing one design system.
+**A native macOS studio for building fictional worlds.**
+Write freely, connect everything, and let an assistant help without ever rewriting your canon.
+
+[![Release](https://img.shields.io/github/v/release/desenyon/synthesis?label=release&color=5b7fbf)](https://github.com/desenyon/synthesis/releases/latest)
+[![CI](https://github.com/desenyon/synthesis/actions/workflows/ci.yml/badge.svg)](https://github.com/desenyon/synthesis/actions/workflows/ci.yml)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-111111?logo=apple)
+![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
+
+[Download](https://github.com/desenyon/synthesis/releases/latest) · [Features](#features) · [Build from source](#build-from-source) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
 ![Synthesis Canvas with linked character, system and place cards in the Aster sample world](docs/screenshots/canvas.png)
 
-*Canvas — arrange real world records and explore their relationships.*
+</div>
+
+## Why Synthesis
+
+Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis treats a world as one connected database: a character on the Canvas is the same record you edit in the Library, place on the Atlas, cite on the Timeline and see in the Graph.
+
+- **Creative flow first.** Dump an idea without a template. Organise it later.
+- **Canon is deliberate.** Ideas, drafts, proposals and accepted canon stay distinct. Nothing becomes canon until you accept an exact revision.
+- **Local and private.** Everything lives in a local SQLite database. No account, no cloud sync, no telemetry.
+- **Assistance on your terms.** AI Assisted or Manual, switchable anywhere. Assistance runs through your own Claude Code or Codex subscription, with no tools or file access.
+- **Portable.** Export a world as a `.synthesis` file, Markdown or JSON at any time.
+
+## Features
+
+| | |
+| --- | --- |
+| **Conversation**: think with an assistant grounded in your world. Reference lore with `@`; every answer shows what it read, and suggested changes arrive as a review card. | **Canvas**: an offline [Excalidraw](https://github.com/excalidraw/excalidraw) board where record cards stay linked to your library and relationships draw themselves. |
+| ![Conversation with a proposal card](docs/screenshots/conversation.png) | ![Canvas in light mode](docs/screenshots/canvas-light.png) |
+| **Graph**: the relationship network, laid out automatically from stored data. Copy any neighbourhood onto a board. | **Library and editor**: rich text, tags, aliases, links, sections and a details inspector, with canon review as a line diff. |
+| ![Graph of entities and relationships](docs/screenshots/graph.png) | ![Record editor with inspector](docs/screenshots/editor.png) |
+| **Mechanics**: rules, costs, limits and scenarios for power systems, plus a technique tree built from what each technique requires. | **Timeline**: sourced events with free-form dates, nested branches and periods, and Detailed, Compact or By-era views. |
+| ![Technique tree in Mechanics](docs/screenshots/technique-tree.png) | ![Timeline grouped by era](docs/screenshots/timeline.png) |
+| **Atlas**: named maps linked to places, with markers and drawn regions you can reshape. | **Review**: proposals, canon decisions and local consistency checks in one place, including changes sent back from what-if worlds. |
+| ![Atlas map with a selected region](docs/screenshots/atlas.png) | ![Review with consistency checks](docs/screenshots/review-checks.png) |
+
+**Also:** what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a ⌘K command palette · Finder integration for `.synthesis` files.
 
 <details>
-<summary>More app screenshots: Conversation, editor, Graph, Mechanics, Atlas and Settings</summary>
+<summary>More screenshots</summary>
 
-**Conversation** — start with a thought and reference existing lore.
+**What-if changes in Review**
 
-![Conversation home with a shared lore-aware composer and contextual references](docs/screenshots/conversation-home.png)
+![Changes from a what-if world awaiting review](docs/screenshots/what-if-review.png)
 
-**Editor** — write with linked records, sections and explicit canon review.
+**Settings**
 
-![Mira Vale's document editor with tags, aliases and relationship navigation](docs/screenshots/editor.png)
-
-**Graph** — explore relationships derived from the same saved world.
-
-![Knowledge Graph showing seven entities connected by labeled relationships](docs/screenshots/graph.png)
-
-**Timeline** — organize sourced events into editable, collapsible history branches and periods.
-
-![Timeline with a nested history branch, period and sourced events](docs/screenshots/timeline.png)
-
-**Mechanics** — develop rules, costs, techniques and scenarios, then review exact wording for canon.
-
-![Mechanics workspace with rules for the Art of Remembrance](docs/screenshots/mechanics.png)
-
-**Atlas** — place linked locations on a map. This example uses bundled sample artwork.
-
-![Atlas displaying a sample map with linked markers for the Glass Sea, Tidekeepers and Drowned City](docs/screenshots/atlas.png)
-
-**Settings** — searchable preferences for writing, navigation, assistance and each world.
-
-![Redesigned Settings workspace with section navigation, search and General controls](docs/screenshots/settings.png)
+![Settings with section navigation](docs/screenshots/settings.png)
 
 </details>
 
-Screenshots show the actual native development app with the **Aster sample world**, captured at 1440×900. [Capture notes and refresh command](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. [How they are captured](docs/screenshots/README.md).
 
-## Run locally
+## Install
+
+1. Download `Synthesis-<version>-macos-arm64.zip` from the [latest release](https://github.com/desenyon/synthesis/releases/latest).
+2. Unzip and move **Synthesis.app** to Applications.
+3. The app is ad-hoc signed and **not notarized**, so macOS blocks the first launch. Open it once, then choose **System Settings → Privacy & Security → Open Anyway**.
+
+Requires Apple Silicon and macOS 14 or later. Verify the download with the release's `SHA256SUMS.txt`.
+
+## Build from source
 
 ```sh
-export EDITOR=vim VISUAL=vim GIT_EDITOR=vim
+git clone https://github.com/desenyon/synthesis.git
+cd synthesis
 ./scripts/build.sh release
 open dist/Synthesis.app
 ```
 
-The primary checkout is `/Users/desenyon/Developer/synthesis` on `main`, which is also the GitHub default branch. Build and launch `dist/Synthesis.app` here. Other worktree builds are retired.
+Requires macOS 14+ and Xcode 26 (or the Swift 6 Command Line Tools with the macOS 26 SDK). The Canvas web bundle is committed; Node is only needed to change it (`cd CanvasWeb && npm install && npm run build`).
 
-Requires macOS 14+ and Swift 6 Command Line Tools. The canvas bundle is committed; Node is only needed to change it (`cd CanvasWeb && npm install && npm run build`). Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md). [Native Kokonut activity component usage](docs/AI_COMPONENTS.md). Scripts select the compatible installed SDK. [Download **0.0.1** (development prerelease)](https://github.com/desenyon/synthesis/releases/tag/v0.0.1); the public product launch remains 1.0. [Release notes and installation limits](docs/releases/0.0.1.md). The Apple Silicon bundle is ad-hoc signed and not notarized. Package a checked build with `./scripts/package-prerelease.sh`.
+Your data lives in `~/Library/Application Support/Synthesis/synthesis.sqlite`. Set `SYNTHESIS_DATABASE_PATH` to use another file.
 
-## Workspaces
+## Assistant setup
 
-- **Conversation** is the assisted entry point. Pick a mode (Create, Develop, Critique, Simulate, Canonize) and type `@` to reference lore. The shared composer supports attachments and lore references throughout the studio. Actual context retrieval and proposal staging appear in a compact activity list; each answer shows which records were read. When the assistant proposes changes they arrive as a review card: accept or dismiss each record, revision, relationship, event, rule, link or spatial placement; accepted ones become drafts. Chats persist and can be renamed or archived. Without a configured provider the app says so and keeps your message.
-- **AI Assisted / Manual** sits in every workspace bar and is independent of navigation. Manual persists, cancels active work and blocks provider requests in the native core. Every other tool keeps working.
-- **Canvas** runs on the [Excalidraw](https://github.com/excalidraw/excalidraw) engine: draw freely, add shapes, text, images and frames, and place record cards that stay linked to your library. Relationships between entities appear as labelled arrows, and an arrow you draw between two entity cards can become a relationship. An explicit Arrange action uses Dagre and can be undone; PNG export includes Synthesis card styling and artwork. It works offline; nothing is loaded from the network. Synthesis supplies the visible world-record cards, colored connection ports, image previews and compact toolbars; Excalidraw supplies gestures and history. A compact composer expands into a resizable docked companion that shares the conversation.
-- **Graph** uses the open-source Dagre engine to arrange native record cards from entity relationships. Select an entity for its details, edit relationships, or copy a neighbourhood into an editable board. Graph and Atlas keep zoom anchored after panning; buttons zoom around the viewport centre and gestures around the pointer.
-- **Library** holds every document, entity and idea with full-text search, filters and an archive. The editor has rich text, a details inspector (tags, aliases, links, relationships, timeline) and canon review as a line diff.
-- **Mechanics** is an entity tab for power systems, cosmology, organizations or your own categories. Write rules, scenarios and conclusions; inspect history and restore a draft. Techniques and progression steps can require one another, and Mechanics draws the resulting technique tree. Rule canon review compares accepted and proposed wording. Assistant revisions enter Review and cannot silently replace canon. [Mechanics guide](docs/MECHANICS.md).
-- **Timeline** orders sourced events with free-form dates, nested branches and periods. Branches organize alternate histories; they do not duplicate or merge canon. Switch between Detailed, Compact and By era views, and move events earlier or later. **Atlas** manages named maps linked to place records and parent maps. Each keeps its own image, markers and drawn regions (outlines linked to records, reshaped by dragging their points); switching maps, renaming, moving markers and restoring an image preserve other maps. The assistant can propose empty maps and placements for review. [Atlas guide](docs/ATLAS.md).
-- **Review** gathers what is waiting on you: AI proposals from every conversation, drafts that have moved past accepted canon, changes sent back from what-if worlds, and a local consistency check (clashing names, one-way relationships recorded both ways, dates out of order, tag spellings, unlinked mentions, unconnected entities) that needs no model.
+Synthesis talks to **Codex** (ChatGPT subscription) or **Claude Code** (Claude subscription) installed on your Mac. There are no API keys to enter: sign in to the CLI once (`codex login`, or run `claude`), then pick it in **Settings → Assistant**. Each request runs in an empty scratch folder with tools, file access and your CLI configuration disabled. Manual mode blocks every request in the core. Details: [AI setup](docs/AI_SETUP.md).
 
-Nothing is hard-deleted: removing a record, conversation, board, event or relationship archives it and offers Undo. No AI output becomes canon without your explicit acceptance of an exact revision.
-
-## Worlds and setup
-
-Use the world menu → **All worlds** to browse, search, create or open a world. **Save world file** exports a portable `.synthesis` snapshot; opening it creates an independent copy with fresh identifiers and preserved internal links. It includes rich text, images, boards, conversations, proposals, rules and history. The live copy stays in the local SQLite database: saving an archive is an explicit snapshot, not continuous folder synchronization. Files are private world data; they contain no provider credentials. Double-clicking a `.synthesis` file in Finder asks before opening it as a new world.
-
-**What-ifs.** World menu → **New what-if from …** copies the open world into a separate world to explore freely. **Send changes to …** previews the differences and sends the clean ones to the original's Review as one proposal; text edited in both worlds is listed but never sent. Nothing in the original changes until you accept it.
-
-**Recovery.** Editor text that never reached a saved revision (a crash, forced quit or failed save) is kept on this device; reopening the page offers Restore or Discard.
-
-Markdown, JSON and image-only exports are available from Settings and the File menu. Settings is a searchable workspace with **General, Writing, Assistant, This world and Data** sections. Set text size/reading width, spelling and smart punctuation, word counts, Library previews, sidebar counts/history, launch workspace and Return versus Command–Return to send. New entity types and conversation modes can default per world; these travel in portable world files. Existing rich formatting is preserved. The setup flow appears only for a fresh installation. Codex is recommended; an existing provider choice is preserved. The illustration library (Canvas and Atlas) can **Generate with Codex**: one explicit request per press, carrying only your description; chat never generates images. See [AI setup](docs/AI_SETUP.md).
-
-Every content workspace has the shared contextual composer in Assisted mode. Expand it to read the conversation alongside the current page. The open record is included as context. Manual removes these controls and blocks requests in the core.
-
-## Keys
+## Keyboard shortcuts
 
 | Shortcut | Action |
-| - | - |
+| --- | --- |
 | ⌘K | Search and commands |
 | ⌘1 – ⌘7 | Conversation, Canvas, Library, Graph, Timeline, Atlas, Review |
-| ⌘O / ⇧⌘S | Open / save a portable world snapshot |
 | ⌘8 / ⌘9 | Worlds / Settings |
 | ⌘N / ⇧⌘N | New record / new conversation |
+| ⌘O / ⇧⌘S | Open / save a `.synthesis` world file |
 | ⇧⌘I | Import Markdown or text files |
-| @ in a message | Reference lore; ↑↓ choose, ↵ insert |
-| ⌘\ | Toggle navigation |
 | ⇧⌘M | Toggle AI Assisted / Manual |
+| ⌘\ | Toggle navigation |
 | ⌘[ | Back from a record |
-| Canvas | Excalidraw's shortcuts: 1–0 tools, V select, H hand, A arrow, ⌫ delete, ⌘Z undo, ⌘D duplicate, ⌘G group |
+| `@` in a message | Reference lore (↑↓ choose, ↵ insert) |
 
-The 312pt sidebar groups workspaces, world categories and real conversation history on a restrained graphite material. It collapses to a 72pt rail; Search and appearance remain available. Native transparency has an opaque accessibility fallback, and reduced-motion preferences are respected. [Sidebar design and verification](docs/SIDEBAR.md). Authored controls use bundled Phosphor icons and Inter typography in both native views and Canvas. The Graph shares stored relationships with Canvas, but keeps its own derived layout.
+Canvas also supports Excalidraw's own shortcuts (V select, H hand, A arrow, ⌘D duplicate, ⌘G group).
 
-On Canvas, double-click a card to open its record. Draw an arrow from one entity card to another to propose a relationship. Select cards and choose Reference to mention them in the conversation; Add ▸ Artwork puts a picture on the selected card. "Show on canvas" in a record's menu finds or places its card. Board text is explicitly board-only until you select **Save as idea**, which creates a linked Library record. Selecting a relationship opens its shared native inspector. The assistant can propose a new board, card placement or an Atlas marker; approval flushes and reloads the live scene without discarding other drawings.
-
-## Development checks
+## Development
 
 ```sh
-./scripts/check.sh                                # strict lint, tests, optimized build
-./scripts/verify-ui.sh docs/verification/latest   # captures every state; stays in the background
-./scripts/selftest-ui.sh docs/verification/latest # posts real pointer and key events to the app
-uv run --with pillow python scripts/contact-sheets.py docs/verification/latest --prune
+./scripts/check.sh                       # strict lint, tests, optimized build
+./scripts/verify-ui.sh /tmp/captures     # renders every app state in the background
+./scripts/selftest-ui.sh /tmp/selftest   # real pointer and key events (takes focus briefly)
+cd CanvasWeb && npm test && npm run typecheck
 ```
 
-The native suite (includes the rules backend) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Eleven additional Node tests cover canvas geometry, relationship state, nested groups and session isolation (`cd CanvasWeb && npm test`). Visual checks use the real native window and bundled WebKit engine, never HTML previews. The background runner builds a temporary app, requires a fresh isolated database and refuses model requests. It does not overwrite the running bundle. Background sheets render their real content inline to avoid modal activation; native modal interaction requires the explicit foreground test. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the current audit and limits are in [INTEGRATION_OVERHAUL](docs/INTEGRATION_OVERHAUL.md). Full strict lint, the native suite and optimized build pass on the consolidated checkout. Mechanics provides rule and scenario editing, review and history on every entity. Spatial technique trees and automatic simulations remain future work.
+The code is split into `SynthesisCore` (SQLite persistence, canon, proposals, retrieval and the subscription harness), `SynthesisUI` (SwiftUI workspaces and the design system) and `CanvasWeb` (the Excalidraw integration). Start with [Architecture](docs/ARCHITECTURE.md), [Product](docs/PRODUCT.md) and the [documentation index](docs/README.md). Coding agents should read [AGENTS.md](AGENTS.md) first.
 
-The assistant uses only Claude Code or Codex with your subscription. Direct API settings and transport have been removed; see [AI setup](docs/AI_SETUP.md).
+## Project status
 
-Data: `~/Library/Application Support/Synthesis/synthesis.sqlite`, overridable with `SYNTHESIS_DATABASE_PATH`. Subscription credentials stay with Claude Code or Codex; Synthesis does not read or store them. See [AI setup](docs/AI_SETUP.md), [architecture](docs/ARCHITECTURE.md), [design direction](docs/UI_DIRECTION.md), [roadmap](docs/ROADMAP.md).
+Synthesis is in early releases (0.0.x): usable and tested on the development Mac, but not yet the 1.0 launch. Current state and verification: [STATE](docs/STATE.md). What's next: [ROADMAP](docs/ROADMAP.md). Release history: [CHANGELOG](CHANGELOG.md).
 
-Typing in ⌘K also offers to capture the text as an idea. Worlds export as a folder of Markdown files or as complete JSON; Markdown and text files import as drafts.
+## Contributing
 
-Current limits: one owner-approved isolated Codex request passed in the 0.0.2 audit, returning cited prose and a staged proposal without applying changes. Codex currently emits completed updates, not token-by-token text. Live streaming/Stop UI, large boards/graphs, trackpad and VoiceOver remain unverified. PNG export includes actual card typography, state and artwork; editor controls and ports are not part of the exported illustration. Bundled AI-generated sample artwork is optional; on-demand image generation is not implemented. Earlier evidence under `docs/verification` is historical.
+Issues and pull requests are welcome. Please read [CONTRIBUTING](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Report security problems privately as described in [SECURITY](SECURITY.md).
 
-To build a separate review bundle without replacing a running app: `./scripts/build.sh release dist/Synthesis-review.app`. Use the primary checkout above; historical worktree paths in old verification logs are not current launch targets.
+## License
 
-Audit repairs are tracked in [AUDIT.md](docs/AUDIT.md) and [PROGRESS.md](docs/PROGRESS.md), with per-item native captures. Entity sections remain searchable but have their own Library filter; entities open on Overview and remember the selected tab for the session. Saved `Factions` categories display as **Systems** without altering their stored value. Canvas Fit reserves space for its composer and tools.
-
-The current audit has completed 19 items; A2 still needs its live Canvas theme check, and C2 remains excluded pending owner approval. The latest composer directive authorizes the shared composer rebuild; the old C3-specific pill proposal was not adopted. Worlds now shows saved covers and activity with editable descriptions. Timeline can create an event in an empty world with its source draft. Markdown export preserves supported rich formatting and entity sections. Settings now uses searchable sections and individually explained import/export actions; provider details stay behind a disclosure. See [STATE](docs/STATE.md) for exact verification limits, including the unrun foreground modal test.
-
-Creative components let you add notes, facts, checklists and progression tracks to workspaces and entity pages. They are ordinary versioned lore, usable in Manual mode and available to reviewed assistant proposals. [Usage and data contract](docs/CREATIVE_COMPONENTS.md).
-
-The 0.0.2 interaction pass adds safe conversation recovery, workspace/selection-aware requests, reviewed edits to existing chronology/maps/relationships and stable Canvas reloads. See the [completion ledger](docs/INTERACTION_COMPLETION.md) and [verification evidence](docs/verification/interaction-0.0.2/README.md) for exact coverage and remaining limits.
+Synthesis is free software under the [GNU General Public License v3.0](LICENSE). Bundled third-party components (Excalidraw, Dagre, Phosphor icons, Inter) keep their own licenses; see [THIRD_PARTY](THIRD_PARTY.md).
