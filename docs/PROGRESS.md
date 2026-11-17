@@ -330,3 +330,9 @@ Restrained shared motion for selection, panels, companions, relationship navigat
 ### Expansion #9 — contextual tools (2026-11-17)
 
 Audited workspace toolbars and fixed conflicting Atlas modes, missing marker Undo, empty marker pickers, stale Graph relationship form settings and ineffective Canvas drawing-style controls. 181 native tests / 45 suites, lint and optimized build; Canvas typecheck, 15 tests, bundle build and 28 embedded engine checks passed. 24 captures inspected at both sizes. [Evidence](verification/expansion-009/README.md). Next #10: optional contextual inspectors across workspaces.
+
+## 2026-11-17 — expansion #10, contextual inspectors
+
+Implemented the optional inspector for every workspace and extended the editor inspector to Mechanics. Read-only projections expose current stored properties and connected records, with explicit Open/Reference actions. A toolbar control and ⌥⌘I toggle visibility; compact windows float the inspector below the toolbar. Tests reject foreign/archived objects and preserve navigation, Manual mode and pending proposals. Canvas selection feeds the same inspector; dock sizing respects companion takeover.
+
+`./scripts/check.sh`: 184 tests / 46 suites, strict lint and optimized build passed. Inspected all 32 initial captures and 8 refinement captures in contact sheets. Fixed a wrapped Conversations label and WKWebView bleed-through found in the first captures; recaptured both sizes. No foreground interaction, provider request, app restart, release or AGENTS edit. [Evidence](verification/expansion-010/README.md). Next: #11 reversible breadcrumbs/history.

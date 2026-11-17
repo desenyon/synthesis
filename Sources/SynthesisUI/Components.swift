@@ -582,6 +582,12 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
       Spacer(minLength: 8)
       trailing()
       if global {
+        if studio.selectedRecord == nil {
+          IconButton(
+            icon: "sidebar.right", label: "Toggle inspector", t: studio.t,
+            active: studio.workspaceInspector
+          ) { studio.toggleWorkspaceInspector() }
+        }
         if studio.creativeScope != nil {
           IconButton(icon: "rectangle.on.rectangle", label: "Creative components", t: studio.t) {
             studio.sheet = .components

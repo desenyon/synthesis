@@ -362,6 +362,7 @@ struct TimelineScreen: View {
       }
       IconMenu(icon: "ellipsis", label: "Event actions", t: studio.t, size: 22) {
         Button("Edit…") { begin(event) }
+        Button("Inspect") { studio.inspect(.event(event.id)) }
         if let source { Button("Open source record") { studio.openRecord(source) } }
         moveActions(event)
         Button("Remove") { remove(event) }
@@ -369,6 +370,7 @@ struct TimelineScreen: View {
     }.padding(.horizontal, 8).frame(height: 34).hoverFill(studio.t, radius: 7)
       .contextMenu {
         Button("Edit…") { begin(event) }
+        Button("Inspect") { studio.inspect(.event(event.id)) }
         if let source { Button("Open source record") { studio.openRecord(source) } }
         moveActions(event)
         Divider()
@@ -658,6 +660,7 @@ private struct EventCard: View {
       Spacer(minLength: 0)
       IconMenu(icon: "ellipsis", label: "Event actions", t: t, size: 24) {
         Button("Edit…", action: edit)
+        Button("Inspect") { studio.inspect(.event(event.id)) }
         Button("Move earlier") { moveEarlier?() }.disabled(moveEarlier == nil)
         Button("Move later") { moveLater?() }.disabled(moveLater == nil)
         Button("Remove", action: remove)
@@ -670,6 +673,7 @@ private struct EventCard: View {
       .trackedHover($hover)
       .contextMenu {
         Button("Edit…", action: edit)
+        Button("Inspect") { studio.inspect(.event(event.id)) }
         if let source { Button("Open source record") { studio.openRecord(source) } }
         Button("Move earlier") { moveEarlier?() }.disabled(moveEarlier == nil)
         Button("Move later") { moveLater?() }.disabled(moveLater == nil)

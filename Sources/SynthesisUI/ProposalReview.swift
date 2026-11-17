@@ -62,6 +62,7 @@ struct ProposalCard: View {
     .overlay(RoundedRectangle(cornerRadius: Metric.cardRadius).stroke(t.hairline, lineWidth: 1))
     .accessibilityElement(children: .contain)
     .accessibilityLabel("Proposed changes: \(proposal.summary)")
+    .contextMenu { Button("Inspect proposal") { studio.inspect(.proposal(proposal.id)) } }
     .disabled(studio.reviewingProposal)
     .animation(reduceMotion ? nil : Motion.panelAnimation, value: expanded)
     .animation(reduceMotion ? nil : Motion.panelAnimation, value: proposal.changes.map(\.status))
@@ -421,6 +422,7 @@ struct ContextDisclosure: View {
                 StateBadge(state: source.record.state, t: t)
               }.padding(.horizontal, 8).frame(height: 28).hoverFill(t, radius: 6)
             }.buttonStyle(.plain)
+              .contextMenu { Button("Inspect source") { studio.inspect(.record(source.id)) } }
           }
         }.padding(6)
           .background(

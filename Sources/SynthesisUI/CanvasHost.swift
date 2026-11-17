@@ -505,6 +505,10 @@ struct CanvasBoardContent {
     case "selection":
       selection = message["recordIDs"] as? [String] ?? []
       selectionWithArt = message["withArt"] as? [String] ?? []
+      if studio.destination == .canvas && studio.selectedRecord == nil {
+        studio.followInspectionSelection()
+      }
+      studio.objectWillChange.send()
     case "change":
       store(message, migrated: false)
       resumeFlush()

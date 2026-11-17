@@ -1,0 +1,9 @@
+CAPTURE light-inspector-library 1440x900, bitmap 1440x900, 141ms
+CAPTURE inspector-canvas 1440x900, bitmap 1440x900, 162ms
+CAPTURE inspector-empty 1440x900, bitmap 1440x900, 122ms
+CAPTURE inspector-mechanics 1440x900, bitmap 1440x900, 145ms
+CAPTURE light-inspector-library 1024x768, bitmap 1024x768, 94ms
+CAPTURE inspector-canvas 1024x768, bitmap 1024x768, 125ms
+CAPTURE inspector-empty 1024x768, bitmap 1024x768, 107ms
+CAPTURE inspector-mechanics 1024x768, bitmap 1024x768, 116ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-010/refined

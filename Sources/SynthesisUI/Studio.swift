@@ -109,7 +109,9 @@ public struct Toast: Identifiable {
   @Published public var contexts: [String: [ContextSource]] = [:]
   @Published public var conversationID: String?
   @Published public var selectedRecord: LoreRecord?
-  @Published public var destination: Destination = .chat
+  @Published public var destination: Destination = .chat {
+    didSet { if oldValue != destination { inspectionTarget = nil } }
+  }
   @Published public var mode: WorkspaceMode = .assisted
   @Published public var dark = false
   @Published public var worldCover: NSImage?
@@ -135,8 +137,12 @@ public struct Toast: Identifiable {
   @Published public var editorSave: (() -> Bool)?
   @Published public var canvasBoardID: String?
   @Published public var mapBoardID: String?
-  @Published var graphSelectedID: String?
-  @Published var atlasSelectedID: String?
+  @Published var graphSelectedID: String? {
+    didSet { if oldValue != graphSelectedID { inspectionTarget = nil } }
+  }
+  @Published var atlasSelectedID: String? {
+    didSet { if oldValue != atlasSelectedID { inspectionTarget = nil } }
+  }
   @Published var timelineLaneID: String?
   @Published var pendingEventSourceID: String?
   private var pendingSubmission: (world: String, conversation: String, text: String)?
@@ -165,6 +171,8 @@ public struct Toast: Identifiable {
   @Published public var libraryCategory: String?
   @Published public var newRecordKind = "lore"
   @Published public var inspector = true
+  @Published var workspaceInspector = false
+  @Published var inspectionTarget: InspectionTarget?
   @Published public var preferences = StudioPreferences()
   @Published public var worldDefaults = WorldPreferences()
   /// Set only by the isolated capture runner so a screenshot can show a selected state.
@@ -184,9 +192,14 @@ public struct Toast: Identifiable {
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
+  func dockedInspectorWidth(windowWidth: Double) -> Double {
+    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Metric.rail : Metric.sidebar)
+    return workspaceInspector && selectedRecord == nil && windowWidth - sidebar >= 980 ? 300 : 0
+  }
   public func canvasVisible(windowWidth: Double) -> Bool {
     let sidebar = windowWidth < 760 ? 0 : (collapsed ? Metric.rail : Metric.sidebar)
-    let takeover = mode == .assisted && companionExpanded && windowWidth - sidebar < 860
+    let contentWidth = windowWidth - sidebar - dockedInspectorWidth(windowWidth: windowWidth)
+    let takeover = mode == .assisted && companionExpanded && contentWidth < 860
     return destination == .canvas && selectedRecord == nil && !takeover
   }
   public var t: Theme { Theme(dark: dark, oled: preferences.darkPalette == .oled) }
@@ -273,6 +286,7 @@ public struct Toast: Identifiable {
       companionWidth = min(460, max(320, saved))
     }
     inspector = try store.preference("inspector") != "hidden"
+    workspaceInspector = try store.preference("workspace-inspector") == "shown"
     let savedDestination = try store.preference("destination").flatMap(Destination.init(rawValue:))
     destination =
       Destination(rawValue: preferences.launchWorkspace)
@@ -584,6 +598,7 @@ public struct Toast: Identifiable {
       atlasSelectedID = nil
       timelineLaneID = nil
       pendingEventSourceID = nil
+      inspectionTarget = nil
       companionExpanded = false
       libraryCategory = nil
       let nextDefaults = try store.worldPreferences(worldID: id)

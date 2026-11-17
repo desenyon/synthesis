@@ -232,7 +232,7 @@ struct RelationshipGraph: View {
           .frame(maxHeight: .infinity, alignment: .top).padding(.top, 14)
         }
         VStack {
-          if let entity = nodes.first(where: { $0.id == selected }) {
+          if !studio.workspaceInspector, let entity = nodes.first(where: { $0.id == selected }) {
             detail(entity).frame(
               maxWidth: .infinity, alignment: studio.companionExpanded ? .leading : .trailing
             )
@@ -352,6 +352,7 @@ struct RelationshipGraph: View {
       .position(x: point(entity.id, size).x, y: point(entity.id, size).y)
       .contextMenu {
         Button("Open record") { studio.openRecord(entity) }
+        Button("Inspect") { studio.inspect(.record(entity.id)) }
         Button("Connect from here…") {
           beginRelationship(from: entity.id)
         }.disabled(entities.count < 2)
@@ -439,6 +440,7 @@ struct RelationshipGraph: View {
       }
       HStack(spacing: 6) {
         Button("Open record") { studio.openRecord(entity) }
+        Button("Inspect") { studio.inspect(.record(entity.id)) }
           .buttonStyle(QuietButton(t: studio.t, primary: true))
         Button("Copy neighbourhood") { transferToCanvas() }.buttonStyle(QuietButton(t: studio.t))
       }

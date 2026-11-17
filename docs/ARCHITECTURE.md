@@ -157,3 +157,7 @@ Migration 0014 adds world-scoped `record_artwork` revisions with an active-image
 ### Shared interaction feedback
 
 `Interaction.swift` owns native transient hover lifecycle. `ConnectedRoot` supplies a world/workspace/object scope; scope changes, disabled controls, disappearance and app/window deactivation clear hover. Motion tokens in `Theme.swift` provide restrained feedback, panel and workspace transitions, with accessibility Reduce Motion respected. No interaction state is persisted as lore.
+
+### Contextual inspection
+
+`ObjectInspection.swift` builds read-only, active-world projections for records, events, chronology lanes, maps, canvas boards, relationships, conversations, proposals and world identity. `ObjectInspector` follows current selection or an explicitly inspected reference without navigating the main view. Visibility persists; a 300pt dock becomes a dismissible overlay below the toolbar in narrow windows. Native frosted backing prevents the persistent WKWebView from drawing through the floating inspector. The editor retains its existing editable inspector, also available in Mechanics. Inspection never submits a model request or accepts a proposal.

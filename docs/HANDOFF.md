@@ -16,6 +16,10 @@ Start here when picking up Synthesis.
 3. [EXPANSION](EXPANSION.md) and [EXPANSION_SOURCE](EXPANSION_SOURCE.md): all 394 requirements, individual acceptance and exact source. Then [ROADMAP](ROADMAP.md) and [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md).
 4. [ARCHITECTURE](ARCHITECTURE.md): modules, migrations (0001–0014), portable format v8, JSON schema 11.
 
+## Active expansion
+
+All 394 requirements remain individually tracked in EXPANSION. **#1–#10 verified; #11 navigation history is next.** Latest check: 184 tests / 46 suites, strict lint and optimized build. #10 has 40 inspected background captures; no foreground events or subscription requests.
+
 ## Current shape
 
 Native SwiftUI/AppKit app over SQLite, with the Canvas on an embedded offline Excalidraw bundle (`CanvasWeb/` → `Sources/SynthesisUI/CanvasBundle`). Workspaces: Conversation, Canvas, Library and editor, Graph, Timeline, Atlas, Review, Worlds, Settings, plus Mechanics on entities. The assistant is Codex or Claude Code through the creator's own subscription, with no tools or files; Manual mode blocks requests in the core.

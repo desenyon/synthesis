@@ -405,7 +405,9 @@ struct AtlasScreen: View {
         }
         Spacer()
         HStack(alignment: .bottom) {
-          if let record = studio.records.first(where: { $0.id == selected }) {
+          if !studio.workspaceInspector,
+            let record = studio.records.first(where: { $0.id == selected })
+          {
             HStack(spacing: 10) {
               CategoryTile(record: record, t: studio.t, size: 30)
               VStack(alignment: .leading, spacing: 2) {

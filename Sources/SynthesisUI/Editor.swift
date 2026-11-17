@@ -101,7 +101,7 @@ struct EditorScreen: View {
           } else {
             writing.frame(maxWidth: .infinity, maxHeight: .infinity)
           }
-          if studio.inspector && !mechanicsVisible {
+          if studio.inspector {
             Rectangle().fill(studio.t.hairline).frame(width: 1)
             RecordInspector(
               studio: studio, record: record, flush: { save() },

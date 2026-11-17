@@ -184,7 +184,10 @@ struct ConversationStudio: View {
                 )
                 .hoverFill(studio.t, radius: 10)
             }.buttonStyle(.plain).help("Reference \(record.title) in your message")
-              .contextMenu { Button("Open record") { studio.openRecord(record) } }
+              .contextMenu {
+                Button("Open record") { studio.openRecord(record) }
+                Button("Inspect") { studio.inspect(.record(record.id)) }
+              }
           }
         }
       }

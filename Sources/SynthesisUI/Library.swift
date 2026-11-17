@@ -263,6 +263,7 @@ struct RecordRow: View {
           }
         } else {
           Button("Open") { studio.openRecord(record) }
+          Button("Inspect") { studio.inspect(.record(record.id)) }
           if studio.mode == .assisted {
             Button("Reference in conversation") {
               studio.reference(record)

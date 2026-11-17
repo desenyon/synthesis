@@ -267,6 +267,7 @@ final class StudioWindow: NSWindow {
     }
     view.addItem(.separator())
     item(view, "Toggle Navigation", #selector(toggleSidebar), "\\")
+    item(view, "Toggle Inspector", #selector(toggleInspector), "i", [.command, .option])
     item(view, "Toggle AI Assisted / Manual", #selector(toggleMode), "m", [.command, .shift])
     item(view, "Toggle Appearance", #selector(toggleTheme), "l", [.command, .shift])
     view.addItem(.separator())
@@ -330,6 +331,13 @@ final class StudioWindow: NSWindow {
     if all.indices.contains(sender.tag) { studio.navigate(all[sender.tag]) }
   }
   @objc func toggleSidebar() { studio.toggleSidebar() }
+  @objc func toggleInspector() {
+    if studio.selectedRecord == nil {
+      studio.toggleWorkspaceInspector()
+    } else {
+      studio.toggleInspector()
+    }
+  }
   @objc func toggleMode() { studio.setMode(studio.mode == .assisted ? .manual : .assisted) }
   @objc func toggleTheme() {
     studio.toggleTheme()

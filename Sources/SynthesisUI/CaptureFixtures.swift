@@ -5,6 +5,11 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "inspector-library", "light-inspector-library", "manual-inspector-library",
+    "inspector-graph", "inspector-canvas", "inspector-atlas", "light-inspector-atlas",
+    "inspector-event", "inspector-lane", "inspector-conversation", "inspector-review",
+    "inspector-worlds", "inspector-settings", "inspector-empty", "inspector-hidden",
+    "inspector-mechanics",
     "composer-attached", "light-composer-attached", "composer-context", "light-composer-context",
     "composer-browser", "composer-overflow", "composer-expanded",
     "composer-companion", "light-composer-companion", "composer-command-return",
@@ -249,6 +254,39 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    let inspectorStates = [
+      "inspector-library": "library", "light-inspector-library": "light-library",
+      "manual-inspector-library": "library", "inspector-graph": "graph",
+      "inspector-canvas": "canvas", "inspector-atlas": "atlas",
+      "light-inspector-atlas": "atlas", "inspector-event": "timeline",
+      "inspector-lane": "timeline", "inspector-conversation": "conversation",
+      "inspector-review": "review", "inspector-worlds": "worlds",
+      "inspector-settings": "settings", "inspector-empty": "empty-library",
+      "inspector-hidden": "library", "inspector-mechanics": "mechanics",
+    ]
+    if let base = inspectorStates[state] {
+      configureConnectedCapture(base, board: board, conversation: conversation)
+      workspaceInspector = state != "inspector-hidden"
+      if state == "inspector-mechanics" { inspector = true }
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      if state.hasSuffix("-library"), let record = records.first(where: { $0.title == "Mira Vale" })
+      {
+        inspectionTarget = .record(record.id)
+      }
+      if state == "inspector-graph" {
+        graphSelectedID = records.first { $0.title == "Mira Vale" }?.id
+      }
+      if state == "inspector-event", let event = try? store.events(worldID: worldID).first {
+        inspectionTarget = .event(event.id)
+      }
+      if state == "inspector-lane", let lane = try? store.chronologyLanes(worldID: worldID).first {
+        inspectionTarget = .lane(lane.id)
+      }
+      // Preserve Mechanics' existing on-appear fixture selection.
+      if state != "inspector-mechanics" { captureHint = state }
+      return
+    }
     _ = flushEditor()
     editorSave = nil
     let stress = state.contains("sidebar-long") || state == "sidebar-history"
@@ -309,6 +347,8 @@ extension Studio {
     }
     collapsed = ["collapsed", "light-collapsed", "settings-collapsed"].contains(state)
     inspector = true
+    workspaceInspector = false
+    inspectionTarget = nil
     libraryCategory = nil
     canvasBoardID = board.isEmpty ? nil : board
     companionExpanded = state.hasSuffix("-companion") || state == "companion"

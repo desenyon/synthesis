@@ -14,6 +14,7 @@ public struct ConnectedRoot: View {
       let compact = geo.size.width < 760
       let rail = studio.collapsed
       let column: CGFloat = compact ? 0 : (rail ? Metric.rail : Metric.sidebar)
+      let dockInspector = studio.dockedInspectorWidth(windowWidth: geo.size.width) > 0
       ZStack(alignment: .topLeading) {
         studio.t.sidebar.ignoresSafeArea()
         // The canvas engine's web view is mounted here once and never moved. The Canvas
@@ -37,23 +38,45 @@ public struct ConnectedRoot: View {
               }
 
           }
-          workspace.id("\(studio.worldID)#\(studio.captureNonce)")
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // Canvas is mounted underneath this native layout. An opaque background
-            // here hides the entire engine while its accessibility tree stays alive.
-            .background(
-              studio.destination == .canvas && studio.selectedRecord == nil
-                ? Color.clear : studio.t.background
-            )
-            .overlay(alignment: .leading) {
-              Rectangle().fill(studio.t.hairline).frame(width: 1).allowsHitTesting(false)
+          HStack(spacing: 0) {
+            workspace.id("\(studio.worldID)#\(studio.captureNonce)")
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
+              // Canvas is mounted underneath this native layout. An opaque background
+              // here hides the entire engine while its accessibility tree stays alive.
+              .background(
+                studio.destination == .canvas && studio.selectedRecord == nil
+                  ? Color.clear : studio.t.background
+              )
+              .overlay(alignment: .leading) {
+                Rectangle().fill(studio.t.hairline).frame(width: 1).allowsHitTesting(false)
+              }
+              .environment(\.barInset, max(0, Metric.chrome - column - 12))
+              .animation(reduceMotion ? nil : Motion.workspaceAnimation, value: studio.destination)
+              .animation(
+                reduceMotion ? nil : Motion.workspaceAnimation, value: studio.selectedRecord?.id
+              )
+              .animation(
+                reduceMotion ? nil : Motion.panelAnimation, value: studio.companionExpanded)
+            if dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
+              Rectangle().fill(studio.t.hairline).frame(width: 1)
+              ObjectInspector(studio: studio)
+                .frame(width: 300)
+                .transition(Motion.panelTransition)
             }
-            .environment(\.barInset, max(0, Metric.chrome - column - 12))
-            .animation(reduceMotion ? nil : Motion.workspaceAnimation, value: studio.destination)
-            .animation(
-              reduceMotion ? nil : Motion.workspaceAnimation, value: studio.selectedRecord?.id
-            )
-            .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.companionExpanded)
+          }.overlay(alignment: .trailing) {
+            if !dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
+              ObjectInspector(studio: studio).frame(width: 300)
+                .clipShape(RoundedRectangle(cornerRadius: Metric.floatingRadius))
+                .overlay(
+                  RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
+                    studio.t.hairline, lineWidth: 1)
+                )
+                .shadow(color: studio.t.shadow, radius: 12, x: -4, y: 4)
+                .padding(.top, Metric.bar + 10).padding([.trailing, .bottom], 12)
+                .transition(Motion.panelTransition)
+            }
+          }.animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.workspaceInspector)
+
         }
         HStack(spacing: 0) {
           Color.clear.frame(width: 84, height: 1)
