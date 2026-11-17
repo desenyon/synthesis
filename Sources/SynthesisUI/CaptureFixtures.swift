@@ -34,7 +34,7 @@ extension Studio {
     "graph-companion", "atlas-companion", "light-atlas-companion", "editor-recovered",
     "what-if-new", "what-if-send",
     "review-what-if", "worlds-what-if", "mechanics-tree", "mechanics-requires", "atlas-regions",
-    "atlas-drawing",
+    "atlas-drawing", "timeline-compact", "timeline-overview",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -539,7 +539,8 @@ extension Studio {
       "graph-companion":
       destination = .knowledge
     case "review", "review-canon", "review-checks": destination = .review
-    case "timeline", "empty-timeline", "timeline-edit", "timeline-companion":
+    case "timeline", "empty-timeline", "timeline-edit", "timeline-companion", "timeline-compact",
+      "timeline-overview":
       destination = .timeline
       if state != "empty-timeline" {
         perform {
@@ -551,6 +552,16 @@ extension Studio {
             _ = try store.saveChronologyEvent(
               worldID: worldID, id: nil, title: "The first charts", date: "Year 12", source: nil,
               order: nil, laneID: period.id)
+            let tides = try store.createChronologyLane(
+              worldID: worldID, name: "The Long Tide", kind: "period")
+            for (title, date) in [
+              ("The ledger is sealed", "Year 40"), ("Oren's crossing", "Year 52"),
+              ("The lamps go dark", "Year 61"),
+            ] {
+              _ = try store.saveChronologyEvent(
+                worldID: worldID, id: nil, title: title, date: date, source: nil, order: nil,
+                laneID: tides.id)
+            }
             try reload()
           }
         }

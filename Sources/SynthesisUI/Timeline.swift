@@ -3,6 +3,18 @@ import SynthesisCore
 
 /// Chronology of sourced events. Date labels keep the world's own language; ordering is an
 /// optional position and never invents calendar precision.
+/// How much of each event Timeline shows. Remembered on this device only.
+enum TimelineDensity: String, CaseIterable {
+  case detailed, compact, overview
+  var title: String {
+    switch self {
+    case .detailed: return "Detailed"
+    case .compact: return "Compact"
+    case .overview: return "By era"
+    }
+  }
+}
+
 struct TimelineScreen: View {
   @ObservedObject var studio: Studio
   @State private var lanes: [ChronologyLane] = []
@@ -22,6 +34,8 @@ struct TimelineScreen: View {
   @State private var laneStart = ""
   @State private var laneEnd = ""
   @State private var events: [WorldEvent] = []
+  @State private var density = TimelineDensity.detailed
+  @State private var foldedEras: Set<String> = []
   @State private var query = ""
   @State private var editing: WorldEvent?
   @State private var composing = false
@@ -94,6 +108,14 @@ struct TimelineScreen: View {
           }
         }
         Spacer()
+        SegmentedSwitch(
+          choices: TimelineDensity.allCases.map {
+            .init(value: $0, title: $0.title, help: "Show \($0.title.lowercased())")
+          }, selected: density, label: "Timeline zoom", t: studio.t
+        ) { value in
+          withAnimation(.easeOut(duration: 0.16)) { density = value }
+          try? studio.store.setPreference("timeline-density", value: value.rawValue)
+        }
         Button("New branch") {
           editingLane = nil
           laneParent = selectedLane
@@ -119,18 +141,35 @@ struct TimelineScreen: View {
       if rows.isEmpty {
         empty.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
-        ScrollView {
-          ContentColumn {
-            VStack(alignment: .leading, spacing: 0) {
-              ForEach(Array(rows.enumerated()), id: \.element.id) { index, event in
-                row(event, first: index == 0, last: index == rows.count - 1)
+        ScrollViewReader { proxy in
+          ScrollView {
+            ContentColumn {
+              switch density {
+              case .detailed:
+                VStack(alignment: .leading, spacing: 0) {
+                  ForEach(Array(rows.enumerated()), id: \.element.id) { index, event in
+                    row(event, first: index == 0, last: index == rows.count - 1)
+                  }
+                }.padding(.vertical, 20)
+              case .compact:
+                VStack(alignment: .leading, spacing: 1) {
+                  ForEach(rows) { event in compactRow(event) }
+                }.padding(.vertical, 16)
+              case .overview:
+                overview(rows, proxy: proxy)
               }
-            }.padding(.vertical, 20)
+            }
           }
         }
       }
     }
     .onAppear {
+      density =
+        (try? studio.store.preference("timeline-density")).flatMap {
+          TimelineDensity(rawValue: $0)
+        } ?? .detailed
+      if studio.captureHint == "timeline-compact" { density = .compact }
+      if studio.captureHint == "timeline-overview" { density = .overview }
       refresh()
       if studio.captureHint == "timeline-edit", let lane = lanes.first {
         selectedLane = lane.id
@@ -216,6 +255,117 @@ struct TimelineScreen: View {
       result.formUnion(children)
     }
     return result
+  }
+  /// The top-level period or branch an event's placement belongs to, if any.
+  private func era(of event: WorldEvent) -> ChronologyLane? {
+    guard var lane = lanes.first(where: { $0.id == placements[event.id] }) else { return nil }
+    var seen: Set<String> = [lane.id]
+    while let parent = lanes.first(where: { $0.id == lane.parentID }),
+      seen.insert(parent.id).inserted
+    {
+      lane = parent
+    }
+    return lane
+  }
+  private func overview(_ rows: [WorldEvent], proxy: ScrollViewProxy) -> some View {
+    let eras = lanes.filter { lane in
+      lane.parentID == nil || !lanes.contains { $0.id == lane.parentID }
+    }
+    var groups: [(id: String, lane: ChronologyLane?, events: [WorldEvent])] = eras.map { lane in
+      (lane.id, lane, rows.filter { era(of: $0)?.id == lane.id })
+    }.filter { !$0.events.isEmpty }
+    let unplaced = rows.filter { era(of: $0) == nil }
+    if !unplaced.isEmpty { groups.append(("unplaced", nil, unplaced)) }
+    return VStack(alignment: .leading, spacing: 18) {
+      if groups.count > 1 {
+        ScrollView(.horizontal) {
+          HStack(spacing: 6) {
+            ForEach(groups, id: \.id) { group in
+              FilterChip(
+                title: group.lane?.name ?? "Not in a period", count: group.events.count,
+                selected: false, t: studio.t
+              ) {
+                withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(group.id, anchor: .top) }
+              }
+              .help("Jump to \(group.lane?.name ?? "events outside any period")")
+            }
+          }
+        }.scrollIndicators(.never)
+      }
+      ForEach(groups, id: \.id) { group in
+        VStack(alignment: .leading, spacing: 8) {
+          Button {
+            withAnimation(.easeOut(duration: 0.16)) {
+              if !foldedEras.insert(group.id).inserted { foldedEras.remove(group.id) }
+            }
+          } label: {
+            HStack(spacing: 8) {
+              StudioIcon("chevron.right", size: 10)
+                .rotationEffect(.degrees(foldedEras.contains(group.id) ? 0 : 90))
+              StudioIcon(
+                group.lane?.kind == "branch" ? "arrow.triangle.branch" : "calendar", size: 13
+              ).foregroundStyle(studio.t.accent)
+              Text(group.lane?.name ?? "Not in a period").font(.studio(size: 16, weight: .semibold))
+                .lineLimit(1)
+              if let lane = group.lane, !(lane.start + lane.end).isEmpty {
+                Text([lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — "))
+                  .font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary).lineLimit(1)
+              }
+              Spacer(minLength: 8)
+              Text("\(group.events.count) \(group.events.count == 1 ? "event" : "events")")
+                .font(.studio(size: 12)).monospacedDigit().foregroundStyle(studio.t.muted)
+            }.contentShape(Rectangle())
+          }.buttonStyle(.plain)
+            .accessibilityLabel(
+              "\(foldedEras.contains(group.id) ? "Expand" : "Collapse") \(group.lane?.name ?? "events outside any period")"
+            )
+          if !foldedEras.contains(group.id) {
+            VStack(alignment: .leading, spacing: 1) {
+              ForEach(group.events) { event in compactRow(event) }
+            }.padding(.leading, 18)
+          }
+        }.id(group.id)
+      }
+    }.padding(.vertical, 18)
+  }
+  private func compactRow(_ event: WorldEvent) -> some View {
+    let source = studio.records.first { $0.id == event.sourceID }
+    let unknown = event.dateLabel == "unknown" || event.dateLabel.isEmpty
+    let lane = lanes.first { $0.id == placements[event.id] }
+    return HStack(spacing: 12) {
+      Text(unknown ? "Date unknown" : event.dateLabel).font(.studio(size: 12, weight: .medium))
+        .foregroundStyle(unknown ? studio.t.muted : studio.t.accent).lineLimit(1)
+        .frame(width: 132, alignment: .trailing)
+      Circle().fill(unknown ? studio.t.muted : studio.t.accent).frame(width: 6, height: 6)
+      Text(event.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
+        .layoutPriority(1)
+      if density == .compact, let lane {
+        Text(lane.name).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(1)
+      }
+      Spacer(minLength: 8)
+      if let source {
+        Button {
+          studio.openRecord(source)
+        } label: {
+          HStack(spacing: 5) {
+            StudioIcon(recordIcon(source), size: 10).foregroundStyle(
+              studio.t.category(source.category))
+            Text(source.title).font(.studio(size: 12)).lineLimit(1)
+          }.foregroundStyle(studio.t.secondary)
+        }.buttonStyle(.plain).help("Open the source record")
+      }
+      IconMenu(icon: "ellipsis", label: "Event actions", t: studio.t, size: 22) {
+        Button("Edit…") { begin(event) }
+        if let source { Button("Open source record") { studio.openRecord(source) } }
+        Button("Remove") { remove(event) }
+      }
+    }.padding(.horizontal, 8).frame(height: 34).hoverFill(studio.t, radius: 7)
+      .contextMenu {
+        Button("Edit…") { begin(event) }
+        if let source { Button("Open source record") { studio.openRecord(source) } }
+        Divider()
+        Button("Remove") { remove(event) }
+      }
   }
   private func row(_ event: WorldEvent, first: Bool, last: Bool) -> some View {
     let sourceRecord = studio.records.first { $0.id == event.sourceID }
