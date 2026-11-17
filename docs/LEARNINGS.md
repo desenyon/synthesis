@@ -112,3 +112,7 @@ Adding an opaque black inline sheet did not fix the artwork capture: the WebKit 
 ## 2026-11-16 — native Dagre and export verification
 
 JavaScriptCore lacks browser structuredClone; Dagre initially fell back silently to a grid. A JSON-only compatibility function and an asymmetric directed-chain layout assertion now verify the actual bundled engine. The app's Canvas export filter also inverted images painted after Excalidraw export in WebKit: export in literal colours, explicitly transform engine shapes for dark mode, and clear the filter before custom card painting. Actual exported PNGs were inspected. Use the repository check/build wrappers (pinned SDK); bare swift build selected an incompatible SDK macro toolchain. No AGENTS.md edit was needed.
+
+## 2026-11-16 — proposal identity and scoped spatial Undo
+
+A successful rule-acceptance test exposed a generic proposal guard treating every `recordID` as lore. Rules need their own scoped active-record validation before comparing the captured revision. Evidence: MechanicsTests and the Mechanics checkpoint. Atlas Undo previously referenced view state, so switching maps could redirect a restore. Capture the original world/map plus expected replacement instead; reject intervening edits. Evidence: AtlasMapTests stale-Undo and world-isolation cases. No AGENTS.md change: these are implementation-specific findings, documented here and in their domain tests.

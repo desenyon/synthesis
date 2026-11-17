@@ -187,6 +187,20 @@ struct EditorScreen: View {
             }
           }
         }
+        if let maps = try? studio.store.mapsForRecord(worldID: record.worldID, recordID: record.id),
+          !maps.isEmpty
+        {
+          MenuSection("Maps") {
+            ForEach(maps) { map in
+              Button("Open \(map.name)") {
+                if save() {
+                  studio.mapBoardID = map.id
+                  studio.navigate(.atlas)
+                }
+              }
+            }
+          }
+        }
         Button("Show on canvas") { if save() { studio.showOnCanvas(record) } }
         Button("Export as Markdown…") { export() }
         Divider()

@@ -80,6 +80,17 @@ struct ProposalCard: View {
         "calendar", change.action == "create_branch" ? "New history branch" : "New period",
         "\(change.title ?? "Untitled") · \(change.date ?? "") — \(change.endDate ?? "")"
       )
+    case "create_map":
+      let parent = change.parentMapID.flatMap { id in
+        (try? studio.store.boards(worldID: studio.worldID, kind: "atlas"))?.first { $0.id == id }?
+          .name
+      }
+      let place = change.source.map { _ in studio.name(for: change.source, in: proposal) }
+      return (
+        "map", "New map · image chosen separately",
+        ([change.title ?? "Map", place, parent.map { "Inside \($0)" }].compactMap { $0 }).joined(
+          separator: " · ")
+      )
     case "create_board": return ("rectangle.on.rectangle", "New canvas", change.title ?? "Board")
     case "place_record", "place_marker":
       return (
@@ -216,7 +227,7 @@ struct ProposalCard: View {
           Button("Open timeline") { studio.navigate(.timeline) }.buttonStyle(
             QuietButton(t: t, role: .ghost))
         }
-        if change.action == "place_marker", let id = change.resultID {
+        if ["place_marker", "create_map"].contains(change.action), let id = change.resultID {
           Button("Open atlas") {
             studio.mapBoardID = id
             studio.navigate(.atlas)

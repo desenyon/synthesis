@@ -26,7 +26,7 @@ This is an implementation ledger, not an acceptance claim. Preserve real lore an
 4. Entity sections and native Notes/Facts/Checklist/Progression components are implemented across workspaces. Mechanics adds rules, scenarios and canon/history UI to every entity category. Richer spatial technique/cosmology tools remain; no arbitrary model code is executed.
 5. Image-only export and portable world snapshots implemented. File association and continuous save synchronization remain.
 6. Explicit-click subscription image generation, with usage disclosure. Text chat must not invoke image generation implicitly. Verify Codex's actual output contract before claiming support.
-7. Coherent Atlas layers and local place-map hierarchy. Evaluate editable geometry plus optional generated imagery; never promise literal imagination-to-map accuracy or silently regenerate established geography.
+7. Named maps and place/parent hierarchy are implemented, with scoped save/Undo and reviewed creation. Coherent Atlas layers remain. Evaluate editable geometry plus optional generated imagery; never promise literal imagination-to-map accuracy or silently regenerate established geography.
 8. Review filtering/sorting and improved proposal browsing; real conversation context summaries and richer interactions.
 9. Search performance measurements on a large world; broaden native menu actions; reduce-motion-aware transitions.
 

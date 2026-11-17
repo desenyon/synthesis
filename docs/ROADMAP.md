@@ -12,7 +12,7 @@
 ## Active — connected studio audit and UI overhaul
 
 - 2026-11-16: shared composers, real activity rows, themed app menus, Dagre entity-card Graph and undoable Canvas arrangement implemented. Canvas PNG now exports styled cards and local artwork. Evidence and remaining interaction limits: [STATE](STATE.md).
-- Creative components implemented: Notes, Facts, Checklist and Progression backed by ordinary revisioned lore, manual creation, reviewed agent proposals and portable persistence. Mechanics now provides rule/scenario editing, explicit rule canon review and restorable history. Next: map hierarchy and richer chronology.
+- Creative components implemented: Notes, Facts, Checklist and Progression backed by ordinary revisioned lore, manual creation, reviewed agent proposals and portable persistence. Mechanics now provides rule/scenario editing, explicit rule canon review and restorable history. Atlas now has named maps, place/parent links and guarded saves/Undo. Next: richer chronology and specialized spatial tools.
 
 - Settings refinement (2026-11-15): searchable sections and typed writing/navigation preferences, with portable per-world entity/chat defaults. Final verification is recorded in [STATE](STATE.md); no additional theme or composer overhaul is implied.
 
@@ -33,7 +33,7 @@
 
 - Power-system depth beyond Mechanics: spatial technique trees and richer linked progression; structural considerations are not semantic conflict detection.
 - Hypothetical branches: explore a what-if without touching the main line, then discard or merge through review.
-- Canvas depth (resize, snapping, named groups); Timeline reordering and canon state for events; several maps and draggable markers in Atlas.
+- Canvas depth (resize, snapping, named groups); Timeline reordering and canon state for events; richer Atlas layers and draggable markers; named map hierarchy and click-to-move markers are implemented.
 - Measured large-board and large-graph pass; accessibility walk-through; crash recovery for unsaved text.
 
 No releases or public deployment.

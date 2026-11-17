@@ -99,6 +99,7 @@ public struct ProposedChange: Identifiable, Codable, Equatable, Sendable {
   public var laneID: String? = nil
   public var endDate: String? = nil
   public var ruleBefore: WorldRule? = nil
+  public var parentMapID: String? = nil
   public var componentScope: String? = nil
   public var boardID: String? = nil
   public var x: Double? = nil

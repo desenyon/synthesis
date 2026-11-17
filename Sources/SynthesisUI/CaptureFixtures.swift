@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
+    "atlas-local",
     "mechanics", "light-mechanics", "manual-mechanics", "mechanics-empty", "mechanics-scenario",
     "mechanics-review", "mechanics-history",
     "components", "light-components", "manual-components", "components-empty", "entity-components",
@@ -349,6 +351,31 @@ extension Studio {
       destination = .knowledge
     case "review", "review-canon", "review-checks": destination = .review
     case "timeline", "empty-timeline": destination = .timeline
+    case "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
+      "atlas-local":
+      destination = .atlas
+      perform {
+        guard let original = try store.boards(worldID: worldID, kind: "atlas").first,
+          let sea = records.first(where: { $0.title == "The Glass Sea" }),
+          let city = records.first(where: { $0.title == "The Drowned City" })
+        else { return }
+        if !(try store.boards(worldID: worldID, kind: "atlas").contains {
+          $0.name == "The drowned harbour"
+        }) {
+          var document = try JSONDecoder().decode(
+            AtlasDocument.self, from: Data(original.content.utf8))
+          document.placeID = sea.id
+          let root = try store.saveAtlasMap(
+            worldID: worldID, id: original.id, name: "The Glass Sea",
+            content: String(decoding: JSONEncoder().encode(document), as: UTF8.self),
+            expected: original)
+          _ = try store.createAtlasMap(
+            worldID: worldID, name: "The drowned harbour", placeID: city.id, parentMapID: root.id)
+        }
+        let maps = try store.boards(worldID: worldID, kind: "atlas")
+        mapBoardID =
+          state == "atlas-local" ? maps.first { $0.name == "The drowned harbour" }?.id : original.id
+      }
     case "atlas", "empty-atlas": destination = .atlas
     case "sections", "light-sections", "manual-sections", "sections-companion", "sheet-section",
       "section-editor":

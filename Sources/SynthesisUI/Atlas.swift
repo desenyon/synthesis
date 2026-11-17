@@ -8,6 +8,13 @@ struct AtlasScreen: View {
   @State private var markerPicker = false
   @State private var artworkPicker = false
   @State private var boardID: String?
+  @State private var currentBoard: Board?
+  @State private var maps: [Board] = []
+  @State private var loadedMap = AtlasDocument()
+  @State private var loadedWorld = ""
+  @State private var details = false
+  @State private var reloadConfirmation = false
+  @State private var newMap = false
   @State private var loadFailed = false
   @State private var map = AtlasDocument()
   @State private var zoom = 1.0
@@ -18,11 +25,29 @@ struct AtlasScreen: View {
   var body: some View {
     VStack(spacing: 0) {
       WorkspaceBar(studio: studio) {
-        BarTitle(
-          icon: Destination.atlas.icon, title: "Atlas",
-          detail: map.image == nil
-            ? nil : "\(map.markers.count) \(map.markers.count == 1 ? "marker" : "markers")",
-          t: studio.t)
+        PlainMenu(flexible: true) {
+          MenuSection("Maps") {
+            ForEach(maps) { board in
+              Button(board.name) { switchMap(board.id) }
+            }
+          }
+          Divider()
+          Button("New map…") {
+            newMap = true
+            details = true
+          }
+        } label: {
+          HStack(spacing: 8) {
+            StudioIcon("map", size: 16)
+            Text(currentBoard?.name ?? "Atlas").font(.studio(size: 16, weight: .semibold))
+              .lineLimit(1)
+            StudioIcon("chevron.down", size: 10)
+          }.foregroundStyle(studio.t.text)
+        }
+        if let parent = maps.first(where: { $0.id == map.parentMapID }) {
+          Button("In \(parent.name)") { switchMap(parent.id) }
+            .buttonStyle(QuietButton(t: studio.t, role: .ghost)).lineLimit(1)
+        }
       } trailing: {
         if map.image != nil {
           Button {
@@ -44,14 +69,40 @@ struct AtlasScreen: View {
                 markerPicker = false
               }
             }
-          IconMenu(icon: "ellipsis", label: "Map actions", t: studio.t) {
+        }
+        IconMenu(icon: "ellipsis", label: "Map actions", t: studio.t) {
+          Button("New map…") {
+            newMap = true
+            details = true
+          }
+          if map != loadedMap {
+            Button("Reload saved map…") { reloadConfirmation = true }
+          }
+          if currentBoard != nil {
+            Button("Map details…") {
+              newMap = false
+              details = true
+            }
+            Button("Remove map") { removeMap() }
+          }
+          if map.image != nil {
+            Divider()
             Button("Replace map image…") { upload() }
             Button("Choose an illustration…") { artworkPicker = true }
           }
         }
       }
       GeometryReader { geo in
-        if let image = ImageCache.image(base64: map.image) {
+        if loadFailed {
+          EmptyState(
+            icon: "map", title: "This map could not be opened",
+            message:
+              "Its saved content has been left untouched. You can retry or choose another map.",
+            t: studio.t
+          ) {
+            Button("Retry") { loadMap() }.buttonStyle(QuietButton(t: studio.t))
+          }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if let image = ImageCache.image(base64: map.image) {
           mapView(image, size: geo.size)
         } else {
           EmptyState(
@@ -68,6 +119,30 @@ struct AtlasScreen: View {
         }
       }
     }
+    .studioSheet(isPresented: $reloadConfirmation) {
+      SheetScaffold(
+        title: "Reload the saved map?",
+        subtitle: "Unsaved map changes in this window will be discarded.", t: studio.t, width: 440,
+        close: { reloadConfirmation = false }
+      ) {
+        Text("The stored image, markers and map details will replace the version currently open.")
+          .font(.studio(size: 14)).foregroundStyle(studio.t.secondary)
+      } footer: {
+        Spacer()
+        Button("Keep changes") { reloadConfirmation = false }.buttonStyle(QuietButton(t: studio.t))
+        Button("Reload saved map") {
+          map = loadedMap
+          loadMap()
+          reloadConfirmation = false
+        }.buttonStyle(QuietButton(t: studio.t, primary: true))
+      }
+    }
+    .studioSheet(isPresented: $details) {
+      AtlasMapEditor(studio: studio, board: newMap ? nil : currentBoard, maps: maps) { board in
+        details = false
+        if let board { switchMap(board.id) }
+      }
+    }
     .studioSheet(isPresented: $artworkPicker) {
       ArtworkPicker(
         t: studio.t, mapOnly: true,
@@ -79,24 +154,61 @@ struct AtlasScreen: View {
     .onAppear {
       studio.editorSave = { persist() }
       loadMap()
+      if studio.captureHint == "atlas-details" { details = true }
+      if studio.captureHint == "atlas-new" {
+        newMap = true
+        details = true
+      }
     }
     .onChange(of: studio.worldRevision) { _, _ in loadMap() }
     .onChange(of: studio.mapBoardID) { _, _ in loadMap() }
   }
+  private func switchMap(_ id: String) {
+    guard persist() else { return }
+    studio.mapBoardID = id
+    loadMap()
+  }
   private func loadMap() {
+    guard loadedWorld != studio.worldID || map == loadedMap else { return }
     do {
-      let boards = try studio.store.boards(worldID: studio.worldID, kind: "atlas")
-      if let board = boards.first(where: { $0.id == studio.mapBoardID }) ?? boards.first {
-        boardID = board.id
-        map = try JSONDecoder().decode(AtlasDocument.self, from: Data(board.content.utf8))
-      } else {
-        boardID = nil
-        map = AtlasDocument()
+      maps = try studio.store.boards(worldID: studio.worldID, kind: "atlas")
+      let board = maps.first(where: { $0.id == studio.mapBoardID }) ?? maps.first
+      let changed = loadedWorld != studio.worldID || boardID != board?.id
+      let next =
+        try board.map { try JSONDecoder().decode(AtlasDocument.self, from: Data($0.content.utf8)) }
+        ?? AtlasDocument()
+      boardID = board?.id
+      currentBoard = board
+      map = next
+      loadedMap = next
+      loadedWorld = studio.worldID
+      studio.mapBoardID = board?.id
+      if changed {
+        zoom = 1
+        pan = .zero
+        selected = nil
+        placing = nil
       }
       loadFailed = false
     } catch {
       loadFailed = true
       studio.error = error.localizedDescription
+    }
+  }
+  private func removeMap() {
+    guard let board = currentBoard, persist() else { return }
+    let world = loadedWorld
+    studio.perform {
+      try studio.store.archiveAtlasMap(worldID: world, id: board.id)
+      studio.mapBoardID = nil
+      loadMap()
+      studio.show("Map removed", actionTitle: "Undo") {
+        studio.perform {
+          try studio.store.setBoardArchived(worldID: world, id: board.id, archived: false)
+          try studio.reload()
+        }
+      }
+      try studio.reload()
     }
   }
   private func mapView(_ image: NSImage, size: CGSize) -> some View {
@@ -142,9 +254,11 @@ struct AtlasScreen: View {
         .gesture(
           SpatialTapGesture().onEnded { value in
             guard let id = placing else { return }
+            let previousID = map.markers.first { $0.recordID == id }?.id ?? UUID().uuidString
+            map.markers.removeAll { $0.recordID == id }
             map.markers.append(
               MapMarker(
-                recordID: id, x: min(1, max(0, value.location.x / width)),
+                id: previousID, recordID: id, x: min(1, max(0, value.location.x / width)),
                 y: min(1, max(0, value.location.y / height))))
             placing = nil
             selected = id
@@ -158,6 +272,28 @@ struct AtlasScreen: View {
             x: origin.x + (marker.x - 0.5) * width, y: origin.y + (marker.y - 0.5) * height)
       }
       VStack {
+        HStack(spacing: 8) {
+          if let place = studio.records.first(where: { $0.id == map.placeID }) {
+            Button {
+              studio.openRecord(place)
+            } label: {
+              StudioLabel(place.title, icon: "mappin.and.ellipse").lineLimit(1)
+            }.buttonStyle(QuietButton(t: studio.t))
+          }
+          let children = maps.filter {
+            (try? AtlasLinks(content: $0.content).parentMapID) == boardID
+          }
+          if !children.isEmpty {
+            PlainMenu {
+              ForEach(children) { child in Button(child.name) { switchMap(child.id) } }
+            } label: {
+              StudioLabel("Local maps · \(children.count)", icon: "chevron.down")
+                .font(.studio(size: 13, weight: .medium)).padding(.horizontal, 12)
+                .frame(height: Metric.control).floatingPanel(studio.t)
+            }
+          }
+          Spacer()
+        }
         if let id = placing {
           HStack(spacing: 10) {
             StudioIcon("mappin.and.ellipse").foregroundStyle(studio.t.accent)
@@ -222,15 +358,15 @@ struct AtlasScreen: View {
     }
     .contextMenu {
       if let record { Button("Open record") { studio.openRecord(record) } }
+      Button("Move marker") {
+        placing = marker.recordID
+        selected = nil
+      }
       Button("Remove marker") {
-        let removed = marker
+        let before = currentBoard
         map.markers.removeAll { $0.id == marker.id }
         if selected == marker.recordID { selected = nil }
-        persist()
-        studio.show("Marker removed", icon: "minus.circle", actionTitle: "Undo") {
-          map.markers.append(removed)
-          persist()
-        }
+        if persist() { offerUndo(before, title: "Marker removed") }
       }
     }
     .help(record?.title ?? "Archived record")
@@ -245,25 +381,43 @@ struct AtlasScreen: View {
     }
   }
   private func replaceImage(_ image: String) {
-    let previous = map
+    let previous = currentBoard
     map.image = image
     zoom = 1
     pan = .zero
     if persist() {
-      studio.show("Map image updated", icon: "photo", actionTitle: "Undo") {
-        map = previous
-        persist()
+      offerUndo(previous, title: "Map image updated")
+    }
+  }
+  private func offerUndo(_ before: Board?, title: String) {
+    guard let before, let after = currentBoard else {
+      studio.show(title)
+      return
+    }
+    let world = loadedWorld
+    studio.show(title, actionTitle: "Undo") {
+      studio.perform {
+        _ = try studio.store.saveAtlasMap(
+          worldID: world, id: before.id, name: before.name,
+          content: before.content, expected: after)
+        try studio.reload()
       }
     }
   }
   @discardableResult private func persist() -> Bool {
-    guard !loadFailed else { return true }
-    guard boardID != nil || map.image != nil || !map.markers.isEmpty else { return true }
+    guard !loadFailed else { return map == loadedMap }
+    guard map != loadedMap else { return true }
+    guard loadedWorld == studio.worldID else { return false }
     do {
-      boardID = try studio.store.saveBoard(
-        worldID: studio.worldID, id: boardID, name: "Atlas", kind: "atlas",
-        content: String(decoding: try JSONEncoder().encode(map), as: UTF8.self)
-      ).id
+      let saved = try studio.store.saveAtlasMap(
+        worldID: loadedWorld, id: boardID, name: currentBoard?.name ?? "World map",
+        content: String(decoding: try JSONEncoder().encode(map), as: UTF8.self),
+        expected: currentBoard)
+      currentBoard = saved
+      boardID = saved.id
+      loadedMap = map
+      studio.mapBoardID = saved.id
+      maps = try studio.store.boards(worldID: loadedWorld, kind: "atlas")
       return true
     } catch {
       studio.error = "Atlas could not save. Your changes remain open. " + error.localizedDescription

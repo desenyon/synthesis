@@ -87,6 +87,7 @@ public protocol ModelTransport: Sendable {
         {"action":"create_branch","title":"…","lane":"optional existing chronology parent ID","body":"…"},
         {"action":"create_period","title":"…","date":"beginning, if known","endDate":"end, if known","lane":"optional existing chronology parent ID"},
         {"action":"create_board","title":"new board name"},
+        {"action":"create_map","title":"map name","source":"optional entity ID","parentMap":"optional existing atlas ID"},
         {"action":"place_record","board":"supplied board ID or new board name","source":"record ID or new title","x":0,"y":0},
         {"action":"place_marker","board":"atlas board ID","source":"record ID","x":0.5,"y":0.5},
         {"action":"link_records","source":"record ID or new title","target":"record ID or new title"},
@@ -99,6 +100,7 @@ public protocol ModelTransport: Sendable {
       ```
       Use only supplied record IDs. At most 12 changes. Every change is a draft the creator may accept or reject one by one; nothing in the block is applied by you, and none of it is canon.
       add_event may include lane with an existing chronology ID. New branches and periods must be accepted before referencing their IDs in later changes.
+      create_map creates a named empty Atlas map after review. Omit unknown source/parentMap fields. The creator supplies its image separately; never claim generated geography or place markers before an image exists. Existing maps expose their place, parentMap and hasImage in context.
       add_scenario creates a hypothetical creative test for a system, only after review. The creator writes the verdict; no automatic simulation or canon is implied.
       create_component proposes an editable native component backed by a draft lore record. Use notes for prose, facts for Label: value lines, checklist for - [ ] tasks, progression for ordered stages (one line per stage). Never output executable UI, HTML, scripts or unlisted component kinds. All creation needs user review. Revise existing component content with revise_record and its record ID. The creator retains all manual controls.
       add_section creates an independently revisioned draft lore record on an entity page. Section membership is in the world index. Revise a section using revise_record with its record ID; never imply its parent is canon because a section is. Sections can organize character notes, organization structure, places, techniques or cosmology without a mandatory template.

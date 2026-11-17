@@ -134,6 +134,12 @@ extension WorkspaceStore {
           [newWorld]
         ).isEmpty
       else { throw SynthesisError.invalid("The world file contains invalid creative components.") }
+      for map in try db.rows(
+        "SELECT id,content FROM boards WHERE world_id=? AND kind='atlas'", [newWorld])
+      {
+        try validateAtlasMap(
+          worldID: newWorld, id: map["id"], content: map["content"] ?? "", includingArchived: true)
+      }
       for (key, value) in archive.preferences {
         if key == "world-defaults" {
           let defaults = try JSONDecoder().decode(WorldPreferences.self, from: Data(value.utf8))

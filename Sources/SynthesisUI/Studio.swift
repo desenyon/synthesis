@@ -589,7 +589,8 @@ public struct Toast: Identifiable {
       return
     }
     guard flushEditor() else { return }
-    let activeBoard = destination == .canvas ? canvasSession?.boardID : nil
+    let activeBoard =
+      destination == .canvas ? canvasSession?.boardID : (destination == .atlas ? mapBoardID : nil)
     let selectedIDs =
       selectedRecord.map { [$0.id] }
       ?? (destination == .canvas ? (canvasSession?.selection ?? []) : [])

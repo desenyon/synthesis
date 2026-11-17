@@ -39,6 +39,8 @@ struct MapMarker: Identifiable, Codable, Equatable {
   var y: Double
 }
 struct AtlasDocument: Codable, Equatable {
+  var placeID: String?
+  var parentMapID: String?
   var image: String?
   var markers: [MapMarker] = []
 }

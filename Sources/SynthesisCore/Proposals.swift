@@ -145,6 +145,25 @@ extension WorkspaceStore {
         change.title = title
         change.date = text(item["date"], limit: 160)
         change.source = source
+      case "create_map":
+        guard let title = text(item["title"], limit: 120) else { continue }
+        if item["source"] != nil {
+          guard let source = resolve(item["source"]) else { continue }
+          if let record = known[source], record.kind != "entity" { continue }
+          if source.hasPrefix("change:"),
+            changes.first(where: { "change:\($0.id)" == source })?.kind != "entity"
+          {
+            continue
+          }
+          change.source = source
+        }
+        if let parent = item["parentMap"] {
+          guard let parent = parent as? String,
+            boards.contains(where: { $0.id == parent && $0.kind == "atlas" })
+          else { continue }
+          change.parentMapID = parent
+        }
+        change.title = title
       case "create_board":
         guard let title = text(item["title"], limit: 120) else { continue }
         change.title = title
@@ -339,6 +358,11 @@ extension WorkspaceStore {
             date: change.date ?? "",
             source: try resolved(change.source), order: nil, laneID: change.laneID,
             origin: "ai-proposed"
+          ).id
+        case "create_map":
+          change.resultID = try createAtlasMap(
+            worldID: worldID, name: change.title ?? "Map",
+            placeID: change.source.map { try resolved($0) }, parentMapID: change.parentMapID
           ).id
         case "create_board":
           change.resultID = try saveBoard(

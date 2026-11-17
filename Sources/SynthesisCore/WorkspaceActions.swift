@@ -100,11 +100,11 @@ extension WorkspaceStore {
       markers.append(["id": UUID().uuidString, "recordID": recordID, "x": x, "y": y])
     }
     object["markers"] = markers
-    return try saveBoard(
-      worldID: worldID, id: boardID, name: board.name, kind: "atlas",
+    return try saveAtlasMap(
+      worldID: worldID, id: boardID, name: board.name,
       content: String(
         decoding: JSONSerialization.data(withJSONObject: object, options: [.sortedKeys]),
-        as: UTF8.self))
+        as: UTF8.self), expected: board)
   }
 
   /// Bounded structured context, without image bytes, credentials or foreign-world content.
@@ -137,6 +137,9 @@ extension WorkspaceStore {
         return [
           "id": board.id, "name": board.name, "kind": board.kind, "active": board.id == boardID,
           "placements": Array(placements.prefix(80)), "totalPlacements": placements.count,
+          "place": object["placeID"] as? String ?? "",
+          "parentMap": object["parentMapID"] as? String ?? "",
+          "hasImage": object["image"] as? String != nil,
         ]
       }
     let relations = try relations(worldID: worldID)
