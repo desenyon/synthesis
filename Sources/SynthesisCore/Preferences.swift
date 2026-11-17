@@ -1,11 +1,16 @@
 import Foundation
 
+public enum DarkPalette: String, Codable, CaseIterable, Sendable {
+  case graphite, oled
+}
+
 public enum SendShortcut: String, Codable, CaseIterable, Sendable {
   case enter, commandEnter
 }
 
 /// Local presentation preferences. These never change lore or the canon approval boundary.
 public struct StudioPreferences: Codable, Equatable, Sendable {
+  public var darkPalette = DarkPalette.graphite
   public var bodySize = 16
   public var readingWidth = 780
   public var spellCheck = false
@@ -21,12 +26,14 @@ public struct StudioPreferences: Codable, Equatable, Sendable {
   public init() {}
 
   enum CodingKeys: String, CodingKey {
+    case darkPalette
     case bodySize, readingWidth, spellCheck, smartQuotes, smartDashes, automaticLinks, wordCount
     case libraryPreviews, sidebarCounts, recentChats, launchWorkspace, sendShortcut
   }
   public init(from decoder: Decoder) throws {
     self.init()
     let c = try decoder.container(keyedBy: CodingKeys.self)
+    darkPalette = (try? c.decode(DarkPalette.self, forKey: .darkPalette)) ?? .graphite
     bodySize = (try? c.decode(Int.self, forKey: .bodySize)) ?? bodySize
     readingWidth = (try? c.decode(Int.self, forKey: .readingWidth)) ?? readingWidth
     spellCheck = (try? c.decode(Bool.self, forKey: .spellCheck)) ?? spellCheck

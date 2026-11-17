@@ -2,6 +2,10 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. 0.0.x versions are published as full GitHub releases (owner instruction); v0.0.3 is the latest. Licensed GPL-3.0. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits.
 
+## Active — complete expansion brief
+
+The owner explicitly requires all 394 items, one by one. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the full supplied brief. Earlier composer work does not constitute completion. #1 is now verified: graphite default and persistent OLED option across native UI, Canvas and export; 175 native tests, 13 Canvas tests, lint/typecheck/build and 14 inspected captures. Continue #2. No new release or live provider request. The owner's running app is left alone during background checks.
+
 ## Latest — chatbox refinement (unreleased)
 
 The shared composer now follows the rest of the app: 16pt bundled Inter for placeholder and typed text, quiet reference chips, one adaptive 32pt toolbar, restrained focus and Send/Stop feedback, and a send-shortcut hint matching the saved preference. Preset/intent controls sit together; context inspection remains beside Send. Canon protection and provider disclosure sit below the writing surface. Sidebar, navigation, model requests, draft ownership and context permissions are unchanged.

@@ -1,0 +1,15 @@
+CAPTURE oled-conversation 1440x900, bitmap 2880x1800, 901ms
+CAPTURE oled-canvas 1440x900, bitmap 2880x1800, 830ms
+CAPTURE oled-settings 1440x900, bitmap 2880x1800, 175ms
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 838ms
+CAPTURE canvas 1440x900, bitmap 2880x1800, 809ms
+CAPTURE light 1440x900, bitmap 2880x1800, 756ms
+CAPTURE settings 1440x900, bitmap 2880x1800, 167ms
+CAPTURE oled-conversation 1024x768, bitmap 2048x1536, 536ms
+CAPTURE oled-canvas 1024x768, bitmap 2048x1536, 533ms
+CAPTURE oled-settings 1024x768, bitmap 2048x1536, 129ms
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, 486ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 507ms
+CAPTURE light 1024x768, bitmap 2048x1536, 520ms
+CAPTURE settings 1024x768, bitmap 2048x1536, 123ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-001

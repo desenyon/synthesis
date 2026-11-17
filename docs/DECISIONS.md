@@ -119,3 +119,7 @@ Keep v0.0.1 and its binary intact. Package the verified interaction follow-up as
 - **GPL-3.0.** The owner chose GPL-3.0 over MIT, Apache-2.0 and all-rights-reserved. Bundled components (Excalidraw, Dagre, Phosphor: MIT; Inter: OFL) are compatible and keep their own notices in THIRD_PARTY.md, which ships with every release.
 - **0.0.x are full releases.** v0.0.1 and v0.0.2 were published as GitHub pre-releases; the owner asked for 0.0.1, 0.0.2 and 0.0.3 to be full releases. They remain early versions: ad-hoc signed, not notarized, tested on the development Mac. 1.0 stays the public launch.
 - Repository organisation: superseded plans and prompts moved to `docs/archive/`; a docs index, changelog, contributing, security and conduct files, issue/PR templates, CI and Dependabot were added.
+
+## 2026-11-17 — complete expansion and graphite/OLED (owner direction)
+
+The owner resupplied the 394-item brief and explicitly directed implementation of every item. Its #1 replaces the earlier pure-black default with graphite and an optional true-black OLED palette. Preserve the accepted navigation layout. EXPANSION.md is the item-level acceptance ledger; partial or unaudited work stays open. Existing canon/privacy/subscription boundaries remain enforced; any conflicting provider or publishing requirements must be resolved explicitly rather than weakened implicitly.

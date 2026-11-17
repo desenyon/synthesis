@@ -188,7 +188,7 @@ public struct Toast: Identifiable {
     let takeover = mode == .assisted && companionExpanded && windowWidth - sidebar < 860
     return destination == .canvas && selectedRecord == nil && !takeover
   }
-  public var t: Theme { Theme(dark: dark) }
+  public var t: Theme { Theme(dark: dark, oled: preferences.darkPalette == .oled) }
   public let imageGenerator: CodexImageGenerator
   @Published public var generatingImage = false
   private var imageTask: Task<Void, Never>?

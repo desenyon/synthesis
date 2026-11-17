@@ -8,7 +8,7 @@ extension Studio {
     "composer-attached", "light-composer-attached", "composer-context", "light-composer-context",
     "composer-browser", "composer-overflow", "composer-expanded",
     "composer-companion", "light-composer-companion", "composer-command-return",
-    "composer-unavailable",
+    "composer-unavailable", "oled-conversation", "oled-canvas", "oled-settings",
     "sidebar-long", "light-sidebar-long", "sidebar-history", "sidebar-folded",
     "sidebar-opaque", "light-sidebar-opaque", "empty-sidebar", "light-collapsed",
     "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
@@ -267,6 +267,7 @@ extension Studio {
       }
     }
     updatePreferences { $0 = StudioPreferences() }
+    if state.hasPrefix("oled-") { updatePreferences { $0.darkPalette = .oled } }
     refreshProviderAvailability()
     if state.hasPrefix("preferences-") {
       updatePreferences {
@@ -303,7 +304,8 @@ extension Studio {
     updateContext { $0 = AssistantContextOptions() }
     conversationID = state.hasSuffix("conversation-home") ? nil : conversation
     perform { try reload() }
-    switch state {
+    let viewState = state.hasPrefix("oled-") ? String(state.dropFirst(5)) : state
+    switch viewState {
     case "composer-attached", "light-composer-attached", "composer-context",
       "light-composer-context",
       "composer-browser", "composer-overflow", "composer-expanded",

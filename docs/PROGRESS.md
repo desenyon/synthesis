@@ -292,3 +292,9 @@ Visual iteration exposed a third attachment clipped in narrow companions and a s
 `./scripts/check.sh` passed **175 tests / 42 suites**, strict Swift format lint and optimized native build. **40 final states** at 1440×900 and 1024×768 inspected in two contact sheets, including six focused recaptures after the wrapping fix; same-size before/after inspected. README screenshots, composer guide, state, roadmap, handoff, run prompt and changelog updated. [Evidence](verification/composer-polish/README.md).
 
 Launched the rebuilt canonical `dist/Synthesis.app`, opened Conversation and inspected its running window for owner review; left it open without entering a draft or sending a request. Background tests do not establish foreground typing, native popover interactions, animation pacing or VoiceOver. No live provider usage, release, dependency, migration or AGENTS change. Owner brief untouched.
+
+## 2026-11-17 — complete expansion ledger and #1
+
+The owner clarified that all 394 numbered requirements must be implemented individually; the composer was only a slice. Preserved the exact attached source in EXPANSION_SOURCE and created EXPANSION with every original requirement and explicit status/evidence. Unnumbered modules/composer/workflow acceptance is retained too. No unaudited requirement is marked complete.
+
+#1: graphite dark surfaces plus a persistent optional OLED palette, including real Canvas rendering and export. Native checks passed 175 tests / 42 suites, strict lint and optimized build; Canvas typecheck, 13 tests and bundle build passed. Inspected 14 native captures at two sizes. A Settings search description regression was fixed before the passing rerun. [Evidence](verification/expansion-001/README.md). No live calls, release or foreground interruption. Continue #2 in order.

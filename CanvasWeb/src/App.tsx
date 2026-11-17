@@ -22,7 +22,7 @@ import {
   type RecordInfo,
   type RelationInfo,
 } from "./cards";
-import { palette, type Theme } from "./palette";
+import { palette, engineTheme, type Theme } from "./palette";
 import { acceptsSession, containsCardPoint } from "./sceneRules";
 import { arrangeCards } from "./layout";
 import { exportBoard } from "./exportBoard";
@@ -75,7 +75,8 @@ function imageSize(dataURL: string): Promise<{ width: number; height: number }> 
 }
 
 // Native supplies this before any paint; subsequent switches use the bridge.
-const initialTheme: Theme = new URLSearchParams(window.location.search).get("theme") === "light" ? "light" : "dark";
+const requestedTheme = new URLSearchParams(window.location.search).get("theme");
+const initialTheme: Theme = requestedTheme === "light" || requestedTheme === "oled" ? requestedTheme : "dark";
 
 export function App() {
   const [api, setApi] = useState<Api>(null);
@@ -326,7 +327,7 @@ export function App() {
           api.resetScene();
           api.updateScene({
             elements,
-            appState: { ...appState, selectedElementIds: {}, selectedGroupIds: {}, editingGroupId: null, theme: payload.theme, viewBackgroundColor: "transparent" },
+            appState: { ...appState, selectedElementIds: {}, selectedGroupIds: {}, editingGroupId: null, theme: engineTheme(payload.theme), viewBackgroundColor: "transparent" },
             captureUpdate: CaptureUpdateAction.NEVER,
           });
         });
@@ -346,7 +347,7 @@ export function App() {
         s.theme = next;
         setTheme(next);
         if (!s.loaded) return;
-        apply(api.getSceneElementsIncludingDeleted(), { theme: next, viewBackgroundColor: "transparent" });
+        apply(api.getSceneElementsIncludingDeleted(), { theme: engineTheme(next), viewBackgroundColor: "transparent" });
         synchronise();
       },
       /** Latest records and relationships from the world. */
@@ -771,7 +772,7 @@ export function App() {
     <div className={`synthesis-board ${theme}`}>
     <Excalidraw
       excalidrawAPI={setApi}
-      theme={theme}
+      theme={engineTheme(theme)}
       name={name}
       onChange={onChange}
       aiEnabled={false}

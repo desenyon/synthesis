@@ -169,6 +169,12 @@ struct SettingsScreen: View {
   @ViewBuilder private func setting(_ item: SettingsItem) -> some View {
     switch item {
     case .appearance: row(item) { AppearanceSwitch(studio: studio) }
+    case .darkPalette:
+      row(item) {
+        PreferenceMenu(
+          title: item.title, value: preference(\.darkPalette),
+          options: [(.graphite, "Graphite"), (.oled, "True black · OLED")], t: t)
+      }
     case .sidebar:
       row(item) {
         Toggle(

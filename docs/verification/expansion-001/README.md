@@ -1,0 +1,7 @@
+# Expansion #1 — graphite and optional OLED
+
+Implemented in Theme.swift, Preferences.swift, Settings/SettingsCatalog, Studio and CanvasHost; CanvasWeb palette, live background and image export use the same chosen theme. Dark appearance defaults to graphite; Settings → General → Dark surfaces selects true black. Light and stored world data remain intact. Preference persistence and malformed/missing-value defaults use the version-tolerant existing decoder.
+
+Observed checks: `./scripts/check.sh` passed **175 tests / 42 suites**, strict lint, optimized native build. `cd CanvasWeb && npm run typecheck && npm test && npm run build` passed, **13 tests**. The new Canvas test checks graphite/OLED/light export colors and the engine dark-mode mapping; the preferences disk-reopen test now includes OLED. The first native run caught the word “exports” broadening Settings search results; the control description was clarified and the full check rerun.
+
+`SYNTHESIS_CAPTURE_SIZES=1440x900,1024x768 SYNTHESIS_CAPTURE_STATES=conversation-home,oled-conversation,settings,oled-settings,canvas,oled-canvas,light ./scripts/verify-ui.sh docs/verification/expansion-001` captured **14 states**. Both contact sheets were inspected: graphite separation, black variant, light Canvas, compact Settings. Source PNGs pruned after inspection. Background rendering does not verify physical mouse/keyboard interaction. No provider calls or restart of the owner's active app.

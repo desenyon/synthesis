@@ -15,7 +15,7 @@ export async function exportBoard(elements: readonly any[], appState: any, files
       opacity: ['card', 'part'].includes(e.customData?.synthesis) ? 0 : e.opacity,
       strokeColor: displayColor(e.strokeColor, theme), backgroundColor: displayColor(e.backgroundColor, theme)})),
     appState: {...appState, exportBackground: true, exportWithDarkMode: false,
-      viewBackgroundColor: theme === 'dark' ? '#000000' : '#f8f9fb'},
+      viewBackgroundColor: displayPalette(theme).background},
     files, exportPadding: 32,
     getDimensions: (width, height) => {
       scale = Math.min(2, 4096 / width, 4096 / height);

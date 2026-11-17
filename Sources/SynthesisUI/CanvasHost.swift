@@ -143,7 +143,7 @@ struct CanvasBoardContent {
       }
     }
     // The first React render must already use the native theme, before the bridge is ready.
-    let initialTheme = studio.dark ? "dark" : "light"
+    let initialTheme = studio.t.canvasTheme
     webView.load(
       URLRequest(url: URL(string: "\(Self.scheme)://app/index.html?theme=\(initialTheme)")!))
     // Cards follow their records, and the canvas follows the theme.
@@ -152,8 +152,10 @@ struct CanvasBoardContent {
     studio.$mode.dropFirst().removeDuplicates().sink { [weak self] mode in
       self?.call("setAssistance", [mode == .assisted])
     }.store(in: &observers)
-    studio.$dark.dropFirst().removeDuplicates().sink { [weak self] dark in
-      self?.call("setTheme", [dark ? "dark" : "light"])
+    studio.$dark.combineLatest(studio.$preferences).dropFirst().sink {
+      [weak self] dark, preferences in
+      let theme = Theme(dark: dark, oled: preferences.darkPalette == .oled)
+      self?.call("setTheme", [theme.canvasTheme])
     }.store(in: &observers)
   }
 
@@ -230,7 +232,7 @@ struct CanvasBoardContent {
     pendingLoad = false
     var payload: [String: Any] = [
       "sessionID": loadID, "assisted": studio.mode == .assisted, "name": name,
-      "theme": studio.dark ? "dark" : "light", "fitInsets": fitInsets,
+      "theme": studio.t.canvasTheme, "fitInsets": fitInsets,
       "hiddenRelations": content.hiddenRelations, "records": recordPayload(),
       "relations": relationPayload(),
     ]

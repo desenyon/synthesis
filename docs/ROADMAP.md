@@ -1,5 +1,9 @@
 # Roadmap
 
+## Execution order — 2026-11-17
+
+The owner's latest instruction is to implement **all 394 requirements individually**, not another selected subset. Use [EXPANSION](EXPANSION.md) for numerical order and evidence. Shared prerequisites may be implemented with their first dependent item; never count partial systems as done. The older foundation phases below describe dependencies, not permission to omit items.
+
 ## Current — expansion brief, connected slices
 
 The owner's 2026-11-16 expansion brief describes 394 improvements and explicitly prioritizes shared foundations over simultaneous feature expansion. Keep the approved native shell and subscription-only/canon safeguards.
