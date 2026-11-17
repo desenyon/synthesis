@@ -150,6 +150,12 @@ extension WorkspaceStore {
       "sections": try db.rows(
         "SELECT s.parent_id AS parent,s.record_id AS record,s.position FROM record_sections s JOIN records p ON p.id=s.parent_id AND p.world_id=s.world_id JOIN records r ON r.id=s.record_id AND r.world_id=s.world_id WHERE s.world_id=? AND s.archived=0 AND p.archived=0 AND r.archived=0 ORDER BY s.parent_id,s.position LIMIT 100",
         [worldID]),
+      "components": try creativeComponents(worldID: worldID).prefix(80).map {
+        [
+          "id": $0.id, "record": $0.record.id, "parent": $0.parentID ?? "",
+          "scope": $0.scope.rawValue, "kind": $0.kind.rawValue,
+        ]
+      },
       "relationships": relations.prefix(100).map {
         ["id": $0.id, "source": $0.sourceID, "target": $0.targetID, "label": $0.label]
       },

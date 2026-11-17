@@ -1,0 +1,24 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.14s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.Fu17mx/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.Fu17mx/Synthesis-Verification.app (development, ad-hoc signed; not a release).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.Fu17mx/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE components 1440x900, bitmap 2880x1800, 1584ms
+CAPTURE light-components 1440x900, bitmap 2880x1800, 1502ms
+CAPTURE manual-components 1440x900, bitmap 2880x1800, 292ms
+CAPTURE components-empty 1440x900, bitmap 2880x1800, 1871ms
+CAPTURE entity-components 1440x900, bitmap 2880x1800, 997ms
+CAPTURE component-new 1440x900, bitmap 2880x1800, 1369ms
+CAPTURE components 1024x768, bitmap 2048x1536, 771ms
+CAPTURE light-components 1024x768, bitmap 2048x1536, 829ms
+CAPTURE manual-components 1024x768, bitmap 2048x1536, 217ms
+CAPTURE components-empty 1024x768, bitmap 2048x1536, 1076ms
+CAPTURE entity-components 1024x768, bitmap 2048x1536, 683ms
+CAPTURE component-new 1024x768, bitmap 2048x1536, 799ms
+Native captures complete: /private/tmp/synthesis-components
+Native captures: /tmp/synthesis-components
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py '/tmp/synthesis-components' [--prune]

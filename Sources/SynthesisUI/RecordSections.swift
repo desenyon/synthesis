@@ -6,6 +6,7 @@ struct RecordSectionsPage: View {
   @ObservedObject var studio: Studio
   let parent: LoreRecord
   @State private var sections: [RecordSection] = []
+  @State private var components: [CreativeComponent] = []
   @State private var removed: [RecordSection] = []
   @State private var creating = false
   @State private var showRemoved = false
@@ -17,8 +18,11 @@ struct RecordSectionsPage: View {
         VStack(alignment: .leading, spacing: 24) {
           HStack {
             Text("Sections").font(.studio(size: 16, weight: .semibold))
-            Text("\(sections.count)").font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+            Text("\(sections.count + components.count)").font(.studio(size: 12)).foregroundStyle(
+              studio.t.secondary)
             Spacer()
+            Button("Add component") { studio.sheet = .components }.buttonStyle(
+              QuietButton(t: studio.t))
             Button {
               creating = true
             } label: {
@@ -26,7 +30,10 @@ struct RecordSectionsPage: View {
             }
             .buttonStyle(QuietButton(t: studio.t))
           }
-          if sections.isEmpty {
+          ForEach(components) { component in
+            CreativeComponentCard(studio: studio, component: component)
+          }
+          if sections.isEmpty && components.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
               Text("Make room for the details").font(.studio(size: 18, weight: .medium))
               Text(
@@ -113,7 +120,14 @@ struct RecordSectionsPage: View {
 
   private func load() {
     studio.perform {
+      components = try studio.store.creativeComponents(worldID: parent.worldID).filter {
+        $0.parentID == parent.id
+      }
+      let archivedComponents = try studio.store.creativeComponents(
+        worldID: parent.worldID, archived: true)
+      let componentRecords = Set((components + archivedComponents).map { $0.record.id })
       sections = try studio.store.recordSections(worldID: parent.worldID, parentID: parent.id)
+        .filter { !componentRecords.contains($0.record.id) }
       removed = try studio.store.recordSections(
         worldID: parent.worldID, parentID: parent.id, archived: true)
     }

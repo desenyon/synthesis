@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "components", "light-components", "manual-components", "components-empty", "entity-components",
+    "component-new",
     "conversation-home", "light-conversation-home", "conversation-loading", "conversation",
     "sheet-artwork", "canvas", "companion", "manual",
     "collapsed", "light",
@@ -189,6 +191,49 @@ extension Studio {
     conversationID = state.hasSuffix("conversation-home") ? nil : conversation
     perform { try reload() }
     switch state {
+    case "components", "component-new", "light-components", "manual-components", "components-empty",
+      "entity-components":
+      destination = state == "entity-components" ? .library : .timeline
+      inspector = false
+      if state == "entity-components" {
+        selectedRecord = records.first { $0.title == "The art of remembrance" }
+        if let id = selectedRecord?.id { recordSectionTabs[id] = true }
+      }
+      let scope: CreativeScope = state == "entity-components" ? .entity : .timeline
+      let parent = state == "entity-components" ? selectedRecord?.id : nil
+      if state != "components-empty" {
+        let examples: [(CreativeKind, String, String)] = [
+          (
+            .facts, "The price of remembrance",
+            "Source: A memory freely offered\nCost: One memory of your own\nLimit: A borrowed life cannot be changed"
+          ),
+          (
+            .checklist, "Questions for the next crossing",
+            "- [x] Locate the drowned observatory\n- [ ] Decide what Mira refuses to forget\n- [ ] Trace the Tidekeepers’ disputed account"
+          ),
+          (
+            .progression, "Paths of practice",
+            "Listener — recognize the echo of a borrowed memory\nKeeper — carry a skill through one tide\nWitness — retain the cost without changing the past"
+          ),
+          (
+            .notes, "Keep the contradiction open",
+            "Two charts place the observatory on opposite shores. Both are drafts; the next scene can explore what each cartographer chose to remember."
+          ),
+        ]
+        if (try? store.creativeComponents(worldID: worldID).contains {
+          $0.scope == scope && $0.parentID == parent
+        }) != true {
+          for example in examples {
+            _ = try? store.createCreativeComponent(
+              worldID: worldID, scope: scope, kind: example.0, parentID: parent, title: example.1,
+              body: example.2)
+          }
+          try? reload()
+        }
+      } else {
+        destination = .atlas
+      }
+      if state != "entity-components" { sheet = .components }
     case "conversation-loading":
       destination = .chat
       busy = true

@@ -1,5 +1,11 @@
 # Current state — 2026-11-15
 
+## Creative components — 2026-11-16
+
+Native Notes, Facts, Checklist and Progression components are available from workspace toolbars and entity Sections. They use searchable, versioned lore records and can be opened, edited, referenced in chat, placed on Canvas or removed/restored. Assistant creation is a validated, reviewable `create_component` proposal; it cannot execute code or promote canon. Checklist edits reject stale versions, preserve accepted canon and refuse to discard rich formatting. `.synthesis` v5 / JSON schema 8 include component presentation; v1–v4 remain importable. [Usage and boundaries](CREATIVE_COMPONENTS.md).
+
+`./scripts/check.sh`: strict lint, **106 tests / 24 suites**, optimized build passed. Twelve background captures at 1440×900 and 1024×768 cover dark/light/Manual, entity sections, empty and creation states. Evidence: `verification/creative-components`. No live model call or foreground interaction test. These four component kinds are a first constrained vocabulary; specialized rule/scenario UI, map hierarchy and more advanced timeline/canvas tools remain follow-up work.
+
 ## Connected presentation — 2026-11-16
 
 Shared full, companion and compact composers now use one lore-aware control system. The conversation home places writing beside its heading and real references. App dropdowns use a themed popover; workspace/companion transitions respect Reduce Motion. Native Kokonut-inspired activity reports actual retrieval, response and proposal validation, with observed timings and no demo playback. Usage: [AI_COMPONENTS](AI_COMPONENTS.md).

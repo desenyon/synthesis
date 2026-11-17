@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 4
+  var version = 5
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -14,7 +14,7 @@ extension WorkspaceStore {
     "worlds", "records", "rich_documents", "revisions", "native_revisions", "links",
     "relationships", "relationship_history", "events", "conversations", "messages",
     "proposals", "message_context", "boards", "rules", "rule_scenarios", "chronology_lanes",
-    "chronology_placements", "record_sections",
+    "chronology_placements", "record_sections", "creative_components",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
     _ = try world(worldID)
@@ -52,7 +52,8 @@ extension WorkspaceStore {
       archive.tables["chronology_placements"] = []
     }
     if [1, 2].contains(archive.version) { archive.tables["record_sections"] = [] }
-    guard archive.format == "dev.synthesis.world", [1, 2, 3, 4].contains(archive.version),
+    if (1...4).contains(archive.version) { archive.tables["creative_components"] = [] }
+    guard archive.format == "dev.synthesis.world", [1, 2, 3, 4, 5].contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -125,6 +126,12 @@ extension WorkspaceStore {
           [newWorld]
         ).isEmpty
       else { throw SynthesisError.invalid("The world file contains invalid entity sections.") }
+      guard
+        try db.rows(
+          "SELECT c.id FROM creative_components c JOIN records r ON r.id=c.record_id LEFT JOIN record_sections s ON s.record_id=c.record_id AND s.parent_id=c.parent_id AND s.world_id=c.world_id WHERE c.world_id=? AND (r.kind!='lore' OR (c.scope='entity' AND s.id IS NULL)) LIMIT 1",
+          [newWorld]
+        ).isEmpty
+      else { throw SynthesisError.invalid("The world file contains invalid creative components.") }
       for (key, value) in archive.preferences {
         if key == "world-defaults" {
           let defaults = try JSONDecoder().decode(WorldPreferences.self, from: Data(value.utf8))

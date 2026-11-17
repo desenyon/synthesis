@@ -24,6 +24,13 @@ struct StudioSheet: View {
   var body: some View {
     Group {
       switch sheet {
+      case .components:
+        if let scope = studio.creativeScope {
+          CreativeComponentsSheet(studio: studio, scope: scope, parentID: studio.creativeParent)
+            .id(
+              "\(studio.worldID):\(scope.rawValue):\(studio.creativeParent ?? ""):\(studio.captureNonce)"
+            )
+        }
       case .world: world
       case .document: document
       case .rename: rename

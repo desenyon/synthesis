@@ -495,6 +495,11 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
       Spacer(minLength: 8)
       trailing()
       if global {
+        if studio.creativeScope != nil {
+          IconButton(icon: "rectangle.on.rectangle", label: "Creative components", t: studio.t) {
+            studio.sheet = .components
+          }
+        }
         Rectangle().fill(studio.t.hairline).frame(width: 1, height: 18).padding(.horizontal, 4)
         ModeSwitch(studio: studio, compact: compact)
         IconButton(icon: "magnifyingglass", label: "Search and commands · ⌘K", t: studio.t) {

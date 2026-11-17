@@ -171,6 +171,28 @@ extension WorkspaceStore {
         else { continue }
         change.source = source
         change.target = target
+      case "create_component":
+        guard let kind = item["kind"] as? String, CreativeKind(rawValue: kind) != nil,
+          let rawScope = item["scope"] as? String, let scope = CreativeScope(rawValue: rawScope),
+          let title = text(item["title"], limit: 160), let body = text(item["body"], limit: 100_000)
+        else { continue }
+        if scope == .entity {
+          guard let parent = resolve(item["source"]) else { continue }
+          if let record = known[parent], record.kind != "entity" { continue }
+          if parent.hasPrefix("change:"),
+            changes.first(where: { "change:\($0.id)" == parent })?.kind != "entity"
+          {
+            continue
+          }
+          change.source = parent
+        } else if item["source"] != nil {
+          continue
+        }
+        change.kind = kind
+        change.componentScope = scope.rawValue
+        change.title = title
+        change.body = body
+        created[title.lowercased()] = "change:\(id)"
       case "add_section":
         guard let source = resolve(item["source"]), let title = text(item["title"], limit: 160),
           let body = text(item["body"], limit: 100_000)
@@ -297,6 +319,17 @@ extension WorkspaceStore {
           try linkRecord(
             worldID: worldID, source: resolved(change.source), target: resolved(change.target))
           change.resultID = try resolved(change.source)
+        case "create_component":
+          guard let kind = CreativeKind(rawValue: change.kind ?? ""),
+            let scope = CreativeScope(rawValue: change.componentScope ?? "")
+          else {
+            throw SynthesisError.invalid("Unknown creative component.")
+          }
+          change.resultID = try createCreativeComponent(
+            worldID: worldID, scope: scope, kind: kind,
+            parentID: scope == .entity ? resolved(change.source) : nil,
+            title: change.title ?? "Component", body: change.body ?? "", origin: "ai-proposed"
+          ).record.id
         case "add_section":
           change.resultID = try createRecordSection(
             worldID: worldID, parentID: resolved(change.source),

@@ -550,7 +550,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 7
+      var schemaVersion = 8
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -574,6 +574,7 @@ public final class WorkspaceStore {
       var chronology: [[String: String]]
       var chronologyPlacements: [[String: String]]
       var recordSections: [[String: String]]
+      var creativeComponents: [[String: String]]
     }
     // Archived material is exported too: archiving hides, it never discards.
     let hiddenChats = try conversations(worldID: id, archived: true)
@@ -603,7 +604,8 @@ public final class WorkspaceStore {
       chronology: db.rows("SELECT * FROM chronology_lanes WHERE world_id=?", [id]),
       chronologyPlacements: db.rows("SELECT * FROM chronology_placements WHERE world_id=?", [id]),
       recordSections: db.rows(
-        "SELECT * FROM record_sections WHERE world_id=? ORDER BY parent_id,position", [id]))
+        "SELECT * FROM record_sections WHERE world_id=? ORDER BY parent_id,position", [id]),
+      creativeComponents: db.rows("SELECT * FROM creative_components WHERE world_id=?", [id]))
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     return try encoder.encode(export)
