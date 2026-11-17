@@ -270,3 +270,7 @@ Checks: 3 stand-in tests (arguments, prompt, environment allowlist and CODEX_HOM
 ### Accessibility sweep (verified, limited)
 
 An Accessibility-tree script walked an isolated instance with the sample world across all nine workspaces (⌘1–⌘9) and an open record with its inspector: 33–69 interactive controls per screen, none without a title, description, help or value apart from the system minimise/zoom buttons. This checks labels, not VoiceOver reading order or usability; a VoiceOver walkthrough remains open. Canvas's WebKit content was not traversed in depth.
+
+## 2026-11-16 — repository organisation and release 0.0.3
+
+Owner request: full releases for 0.0.1–0.0.3, an organised and professional repository, fresh README screenshots, updated handoff/prompt docs and changelog, better description. Done: GPL-3.0 (owner's choice), community files and templates, CI and Dependabot, docs index and archive, README rewrite with eleven fresh captures (inspected in a contact sheet), stale root `migrations/`, old `RUN_PROMPT.md` and `.env.example` text retired or rewritten. `./scripts/check.sh` passed (158 tests / 40 suites); CI passed on GitHub (both jobs). v0.0.3 published from `cc4ff85` with a verified digest; v0.0.1 and v0.0.2 converted to full releases. Not possible through the API: the repository's social preview image (set it in GitHub → Settings → General if wanted).

@@ -2,7 +2,13 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. 0.0.x versions are published as full GitHub releases (owner instruction); v0.0.3 is the latest. Licensed GPL-3.0. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits.
 
-## Latest — completion pass (no release)
+## Release 0.0.3 and repository organisation (2026-11-16)
+
+[v0.0.3](https://github.com/desenyon/synthesis/releases/tag/v0.0.3) is published as the latest full release from `cc4ff853e133014fbfdf551b43739f60286295dc`, with the Apple Silicon ZIP, SHA256SUMS, LICENSE and THIRD_PARTY notices. GitHub's ZIP digest matches the tested archive: `9eaa1965ce47c328c4533ae027888499da516eecbc3dd59a1a96d7cd4f45244d`. The extracted archive passed `codesign --verify --deep --strict`, matched the checked binary byte for byte, reported 0.0.3, and rendered four capture states. v0.0.1 and v0.0.2 were converted from pre-releases to full releases with refreshed notes. CI (GitHub Actions: Canvas on Ubuntu, lint/tests/build on a macOS 26 runner) passed on that commit.
+
+The repository now has the GPL-3.0 license, CHANGELOG, CONTRIBUTING, SECURITY (private vulnerability reporting enabled), CODE_OF_CONDUCT, issue and PR templates, Dependabot, `.editorconfig`, a rewritten README with eleven fresh screenshots, a docs index, a current HANDOFF and RUN_PROMPT, and an archive for superseded plans. Description, topics and homepage were updated; the unused wiki was disabled.
+
+## Latest — completion pass (before 0.0.3)
 
 Eleven verified slices, each committed and pushed: extended Review checks with reversible tag merge; editor crash recovery (migration 0011); `.synthesis` file association; large-world measurements ([PERFORMANCE](PERFORMANCE.md)); what-if world branches with reviewed merge-back (0012); technique trees (0013, `.synthesis` v7, JSON schema 10); Atlas regions; Timeline zoom and era overview; event reordering; explicit-click Codex image generation; live A2 verification with two bugs fixed (welcome-sheet Return, palette command ranking).
 
