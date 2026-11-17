@@ -175,6 +175,12 @@ struct SettingsScreen: View {
           title: item.title, value: preference(\.darkPalette),
           options: [(.graphite, "Graphite"), (.oled, "True black · OLED")], t: t)
       }
+    case .density:
+      row(item) {
+        PreferenceMenu(
+          title: item.title, value: preference(\.density),
+          options: InformationDensity.allCases.map { ($0, $0.rawValue.capitalized) }, t: t)
+      }
     case .sidebar:
       row(item) {
         Toggle(

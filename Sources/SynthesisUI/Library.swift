@@ -207,6 +207,7 @@ struct LibraryScreen: View {
 }
 
 struct RecordRow: View {
+  @Environment(\.studioDensity) private var density
   @ObservedObject var studio: Studio
   let record: LoreRecord
   var archived = false
@@ -225,7 +226,7 @@ struct RecordRow: View {
       if !archived { studio.openRecord(record) }
     } label: {
       HStack(spacing: 12) {
-        CategoryTile(record: record, t: studio.t, size: 34)
+        CategoryTile(record: record, t: studio.t, size: density.thumbnail)
         VStack(alignment: .leading, spacing: 3) {
           Text(record.title).font(.studio(.control))
             .foregroundStyle(studio.t.text).lineLimit(1)
@@ -249,8 +250,10 @@ struct RecordRow: View {
           Text(relativeDate(record.updatedAt)).font(.studio(.caption)).monospacedDigit()
             .foregroundStyle(studio.t.muted).frame(width: 72, alignment: .trailing)
         }
-      }.padding(.horizontal, 10).frame(height: studio.preferences.libraryPreviews ? 54 : 44)
-        .hoverFill(studio.t, radius: 9)
+      }.padding(.horizontal, 10).frame(
+        height: density.libraryRow - (studio.preferences.libraryPreviews ? 0 : 10)
+      )
+      .hoverFill(studio.t, radius: 9)
     }.buttonStyle(.plain)
       .contextMenu {
         if archived {

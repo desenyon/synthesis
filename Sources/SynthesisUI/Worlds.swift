@@ -62,6 +62,7 @@ extension Studio {
 }
 
 struct WorldsScreen: View {
+  @Environment(\.studioDensity) private var density
   @ObservedObject var studio: Studio
   @State private var query = ""
   @State private var summaries: [String: WorldSummary] = [:]
@@ -83,7 +84,7 @@ struct WorldsScreen: View {
       }
       ScrollView {
         ContentColumn {
-          VStack(alignment: .leading, spacing: 26) {
+          VStack(alignment: .leading, spacing: density.contentGap) {
             VStack(alignment: .leading, spacing: 8) {
               Text("A place for every universe.").font(.studio(.title))
                 .tracking(
@@ -93,8 +94,11 @@ struct WorldsScreen: View {
             }
             FormField(placeholder: "Find a world…", text: $query, t: studio.t)
             LazyVGrid(
-              columns: [GridItem(.adaptive(minimum: 260), spacing: 16, alignment: .top)],
-              spacing: 16
+              columns: [
+                GridItem(
+                  .adaptive(minimum: density.cardWidth), spacing: density.cardGap, alignment: .top)
+              ],
+              spacing: density.cardGap
             ) {
               ForEach(worlds) { world in
                 VStack(alignment: .leading, spacing: 16) {
@@ -171,8 +175,10 @@ struct WorldsScreen: View {
                         .padding(.top, 12)
                     }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
                   }.buttonStyle(.plain)
-                }.padding(22).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
-                  .overlay(RoundedRectangle(cornerRadius: 16).stroke(studio.t.hairline))
+                }.padding(density.cardInset).background(
+                  studio.t.surface, in: RoundedRectangle(cornerRadius: 16)
+                )
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(studio.t.hairline))
               }
             }
             if worlds.isEmpty {

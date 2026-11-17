@@ -5,6 +5,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 ## [Unreleased]
 
 ### Added
+- Expansion #6: persisted Compact, Comfortable and Immersive density in Settings. Navigation and history rows, Library previews, Worlds/Mechanics cards and entity-section spacing adapt together.
 - Shared World assistant composer with expandable writing space, removable context chips and matching full, companion and compact layouts.
 - Real record, Canvas, Atlas and history attachments; a local context inspector showing source reasons, excerpts and structured workspace data before Send.
 - Per-world Explore/Propose, World/Attachments-only scope, record exclusions, selection/history controls and 8/16/32-record excerpt limits. These are device-local request preferences, not exported lore.

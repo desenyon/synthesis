@@ -1,0 +1,36 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.15s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.sRFLLB/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.sRFLLB/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.sRFLLB/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE compact-library 1440x900, bitmap 1440x900, 134ms
+CAPTURE immersive-library 1440x900, bitmap 1440x900, 117ms
+CAPTURE light-compact-library 1440x900, bitmap 1440x900, 130ms
+CAPTURE light-immersive-library 1440x900, bitmap 1440x900, 124ms
+CAPTURE compact-worlds 1440x900, bitmap 1440x900, 41ms
+CAPTURE immersive-worlds 1440x900, bitmap 1440x900, 46ms
+CAPTURE compact-mechanics 1440x900, bitmap 1440x900, 136ms
+CAPTURE immersive-mechanics 1440x900, bitmap 1440x900, 128ms
+CAPTURE compact-sections 1440x900, bitmap 1440x900, 120ms
+CAPTURE immersive-sections 1440x900, bitmap 1440x900, 128ms
+CAPTURE library 1440x900, bitmap 1440x900, 123ms
+CAPTURE settings 1440x900, bitmap 1440x900, 49ms
+CAPTURE compact-library 1024x768, bitmap 1024x768, 101ms
+CAPTURE immersive-library 1024x768, bitmap 1024x768, 100ms
+CAPTURE light-compact-library 1024x768, bitmap 1024x768, 93ms
+CAPTURE light-immersive-library 1024x768, bitmap 1024x768, 69ms
+CAPTURE compact-worlds 1024x768, bitmap 1024x768, 29ms
+CAPTURE immersive-worlds 1024x768, bitmap 1024x768, 55ms
+CAPTURE compact-mechanics 1024x768, bitmap 1024x768, 111ms
+CAPTURE immersive-mechanics 1024x768, bitmap 1024x768, 79ms
+CAPTURE compact-sections 1024x768, bitmap 1024x768, 99ms
+CAPTURE immersive-sections 1024x768, bitmap 1024x768, 98ms
+CAPTURE library 1024x768, bitmap 1024x768, 101ms
+CAPTURE settings 1024x768, bitmap 1024x768, 48ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-006
+Native captures: docs/verification/expansion-006
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py 'docs/verification/expansion-006' [--prune]

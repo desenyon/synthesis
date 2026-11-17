@@ -4,11 +4,12 @@ import SynthesisCore
 
 /// One shared reading edge for content browsers, their filters and section headings.
 struct ContentColumn<Content: View>: View {
+  @Environment(\.studioDensity) private var density
   @ViewBuilder var content: () -> Content
   var body: some View {
     VStack(alignment: .leading, spacing: 0, content: content)
       .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(.horizontal, Metric.contentInset)
+      .padding(.horizontal, density.inset)
       .frame(maxWidth: Metric.contentWidth)
       .frame(maxWidth: .infinity)
   }

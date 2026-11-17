@@ -3,6 +3,7 @@ import SynthesisCore
 
 /// Mechanics, scenarios and explicit rule review share the core rule model.
 struct RulesLab: View {
+  @Environment(\.studioDensity) private var density
   @ObservedObject var studio: Studio
   let record: LoreRecord
   @State private var rules: [WorldRule] = []
@@ -20,7 +21,7 @@ struct RulesLab: View {
   var body: some View {
     ScrollView {
       ContentColumn {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: density.contentGap) {
           HStack(alignment: .top) {
             EntityPageHeading(
               record: record, t: studio.t,
@@ -54,8 +55,9 @@ struct RulesLab: View {
               .vertical, 20)
           } else {
             LazyVGrid(
-              columns: [GridItem(.adaptive(minimum: 260), spacing: 14)], alignment: .leading,
-              spacing: 14
+              columns: [GridItem(.adaptive(minimum: density.cardWidth), spacing: density.cardGap)],
+              alignment: .leading,
+              spacing: density.cardGap
             ) {
               ForEach(rules.filter { filter == nil || $0.kind == filter }) { rule in ruleCard(rule)
               }
@@ -102,7 +104,7 @@ struct RulesLab: View {
                   )
                   .background(studio.t.accent.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
                 }
-              }.padding(18).background(
+              }.padding(density.cardInset).background(
                 studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.panelRadius))
             }
           }
@@ -192,9 +194,11 @@ struct RulesLab: View {
       Text(rule.body).font(.studio(size: 14)).foregroundStyle(studio.t.secondary).lineSpacing(4)
         .fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
       StateBadge(state: rule.state, t: studio.t)
-    }.padding(20).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
-      .overlay(RoundedRectangle(cornerRadius: 16).stroke(studio.t.hairline, lineWidth: 1))
+    }.padding(density.cardInset).frame(
+      maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading
+    )
+    .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
+    .overlay(RoundedRectangle(cornerRadius: 16).stroke(studio.t.hairline, lineWidth: 1))
   }
   private func load() {
     studio.perform {

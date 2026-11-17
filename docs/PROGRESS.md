@@ -314,3 +314,7 @@ Added semantic typography roles over bundled Inter and shared spacing/elevation 
 ### Expansion #5 — semantic category identity (verified, 2026-11-17)
 
 Removed the divergent Canvas pastel map. Native and Canvas categories use matching colors and Phosphor glyphs; singular/imported visual aliases preserve original stored names. History receives a calendar and understated blue-gray identity. Light Canvas accent corrected to the native value. `./scripts/check.sh`: 175 tests / 42 suites, lint and optimized build. Canvas typecheck, rebuilt bundle, 14 tests including 4.5:1 category text contrast and alias checks. 14 native captures inspected across Canvas, Graph, Library and Timeline in dark/light at both sizes. [Evidence](verification/expansion-005/README.md).
+
+### Expansion #6 — information density (verified, 2026-11-17)
+
+Persisted Compact/Comfortable/Immersive option with shared density environment. Real row heights, thumbnail sizes, card minimum widths, card padding and content gaps adapt across navigation, Library, Worlds, Mechanics and Sections. Existing authored Canvas geometry and rich text remain intact. Disk-reopen and malformed-value preference coverage extended. `./scripts/check.sh`: 175 tests / 42 suites, lint and optimized build. 24 captures across two sizes inspected, including all modes, light extremes, Settings, narrow immersive cards and compact navigation. [Evidence](verification/expansion-006/README.md).

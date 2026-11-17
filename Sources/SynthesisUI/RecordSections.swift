@@ -3,6 +3,7 @@ import SynthesisCore
 
 /// Creator-defined sections share the same records, citations and editor as the Library.
 struct RecordSectionsPage: View {
+  @Environment(\.studioDensity) private var density
   @ObservedObject var studio: Studio
   let parent: LoreRecord
   @State private var sections: [RecordSection] = []
@@ -15,7 +16,7 @@ struct RecordSectionsPage: View {
   var body: some View {
     ScrollView {
       ContentColumn {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: density.contentGap) {
           EntityPageHeading(record: parent, t: studio.t)
           HStack {
             Text("Sections").font(.studio(.label)).foregroundStyle(studio.t.secondary)
@@ -44,7 +45,7 @@ struct RecordSectionsPage: View {
             }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
               .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
           } else {
-            LazyVStack(spacing: 12) {
+            LazyVStack(spacing: density.cardGap) {
               ForEach(Array(sections.enumerated()), id: \.element.id) { index, section in
                 card(section, index: index)
               }
@@ -114,7 +115,7 @@ struct RecordSectionsPage: View {
         Text(section.record.body).font(.studio(size: 14.5)).lineSpacing(4)
           .foregroundStyle(studio.t.secondary).lineLimit(5).textSelection(.enabled)
       }
-    }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
+    }.padding(density.cardInset).frame(maxWidth: .infinity, alignment: .leading)
       .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.panelRadius))
       .overlay(
         RoundedRectangle(cornerRadius: Metric.panelRadius).stroke(studio.t.hairline, lineWidth: 1))

@@ -29,7 +29,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 
 /// One searchable inventory. The same entries label and render the actual controls.
 enum SettingsItem: CaseIterable, Identifiable {
-  case appearance, darkPalette, sidebar, counts, recents, launch, previews
+  case appearance, darkPalette, density, sidebar, counts, recents, launch, previews
   case textSize, readingWidth, spelling, quotes, dashes, links, words
   case assistance, connection, sendKey
   case identity, cover, category, chatMode
@@ -37,7 +37,8 @@ enum SettingsItem: CaseIterable, Identifiable {
   var id: Self { self }
   var section: SettingsSection {
     switch self {
-    case .appearance, .darkPalette, .sidebar, .counts, .recents, .launch, .previews: .general
+    case .appearance, .darkPalette, .density, .sidebar, .counts, .recents, .launch, .previews:
+      .general
     case .textSize, .readingWidth, .spelling, .quotes, .dashes, .links, .words: .writing
     case .assistance, .connection, .sendKey: .assistant
     case .identity, .cover, .category, .chatMode: .world
@@ -48,6 +49,7 @@ enum SettingsItem: CaseIterable, Identifiable {
     switch self {
     case .appearance: "Appearance"
     case .darkPalette: "Dark surfaces"
+    case .density: "Information density"
     case .sidebar: "Expanded navigation"
     case .counts: "Category counts"
     case .recents: "Recent conversations"
@@ -81,6 +83,7 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .appearance: "Light or dark across the whole studio."
     case .darkPalette:
       "Layered graphite or true-black OLED. Used throughout dark appearance, including Canvas."
+    case .density: "Compact, comfortable or immersive rows, cards and content spacing."
     case .sidebar: "Show labels alongside workspace icons."
     case .counts: "Show record totals beside world categories."
     case .recents: "How many chats appear in navigation."
@@ -112,6 +115,7 @@ enum SettingsItem: CaseIterable, Identifiable {
   private var keywords: String {
     switch self {
     case .appearance, .darkPalette: "theme color colour graphite black OLED"
+    case .density: "compact comfortable immersive spacing layout"
     case .textSize: "font typography"
     case .readingWidth: "margins layout"
     case .sendKey: "keyboard shortcut enter return"

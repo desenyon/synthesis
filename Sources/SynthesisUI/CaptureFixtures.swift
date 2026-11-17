@@ -11,6 +11,9 @@ extension Studio {
     "composer-unavailable", "oled-conversation", "oled-canvas", "oled-settings",
     "opaque-conversation", "opaque-graph", "light-opaque-graph",
     "editor-long", "light-editor-long",
+    "compact-library", "immersive-library", "light-compact-library", "light-immersive-library",
+    "compact-worlds", "immersive-worlds", "compact-mechanics", "immersive-mechanics",
+    "compact-sections", "immersive-sections",
     "sidebar-long", "light-sidebar-long", "sidebar-history", "sidebar-folded",
     "sidebar-opaque", "light-sidebar-opaque", "empty-sidebar", "light-collapsed",
     "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
@@ -295,6 +298,12 @@ extension Studio {
     stop()
     setMode(state.hasPrefix("manual") ? .manual : .assisted)
     dark = !state.hasPrefix("light")
+    updatePreferences {
+      $0.density =
+        state.contains("compact-")
+        ? .compact
+        : state.contains("immersive-") ? .immersive : .comfortable
+    }
     collapsed = ["collapsed", "light-collapsed", "settings-collapsed"].contains(state)
     inspector = true
     libraryCategory = nil
@@ -308,6 +317,8 @@ extension Studio {
     perform { try reload() }
     let viewState = state.replacingOccurrences(of: "oled-", with: "")
       .replacingOccurrences(of: "opaque-", with: "")
+      .replacingOccurrences(of: "compact-", with: "")
+      .replacingOccurrences(of: "immersive-", with: "")
     switch viewState {
     case "composer-attached", "light-composer-attached", "composer-context",
       "light-composer-context",

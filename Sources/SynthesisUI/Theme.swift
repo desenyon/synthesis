@@ -85,6 +85,38 @@ enum Space {
   static let xxl: CGFloat = 32
 }
 
+/// Presentation density never resizes authored canvas geometry or reformats document text.
+struct DensityMetric {
+  let value: InformationDensity
+  private func choose(_ compact: CGFloat, _ comfortable: CGFloat, _ immersive: CGFloat) -> CGFloat {
+    switch value {
+    case .compact: compact
+    case .comfortable: comfortable
+    case .immersive: immersive
+    }
+  }
+  var navigationRow: CGFloat { choose(32, SidebarMetric.row, 44) }
+  var historyRow: CGFloat { choose(28, SidebarMetric.history, 40) }
+  var libraryRow: CGFloat { choose(46, 54, 72) }
+  var thumbnail: CGFloat { choose(28, 34, 44) }
+  var inset: CGFloat { choose(20, Metric.contentInset, 36) }
+  var sectionGap: CGFloat { choose(8, 12, 16) }
+  var contentGap: CGFloat { choose(16, 24, 32) }
+  var cardGap: CGFloat { choose(8, 14, 20) }
+  var cardInset: CGFloat { choose(14, 20, 28) }
+  var cardWidth: CGFloat { choose(220, 260, 340) }
+}
+
+private struct StudioDensityKey: EnvironmentKey {
+  static let defaultValue = DensityMetric(value: .comfortable)
+}
+extension EnvironmentValues {
+  var studioDensity: DensityMetric {
+    get { self[StudioDensityKey.self] }
+    set { self[StudioDensityKey.self] = newValue }
+  }
+}
+
 enum Motion {
   static let feedback = 0.15
   static let panel = 0.22

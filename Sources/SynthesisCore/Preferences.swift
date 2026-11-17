@@ -4,6 +4,10 @@ public enum DarkPalette: String, Codable, CaseIterable, Sendable {
   case graphite, oled
 }
 
+public enum InformationDensity: String, Codable, CaseIterable, Sendable {
+  case compact, comfortable, immersive
+}
+
 public enum SendShortcut: String, Codable, CaseIterable, Sendable {
   case enter, commandEnter
 }
@@ -11,6 +15,7 @@ public enum SendShortcut: String, Codable, CaseIterable, Sendable {
 /// Local presentation preferences. These never change lore or the canon approval boundary.
 public struct StudioPreferences: Codable, Equatable, Sendable {
   public var darkPalette = DarkPalette.graphite
+  public var density = InformationDensity.comfortable
   public var bodySize = 16
   public var readingWidth = 780
   public var spellCheck = false
@@ -26,7 +31,7 @@ public struct StudioPreferences: Codable, Equatable, Sendable {
   public init() {}
 
   enum CodingKeys: String, CodingKey {
-    case darkPalette
+    case darkPalette, density
     case bodySize, readingWidth, spellCheck, smartQuotes, smartDashes, automaticLinks, wordCount
     case libraryPreviews, sidebarCounts, recentChats, launchWorkspace, sendShortcut
   }
@@ -34,6 +39,7 @@ public struct StudioPreferences: Codable, Equatable, Sendable {
     self.init()
     let c = try decoder.container(keyedBy: CodingKeys.self)
     darkPalette = (try? c.decode(DarkPalette.self, forKey: .darkPalette)) ?? .graphite
+    density = (try? c.decode(InformationDensity.self, forKey: .density)) ?? .comfortable
     bodySize = (try? c.decode(Int.self, forKey: .bodySize)) ?? bodySize
     readingWidth = (try? c.decode(Int.self, forKey: .readingWidth)) ?? readingWidth
     spellCheck = (try? c.decode(Bool.self, forKey: .spellCheck)) ?? spellCheck

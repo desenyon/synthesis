@@ -90,6 +90,7 @@ public struct ConnectedRoot: View {
     }
     .foregroundStyle(studio.t.text)
     .environment(\.studioTheme, studio.t)
+    .environment(\.studioDensity, DensityMetric(value: studio.preferences.density))
     .environment(\.studioOpaqueMaterials, studio.captureHint.contains("opaque"))
     .ignoresSafeArea()
     .preferredColorScheme(studio.dark ? .dark : .light)

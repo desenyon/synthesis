@@ -12,6 +12,7 @@ struct PreferencesTests {
     let store = try WorkspaceStore(path: path)
     var preferences = StudioPreferences()
     preferences.darkPalette = .oled
+    preferences.density = .immersive
     preferences.bodySize = 20
     preferences.readingWidth = 960
     preferences.spellCheck = true
@@ -22,10 +23,10 @@ struct PreferencesTests {
     try store.setPreference(
       "studio-preferences",
       value:
-        #"{"bodySize":999,"readingWidth":-1,"smartQuotes":false,"recentChats":-2,"launchWorkspace":"Delete","sendShortcut":"future"}"#
+        #"{"bodySize":999,"readingWidth":-1,"smartQuotes":false,"recentChats":-2,"launchWorkspace":"Delete","sendShortcut":"future","density":"future"}"#
     )
     let repaired = try store.studioPreferences()
-    #expect(repaired.darkPalette == .graphite)
+    #expect(repaired.darkPalette == .graphite && repaired.density == .comfortable)
     #expect(repaired.bodySize == 16 && repaired.readingWidth == 780 && repaired.recentChats == 12)
     #expect(
       !repaired.smartQuotes && repaired.launchWorkspace == "remember"

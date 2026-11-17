@@ -41,3 +41,7 @@ The obsolete Settings sheet, duplicated provider cards, unused saved-state flag 
 ## Verification
 
 Final `./scripts/check.sh`: strict Swift lint, 94 tests in 21 suites, optimized ad-hoc development app. Tests cover restart persistence, invalid values, world isolation, archive privacy/rollback, identity transactions, launch defaults, native send keys and text configuration/RTF preservation, search and Manual/provider selection. Final 40 background captures were inspected across 1440×900, 1024×768 and 720×800; evidence in `verification/settings-refinement`. Native menus/file dialogs, foreground gestures/focus traversal and live provider calls remain unverified in this pass.
+
+## Information density
+
+General → Information density saves Compact, Comfortable or Immersive on this Mac. Navigation/history and Library rows change height; record thumbnails, Worlds/Mechanics cards, section padding and reading-edge spacing adapt immediately. Comfortable preserves the standard scale. Fonts stay readable at every density. Authored Canvas positions/sizes and document rich text are not rewritten. Missing or unknown older preference values safely use Comfortable.

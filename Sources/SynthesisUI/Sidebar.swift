@@ -12,6 +12,7 @@ private struct SidebarViewportHeightKey: PreferenceKey {
 
 /// Fixed identity and utilities frame a single scrolling navigation/history surface.
 struct Sidebar: View {
+  @Environment(\.studioDensity) private var density
   @ObservedObject var studio: Studio
   let collapsed: Bool
   @State private var worldExpanded = true
@@ -26,7 +27,7 @@ struct Sidebar: View {
       actions.padding(.bottom, 16)
       ScrollViewReader { scroll in
         ScrollView {
-          VStack(alignment: .leading, spacing: 12) {
+          VStack(alignment: .leading, spacing: density.sectionGap) {
             section("Workspace", items: [.chat, .canvas, .library])
             section("Explore", items: [.knowledge, .timeline, .atlas, .review])
             if !collapsed {
@@ -59,7 +60,7 @@ struct Sidebar: View {
                       Text("No conversations yet").font(.studio(.caption))
                         .foregroundStyle(palette.muted)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 10).frame(height: SidebarMetric.history)
+                        .padding(.horizontal, 10).frame(height: density.historyRow)
                     }
                   }
                 }.id("sidebar-history")
@@ -169,7 +170,7 @@ struct Sidebar: View {
       }
     } label: {
       StudioIcon(studio.dark ? "moon" : "sun", size: SidebarMetric.icon)
-        .frame(width: 40, height: SidebarMetric.row)
+        .frame(width: 40, height: density.navigationRow)
     }.buttonStyle(SidebarControlStyle(t: studio.t))
       .help(studio.dark ? "Dark appearance · Switch to light" : "Light appearance · Switch to dark")
       .accessibilityLabel("Appearance").accessibilityValue(studio.dark ? "Dark" : "Light")
@@ -269,6 +270,7 @@ struct Sidebar: View {
 }
 
 struct NavRow: View {
+  @Environment(\.studioDensity) private var density
   let t: Theme
   let title: String
   let icon: String
@@ -300,7 +302,7 @@ struct NavRow: View {
               .fixedSize()
           }
         }
-      }.padding(.horizontal, 10).frame(maxWidth: .infinity).frame(height: SidebarMetric.row)
+      }.padding(.horizontal, 10).frame(maxWidth: .infinity).frame(height: density.navigationRow)
     }.buttonStyle(SidebarControlStyle(t: t, role: .navigation, selected: selected))
       .help(help ?? title)
       .overlay(alignment: .topTrailing) {
@@ -315,6 +317,7 @@ struct NavRow: View {
 }
 
 struct ConversationRow: View {
+  @Environment(\.studioDensity) private var density
   @ObservedObject var studio: Studio
   let chat: Conversation
   @State private var hover = false
@@ -330,7 +333,7 @@ struct ConversationRow: View {
           StudioIcon("bubble.left", size: 15).frame(width: 20)
           Text(chat.title).font(.studio(size: 12, weight: selected ? .medium : .regular))
             .lineLimit(1).truncationMode(.tail).frame(maxWidth: .infinity, alignment: .leading)
-        }.padding(.leading, 10).padding(.trailing, 4).frame(height: SidebarMetric.history)
+        }.padding(.leading, 10).padding(.trailing, 4).frame(height: density.historyRow)
       }.buttonStyle(SidebarControlStyle(t: studio.t, role: .history, selected: selected))
         .accessibilityLabel(chat.title).accessibilityAddTraits(selected ? .isSelected : [])
       PlainMenu(sidebarTheme: studio.t, sidebarRole: .quiet) {
