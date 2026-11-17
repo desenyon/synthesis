@@ -611,7 +611,7 @@ struct RecordBreadcrumb: View {
   @ObservedObject var studio: Studio
   let origin: String
   let title: String
-  let status: String
+  let status: DocumentSaveState
   let t: Theme
   @Environment(\.barCompact) private var compact
   var body: some View {
@@ -619,14 +619,8 @@ struct RecordBreadcrumb: View {
       RecordTrail(studio: studio, origin: origin)
       Text(title.isEmpty ? "Untitled" : title).font(.studio(size: 13.5, weight: .medium))
         .lineLimit(1).layoutPriority(1)
-      if compact {
-        Circle().fill(status.contains("Not saved") ? t.danger : t.muted)
-          .frame(width: 5, height: 5).help(status).accessibilityLabel(status)
-      } else {
-        Text(status).font(.studio(.caption)).lineLimit(1)
-          .foregroundStyle(status.contains("Not saved") ? t.danger : t.muted)
-          .padding(.leading, 4)
-      }
+      OperationFeedbackView(feedback: status.feedback, t: t, compact: compact, showDetail: false)
+        .padding(.leading, compact ? 0 : 4)
     }
   }
 }

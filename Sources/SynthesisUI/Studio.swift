@@ -64,6 +64,7 @@ public struct Toast: Identifiable {
   var replayingNavigation = false
   @Published public var worldRevision = 0
   @Published public var reviewingProposal = false
+  @Published var reviewProgress: ReviewProgress?
   @Published var reviewFocusID: String?
   @Published public var records: [LoreRecord] = []
   @Published public var recordTabs: [String: RecordPageTab] = [:]
@@ -420,28 +421,32 @@ public struct Toast: Identifiable {
     resolve(proposal, changes: proposal.changes.filter { $0.status == "pending" }, accept: accept)
   }
   private func resolve(_ proposal: Proposal, changes: [ProposedChange], accept: Bool) {
-    guard !reviewingProposal, flushEditor() else { return }
+    guard !reviewingProposal, !changes.isEmpty, flushEditor() else { return }
     let world = worldID
     reviewingProposal = true
+    reviewProgress = ReviewProgress(
+      worldID: world, proposalID: proposal.id, accept: accept, total: changes.count,
+      summary: proposal.summary)
     Task {
       defer { reviewingProposal = false }
-      guard await flushCanvas(), world == worldID else { return }
-      perform {
-        defer {
-          try? reload()
-          if accept && changes.contains(where: { $0.action == "place_record" }) {
-            canvasSession?.reloadStoredBoard()
-          }
+      do {
+        guard await flushCanvas() else {
+          throw SynthesisError.invalid("Canvas is not saved yet. No review decisions were applied.")
         }
         for change in changes {
+          guard world == worldID else { throw CancellationError() }
+          reviewProgress?.phase = .running
+          reviewProgress?.detail = "Canon is unchanged."
+          await Task.yield()
+          guard world == worldID else { throw CancellationError() }
           let resolved = try store.resolveChange(
             worldID: world, proposalID: proposal.id, changeID: change.id,
             accept: accept, confirmation: proposal.id)
+          reviewProgress?.completed += 1
           if accept, let applied = resolved.changes.first(where: { $0.id == change.id }) {
-            if ["create_map", "revise_map"].contains(applied.action) {
+            if ["create_map", "revise_map", "place_marker"].contains(applied.action) {
               mapBoardID = applied.resultID
             }
-            if applied.action == "place_marker" { mapBoardID = applied.resultID }
             if ["create_branch", "create_period", "add_event", "revise_event", "revise_lane"]
               .contains(applied.action)
             {
@@ -450,7 +455,22 @@ public struct Toast: Identifiable {
             if applied.action == "create_board" { canvasBoardID = applied.resultID }
           }
         }
+        reviewProgress?.phase = .complete
+        reviewProgress?.detail = "Canon is unchanged."
         show(accept ? "Saved reviewed changes. Canon is unchanged." : "Changes dismissed.")
+      } catch is CancellationError {
+        reviewProgress?.phase = .cancelled
+        reviewProgress?.detail = "Remaining changes still await your review."
+      } catch {
+        reviewProgress?.phase = .failed
+        reviewProgress?.detail = error.localizedDescription
+        if world == worldID { self.error = error.localizedDescription }
+      }
+      if world == worldID {
+        perform { try reload() }
+        if accept && changes.contains(where: { $0.action == "place_record" }) {
+          canvasSession?.reloadStoredBoard()
+        }
       }
     }
   }

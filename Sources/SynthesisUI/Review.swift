@@ -63,6 +63,10 @@ struct ReviewScreen: View {
         ScrollView {
           ContentColumn {
             VStack(alignment: .leading, spacing: 14) {
+              if let progress = studio.reviewProgress, progress.worldID == studio.worldID {
+                OperationFeedbackView(feedback: progress.feedback, t: studio.t)
+                  .padding(.vertical, 8)
+              }
               switch tab {
               case .proposals: proposals
               case .canon: canon(queue)

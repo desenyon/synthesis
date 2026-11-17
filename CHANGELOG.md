@@ -16,6 +16,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 
 ### Added
+- Expansion #18: accurate autosave/search feedback, named review progress and partial-failure counts, visible AI failures and elapsed hypothetical generation. World changes stop unapplied review decisions.
 - Expansion #16: per-world document tabs, pins, recent reopening and keyboard cycling. Tab/workspace changes retain native caret, scroll, formatting and independent undo; failed saves keep the current document open.
 - Expansion #15: graph semantic zoom from compact titles through summaries to stored artwork and relationship labels. Ports follow visible cards; offscreen culling and bounded thumbnails avoid repeated image decoding.
 - Expansion #6: persisted Compact, Comfortable and Immersive density in Settings. Navigation and history rows, Library previews, Worlds/Mechanics cards and entity-section spacing adapt together.

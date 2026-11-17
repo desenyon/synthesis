@@ -13,3 +13,5 @@ Open IDs, pins and the last 50 recent IDs persist per world on this device. They
 This is not full session restoration (#33): the selected workspace/tab and native undo stacks are not restored after quitting. Switching worlds reloads that world’s tab addresses with fresh native editor views.
 
 The sidebar, writing surface and inspector scroll independently; document tabs, title/format controls and workspace actions stay fixed. A rendered background audit verifies all three regions at standard and compact desktop sizes.
+
+Autosave distinguishes Unsaved (pending), Saving, Saved and Not saved. Saved revisions are searchable immediately; a failure keeps your writing open and offers Retry. A committed revision is not reported as unsaved if refreshing another view subsequently fails.

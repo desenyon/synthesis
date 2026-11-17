@@ -29,6 +29,23 @@ struct ScriptedTransport: ModelTransport {
   }
 }
 @MainActor struct AgentTests {
+  @Test func simulationActivityRemainsExplicitlyHypothetical() async throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Isolated")
+    let chat = try store.createConversation(worldID: world.id)
+    let engine = AgentEngine(
+      store: store, transport: ScriptedTransport(answer: "A possible outcome."))
+    var activity: [AgentActivity] = []
+    try await engine.submit(
+      worldID: world.id, conversationID: chat.id, prompt: "Explore this situation",
+      preset: "Simulate", onActivity: { activity.append($0) }, onDelta: { _ in })
+    let running = try #require(activity.first { $0.id == "response" && $0.state == .running })
+    #expect(running.title == "Exploring hypothetical outcomes")
+    #expect(running.detail.contains("not a deterministic simulation"))
+    #expect(activity.last?.state == .complete)
+    #expect(try store.records(worldID: world.id).isEmpty)
+  }
+
   @Test func workspaceContextChangesWithoutLeakingOtherUniverses() async throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Chosen universe")

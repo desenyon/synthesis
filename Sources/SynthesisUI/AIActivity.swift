@@ -10,22 +10,25 @@ struct AIActivityView: View {
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   private var finished: Bool { !steps.isEmpty && !steps.contains { $0.state == .running } }
   var body: some View {
+    let summary = ActivitySummary(steps)
     VStack(alignment: .leading, spacing: 12) {
       Button {
         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.22)) { expanded.toggle() }
       } label: {
         HStack(spacing: 9) {
           if finished {
-            StudioIcon("checkmark.circle", size: 15).foregroundStyle(t.positive)
+            StudioIcon(
+              summary.state == .failed
+                ? "exclamationmark.circle"
+                : (summary.state == .cancelled ? "stop.fill" : "checkmark.circle"), size: 15
+            )
+            .foregroundStyle(summary.state == .failed ? t.danger : t.secondary)
           } else {
             ActivitySpinner(t: t)
           }
-          Text(
-            steps.last(where: { $0.state == .running })?.title
-              ?? (finished ? "World context prepared" : "Preparing your conversation")
-          )
-          .font(.studio(.label)).foregroundStyle(t.secondary)
-          .lineLimit(1)
+          Text(summary.title)
+            .font(.studio(.label)).foregroundStyle(t.secondary)
+            .lineLimit(1)
           StudioIcon("chevron.right", size: 10).rotationEffect(.degrees(expanded ? 90 : 0))
             .foregroundStyle(t.muted)
         }.contentShape(Rectangle())
@@ -47,7 +50,13 @@ struct AIActivityView: View {
                 }
               }
               Spacer(minLength: 8)
-              if let end = step.endedAt {
+              if step.state == .running {
+                TimelineView(.periodic(from: step.startedAt, by: 1)) { context in
+                  Text("\(Int(max(0, context.date.timeIntervalSince(step.startedAt))))s")
+                    .font(.studio(.caption)).monospacedDigit().foregroundStyle(t.muted)
+                    .accessibilityHidden(true)
+                }
+              } else if let end = step.endedAt {
                 Text(String(format: "%.1fs", max(0, end.timeIntervalSince(step.startedAt))))
                   .font(.studio(size: 11.5)).monospacedDigit().foregroundStyle(t.muted)
               }
@@ -59,8 +68,13 @@ struct AIActivityView: View {
           }.transition(.opacity.combined(with: .move(edge: .top)))
       }
     }.animation(reduceMotion ? nil : .easeOut(duration: 0.22), value: steps)
+      .accessibilityElement(children: .contain)
       .task(id: finished) {
         guard finished else {
+          expanded = true
+          return
+        }
+        guard !steps.contains(where: { $0.state == .failed || $0.state == .cancelled }) else {
           expanded = true
           return
         }

@@ -53,3 +53,5 @@ The initial 2026-11-16 implementation passed `./scripts/check.sh` with **174 tes
 6. Three-way branch merging, extensible modules and later collaboration/publishing.
 
 The brief's hosted API credentials do not supersede the protected subscription-only direction. New simulations, multiplayer, arbitrary executable UI and a global palette overhaul are not implied by this first slice. Preserve the accepted sidebar while implementing its composer reference.
+
+Operation feedback follows actual app events: elapsed waiting, context preparation, response reception and proposal validation. Failed activity stays visible; it never changes to a success label. Simulate explicitly describes hypothetical AI exploration. Review reports the named change set and actual committed count, including partial failure; remaining decisions stay pending.

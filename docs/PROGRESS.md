@@ -376,3 +376,7 @@ Connected tabs, pins, recent reopening, close-other-unpinned, native menu shortc
 ### Expansion #17 — independent scroll regions (2026-11-17)
 
 Confirmed the existing three native scroll regions against long actual records, linked entities and conversation history. Added a background rendered-scroll audit that rejects movement of neighboring offsets or workspace frames; normalized fixture offsets after retained document state made the initial sequential test a no-op. Final check: strict lint, 204 tests / 52 suites, optimized build. All 36 scroll assertions passed and all 12 captures at 1440×900 / 1024×768 were inspected. No foreground events, user-data changes or model calls. Evidence: `docs/verification/expansion-017`. #18 is next; the full brief remains unfinished.
+
+### Expansion #18 — operation feedback (2026-11-17)
+
+Replaced ambiguous save labels with typed pending/running/committed/failure states and Retry. Search indexing remains part of the successful save transaction. Added named review progress with real commit counts, partial failure and world-switch cancellation; no canon privilege changes. Failed AI activity no longer collapses into a success label, elapsed waiting is visible, and Simulate states that outcomes are hypothetical. Final check passed strict lint, 210 tests / 53 suites and optimized build. All 20 final captures inspected at two sizes; review fixtures reflect actual commits/stale failure. No provider requests or foreground events. Evidence: `docs/verification/expansion-018`; #19 next.

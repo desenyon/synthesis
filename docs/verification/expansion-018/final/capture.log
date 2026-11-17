@@ -1,0 +1,32 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.14s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.s4Cuap/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.s4Cuap/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.s4Cuap/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE status-save-waiting 1440x900, bitmap 1440x900, 149ms
+CAPTURE status-save-running 1440x900, bitmap 1440x900, 132ms
+CAPTURE status-save-failed 1440x900, bitmap 1440x900, 139ms
+CAPTURE light-status-save-failed 1440x900, bitmap 1440x900, 122ms
+CAPTURE status-review-running 1440x900, bitmap 1440x900, 249ms
+CAPTURE status-review-failed 1440x900, bitmap 1440x900, 134ms
+CAPTURE light-status-review-complete 1440x900, bitmap 1440x900, 132ms
+CAPTURE status-simulate 1440x900, bitmap 1440x900, 159ms
+CAPTURE light-status-simulate 1440x900, bitmap 1440x900, 170ms
+CAPTURE status-agent-failed 1440x900, bitmap 1440x900, 161ms
+CAPTURE status-save-waiting 1024x768, bitmap 1024x768, 108ms
+CAPTURE status-save-running 1024x768, bitmap 1024x768, 107ms
+CAPTURE status-save-failed 1024x768, bitmap 1024x768, 106ms
+CAPTURE light-status-save-failed 1024x768, bitmap 1024x768, 108ms
+CAPTURE status-review-running 1024x768, bitmap 1024x768, 156ms
+CAPTURE status-review-failed 1024x768, bitmap 1024x768, 111ms
+CAPTURE light-status-review-complete 1024x768, bitmap 1024x768, 81ms
+CAPTURE status-simulate 1024x768, bitmap 1024x768, 119ms
+CAPTURE light-status-simulate 1024x768, bitmap 1024x768, 122ms
+CAPTURE status-agent-failed 1024x768, bitmap 1024x768, 117ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-018/final
+Native captures: docs/verification/expansion-018/final
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py 'docs/verification/expansion-018/final' [--prune]

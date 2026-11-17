@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "status-save-waiting", "status-save-running", "status-save-failed", "light-status-save-failed",
+    "status-review-running", "status-review-failed", "light-status-review-complete",
+    "status-simulate", "light-status-simulate", "status-agent-failed",
     "scroll-regions", "scroll-regions-document", "scroll-regions-inspector",
     "scroll-regions-sidebar",
     "light-scroll-regions-inspector", "manual-scroll-regions-document",
@@ -268,6 +271,98 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("status-save") {
+      configureConnectedCapture("editor", board: board, conversation: conversation)
+      dark = !state.hasPrefix("light-")
+      captureHint = state
+      return
+    }
+    if state.contains("status-review") {
+      configureConnectedCapture("review", board: board, conversation: conversation)
+      perform {
+        for old in try store.proposals(worldID: worldID) where old.summary == "Coastal expedition" {
+          for change in old.changes where change.status == "pending" {
+            _ = try store.resolveChange(
+              worldID: worldID, proposalID: old.id, changeID: change.id,
+              accept: false, confirmation: old.id)
+          }
+        }
+        let source = try store.createRecord(
+          worldID: worldID, title: "Expedition route", body: "Along the coast")
+        guard
+          let proposal = try store.stageProposal(
+            worldID: worldID, conversationID: nil, messageID: nil,
+            payload: [
+              "summary": "Coastal expedition",
+              "changes": [
+                [
+                  "action": "create_record", "title": "Expedition supplies",
+                  "body": "Charts and dry stores",
+                ],
+                [
+                  "action": "revise_record", "id": source.id, "body": "Following the eastern coast",
+                ],
+                ["action": "add_event", "title": "Expedition departure", "source": source.id],
+              ],
+            ])
+        else { return }
+        var progress = ReviewProgress(
+          worldID: worldID, proposalID: proposal.id, accept: true,
+          total: proposal.changes.count, summary: proposal.summary)
+        _ = try store.resolveChange(
+          worldID: worldID, proposalID: proposal.id,
+          changeID: proposal.changes[0].id, accept: true, confirmation: proposal.id)
+        progress.completed = 1
+        progress.phase = .running
+        progress.detail = "Canon is unchanged."
+        if state.hasSuffix("complete") {
+          for change in proposal.changes.dropFirst() {
+            _ = try store.resolveChange(
+              worldID: worldID, proposalID: proposal.id, changeID: change.id,
+              accept: true, confirmation: proposal.id)
+            progress.completed += 1
+          }
+          progress.phase = .complete
+        } else if state.hasSuffix("failed") {
+          _ = try store.saveRecord(
+            worldID: worldID, id: source.id, version: source.version,
+            title: source.title, body: "A newly discovered route", rtf: nil)
+          do {
+            _ = try store.resolveChange(
+              worldID: worldID, proposalID: proposal.id,
+              changeID: proposal.changes[1].id, accept: true, confirmation: proposal.id)
+          } catch {
+            progress.phase = .failed
+            progress.detail = error.localizedDescription
+          }
+        }
+        try reload()
+        reviewProgress = progress
+        reviewingProposal = progress.phase == .running
+      }
+      dark = !state.hasPrefix("light-")
+      captureHint = state
+      return
+    }
+    if state.contains("status-simulate") || state == "status-agent-failed" {
+      configureConnectedCapture("conversation-loading", board: board, conversation: conversation)
+      if state.contains("simulate") { preset = "Simulate" }
+      activity[1].title =
+        state == "status-agent-failed" ? "Assistant unavailable" : "Exploring hypothetical outcomes"
+      activity[1].detail =
+        state == "status-agent-failed"
+        ? "The subscription connection ended. Your message is saved."
+        : "AI exploration with assumptions, not a deterministic simulation. Nothing becomes canon."
+      activity[1].state = state == "status-agent-failed" ? .failed : .running
+      activity[1].startedAt = Date().addingTimeInterval(-25)
+      if state == "status-agent-failed" {
+        activity[1].endedAt = Date()
+        busy = false
+      }
+      dark = !state.hasPrefix("light-")
+      captureHint = state
+      return
+    }
     if state.contains("scroll-regions") {
       configureConnectedCapture("library", board: board, conversation: conversation)
       perform {
@@ -551,6 +646,8 @@ extension Studio {
     palette = false
     sheet = nil
     toast = nil
+    reviewProgress = nil
+    reviewingProposal = false
     stop()
     setMode(state.hasPrefix("manual") ? .manual : .assisted)
     dark = !state.hasPrefix("light")

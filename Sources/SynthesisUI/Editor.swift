@@ -56,7 +56,7 @@ struct EditorScreen: View {
   @State private var richText: String?
   @State private var category: String
   @State private var dirty = false
-  @State private var status = "Saved"
+  @State private var status = DocumentSaveState.saved
   @State private var saving: Task<Void, Never>?
   @State private var journaling: Task<Void, Never>?
   @State private var recovered: JournalEntry?
@@ -92,6 +92,14 @@ struct EditorScreen: View {
     GeometryReader { geo in
       VStack(spacing: 0) {
         bar
+        if status == .failed {
+          HStack(spacing: 12) {
+            OperationFeedbackView(feedback: status.feedback, t: studio.t)
+            Spacer(minLength: 8)
+            Button("Retry save") { _ = save() }.buttonStyle(QuietButton(t: studio.t))
+          }.padding(.horizontal, 20).padding(.vertical, 10)
+            .background(studio.t.surface)
+        }
         DocumentTabBar(studio: studio)
         if record.kind == "entity" { entityTabs }
         HStack(spacing: 0) {
@@ -125,6 +133,9 @@ struct EditorScreen: View {
     }
     .onAppear {
       studio.editorSave = { save() }
+      if studio.captureHint.contains("status-save-waiting") { status = .waiting }
+      if studio.captureHint.contains("status-save-running") { status = .saving }
+      if studio.captureHint.contains("status-save-failed") { status = .failed }
       if studio.captureHint.contains("mechanics") { tab = .mechanics }
       studio.perform {
         sectionParent = try studio.store.sectionParent(worldID: record.worldID, recordID: record.id)
@@ -393,7 +404,7 @@ struct EditorScreen: View {
 
   private func changed() {
     dirty = true
-    status = "Saving…"
+    status = .waiting
     journaling?.cancel()
     journaling = Task { @MainActor in
       try? await Task.sleep(for: .milliseconds(200))
@@ -410,19 +421,21 @@ struct EditorScreen: View {
   @discardableResult private func save() -> Bool {
     saving?.cancel()
     guard dirty else { return true }
+    status = .saving
     do {
       record = try studio.store.saveRecord(
         worldID: record.worldID, id: record.id, version: record.version, title: title,
         body: bodyText, rtf: richText, category: category)
       dirty = false
-      status = "Saved"
+      status = .saved
       journaling?.cancel()
       try? studio.store.clearJournal(worldID: record.worldID, recordID: record.id)
-      try studio.reload()
+      // Refresh errors must not report a committed revision as unsaved.
+      studio.perform { try studio.reload() }
       return true
     } catch {
       journal()
-      status = "Not saved · your text is kept here"
+      status = .failed
       studio.error = error.localizedDescription
       return false
     }
@@ -501,7 +514,7 @@ struct EditorScreen: View {
       title = record.title
       category = record.category
       dirty = false
-      status = "Saved"
+      status = .saved
       reloadToken += 1
       panel = nil
       try studio.reload()

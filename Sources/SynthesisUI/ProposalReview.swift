@@ -29,6 +29,11 @@ struct ProposalCard: View {
         ).font(.studio(.captionStrong)).fixedSize()
           .foregroundStyle(proposal.pending == 0 ? t.muted : t.accent)
       }.padding(.horizontal, 14).padding(.vertical, 12)
+      if studio.destination != .review, let progress = studio.reviewProgress,
+        progress.worldID == studio.worldID, progress.proposalID == proposal.id
+      {
+        OperationFeedbackView(feedback: progress.feedback, t: t).padding(14)
+      }
       ForEach(proposal.changes) { change in
         Rectangle().fill(t.hairline).frame(height: 1)
         row(change)

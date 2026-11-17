@@ -217,7 +217,9 @@ struct ConversationStudio: View {
           ForEach(studio.messages) { message in
             ChatRow(studio: studio, message: message, narrow: narrow)
           }
-          if studio.busy {
+          if studio.busy
+            || studio.activity.contains(where: { $0.state == .failed || $0.state == .cancelled })
+          {
             VStack(alignment: .leading, spacing: 12) {
               AIActivityView(steps: studio.activity, t: studio.t)
               if !studio.streamed.isEmpty {

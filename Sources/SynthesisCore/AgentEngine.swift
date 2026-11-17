@@ -47,9 +47,18 @@ public protocol ModelTransport: Sendable {
     let history = try store.messages(worldID: worldID, conversationID: conversationID)
     let retrievalStart = Date()
     onActivity(.init(id: "lore", title: "Finding relevant lore", state: .running))
-    let prepared = try store.assistantContext(
-      worldID: worldID, prompt: text, options: contextOptions,
-      selectedRecordIDs: selectedRecordIDs, boardID: boardID, chronologyLaneID: chronologyLaneID)
+    let prepared: AssistantContext
+    do {
+      prepared = try store.assistantContext(
+        worldID: worldID, prompt: text, options: contextOptions,
+        selectedRecordIDs: selectedRecordIDs, boardID: boardID, chronologyLaneID: chronologyLaneID)
+    } catch {
+      onActivity(
+        .init(
+          id: "lore", title: "Could not prepare world context", detail: error.localizedDescription,
+          state: .failed, startedAt: retrievalStart, endedAt: Date()))
+      throw error
+    }
     let sources = prepared.sources
     onActivity(
       .init(
@@ -132,7 +141,14 @@ public protocol ModelTransport: Sendable {
     let token = UUID()
     generation = token
     let responseStart = Date()
-    onActivity(.init(id: "response", title: "Waiting for your assistant", state: .running))
+    onActivity(
+      .init(
+        id: "response",
+        title: preset == "Simulate"
+          ? "Exploring hypothetical outcomes" : "Waiting for your assistant",
+        detail: preset == "Simulate"
+          ? "AI exploration with assumptions, not a deterministic simulation. Nothing becomes canon."
+          : "You can stop while waiting; your message is saved.", state: .running))
     let partial = PartialResponse()
     let task = Task {
       try Task.checkCancellation()
