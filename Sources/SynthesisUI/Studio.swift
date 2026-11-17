@@ -166,6 +166,7 @@ public struct Toast: Identifiable {
   @Published public var editorSave: (() -> Bool)?
   @Published public var canvasBoardID: String?
   @Published public var mapBoardID: String?
+  lazy var atlasView = AtlasViewSession(store: store)
   @Published var graphSelectedID: String? {
     didSet { if oldValue != graphSelectedID { inspectionTarget = nil } }
   }

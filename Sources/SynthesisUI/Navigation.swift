@@ -12,6 +12,7 @@ struct NavigationLocation: Codable, Equatable {
   var selectionID: String?
   var laneID: String?
   var splitRecordID: String?
+  var atlasView: AtlasViewState?
 }
 struct NavigationEntry: Identifiable, Equatable {
   let id = UUID()
@@ -33,7 +34,9 @@ extension Studio {
       selectionID: destination == .knowledge
         ? graphSelectedID
         : (destination == .atlas ? atlasSelectedID : nil),
-      laneID: destination == .timeline ? timelineLaneID : nil, splitRecordID: splitRecord?.id)
+      laneID: destination == .timeline ? timelineLaneID : nil, splitRecordID: splitRecord?.id,
+      atlasView: destination == .atlas && atlasView.matches(worldID: worldID, boardID: mapBoardID)
+        ? atlasView.value : nil)
   }
   var navigationEntry: NavigationEntry {
     var title = selectedRecord?.title ?? libraryCategory ?? destination.rawValue
@@ -107,7 +110,11 @@ extension Studio {
     guard try store.worlds().contains(where: { $0.id == address.worldID }) else {
       throw SynthesisError.invalid("This universe is no longer available.")
     }
-    for id in [address.recordID, address.selectionID, address.splitRecordID].compactMap({ $0 }) {
+    // A removed Atlas selection should clear itself, not make the still-valid map unreachable.
+    for id in [
+      address.recordID, address.destination == .atlas ? nil : address.selectionID,
+      address.splitRecordID,
+    ].compactMap({ $0 }) {
       _ = try store.record(worldID: address.worldID, id: id)
       guard try !store.isArchived(worldID: address.worldID, recordID: id) else {
         throw SynthesisError.invalid("This record is no longer available in that universe.")
@@ -128,6 +135,10 @@ extension Studio {
           worldID: address.worldID, kind: address.destination == .canvas ? "canvas" : "atlas"
         ).contains(where: { $0.id == id })
       else { throw SynthesisError.invalid("This board is no longer available.") }
+      if address.destination == .atlas {
+        let board = try store.board(worldID: address.worldID, id: id, kind: "atlas")
+        _ = try JSONDecoder().decode(AtlasDocument.self, from: Data(board.content.utf8))
+      }
     }
     if let id = address.laneID {
       guard try store.chronologyLanes(worldID: address.worldID).contains(where: { $0.id == id })
@@ -166,6 +177,9 @@ extension Studio {
       if address.destination == .atlas {
         mapBoardID = address.boardID
         atlasSelectedID = address.selectionID
+        if let id = address.boardID {
+          try restoreAtlasView(boardID: id, view: address.atlasView, selection: address.selectionID)
+        }
       }
       if address.destination == .knowledge { graphSelectedID = address.selectionID }
       if address.destination == .timeline { timelineLaneID = address.laneID }
@@ -197,7 +211,7 @@ extension Studio {
           canvasSession?.switchBoard(id)
         } else {
           mapBoardID = id
-          atlasSelectedID = nil
+          try restoreAtlasView(boardID: id)
         }
       }
     }

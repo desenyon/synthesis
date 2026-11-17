@@ -37,7 +37,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 | ![Graph of entities and relationships](docs/screenshots/graph.png) | ![Record editor with inspector](docs/screenshots/editor.png) |
 | **Mechanics**: rules, costs, limits and scenarios for power systems, plus a technique tree built from what each technique requires. | **Timeline**: sourced events with free-form dates, nested branches and periods, and Detailed, Compact or By-era views. |
 | ![Technique tree in Mechanics](docs/screenshots/technique-tree.png) | ![Timeline grouped by era](docs/screenshots/timeline.png) |
-| **Atlas**: named maps linked to places, with markers and drawn regions you can reshape. | **Review**: proposals, canon decisions and local consistency checks in one place, including changes sent back from what-if worlds. |
+| **Atlas**: named maps linked to places, with markers and drawn regions you can reshape. Return to the same zoom, layers and selected region. | **Review**: proposals, canon decisions and local consistency checks in one place, including changes sent back from what-if worlds. |
 | ![Atlas map with a selected region](docs/screenshots/atlas.png) | ![Review with consistency checks](docs/screenshots/review-checks.png) |
 
 **Also:** searchable [world activity history](docs/ACTIVITY.md) · customizable navigation with per-universe section order, category visibility and favorite records/collections · a world dashboard with project outlines · saved workspace layouts (⌥⌘L) · reversible navigation history · resizable navigation, inspectors and conversation panels · consistent entity selection across workspaces · adjustable information density · portable entity artwork · what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a [universal ⌘K palette](docs/SEARCH.md) for lore, maps, tools, settings and recent changes · shared structured search (`type:character faction:Tidekeepers`, `status:canon updated:7d`) · Finder integration for `.synthesis` files.
@@ -87,6 +87,12 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 Drag from Search, Favorites or Library; Canvas places a linked card at the pointer. [Usage](docs/DRAG_RECORDS.md).
 
+**Return to your map**
+
+![Atlas restored to the same framing and selected Glass Sea region after opening its source](docs/screenshots/atlas-context.png)
+
+[Map navigation](docs/ATLAS_NAVIGATION.md) preserves the view independently from lore.
+
 **Saved workspace layouts**
 
 ![Named Research, Writing, Cartography and Simulation arrangements in the native layout manager](docs/screenshots/layouts.png)
@@ -105,7 +111,7 @@ Drag from Search, Favorites or Library; Canvas places a linked card at the point
 
 </details>
 
-Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard, command-palette, navigation, favorites, activity, split-workspace and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard, command-palette, navigation, favorites, activity, split-workspace, record-drag, Atlas-context and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
 
 The complete 394-item expansion is tracked individually in [the implementation ledger](docs/EXPANSION.md). It is **not yet complete**. Dark surfaces now default to graphite; **Settings → General → Dark surfaces** retains true-black OLED as an option.
 

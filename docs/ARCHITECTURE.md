@@ -208,3 +208,7 @@ Canvas remains mounted once in the shell. Its visibility and overlay insets acco
 ### Local record drag (expansion #27)
 
 `RecordDragAddress` carries only a version and stable world/record IDs through an own-process NSItemProvider type declared in the app bundle. Search, Favorites and Library use one source modifier. Transient native drop surfaces resolve current records, validate the source and captured destination, and invoke existing guarded editor navigation. Canvas converts native viewport coordinates in the offline engine, moves or creates the grouped record card without changing lore, uses engine Undo and confirms native persistence. Its board-generation token protects delayed WebKit delivery. No new schema, model authority or export format is introduced.
+
+### Atlas view sessions (expansion #28)
+
+`AtlasViewSession` outlives the SwiftUI Atlas view. Versioned `atlas-view:<world>:<map>` preferences store image-relative framing, layer visibility and selection; `atlas-last-map:<world>` remembers the active map. Save/navigation boundaries persist changes, with no per-input database writes or lore revisions. The session validates world ownership and reconciles archived/removed selections against fresh map data. Invalid preferences are preserved before replacement. Optional `NavigationLocation.atlasView` snapshots make history and existing saved layouts restore the exact visit; older layouts remain readable.

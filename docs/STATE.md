@@ -4,13 +4,13 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#27 verified; #28 context-preserving Atlas navigation is next.** The full expansion is unfinished.
+The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#28 verified; #29 global Back/Forward navigation is next.** The full expansion is unfinished.
 
-Latest: [drag records](DRAG_RECORDS.md) from Search, sidebar Favorites or Library into either native editor pane or onto Canvas. Drag targets appear only during the gesture; the palette and compact composers step aside without destroying state. Receivers resolve current lore, honor both save guards, reject late/foreign/archived addresses and preserve Manual mode. Canvas drops use current pan/zoom, move an existing card without duplication, retain relationships/artwork, support Undo and wait for a real save acknowledgment.
+Latest: [Atlas navigation](ATLAS_NAVIGATION.md) restores each map's zoom, image-relative center, marker/region visibility and selection across documents, tools, maps and normal restarts. Saved layouts and history carry visit framing. Native captures exposed a map-switch save-callback bug; it is fixed and covered by a mounted-view regression. Corrupt view preferences and removed selections cannot overwrite lore or resurrect archived maps.
 
-Latest checks: `./scripts/check.sh` passed **256 tests / 63 suites**, strict lint and optimized ad-hoc build. Canvas passed **17 tests**, typecheck/bundle build and **49 embedded-engine checks**. **33 final native states** were inspected at 1440×900, 1024×768 and 720×800, after an initial 22-state pass. [Exact evidence](verification/expansion-027/README.md). No foreground input, live model call, release or restart of the owner's app; AGENTS.md unchanged.
+Latest checks: `./scripts/check.sh` passed **262 tests / 64 suites**, strict lint and optimized ad-hoc build. **27 final native states** were inspected at 1440×900, 1024×768 and 720×800, with **54 mounted-view audit assertions**. [Exact evidence](verification/expansion-028/README.md). README now includes the returned Atlas view. No foreground input, live model call, release or owner-app restart; AGENTS.md unchanged.
 
-Earlier verified slices include the shared visual system, contextual tools/inspectors, reversible navigation, saved layouts, Dashboard, semantic Graph zoom, document tabs, operation feedback, resizable panels, shared selection, structured search, customized navigation, Favorites, durable activity and the real split workspace. Individual evidence remains in the ledger. Activity uses migration 0015, portable v9 and JSON schema 12; this drag slice adds no migration or dependency. Physical OS drag feel, animation pacing and VoiceOver remain unverified by background checks.
+Earlier slices include real split editors and native record drag to panes/Canvas; #27 passed 17 Canvas tests and 49 engine checks. The Atlas slice changes no Canvas code, migrations or dependencies. Physical pointer/trackpad feel, animation pacing and VoiceOver remain unverified by background checks. Complete application-session restoration remains #33.
 
 ## Latest — chatbox refinement (unreleased)
 

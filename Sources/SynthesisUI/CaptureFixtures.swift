@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "atlas-context-before", "atlas-context-return", "light-atlas-context-return",
+    "manual-atlas-context-return", "atlas-context-map-switch", "atlas-context-tools",
+    "atlas-context-layers", "atlas-context-split", "atlas-context-fit",
     "selection-graph", "light-selection-graph", "manual-selection-graph",
     "selection-canvas", "light-selection-canvas", "selection-atlas", "light-selection-atlas",
     "selection-regions", "selection-library", "selection-timeline",
@@ -300,6 +303,10 @@ extension Studio {
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
     endRecordDrag()
+    if state.contains("atlas-context-") {
+      configureAtlasContextCapture(state, board: board, conversation: conversation)
+      return
+    }
     if state.contains("drag-") {
       configureRecordDragCapture(state, board: board, conversation: conversation)
       return
@@ -1342,6 +1349,16 @@ extension Studio {
     default: destination = .canvas
     }
     if state == "composer-unavailable" { providerConfigured = false }
+    // Each ordinary fixture starts at a deterministic view. Context-restoration fixtures set
+    // their framing afterward, then exercise real navigation on the mounted workspace.
+    if destination == .atlas, selectedRecord == nil {
+      perform {
+        let maps = try store.boards(worldID: worldID, kind: "atlas")
+        if let id = mapBoardID ?? maps.first?.id {
+          try restoreAtlasView(boardID: id, view: AtlasViewState())
+        }
+      }
+    }
     captureHint = state
     captureNonce += 1
   }

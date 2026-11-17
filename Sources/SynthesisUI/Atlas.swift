@@ -5,6 +5,7 @@ import SynthesisCore
 /// A creator-supplied map with markers that open real records. The image stays on this device.
 struct AtlasScreen: View {
   @ObservedObject var studio: Studio
+  @ObservedObject private var viewport: AtlasViewSession
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var markerPicker = false
   @State private var artworkPicker = false
@@ -19,8 +20,7 @@ struct AtlasScreen: View {
   @State private var loadFailed = false
   @State private var map = AtlasDocument()
   @State private var mapImage: NSImage?
-  @State private var zoom = 1.0
-  @State private var pan = CGSize.zero
+  private var zoom: Double { viewport.value.zoom }
   @State private var panAnchor: CGPoint?
   @State private var authoring = AtlasAuthoring()
   private var placing: String? { authoring.markerID }
@@ -32,13 +32,23 @@ struct AtlasScreen: View {
     let placed = Set(map.markers.map(\.recordID))
     return studio.records.filter { !placed.contains($0.id) }
   }
-  @State private var selectedRegion: String?
+  private var selectedRegion: String? {
+    get { viewport.value.selectedRegionID }
+    nonmutating set { viewport.value.selectedRegionID = newValue }
+  }
   @State private var reshapeBefore: Board?
-  @State private var showMarkers = true
-  @State private var showRegions = true
+  private var showMarkers: Bool { viewport.value.showMarkers }
+  private var showRegions: Bool { viewport.value.showRegions }
   private var selected: String? {
     get { studio.atlasSelectedID }
-    nonmutating set { studio.atlasSelectedID = newValue }
+    nonmutating set {
+      studio.atlasSelectedID = newValue
+      viewport.value.selectedRecordID = newValue
+    }
+  }
+  init(studio: Studio) {
+    self.studio = studio
+    viewport = studio.atlasView
   }
   var body: some View {
     VStack(spacing: 0) {
@@ -99,8 +109,8 @@ struct AtlasScreen: View {
         }
         IconMenu(icon: "ellipsis", label: "Map actions", t: studio.t) {
           if map.image != nil {
-            Toggle("Show markers", isOn: $showMarkers)
-            Toggle("Show regions", isOn: $showRegions)
+            Toggle("Show markers", isOn: $viewport.value.showMarkers)
+            Toggle("Show regions", isOn: $viewport.value.showRegions)
             Divider()
           }
           Button("New map…") {
@@ -184,7 +194,6 @@ struct AtlasScreen: View {
         }, close: { artworkPicker = false })
     }
     .onAppear {
-      studio.editorSave = { persist() }
       loadMap()
       if studio.captureHint == "atlas-details" { details = true }
       if studio.captureHint == "sheet-generate" { artworkPicker = true }
@@ -213,6 +222,12 @@ struct AtlasScreen: View {
     }
     .onChange(of: studio.worldRevision) { _, _ in loadMap() }
     .onChange(of: studio.mapBoardID) { _, _ in loadMap() }
+    .onDisappear {
+      guard viewport.matches(worldID: loadedWorld, boardID: boardID) else { return }
+      do { try viewport.persist() } catch {
+        studio.show("The Atlas view could not be saved.", icon: "exclamationmark.triangle")
+      }
+    }
   }
   private func switchMap(_ id: String) {
     guard persist() else { return }
@@ -221,13 +236,25 @@ struct AtlasScreen: View {
   }
   private func loadMap() {
     guard loadedWorld != studio.worldID || map == loadedMap else { return }
+    // Switching maps keeps this view mounted while navigation clears the previous save hook.
+    studio.editorSave = { persist() }
     do {
       maps = try studio.store.boards(worldID: studio.worldID, kind: "atlas")
-      let board = maps.first(where: { $0.id == studio.mapBoardID }) ?? maps.first
+      let remembered = try studio.store.preference("atlas-last-map:\(studio.worldID)")
+      let board =
+        maps.first(where: { $0.id == studio.mapBoardID })
+        ?? maps.first(where: { $0.id == remembered }) ?? maps.first
       let changed = loadedWorld != studio.worldID || boardID != board?.id
       let next =
         try board.map { try JSONDecoder().decode(AtlasDocument.self, from: Data($0.content.utf8)) }
         ?? AtlasDocument()
+      if let board {
+        try viewport.activate(
+          worldID: studio.worldID, board: board, map: next,
+          recordIDs: Set(studio.records.map(\.id)))
+      } else {
+        try viewport.deactivate()
+      }
       mapImage = ImageCache.image(base64: next.image)
       boardID = board?.id
       currentBoard = board
@@ -235,16 +262,12 @@ struct AtlasScreen: View {
       loadedMap = next
       loadedWorld = studio.worldID
       studio.mapBoardID = board?.id
+      studio.atlasSelectedID = viewport.value.selectedRecordID
       if changed {
-        zoom = 1
-        pan = .zero
-        if let selected, !map.markers.contains(where: { $0.recordID == selected }),
-          !map.regions.contains(where: { $0.recordID == selected })
-        {
-          self.selected = nil
-        }
-        selectedRegion = nil
+        panAnchor = nil
+        reshapeBefore = nil
         authoring.choose(.browse)
+        if let notice = viewport.recoveryNotice { studio.show(notice, icon: "info.circle") }
       }
       loadFailed = false
     } catch {
@@ -270,19 +293,23 @@ struct AtlasScreen: View {
   }
   private func mapView(_ image: NSImage, size: CGSize) -> some View {
     let ratio = image.size.width / max(1, image.size.height)
-    let width = min(size.width - 56, (size.height - 56) * ratio) * zoom
+    let baseWidth = max(1, min(size.width - 56, (size.height - 56) * ratio))
+    let baseSize = CGSize(width: baseWidth, height: baseWidth / max(0.001, ratio))
+    let width = baseWidth * zoom
     let height = width / ratio
+    let imageSize = CGSize(width: width, height: height)
+    let pan = viewport.value.pan(imageSize: imageSize)
     let origin = CGPoint(x: size.width / 2 + pan.width, y: size.height / 2 + pan.height)
     return ZStack {
       CanvasInputSurface(
         onPan: {
-          pan.width += $0.width
-          pan.height += $0.height
+          viewport.value.move(by: $0, imageSize: imageSize)
         },
         onZoom: { factor, location in
-          changeZoom(
-            factor,
-            anchor: CGPoint(x: location.x - size.width / 2, y: location.y - size.height / 2))
+          viewport.value.magnify(
+            by: factor,
+            anchor: CGPoint(x: location.x - size.width / 2, y: location.y - size.height / 2),
+            baseImageSize: baseSize)
         },
         onClick: {
           guard drawingRecord == nil else { return }
@@ -292,8 +319,8 @@ struct AtlasScreen: View {
         },
         onDrag: { start, current, phase in
           let last = panAnchor ?? start
-          pan.width += current.x - last.x
-          pan.height += current.y - last.y
+          viewport.value.move(
+            by: CGSize(width: current.x - last.x, height: current.y - last.y), imageSize: imageSize)
           panAnchor = phase == .ended ? nil : current
         },
         onKey: { event in
@@ -423,12 +450,11 @@ struct AtlasScreen: View {
           }
           Spacer()
           ZoomControls(
-            zoom: zoom, t: studio.t, zoomOut: { stepZoom(1 / 1.25) },
-            zoomIn: { stepZoom(1.25) },
+            zoom: zoom, t: studio.t, zoomOut: { stepZoom(1 / 1.25, baseSize: baseSize) },
+            zoomIn: { stepZoom(1.25, baseSize: baseSize) },
             fit: {
               withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
-                zoom = 1
-                pan = .zero
+                viewport.value.fit()
               }
             })
         }
@@ -589,14 +615,10 @@ struct AtlasScreen: View {
       offerUndo(before, title: title)
     }
   }
-  private func changeZoom(_ factor: Double, anchor: CGPoint = .zero) {
-    let next = SpatialViewport.zoom(
-      scale: zoom, pan: pan, factor: factor, anchor: anchor, limits: 0.5...5)
-    zoom = next.scale
-    pan = next.pan
-  }
-  private func stepZoom(_ factor: Double) {
-    withAnimation(reduceMotion ? nil : Motion.panelAnimation) { changeZoom(factor) }
+  private func stepZoom(_ factor: Double, baseSize: CGSize) {
+    withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
+      viewport.value.magnify(by: factor, anchor: .zero, baseImageSize: baseSize)
+    }
   }
   private func markerView(_ marker: MapMarker) -> some View {
     let record = studio.records.first { $0.id == marker.recordID }
@@ -654,8 +676,7 @@ struct AtlasScreen: View {
     let previous = currentBoard
     map.image = image
     mapImage = ImageCache.image(base64: image)
-    zoom = 1
-    pan = .zero
+    viewport.value.fit()
     if persist() {
       offerUndo(previous, title: "Map image updated")
     }
@@ -677,18 +698,22 @@ struct AtlasScreen: View {
   }
   @discardableResult private func persist() -> Bool {
     guard !loadFailed else { return map == loadedMap }
-    guard map != loadedMap else { return true }
     guard loadedWorld == studio.worldID else { return false }
     do {
-      let saved = try studio.store.saveAtlasMap(
-        worldID: loadedWorld, id: boardID, name: currentBoard?.name ?? "World map",
-        content: String(decoding: try JSONEncoder().encode(map), as: UTF8.self),
-        expected: currentBoard)
-      currentBoard = saved
-      boardID = saved.id
-      loadedMap = map
-      studio.mapBoardID = saved.id
-      maps = try studio.store.boards(worldID: loadedWorld, kind: "atlas")
+      if map != loadedMap {
+        let saved = try studio.store.saveAtlasMap(
+          worldID: loadedWorld, id: boardID, name: currentBoard?.name ?? "World map",
+          content: String(decoding: try JSONEncoder().encode(map), as: UTF8.self),
+          expected: currentBoard)
+        currentBoard = saved
+        boardID = saved.id
+        loadedMap = map
+        studio.mapBoardID = saved.id
+        maps = try studio.store.boards(worldID: loadedWorld, kind: "atlas")
+        try viewport.activate(
+          worldID: loadedWorld, board: saved, map: map, recordIDs: Set(studio.records.map(\.id)))
+      }
+      try viewport.persist()
       return true
     } catch {
       studio.error = "Atlas could not save. Your changes remain open. " + error.localizedDescription

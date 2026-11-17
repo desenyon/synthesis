@@ -1,0 +1,22 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.15s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.Il8Sxw/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.Il8Sxw/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.Il8Sxw/Synthesis-Verification.app: 1 (Operation not permitted)
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-before: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-before: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-before 1440x900, bitmap 1440x900, 269ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-return 1440x900, bitmap 1440x900, 246ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS light-atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS light-atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE light-atlas-context-return 1440x900, bitmap 1440x900, 258ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS manual-atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS manual-atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE manual-atlas-context-return 1440x900, bitmap 1440x900, 194ms
+Capture failed: invalid("Atlas view restoration or source preservation failed.")

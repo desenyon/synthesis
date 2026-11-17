@@ -56,7 +56,7 @@ public struct WorldEvent: Identifiable, Codable, Sendable {
   public var sourceID: String
   public var order: Int?
 }
-public struct Board: Identifiable, Codable, Sendable {
+public struct Board: Identifiable, Codable, Equatable, Sendable {
   public var id: String
   public var name: String
   public var kind: String

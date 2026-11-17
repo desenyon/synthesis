@@ -18,7 +18,9 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#27 verified; #28 context-preserving Atlas navigation is next.** Latest check: 256 tests / 63 suites, strict lint and optimized build. Canvas: 17 tests, typecheck/build, 49 engine checks. #27 has 33 final inspected native states across three sizes.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#28 verified; #29 global Back/Forward navigation is next.** Latest check: 262 tests / 64 suites, strict lint and optimized build. #28 has 27 inspected native states and 54 mounted-view audit assertions across three sizes. Earlier #27 Canvas evidence remains 17 tests and 49 engine checks.
+
+`AtlasViewSession.swift` retains image-relative framing, marker/region visibility and selection separately from lore. Local preferences are keyed by world/map; history/layouts hold optional visit snapshots. Atlas must reinstall its save callback when loading a map: switching maps keeps the view mounted. Keep unchanged corrupt preferences and recovered copies intact. The capture runner resets ordinary Atlas fixtures before setting custom context states.
 
 `RecordDrag.swift` shares process-local, bounded record addresses across Search, Favorites and Library. Both native editor targets preserve save guards; Canvas placement validates the captured board generation and waits for a save acknowledgment. Drop coordinates use live pan/zoom, existing card groups move without duplication, and model requests/canon are untouched. Keep the palette mounted while hidden during drag; only transient targets may intercept editor/WebKit input. Wider event/image/proposal transfer remains #35.
 

@@ -7,7 +7,7 @@
 | [AI setup](AI_SETUP.md) | Connecting Codex or Claude Code, privacy boundaries, Manual mode, illustration generation |
 | [Composer and context](COMPOSER_CONTEXT.md) | Attach lore, inspect request context, Explore/Propose, scope and exclusions |
 | [Mechanics](MECHANICS.md) | Rules, scenarios, canon review, history and technique trees |
-| [Atlas](ATLAS.md) | Named maps, place hierarchy, markers and regions |
+| [Atlas](ATLAS.md) / [Navigation](ATLAS_NAVIGATION.md) | Named maps, place hierarchy, markers, regions and view restoration |
 | [Creative components](CREATIVE_COMPONENTS.md) | Notes, facts, checklists and progression tracks |
 | [Search and commands](SEARCH.md) | Universal ⌘K palette, real destinations and local search |
 | [World activity](ACTIVITY.md) | Committed edits, approvals, connections, source navigation and portable history |

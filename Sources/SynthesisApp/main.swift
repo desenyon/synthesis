@@ -588,6 +588,11 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
               print("SCROLL_AUDIT \(width)x\(height) \(line)")
             }
           }
+          if state.contains("atlas-context-") {
+            for line in try await studio.auditAtlasContextCapture(state) {
+              print("ATLAS_CONTEXT_AUDIT \(width)x\(height) \(line)")
+            }
+          }
           let start = CFAbsoluteTimeGetCurrent()
           let pixels = try await shot(
             frameView, to: folder.appendingPathComponent("\(state)-\(width)x\(height).png"),

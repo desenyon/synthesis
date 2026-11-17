@@ -1,0 +1,82 @@
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-before: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-before: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-before 1440x900, bitmap 1440x900, 272ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-return 1440x900, bitmap 1440x900, 255ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS light-atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS light-atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE light-atlas-context-return 1440x900, bitmap 1440x900, 255ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS manual-atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS manual-atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE manual-atlas-context-return 1440x900, bitmap 1440x900, 185ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-map-switch: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-map-switch: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-map-switch 1440x900, bitmap 1440x900, 242ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-tools: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-tools: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-tools 1440x900, bitmap 1440x900, 252ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-layers: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-layers: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-layers 1440x900, bitmap 1440x900, 260ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-split: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-split: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-split 1440x900, bitmap 1440x900, 216ms
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-fit: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1440x900 PASS atlas-context-fit: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-fit 1440x900, bitmap 1440x900, 248ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-before: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-before: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-before 1024x768, bitmap 1024x768, 170ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-return 1024x768, bitmap 1024x768, 170ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS light-atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS light-atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE light-atlas-context-return 1024x768, bitmap 1024x768, 171ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS manual-atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS manual-atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE manual-atlas-context-return 1024x768, bitmap 1024x768, 133ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-map-switch: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-map-switch: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-map-switch 1024x768, bitmap 1024x768, 171ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-tools: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-tools: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-tools 1024x768, bitmap 1024x768, 170ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-layers: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-layers: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-layers 1024x768, bitmap 1024x768, 174ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-split: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-split: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-split 1024x768, bitmap 1024x768, 130ms
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-fit: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 1024x768 PASS atlas-context-fit: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-fit 1024x768, bitmap 1024x768, 158ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-before: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-before: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-before 720x800, bitmap 720x800, 149ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-return 720x800, bitmap 720x800, 149ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS light-atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS light-atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE light-atlas-context-return 720x800, bitmap 720x800, 156ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS manual-atlas-context-return: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS manual-atlas-context-return: save boundary preserved map and lore; no generation active
+CAPTURE manual-atlas-context-return 720x800, bitmap 720x800, 111ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-map-switch: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-map-switch: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-map-switch 720x800, bitmap 720x800, 131ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-tools: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-tools: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-tools 720x800, bitmap 720x800, 149ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-layers: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-layers: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-layers 720x800, bitmap 720x800, 156ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-split: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-split: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-split 720x800, bitmap 720x800, 118ms
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-fit: framing/layers/region/source restored on the mounted Atlas
+ATLAS_CONTEXT_AUDIT 720x800 PASS atlas-context-fit: save boundary preserved map and lore; no generation active
+CAPTURE atlas-context-fit 720x800, bitmap 720x800, 150ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-028/final
