@@ -4,6 +4,8 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 ## 0.0.1 — connected interaction fixes
 
+Published [v0.0.1](https://github.com/desenyon/synthesis/releases/tag/v0.0.1), prerelease (not draft), from `88a6c2eef805afa1ae4506596450bc2e78e5b1c6`. Apple Silicon ZIP, SHA256SUMS and third-party notices uploaded. GitHub's ZIP digest matches the tested local artifact: `ff22a54271450d77df5d3cb078a35fa054343c3a1ffb164a721af5e12d76a67a`.
+
 - Sidebar narrowed to 284pt without changing its composition. Hover cleanup, composer focus/height feedback and workspace/companion transitions retain Reduce Motion behavior.
 - Graph uses one bounded, focal-point-preserving zoom transform for buttons and gestures. Fit and zoom share the 10% minimum. Selected details float over the graph without resizing its viewport; overview titles retain a readable minimum size.
 - Stored Canvas relationship arrows and labels are locked to world records. Click the label to inspect/edit; Hide on board remains separate from world archive. Newly converted connections use the same routing/styling as existing links.
