@@ -225,7 +225,10 @@ struct DocumentTabBar: View {
     )
     .hoverFill(studio.t, radius: 7).help(record.title + (pinned ? " · Pinned" : ""))
     .contextMenu {
-      Button(pinned ? "Unpin document" : "Pin document") { studio.toggleDocumentPin(record.id) }
+      RecordFavoriteAction(studio: studio, record: record)
+      Button(pinned ? "Unpin document tab" : "Pin document tab") {
+        studio.toggleDocumentPin(record.id)
+      }
       Button("Close document") { studio.closeDocument(record.id) }
       Button("Close other unpinned documents") { studio.closeOtherDocuments(keeping: record.id) }
     }

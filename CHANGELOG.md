@@ -16,6 +16,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 
 ### Added
+- Expansion #24: favorite characters, places and documents alongside collections; shared pin controls, ordering, current-source navigation and archive/restore retention, independent of open tabs.
 - Expansion #23: per-universe sidebar section ordering, category visibility and pinned collections; native customization in Settings and sidebar menus, with safe preference recovery.
 
 - Expansion #22: structured local search in ⌘K and Library for types, current canon state, real faction/entity relationships, tags, aliases and saved-edit dates. Quoted names, honest query errors, archive scope and pre-limit Library filters preserve result accuracy.

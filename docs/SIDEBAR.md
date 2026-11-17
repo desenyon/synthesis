@@ -28,8 +28,18 @@ Design refinement used the Unslop workflow by [Damir Sokolovsky](https://heydami
 
 ## Customizable navigation — expansion #23
 
-Open **Settings → General → Navigation content → Customize**, or right-click a sidebar section/category and choose Customize navigation. Arrangement moves sections and pinned collections up/down; Categories searches all known entity categories, toggles their World visibility and pins them into Favorites. Standard categories and custom top-level entity categories share the same rows. Favorites appears only when something is pinned, including in the collapsed rail.
+Open **Settings → General → Navigation content → Customize**, or right-click a sidebar section/category and choose Customize navigation. Arrangement moves sections up/down; Favorites orders pinned collections and records; Categories searches all known entity categories, toggles their World visibility and pins them into Favorites. Standard categories and custom top-level entity categories share the same rows. Favorites appears only when something is pinned, including in the collapsed rail.
 
 The arrangement belongs to this universe on this Mac and persists after restart. Hiding a category never archives content or removes it from search. Collection navigation clears an old Library query after successfully saving current writing. Existing counts, history, group disclosures, world switching, resizing and native controls are retained. Restore defaults resets only this arrangement. Unreadable preferences stay preserved until that explicit reset.
 
-Verified strict lint, 231 tests / 58 suites, optimized native build, and 26 final background states at 1440×900, 1024×768 and 1024×620. Visual iteration separated category controls from arrangement so they are readily accessible in shorter windows. [Evidence](verification/expansion-023/README.md). Record favorites are the next requirement (#24).
+Verified strict lint, 231 tests / 58 suites, optimized native build, and 26 final background states at 1440×900, 1024×768 and 1024×620. Visual iteration separated category controls from arrangement so they are readily accessible in shorter windows. [Evidence](verification/expansion-023/README.md). Record favorites are documented below.
+
+## Favorite records — expansion #24
+
+Use the **pin button** in an editor or record inspector, or **Add to favorites** in a Library row/document-tab menu. Favorite characters, places, documents and their collections appear in the same sidebar region, including labeled tooltips in the collapsed rail. Library rows show a quiet pin. Selecting a pinned collection highlights its Favorites row only.
+
+Right-click a favorite to open, inspect, move or remove it. Settings → Navigation content → Favorites provides reorder and removal controls for records and collections. The empty manager explains where to pin and uses a compact height. Long names truncate; tooltips retain the full title and type.
+
+Favorites belong to this universe on this Mac. Closing an editor tab does not unpin its favorite. A tab's **Pin document tab** is a separate control. Names update with the underlying record; opening resolves the current revision and respects failed-save guards. Archiving hides a favorite without losing its address; restoring brings it back. Removing a favorite changes no lore or canon. Restore defaults clears the navigation arrangement and its favorites.
+
+Verified strict lint, 235 tests / 59 suites, optimized build and 26 final native captures across 1440×900, 1024×768 and 1024×620. [Evidence](verification/expansion-024/README.md). No foreground interaction or live provider request.

@@ -1,0 +1,13 @@
+CAPTURE favorites-options 1440x900, bitmap 1440x900, 167ms
+CAPTURE light-favorites-options 1440x900, bitmap 1440x900, 171ms
+CAPTURE favorites-empty 1440x900, bitmap 1440x900, 164ms
+CAPTURE favorites-long 1440x900, bitmap 1440x900, 125ms
+CAPTURE favorites-options 1024x768, bitmap 1024x768, 129ms
+CAPTURE light-favorites-options 1024x768, bitmap 1024x768, 130ms
+CAPTURE favorites-empty 1024x768, bitmap 1024x768, 125ms
+CAPTURE favorites-long 1024x768, bitmap 1024x768, 123ms
+CAPTURE favorites-options 1024x620, bitmap 1024x620, 108ms
+CAPTURE light-favorites-options 1024x620, bitmap 1024x620, 116ms
+CAPTURE favorites-empty 1024x620, bitmap 1024x620, 113ms
+CAPTURE favorites-long 1024x620, bitmap 1024x620, 110ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-024/refined

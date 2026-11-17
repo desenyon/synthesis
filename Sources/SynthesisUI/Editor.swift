@@ -205,6 +205,7 @@ struct EditorScreen: View {
       RecordBreadcrumb(studio: studio, origin: origin, title: title, status: status, t: studio.t)
         .layoutPriority(1)
     } trailing: {
+      RecordFavoriteButton(studio: studio, record: record)
       if record.state == "canon" {
         StateBadge(state: "canon", t: studio.t).padding(.horizontal, 6)
           .help("This revision is accepted canon. Editing starts a new draft.")

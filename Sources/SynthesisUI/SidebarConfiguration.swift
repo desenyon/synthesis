@@ -13,10 +13,11 @@ struct SidebarConfiguration: Codable, Hashable {
   var sectionOrder = SidebarSection.allCases.map(\.rawValue)
   var hiddenCategories: [String] = []
   var pinnedCategories: [String] = []
+  var favoriteRecordIDs: [String] = []
 
   init() {}
   enum CodingKeys: String, CodingKey {
-    case version, sectionOrder, hiddenCategories, pinnedCategories
+    case version, sectionOrder, hiddenCategories, pinnedCategories, favoriteRecordIDs
   }
   init(from decoder: Decoder) throws {
     self.init()
@@ -25,6 +26,7 @@ struct SidebarConfiguration: Codable, Hashable {
     sectionOrder = try values.decodeIfPresent([String].self, forKey: .sectionOrder) ?? sectionOrder
     hiddenCategories = try values.decodeIfPresent([String].self, forKey: .hiddenCategories) ?? []
     pinnedCategories = try values.decodeIfPresent([String].self, forKey: .pinnedCategories) ?? []
+    favoriteRecordIDs = try values.decodeIfPresent([String].self, forKey: .favoriteRecordIDs) ?? []
   }
 
   var sections: [SidebarSection] { sectionOrder.compactMap(SidebarSection.init(rawValue:)) }
@@ -42,6 +44,10 @@ struct SidebarConfiguration: Codable, Hashable {
     }
     value.hiddenCategories = unique(hiddenCategories)
     value.pinnedCategories = unique(pinnedCategories)
+    var recordIDs = Set<String>()
+    value.favoriteRecordIDs = favoriteRecordIDs.filter {
+      !$0.isEmpty && recordIDs.insert($0).inserted
+    }
     return value
   }
   func isHidden(_ category: String) -> Bool {

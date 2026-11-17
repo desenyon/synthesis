@@ -263,8 +263,14 @@ struct RecordRow: View {
       HStack(spacing: 12) {
         CategoryTile(record: record, t: studio.t, size: density.thumbnail)
         VStack(alignment: .leading, spacing: 3) {
-          Text(record.title).font(.studio(.control))
-            .foregroundStyle(studio.t.text).lineLimit(1)
+          HStack(spacing: 6) {
+            Text(record.title).font(.studio(.control))
+              .foregroundStyle(studio.t.text).lineLimit(1)
+            if studio.isFavorite(record.id) {
+              StudioIcon("pin", size: 11).foregroundStyle(studio.t.secondary)
+                .help("In sidebar Favorites").accessibilityLabel("Favorite")
+            }
+          }
           if studio.preferences.libraryPreviews {
             Text(
               record.body.isEmpty
@@ -302,6 +308,7 @@ struct RecordRow: View {
         } else {
           Button("Open") { studio.openRecord(record) }
           Button("Inspect") { studio.inspect(.record(record.id)) }
+          RecordFavoriteAction(studio: studio, record: record)
           if studio.mode == .assisted {
             Button("Reference in conversation") {
               studio.reference(record)

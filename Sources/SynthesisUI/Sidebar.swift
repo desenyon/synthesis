@@ -114,26 +114,48 @@ struct Sidebar: View {
         }.id("sidebar-history")
       }
     case .favorites:
-      if !studio.sidebarConfiguration.pinnedCategories.isEmpty {
+      if studio.hasSidebarFavorites {
         VStack(spacing: 0) {
           if !collapsed {
             heading("Favorites").padding(.horizontal, 10).frame(height: SidebarMetric.section)
               .contextMenu { sectionActions(.favorites) }
           }
+          ForEach(studio.favoriteRecords) { record in favoriteRow(record) }
           ForEach(studio.sidebarConfiguration.pinnedCategories, id: \.self) { category in
-            categoryRow(category)
+            categoryRow(category, favorite: true)
           }
         }
       }
     }
   }
-  private func categoryRow(_ category: String) -> some View {
+  private func favoriteRow(_ record: LoreRecord) -> some View {
+    let favorites = studio.favoriteRecords
+    return NavRow(
+      t: studio.t, title: record.title, icon: recordIcon(record),
+      selected: studio.selectedRecord?.id == record.id, collapsed: collapsed
+    ) { studio.openRecord(record) }
+    .help("\(record.title) · \(favoriteRecordDetail(record))")
+    .contextMenu {
+      Button("Open") { studio.openRecord(record) }
+      Button("Inspect") { studio.inspect(.record(record.id)) }
+      Divider()
+      Button("Move favorite up") { studio.moveFavorite(record, by: -1) }
+        .disabled(favorites.first?.id == record.id)
+      Button("Move favorite down") { studio.moveFavorite(record, by: 1) }
+        .disabled(favorites.last?.id == record.id)
+      RecordFavoriteAction(studio: studio, record: record)
+      Divider()
+      Button("Customize navigation…") { studio.sheet = .navigation }
+    }
+  }
+  private func categoryRow(_ category: String, favorite: Bool = false) -> some View {
     let count = studio.topLevelRecords.filter {
       Vocabulary.categoryKey($0.category) == Vocabulary.categoryKey(category)
     }.count
     return NavRow(
       t: studio.t, title: Vocabulary.displayCategory(category), icon: categoryIcon(category),
       selected: studio.destination == .library
+        && (favorite || !studio.sidebarConfiguration.isPinned(category))
         && studio.libraryCategory.map {
           Vocabulary.categoryKey($0) == Vocabulary.categoryKey(category)
         } == true

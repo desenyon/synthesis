@@ -18,7 +18,7 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#23 verified; #24 favorite entities and collections is next.** Latest check: 231 tests / 58 suites, strict lint and optimized build. #23 has 26 final inspected states. SidebarConfiguration stores per-world local arrangements; category pins do not yet cover individual records (#24). Corrupt preferences remain preserved until explicit reset. Shared advanced search preserves world/archive/canon boundaries and applies Library scopes before LIMIT. Keep the materialized FTS CTE: the scale test caught repeated scans without it. No foreground events, owner-app restart or subscription requests.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#24 verified; #25 recent activity history is next.** Latest check: 235 tests / 59 suites, strict lint and optimized build. #24 has 26 final inspected states. SidebarConfiguration stores per-world local arrangements and stable record favorites. Favorites survive closing tabs and archive/restore; keep archived IDs while resolving only current-world live records. Corrupt preferences remain preserved until explicit reset. Shared advanced search preserves world/archive/canon boundaries and applies Library scopes before LIMIT. Keep the materialized FTS CTE: the scale test caught repeated scans without it. No foreground events, owner-app restart or subscription requests.
 
 ## Current shape
 

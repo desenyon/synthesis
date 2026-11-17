@@ -66,6 +66,10 @@ extension Studio {
     "navigation-options", "light-navigation-options", "navigation-empty", "navigation-rail",
     "navigation-default", "navigation-error", "navigation-long",
     "navigation-categories", "light-navigation-categories", "navigation-settings",
+    "favorites-library", "light-favorites-library", "favorites-editor", "manual-favorites-editor",
+    "favorites-inspector", "favorites-rail", "favorites-options", "light-favorites-options",
+    "favorites-empty", "favorites-long",
+    "favorites-collection",
     "light-editor",
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
@@ -287,6 +291,41 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("favorites-") {
+      configureConnectedCapture("library", board: board, conversation: conversation)
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      restoreSidebarDefaults()
+      if state != "favorites-empty" {
+        for title in ["Mira Vale", "The Glass Sea", "Crossing the Glass Sea"] {
+          if let record = records.first(where: { $0.title == title }) {
+            setFavorite(record, enabled: true)
+          }
+        }
+        pinSidebarCategory("Places", pinned: true)
+      }
+      if state.hasSuffix("editor"), let record = favoriteRecords.first { openRecord(record) }
+      if state == "favorites-inspector", let record = favoriteRecords.first {
+        inspect(.record(record.id))
+      }
+      if state.hasSuffix("options") || state == "favorites-empty" { sheet = .navigation }
+      if state == "favorites-rail" { collapsed = true }
+      if state == "favorites-collection" { openLens("Places") }
+      if state == "favorites-long" {
+        perform {
+          let title = "A traveller's guide to the vanished settlements of the western archipelago"
+          let record =
+            try records.first(where: { $0.title == title })
+            ?? store.createRecord(worldID: worldID, title: title, kind: "lore")
+          try reload()
+          setFavorite(record, enabled: true)
+          moveFavorite(record, by: -3)
+          openRecord(record)
+        }
+      }
+      captureHint = state
+      return
+    }
     if state.contains("navigation-") {
       configureConnectedCapture("library", board: board, conversation: conversation)
       dark = !state.hasPrefix("light-")

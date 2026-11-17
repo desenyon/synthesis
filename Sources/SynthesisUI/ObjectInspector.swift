@@ -20,6 +20,11 @@ struct ObjectInspector: View {
       HStack(spacing: 8) {
         Text("Inspector").font(.studio(.control))
         Spacer(minLength: 0)
+        if case .record(let id) = target,
+          let record = studio.records.first(where: { $0.id == id })
+        {
+          RecordFavoriteButton(studio: studio, record: record)
+        }
         IconButton(icon: "books.vertical", label: "Inspect a record", t: studio.t) {
           recordPicker = true
         }.disabled(studio.records.isEmpty).popover(isPresented: $recordPicker) {

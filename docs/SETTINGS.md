@@ -48,4 +48,4 @@ General → Information density saves Compact, Comfortable or Immersive on this 
 
 ## Per-universe navigation content
 
-General → Navigation content opens customization for the current universe on this Mac. Reorder sections, hide unused World categories and pin/reorder collections in Favorites; search remains complete. Arrangement and Categories use separate tabs in the shared sheet. These preferences are not world exports or shared lore. [Sidebar usage and verification](SIDEBAR.md#customizable-navigation--expansion-23).
+General → Navigation content opens customization for the current universe on this Mac. Reorder sections, hide unused World categories and pin/reorder collections in Favorites; search remains complete. Arrangement, Categories and Favorites use separate tabs in the shared sheet. Favorites orders/removes individual records and collections; closing a document tab does not remove its favorite. These preferences are not world exports or shared lore. [Sidebar usage and verification](SIDEBAR.md#customizable-navigation--expansion-23).

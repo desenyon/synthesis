@@ -1,0 +1,23 @@
+CAPTURE favorites-library 1440x900, bitmap 1440x900, 139ms
+CAPTURE light-favorites-library 1440x900, bitmap 1440x900, 134ms
+CAPTURE favorites-editor 1440x900, bitmap 1440x900, 132ms
+CAPTURE manual-favorites-editor 1440x900, bitmap 1440x900, 46ms
+CAPTURE favorites-inspector 1440x900, bitmap 1440x900, 137ms
+CAPTURE favorites-rail 1440x900, bitmap 1440x900, 124ms
+CAPTURE favorites-options 1440x900, bitmap 1440x900, 146ms
+CAPTURE light-favorites-options 1440x900, bitmap 1440x900, 172ms
+CAPTURE favorites-empty 1440x900, bitmap 1440x900, 171ms
+CAPTURE favorites-long 1440x900, bitmap 1440x900, 136ms
+CAPTURE favorites-collection 1440x900, bitmap 1440x900, 126ms
+CAPTURE favorites-library 1024x768, bitmap 1024x768, 106ms
+CAPTURE light-favorites-library 1024x768, bitmap 1024x768, 102ms
+CAPTURE favorites-editor 1024x768, bitmap 1024x768, 127ms
+CAPTURE manual-favorites-editor 1024x768, bitmap 1024x768, 73ms
+CAPTURE favorites-inspector 1024x768, bitmap 1024x768, 112ms
+CAPTURE favorites-rail 1024x768, bitmap 1024x768, 104ms
+CAPTURE favorites-options 1024x768, bitmap 1024x768, 127ms
+CAPTURE light-favorites-options 1024x768, bitmap 1024x768, 135ms
+CAPTURE favorites-empty 1024x768, bitmap 1024x768, 114ms
+CAPTURE favorites-long 1024x768, bitmap 1024x768, 117ms
+CAPTURE favorites-collection 1024x768, bitmap 1024x768, 102ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-024/main

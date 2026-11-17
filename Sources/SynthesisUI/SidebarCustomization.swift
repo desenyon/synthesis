@@ -3,7 +3,12 @@ import SwiftUI
 struct SidebarCustomizationSheet: View {
   @ObservedObject var studio: Studio
   @State private var query = ""
-  @State private var categories = false
+  private enum Page: String, CaseIterable {
+    case arrangement = "Arrangement"
+    case categories = "Categories"
+    case favorites = "Favorites"
+  }
+  @State private var page = Page.arrangement
   private func close() { studio.sheet = nil }
   var body: some View {
     SheetScaffold(
@@ -16,21 +21,19 @@ struct SidebarCustomizationSheet: View {
         Text(error).font(.studio(.label)).foregroundStyle(studio.t.warning)
       }
       SegmentedSwitch(
-        choices: [
-          .init(value: false, title: "Arrangement"), .init(value: true, title: "Categories"),
-        ],
-        selected: categories, label: "Navigation customization", t: studio.t
-      ) { categories = $0 }
+        choices: Page.allCases.map { .init(value: $0, title: $0.rawValue) },
+        selected: page, label: "Navigation customization", t: studio.t
+      ) { page = $0 }
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
-          if !categories {
+          if page == .arrangement {
             VStack(alignment: .leading, spacing: 4) {
               SectionLabel(title: "Section order", t: studio.t)
               ForEach(Array(studio.sidebarConfiguration.sections.enumerated()), id: \.element.id) {
                 index, section in
                 HStack {
                   Text(section.title).font(.studio(.label))
-                  if section == .favorites && studio.sidebarConfiguration.pinnedCategories.isEmpty {
+                  if section == .favorites && !studio.hasSidebarFavorites {
                     Text("Appears when pinned").font(.studio(.caption)).foregroundStyle(
                       studio.t.muted)
                   }
@@ -43,6 +46,8 @@ struct SidebarCustomizationSheet: View {
                 }.frame(height: 32)
               }
             }
+          } else if page == .favorites {
+            favoriteRecords
             if !studio.sidebarConfiguration.pinnedCategories.isEmpty {
               VStack(alignment: .leading, spacing: 4) {
                 SectionLabel(title: "Pinned collections", t: studio.t)
@@ -91,10 +96,15 @@ struct SidebarCustomizationSheet: View {
             }
           }
         }.padding(.trailing, 4)
-      }.frame(height: 340).disabled(studio.sidebarConfigurationError != nil)
+      }.frame(height: page == .favorites && !studio.hasSidebarFavorites ? 110 : 340)
+        .disabled(studio.sidebarConfigurationError != nil)
         .onChange(of: studio.captureNonce, initial: true) {
           guard !studio.captureHint.isEmpty else { return }
-          categories = studio.captureHint.contains("navigation-categories")
+          page =
+            studio.captureHint.contains("navigation-categories")
+            ? .categories
+            : studio.captureHint.contains("favorites-options")
+              || studio.captureHint.contains("favorites-empty") ? .favorites : .arrangement
         }
     } footer: {
       Button("Restore defaults") { studio.restoreSidebarDefaults() }.buttonStyle(
@@ -102,6 +112,37 @@ struct SidebarCustomizationSheet: View {
       Spacer()
       Button("Done") { studio.sheet = nil }.buttonStyle(QuietButton(t: studio.t, primary: true))
         .keyboardShortcut(.defaultAction)
+    }
+  }
+  private var favoriteRecords: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      SectionLabel(title: "Favorite records", t: studio.t)
+      if studio.favoriteRecords.isEmpty {
+        Text(
+          "Pin a character, place or document from its editor or Library menu. Favorites stay here when you close a document."
+        )
+        .font(.studio(.label)).foregroundStyle(studio.t.secondary)
+        .fixedSize(horizontal: false, vertical: true)
+      }
+      ForEach(Array(studio.favoriteRecords.enumerated()), id: \.element.id) { index, record in
+        HStack(spacing: 10) {
+          StudioIcon(recordIcon(record), size: 15).foregroundStyle(studio.t.secondary)
+          VStack(alignment: .leading, spacing: 2) {
+            Text(record.title).font(.studio(.label)).lineLimit(1)
+            Text(favoriteRecordDetail(record))
+              .font(.studio(.caption)).foregroundStyle(studio.t.secondary).lineLimit(1)
+          }.help(record.title)
+          Spacer(minLength: 8)
+          moveControls(record.title, index: index, count: studio.favoriteRecords.count) {
+            studio.moveFavorite(record, by: $0)
+          }
+          IconButton(
+            icon: "xmark", label: "Remove \(record.title) from favorites", t: studio.t, size: 24
+          ) {
+            studio.setFavorite(record, enabled: false)
+          }
+        }.frame(height: 44)
+      }
     }
   }
   private func categoryRow(_ category: String) -> some View {

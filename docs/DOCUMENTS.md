@@ -17,3 +17,7 @@ The sidebar, writing surface and inspector scroll independently; document tabs, 
 Autosave distinguishes Unsaved (pending), Saving, Saved and Not saved. Saved revisions are searchable immediately; a failure keeps your writing open and offers Retry. A committed revision is not reported as unsaved if refreshing another view subsequently fails.
 
 Drag the navigation or inspector edge to resize it; double-click resets its width. Arrow keys work when the divider is focused. Settings → General provides equivalent width controls, including conversation panels. Widths persist locally and in saved workspace layouts. On narrow windows the inspector floats so writing controls remain readable; toggle it with the existing inspector button.
+
+## Sidebar favorites
+
+An editor's pin button adds/removes the record in sidebar Favorites. This survives closing its tab. Tab menus label the separate close-protection action **Pin document tab** and also provide **Add to favorites**. Both remain local to the universe on this Mac; neither changes the document's revision or canon. See [Favorites](SIDEBAR.md#favorite-records--expansion-24).
