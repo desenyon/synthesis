@@ -1,0 +1,60 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.14s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.T2pLxr/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.T2pLxr/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.T2pLxr/Synthesis-Verification.app: 1 (Operation not permitted)
+SCROLL_AUDIT 1440x900 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions 1440x900, bitmap 1440x900, 122ms
+SCROLL_AUDIT 1440x900 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions-document 1440x900, bitmap 1440x900, 134ms
+SCROLL_AUDIT 1440x900 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions-inspector 1440x900, bitmap 1440x900, 142ms
+SCROLL_AUDIT 1440x900 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions-sidebar 1440x900, bitmap 1440x900, 146ms
+SCROLL_AUDIT 1440x900 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS inspector scrolls independently without moving workspace frames
+CAPTURE light-scroll-regions-inspector 1440x900, bitmap 1440x900, 121ms
+SCROLL_AUDIT 1440x900 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS inspector scrolls independently without moving workspace frames
+CAPTURE manual-scroll-regions-document 1440x900, bitmap 1440x900, 57ms
+SCROLL_AUDIT 1024x768 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions 1024x768, bitmap 1024x768, 108ms
+SCROLL_AUDIT 1024x768 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions-document 1024x768, bitmap 1024x768, 112ms
+SCROLL_AUDIT 1024x768 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions-inspector 1024x768, bitmap 1024x768, 82ms
+SCROLL_AUDIT 1024x768 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions-sidebar 1024x768, bitmap 1024x768, 94ms
+SCROLL_AUDIT 1024x768 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS inspector scrolls independently without moving workspace frames
+CAPTURE light-scroll-regions-inspector 1024x768, bitmap 1024x768, 112ms
+SCROLL_AUDIT 1024x768 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS inspector scrolls independently without moving workspace frames
+CAPTURE manual-scroll-regions-document 1024x768, bitmap 1024x768, 46ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-017
+Native captures: docs/verification/expansion-017
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py 'docs/verification/expansion-017' [--prune]

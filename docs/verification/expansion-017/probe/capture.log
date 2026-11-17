@@ -1,0 +1,5 @@
+SCROLL_AUDIT 1440x900 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions 1440x900, bitmap 1440x900, 147ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-017/probe

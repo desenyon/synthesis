@@ -568,6 +568,12 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
           guard Int(content.bounds.width) == width, Int(content.bounds.height) == height else {
             throw SynthesisError.invalid("Capture viewport mismatch: \(content.bounds.size)")
           }
+          if state.contains("scroll-regions") {
+            let target = state.components(separatedBy: "-").last ?? ""
+            for line in try await auditScrollRegions(in: content, showing: target) {
+              print("SCROLL_AUDIT \(width)x\(height) \(line)")
+            }
+          }
           let start = CFAbsoluteTimeGetCurrent()
           let pixels = try await shot(
             frameView, to: folder.appendingPathComponent("\(state)-\(width)x\(height).png"),

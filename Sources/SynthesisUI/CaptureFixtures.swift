@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "scroll-regions", "scroll-regions-document", "scroll-regions-inspector",
+    "scroll-regions-sidebar",
+    "light-scroll-regions-inspector", "manual-scroll-regions-document",
     "document-tabs", "light-document-tabs", "manual-document-tabs", "document-tabs-many",
     "document-tabs-reopened", "document-tabs-sections",
     "graph-zoom-overview", "graph-zoom-summary", "graph-zoom-detail",
@@ -265,6 +268,41 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("scroll-regions") {
+      configureConnectedCapture("library", board: board, conversation: conversation)
+      perform {
+        guard var mira = records.first(where: { $0.title == "Mira Vale" }) else { return }
+        let body = (1...80).map {
+          "Crossing \($0). Mira follows the shoreline, comparing the new chart with the accounts in the tide ledgers. What changed since her last visit remains an open question."
+        }.joined(separator: "\n\n")
+        if mira.body != body {
+          mira = try store.saveRecord(
+            worldID: worldID, id: mira.id, version: mira.version,
+            title: mira.title, body: body, rtf: nil)
+        }
+        for index in 1...24 {
+          let name = "Crossing witness \(index)"
+          if !records.contains(where: { $0.title == name }) {
+            let record = try store.createRecord(
+              worldID: worldID, title: name, kind: "entity", category: "Characters")
+            _ = try store.addRelation(
+              worldID: worldID, source: mira.id, target: record.id, label: "interviewed")
+          }
+          if !conversations.contains(where: { $0.title == name }) {
+            _ = try store.createConversation(worldID: worldID, title: name)
+          }
+        }
+        preferences.recentChats = 30
+        try reload()
+        openRecord(mira)
+      }
+      inspector = true
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      toast = nil
+      captureHint = state
+      return
+    }
     if state.contains("document-tabs") {
       configureConnectedCapture("library", board: board, conversation: conversation)
       for id in documentSession.open { closeDocument(id) }
