@@ -13,7 +13,7 @@ public struct ConnectedRoot: View {
     GeometryReader { geo in
       let compact = geo.size.width < 760
       let rail = studio.collapsed
-      let column: CGFloat = compact ? 0 : (rail ? Metric.rail : studio.sidebarWidth)
+      let column = studio.visibleSidebarWidth(windowWidth: geo.size.width)
       let dockInspector = studio.dockedInspectorWidth(windowWidth: geo.size.width) > 0
       ZStack(alignment: .topLeading) {
         studio.t.sidebar.ignoresSafeArea()
@@ -30,7 +30,7 @@ public struct ConnectedRoot: View {
             .accessibilityHidden(!visible)
         }
         HStack(spacing: 0) {
-          if !compact {
+          if !compact && !studio.focusMode {
             Sidebar(studio: studio, collapsed: rail).padding(.top, Metric.bar)
               .background {
                 NavigationGlass(
@@ -65,7 +65,9 @@ public struct ConnectedRoot: View {
                 )
                 .animation(
                   reduceMotion ? nil : Motion.panelAnimation, value: studio.companionExpanded)
-              if dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
+              if !studio.focusMode && dockInspector && studio.workspaceInspector
+                && studio.selectedRecord == nil
+              {
                 ObjectInspector(studio: studio)
                   .frame(width: studio.inspectorWidth)
                   .overlay(alignment: .leading) {
@@ -74,7 +76,9 @@ public struct ConnectedRoot: View {
                   .transition(Motion.panelTransition)
               }
             }.overlay(alignment: .trailing) {
-              if !dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
+              if !studio.focusMode && !dockInspector && studio.workspaceInspector
+                && studio.selectedRecord == nil
+              {
                 ObjectInspector(studio: studio).frame(
                   width: min(
                     studio.inspectorWidth,
@@ -105,20 +109,26 @@ public struct ConnectedRoot: View {
         }
         HStack(spacing: 0) {
           Color.clear.frame(width: 84, height: 1)
-          if !rail && !compact {
+          if !rail && !compact && !studio.focusMode {
             Text("Synthesis").font(.studio(size: 14, weight: .semibold))
               .foregroundStyle(studio.t.text).padding(.trailing, 10)
           }
           Button {
             withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
-              if compact { studio.mobileNavigation.toggle() } else { studio.toggleSidebar() }
+              if studio.focusMode {
+                studio.toggleFocusMode()
+              } else if compact {
+                studio.mobileNavigation.toggle()
+              } else {
+                studio.toggleSidebar()
+              }
             }
           } label: {
             StudioIcon("sidebar.left", size: 15).frame(width: 28, height: 28)
           }.buttonStyle(SidebarControlStyle(t: studio.t))
             .help("Toggle navigation · ⌘\\").accessibilityLabel("Toggle navigation")
         }.frame(height: Metric.bar)
-        if compact && studio.mobileNavigation {
+        if compact && studio.mobileNavigation && !studio.focusMode {
           studio.t.scrim.ignoresSafeArea().onTapGesture {
             withAnimation(reduceMotion ? nil : Motion.feedbackAnimation) {
               studio.mobileNavigation = false
@@ -144,6 +154,7 @@ public struct ConnectedRoot: View {
       .overlay(alignment: .bottom) { toast }
       .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.palette)
       .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.toast?.id)
+      .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.focusMode)
     }
     .foregroundStyle(studio.t.text)
     .environment(\.studioTheme, studio.t)
@@ -189,7 +200,7 @@ public struct ConnectedRoot: View {
       GeometryReader { geometry in
         content.transition(.opacity).frame(maxWidth: .infinity, maxHeight: .infinity)
           .safeAreaInset(edge: .bottom, spacing: 0) {
-            if studio.mode == .assisted && !studio.splitUsesSharedComposer {
+            if !studio.focusMode && studio.mode == .assisted && !studio.splitUsesSharedComposer {
               UnifiedComposer(studio: studio, companion: true, collapsed: true)
                 .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
                 .frame(maxWidth: .infinity).background(studio.t.background)
@@ -200,7 +211,7 @@ public struct ConnectedRoot: View {
             }
           }
           .overlay(alignment: .bottomTrailing) {
-            if studio.mode == .assisted && studio.companionExpanded {
+            if !studio.focusMode && studio.mode == .assisted && studio.companionExpanded {
               FloatingCompanion(studio: studio, available: geometry.size)
                 .padding(14)
                 .transition(Motion.companionTransition)
@@ -244,7 +255,7 @@ public struct ConnectedRoot: View {
         // Keep feedback above every compact composer, not over its input or Send control.
         .padding(
           .bottom,
-          studio.mode == .assisted && !studio.companionExpanded
+          !studio.focusMode && studio.mode == .assisted && !studio.companionExpanded
             && (studio.selectedRecord != nil
               || ![.chat, .worlds, .settings].contains(studio.destination))
             ? 106 : 22

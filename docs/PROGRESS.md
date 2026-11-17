@@ -461,3 +461,9 @@ New Entity ⌥⌘N and Link Records ⇧⌘K share native menu/palette routes and
 Added Atlas to the shared startup catalog and fixed Last workspace for direct chat routes. Device-local homes include every requested option plus existing Library/Worlds. Manual and world selection survive; switching the setting does not navigate immediately or spend model allowance.
 
 `./scripts/check.sh`: **275 tests / 67 suites**, lint and optimized build. Four new restart/navigation/isolation tests cover all choices in both modes with a recording transport. **33 final frames inspected** at three sizes; **33 assertions** reconstruct native roots from persisted preferences, check destination/world/data and idle state. [Evidence](verification/expansion-031/README.md). Docs and screenshot updated. No foreground input, live model request, owner-app restart or release; AGENTS unchanged. Continue #32; complete view-session restoration remains #33.
+
+### Expansion #32 — focusable workspaces (verified, 2026-11-17)
+
+Shared Focus hides unrelated chrome while preserving writing, native editor identity/caret/Undo, split context, panel choices and assistance mode. Exiting restores the original layout. Graph no longer changes orientation simply because a panel or Focus resizes it. Native menu, palette and toolbar expose ⌥⌘F with save/modal guards.
+
+`./scripts/check.sh`: **279 tests / 68 suites**, strict lint and optimized build. **33 final frames inspected** at three sizes, all 33 initial frames also reviewed; **66 native-menu assertions** passed. [Evidence](verification/expansion-032/README.md), [guide](FOCUS.md). README screenshot updated. No foreground input, live model allowance, owner-app restart, release or AGENTS change. Continue #33; the full brief remains unfinished.

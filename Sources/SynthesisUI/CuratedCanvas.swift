@@ -24,9 +24,12 @@ struct CuratedCanvas: View {
     self.studio = studio
     session = studio.canvas()
   }
-  private var assistantDocked: Bool { studio.mode == .assisted && studio.companionExpanded }
+  private var assistantDocked: Bool {
+    !studio.focusMode && studio.mode == .assisted && studio.companionExpanded
+  }
   private var composerVisible: Bool {
-    studio.mode == .assisted && !studio.companionExpanded && !studio.splitUsesSharedComposer
+    !studio.focusMode && studio.mode == .assisted && !studio.companionExpanded
+      && !studio.splitUsesSharedComposer
   }
 
   var body: some View {
@@ -64,6 +67,7 @@ struct CuratedCanvas: View {
       if studio.captureHint == "sheet-artwork" { panel = .artwork }
     }
     .onChange(of: studio.mode) { _, _ in session.updateFitInsets() }
+    .onChange(of: studio.focusMode) { _, _ in session.updateFitInsets() }
     .onChange(of: studio.companionExpanded) { _, _ in session.updateFitInsets() }
     .onChange(of: studio.splitRecord?.id) { _, _ in session.updateFitInsets() }
     .onPreferenceChange(CanvasComposerHeightKey.self) {

@@ -100,7 +100,7 @@ struct CanvasBoardContent {
   private var fitInsets: [String: Double] {
     [
       "top": 76, "right": 80, "left": 32,
-      "bottom": studio.mode == .assisted && !studio.companionExpanded
+      "bottom": !studio.focusMode && studio.mode == .assisted && !studio.companionExpanded
         && !studio.splitUsesSharedComposer
         ? Double(composerHeight) + 24 + 76 : 76,
     ]

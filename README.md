@@ -57,6 +57,12 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 ![Graph with profile artwork, summaries and typed relationships](docs/screenshots/graph-detail.png)
 
+**Focus on writing**
+
+![Native writing workspace with navigation and inspectors temporarily hidden](docs/screenshots/focus-writing.png)
+
+Use ⌥⌘F to focus or restore your layout. [Focus guide](docs/FOCUS.md).
+
 **Keep related documents open**
 
 ![Pinned and open world documents above the native editor](docs/screenshots/document-tabs.png)

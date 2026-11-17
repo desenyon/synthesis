@@ -97,6 +97,12 @@ extension Studio {
     return activeEditorPlacement
   }
   public func toggleActiveInspector() {
+    if focusMode {
+      focusMode = false
+      if focusedEditorPlacement == .beside && splitRecord != nil && splitInspector { return }
+      if focusedEditorPlacement != .beside && selectedRecord != nil && inspector { return }
+      if selectedRecord == nil && splitRecord == nil && workspaceInspector { return }
+    }
     if focusedEditorPlacement == .beside && splitRecord != nil {
       splitInspector.toggle()
     } else if selectedRecord != nil {
@@ -111,7 +117,7 @@ extension Studio {
   }
   static func splitsHorizontally(available: Double) -> Bool { available >= 1040 }
   func primaryContentWidth(windowWidth: Double) -> Double {
-    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Double(Metric.rail) : sidebarWidth)
+    let sidebar = visibleSidebarWidth(windowWidth: windowWidth)
     let available = windowWidth - sidebar
     return splitRecord != nil && Self.splitsHorizontally(available: available)
       ? available - splitDisplayWidth(available: available) : available
@@ -175,7 +181,9 @@ struct SplitWorkspace<Primary: View>: View {
       }.animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.splitRecord?.id)
     }
     .safeAreaInset(edge: .bottom, spacing: 0) {
-      if studio.splitUsesSharedComposer && studio.mode == .assisted && !studio.companionExpanded {
+      if !studio.focusMode && studio.splitUsesSharedComposer && studio.mode == .assisted
+        && !studio.companionExpanded
+      {
         UnifiedComposer(studio: studio, companion: true, collapsed: true)
           .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
           .frame(maxWidth: .infinity).background(studio.t.background)

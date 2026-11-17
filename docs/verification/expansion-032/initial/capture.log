@@ -1,0 +1,100 @@
+FOCUS_AUDIT 1440x900 PASS focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-writing 1440x900, bitmap 1440x900, 26ms
+FOCUS_AUDIT 1440x900 PASS light-focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS light-focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE light-focus-writing 1440x900, bitmap 1440x900, 32ms
+FOCUS_AUDIT 1440x900 PASS manual-focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS manual-focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE manual-focus-writing 1440x900, bitmap 1440x900, 26ms
+FOCUS_AUDIT 1440x900 PASS focus-restored: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-restored: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-restored 1440x900, bitmap 1440x900, 112ms
+FOCUS_AUDIT 1440x900 PASS focus-collapsed: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-collapsed: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-collapsed 1440x900, bitmap 1440x900, 125ms
+FOCUS_AUDIT 1440x900 PASS focus-split: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-split: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-split 1440x900, bitmap 1440x900, 35ms
+FOCUS_AUDIT 1440x900 PASS focus-blank: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-blank: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-blank 1440x900, bitmap 1440x900, 25ms
+FOCUS_AUDIT 1440x900 PASS focus-atlas: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-atlas: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-atlas 1440x900, bitmap 1440x900, 167ms
+FOCUS_AUDIT 1440x900 PASS focus-graph: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-graph: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-graph 1440x900, bitmap 1440x900, 186ms
+FOCUS_AUDIT 1440x900 PASS focus-canvas: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-canvas: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-canvas 1440x900, bitmap 1440x900, 100ms
+FOCUS_AUDIT 1440x900 PASS focus-conversation: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-conversation: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-conversation 1440x900, bitmap 1440x900, 163ms
+FOCUS_AUDIT 1024x768 PASS focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-writing 1024x768, bitmap 1024x768, 22ms
+FOCUS_AUDIT 1024x768 PASS light-focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS light-focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE light-focus-writing 1024x768, bitmap 1024x768, 25ms
+FOCUS_AUDIT 1024x768 PASS manual-focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS manual-focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE manual-focus-writing 1024x768, bitmap 1024x768, 23ms
+FOCUS_AUDIT 1024x768 PASS focus-restored: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-restored: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-restored 1024x768, bitmap 1024x768, 125ms
+FOCUS_AUDIT 1024x768 PASS focus-collapsed: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-collapsed: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-collapsed 1024x768, bitmap 1024x768, 103ms
+FOCUS_AUDIT 1024x768 PASS focus-split: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-split: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-split 1024x768, bitmap 1024x768, 31ms
+FOCUS_AUDIT 1024x768 PASS focus-blank: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-blank: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-blank 1024x768, bitmap 1024x768, 26ms
+FOCUS_AUDIT 1024x768 PASS focus-atlas: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-atlas: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-atlas 1024x768, bitmap 1024x768, 117ms
+FOCUS_AUDIT 1024x768 PASS focus-graph: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-graph: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-graph 1024x768, bitmap 1024x768, 136ms
+FOCUS_AUDIT 1024x768 PASS focus-canvas: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-canvas: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-canvas 1024x768, bitmap 1024x768, 67ms
+FOCUS_AUDIT 1024x768 PASS focus-conversation: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-conversation: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-conversation 1024x768, bitmap 1024x768, 122ms
+FOCUS_AUDIT 720x800 PASS focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-writing 720x800, bitmap 720x800, 23ms
+FOCUS_AUDIT 720x800 PASS light-focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS light-focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE light-focus-writing 720x800, bitmap 720x800, 20ms
+FOCUS_AUDIT 720x800 PASS manual-focus-writing: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS manual-focus-writing: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE manual-focus-writing 720x800, bitmap 720x800, 19ms
+FOCUS_AUDIT 720x800 PASS focus-restored: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-restored: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-restored 720x800, bitmap 720x800, 107ms
+FOCUS_AUDIT 720x800 PASS focus-collapsed: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-collapsed: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-collapsed 720x800, bitmap 720x800, 99ms
+FOCUS_AUDIT 720x800 PASS focus-split: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-split: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-split 720x800, bitmap 720x800, 29ms
+FOCUS_AUDIT 720x800 PASS focus-blank: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-blank: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-blank 720x800, bitmap 720x800, 22ms
+FOCUS_AUDIT 720x800 PASS focus-atlas: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-atlas: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-atlas 720x800, bitmap 720x800, 92ms
+FOCUS_AUDIT 720x800 PASS focus-graph: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-graph: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-graph 720x800, bitmap 720x800, 119ms
+FOCUS_AUDIT 720x800 PASS focus-canvas: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-canvas: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-canvas 720x800, bitmap 720x800, 58ms
+FOCUS_AUDIT 720x800 PASS focus-conversation: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-conversation: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-conversation 720x800, bitmap 720x800, 103ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-032/initial

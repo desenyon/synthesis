@@ -56,6 +56,7 @@ extension Studio {
     // Validate before publishing so a foreign or stale reference cannot leak a prior object.
     perform {
       _ = try inspectionData(for: target)
+      focusMode = false
       inspectionTarget = target
       workspaceInspector = true
       try store.setPreference("workspace-inspector", value: "shown")
@@ -68,6 +69,10 @@ extension Studio {
     }
   }
   public func toggleWorkspaceInspector() {
+    if focusMode {
+      focusMode = false
+      if workspaceInspector { return }
+    }
     perform {
       try store.setPreference("workspace-inspector", value: workspaceInspector ? "hidden" : "shown")
       workspaceInspector.toggle()

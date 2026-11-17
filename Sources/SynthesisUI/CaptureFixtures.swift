@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "focus-writing", "light-focus-writing", "manual-focus-writing", "focus-restored",
+    "focus-collapsed", "focus-split", "focus-blank", "focus-atlas", "focus-graph",
+    "focus-canvas", "focus-conversation",
     "startup-settings", "light-startup-settings", "startup-atlas", "light-startup-atlas",
     "manual-startup-atlas", "startup-conversation", "manual-startup-conversation",
     "startup-canvas", "startup-dashboard", "startup-last", "startup-empty-atlas",
@@ -313,6 +316,11 @@ extension Studio {
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
     endRecordDrag()
+    if state.contains("focus-") {
+      configureFocusCapture(state, board: board, conversation: conversation)
+      return
+    }
+    focusMode = false
     if state.contains("keyboard-") {
       configureKeyboardCreationCapture(state, board: board, conversation: conversation)
       return

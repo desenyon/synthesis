@@ -18,7 +18,7 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#31 verified; #32 focusable workspaces is next.** Latest check: 275 tests / 67 suites, strict lint and optimized build. #31 has 33 inspected reconstructed-root frames and startup assertions across three sizes. #30 has 99 native key-equivalent assertions. Earlier #27 Canvas evidence remains 17 tests and 49 engine checks.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#32 verified; #33 full session restoration is next.** Latest check: 279 tests / 68 suites, strict lint and optimized build. #32 has 33 final inspected frames and 66 native-menu assertions. Focus is presentation only; preserve panel preferences, native editor handles and both split panes. #31 has 33 inspected reconstructed-root frames and startup assertions across three sizes. #30 has 99 native key-equivalent assertions. Earlier #27 Canvas evidence remains 17 tests and 49 engine checks.
 
 `StartupWorkspace` is the shared home catalog. `withNavigation` remembers direct routes; history replay persists its destination separately. Manual startup keeps the Library fallback for Conversation. Startup capture roots are reconstructed from preferences, not assigned a destination. Preserve this alongside the full session restoration planned in #33.
 
@@ -57,7 +57,7 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#31 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
+- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#32 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.

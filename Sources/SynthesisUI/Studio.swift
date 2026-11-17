@@ -218,6 +218,7 @@ public struct Toast: Identifiable {
   @Published public var newRecordKind = "lore"
   @Published var recordLinkDraft: RecordLinkDraft?
   @Published public var inspector = true
+  @Published public var focusMode = false
   @Published var workspaceInspector = false
   @Published var inspectionTarget: InspectionTarget?
   @Published public var preferences = StudioPreferences()
@@ -241,15 +242,15 @@ public struct Toast: Identifiable {
   }
   public var world: World? { worlds.first { $0.id == worldID } }
   func dockedInspectorWidth(windowWidth: Double) -> Double {
-    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Double(Metric.rail) : sidebarWidth)
-    return splitRecord == nil && workspaceInspector && selectedRecord == nil
+    let sidebar = visibleSidebarWidth(windowWidth: windowWidth)
+    return !focusMode && splitRecord == nil && workspaceInspector && selectedRecord == nil
       && windowWidth - sidebar - inspectorWidth >= 640 ? inspectorWidth : 0
   }
   public func canvasVisible(windowWidth: Double) -> Bool {
     let contentWidth =
       primaryContentWidth(windowWidth: windowWidth)
       - dockedInspectorWidth(windowWidth: windowWidth)
-    let takeover = mode == .assisted && companionExpanded && contentWidth < 860
+    let takeover = !focusMode && mode == .assisted && companionExpanded && contentWidth < 860
     return destination == .canvas && selectedRecord == nil && !takeover
   }
   public var t: Theme { Theme(dark: dark, oled: preferences.darkPalette == .oled) }
@@ -592,6 +593,10 @@ public struct Toast: Identifiable {
     }
   }
   public func toggleSidebar() {
+    if focusMode {
+      focusMode = false
+      return
+    }
     perform {
       try store.setPreference("sidebar", value: collapsed ? "expanded" : "collapsed")
       collapsed.toggle()

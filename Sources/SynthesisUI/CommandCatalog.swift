@@ -134,6 +134,17 @@ extension CommandPalette {
       }
     }
     let assisted = studio.mode == .assisted
+    if (studio.focusMode || studio.canFocusWorkspace)
+      && matches("Focus workspace writing distraction")
+    {
+      items.append(
+        Item(
+          id: "focus-workspace", section: "Workspace", icon: "viewfinder",
+          title: studio.focusMode ? "Exit focus" : "Focus workspace", detail: "⌥⌘F"
+        ) {
+          studio.toggleFocusMode()
+        })
+    }
     let settings: [(String, String, String, () -> Void)] = [
       (
         assisted ? "Switch to Manual — no model requests" : "Switch to AI Assisted",

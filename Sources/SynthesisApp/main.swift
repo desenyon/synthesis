@@ -284,6 +284,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     item(view, "World Activity History…", #selector(worldActivity), "")
     item(view, "Toggle Navigation", #selector(toggleSidebar), "\\")
     item(view, "Toggle Inspector", #selector(toggleInspector), "i", [.command, .option])
+    item(view, "Toggle Workspace Focus", #selector(toggleFocus), "f", [.command, .option])
     item(view, "Toggle AI Assisted / Manual", #selector(toggleMode), "m", [.command, .shift])
     item(view, "Toggle Appearance", #selector(toggleTheme), "l", [.command, .shift])
     view.addItem(.separator())
@@ -344,6 +345,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     }
   }
   @objc func newItem() { studio.beginRecordCreation() }
+  @objc func toggleFocus() { studio.toggleFocusMode() }
   @objc func newEntity() { studio.beginRecordCreation(kind: "entity") }
   @objc func linkRecords() { studio.beginLinkRecords() }
   @objc func newConversation() { studio.newChat() }
@@ -355,6 +357,10 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     if all.indices.contains(sender.tag) { studio.navigate(all[sender.tag]) }
   }
   func validateMenuItem(_ item: NSMenuItem) -> Bool {
+    if item.action == #selector(toggleFocus) {
+      item.state = studio?.focusMode == true ? .on : .off
+      return studio.map { $0.focusMode || $0.canFocusWorkspace } ?? false
+    }
     if item.action == #selector(newItem) || item.action == #selector(newEntity) {
       return studio?.canBeginCreation ?? false
     }
@@ -545,6 +551,14 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
           window.backgroundColor = NSColor(studio.t.background)
           window.layoutTrafficLights()
           try await Task.sleep(for: .milliseconds(700))
+          if state.contains("focus-") {
+            for line in try await studio.auditFocusCapture(
+              state,
+              toggle: {
+                try self.dispatchCreationKey("Toggle Workspace Focus")
+              })
+            { print("FOCUS_AUDIT \(width)x\(height) \(line)") }
+          }
           // A compact companion replaces Canvas. Never composite a hidden engine into chat.
           let canvas = studio.canvasVisible(windowWidth: Double(width))
           if canvas {

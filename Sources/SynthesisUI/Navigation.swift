@@ -95,6 +95,7 @@ extension Studio {
     navigationDepth += 1
     defer {
       navigationDepth -= 1
+      if navigationDepth == 0 && !canFocusWorkspace { focusMode = false }
       if navigationDepth == 0 && !replayingNavigation && before.location != navigationLocation {
         navigationBack.append(before)
         navigationBack = Array(navigationBack.suffix(100))
@@ -258,6 +259,7 @@ extension Studio {
       if let shown = address.context?.inspectorShown { workspaceInspector = shown }
       mobileNavigation = false
       try store.setPreference("destination", value: destination.rawValue)
+      if !canFocusWorkspace { focusMode = false }
       return true
     } catch {
       self.error = error.localizedDescription

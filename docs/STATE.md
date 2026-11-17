@@ -4,13 +4,13 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#31 verified; #32 focusable workspaces is next.** The full expansion is unfinished.
+The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#32 verified; #33 full session restoration is next.** The full expansion is unfinished.
 
-Latest: [custom home views](STARTUP.md) include Atlas, Conversation, Dashboard, Canvas, Library, Worlds and Last workspace. Validation and Settings share one catalog. Direct conversation routes now remember their workspace; companion chats and failed saves preserve the underlying destination. The setting applies next launch, remains device-local and preserves Manual mode.
+Latest: [Focus workspaces](FOCUS.md) temporarily hide navigation, inspectors, companion chat and unrelated document controls. ⌥⌘F, View, the palette and the shared toolbar all use the same save guard. Native editor/caret/Undo, split documents, panel choices, current view and assistance mode survive. Focus does not change startup preferences or initiate requests.
 
-`./scripts/check.sh` passed **275 tests / 67 suites**, strict lint and optimized ad-hoc build. **33 native frames inspected** across 1440×900, 1024×768 and 720×800; each reconstructs a new Studio/root from persisted preferences and asserts its expected world/home, unchanged lore and idle state. Disk-reopen tests cover all choices in both modes and zero model requests. [Exact evidence](verification/expansion-031/README.md). No live request, foreground input, owner-app restart or release; AGENTS.md unchanged.
+`./scripts/check.sh` passed **279 tests / 68 suites**, strict lint and optimized ad-hoc build. **33 final native frames inspected** across 1440×900, 1024×768 and 720×800, plus the 33 initial frames. **66 native-menu assertions** passed. [Exact evidence](verification/expansion-032/README.md). No live request, foreground input, owner-app restart or release; AGENTS.md unchanged.
 
-Earlier #30 includes shared keyboard-first creation/linking, 36 inspected frames and 99 native-menu assertions. #27 retains 17 Canvas tests and 49 engine checks. Physical keyboard/trackpad feel, popovers, animation pacing and VoiceOver remain unverified by background checks. Full session restoration remains #33.
+Earlier #31 verifies custom startup homes; #30 covers keyboard-first creation/linking. #27 retains 17 Canvas tests and 49 engine checks. Physical keyboard/trackpad feel, popovers, animation pacing and VoiceOver remain unverified by background checks.
 
 ## Latest — chatbox refinement (unreleased)
 

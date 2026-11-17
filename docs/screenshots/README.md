@@ -61,3 +61,5 @@ Record drag: `drag-records.png` is `drag-targets` at 1440×900 from [expansion #
 `keyboard-link.png`: expansion #30, `keyboard-link`, 1440×900, unreleased main. [Evidence](../verification/expansion-030/README.md).
 
 `startup.png`: expansion #31, `startup-settings`, 1440×900, unreleased main. [Evidence](../verification/expansion-031/README.md).
+
+`focus-writing.png`: expansion #32, `focus-writing`, 1440×900 from the final set; temporary native Focus on unreleased main. [Evidence](../verification/expansion-032/README.md).

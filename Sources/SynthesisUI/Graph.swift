@@ -13,6 +13,7 @@ struct RelationshipGraph: View {
   @State private var artworkIDs: [String: String] = [:]
   private var detailLevel: GraphDetail { GraphDetail(scale: zoom) }
   @State private var layout: [String: CGPoint] = [:]
+  @State private var layoutLandscape: Bool?
   @State private var signature = ""
   @State private var layoutTask: Task<Void, Never>?
   @State private var query = ""
@@ -77,7 +78,6 @@ struct RelationshipGraph: View {
       }
     }
     .onAppear {
-      refresh()
       if studio.captureHint == "graph-selected" {
         selected = entities.first { $0.title == "Mira Vale" }?.id
       } else if studio.captureHint == "sheet-relation" {
@@ -206,7 +206,9 @@ struct RelationshipGraph: View {
           .frame(maxHeight: .infinity, alignment: .top).padding(.top, 14)
         }
         VStack {
-          if !studio.workspaceInspector, let entity = nodes.first(where: { $0.id == selected }) {
+          if !studio.focusMode && !studio.workspaceInspector,
+            let entity = nodes.first(where: { $0.id == selected })
+          {
             detail(entity).frame(
               maxWidth: .infinity, alignment: studio.companionExpanded ? .leading : .trailing
             )
@@ -225,17 +227,17 @@ struct RelationshipGraph: View {
       .coordinateSpace(name: "graph").clipped()
       .onAppear {
         area = geo.size
+        if !framed { layoutLandscape = area.width >= area.height }
         refresh()
         if !framed {
           framed = true
           frame(geo.size, animated: false)
         }
       }
-      .onChange(of: geo.size) { old, size in
+      .onChange(of: geo.size) { _, size in
         area = size
-        if (old.width >= old.height) != (size.width >= size.height) {
-          refresh()
-        }
+        // Focus, inspectors and window resizing must not rearrange the universe.
+        // Pan is relative to the viewport centre, so the focal point stays put.
       }
     }
   }
@@ -492,7 +494,7 @@ struct RelationshipGraph: View {
       relationships = try studio.store.relations(worldID: studio.worldID)
       artworkIDs = try studio.store.recordArtworkIDs(worldID: studio.worldID)
       let nodes = entities.map(\.id).sorted()
-      let landscape = area.width >= area.height
+      let landscape = layoutLandscape ?? (area.width >= area.height)
       let next =
         nodes.joined(separator: ",") + "|\(landscape)|"
         + relationships.map { "\($0.sourceID)>\($0.targetID)" }.sorted().joined(separator: ",")

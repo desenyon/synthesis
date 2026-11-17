@@ -102,8 +102,8 @@ struct EditorScreen: View {
           }.padding(.horizontal, 20).padding(.vertical, 10)
             .background(studio.t.surface)
         }
-        if placement == .main { DocumentTabBar(studio: studio) }
-        if record.kind == "entity" { entityTabs }
+        if placement == .main && !studio.focusMode { DocumentTabBar(studio: studio) }
+        if record.kind == "entity" && !studio.focusMode { entityTabs }
         HStack(spacing: 0) {
           if record.kind == "entity" && mechanicsVisible {
             RulesLab(studio: studio, record: record).frame(
@@ -198,7 +198,7 @@ struct EditorScreen: View {
   }
 
   private var inspectorShown: Bool {
-    placement == .beside ? studio.splitInspector : studio.inspector
+    !studio.focusMode && (placement == .beside ? studio.splitInspector : studio.inspector)
   }
   private var inspectorPanel: some View {
     RecordInspector(
@@ -365,14 +365,14 @@ struct EditorScreen: View {
         .accessibilityLabel("Record title")
         .onChange(of: title) { _, _ in changed() }.accessibilityLabel("Title")
       if record.kind == "entity" && bodyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        && !writingStarted
+        && !writingStarted && !studio.focusMode
       {
         EntityProfileStart(studio: studio, record: record) { prompt in
           writingPrompt = prompt
           writingStarted = true
         }
       } else {
-        if record.kind == "entity" {
+        if record.kind == "entity" && !studio.focusMode {
           EntityArtworkControl(studio: studio, record: record, compact: true).padding(
             .top, Space.md)
         }

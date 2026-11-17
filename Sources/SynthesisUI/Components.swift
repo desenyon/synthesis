@@ -586,13 +586,18 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
   }
   private func row(compact: Bool) -> some View {
     HStack(spacing: Space.sm) {
-      if global { NavigationButtons(studio: studio) }
+      if global && !studio.focusMode { NavigationButtons(studio: studio) }
       leading()
       Spacer(minLength: 8)
-      trailing()
+      if !studio.focusMode { trailing() }
       if global {
-        if compact {
+        if studio.focusMode {
+          FocusWorkspaceControl(studio: studio)
+        } else if compact {
           IconMenu(icon: "square.stack.3d.up", label: "Workspace tools", t: studio.t) {
+            if studio.canFocusWorkspace {
+              Button("Focus workspace · ⌥⌘F") { studio.toggleFocusMode() }
+            }
             Button("Open document beside workspace…") { studio.sheet = .splitRecord }
             if studio.selectedRecord == nil {
               Button(studio.workspaceInspector ? "Hide inspector" : "Show inspector") {
@@ -604,6 +609,7 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
             }
           }
         } else {
+          FocusWorkspaceControl(studio: studio)
           IconButton(
             icon: "square.stack.3d.up", label: "Open a document beside this workspace", t: studio.t,
             active: studio.splitRecord != nil
