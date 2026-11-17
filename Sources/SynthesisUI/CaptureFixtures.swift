@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "dashboard-activity", "light-dashboard-activity", "dashboard", "light-dashboard",
+    "manual-dashboard", "dashboard-empty",
+    "dashboard-project", "dashboard-new-project", "dashboard-review", "dashboard-long",
     "layouts", "light-layouts", "manual-layouts", "layouts-empty", "layouts-many",
     "layouts-archived", "layouts-applied", "light-layouts-applied",
     "history-trail", "history-back", "history-map", "manual-history-trail",
@@ -258,6 +261,46 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("dashboard") {
+      configureConnectedCapture(
+        state == "dashboard-empty" ? "empty-library" : "library", board: board,
+        conversation: conversation)
+      navigate(.dashboard)
+      if state != "dashboard-empty" {
+        perform {
+          _ = try store.renameWorld(worldID, name: "Aster")
+          if dashboardProjects.isEmpty {
+            let project = try store.createProject(worldID: worldID, title: "The first crossing")
+            _ = try store.saveRecord(
+              worldID: worldID, id: project.id, version: project.version, title: project.title,
+              body: "A story about the coast that remembers, and the mapmaker who cannot.", rtf: nil
+            )
+            _ = try store.createRecordSection(
+              worldID: worldID, parentID: project.id,
+              title: "Opening scene", body: "Mira reaches the shore before the next crossing.")
+          }
+          try reload()
+        }
+      }
+      if state == "dashboard-project", let project = dashboardProjects.first { openRecord(project) }
+      if state == "dashboard-review", let proposal = pendingProposals.last {
+        openProposalReview(proposal.id)
+      }
+      if state == "dashboard-long" {
+        perform {
+          _ = try store.renameWorld(
+            worldID,
+            name: "Aster and the remembered kingdoms beyond the farthest eastern coast")
+          try reload()
+        }
+      }
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      sheet = state == "dashboard-new-project" ? .project : nil
+      toast = nil
+      captureHint = state
+      return
+    }
     if state.contains("layouts") {
       configureConnectedCapture(
         state == "layouts-empty" ? "empty-library" : "library", board: board,

@@ -1,6 +1,6 @@
 # Screenshots
 
-README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png` and `layouts.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
+README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png` and `dashboard.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
 
 | File | Capture state |
 | --- | --- |
@@ -17,6 +17,7 @@ README images come from the real app with the bundled Aster sample world, at 144
 | `what-if-review.png` | `review-what-if` |
 | `settings.png` | `settings` |
 | `layouts.png` | `layouts` (expansion #12) |
+| `dashboard.png` | `dashboard` (expansion #13, refined) |
 
 To refresh:
 
@@ -32,3 +33,5 @@ Captures run in the background against an isolated database and never touch your
 The context inspector capture displays the actual popover content inline so verification never steals focus. Its position is a capture layout; native popover pointer/keyboard behavior requires a separate interaction check. Latest evidence: [composer-polish](../verification/composer-polish/README.md).
 
 Workspace layouts: [expansion-012](../verification/expansion-012/README.md). The four named arrangements are saved through the real layout API in isolated capture data; they are not preloaded into user worlds.
+
+Dashboard: [expansion-013](../verification/expansion-013/README.md). Project and activity fixtures are created through actual persistence APIs; no provider responses are fabricated in production.

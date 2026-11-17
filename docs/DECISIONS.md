@@ -123,3 +123,7 @@ Keep v0.0.1 and its binary intact. Package the verified interaction follow-up as
 ## 2026-11-17 — complete expansion and graphite/OLED (owner direction)
 
 The owner resupplied the 394-item brief and explicitly directed implementation of every item. Its #1 replaces the earlier pure-black default with graphite and an optional true-black OLED palette. Preserve the accepted navigation layout. EXPANSION.md is the item-level acceptance ledger; partial or unaudited work stays open. Existing canon/privacy/subscription boundaries remain enforced; any conflicting provider or publishing requirements must be resolved explicitly rather than weakened implicitly.
+
+## 2026-11-17 — optional welcome dashboard (#13)
+
+The owner explicitly requests a dashboard in the renewed expansion brief, superseding the earlier prohibition on dashboards for this destination. Conversation remains the default assisted entry. Dashboard is optional navigation and startup, composed from real world activity and source records rather than analytics filler. Project outlines use the existing record/section model so they are portable and connected immediately; later narrative-project structures remain individually tracked.

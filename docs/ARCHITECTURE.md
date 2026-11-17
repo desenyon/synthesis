@@ -35,7 +35,7 @@ Migration 0004 adds `archived` to records, conversations, boards and events. Arc
 Swift package, macOS 14+, SwiftUI presentation with AppKit window/menu integration and NSTextView rich editing. Only Canvas embeds a bundled offline WKWebView; the other workspaces are native. No Next.js runtime, Rust dependency or hosted service. The installed command-line Swift toolchain builds against macOS 26.5 SDK; scripts avoid the default 27 SDK's unavailable SwiftUI macro plugin. Development bundle is ad-hoc signed.
 
 - `SynthesisCore`: SQLite C driver, migrations, domain operations, full-text retrieval, agent cancellation, subscription harness transport.
-- `SynthesisUI`: observable Studio state, design system, shell and the seven workspaces.
+- `SynthesisUI`: observable Studio state, design system, shell and connected workspaces.
 - `SynthesisApp`: NSApplication lifecycle, native menu shortcuts, window and screenshot harness.
 - `Tests/SynthesisCoreTests`: disk persistence, world isolation, canon/revision boundary, reversible archive and injected transport tests.
 - `Tests/SynthesisUITests`: Studio navigation and archive, board controller, Markdown, diff, connector and graph layout.
@@ -169,3 +169,9 @@ Migration 0014 adds world-scoped `record_artwork` revisions with an active-image
 ## Saved workspace layouts
 
 `WorkspaceLayouts.swift` stores versioned per-world, device-local arrangements in preferences. Layouts carry navigation addresses, panel state, density, reading width and entity tab; never text, canon, theme or model permissions. Restore validates targets and flushes writing before using the shared navigation path, then saves related preferences in one SQLite transaction. Rename, explicit Update, archive/restore and guarded Undo preserve earlier arrangements. Native View → Workspace Layouts (⌥⌘L), Settings and quick-open share one manager. Full application-session restoration is separate (#33).
+
+## Welcome dashboard
+
+`Dashboard.swift` combines current Studio records/proposals with a bounded world-scoped `recentWorldActivity` query across saved records, maps/boards, relationships, chronology and proposal decisions. Activity shows the latest state per object, not a full append-only audit log. Navigation resolves actual source objects through existing save guards. The optional Dashboard destination has no model calls and can be selected as startup in Settings. Existing ⌘1–9 destinations retain their shortcuts.
+
+Project outlines are ordinary entity records with category `Projects`: draft/canon rules, revisions, archive, sections, relationships and portable exports already apply. This is the project entry point for #13; it does not claim the later multi-book/script project engine (#313).

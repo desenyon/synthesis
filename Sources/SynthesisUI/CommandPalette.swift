@@ -131,7 +131,7 @@ struct CommandPalette: View {
       items.append(
         Item(
           id: "go-\(destination.rawValue)", section: "Go to", icon: destination.icon,
-          title: destination.rawValue, detail: "⌘\(offset + 1)"
+          title: destination.rawValue, detail: offset < 9 ? "⌘\(offset + 1)" : ""
         ) { studio.navigate(destination) })
     }
     let create: [(String, String, String, String, () -> Void)] = [

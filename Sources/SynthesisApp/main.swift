@@ -269,7 +269,8 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     item(view, "Forward", #selector(goForward), "]")
     view.addItem(.separator())
     for (index, destination) in Destination.allCases.enumerated() {
-      item(view, destination.rawValue, #selector(go(_:)), "\(index + 1)", tag: index)
+      item(
+        view, destination.rawValue, #selector(go(_:)), index < 9 ? "\(index + 1)" : "", tag: index)
     }
     view.addItem(.separator())
     item(view, "Workspace Layouts…", #selector(workspaceLayouts), "l", [.command, .option])

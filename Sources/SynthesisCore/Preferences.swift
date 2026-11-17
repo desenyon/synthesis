@@ -59,7 +59,9 @@ public struct StudioPreferences: Codable, Equatable, Sendable {
     if ![14, 16, 18, 20].contains(bodySize) { value.bodySize = 16 }
     if ![640, 780, 960].contains(readingWidth) { value.readingWidth = 780 }
     if ![0, 5, 12, 20].contains(recentChats) { value.recentChats = 12 }
-    if !["remember", "Conversation", "Canvas", "Library", "Worlds"].contains(launchWorkspace) {
+    if !["remember", "Conversation", "Canvas", "Library", "Worlds", "Dashboard"].contains(
+      launchWorkspace)
+    {
       value.launchWorkspace = "remember"
     }
     return value

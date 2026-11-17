@@ -1,0 +1,21 @@
+CAPTURE dashboard-activity 1440x900, bitmap 1440x900, 143ms
+CAPTURE light-dashboard-activity 1440x900, bitmap 1440x900, 137ms
+CAPTURE dashboard 1440x900, bitmap 1440x900, 134ms
+CAPTURE light-dashboard 1440x900, bitmap 1440x900, 132ms
+CAPTURE manual-dashboard 1440x900, bitmap 1440x900, 54ms
+CAPTURE dashboard-empty 1440x900, bitmap 1440x900, 108ms
+CAPTURE dashboard-project 1440x900, bitmap 1440x900, 133ms
+CAPTURE dashboard-new-project 1440x900, bitmap 1440x900, 171ms
+CAPTURE dashboard-review 1440x900, bitmap 1440x900, 134ms
+CAPTURE dashboard-long 1440x900, bitmap 1440x900, 134ms
+CAPTURE dashboard-activity 1024x768, bitmap 1024x768, 96ms
+CAPTURE light-dashboard-activity 1024x768, bitmap 1024x768, 98ms
+CAPTURE dashboard 1024x768, bitmap 1024x768, 104ms
+CAPTURE light-dashboard 1024x768, bitmap 1024x768, 98ms
+CAPTURE manual-dashboard 1024x768, bitmap 1024x768, 22ms
+CAPTURE dashboard-empty 1024x768, bitmap 1024x768, 98ms
+CAPTURE dashboard-project 1024x768, bitmap 1024x768, 104ms
+CAPTURE dashboard-new-project 1024x768, bitmap 1024x768, 120ms
+CAPTURE dashboard-review 1024x768, bitmap 1024x768, 103ms
+CAPTURE dashboard-long 1024x768, bitmap 1024x768, 102ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-013/refined

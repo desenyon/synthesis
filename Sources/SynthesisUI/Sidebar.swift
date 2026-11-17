@@ -28,7 +28,7 @@ struct Sidebar: View {
       ScrollViewReader { scroll in
         ScrollView {
           VStack(alignment: .leading, spacing: density.sectionGap) {
-            section("Workspace", items: [.chat, .canvas, .library])
+            section("Workspace", items: [.chat, .canvas, .library, .dashboard])
             section("Explore", items: [.knowledge, .timeline, .atlas, .review])
             if !collapsed {
               VStack(spacing: 0) {

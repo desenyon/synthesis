@@ -59,19 +59,31 @@ struct ReviewScreen: View {
         Spacer()
       }
       Rectangle().fill(studio.t.hairline).frame(height: 1)
-      ScrollView {
-        ContentColumn {
-          VStack(alignment: .leading, spacing: 14) {
-            switch tab {
-            case .proposals: proposals
-            case .canon: canon(queue)
-            case .checks: checks
+      ScrollViewReader { scroll in
+        ScrollView {
+          ContentColumn {
+            VStack(alignment: .leading, spacing: 14) {
+              switch tab {
+              case .proposals: proposals
+              case .canon: canon(queue)
+              case .checks: checks
+              }
+            }.padding(.vertical, 18)
+              .animation(
+                reduceMotion ? nil : Motion.panelAnimation, value: studio.pendingProposals.map(\.id)
+              )
+              .animation(reduceMotion ? nil : Motion.panelAnimation, value: tab)
+          }
+        }
+        .onChange(of: studio.reviewFocusID, initial: true) {
+          guard let id = studio.reviewFocusID else { return }
+          tab = .proposals
+          query = ""
+          DispatchQueue.main.async {
+            withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
+              scroll.scrollTo(id, anchor: .top)
             }
-          }.padding(.vertical, 18)
-            .animation(
-              reduceMotion ? nil : Motion.panelAnimation, value: studio.pendingProposals.map(\.id)
-            )
-            .animation(reduceMotion ? nil : Motion.panelAnimation, value: tab)
+          }
         }
       }
     }
@@ -136,7 +148,7 @@ struct ReviewScreen: View {
             }.buttonStyle(.plain).padding(.leading, -7).help("Open the conversation")
           }
           ProposalCard(studio: studio, proposal: proposal)
-        }
+        }.id(proposal.id)
       }
     }
   }

@@ -32,6 +32,7 @@ struct StudioSheet: View {
             )
         }
       case .layouts: WorkspaceLayoutsSheet(studio: studio)
+      case .project: NewProjectSheet(studio: studio)
       case .world: world
       case .document: document
       case .rename: rename

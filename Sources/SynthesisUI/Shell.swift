@@ -194,6 +194,7 @@ public struct ConnectedRoot: View {
       case .review: ReviewScreen(studio: studio)
       case .worlds: WorldsScreen(studio: studio)
       case .settings: SettingsScreen(studio: studio)
+      case .dashboard: DashboardScreen(studio: studio)
       }
     }
   }

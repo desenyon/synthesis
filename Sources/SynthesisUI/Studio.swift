@@ -12,6 +12,7 @@ public enum Destination: String, CaseIterable, Identifiable, Codable {
   case review = "Review"
   case worlds = "Worlds"
   case settings = "Settings"
+  case dashboard = "Dashboard"
   public var id: String { rawValue }
   var icon: String {
     switch self {
@@ -24,6 +25,7 @@ public enum Destination: String, CaseIterable, Identifiable, Codable {
     case .review: return "checkmark.seal"
     case .worlds: return "globe"
     case .settings: return "gearshape"
+    case .dashboard: return "rectangle.grid.2x2"
     }
   }
   var summary: String {
@@ -37,6 +39,7 @@ public enum Destination: String, CaseIterable, Identifiable, Codable {
     case .review: return "Proposals, canon and checks"
     case .worlds: return "Open, save and organize your universes"
     case .settings: return "Application and world preferences"
+    case .dashboard: return "Recent work, projects and decisions"
     }
   }
 }
@@ -61,6 +64,7 @@ public struct Toast: Identifiable {
   var replayingNavigation = false
   @Published public var worldRevision = 0
   @Published public var reviewingProposal = false
+  @Published var reviewFocusID: String?
   @Published public var records: [LoreRecord] = []
   @Published public var recordTabs: [String: RecordPageTab] = [:]
   @Published var layoutRevision = 0
@@ -196,7 +200,7 @@ public struct Toast: Identifiable {
   private var requestID = UUID()
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
-    case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts
+    case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts, project
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
@@ -565,6 +569,7 @@ public struct Toast: Identifiable {
       editorSave = nil
       destination = value
       if value != .timeline { pendingEventSourceID = nil }
+      if value != .review { reviewFocusID = nil }
       if value != .canvas {
         canvasUndo = nil
         canvasFit = nil
@@ -634,6 +639,7 @@ public struct Toast: Identifiable {
         worldDefaults = nextDefaults
         preset = nextDefaults.chatMode
         worldCover = Self.cover(store: store, worldID: id)
+        reviewFocusID = nil
         conversationID = nil
         selectedRecord = nil
         editorSave = nil

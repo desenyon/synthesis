@@ -213,7 +213,7 @@ struct SettingsScreen: View {
           title: item.title, value: preference(\.launchWorkspace),
           options: [
             ("remember", "Last workspace"), ("Conversation", "Conversation"), ("Canvas", "Canvas"),
-            ("Library", "Library"), ("Worlds", "Your worlds"),
+            ("Library", "Library"), ("Dashboard", "Dashboard"), ("Worlds", "Your worlds"),
           ], t: t)
       }
     case .textSize:

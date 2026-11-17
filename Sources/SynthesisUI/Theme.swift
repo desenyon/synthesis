@@ -248,6 +248,7 @@ func categoryIcon(_ category: String) -> String {
   case "cosmology": return "sparkles"
   case "events": return "calendar"
   case "ideas": return "lightbulb"
+  case "projects": return "folder"
   default: return "doc.text"
   }
 }
