@@ -132,3 +132,24 @@ struct ChronologyAgentTests {
     #expect(try store.workspaceContext(worldID: world.id).contains(period.id))
   }
 }
+
+struct EventOrderTests {
+  @Test func movingNumbersTheTimelineAndUndoRestoresIt() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Order")
+    let source = try store.createRecord(worldID: world.id, title: "Annals")
+    let a = try store.addEvent(worldID: world.id, title: "A", date: "", source: source.id)
+    let b = try store.addEvent(worldID: world.id, title: "B", date: "", source: source.id)
+    let c = try store.addEvent(worldID: world.id, title: "C", date: "", source: source.id)
+    #expect(try store.events(worldID: world.id).map(\.id) == [a.id, b.id, c.id])
+    let previous = try store.moveEvent(worldID: world.id, id: c.id, by: -1)
+    #expect(try store.events(worldID: world.id).map(\.id) == [a.id, c.id, b.id])
+    #expect(try store.events(worldID: world.id).map(\.order) == [1, 2, 3])
+    // Moving past either end changes nothing.
+    _ = try store.moveEvent(worldID: world.id, id: a.id, by: -1)
+    #expect(try store.events(worldID: world.id).map(\.id) == [a.id, c.id, b.id])
+    try store.restoreEventOrder(worldID: world.id, previous: previous)
+    #expect(try store.events(worldID: world.id).map(\.id) == [a.id, b.id, c.id])
+    #expect(try store.events(worldID: world.id).allSatisfy { $0.order == nil })
+  }
+}

@@ -130,4 +130,40 @@ extension WorkspaceStore {
       return event
     }
   }
+
+  /// Moves an event one place earlier or later in the world's Timeline order. The first move
+  /// numbers every active event 1…n in its current order, so unordered events gain a stable place.
+  /// Returns the previous order of every event, for Undo.
+  @discardableResult public func moveEvent(worldID: String, id: String, by offset: Int) throws
+    -> [String: Int?]
+  {
+    try db.transaction {
+      var ordered = try events(worldID: worldID)
+      let previous = Dictionary(uniqueKeysWithValues: ordered.map { ($0.id, $0.order) })
+      guard let index = ordered.firstIndex(where: { $0.id == id }) else {
+        throw SynthesisError.notFound
+      }
+      let target = index + offset
+      guard ordered.indices.contains(target) else { return previous }
+      ordered.swapAt(index, target)
+      let now = timestamp()
+      for (position, event) in ordered.enumerated() {
+        try db.execute(
+          "UPDATE events SET sort_order=?,updated_at=? WHERE world_id=? AND id=?",
+          [String(position + 1), now, worldID, event.id])
+      }
+      return previous
+    }
+  }
+  /// Puts back an order returned by `moveEvent`.
+  public func restoreEventOrder(worldID: String, previous: [String: Int?]) throws {
+    try db.transaction {
+      let now = timestamp()
+      for (id, order) in previous {
+        try db.execute(
+          "UPDATE events SET sort_order=?,updated_at=? WHERE world_id=? AND id=?",
+          [order.map(String.init), now, worldID, id])
+      }
+    }
+  }
 }

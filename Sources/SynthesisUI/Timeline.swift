@@ -357,12 +357,14 @@ struct TimelineScreen: View {
       IconMenu(icon: "ellipsis", label: "Event actions", t: studio.t, size: 22) {
         Button("Edit…") { begin(event) }
         if let source { Button("Open source record") { studio.openRecord(source) } }
+        moveActions(event)
         Button("Remove") { remove(event) }
       }
     }.padding(.horizontal, 8).frame(height: 34).hoverFill(studio.t, radius: 7)
       .contextMenu {
         Button("Edit…") { begin(event) }
         if let source { Button("Open source record") { studio.openRecord(source) } }
+        moveActions(event)
         Divider()
         Button("Remove") { remove(event) }
       }
@@ -385,7 +387,9 @@ struct TimelineScreen: View {
       }.frame(width: 12)
       EventCard(
         studio: studio, event: event, source: sourceRecord, edit: { begin(event) },
-        remove: { remove(event) }
+        remove: { remove(event) },
+        moveEarlier: events.first?.id == event.id ? nil : { move(event, by: -1) },
+        moveLater: events.last?.id == event.id ? nil : { move(event, by: 1) }
       ).padding(.bottom, 14)
     }.fixedSize(horizontal: false, vertical: true)
   }
@@ -415,6 +419,27 @@ struct TimelineScreen: View {
     source = event?.sourceID ?? studio.records.first?.id ?? ""
     newSource = event == nil && studio.records.isEmpty
     composing = true
+  }
+  private func move(_ event: WorldEvent, by offset: Int) {
+    studio.perform {
+      let previous = try studio.store.moveEvent(
+        worldID: studio.worldID, id: event.id, by: offset)
+      refresh()
+      studio.show(
+        "Moved “\(event.title)” \(offset < 0 ? "earlier" : "later")", icon: "arrow.up.arrow.down",
+        actionTitle: "Undo"
+      ) {
+        studio.perform {
+          try studio.store.restoreEventOrder(worldID: studio.worldID, previous: previous)
+          refresh()
+        }
+      }
+    }
+  }
+  @ViewBuilder private func moveActions(_ event: WorldEvent) -> some View {
+    let index = events.firstIndex { $0.id == event.id } ?? 0
+    Button("Move earlier") { move(event, by: -1) }.disabled(index == 0)
+    Button("Move later") { move(event, by: 1) }.disabled(index >= events.count - 1)
   }
   private func remove(_ event: WorldEvent) {
     studio.perform {
@@ -584,6 +609,8 @@ private struct EventCard: View {
   let source: LoreRecord?
   var edit: () -> Void
   var remove: () -> Void
+  var moveEarlier: (() -> Void)?
+  var moveLater: (() -> Void)?
   @State private var hover = false
   var body: some View {
     let t = studio.t
@@ -613,6 +640,8 @@ private struct EventCard: View {
       Spacer(minLength: 0)
       IconMenu(icon: "ellipsis", label: "Event actions", t: t, size: 24) {
         Button("Edit…", action: edit)
+        Button("Move earlier") { moveEarlier?() }.disabled(moveEarlier == nil)
+        Button("Move later") { moveLater?() }.disabled(moveLater == nil)
         Button("Remove", action: remove)
       }
     }.padding(14).frame(maxWidth: .infinity, alignment: .leading)
@@ -624,6 +653,8 @@ private struct EventCard: View {
       .contextMenu {
         Button("Edit…", action: edit)
         if let source { Button("Open source record") { studio.openRecord(source) } }
+        Button("Move earlier") { moveEarlier?() }.disabled(moveEarlier == nil)
+        Button("Move later") { moveLater?() }.disabled(moveLater == nil)
         Divider()
         Button("Remove", action: remove)
       }
