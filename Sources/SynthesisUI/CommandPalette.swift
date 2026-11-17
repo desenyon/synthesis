@@ -19,6 +19,7 @@ struct CommandPalette: View {
     var title: String
     var detail: String = ""
     var tint: Color?
+    var record: LoreRecord?
     var run: () -> Void
   }
   var body: some View {
@@ -65,6 +66,7 @@ struct CommandPalette: View {
                     row(item, selected: offset == index)
                   }
                   .buttonStyle(.plain).id(item.id)
+                  .recordDraggable(item.record, studio: studio)
                   .accessibilityAddTraits(offset == index ? .isSelected : [])
                   .help([item.title, item.detail].filter { !$0.isEmpty }.joined(separator: " · "))
                 }
@@ -105,6 +107,12 @@ struct CommandPalette: View {
           HStack(spacing: 14) {
             hint("↑↓", "Navigate")
             hint("↵", "Open")
+            if items.contains(where: { $0.record != nil }) {
+              Text("Drag to a pane or canvas").font(.studio(.caption)).foregroundStyle(
+                studio.t.muted
+              )
+              .lineLimit(1)
+            }
             Spacer(minLength: 8)
             SearchSyntaxMenu(query: $studio.paletteQuery, t: studio.t)
             Text(studio.world?.name ?? "").font(.studio(size: 11.5))

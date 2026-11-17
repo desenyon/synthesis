@@ -63,6 +63,8 @@ public struct Toast: Identifiable {
   var navigationDepth = 0
   var replayingNavigation = false
   @Published public var worldRevision = 0
+  @Published var recordDrag: RecordDragSession?
+  var recordDragTimer: Timer?
   @Published public var reviewingProposal = false
   @Published var reviewProgress: ReviewProgress?
   @Published var reviewFocusID: String?

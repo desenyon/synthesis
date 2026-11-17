@@ -135,6 +135,7 @@ struct Sidebar: View {
       selected: studio.selectedRecord?.id == record.id, collapsed: collapsed
     ) { studio.openRecord(record) }
     .help("\(record.title) · \(favoriteRecordDetail(record))")
+    .recordDraggable(record, studio: studio)
     .contextMenu {
       Button("Open") { studio.openRecord(record) }
       SplitRecordAction(studio: studio, record: record)

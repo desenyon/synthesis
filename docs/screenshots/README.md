@@ -51,3 +51,5 @@ Document tabs: expansion #16, `verification/expansion-016`, with pinned and real
 Activity: `activity.png` is `changes-search` at 1440×900 from [expansion-025](../verification/expansion-025/README.md), showing actual fixture mutations recorded through the database triggers.
 
 Split workspace: `split-workspace.png` is `split-atlas` at 1440×900 from expansion #26's final `verified` set. Both panes refer to actual sample-world records; no model request was made. [Evidence](../verification/expansion-026/README.md).
+
+Record drag: `drag-records.png` is `drag-targets` at 1440×900 from [expansion #27](../verification/expansion-027/README.md). The isolated sample has an actual favorite record and the native drag-target state; it does not claim a physical mouse gesture was captured.

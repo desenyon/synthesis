@@ -240,7 +240,8 @@ extension CommandPalette {
     Item(
       id: "record-\(record.id)", section: section, icon: recordIcon(record), title: record.title,
       detail: [Vocabulary.displayCategory(record.category), Vocabulary.stateLabel(record.state)]
-        .filter { !$0.isEmpty }.joined(separator: " · "), tint: studio.t.category(record.category)
+        .filter { !$0.isEmpty }.joined(separator: " · "), tint: studio.t.category(record.category),
+      record: record
     ) { studio.openRecord(record) }
   }
 }

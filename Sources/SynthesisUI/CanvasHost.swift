@@ -277,6 +277,32 @@ struct CanvasBoardContent {
 
   // MARK: Commands
 
+  var dropSessionID: String? { loaded && writable ? loadID : nil }
+
+  /// A native drop is measured in this web view's points. Excalidraw converts it using the
+  /// current pan/zoom. The captured board generation prevents a late drop entering another board.
+  func drop(_ record: LoreRecord, at point: CGPoint, boardID: String, sessionID: String)
+    async throws
+  {
+    guard loaded, writable, worldID == studio.worldID, record.worldID == worldID,
+      self.boardID == boardID, loadID == sessionID, point.x.isFinite, point.y.isFinite,
+      webView.bounds.contains(point)
+    else { throw SynthesisError.invalid("This canvas changed. Drag the record again.") }
+    sync()
+    let accepted = try await webView.callAsyncJavaScript(
+      "return window.synthesis.dropCard(id, x, y, sessionID)",
+      arguments: ["id": record.id, "x": point.x, "y": point.y, "sessionID": sessionID],
+      in: nil, contentWorld: .page)
+    guard accepted as? Bool == true, self.boardID == boardID, loadID == sessionID,
+      worldID == studio.worldID
+    else { throw SynthesisError.invalid("The record could not be placed on this canvas.") }
+    await flush()
+    if let failure { throw SynthesisError.invalid(failure) }
+    guard self.boardID == boardID, loadID == sessionID, worldID == studio.worldID else {
+      throw SynthesisError.invalid("The canvas changed before its save completed.")
+    }
+  }
+
   func add(_ records: [LoreRecord]) {
     let ids = records.filter { $0.worldID == worldID }.map(\.id)
     guard !ids.isEmpty else { return }
@@ -451,6 +477,57 @@ struct CanvasBoardContent {
       studio.toast = nil
     } else {
       checks.append("FAIL missing linked card for reviewed placement audit")
+    }
+    if let boardID, let sessionID = dropSessionID {
+      let beforeDrop = try content.encoded()
+      let record = try studio.store.createRecord(
+        worldID: worldID, title: "Dropped source",
+        body: "A real linked source in the isolated audit.",
+        kind: "entity", category: "Characters")
+      try studio.reload()
+      let point = CGPoint(x: webView.bounds.width * 0.35, y: webView.bounds.height * 0.4)
+      _ = studio.beginRecordDrag(record, monitor: false)
+      let dragID = studio.recordDrag!.id
+      let accepted = try await studio.receiveRecordDrop(
+        JSONEncoder().encode(RecordDragAddress(worldID: worldID, recordID: record.id)),
+        target: .canvas(boardID: boardID, sessionID: sessionID, point: point),
+        location: studio.navigationLocation, dragID: dragID)
+      checks.append(
+        accepted ? "PASS native record drop is acknowledged and saved" : "FAIL native record drop")
+      let dropped = await probe()
+      let position = (dropped["cards"] as? [[String: Any]])?.first {
+        $0["recordID"] as? String == record.id
+      }
+      reloadStoredBoard()
+      let deadline = Date().addingTimeInterval(5)
+      while !loaded, Date() < deadline { try await Task.sleep(for: .milliseconds(50)) }
+      try await Task.sleep(for: .milliseconds(150))
+      let restored = await probe()
+      let matches =
+        (restored["cards"] as? [[String: Any]])?.filter { $0["recordID"] as? String == record.id }
+        ?? []
+      checks.append(
+        matches.count == 1 && position != nil
+          && ["x", "y"].allSatisfy {
+            position?[$0] as? Double == matches.first?[$0] as? Double
+          }
+          ? "PASS native record drop survives a board reload without duplicates"
+          : "FAIL native drop persistence")
+      checks.append(
+        try studio.store.record(worldID: worldID, id: record.id) == record
+          ? "PASS native record drop preserves source lore and canon state"
+          : "FAIL native drop modified lore")
+      // Keep later appearance fixtures independent from the audit's deliberately overlapping drop.
+      _ = try studio.store.saveBoard(
+        worldID: worldID, id: boardID, name: name, kind: "canvas", content: beforeDrop)
+      try studio.store.archiveRecord(worldID: worldID, id: record.id)
+      try studio.reload()
+      reloadStoredBoard()
+      let cleanupDeadline = Date().addingTimeInterval(5)
+      while !loaded, Date() < cleanupDeadline { try await Task.sleep(for: .milliseconds(50)) }
+      studio.toast = nil
+    } else {
+      checks.append("FAIL missing writable canvas for native record drop")
     }
     return checks
   }

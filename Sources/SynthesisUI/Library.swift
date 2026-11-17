@@ -299,6 +299,7 @@ struct RecordRow: View {
         selected: !archived && studio.workspaceInspector
           && studio.effectiveInspection == .record(record.id), radius: 9)
     }.buttonStyle(.plain)
+      .recordDraggable(archived ? nil : record, studio: studio)
       .contextMenu {
         if archived {
           Button("Restore") {

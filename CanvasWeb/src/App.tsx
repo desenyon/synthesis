@@ -386,6 +386,37 @@ export function App() {
         if (targets.length) api.scrollToContent(targets, { fitToContent: false, animate: true });
         onChange();
       },
+      /** Place a real record at a native drop point without panning or cloning its lore. */
+      dropCard(id: string, x: number, y: number, sessionID: string) {
+        const state = api.getAppState();
+        if (!s.loaded || !acceptsSession(activeSession, sessionID) || !s.records.has(id) ||
+          !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 ||
+          x >= state.width || y >= state.height) return false;
+        const point = viewportCoordsToSceneCoords(
+          {clientX: x + state.offsetLeft, clientY: y + state.offsetTop}, state);
+        const left = point.x - CARD_WIDTH / 2, top = point.y - 32;
+        let all: El[] = api.getSceneElementsIncludingDeleted();
+        const card = all.find(e => !e.isDeleted && isCard(e) && e.customData.recordID === id);
+        const selected: Record<string, true> = {};
+        if (card) {
+          const dx = left - card.x, dy = top - card.y, group = card.groupIds?.[0];
+          all = all.map(e => {
+            if (e.isDeleted || !(e.id === card.id || (group && e.groupIds?.[0] === group))) return e;
+            selected[e.id] = true;
+            return newElementWith(e, {x: e.x + dx, y: e.y + dy});
+          });
+        } else {
+          const {rect, parts} = buildCard(s.records.get(id), id, left, top, s.theme, `card:${randomId()}`);
+          const added = [rect, ...Object.values(parts)];
+          for (const part of added) selected[part.id] = true;
+          all = [...all, ...added];
+        }
+        api.updateScene({elements: all, appState: {selectedElementIds: selected, selectedGroupIds: {}, editingGroupId: null},
+          captureUpdate: CaptureUpdateAction.IMMEDIATELY});
+        synchronise();
+        onChange();
+        return true;
+      },
       async addImage(base64: string) {
         const epoch = loadEpoch;
         const dataURL = `data:${imageMime(base64)};base64,${base64}`;
@@ -679,6 +710,30 @@ export function App() {
           && beforeArrange.some((old:El) => api.getSceneElements().some((c:El) => c.id === old.id && (c.x !== old.x || c.y !== old.y))));
         bridge.command("undo"); await wait();
         check("auto arrangement can be undone", beforeArrange.every((old:El) => api.getSceneElements().some((c:El) => c.id === old.id && c.x === old.x && c.y === old.y)));
+        await bridge.load(original); await wait();
+        const dropID = card.customData.recordID;
+        api.updateScene({appState:{zoom:{value:0.7},scrollX:135,scrollY:-42}}); await wait();
+        const dropState = api.getAppState(), priorCard = {...api.getSceneElements().find((e:El)=>isCard(e)&&e.customData.recordID===dropID)};
+        const priorCount = api.getSceneElements().filter(isCard).length;
+        const dropX = dropState.width * 0.45, dropY = dropState.height * 0.4;
+        check("record drop rejects foreign sessions and unknown records", !bridge.dropCard(dropID,dropX,dropY,"stale") && !bridge.dropCard("missing",dropX,dropY,activeSession));
+        check("record drop rejects invalid viewport coordinates", !bridge.dropCard(dropID,NaN,dropY,activeSession) && !bridge.dropCard(dropID,-1,dropY,activeSession));
+        check("record drop reaches the live engine", bridge.dropCard(dropID,dropX,dropY,activeSession));
+        await wait();
+        const dropped = api.getSceneElements().find((e:El)=>isCard(e)&&e.customData.recordID===dropID);
+        check("record drop uses current pan and zoom", Math.abs((dropped.x+CARD_WIDTH/2+dropState.scrollX)*dropState.zoom.value-dropX)<0.01 && Math.abs((dropped.y+32+dropState.scrollY)*dropState.zoom.value-dropY)<0.01);
+        check("record drop preserves viewport and avoids duplicate cards", api.getSceneElements().filter(isCard).length===priorCount && api.getAppState().scrollX===dropState.scrollX && api.getAppState().scrollY===dropState.scrollY && api.getAppState().zoom.value===dropState.zoom.value);
+        const owned = api.getSceneElements().filter((e:El)=>e.groupIds?.[0]===dropped.groupIds?.[0]);
+        check("record drop selects the complete card group", owned.length>1 && owned.every((e:El)=>api.getAppState().selectedElementIds[e.id]));
+        bridge.command("undo"); await wait();
+        check("record drop move is undoable", api.getSceneElements().some((e:El)=>e.id===priorCard.id && Math.abs(e.x-priorCard.x)<0.01 && Math.abs(e.y-priorCard.y)<0.01));
+        const missing = [...s.records.values()].find(r=>!api.getSceneElements().some((e:El)=>isCard(e)&&e.customData.recordID===r.id));
+        if (missing) {
+          bridge.dropCard(missing.id,dropX,dropY,activeSession); await wait();
+          check("new record drop creates a linked card", api.getSceneElements().filter((e:El)=>isCard(e)&&e.customData.recordID===missing.id).length===1);
+          bridge.command("undo"); await wait();
+          check("new record drop can be undone", !api.getSceneElements().some((e:El)=>isCard(e)&&e.customData.recordID===missing.id));
+        } else check("new record drop fixture contains an unplaced record", false);
         await bridge.load(original); await wait();
         try {
           const blob = await exportBoard(api.getSceneElements(), api.getAppState(), api.getFiles(), s.records, s.relations, s.theme);

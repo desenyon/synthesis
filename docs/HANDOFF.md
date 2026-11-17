@@ -18,7 +18,9 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#26 verified; #27 drag-to-open is next.** Latest check: 251 tests / 62 suites, strict lint and optimized build. Canvas: 17 tests, typecheck/build, 37 engine checks. #26 has 37 final inspected native states across four sizes.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#27 verified; #28 context-preserving Atlas navigation is next.** Latest check: 256 tests / 63 suites, strict lint and optimized build. Canvas: 17 tests, typecheck/build, 49 engine checks. #27 has 33 final inspected native states across three sizes.
+
+`RecordDrag.swift` shares process-local, bounded record addresses across Search, Favorites and Library. Both native editor targets preserve save guards; Canvas placement validates the captured board generation and waits for a save acknowledgment. Drop coordinates use live pan/zoom, existing card groups move without duplication, and model requests/canon are untouched. Keep the palette mounted while hidden during drag; only transient targets may intercept editor/WebKit input. Wider event/image/proposal transfer remains #35.
 
 `SplitWorkspace.swift` uses the shared native editor in both panes, never two views of the same record. Keep both save guards, separate editor handles and focus-sensitive ⌘W/inspector routing. A secondary record remains open when closing the primary. Short windows stack scrollable content and share one composer; narrow bars group utility actions. The secondary address is per-world, preferred width device-wide; layouts and Back/Forward include both. Canvas is still mounted once in the shell. Its exact-fit helper avoids engine floor rounding; short toolbars remain accessible. Capture fixtures clear prior split state so subsequent workspaces are not contaminated.
 
@@ -47,7 +49,7 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#25 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
+- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#27 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.

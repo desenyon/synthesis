@@ -1,0 +1,83 @@
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT PASS first-fit acknowledgement contains the committed viewport
+CANVAS_AUDIT PASS dark entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS dark engine selection handles use the same accent
+CANVAS_AUDIT PASS light entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS light engine selection handles use the same accent
+CANVAS_AUDIT PASS oled entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS oled engine selection handles use the same accent
+CANVAS_AUDIT PASS entity keyboard Escape clears selection
+CANVAS_AUDIT PASS entity keyboard selection is repeatable and selects its grouped content
+CANVAS_AUDIT PASS losing focus clears transient entity hover
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS record drop rejects foreign sessions and unknown records
+CANVAS_AUDIT PASS record drop rejects invalid viewport coordinates
+CANVAS_AUDIT PASS record drop reaches the live engine
+CANVAS_AUDIT PASS record drop uses current pan and zoom
+CANVAS_AUDIT PASS record drop preserves viewport and avoids duplicate cards
+CANVAS_AUDIT PASS record drop selects the complete card group
+CANVAS_AUDIT PASS record drop move is undoable
+CANVAS_AUDIT PASS new record drop creates a linked card
+CANVAS_AUDIT PASS new record drop can be undone
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS unacknowledged canvas save blocks shutdown
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+CANVAS_AUDIT PASS native record drop is acknowledged and saved
+CANVAS_AUDIT PASS native record drop survives a board reload without duplicates
+CANVAS_AUDIT PASS native record drop preserves source lore and canon state
+CAPTURE canvas 1440x900, bitmap 1440x900, 184ms
+CAPTURE drag-search 1440x900, bitmap 1440x900, 338ms
+CAPTURE light-drag-search 1440x900, bitmap 1440x900, 347ms
+CAPTURE drag-favorites 1440x900, bitmap 1440x900, 240ms
+CAPTURE drag-targets 1440x900, bitmap 1440x900, 164ms
+CAPTURE light-drag-targets 1440x900, bitmap 1440x900, 160ms
+CAPTURE manual-drag-targets 1440x900, bitmap 1440x900, 174ms
+CAPTURE drag-second-pane 1440x900, bitmap 1440x900, 122ms
+CAPTURE drag-opened 1440x900, bitmap 1440x900, 188ms
+CAPTURE light-drag-opened 1440x900, bitmap 1440x900, 195ms
+CAPTURE drag-canvas 1440x900, bitmap 1440x900, 91ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 124ms
+CAPTURE drag-search 1024x768, bitmap 1024x768, 229ms
+CAPTURE light-drag-search 1024x768, bitmap 1024x768, 224ms
+CAPTURE drag-favorites 1024x768, bitmap 1024x768, 160ms
+CAPTURE drag-targets 1024x768, bitmap 1024x768, 112ms
+CAPTURE light-drag-targets 1024x768, bitmap 1024x768, 115ms
+CAPTURE manual-drag-targets 1024x768, bitmap 1024x768, 117ms
+CAPTURE drag-second-pane 1024x768, bitmap 1024x768, 91ms
+CAPTURE drag-opened 1024x768, bitmap 1024x768, 125ms
+CAPTURE light-drag-opened 1024x768, bitmap 1024x768, 114ms
+CAPTURE drag-canvas 1024x768, bitmap 1024x768, 77ms
+CAPTURE canvas 720x800, bitmap 720x800, 92ms
+CAPTURE drag-search 720x800, bitmap 720x800, 192ms
+CAPTURE light-drag-search 720x800, bitmap 720x800, 192ms
+CAPTURE drag-favorites 720x800, bitmap 720x800, 140ms
+CAPTURE drag-targets 720x800, bitmap 720x800, 99ms
+CAPTURE light-drag-targets 720x800, bitmap 720x800, 95ms
+CAPTURE manual-drag-targets 720x800, bitmap 720x800, 102ms
+CAPTURE drag-second-pane 720x800, bitmap 720x800, 68ms
+CAPTURE drag-opened 720x800, bitmap 720x800, 115ms
+CAPTURE light-drag-opened 720x800, bitmap 720x800, 100ms
+CAPTURE drag-canvas 720x800, bitmap 720x800, 67ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-027/final

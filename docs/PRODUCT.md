@@ -35,3 +35,5 @@ An unwritten entity offers free writing, category-specific prompts, an optional 
 ## Connected reading and writing
 
 A record can remain open beside Atlas, Timeline, Graph, Canvas or another document. Both views reference the same saved universe, retain independent native editing state, and preserve explicit canon approval. Wide windows resize the second pane; narrow windows stack it. Navigation and closing respect both draft-save guards. See [Split workspace](SPLIT_WORKSPACE.md).
+
+Records can be dragged from world Search, Favorites and Library into either editor pane or onto a curated Canvas. A drop opens or positions the same underlying lore; it never creates a second canon claim. See [record drag](DRAG_RECORDS.md).

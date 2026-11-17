@@ -169,3 +169,7 @@ Validation: `LoreSearchTests`, `AdvancedSearchTests`, existing search/scale test
 ## 2026-11-17 — split panes and engine fitting
 
 Observed: short-pane captures collapsed the editor title and left a Canvas board at 10% despite unused space. Give the short writing surface its own scroll container; move shared composers outside both panes. Excalidraw 0.18.1 floors fit zoom in 10-percent steps. Supplying matching min/max zoom calculated from actual content and reserved toolbar bounds preserves its animation and persistence while using the available viewport. Node tests and 37 embedded-engine checks passed; the corrected captures show 20–22% in short panes without clipped tools. Closing a primary document must exclude the already-open secondary from fallback tab selection. No AGENTS.md change; rollback this feature as one slice without touching the world database.
+
+### 2026-11-17 — record drops across native and Canvas surfaces
+
+Background engine checks for expansion #27 confirmed that native drop points must be converted through the engine's live pan/zoom and guarded by its current load token, including after save acknowledgment. Native provider tests use process-local addresses rather than copying lore into the pasteboard. The first contact sheets showed a target/composer overlap in narrow layouts; retaining geometry while hiding the composer during the gesture fixed it in the 33-state final matrix. No AGENTS.md change; the shared drag helper and evidence document carry this bounded implementation detail.

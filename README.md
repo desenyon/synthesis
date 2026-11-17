@@ -81,6 +81,12 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 ![Mira Vale open in a native editor beside the Glass Sea atlas](docs/screenshots/split-workspace.png)
 
+**Move lore between workspaces**
+
+![Native drop targets for opening a real record in the current or a second pane](docs/screenshots/drag-records.png)
+
+Drag from Search, Favorites or Library; Canvas places a linked card at the pointer. [Usage](docs/DRAG_RECORDS.md).
+
 **Saved workspace layouts**
 
 ![Named Research, Writing, Cartography and Simulation arrangements in the native layout manager](docs/screenshots/layouts.png)

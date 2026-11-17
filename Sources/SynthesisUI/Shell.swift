@@ -131,6 +131,9 @@ public struct ConnectedRoot: View {
         }
         if studio.palette {
           CommandPalette(studio: studio).transition(.opacity)
+            .opacity(studio.recordDrag == nil ? 1 : 0)
+            .allowsHitTesting(studio.recordDrag == nil)
+            .animation(reduceMotion ? nil : Motion.feedbackAnimation, value: studio.recordDrag?.id)
         }
       }
       .coordinateSpace(name: "shell")
@@ -155,6 +158,7 @@ public struct ConnectedRoot: View {
     .environment(\.studioOpaqueMaterials, studio.captureHint.contains("opaque"))
     .ignoresSafeArea()
     .preferredColorScheme(studio.dark ? .dark : .light)
+    .onChange(of: studio.worldID) { _, _ in studio.endRecordDrag() }
     .studioSheet(item: $studio.sheet) { StudioSheet(studio: studio, sheet: $0).id($0) }
     .alert(
       "Something needs attention",
@@ -189,9 +193,9 @@ public struct ConnectedRoot: View {
               UnifiedComposer(studio: studio, companion: true, collapsed: true)
                 .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
                 .frame(maxWidth: .infinity).background(studio.t.background)
-                .opacity(studio.companionExpanded ? 0 : 1)
-                .allowsHitTesting(!studio.companionExpanded)
-                .accessibilityHidden(studio.companionExpanded)
+                .opacity(studio.companionExpanded || studio.recordDrag != nil ? 0 : 1)
+                .allowsHitTesting(!studio.companionExpanded && studio.recordDrag == nil)
+                .accessibilityHidden(studio.companionExpanded || studio.recordDrag != nil)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
           }
