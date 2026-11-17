@@ -15,3 +15,5 @@ This is not full session restoration (#33): the selected workspace/tab and nativ
 The sidebar, writing surface and inspector scroll independently; document tabs, title/format controls and workspace actions stay fixed. A rendered background audit verifies all three regions at standard and compact desktop sizes.
 
 Autosave distinguishes Unsaved (pending), Saving, Saved and Not saved. Saved revisions are searchable immediately; a failure keeps your writing open and offers Retry. A committed revision is not reported as unsaved if refreshing another view subsequently fails.
+
+Drag the navigation or inspector edge to resize it; double-click resets its width. Arrow keys work when the divider is focused. Settings → General provides equivalent width controls, including conversation panels. Widths persist locally and in saved workspace layouts. On narrow windows the inspector floats so writing controls remain readable; toggle it with the existing inspector button.

@@ -20,7 +20,6 @@ struct CuratedCanvas: View {
   @State private var boardName = ""
   @State private var pickerQuery = ""
   @State private var edgeLabel = ""
-  @State private var companionStart: Double?
   init(studio: Studio) {
     self.studio = studio
     session = studio.canvas()
@@ -42,9 +41,12 @@ struct CuratedCanvas: View {
         if takeover {
           ConversationStudio(studio: studio, companion: true, docked: false)
         } else if assistantDocked {
-          companionDivider
+          PanelResizeHandle(
+            studio: studio, panel: .companion,
+            displayedWidth: studio.companionDisplayWidth(available: geo.size.width),
+            maximum: max(320, geo.size.width - 520))
           ConversationStudio(studio: studio, companion: true)
-            .frame(width: geo.size.width < 1000 ? 320 : studio.companionWidth)
+            .frame(width: studio.companionDisplayWidth(available: geo.size.width))
             .transition(.move(edge: .trailing).combined(with: .opacity))
         }
       }
@@ -350,27 +352,6 @@ struct CuratedCanvas: View {
       }
     }
   }
-  /// A 9-point grab column with a hairline, so the divider is easy to hit and drag.
-  private var companionDivider: some View {
-    studio.t.background.frame(width: 9).frame(maxHeight: .infinity)
-      .overlay(Rectangle().fill(studio.t.hairline).frame(width: 1))
-      .contentShape(Rectangle())
-      .onHover { if $0 { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() } }
-      .gesture(
-        DragGesture(minimumDistance: 1, coordinateSpace: .global).onChanged { value in
-          if companionStart == nil { companionStart = studio.companionWidth }
-          studio.companionWidth = max(
-            320, min(460, (companionStart ?? 400) - value.translation.width))
-        }.onEnded { _ in
-          companionStart = nil
-          studio.perform {
-            try studio.store.setPreference("companion-width", value: String(studio.companionWidth))
-          }
-        }
-      )
-      .help("Drag to resize the companion").accessibilityLabel("Resize companion")
-  }
-
   // MARK: Sheets
 
   private func closePanel() { panel = nil }

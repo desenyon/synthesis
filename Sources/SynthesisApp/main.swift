@@ -568,6 +568,14 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
           guard Int(content.bounds.width) == width, Int(content.bounds.height) == height else {
             throw SynthesisError.invalid("Capture viewport mismatch: \(content.bounds.size)")
           }
+          if state == "panels-default" || state == "panels-companion-wide" {
+            for line in try await auditPanelSizes(
+              in: content, studio: studio,
+              companion: state == "panels-companion-wide")
+            {
+              print("PANEL_AUDIT \(width)x\(height) \(line)")
+            }
+          }
           if state.contains("scroll-regions") {
             let target = state.components(separatedBy: "-").last ?? ""
             for line in try await auditScrollRegions(in: content, showing: target) {

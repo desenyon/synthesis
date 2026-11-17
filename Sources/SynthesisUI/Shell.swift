@@ -13,7 +13,7 @@ public struct ConnectedRoot: View {
     GeometryReader { geo in
       let compact = geo.size.width < 760
       let rail = studio.collapsed
-      let column: CGFloat = compact ? 0 : (rail ? Metric.rail : Metric.sidebar)
+      let column: CGFloat = compact ? 0 : (rail ? Metric.rail : studio.sidebarWidth)
       let dockInspector = studio.dockedInspectorWidth(windowWidth: geo.size.width) > 0
       ZStack(alignment: .topLeading) {
         studio.t.sidebar.ignoresSafeArea()
@@ -36,7 +36,12 @@ public struct ConnectedRoot: View {
                 NavigationGlass(
                   theme: studio.t, forceOpaque: studio.captureHint.hasSuffix("sidebar-opaque"))
               }
-
+              .overlay(alignment: .trailing) {
+                if !rail {
+                  PanelResizeHandle(studio: studio, panel: .sidebar, divider: false).padding(
+                    .top, Metric.bar)
+                }
+              }
           }
           HStack(spacing: 0) {
             workspace.id("\(studio.worldID)#\(studio.captureNonce)")
@@ -58,22 +63,32 @@ public struct ConnectedRoot: View {
               .animation(
                 reduceMotion ? nil : Motion.panelAnimation, value: studio.companionExpanded)
             if dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
-              Rectangle().fill(studio.t.hairline).frame(width: 1)
               ObjectInspector(studio: studio)
-                .frame(width: 300)
+                .frame(width: studio.inspectorWidth)
+                .overlay(alignment: .leading) {
+                  PanelResizeHandle(studio: studio, panel: .inspector)
+                }
                 .transition(Motion.panelTransition)
             }
           }.overlay(alignment: .trailing) {
             if !dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
-              ObjectInspector(studio: studio).frame(width: 300)
-                .clipShape(RoundedRectangle(cornerRadius: Metric.floatingRadius))
-                .overlay(
-                  RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
-                    studio.t.hairline, lineWidth: 1)
-                )
-                .shadow(color: studio.t.shadow, radius: 12, x: -4, y: 4)
-                .padding(.top, Metric.bar + 10).padding([.trailing, .bottom], 12)
-                .transition(Motion.panelTransition)
+              ObjectInspector(studio: studio).frame(
+                width: min(studio.inspectorWidth, geo.size.width - column - 28)
+              )
+              .overlay(alignment: .leading) {
+                PanelResizeHandle(
+                  studio: studio, panel: .inspector,
+                  displayedWidth: min(studio.inspectorWidth, geo.size.width - column - 28),
+                  maximum: geo.size.width - column - 28, divider: false)
+              }
+              .clipShape(RoundedRectangle(cornerRadius: Metric.floatingRadius))
+              .overlay(
+                RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
+                  studio.t.hairline, lineWidth: 1)
+              )
+              .shadow(color: studio.t.shadow, radius: 12, x: -4, y: 4)
+              .padding(.top, Metric.bar + 10).padding([.trailing, .bottom], 12)
+              .transition(Motion.panelTransition)
             }
           }.animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.workspaceInspector)
 

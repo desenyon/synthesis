@@ -12,6 +12,8 @@ struct WorkspaceArrangement: Codable, Equatable {
   var inspectionTarget: InspectionTarget?
   var companion: Bool
   var companionWidth: Double
+  var sidebarWidth: Double?
+  var inspectorWidth: Double?
   var density: InformationDensity
   var readingWidth: Int
   var entityTab: RecordPageTab
@@ -35,6 +37,7 @@ extension Studio {
       location: navigationLocation, collapsed: collapsed, inspector: inspector,
       workspaceInspector: workspaceInspector, inspectionTarget: inspectionTarget,
       companion: companionExpanded, companionWidth: companionWidth,
+      sidebarWidth: sidebarWidth, inspectorWidth: inspectorWidth,
       density: preferences.density, readingWidth: preferences.readingWidth,
       entityTab: selectedRecord.flatMap { recordTabs[$0.id] } ?? .overview)
   }
@@ -169,8 +172,13 @@ extension Studio {
           inspectionTarget = nil
         }
         companionExpanded = mode == .assisted && arrangement.companion
-        companionWidth =
-          arrangement.companionWidth.isFinite ? min(460, max(320, arrangement.companionWidth)) : 400
+        setPanelWidth(.companion, to: arrangement.companionWidth, persist: false)
+        if let width = arrangement.sidebarWidth {
+          setPanelWidth(.sidebar, to: width, persist: false)
+        }
+        if let width = arrangement.inspectorWidth {
+          setPanelWidth(.inspector, to: width, persist: false)
+        }
         if let record = selectedRecord { recordTabs[record.id] = arrangement.entityTab }
         var nextPreferences = preferences
         nextPreferences.density = arrangement.density
@@ -181,6 +189,8 @@ extension Studio {
           "inspector": inspector ? "shown" : "hidden",
           "workspace-inspector": workspaceInspector ? "shown" : "hidden",
           "companion-width": String(companionWidth),
+          "sidebar-width": String(sidebarWidth),
+          "inspector-width": String(inspectorWidth),
           "studio-preferences": String(
             decoding: JSONEncoder().encode(nextPreferences), as: UTF8.self),
         ])

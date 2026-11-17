@@ -186,6 +186,8 @@ public struct Toast: Identifiable {
   }
   @Published public var companionExpanded = false
   @Published public var companionWidth = 400.0
+  @Published var sidebarWidth = Double(Metric.sidebar)
+  @Published var inspectorWidth = 300.0
   @Published public var libraryCategory: String?
   @Published public var newRecordKind = "lore"
   @Published public var inspector = true
@@ -211,11 +213,12 @@ public struct Toast: Identifiable {
   }
   public var world: World? { worlds.first { $0.id == worldID } }
   func dockedInspectorWidth(windowWidth: Double) -> Double {
-    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Metric.rail : Metric.sidebar)
-    return workspaceInspector && selectedRecord == nil && windowWidth - sidebar >= 980 ? 300 : 0
+    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Double(Metric.rail) : sidebarWidth)
+    return workspaceInspector && selectedRecord == nil
+      && windowWidth - sidebar - inspectorWidth >= 640 ? inspectorWidth : 0
   }
   public func canvasVisible(windowWidth: Double) -> Bool {
-    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Metric.rail : Metric.sidebar)
+    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Double(Metric.rail) : sidebarWidth)
     let contentWidth = windowWidth - sidebar - dockedInspectorWidth(windowWidth: windowWidth)
     let takeover = mode == .assisted && companionExpanded && contentWidth < 860
     return destination == .canvas && selectedRecord == nil && !takeover
@@ -300,9 +303,7 @@ public struct Toast: Identifiable {
     mode = WorkspaceMode(rawValue: try store.preference("mode") ?? "assisted") ?? .assisted
     dark = try store.preference("theme") != "light"
     collapsed = try store.preference("sidebar") == "collapsed"
-    if let saved = try store.preference("companion-width").flatMap(Double.init), saved.isFinite {
-      companionWidth = min(460, max(320, saved))
-    }
+    try restorePanelWidths()
     inspector = try store.preference("inspector") != "hidden"
     workspaceInspector = try store.preference("workspace-inspector") == "shown"
     let savedDestination = try store.preference("destination").flatMap(Destination.init(rawValue:))

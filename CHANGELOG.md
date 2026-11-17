@@ -16,6 +16,8 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 
 ### Added
+
+- Expansion #19: persisted resizable navigation, inspectors and conversation panels, with native splitters, keyboard/accessibility adjustment, Settings controls and saved-layout support. Narrow editors float the inspector to preserve writing space.
 - Expansion #18: accurate autosave/search feedback, named review progress and partial-failure counts, visible AI failures and elapsed hypothetical generation. World changes stop unapplied review decisions.
 - Expansion #16: per-world document tabs, pins, recent reopening and keyboard cycling. Tab/workspace changes retain native caret, scroll, formatting and independent undo; failed saves keep the current document open.
 - Expansion #15: graph semantic zoom from compact titles through summaries to stored artwork and relationship labels. Ports follow visible cards; offscreen culling and bounded thumbnails avoid repeated image decoding.

@@ -4,7 +4,6 @@ import SwiftUI
 struct FloatingCompanion: View {
   @ObservedObject var studio: Studio
   var available: CGSize
-  @State private var dragStart: Double?
   var body: some View {
     ConversationStudio(studio: studio, companion: true)
       .environment(\.barInset, 0)
@@ -16,20 +15,10 @@ struct FloatingCompanion: View {
       .overlay(RoundedRectangle(cornerRadius: 18).stroke(studio.t.border, lineWidth: 1))
       .elevation(.companion, t: studio.t)
       .overlay(alignment: .leading) {
-        Color.clear.frame(width: 10).contentShape(Rectangle())
-          .gesture(
-            DragGesture(minimumDistance: 2).onChanged { value in
-              if dragStart == nil { dragStart = studio.companionWidth }
-              studio.companionWidth = min(
-                460, max(320, (dragStart ?? 400) - value.translation.width))
-            }.onEnded { _ in
-              dragStart = nil
-              studio.perform {
-                try studio.store.setPreference(
-                  "companion-width", value: String(studio.companionWidth))
-              }
-            }
-          ).help("Drag to resize the conversation")
+        PanelResizeHandle(
+          studio: studio, panel: .companion,
+          displayedWidth: min(max(300, available.width - 28), studio.companionWidth),
+          maximum: max(320, available.width - 28), divider: false)
       }
   }
 }

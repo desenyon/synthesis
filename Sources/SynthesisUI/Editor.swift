@@ -112,17 +112,27 @@ struct EditorScreen: View {
           } else {
             writing.frame(maxWidth: .infinity, maxHeight: .infinity)
           }
-          if studio.inspector {
-            Rectangle().fill(studio.t.hairline).frame(width: 1)
-            RecordInspector(
-              studio: studio, record: record, flush: { save() },
-              updated: { record = $0 }, review: { if save() { panel = .canon } },
-              history: openHistory,
-              editRule: { rule in
-                editingRule = rule
-                ruleSheet = true
+          if studio.inspector && studio.editorInspectorDocked(available: geo.size.width) {
+            inspectorPanel.frame(width: studio.inspectorDisplayWidth(available: geo.size.width))
+              .overlay(alignment: .leading) {
+                PanelResizeHandle(
+                  studio: studio, panel: .inspector,
+                  displayedWidth: studio.inspectorDisplayWidth(available: geo.size.width),
+                  maximum: max(260, geo.size.width * 0.42))
               }
-            ).frame(width: min(300, geo.size.width * 0.42))
+              .transition(Motion.panelTransition)
+          }
+        }.overlay(alignment: .trailing) {
+          if studio.inspector && !studio.editorInspectorDocked(available: geo.size.width) {
+            inspectorPanel.frame(width: min(studio.inspectorWidth, geo.size.width - 24))
+              .overlay(alignment: .leading) {
+                PanelResizeHandle(
+                  studio: studio, panel: .inspector,
+                  displayedWidth: min(studio.inspectorWidth, geo.size.width - 24),
+                  maximum: geo.size.width - 24, divider: false)
+              }
+              .floatingPanel(studio.t)
+              .padding(12)
               .transition(Motion.panelTransition)
           }
         }
@@ -175,6 +185,16 @@ struct EditorScreen: View {
       case .canon: canonSheet
       }
     }
+  }
+
+  private var inspectorPanel: some View {
+    RecordInspector(
+      studio: studio, record: record, flush: { save() },
+      updated: { record = $0 }, review: { if save() { panel = .canon } }, history: openHistory,
+      editRule: { rule in
+        editingRule = rule
+        ruleSheet = true
+      })
   }
 
   // MARK: Bar
@@ -334,6 +354,7 @@ struct EditorScreen: View {
           if studio.preferences.wordCount {
             Text("\(bodyText.split { $0.isWhitespace || $0.isNewline }.count) words")
               .font(.studio(.caption)).monospacedDigit().foregroundStyle(studio.t.muted)
+              .lineLimit(1)
           }
         }.padding(.top, 14).padding(.bottom, 8)
           .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }

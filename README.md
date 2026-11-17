@@ -40,7 +40,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 | **Atlas**: named maps linked to places, with markers and drawn regions you can reshape. | **Review**: proposals, canon decisions and local consistency checks in one place, including changes sent back from what-if worlds. |
 | ![Atlas map with a selected region](docs/screenshots/atlas.png) | ![Review with consistency checks](docs/screenshots/review-checks.png) |
 
-**Also:** a world dashboard with project outlines · saved workspace layouts (⌥⌘L) · reversible navigation history · optional contextual inspectors · adjustable information density · portable entity artwork · what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a ⌘K command palette · Finder integration for `.synthesis` files.
+**Also:** a world dashboard with project outlines · saved workspace layouts (⌥⌘L) · reversible navigation history · resizable navigation, inspectors and conversation panels · adjustable information density · portable entity artwork · what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a ⌘K command palette · Finder integration for `.synthesis` files.
 
 <details>
 <summary>More screenshots</summary>

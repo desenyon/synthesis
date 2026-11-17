@@ -99,7 +99,7 @@ struct Sidebar: View {
       footer
     }
     .padding(.horizontal, SidebarMetric.inset)
-    .frame(width: collapsed ? Metric.rail : Metric.sidebar).frame(maxHeight: .infinity)
+    .frame(width: collapsed ? Metric.rail : studio.sidebarWidth).frame(maxHeight: .infinity)
     .accessibilityElement(children: .contain).accessibilityLabel("Navigation")
   }
 

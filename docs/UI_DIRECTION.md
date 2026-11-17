@@ -5,7 +5,7 @@ The accepted graphite foundation, applied as one system. Tokens live in `Theme.s
 ## Shell
 
 - Native titled window, content under a transparent title bar. Traffic lights centred in a 56-point integrated header; no separate OS title bar.
-- Navigation: 284-point labelled panel or 72-point rail with tooltips. World switcher at the top, seven workspaces (Review shows a count when something waits), category lenses with counts, recent conversations, Settings.
+- Navigation: default 284-point labelled panel (resizable 240–360) or 72-point rail with tooltips. World switcher at the top, seven workspaces (Review shows a count when something waits), category lenses with counts, recent conversations, Settings.
 - Every workspace begins with `WorkspaceBar`: icon and title on the left, workspace actions, then the persistent AI Assisted / Manual switch and search. Titles truncate; when the full bar does not fit, labelled actions become icons.
 - ⌘K opens the command palette. Removal shows a toast with Undo.
 
@@ -19,10 +19,10 @@ The accepted graphite foundation, applied as one system. Tokens live in `Theme.s
 ## Workspaces
 
 - Conversation: 720-point reading column, bottom composer, explicit provider disclosure. Assistant output is labelled "Suggestion · not canon".
-- Canvas: saved board on the Excalidraw engine, themed with the graphite tokens. 300-point record cards (category, 20-point title, 14-point text, state line) in the application palette; relationship arrows in the accent colour. Empty boards stay empty. The engine's toolbar sits top-centre; the compact composer floats bottom-centre; the companion docks at 320–460 points or takes over below 860.
+- Canvas: saved board on the Excalidraw engine, themed with the graphite tokens. 300-point record cards (category, 20-point title, 14-point text, state line) in the application palette; relationship arrows in the accent colour. Empty boards stay empty. Synthesis toolbars dock at the edges; the compact composer floats bottom-centre; the companion resizes from 320–600 points while reserving working space, or takes over below 860.
 - Graph: derived from stored relationships, never saved. Layout is deterministic and shaped to the window.
 - Library, Timeline, Atlas: lists and cards use the same tiles, badges and empty states.
-- Editor: writing column up to 780 points with a 300-point details inspector. Canon review is a diff.
+- Editor: writing column up to 780 points with a resizable 260–480-point details inspector (300 by default). The inspector floats when docking would leave less than 480 points for writing. Canon review is a diff.
 
 ## Behaviour
 

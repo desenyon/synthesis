@@ -12,7 +12,7 @@ Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bun
 
 `Theme.swift` holds colour/state/stroke tokens for graphite, OLED and light, shared `Metric`, `Space`, `Elevation`, motion values and vocabulary. `Typography.swift` supplies semantic `TextRole` roles over bundled Inter; controls, page headings, card titles, captions and section labels use the shared scale. `Components.swift` holds the pieces every screen uses: `WorkspaceBar` (context, actions, the persistent `ModeSwitch`, search), `BarTitle`, `BarAction`, `QuietButton`, `IconButton`, `PlainMenu`, `FilterChip`, `SearchField`, `FormField`, `StateBadge`, `CategoryTile`, `EmptyState`, `SheetScaffold`, `ZoomControls` and the floating-panel surface. `WorkspaceBar` uses `ViewThatFits` to collapse labelled actions to icons when space is short.
 
-The sidebar uses `SidebarPalette` and `SidebarMetric` in Theme, with `SidebarControlStyle` and `NavigationGlass` in Components. Its 284pt expanded surface (72pt rail) has fixed identity/actions and utilities around one scrolling navigation/history region. Native vibrancy has an explicit appearance and an opaque accessibility fallback. Studio's destinations, category lenses and conversation actions are unchanged.
+The sidebar uses `SidebarPalette` and `SidebarMetric` in Theme, with `SidebarControlStyle` and `NavigationGlass` in Components. Its default 284pt expanded surface (adjustable 240–360pt; 72pt rail) has fixed identity/actions and utilities around one scrolling navigation/history region. Native vibrancy has an explicit appearance and an opaque accessibility fallback. Studio's destinations, category lenses and conversation actions are unchanged.
 
 `FrostedSurface` applies an in-window `NSVisualEffectView` only to floating tools, inspectors, menus and composers. Explicit theme appearance and a lightly tinted fill keep text readable; Reduce Transparency and Increase Contrast use an opaque surface. Menus inherit the active Theme, including OLED, from the root environment. Canvas only receives a theme bridge update when the resolved palette changes.
 
@@ -160,7 +160,7 @@ Migration 0014 adds world-scoped `record_artwork` revisions with an active-image
 
 ### Contextual inspection
 
-`ObjectInspection.swift` builds read-only, active-world projections for records, events, chronology lanes, maps, canvas boards, relationships, conversations, proposals and world identity. `ObjectInspector` follows current selection or an explicitly inspected reference without navigating the main view. Visibility persists; a 300pt dock becomes a dismissible overlay below the toolbar in narrow windows. Native frosted backing prevents the persistent WKWebView from drawing through the floating inspector. The editor retains its existing editable inspector, also available in Mechanics. Inspection never submits a model request or accepts a proposal.
+`ObjectInspection.swift` builds read-only, active-world projections for records, events, chronology lanes, maps, canvas boards, relationships, conversations, proposals and world identity. `ObjectInspector` follows current selection or an explicitly inspected reference without navigating the main view. Visibility and preferred width persist; the default 300pt dock (260–480pt) becomes a dismissible overlay below the toolbar in narrow windows. Native frosted backing prevents the persistent WKWebView from drawing through the floating inspector. The editor retains its existing editable inspector, also available in Mechanics. Inspection never submits a model request or accepts a proposal.
 
 ### Navigation history
 
@@ -175,3 +175,7 @@ Migration 0014 adds world-scoped `record_artwork` revisions with an active-image
 `Dashboard.swift` combines current Studio records/proposals with a bounded world-scoped `recentWorldActivity` query across saved records, maps/boards, relationships, chronology and proposal decisions. Activity shows the latest state per object, not a full append-only audit log. Navigation resolves actual source objects through existing save guards. The optional Dashboard destination has no model calls and can be selected as startup in Settings. Existing ⌘1–9 destinations retain their shortcuts.
 
 Project outlines are ordinary entity records with category `Projects`: draft/canon rules, revisions, archive, sections, relationships and portable exports already apply. This is the project entry point for #13; it does not claim the later multi-book/script project engine (#313).
+
+## Resizable panels — expansion #19
+
+`PanelSizing.swift` centralizes panel bounds and preference updates. `PanelDividerView` supplies AppKit pointer tracking, keyboard actions and an accessibility splitter inside a fixed nine-point hit region. Dragging changes published dimensions; release/focus loss commits once. Window constraints affect presentation only. The editor docks only when at least 480pt remains for writing. Saved layouts add optional sidebar/inspector dimensions for backward compatibility; companion width retains its existing key. `PanelSizingAudit` verifies rendered frames and native accessibility actions without activating the test window.

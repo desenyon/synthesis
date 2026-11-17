@@ -1,0 +1,3 @@
+CAPTURE panels-wide 720x800, bitmap 720x800, 106ms
+CAPTURE panels-canvas-companion 720x800, bitmap 720x800, 98ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-019/narrow

@@ -1,0 +1,37 @@
+PANEL_AUDIT 1440x900 PASS Navigation width: narrow hit area, native increment/decrement and persistence without activation
+PANEL_AUDIT 1440x900 PASS Inspector width: narrow hit area, native increment/decrement and persistence without activation
+CAPTURE panels-default 1440x900, bitmap 1440x900, 115ms
+CAPTURE panels-narrow 1440x900, bitmap 1440x900, 119ms
+CAPTURE panels-wide 1440x900, bitmap 1440x900, 129ms
+CAPTURE light-panels-wide 1440x900, bitmap 1440x900, 146ms
+CAPTURE manual-panels-wide 1440x900, bitmap 1440x900, 56ms
+CAPTURE panels-collapsed 1440x900, bitmap 1440x900, 133ms
+CAPTURE panels-inspector-wide 1440x900, bitmap 1440x900, 380ms
+PANEL_AUDIT 1440x900 PASS Navigation width: narrow hit area, native increment/decrement and persistence without activation
+PANEL_AUDIT 1440x900 PASS Conversation width: narrow hit area, native increment/decrement and persistence without activation
+CAPTURE panels-companion-wide 1440x900, bitmap 1440x900, 348ms
+CAPTURE panels-canvas-companion 1440x900, bitmap 1440x900, 151ms
+CAPTURE panels-settings 1440x900, bitmap 1440x900, 75ms
+SCROLL_AUDIT 1440x900 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1440x900 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions-document 1440x900, bitmap 1440x900, 133ms
+PANEL_AUDIT 1024x768 PASS Navigation width: narrow hit area, native increment/decrement and persistence without activation
+PANEL_AUDIT 1024x768 PASS Inspector width: narrow hit area, native increment/decrement and persistence without activation
+CAPTURE panels-default 1024x768, bitmap 1024x768, 100ms
+CAPTURE panels-narrow 1024x768, bitmap 1024x768, 112ms
+CAPTURE panels-wide 1024x768, bitmap 1024x768, 89ms
+CAPTURE light-panels-wide 1024x768, bitmap 1024x768, 114ms
+CAPTURE manual-panels-wide 1024x768, bitmap 1024x768, 60ms
+CAPTURE panels-collapsed 1024x768, bitmap 1024x768, 101ms
+CAPTURE panels-inspector-wide 1024x768, bitmap 1024x768, 245ms
+PANEL_AUDIT 1024x768 PASS Navigation width: narrow hit area, native increment/decrement and persistence without activation
+PANEL_AUDIT 1024x768 PASS Conversation width: narrow hit area, native increment/decrement and persistence without activation
+CAPTURE panels-companion-wide 1024x768, bitmap 1024x768, 228ms
+CAPTURE panels-canvas-companion 1024x768, bitmap 1024x768, 116ms
+CAPTURE panels-settings 1024x768, bitmap 1024x768, 69ms
+SCROLL_AUDIT 1024x768 PASS sidebar scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS document scrolls independently without moving workspace frames
+SCROLL_AUDIT 1024x768 PASS inspector scrolls independently without moving workspace frames
+CAPTURE scroll-regions-document 1024x768, bitmap 1024x768, 98ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-019/final

@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "panels-default", "panels-narrow", "panels-wide", "light-panels-wide", "manual-panels-wide",
+    "panels-collapsed", "panels-inspector-wide", "panels-companion-wide", "panels-canvas-companion",
+    "panels-settings",
     "status-save-waiting", "status-save-running", "status-save-failed", "light-status-save-failed",
     "status-review-running", "status-review-failed", "light-status-review-complete",
     "status-simulate", "light-status-simulate", "status-agent-failed",
@@ -271,6 +274,27 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("panels-") {
+      let base =
+        state == "panels-inspector-wide"
+        ? "inspector-graph"
+        : state == "panels-companion-wide"
+          ? "graph-companion"
+          : state == "panels-canvas-companion"
+            ? "companion"
+            : state == "panels-settings" ? "settings" : "editor"
+      configureConnectedCapture(base, board: board, conversation: conversation)
+      sidebarWidth =
+        state == "panels-narrow" || state == "panels-canvas-companion"
+        ? 240 : (state.contains("wide") ? 360 : Double(Metric.sidebar))
+      inspectorWidth = state == "panels-narrow" ? 260 : (state.contains("wide") ? 480 : 300)
+      companionWidth = state.contains("companion") ? 600 : 400
+      collapsed = state == "panels-collapsed"
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      dark = !state.hasPrefix("light-")
+      captureHint = state
+      return
+    }
     if state.contains("status-save") {
       configureConnectedCapture("editor", board: board, conversation: conversation)
       dark = !state.hasPrefix("light-")
@@ -667,6 +691,8 @@ extension Studio {
     canvasBoardID = board.isEmpty ? nil : board
     companionExpanded = state.hasSuffix("-companion") || state == "companion"
     companionWidth = 400
+    sidebarWidth = Double(Metric.sidebar)
+    inspectorWidth = 300
     draft = ""
     preset = "Create"
     updateContext { $0 = AssistantContextOptions() }

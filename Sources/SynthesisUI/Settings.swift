@@ -196,6 +196,9 @@ struct SettingsScreen: View {
             })
         ).labelsHidden().toggleStyle(.switch).controlSize(.small).tint(t.accent)
       }
+    case .navigationWidth: row(item) { PanelWidthControl(studio: studio, panel: .sidebar) }
+    case .inspectorWidth: row(item) { PanelWidthControl(studio: studio, panel: .inspector) }
+    case .companionWidth: row(item) { PanelWidthControl(studio: studio, panel: .companion) }
     case .counts: toggle(item, \.sidebarCounts)
     case .previews: toggle(item, \.libraryPreviews)
     case .recents:

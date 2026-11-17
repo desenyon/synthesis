@@ -1,0 +1,7 @@
+PANEL_AUDIT 1440x900 PASS Navigation width responds to native increment/decrement and persists without activation
+PANEL_AUDIT 1440x900 PASS Inspector width responds to native increment/decrement and persists without activation
+CAPTURE panels-default 1440x900, bitmap 1440x900, 139ms
+PANEL_AUDIT 1440x900 PASS Navigation width responds to native increment/decrement and persists without activation
+PANEL_AUDIT 1440x900 PASS Conversation width responds to native increment/decrement and persists without activation
+CAPTURE panels-companion-wide 1440x900, bitmap 1440x900, 353ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-019/probe

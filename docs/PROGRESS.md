@@ -380,3 +380,9 @@ Confirmed the existing three native scroll regions against long actual records, 
 ### Expansion #18 — operation feedback (2026-11-17)
 
 Replaced ambiguous save labels with typed pending/running/committed/failure states and Retry. Search indexing remains part of the successful save transaction. Added named review progress with real commit counts, partial failure and world-switch cancellation; no canon privilege changes. Failed AI activity no longer collapses into a success label, elapsed waiting is visible, and Simulate states that outcomes are hypothetical. Final check passed strict lint, 210 tests / 53 suites and optimized build. All 20 final captures inspected at two sizes; review fixtures reflect actual commits/stale failure. No provider requests or foreground events. Evidence: `docs/verification/expansion-018`; #19 next.
+
+### Expansion #19 — resizable panels (2026-11-17)
+
+Added native nine-point splitters to navigation, record/workspace inspectors and docked/floating chat. Drag, double-click reset, focused arrow keys, accessibility actions and Settings controls share persisted bounds. Saved layouts retain widths; old layouts remain readable. A visual iteration changed narrow editors to float the inspector rather than squeeze writing controls. Defaults and independent scrolling are preserved.
+
+Final `./scripts/check.sh`: strict lint, 215 tests / 54 suites and optimized build. Five meaningful panel tests; eight background rendered accessibility/hit-area assertions and six independent-scroll assertions. Inspected all 24 final captures at 1440×900, 1024×768 and 720×800, with earlier sheets retained as iteration evidence. No physical pointer/VoiceOver/animation claim, model call, release or owner-app restart. [Evidence](verification/expansion-019/README.md). #20 next.

@@ -1,0 +1,29 @@
+PANEL_AUDIT 1440x900 PASS Navigation width: narrow hit area, native increment/decrement and persistence without activation
+PANEL_AUDIT 1440x900 PASS Inspector width: narrow hit area, native increment/decrement and persistence without activation
+CAPTURE panels-default 1440x900, bitmap 1440x900, 139ms
+CAPTURE panels-narrow 1440x900, bitmap 1440x900, 136ms
+CAPTURE panels-wide 1440x900, bitmap 1440x900, 137ms
+CAPTURE light-panels-wide 1440x900, bitmap 1440x900, 131ms
+CAPTURE manual-panels-wide 1440x900, bitmap 1440x900, 59ms
+CAPTURE panels-collapsed 1440x900, bitmap 1440x900, 114ms
+CAPTURE panels-inspector-wide 1440x900, bitmap 1440x900, 365ms
+PANEL_AUDIT 1440x900 PASS Navigation width: narrow hit area, native increment/decrement and persistence without activation
+PANEL_AUDIT 1440x900 PASS Conversation width: narrow hit area, native increment/decrement and persistence without activation
+CAPTURE panels-companion-wide 1440x900, bitmap 1440x900, 348ms
+CAPTURE panels-canvas-companion 1440x900, bitmap 1440x900, 151ms
+CAPTURE panels-settings 1440x900, bitmap 1440x900, 74ms
+PANEL_AUDIT 1024x768 PASS Navigation width: narrow hit area, native increment/decrement and persistence without activation
+PANEL_AUDIT 1024x768 PASS Inspector width: narrow hit area, native increment/decrement and persistence without activation
+CAPTURE panels-default 1024x768, bitmap 1024x768, 121ms
+CAPTURE panels-narrow 1024x768, bitmap 1024x768, 108ms
+CAPTURE panels-wide 1024x768, bitmap 1024x768, 133ms
+CAPTURE light-panels-wide 1024x768, bitmap 1024x768, 128ms
+CAPTURE manual-panels-wide 1024x768, bitmap 1024x768, 77ms
+CAPTURE panels-collapsed 1024x768, bitmap 1024x768, 103ms
+CAPTURE panels-inspector-wide 1024x768, bitmap 1024x768, 163ms
+PANEL_AUDIT 1024x768 PASS Navigation width: narrow hit area, native increment/decrement and persistence without activation
+PANEL_AUDIT 1024x768 PASS Conversation width: narrow hit area, native increment/decrement and persistence without activation
+CAPTURE panels-companion-wide 1024x768, bitmap 1024x768, 166ms
+CAPTURE panels-canvas-companion 1024x768, bitmap 1024x768, 117ms
+CAPTURE panels-settings 1024x768, bitmap 1024x768, 61ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-019/refined
