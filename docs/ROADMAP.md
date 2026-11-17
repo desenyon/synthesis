@@ -11,6 +11,8 @@
 
 ## Active — connected studio audit and UI overhaul
 
+- 2026-11-16 completion pass (no release): what-if branches with reviewed merge-back, technique trees, Atlas regions, Timeline zoom/era view and reordering, crash recovery, file association, extended checks, scale measurements, explicit Codex image generation (live run pending approval), live A2 check. Evidence: STATE and PROGRESS. Next: owner-approved live image request, VoiceOver walkthrough, three-way merge, drag reorder, agent proposals for prerequisites/regions.
+
 - 0.0.2: reviewed existing workspace edits, current selection/branch context, conversation recovery, floating companions, collapsible chronology and stable Canvas reload. 140 native/11 Canvas tests, 28 engine checks and 48 source/16 packaged-app captures; one approved isolated Codex request passed. Physical gesture/animation/VoiceOver verification remains open. See INTERACTION_COMPLETION.md.
 
 - 0.0.1 prerelease: narrower sidebar, stable graph zoom, record-owned Canvas links, nested chronology approval, Atlas selection refresh and world/workspace-scoped harness context. Acceptance evidence and remaining limits are in STATE. Next: an isolated foreground gesture/animation walkthrough, opted-in live subscription checks, and signed/notarized distribution before broader release.
@@ -35,14 +37,14 @@ Owner-directed native sidebar refinement preserves the existing routes and state
 
 1. Exercise the live provider path in a controlled test session; request explicit approval before paid calls: streaming, stop, errors, and whether the model follows the proposal contract. Adjust the prompt from what is observed.
 2. ~~Review inbox and local consistency check~~ — done 2026-11-12 as the Review workspace.
-3. Extend the local check: contradictory relationships, timeline ordering conflicts, and tags that differ only by spelling.
+3. ~~Extend the local check: contradictory relationships, timeline ordering conflicts, and tags that differ only by spelling.~~ Done 2026-11-16.
 
 ## Next — M4 creative tools
 
 - Power-system depth beyond Mechanics: spatial technique trees and richer linked progression; structural considerations are not semantic conflict detection.
-- Hypothetical branches: explore a what-if without touching the main line, then discard or merge through review.
+- ~~Hypothetical branches: explore a what-if without touching the main line, then merge through review.~~ Done 2026-11-16 (two-way; three-way text merge open).
 - Canvas depth (resize, snapping, named groups); Timeline reordering and canon state for events; richer Atlas layers and draggable markers; named map hierarchy and click-to-move markers are implemented.
-- Measured large-board and large-graph pass; accessibility walk-through; crash recovery for unsaved text.
+- Measured large-world pass and crash recovery done 2026-11-16; VoiceOver walk-through and in-WebKit dense-board rendering remain.
 
 Owner-authorized development prereleases begin at 0.0.1. The public product launch remains 1.0; no public deployment is implied.
 

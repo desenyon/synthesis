@@ -266,3 +266,7 @@ Checks: 3 stand-in tests (arguments, prompt, environment allowlist and CODEX_HOM
 ### Slice 11 — live window verification and two fixes (verified)
 
 `./scripts/selftest-ui.sh` (real pointer and key events, foreground for a few seconds) passed **19/19**, including the New record sheet presented as a true modal and dismissed with Escape, closing D2's remaining gap. Audit A2 is now live-verified in an isolated instance (see `verification/audit-A2-live`). The live run exposed two bugs, both fixed: Return in the welcome sheet's name field did nothing, and the command palette put "Capture … as an idea" above matching commands, so "light appearance" + Return created an idea instead of switching theme. New `CommandPaletteRankingTests`; `./scripts/check.sh` passed with **158 tests / 40 suites**; the repeated live run switched theme and created no record.
+
+### Accessibility sweep (verified, limited)
+
+An Accessibility-tree script walked an isolated instance with the sample world across all nine workspaces (⌘1–⌘9) and an open record with its inspector: 33–69 interactive controls per screen, none without a title, description, help or value apart from the system minimise/zoom buttons. This checks labels, not VoiceOver reading order or usability; a VoiceOver walkthrough remains open. Canvas's WebKit content was not traversed in depth.

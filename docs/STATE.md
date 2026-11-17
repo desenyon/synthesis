@@ -1,6 +1,14 @@
 # Current state — 2026-11-16
 
-Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. Development prereleases are owner-authorized; the 1.0 public product launch remains later. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits. AGENTS.md records that release authorization and the verified Canvas viewport-readiness requirement; protected canon/privacy rules are unchanged.
+Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. Development prereleases are owner-authorized; no new release was made in this pass. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits.
+
+## Latest — completion pass (no release)
+
+Eleven verified slices, each committed and pushed: extended Review checks with reversible tag merge; editor crash recovery (migration 0011); `.synthesis` file association; large-world measurements ([PERFORMANCE](PERFORMANCE.md)); what-if world branches with reviewed merge-back (0012); technique trees (0013, `.synthesis` v7, JSON schema 10); Atlas regions; Timeline zoom and era overview; event reordering; explicit-click Codex image generation; live A2 verification with two bugs fixed (welcome-sheet Return, palette command ranking).
+
+Checks observed: `./scripts/check.sh` **158 tests / 40 suites**, strict lint, optimized build; Canvas `npm test` **12** and typecheck; foreground `selftest-ui.sh` **19/19** (includes the real modal sheet + Escape); live window captures in dark and light (isolated database); an Accessibility sweep of all nine workspaces plus the editor found no unlabeled controls beyond the system window buttons; background captures inspected for every new state at 1440×900 and 1024×768. Details per slice are in [PROGRESS](PROGRESS.md).
+
+Not done or not verified: a live Codex image generation (needs owner approval to spend allowance); VoiceOver itself, trackpad feel and animation pacing; three-way text merge for what-ifs; drag-to-reorder events; agent proposals for prerequisites and regions; cosmology-specific tools; continuous file sync. C2 (lighter palette) stays unapproved because it reverses the owner's black-studio direction.
 
 ## Current checkpoint — 0.0.2 interaction completion pass
 
