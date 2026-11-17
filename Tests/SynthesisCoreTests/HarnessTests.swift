@@ -6,6 +6,17 @@ import Testing
 /// The harness transports are exercised against small stand-in executables, so the suite
 /// never spends subscription usage and never depends on what is installed.
 struct HarnessTests {
+  @Test func harnessEnvironmentExcludesUnrelatedAgentAndSecretVariables() {
+    let filtered = HarnessProcess.environment([
+      "HOME": "/test/auth-home", "CODEX_HOME": "/test/codex-auth", "LANG": "en_US.UTF-8",
+      "OPENAI_API_KEY": "test-only", "ANTHROPIC_API_KEY": "test-only",
+      "CLAUDE_CODE_SYSTEM_PROMPT": "private instructions", "T3_THREAD_ID": "unrelated",
+      "DATABASE_URL": "private", "SSH_AUTH_SOCK": "/private/socket",
+    ])
+    #expect(Set(filtered.keys) == ["HOME", "CODEX_HOME", "LANG", "PATH"])
+    #expect(filtered["CODEX_HOME"] == "/test/codex-auth")
+  }
+
   /// Writes an executable shell script and returns its path plus the folder it logs into.
   func script(_ body: String) throws -> (path: String, folder: URL) {
     let folder = FileManager.default.temporaryDirectory.appendingPathComponent(
@@ -178,8 +189,9 @@ struct HarnessTests {
     for flag in [
       "exec --json", "--sandbox read-only", "--ephemeral", "--ignore-user-config",
       "--ignore-rules", "--disable shell_tool", "--disable image_generation", "--disable apps",
-      "--disable plugins",
-      "--skip-git-repo-check",
+      "--disable plugins", "--disable memories", "--disable external_agent_memory_import",
+      "--disable skill_search", "--enable skip_host_skill_discovery", "project_doc_max_bytes=0",
+      "web_search=\"disabled\"", "--skip-git-repo-check",
     ] { #expect(arguments.contains(flag), "missing \(flag)") }
     #expect(arguments.contains("synthesis-harness-") && arguments.hasSuffix("-\n"))
     let prompt = try String(

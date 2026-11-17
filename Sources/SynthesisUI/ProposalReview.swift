@@ -78,7 +78,9 @@ struct ProposalCard: View {
     case "create_branch", "create_period":
       return (
         "calendar", change.action == "create_branch" ? "New history branch" : "New period",
-        "\(change.title ?? "Untitled") · \(change.date ?? "") — \(change.endDate ?? "")"
+        ([change.title ?? "Untitled", change.date, change.endDate].compactMap { $0 }.filter {
+          !$0.isEmpty
+        }).joined(separator: " · ")
       )
     case "create_map":
       let parent = change.parentMapID.flatMap { id in
@@ -126,6 +128,13 @@ struct ProposalCard: View {
       )
     }
   }
+  private func laneName(_ id: String) -> String {
+    if id.hasPrefix("change:") {
+      return proposal.changes.first { "change:\($0.id)" == id }?.title ?? "New history"
+    }
+    return (try? studio.store.chronologyLanes(worldID: studio.worldID))?.first { $0.id == id }?.name
+      ?? "History"
+  }
   private func row(_ change: ProposedChange) -> some View {
     let t = studio.t
     let info = describe(change)
@@ -146,6 +155,13 @@ struct ProposalCard: View {
           Text(info.kind).font(.studio(size: 11.5, weight: .medium)).foregroundStyle(t.muted)
           Text(info.title).font(.studio(size: 14, weight: .medium))
             .fixedSize(horizontal: false, vertical: true)
+          if let lane = change.laneID {
+            Text("Inside \(laneName(lane))").font(.studio(size: 12.5)).foregroundStyle(t.secondary)
+          }
+          if change.action == "add_event", change.source == nil {
+            Text("Creates a linked draft source document").font(.studio(size: 12)).foregroundStyle(
+              t.secondary)
+          }
           if let reason = change.reason {
             Text(reason).font(.studio(size: 12.5)).foregroundStyle(t.secondary)
               .fixedSize(horizontal: false, vertical: true)

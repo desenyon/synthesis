@@ -4,6 +4,24 @@ import Testing
 @testable import SynthesisUI
 
 struct GraphGeometryTests {
+  @Test func zoomPreservesTheAnchoredWorldPointAtEveryScale() {
+    for scale in [0.1, 0.18, 0.4, 1.0, 2.2] {
+      for factor in [1 / 1.2, 1.2, 100.0, 0.001] {
+        let pan = CGSize(width: 213, height: -82)
+        let anchor = CGPoint(x: 100, y: -46)
+        let next = GraphViewport.zoom(scale: scale, pan: pan, factor: factor, anchor: anchor)
+        #expect(
+          abs((anchor.x - pan.width) / scale - (anchor.x - next.pan.width) / next.scale) < 0.00001)
+        #expect(
+          abs((anchor.y - pan.height) / scale - (anchor.y - next.pan.height) / next.scale) < 0.00001
+        )
+        #expect((0.1...2.2).contains(next.scale))
+      }
+    }
+    let out = GraphViewport.zoom(scale: 0.18, pan: .zero, factor: 1 / 1.2, anchor: .zero)
+    #expect(out.scale < 0.18, "Zoom out after Fit must not jump inward to 40 percent")
+  }
+
   @Test func directedChainUsesDagreInsteadOfEmergencyGrid() {
     let ids = ["a", "b", "c", "d"]
     let points = GraphLayout.positions(nodes: ids, edges: [("a", "b"), ("b", "c"), ("c", "d")])

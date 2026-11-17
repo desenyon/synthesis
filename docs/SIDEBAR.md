@@ -4,7 +4,7 @@ The creator is organizing a universe, not a filesystem. Navigation should be qui
 
 ## Composition and scope
 
-- Expanded width 312pt; compact rail 72pt. The existing compact-window navigation behavior stays intact.
+- Expanded width 284pt; compact rail 72pt. The existing compact-window navigation behavior stays intact.
 - Fixed native header and identity/actions, one scrolling middle, persistent utility footer.
 - 16pt outer inset, 38pt navigation rows, 34pt history, 36pt matched actions, 24pt section headers, 17pt navigation icons, 8pt shared radius.
 - Bundled Inter and Phosphor remain. Category icons are monochrome in navigation; semantic color inside content is unchanged.

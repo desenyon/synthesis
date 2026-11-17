@@ -120,3 +120,9 @@ body,
 
 /* Shared, offline studio typography. */
 .studio-overlay, .studio-overlay button, .studio-overlay input { font-family: Inter, sans-serif; }
+
+/* Stored links belong to world records. Their labels open native editing, never loose endpoints. */
+.studio-relationship-layer { position:absolute; inset:0; pointer-events:none; }
+.studio-relationship-hit { position:absolute; pointer-events:auto; background:transparent; border:0; border-radius:6px; cursor:pointer; }
+.studio-relationship-hit:hover { background:rgba(169,199,255,.08); }
+.studio-relationship-hit:focus-visible { outline:2px solid #a9c7ff; outline-offset:2px; }

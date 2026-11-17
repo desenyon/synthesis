@@ -21,6 +21,10 @@ A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Con
 
 ![Knowledge Graph showing seven entities connected by labeled relationships](docs/screenshots/graph.png)
 
+**Timeline** — organize sourced events into history branches and periods.
+
+![Timeline with a nested history branch, period and sourced events](docs/screenshots/timeline.png)
+
 **Mechanics** — develop rules, costs, techniques and scenarios, then review exact wording for canon.
 
 ![Mechanics workspace with rules for the Art of Remembrance](docs/screenshots/mechanics.png)
@@ -47,7 +51,7 @@ open dist/Synthesis.app
 
 The primary checkout is `/Users/desenyon/Developer/synthesis` on `main`, which is also the GitHub default branch. Build and launch `dist/Synthesis.app` here. Other worktree builds are retired.
 
-Requires macOS 14+ and Swift 6 Command Line Tools. The canvas bundle is committed; Node is only needed to change it (`cd CanvasWeb && npm install && npm run build`). Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md). [Native Kokonut activity component usage](docs/AI_COMPONENTS.md). Scripts select the compatible installed SDK. This is a development build, ad-hoc signed; no releases or deployment.
+Requires macOS 14+ and Swift 6 Command Line Tools. The canvas bundle is committed; Node is only needed to change it (`cd CanvasWeb && npm install && npm run build`). Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md). [Native Kokonut activity component usage](docs/AI_COMPONENTS.md). Scripts select the compatible installed SDK. Development prereleases begin at **0.0.1**; the public product launch remains 1.0. [Release notes and installation limits](docs/releases/0.0.1.md). The Apple Silicon bundle is ad-hoc signed and not notarized. Package a checked build with `./scripts/package-prerelease.sh`.
 
 ## Workspaces
 

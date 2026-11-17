@@ -58,7 +58,7 @@ extension Color {
 /// Shared geometry. Radii and control heights are deliberately few.
 enum Metric {
   static let bar: CGFloat = 56
-  static let sidebar: CGFloat = 312
+  static let sidebar: CGFloat = 284
   static let rail: CGFloat = 72
   static let control: CGFloat = 30
   static let radius: CGFloat = 8

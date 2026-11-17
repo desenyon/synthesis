@@ -128,6 +128,10 @@ struct CuratedCanvas: View {
         label: $edgeLabel,
         note: "This relationship is shared by Graph, Canvas and the assistant's world context.",
         suggestions: relationSuggestions, removable: true,
+        hide: {
+          session.hideRelationship(relation.id)
+          session.editingRelation = nil
+        },
         save: {
           studio.perform {
             try studio.store.updateRelation(
@@ -500,6 +504,7 @@ struct RelationEditor: View {
   let note: String
   var suggestions: [String] = []
   var removable = false
+  var hide: (() -> Void)? = nil
   var save: () -> Void
   var remove: () -> Void = {}
   var cancel: () -> Void
@@ -526,6 +531,7 @@ struct RelationEditor: View {
       Text(note).font(.studio(size: 12.5)).foregroundStyle(t.muted).lineSpacing(2)
         .fixedSize(horizontal: false, vertical: true)
     } footer: {
+      if let hide { Button("Hide on board", action: hide).buttonStyle(QuietButton(t: t)) }
       if removable {
         Button("Remove", action: remove).buttonStyle(QuietButton(t: t, role: .danger))
       }

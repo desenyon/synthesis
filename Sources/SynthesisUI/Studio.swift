@@ -314,9 +314,14 @@ public struct Toast: Identifiable {
           }
         }
         for change in changes {
-          _ = try store.resolveChange(
+          let resolved = try store.resolveChange(
             worldID: world, proposalID: proposal.id, changeID: change.id,
             accept: accept, confirmation: proposal.id)
+          if accept, let applied = resolved.changes.first(where: { $0.id == change.id }) {
+            if applied.action == "create_map" { mapBoardID = applied.resultID }
+            if applied.action == "place_marker" { mapBoardID = applied.resultID }
+            if applied.action == "create_board" { canvasBoardID = applied.resultID }
+          }
         }
         show(accept ? "Saved reviewed changes. Canon is unchanged." : "Changes dismissed.")
       }
@@ -594,6 +599,7 @@ public struct Toast: Identifiable {
     let selectedIDs =
       selectedRecord.map { [$0.id] }
       ?? (destination == .canvas ? (canvasSession?.selection ?? []) : [])
+    let workspaceName = destination.rawValue
     let prompt = draft
     let wid = worldID
     perform {
@@ -621,7 +627,7 @@ public struct Toast: Identifiable {
           }
           try await self.engine.submit(
             worldID: wid, conversationID: cid, prompt: prompt, preset: chosenPreset,
-            boardID: activeBoard, selectedRecordIDs: selectedIDs,
+            boardID: activeBoard, selectedRecordIDs: selectedIDs, workspaceName: workspaceName,
             onActivity: { [weak self] step in
               guard let self, self.requestID == request, self.worldID == wid,
                 self.conversationID == cid, self.mode == .assisted

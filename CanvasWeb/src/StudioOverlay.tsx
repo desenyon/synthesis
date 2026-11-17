@@ -92,6 +92,19 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
         setConnecting(null);
     };
     return <div className={`studio-overlay ${theme}`}>
+   <div className="studio-relationship-layer">
+     {elements.filter((e:any) => e.customData?.synthesis === 'relation' && !e.isDeleted).map((edge:any) => {
+       const labelID = edge.boundElements?.find((b:any) => b.type === 'text')?.id;
+       const label = elements.find((e:any) => e.id === labelID);
+       const relation = relations().find(r => r.id === edge.customData.relationID);
+       if (!label || !relation) return null;
+       const bounds = cardFrame(label, state);
+       return <button key={edge.id} className="studio-relationship-hit"
+         style={{left:bounds.x-8,top:bounds.y-6,width:Math.max(30,bounds.width+16),height:Math.max(26,bounds.height+12)}}
+         aria-label={`${recordMap.get(relation.sourceID)?.title} ${relation.label} ${recordMap.get(relation.targetID)?.title}`}
+         title="Inspect relationship" onClick={() => post({type:'inspectRelation',relationID:relation.id})}/>;
+     })}
+   </div>
    <div className="studio-card-layer" aria-label="World records on this board">
      {cards.map((card: any) => {
             const bounds = cardFrame(card, state);

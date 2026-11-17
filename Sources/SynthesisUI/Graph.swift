@@ -73,19 +73,7 @@ struct RelationshipGraph: View {
           }.buttonStyle(QuietButton(t: studio.t, primary: true))
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
-        GeometryReader { outer in
-          // Wide windows dock the details beside the graph; narrow ones float them over it.
-          let docked = outer.size.width >= 860
-          HStack(spacing: 0) {
-            graph(nodes, floating: !docked)
-            if docked, let entity = nodes.first(where: { $0.id == selected }) {
-              Rectangle().fill(studio.t.hairline).frame(width: 1)
-              ScrollView { detail(entity, docked: true) }.frame(width: 300)
-                .background(studio.t.sidebar.opacity(0.45))
-                .transition(.move(edge: .trailing).combined(with: .opacity))
-            }
-          }.animation(.easeOut(duration: 0.16), value: selected)
-        }
+        graph(nodes)
       }
     }
     .onAppear {
@@ -130,7 +118,7 @@ struct RelationshipGraph: View {
       point(edge.sourceID, size), point(edge.targetID, size),
       scale: zoom, lane: (lanes[edge.id] ?? 0) * zoom)
   }
-  private func graph(_ nodes: [LoreRecord], floating: Bool) -> some View {
+  private func graph(_ nodes: [LoreRecord]) -> some View {
     GeometryReader { geo in
       let lanes = edgeLanes(
         relationships.map {
@@ -165,13 +153,10 @@ struct RelationshipGraph: View {
             pan.height += $0.height
           },
           onZoom: { factor, location in
-            let next = min(2.2, max(0.4, zoom * factor))
-            let ratio = next / zoom
-            let anchor = CGPoint(
-              x: location.x - geo.size.width / 2, y: location.y - geo.size.height / 2)
-            pan.width = anchor.x - (anchor.x - pan.width) * ratio
-            pan.height = anchor.y - (anchor.y - pan.height) * ratio
-            zoom = next
+            changeZoom(
+              factor,
+              anchor: CGPoint(
+                x: location.x - geo.size.width / 2, y: location.y - geo.size.height / 2))
           },
           onClick: { selected = nil },
           onDrag: { start, current, phase in
@@ -223,16 +208,16 @@ struct RelationshipGraph: View {
           .frame(maxHeight: .infinity, alignment: .top).padding(.top, 14)
         }
         VStack {
-          if floating, let entity = nodes.first(where: { $0.id == selected }) {
-            detail(entity, docked: false).frame(maxWidth: .infinity, alignment: .trailing)
-              .transition(.opacity)
+          if let entity = nodes.first(where: { $0.id == selected }) {
+            detail(entity).frame(maxWidth: .infinity, alignment: .trailing)
+              .transition(.move(edge: .trailing).combined(with: .opacity))
           }
           Spacer(minLength: 0)
           HStack {
             Spacer()
             ZoomControls(
-              zoom: zoom, t: studio.t, zoomOut: { zoom = max(0.4, zoom / 1.2) },
-              zoomIn: { zoom = min(2.2, zoom * 1.2) }, fit: { frame(geo.size) })
+              zoom: zoom, t: studio.t, zoomOut: { stepZoom(1 / 1.2) },
+              zoomIn: { stepZoom(1.2) }, fit: { frame(geo.size) })
           }
         }.padding(14).animation(.easeOut(duration: 0.14), value: selected)
       }
@@ -249,9 +234,6 @@ struct RelationshipGraph: View {
         area = size
         if (old.width >= old.height) != (size.width >= size.height) {
           refresh()
-        } else if abs(old.width - size.width) > 80 {
-          // Docking or hiding the details changes the room available; keep everything in view.
-          frame(size)
         }
       }
     }
@@ -272,7 +254,7 @@ struct RelationshipGraph: View {
         HStack(spacing: 7) {
           Circle().fill(tint).frame(width: 5, height: 5)
           Text(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category))
-            .font(.studio(size: 12 / min(1, zoom), weight: .medium)).foregroundStyle(
+            .font(.studio(size: 12, weight: .medium)).foregroundStyle(
               studio.t.secondary
             ).lineLimit(1)
           Spacer(minLength: 4)
@@ -284,12 +266,12 @@ struct RelationshipGraph: View {
         Rectangle().fill(studio.t.hairline).frame(height: 1).padding(.horizontal, 13)
       }
       VStack(alignment: .leading, spacing: 7) {
-        Text(entity.title).font(.studio(size: 16.5 / min(1, zoom), weight: .semibold)).tracking(
+        Text(entity.title).font(.studio(size: max(16.5, 12 / zoom), weight: .semibold)).tracking(
           -0.3
         ).lineLimit(zoom < 0.55 ? 2 : (zoom < 0.8 ? 1 : 2))
         if zoom >= 0.55 {
           Text(entity.body.isEmpty ? "Open this record to begin writing." : entity.body)
-            .font(.studio(size: 13.5 / min(1, zoom))).foregroundStyle(studio.t.secondary)
+            .font(.studio(size: max(13.5, 11 / zoom))).foregroundStyle(studio.t.secondary)
             .lineSpacing(
               3
             ).lineLimit(zoom < 0.8 ? 1 : 2)
@@ -297,11 +279,13 @@ struct RelationshipGraph: View {
       }.padding(.horizontal, 14).padding(.vertical, 12).frame(
         maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       HStack {
-        Text("\(count) \(count == 1 ? "connection" : "connections")")
+        Text(
+          zoom < 0.55 ? "\(count) links" : "\(count) \(count == 1 ? "connection" : "connections")"
+        ).lineLimit(1)
         Spacer()
         Circle().fill(studio.t.state(entity.state)).frame(width: 4, height: 4)
         Text(entity.state.capitalized)
-      }.font(.studio(size: 11.5 / min(1, zoom))).foregroundStyle(studio.t.secondary)
+      }.font(.studio(size: max(11.5, 9 / zoom))).foregroundStyle(studio.t.secondary)
         .padding(.horizontal, 13).frame(height: 29)
         .overlay(alignment: .top) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
     }.frame(width: GraphLayout.cardSize.width, height: GraphLayout.cardSize.height)
@@ -375,14 +359,10 @@ struct RelationshipGraph: View {
     )
     .accessibilityLabel("Connect \(entity.title)")
   }
-  @ViewBuilder private func detail(_ entity: LoreRecord, docked: Bool) -> some View {
-    if docked {
-      detailContent(entity).padding(18).frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .contain).accessibilityLabel("Entity details")
-    } else {
-      detailContent(entity).padding(14).frame(width: 290)
-        .floatingPanel(studio.t, radius: Metric.cardRadius)
-    }
+  private func detail(_ entity: LoreRecord) -> some View {
+    detailContent(entity).padding(14).frame(width: 290)
+      .floatingPanel(studio.t, radius: Metric.cardRadius)
+      .accessibilityElement(children: .contain).accessibilityLabel("Entity details")
   }
   private func detailContent(_ entity: LoreRecord) -> some View {
     let related = relationships.filter { $0.sourceID == entity.id || $0.targetID == entity.id }
@@ -473,6 +453,15 @@ struct RelationshipGraph: View {
       }
       if let selected, !nodes.contains(selected) { self.selected = nil }
     }
+  }
+  private func changeZoom(_ factor: Double, anchor: CGPoint = .zero) {
+    let next = GraphViewport.zoom(scale: zoom, pan: pan, factor: factor, anchor: anchor)
+    zoom = next.scale
+    pan = next.pan
+    hoveredEdge = nil
+  }
+  private func stepZoom(_ factor: Double) {
+    withAnimation(.easeOut(duration: 0.18)) { changeZoom(factor) }
   }
   /// Centres and scales the whole graph into the visible area.
   private func frame(_ size: CGSize, animated: Bool = true) {

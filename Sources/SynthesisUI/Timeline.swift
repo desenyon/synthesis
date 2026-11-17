@@ -105,6 +105,7 @@ struct TimelineScreen: View {
           creatingLane = true
         }.buttonStyle(QuietButton(t: studio.t))
       }
+      if !lanes.isEmpty { historyTree }
       if rows.isEmpty {
         empty.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
@@ -123,6 +124,51 @@ struct TimelineScreen: View {
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .studioSheet(isPresented: $composing) { form }
     .studioSheet(isPresented: $creatingLane) { laneForm }
+  }
+  /// The hierarchy stays visible even when a newly accepted branch has no events yet.
+  private var historyTree: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 2) {
+        ForEach(treeRows, id: \.lane.id) { entry in
+          Button {
+            withAnimation(.easeOut(duration: 0.18)) {
+              selectedLane = selectedLane == entry.lane.id ? "" : entry.lane.id
+            }
+          } label: {
+            HStack(spacing: 8) {
+              StudioIcon(
+                entry.lane.kind == "branch" ? "arrow.triangle.branch" : "calendar", size: 13)
+              Text(entry.lane.name).lineLimit(1)
+              Text(entry.lane.kind == "branch" ? "Branch" : "Period")
+                .font(.studio(size: 11)).foregroundStyle(studio.t.muted)
+              Spacer(minLength: 8)
+              Text("\(events.filter { placements[$0.id] == entry.lane.id }.count)")
+                .monospacedDigit().foregroundStyle(studio.t.secondary)
+            }.font(.studio(size: 13, weight: .medium))
+              .padding(.leading, 10 + CGFloat(entry.depth) * 20).padding(.trailing, 10)
+              .frame(height: 30).background(
+                selectedLane == entry.lane.id ? studio.t.hover : .clear,
+                in: RoundedRectangle(cornerRadius: 6)
+              )
+              .contentShape(Rectangle())
+          }.buttonStyle(.plain).help("Show \(entry.lane.name) and its nested history")
+        }
+      }.padding(.horizontal, 24).padding(.vertical, 8)
+    }.frame(maxHeight: min(170, CGFloat(lanes.count * 32 + 16)))
+  }
+  private var treeRows: [(lane: ChronologyLane, depth: Int)] {
+    var result: [(lane: ChronologyLane, depth: Int)] = []
+    var seen = Set<String>()
+    func visit(_ parent: String?, depth: Int) {
+      for lane in lanes where lane.parentID == parent && seen.insert(lane.id).inserted {
+        result.append((lane, depth))
+        visit(lane.id, depth: depth + 1)
+      }
+    }
+    visit(nil, depth: 0)
+    // An archived parent must not hide a surviving child from All history.
+    for lane in lanes where !seen.contains(lane.id) { result.append((lane, 0)) }
+    return result
   }
   private func row(_ event: WorldEvent, first: Bool, last: Bool) -> some View {
     let sourceRecord = studio.records.first { $0.id == event.sourceID }
@@ -304,6 +350,9 @@ struct TimelineScreen: View {
       events = try studio.store.events(worldID: studio.worldID)
       lanes = try studio.store.chronologyLanes(worldID: studio.worldID)
       placements = try studio.store.chronologyPlacements(worldID: studio.worldID)
+      if !selectedLane.isEmpty && !lanes.contains(where: { $0.id == selectedLane }) {
+        selectedLane = ""
+      }
     }
   }
 }

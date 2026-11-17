@@ -12,7 +12,7 @@ Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bun
 
 `Theme.swift` holds colour tokens for both themes, shared metrics and vocabulary (categories, modes, state labels). `Components.swift` holds the pieces every screen uses: `WorkspaceBar` (context, actions, the persistent `ModeSwitch`, search), `BarTitle`, `BarAction`, `QuietButton`, `IconButton`, `PlainMenu`, `FilterChip`, `SearchField`, `FormField`, `StateBadge`, `CategoryTile`, `EmptyState`, `SheetScaffold`, `ZoomControls` and the floating-panel surface. `WorkspaceBar` uses `ViewThatFits` to collapse labelled actions to icons when space is short.
 
-The sidebar uses `SidebarPalette` and `SidebarMetric` in Theme, with `SidebarControlStyle` and `NavigationGlass` in Components. Its 312pt expanded surface (72pt rail) has fixed identity/actions and utilities around one scrolling navigation/history region. Native vibrancy has an explicit appearance and an opaque accessibility fallback. Studio's destinations, category lenses and conversation actions are unchanged.
+The sidebar uses `SidebarPalette` and `SidebarMetric` in Theme, with `SidebarControlStyle` and `NavigationGlass` in Components. Its 284pt expanded surface (72pt rail) has fixed identity/actions and utilities around one scrolling navigation/history region. Native vibrancy has an explicit appearance and an opaque accessibility fallback. Studio's destinations, category lenses and conversation actions are unchanged.
 
 ## Workspaces
 
@@ -86,7 +86,7 @@ Canvas still uses the published OSS engine rather than a fork. Synthesis owns th
 
 `WorldArchive.swift` exports `.synthesis` format version 6: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v6, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 9 includes chronology, including archived lanes.
 
-Migration 0007 adds nested chronology lanes (branch/period) and event placements. Events retain actual source records and free-form dates. A grouping is not a canon branch: no speculative merge or inheritance is implied. Reviewed agent actions can create a branch/period and assign new events to existing lanes. Request context includes lane IDs and memberships.
+Migration 0007 adds nested chronology lanes (branch/period) and event placements. Events retain actual source records and free-form dates. A grouping is not a canon branch: no speculative merge or inheritance is implied. Reviewed agent actions can create a branch/period and assign new events to existing lanes or earlier branch/period changes in the same proposal. Dependencies resolve only after creator acceptance. Events may create a draft source atomically when none is supplied. Request context includes lane IDs and memberships.
 
 The shared companion resizes non-Canvas workspaces and includes the open record in retrieval. Canvas keeps its own movable composer/dock. The native shell must remain transparent over the mounted WKWebView. Engine-composited captures cannot detect native occlusion; live on-screen inspection verified this correction.
 
@@ -115,3 +115,9 @@ The reviewed action vocabulary includes `revise_rule` with its captured before-s
 ## Named Atlas maps — 2026-11-16
 
 Atlas retains the existing board format with optional `placeID` and `parentMapID`. `AtlasMaps.swift` validates world membership, bounded ancestry, marker IDs and normalized finite coordinates. Saves require the expected prior Board content/name in a transaction. UI Undo captures the original world/map and expected replacement, so switching maps cannot redirect Undo or overwrite newer edits. Parent removal is blocked while active children exist. The provider sees active map metadata and can stage `create_map`; image selection stays explicit and local. [Usage and boundaries](ATLAS.md).
+
+## 0.0.1 interaction and privacy fixes
+
+`GraphViewport` is the common focal-point zoom transform. Graph details float without changing the coordinate viewport. Canvas relationship arrows/text are locked; overlay label hit targets open the native RelationEditor, including explicit board hiding. Free arrows stay ordinary Excalidraw drawings until the creator converts them. Sidebar and shared hover modifiers reset transient state on navigation/disappearance.
+
+AgentEngine receives an explicit workspace snapshot from Studio.send before any route change. HarnessProcess inherits only runtime/authentication variables; Codex disables memory/import/skill discovery and project documents in addition to the previous tool restrictions. Studio.resolve publishes worldRevision after accepted changes and selects the map affected by create_map/place_marker. Timeline displays persisted lane hierarchy; reviewed change references resolve using accepted result IDs, not guessed UUIDs.

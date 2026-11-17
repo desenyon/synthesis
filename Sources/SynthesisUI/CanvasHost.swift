@@ -558,6 +558,7 @@ struct CanvasBoardContent {
     }
     if migrated { studio.show("This board now uses the new canvas. The original layout is kept.") }
   }
+  func hideRelationship(_ id: String) { call("hideRelationship", [id]) }
   /// Creates a draft relationship for an arrow the creator drew between two entity cards.
   func saveConnection(_ connection: Connection, label: String) {
     studio.perform {

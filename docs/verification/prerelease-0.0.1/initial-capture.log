@@ -1,0 +1,27 @@
+CAPTURE atlas-linked 1440x900, bitmap 2880x1800, 1462ms
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 1014ms
+CAPTURE conversation-loading 1440x900, bitmap 2880x1800, 1050ms
+CAPTURE conversation 1440x900, bitmap 2880x1800, 1074ms
+CAPTURE canvas 1440x900, bitmap 2880x1800, 1038ms
+CAPTURE companion 1440x900, bitmap 2880x1800, 536ms
+CAPTURE manual 1440x900, bitmap 2880x1800, 226ms
+CAPTURE collapsed 1440x900, bitmap 2880x1800, 1041ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 2430ms
+CAPTURE graph-selected 1440x900, bitmap 2880x1800, 2316ms
+CAPTURE timeline 1440x900, bitmap 2880x1800, 882ms
+CAPTURE light-graph 1440x900, bitmap 2880x1800, 2485ms
+CAPTURE review 1440x900, bitmap 2880x1800, 900ms
+CAPTURE atlas-linked 1024x768, bitmap 2048x1536, 922ms
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, 635ms
+CAPTURE conversation-loading 1024x768, bitmap 2048x1536, 720ms
+CAPTURE conversation 1024x768, bitmap 2048x1536, 772ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 681ms
+CAPTURE companion 1024x768, bitmap 2048x1536, 412ms
+CAPTURE manual 1024x768, bitmap 2048x1536, 139ms
+CAPTURE collapsed 1024x768, bitmap 2048x1536, 687ms
+CAPTURE graph 1024x768, bitmap 2048x1536, 1123ms
+CAPTURE graph-selected 1024x768, bitmap 2048x1536, 1546ms
+CAPTURE timeline 1024x768, bitmap 2048x1536, 610ms
+CAPTURE light-graph 1024x768, bitmap 2048x1536, 1048ms
+CAPTURE review 1024x768, bitmap 2048x1536, 610ms
+Native captures complete: /private/tmp/synthesis-001-captures

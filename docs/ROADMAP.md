@@ -11,6 +11,8 @@
 
 ## Active — connected studio audit and UI overhaul
 
+- 0.0.1 prerelease: narrower sidebar, stable graph zoom, record-owned Canvas links, nested chronology approval, Atlas selection refresh and world/workspace-scoped harness context. Acceptance evidence and remaining limits are in STATE. Next: an isolated foreground gesture/animation walkthrough, opted-in live subscription checks, and signed/notarized distribution before broader release.
+
 - 2026-11-16: shared composers, real activity rows, themed app menus, Dagre entity-card Graph and undoable Canvas arrangement implemented. Canvas PNG now exports styled cards and local artwork. Evidence and remaining interaction limits: [STATE](STATE.md).
 - Creative components implemented: Notes, Facts, Checklist and Progression backed by ordinary revisioned lore, manual creation, reviewed agent proposals and portable persistence. Mechanics now provides rule/scenario editing, explicit rule canon review and restorable history. Atlas now has named maps, place/parent links and guarded saves/Undo. Next: richer chronology and specialized spatial tools.
 

@@ -26,7 +26,7 @@ How each message is run:
 
 Neither adapter gives the model a project checkout or application write tools. Model output is interpreted as validated domain proposals, not shell commands. Unsupported CLI versions fail visibly; Synthesis does not fall back to an API key.
 
-Inherited `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `OPENAI_API_KEY` variables are removed from the harness's environment so a stray key cannot replace your subscription sign-in.
+Only HOME, USER, LOGNAME, TMPDIR, locale and CODEX_HOME are retained from the environment; PATH is built from known executable locations. API keys, prompt overrides and unrelated agent/editor/session variables are not inherited. Codex additionally disables memories, external memory import, skill search and web search, skips host skill discovery and sets project document bytes to zero. Subscription authentication stays with the CLI, never in model context. Administrator-managed CLI policies remain outside Synthesis's control.
 
 ## Subscription authentication only
 
@@ -36,7 +36,7 @@ Before every generation, the native adapter checks subscription sign-in. Claude 
 
 ## What is sent
 
-The composer always states who receives a message. A request contains your message, the recent conversation, and up to 16 records from the selected world chosen for relevance; the transcript shows exactly which ones under "Read N records from your world". A bounded world index also includes up to 100 record identities, 100 relationships, 60 events, and 24 boards with up to 80 placements each. Selected Canvas records are included in retrieval. The index excludes image bytes, archived records and other worlds. The transcript records the retrieved source list; the additional world-index snapshot is not yet retained as a separate trace.
+The composer always states who receives a message. Every submission snapshots the current workspace (for example Timeline or Atlas), without sending background requests on navigation. A request contains your message, the recent conversation, and up to 16 records from the selected world chosen for relevance; the transcript shows exactly which ones under "Read N records from your world". A bounded world index also includes up to 100 record identities, 100 relationships, 60 events, and 24 boards with up to 80 placements each. Selected Canvas records are included in retrieval. The index excludes image bytes, archived records and other worlds. The transcript records the retrieved source list; the additional world-index snapshot is not yet retained as a separate trace.
 
 Modes (Create, Develop, Critique, Simulate, Canonize) are instructions, not permissions. The model cannot accept canon. When it proposes changes they are staged for your review and become drafts only when you accept them.
 
@@ -44,7 +44,7 @@ Stop cancels the request and, for a harness, terminates its process. Switching t
 
 ## What has been verified
 
-One live request through each harness on 2026-11-13 (`SYNTHESIS_LIVE_HARNESS=claude-code|codex ./scripts/test.sh --filter LiveHarnessTests`): both answered from world context with record citations and returned a change set that was staged and not applied. The default test suite uses stand-in executables and scripted answers, so it spends no subscription usage. The subscription-only changes on 2026-11-15 were tested with stand-in executables, not a new live call. The historical live result does not certify the new CLI flags.
+One live request through each harness on 2026-11-13 (`SYNTHESIS_LIVE_HARNESS=claude-code|codex ./scripts/test.sh --filter LiveHarnessTests`): both answered from world context with record citations and returned a change set that was staged and not applied. The default test suite uses stand-in executables and scripted answers, so it spends no subscription usage. The subscription-only changes on 2026-11-15 were tested with stand-in executables, not a new live call. The historical live result does not certify the new CLI flags. The 0.0.1 flags were checked against installed CLI help/features and stand-in executable tests, not a new live model call.
 
 ## Reviewable operations
 

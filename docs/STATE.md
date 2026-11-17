@@ -1,8 +1,19 @@
 # Current state — 2026-11-16
 
-Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. Development only. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits. AGENTS.md is unchanged.
+Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. Development prerelease 0.0.1 is owner-authorized; the 1.0 public product launch remains later. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits. AGENTS.md changes only the former no-releases sentence to reflect that explicit authorization.
 
-## Sidebar refinement — current checkpoint
+## 0.0.1 — connected interaction fixes
+
+- Sidebar narrowed to 284pt without changing its composition. Hover cleanup, composer focus/height feedback and workspace/companion transitions retain Reduce Motion behavior.
+- Graph uses one bounded, focal-point-preserving zoom transform for buttons and gestures. Fit and zoom share the 10% minimum. Selected details float over the graph without resizing its viewport; overview titles retain a readable minimum size.
+- Stored Canvas relationship arrows and labels are locked to world records. Click the label to inspect/edit; Hide on board remains separate from world archive. Newly converted connections use the same routing/styling as existing links.
+- One reviewed proposal can create nested chronology branches/periods and their events by dependency. Accepting an event without an existing source atomically creates a draft source. All history exposes a selectable hierarchy including empty branches. Review explains parent placement and implicit draft creation.
+- Accepted map/marker changes select their affected Atlas map; existing worldRevision observers reload the data. Tests exercise actual Studio acceptance through history and map selection. Canon stays unchanged.
+- Each request snapshots the active workspace; navigating alone makes no model calls. Codex memories/external memories/host skill discovery are disabled. A runtime/authentication environment allowlist excludes unrelated agent sessions, prompts, API keys and project variables. Authentication stays with the user's CLI.
+
+Verified: strict lint, **120 native tests / 27 suites**, optimized build, Canvas typecheck/build and **9 Node tests**. **44 native captures** were inspected (26 initial, 14 final refinements, 3 README, 1 packaged-app audit), plus the actual PNG export. The extracted distribution ZIP passed signature validation and **24 Canvas engine checks**; four final sidebar pixel checks passed. Eight README screenshots refreshed. Verification and release evidence: `verification/prerelease-0.0.1`. The archive is Apple Silicon, ad-hoc signed, not notarized. No live subscription request, foreground interaction/animation walkthrough, Intel build or macOS 14 hardware test was performed. Background tests do not interrupt the user's running app. See [release notes](releases/0.0.1.md).
+
+## Earlier sidebar checkpoint
 
 The owner-directed sidebar is implemented in the actual native shell: 312pt expanded / 72pt rail, graphite vibrancy with explicit appearance and opaque accessibility fallbacks, 40pt world artwork, matched New Chat/Search actions, monochrome 38pt navigation, aligned counts, scrolling history with stable action slots, and persistent Settings/current-appearance controls. Existing Studio navigation, world files, conversation management and data are preserved. [Design details](SIDEBAR.md).
 

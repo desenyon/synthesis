@@ -57,6 +57,13 @@ public enum HarnessLocator {
 /// Runs a harness process, feeding it the prompt on standard input and reading its output
 /// line by line. Cancelling the surrounding task terminates the process.
 enum HarnessProcess {
+  static func environment(_ inherited: [String: String]) -> [String: String] {
+    var result = inherited.filter { key, _ in
+      ["HOME", "USER", "LOGNAME", "TMPDIR", "LANG", "LC_ALL", "CODEX_HOME"].contains(key)
+    }
+    result["PATH"] = HarnessLocator.searchPaths().joined(separator: ":")
+    return result
+  }
   static func run(
     executable: String, arguments: [String], input: String, directory: URL,
     timeout: Duration = .seconds(180),
@@ -66,17 +73,9 @@ enum HarnessProcess {
     process.executableURL = URL(fileURLWithPath: executable)
     process.arguments = arguments
     process.currentDirectoryURL = directory
-    var environment = ProcessInfo.processInfo.environment
-    environment["PATH"] = HarnessLocator.searchPaths().joined(separator: ":")
-    // Never let an inherited API key silently replace the creator's subscription sign-in.
-    for key in [
-      "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "OPENAI_API_KEY", "OPENAI_BASE_URL",
-      "ANTHROPIC_BASE_URL", "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX",
-      "CLAUDE_CODE_USE_FOUNDRY", "CLAUDECODE",
-    ] {
-      environment.removeValue(forKey: key)
-    }
-    process.environment = environment
+    // Authentication stays with the subscription CLI. Never inherit arbitrary shell,
+    // editor, project, prompt, API or agent-session variables into the model process.
+    process.environment = environment(ProcessInfo.processInfo.environment)
     let stdin = Pipe()
     let stdout = Pipe()
     let stderr = Pipe()
@@ -308,7 +307,10 @@ public struct CodexTransport: ModelTransport {
       "exec", "--json", "--sandbox", "read-only", "--skip-git-repo-check", "--ephemeral",
       "--ignore-user-config", "--ignore-rules", "--disable", "apps", "--disable", "plugins",
       "--disable", "browser_use", "--disable", "computer_use", "--disable", "shell_tool",
-      "--disable", "image_generation", "-C",
+      "--disable", "image_generation", "--disable", "memories",
+      "--disable", "external_agent_memory_import", "--disable", "skill_search",
+      "--enable", "skip_host_skill_discovery", "-c", "project_doc_max_bytes=0",
+      "-c", "web_search=\"disabled\"", "-C",
       directory.path,
     ]
     let chosen = model().trimmingCharacters(in: .whitespacesAndNewlines)

@@ -4,6 +4,41 @@ import Testing
 @testable import SynthesisCore
 
 struct ChronologyTests {
+  @Test func reviewedHistoryResolvesParentsAndEventsInOneProposal() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "History")
+    let lore = try store.createRecord(worldID: world.id, title: "Origin")
+    let proposal = try #require(
+      try store.stageProposal(
+        worldID: world.id, conversationID: nil, messageID: nil,
+        payload: [
+          "changes": [
+            ["action": "create_branch", "title": "Eastern history"],
+            ["action": "create_period", "title": "First age", "lane": "Eastern history"],
+            ["action": "add_event", "title": "Founding", "source": lore.id, "lane": "First age"],
+          ]
+        ]))
+    #expect(proposal.changes.count == 3)
+    #expect(try store.events(worldID: world.id).isEmpty)
+    #expect(throws: (any Error).self) {
+      try store.resolveChange(
+        worldID: world.id, proposalID: proposal.id, changeID: proposal.changes[2].id, accept: true,
+        confirmation: proposal.id)
+    }
+    for change in proposal.changes {
+      try store.resolveChange(
+        worldID: world.id, proposalID: proposal.id, changeID: change.id, accept: true,
+        confirmation: proposal.id)
+    }
+    let lanes = try store.chronologyLanes(worldID: world.id)
+    let branch = try #require(lanes.first { $0.name == "Eastern history" })
+    let period = try #require(lanes.first { $0.name == "First age" })
+    #expect(period.parentID == branch.id)
+    let event = try #require(try store.events(worldID: world.id).first)
+    #expect(try store.chronologyPlacements(worldID: world.id)[event.id] == period.id)
+    #expect(try store.record(worldID: world.id, id: lore.id).canonical == nil)
+  }
+
   @Test func emptyWorldEventCreatesDraftSourceAtomically() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "A beginning")
@@ -42,7 +77,7 @@ struct ChronologyTests {
     let copiedPeriod = try #require(lanes.first { $0.kind == "period" })
     #expect(copiedPeriod.parentID == lanes.first { $0.kind == "branch" }?.id)
     #expect(copiedPeriod.start == "Before the crossing")
-    let copiedEvent = try #require(store.events(worldID: imported.id).first)
+    let copiedEvent = try #require(try store.events(worldID: imported.id).first)
     #expect(try store.chronologyPlacements(worldID: imported.id)[copiedEvent.id] == copiedPeriod.id)
     try store.setChronologyLaneArchived(worldID: world.id, id: period.id, archived: true)
     #expect(try store.chronologyLanes(worldID: world.id).count == 1)

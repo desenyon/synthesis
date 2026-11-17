@@ -1,16 +1,7 @@
-# README screenshots
+# App screenshots
 
-All seven screenshots were refreshed on 2026-11-16 from the sidebar refinement over parent `3d0d12e`. Captured from the actual native application with an isolated database and clearly labeled Aster sample world. Logical size: 1440×900; PNG backing resolution: 2880×1800. Original capture pixels are preserved. Atlas uses the `atlas-linked` fixture, saved here as `atlas.png`. Optional bundled artwork does not demonstrate runtime image generation.
+Refreshed 2026-11-16 for 0.0.1: eight actual native screenshots at 1440×900, inspected in contact sheets. Sidebar is 284pt. These captures use isolated Aster sample data, not the owner's worlds. Artwork is bundled sample imagery; no runtime image generation is implied.
 
-The run stayed in the background and rejected model requests. All seven images were inspected in `docs/verification/sidebar/readme-contact.jpg`; `capture.log` records the run. Static captures disable animations to show settled UI states. They establish appearance, not foreground keyboard/pointer or VoiceOver coverage.
+Current evidence and commands: [0.0.1 verification](../verification/prerelease-0.0.1/README.md). States: conversation-home, canvas, editor, graph, mechanics, atlas-linked (saved as atlas.png), timeline and settings. Capture via `SYNTHESIS_CAPTURE_STATES=... SYNTHESIS_CAPTURE_SIZES=1440x900 ./scripts/verify-ui.sh /tmp/synthesis-shots`, then `uv run --with pillow python scripts/contact-sheets.py /tmp/synthesis-shots` and inspect before copying. Bitmap backing scale depends on the capture display; viewport dimensions remain explicit in capture.log.
 
-To refresh after a visual change:
-
-```sh
-SYNTHESIS_CAPTURE_STATES=conversation-home,canvas,editor,graph,atlas-linked,settings,mechanics \
-SYNTHESIS_CAPTURE_SIZES=1440x900 \
-./scripts/verify-ui.sh /tmp/synthesis-readme-screenshots
-uv run --with pillow python scripts/contact-sheets.py /tmp/synthesis-readme-screenshots
-```
-
-Inspect the contact sheet, then copy each `<state>-1440x900.png` here as `<state>.png` and copy `capture.log`. Update the per-image source note above. Root README paths are relative so the images display on GitHub and in local Markdown viewers.
+Background captures establish appearance, not physical interaction, live subscription behavior or generated imagery.

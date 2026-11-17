@@ -329,6 +329,7 @@ struct UnifiedComposer: View {
   @ObservedObject var studio: Studio
   var companion = false
   var collapsed = false
+  @State private var focused = false
   @State private var text = ""
   @State private var loadedWorld = ""
   @State private var saveTask: Task<Void, Never>?
@@ -361,7 +362,7 @@ struct UnifiedComposer: View {
       )
       .overlay(
         RoundedRectangle(cornerRadius: collapsed ? 18 : 22).stroke(
-          studio.t.border.opacity(0.9), lineWidth: 1)
+          focused ? studio.t.accent.opacity(0.5) : studio.t.border.opacity(0.9), lineWidth: 1)
       )
       .shadow(color: studio.t.shadow.opacity(collapsed ? 0.6 : 0.3), radius: 22, y: 8)
       .overlay(alignment: .topLeading) {
@@ -372,7 +373,10 @@ struct UnifiedComposer: View {
         }
       }
       disclosure
-    }.onAppear {
+    }
+    .animation(.easeOut(duration: 0.16), value: focused)
+    .animation(.easeOut(duration: 0.16), value: inputHeight)
+    .onAppear {
       loadedWorld = studio.worldID
       text = studio.draft
     }
@@ -401,7 +405,8 @@ struct UnifiedComposer: View {
         color: studio.t.text, placeholderColor: studio.t.muted, accent: studio.t.accent,
         accentSoft: studio.t.accentSoft, autofocus: !companion,
         sendShortcut: studio.preferences.sendShortcut, handle: handle,
-        onHeight: { inputHeight = $0 }, onMention: updateMention, onMentionKey: mentionKey,
+        onFocus: { focused = $0 }, onHeight: { inputHeight = $0 }, onMention: updateMention,
+        onMentionKey: mentionKey,
         submit: send
       ).frame(height: min(190, max(companion ? 40 : 64, inputHeight)))
         .padding(.horizontal, 20).padding(.top, 20)
@@ -436,7 +441,7 @@ struct UnifiedComposer: View {
           ?? "Ask about this \(studio.destination.rawValue.lowercased())…", color: studio.t.text,
         placeholderColor: studio.t.muted, accent: studio.t.accent,
         accentSoft: studio.t.accentSoft, sendShortcut: studio.preferences.sendShortcut,
-        handle: handle, onHeight: { inputHeight = $0 },
+        handle: handle, onFocus: { focused = $0 }, onHeight: { inputHeight = $0 },
         onMention: updateMention, onMentionKey: mentionKey, submit: send
       ).frame(height: min(96, max(26, inputHeight))).padding(.bottom, 2)
       IconButton(icon: "sidebar.right", label: "Open the companion conversation", t: studio.t) {

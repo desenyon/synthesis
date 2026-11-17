@@ -29,6 +29,26 @@ struct ScriptedTransport: ModelTransport {
   }
 }
 @MainActor struct AgentTests {
+  @Test func workspaceContextChangesWithoutLeakingOtherUniverses() async throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Chosen universe")
+    let foreign = try store.createWorld(name: "Private other universe")
+    try store.createRecord(worldID: foreign.id, title: "PRIVATE_SENTINEL", body: "Never included")
+    let chat = try store.createConversation(worldID: world.id)
+    let transport = CountingTransport()
+    let engine = AgentEngine(store: store, transport: transport)
+    for workspace in ["Timeline", "Atlas"] {
+      try await engine.submit(
+        worldID: world.id, conversationID: chat.id, prompt: "What can I do here?",
+        preset: "Develop", workspaceName: workspace
+      ) { _ in }
+      let request = try #require(await transport.lastRequest)
+      #expect(request.instructions.contains("Current workspace: \(workspace)"))
+      #expect(!request.instructions.contains("PRIVATE_SENTINEL"))
+      #expect(!request.instructions.contains("Private other universe"))
+    }
+  }
+
   @Test func modelChangeSetIsStagedForReviewAndNeverApplied() async throws {
     let s = try WorkspaceStore(path: ":memory:")
     let w = try s.createWorld(name: "Aster")

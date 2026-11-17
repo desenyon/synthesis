@@ -393,7 +393,22 @@ extension Studio {
     case "graph", "graph-selected", "light-graph", "sheet-relation", "empty-graph":
       destination = .knowledge
     case "review", "review-canon", "review-checks": destination = .review
-    case "timeline", "empty-timeline": destination = .timeline
+    case "timeline", "empty-timeline":
+      destination = .timeline
+      if state == "timeline" {
+        perform {
+          if try store.chronologyLanes(worldID: worldID).isEmpty {
+            let branch = try store.createChronologyLane(
+              worldID: worldID, name: "The Eastern Crossing", kind: "branch")
+            let period = try store.createChronologyLane(
+              worldID: worldID, name: "Age of Glass", kind: "period", parentID: branch.id)
+            _ = try store.saveChronologyEvent(
+              worldID: worldID, id: nil, title: "The first charts", date: "Year 12", source: nil,
+              order: nil, laneID: period.id)
+            try reload()
+          }
+        }
+      }
     case "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
       "atlas-local":
       destination = .atlas

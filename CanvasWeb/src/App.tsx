@@ -449,6 +449,15 @@ export function App() {
         api.updateScene({elements:[...all.map(e => e.id === elementID ? newElementWith(e,{isDeleted:true}) : e),card.rect,...Object.values(card.parts)],captureUpdate:CaptureUpdateAction.IMMEDIATELY});
         synchronise(); save();
       },
+      /** Board visibility is independent from the world relationship, and participates in Undo. */
+      hideRelationship(id: string) {
+        const all: El[] = api.getSceneElementsIncludingDeleted();
+        const edge = all.find(e => isRelation(e) && !e.isDeleted && e.customData.relationID === id);
+        if (!edge) return;
+        const label = arrowLabel(edge, all);
+        api.updateScene({elements:all.map(e => e.id === edge.id || e.id === label?.id ? newElementWith(e,{isDeleted:true}) : e), captureUpdate:CaptureUpdateAction.IMMEDIATELY});
+        analyse(); save();
+      },
       /** The creator named a relationship for an arrow they drew. */
       relationSaved(arrowID: string, relation: RelationInfo) {
         s.relations = [...s.relations.filter((r) => r.id !== relation.id), relation];
@@ -592,6 +601,8 @@ export function App() {
         if (relation) {
           bridge.sync([...s.records.values()],s.relations.map(r=>r.id===relation.id?{...r,label:"audit updated"}:r));
           const arrow=api.getSceneElements().find((e:El)=>isRelation(e)&&e.customData.relationID===relation.id);
+          check("stored relationship endpoints are locked to their records",arrow.locked === true);
+          check("stored relationship labels are locked and inspectable",arrowLabel(arrow,api.getSceneElements())?.locked === true && !!document.querySelector('.studio-relationship-hit'));
           check("stored relationship rename refreshes label",arrowLabel(arrow,api.getSceneElements())?.originalText==="audit updated");
           bridge.sync([...s.records.values()],s.relations.filter(r=>r.id!==relation.id));
           check("archived relationship disappears",!api.getSceneElements().some((e:El)=>isRelation(e)&&e.customData.relationID===relation.id));

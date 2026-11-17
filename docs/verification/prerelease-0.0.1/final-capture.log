@@ -1,0 +1,15 @@
+CAPTURE conversation-home 1440x900, bitmap 1440x900, 185ms
+CAPTURE companion 1440x900, bitmap 1440x900, 132ms
+CAPTURE graph 1440x900, bitmap 1440x900, 416ms
+CAPTURE graph-selected 1440x900, bitmap 1440x900, 596ms
+CAPTURE timeline 1440x900, bitmap 1440x900, 165ms
+CAPTURE light-graph 1440x900, bitmap 1440x900, 422ms
+CAPTURE review 1440x900, bitmap 1440x900, 169ms
+CAPTURE conversation-home 1024x768, bitmap 1024x768, 117ms
+CAPTURE companion 1024x768, bitmap 1024x768, 97ms
+CAPTURE graph 1024x768, bitmap 1024x768, 199ms
+CAPTURE graph-selected 1024x768, bitmap 1024x768, 277ms
+CAPTURE timeline 1024x768, bitmap 1024x768, 114ms
+CAPTURE light-graph 1024x768, bitmap 1024x768, 192ms
+CAPTURE review 1024x768, bitmap 1024x768, 126ms
+Native captures complete: /private/tmp/synthesis-001-final

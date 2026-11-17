@@ -5,7 +5,7 @@
 - Product name: Synthesis. A native macOS application; user allows GPUI or another native implementation.
 - Complete replacement of the rejected black three-pane design. Light default, collapsible navigation, central conversational workspace, no fixed AI sidebar, no automatically opened document. Manual mode must remain independently useful and stop model calls.
 - AI output never becomes canon without explicit scoped creator approval. Lore, history and privacy safeguards remain protected.
-- No releases, public deployments or unnecessary paid calls. Commit useful increments and maintain documentation alongside implementation.
+- Owner update (2026-11-16): development prereleases beginning at 0.0.1 are authorized after checks; public product launch remains 1.0. No public deployments or unnecessary paid calls. Commit useful increments and maintain documentation alongside implementation.
 
 ## Implementation choices
 

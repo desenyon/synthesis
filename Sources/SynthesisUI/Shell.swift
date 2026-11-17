@@ -116,23 +116,26 @@ public struct ConnectedRoot: View {
   }
   @ViewBuilder private var workspace: some View {
     if [.canvas, .worlds, .settings].contains(studio.destination) && studio.selectedRecord == nil {
-      content
+      content.transition(.opacity)
     } else if studio.destination == .chat && studio.selectedRecord == nil {
-      content
+      content.transition(.opacity)
     } else {
       GeometryReader { geometry in
         HStack(spacing: 0) {
           if geometry.size.width < 760 && studio.mode == .assisted && studio.companionExpanded {
             ConversationStudio(studio: studio, companion: true, docked: false)
           } else {
-            content.frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
-              .safeAreaInset(edge: .bottom, spacing: 0) {
-                if studio.mode == .assisted && !studio.companionExpanded {
-                  UnifiedComposer(studio: studio, companion: true, collapsed: true)
-                    .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
-                    .frame(maxWidth: .infinity).background(studio.t.background)
-                }
+            content.transition(.opacity).frame(
+              minWidth: 0, maxWidth: .infinity, maxHeight: .infinity
+            )
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+              if studio.mode == .assisted && !studio.companionExpanded {
+                UnifiedComposer(studio: studio, companion: true, collapsed: true)
+                  .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
+                  .frame(maxWidth: .infinity).background(studio.t.background)
+                  .transition(.move(edge: .bottom).combined(with: .opacity))
               }
+            }
             if studio.mode == .assisted && studio.companionExpanded {
               Rectangle().fill(studio.t.hairline).frame(width: 1)
               ConversationStudio(studio: studio, companion: true)

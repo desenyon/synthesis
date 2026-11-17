@@ -6,6 +6,33 @@ import Testing
 @testable import SynthesisUI
 
 @MainActor struct WorkspaceTests {
+  @Test func acceptingWorkspaceChangesRefreshesHistoryAndSelectsTheCreatedMap() async throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    let initial = studio.worldRevision
+    let proposal = try #require(
+      try store.stageProposal(
+        worldID: studio.worldID, conversationID: nil, messageID: nil,
+        payload: [
+          "changes": [
+            ["action": "create_branch", "title": "The long winter"],
+            ["action": "add_event", "title": "First snowfall", "lane": "The long winter"],
+            ["action": "create_map", "title": "Northern coast"],
+          ]
+        ]))
+    #expect(proposal.changes.count == 3)
+    studio.resolveAll(proposal, accept: true)
+    for _ in 0..<100 where studio.reviewingProposal { try await Task.sleep(for: .milliseconds(10)) }
+    #expect(!studio.reviewingProposal)
+    #expect(studio.error == nil, "\(studio.error ?? "")")
+    #expect(studio.worldRevision > initial)
+    #expect(try store.events(worldID: studio.worldID).count == 1)
+    let map = try #require(try store.boards(worldID: studio.worldID, kind: "atlas").first)
+    #expect(studio.mapBoardID == map.id)
+    #expect(studio.pendingProposals.isEmpty)
+    #expect(studio.records.contains { $0.title == "First snowfall" && $0.state == "draft" })
+  }
+
   @Test func sectionChildrenDoNotInflateCharacterNavigation() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let studio = try Studio(store: store)

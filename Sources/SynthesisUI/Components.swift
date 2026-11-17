@@ -285,7 +285,16 @@ struct HoverFill: ViewModifier {
     content.background(
       selected ? t.secondarySurface : (hover ? t.hover : .clear),
       in: RoundedRectangle(cornerRadius: radius)
-    ).contentShape(RoundedRectangle(cornerRadius: radius)).onHover { hover = $0 }
+    ).contentShape(RoundedRectangle(cornerRadius: radius))
+      .onContinuousHover { phase in
+        switch phase {
+        case .active: hover = true
+        case .ended: hover = false
+        }
+      }
+      .onChange(of: selected) { _, _ in hover = false }
+      .onDisappear { hover = false }
+      .animation(.easeOut(duration: 0.14), value: hover)
   }
 }
 extension View {
@@ -873,7 +882,10 @@ struct SidebarControlStyle: PrimitiveButtonStyle {
     @Environment(\.isEnabled) private var enabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
-      Button(action: configuration.trigger) {
+      Button {
+        hover = false
+        configuration.trigger()
+      } label: {
         configuration.label
           .foregroundStyle(selected || hover ? palette.text : palette.secondary)
           .contentShape(RoundedRectangle(cornerRadius: SidebarMetric.radius))
@@ -885,7 +897,14 @@ struct SidebarControlStyle: PrimitiveButtonStyle {
         }
         .focusable().focused($focused).focusEffectDisabled()
         .opacity(enabled ? 1 : 0.4)
-        .onHover { hover = $0 }
+        .onContinuousHover { phase in
+          switch phase {
+          case .active: hover = true
+          case .ended: hover = false
+          }
+        }
+        .onChange(of: selected) { _, _ in hover = false }
+        .onDisappear { hover = false }
         .animation(reduceMotion ? nil : .easeOut(duration: SidebarMetric.transition), value: hover)
         .animation(
           reduceMotion ? nil : .easeOut(duration: SidebarMetric.transition), value: selected)

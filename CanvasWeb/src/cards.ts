@@ -261,6 +261,7 @@ export function buildArrow(a: El, b: El, label: string, theme: Theme, customData
         roundness: { type: 2 },
         endArrowhead: "triangle",
         customData,
+        locked: customData.synthesis === "relation",
         ...(label ? { label: { text: label, fontSize: 14, fontFamily: FONT, strokeColor: p.accent } } : {}),
       } as any,
     ],
@@ -272,7 +273,7 @@ export function buildArrow(a: El, b: El, label: string, theme: Theme, customData
   } as any);
   const bind = (rect: El) =>
     newElementWith(rect, { boundElements: [...(rect.boundElements ?? []), { type: "arrow", id: arrow.id }] });
-  return [bind(a), bind(b), arrow, ...made.slice(1)];
+  return [bind(a), bind(b), arrow, ...made.slice(1).map(e => newElementWith(e as any, {locked: customData.synthesis === "relation"}))];
 }
 
 /** The text bound to an arrow, if any. */
@@ -317,13 +318,13 @@ export function syncRelations(
     const a = byID.get(arrow.startBinding?.elementId), b = byID.get(arrow.endBinding?.elementId);
     if (!a || !b || a.angle || b.angle) continue;
     const lane = lanes.get(arrow.customData.relationID) ?? 0;
-    const routeKey = JSON.stringify([3,a.x,a.y,a.width,a.height,b.x,b.y,b.width,b.height,lane]);
-    if (arrow.customData.routeKey === routeKey) continue;
+    const routeKey = JSON.stringify([4,a.x,a.y,a.width,a.height,b.x,b.y,b.width,b.height,lane]);
+    if (arrow.customData.routeKey === routeKey && arrow.locked) continue;
     const route = connectionRoute(a,b,lane);
     const label = arrowLabel(arrow, next ?? elements);
     next = (next ?? [...elements]).map(e => e.id === arrow.id
-      ? newElementWith(e, {x:route.start.x,y:route.start.y,width:Math.abs(route.end.x-route.start.x),height:Math.abs(route.end.y-route.start.y),points:route.points,roughness:0,roundness:{type:2},endArrowhead:"triangle",strokeWidth:1.5,customData:{...e.customData,routeKey}})
-      : e.id === label?.id ? newElementWith(e,{x:(route.start.x+route.end.x-e.width)/2,y:(route.start.y+route.end.y-e.height)/2+lane}) : e);
+      ? newElementWith(e, {locked:true,x:route.start.x,y:route.start.y,width:Math.abs(route.end.x-route.start.x),height:Math.abs(route.end.y-route.start.y),points:route.points,roughness:0,roundness:{type:2},endArrowhead:"triangle",strokeWidth:1.5,customData:{...e.customData,routeKey}})
+      : e.id === label?.id ? newElementWith(e,{locked:true,x:(route.start.x+route.end.x-e.width)/2,y:(route.start.y+route.end.y-e.height)/2+lane}) : e);
   }
   const current = () => next ?? elements;
   const cardFor = (recordID: string) => current().find((e) => isCard(e) && e.customData.recordID === recordID);

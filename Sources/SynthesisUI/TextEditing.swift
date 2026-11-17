@@ -77,6 +77,17 @@ enum MentionCodec {
 
 final class ComposerTextView: NSTextView {
   var sendShortcut = SendShortcut.enter
+  var onFocus: ((Bool) -> Void)?
+  override func becomeFirstResponder() -> Bool {
+    let accepted = super.becomeFirstResponder()
+    if accepted { onFocus?(true) }
+    return accepted
+  }
+  override func resignFirstResponder() -> Bool {
+    let accepted = super.resignFirstResponder()
+    if accepted { onFocus?(false) }
+    return accepted
+  }
   var onSubmit: (() -> Void)?
   /// Returns true when a mention list is open and consumed the key.
   var onMentionKey: ((MentionKey) -> Bool)?
@@ -145,6 +156,7 @@ struct ComposerInput: NSViewRepresentable {
   var autofocus = false
   var sendShortcut = SendShortcut.enter
   var handle: ComposerHandle?
+  var onFocus: (Bool) -> Void = { _ in }
   var onHeight: (CGFloat) -> Void = { _ in }
   /// The text after `@` while a mention is being typed, or nil.
   var onMention: (String?) -> Void = { _ in }
@@ -209,6 +221,7 @@ struct ComposerInput: NSViewRepresentable {
     editor.insertionPointColor = NSColor(color)
     editor.placeholderColor = NSColor(placeholderColor)
     editor.placeholder = placeholder
+    editor.onFocus = onFocus
     editor.onSubmit = submit
     editor.sendShortcut = sendShortcut
     editor.onMentionKey = onMentionKey

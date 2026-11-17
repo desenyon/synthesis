@@ -338,7 +338,16 @@ struct ConversationRow: View {
       selected || hover ? studio.t.navigation.hover : .clear,
       in: RoundedRectangle(cornerRadius: SidebarMetric.radius)
     )
-    .onHover { hover = $0 }.contextMenu { actions }.help(chat.title)
+    .onContinuousHover { phase in
+      switch phase {
+      case .active: hover = true
+      case .ended: hover = false
+      }
+    }
+    .onChange(of: studio.destination) { _, _ in hover = false }
+    .onChange(of: studio.conversationID) { _, _ in hover = false }
+    .onDisappear { hover = false }
+    .contextMenu { actions }.help(chat.title)
   }
   @ViewBuilder private var actions: some View {
     Button("Rename…") {
