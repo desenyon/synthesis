@@ -124,7 +124,7 @@ struct ReviewScreen: View {
               HStack(spacing: 6) {
                 StudioIcon("bubble.left", size: 11)
                 Text(chat.title).font(.studio(size: 12.5, weight: .medium)).lineLimit(1)
-                Text(relativeDate(proposal.createdAt)).font(.studio(size: 12))
+                Text(relativeDate(proposal.createdAt)).font(.studio(.caption))
                   .foregroundStyle(studio.t.muted)
               }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 24)
                 .hoverFill(studio.t, radius: 6)
@@ -155,7 +155,7 @@ struct ReviewScreen: View {
           HStack(spacing: 12) {
             CategoryTile(record: record, t: studio.t, size: 34)
             VStack(alignment: .leading, spacing: 3) {
-              Text(record.title).font(.studio(size: 14, weight: .medium)).lineLimit(1)
+              Text(record.title).font(.studio(.control)).lineLimit(1)
               Text("Draft changed \(relativeDate(record.updatedAt).lowercased()) · canon preserved")
                 .font(.studio(size: 12.5)).foregroundStyle(studio.t.muted).lineLimit(1)
             }
@@ -226,9 +226,10 @@ struct ReviewScreen: View {
           [.duplicateName, .orphanedEvent, .conflictingRelationship, .timelineOrder].contains(
             finding.kind) ? t.warning : t.secondary
         )
-        .frame(width: 34, height: 34).background(t.surface, in: RoundedRectangle(cornerRadius: 8))
+        .frame(width: 34, height: 34).background(
+          t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
       VStack(alignment: .leading, spacing: 3) {
-        Text(finding.title).font(.studio(size: 14, weight: .medium))
+        Text(finding.title).font(.studio(.control))
           .fixedSize(horizontal: false, vertical: true)
         Text(finding.detail).font(.studio(size: 12.5)).foregroundStyle(t.muted)
           .fixedSize(horizontal: false, vertical: true)
@@ -263,7 +264,7 @@ struct ReviewScreen: View {
               ) { studio.openRecord(record) }
             }
           } label: {
-            Text("Open…").font(.studio(size: 13, weight: .medium)).padding(.horizontal, 12)
+            Text("Open…").font(.studio(.label)).padding(.horizontal, 12)
               .frame(height: Metric.control)
               .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
               .overlay(

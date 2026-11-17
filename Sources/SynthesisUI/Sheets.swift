@@ -54,12 +54,12 @@ struct StudioSheet: View {
         if studio.error == nil { studio.completeOnboarding() }
       }
       HStack {
-        Text("Start creating").font(.studio(size: 14, weight: .medium))
+        Text("Start creating").font(.studio(.control))
         Spacer()
         ModeSwitch(studio: studio)
       }
       HStack {
-        Text("Appearance").font(.studio(size: 14, weight: .medium))
+        Text("Appearance").font(.studio(.control))
         Spacer()
         AppearanceSwitch(studio: studio)
       }
@@ -123,13 +123,13 @@ struct StudioSheet: View {
             }.padding(10).frame(maxWidth: .infinity, alignment: .topLeading).frame(height: 96)
               .background(
                 kind == item.0 ? studio.t.accentSoft.opacity(0.6) : studio.t.surface,
-                in: RoundedRectangle(cornerRadius: 10)
+                in: RoundedRectangle(cornerRadius: Metric.floatingRadius)
               )
               .overlay(
-                RoundedRectangle(cornerRadius: 10).stroke(
+                RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
                   kind == item.0 ? studio.t.accent.opacity(0.6) : studio.t.hairline, lineWidth: 1)
               )
-              .contentShape(RoundedRectangle(cornerRadius: 10))
+              .contentShape(RoundedRectangle(cornerRadius: Metric.floatingRadius))
           }.buttonStyle(.plain).accessibilityAddTraits(kind == item.0 ? .isSelected : [])
         }
       }
@@ -138,7 +138,7 @@ struct StudioSheet: View {
         t: studio.t, submit: create)
       if kind == "entity" {
         VStack(alignment: .leading, spacing: 6) {
-          Text("Type").font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+          Text("Type").font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary)
           FlowLayout(spacing: 6) {
             ForEach(Vocabulary.categories, id: \.self) { item in
               FilterChip(title: item, selected: category == item, t: studio.t) {

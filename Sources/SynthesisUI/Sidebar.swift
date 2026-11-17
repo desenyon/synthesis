@@ -56,7 +56,7 @@ struct Sidebar: View {
                       ConversationRow(studio: studio, chat: chat)
                     }
                     if studio.conversations.isEmpty {
-                      Text("No conversations yet").font(.studio(size: 12))
+                      Text("No conversations yet").font(.studio(.caption))
                         .foregroundStyle(palette.muted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 10).frame(height: SidebarMetric.history)
@@ -122,7 +122,7 @@ struct Sidebar: View {
       HStack(spacing: 12) {
         StudioIcon("square.and.pencil", size: SidebarMetric.icon).frame(width: 20)
         if !collapsed {
-          Text("New chat").font(.studio(size: 13, weight: .medium)).lineLimit(1)
+          Text("New chat").font(.studio(.label)).lineLimit(1)
           Spacer(minLength: 4)
           Text("⇧⌘N").font(.studio(size: 11)).foregroundStyle(palette.muted)
         }

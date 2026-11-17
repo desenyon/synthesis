@@ -85,7 +85,7 @@ struct WorldsScreen: View {
         ContentColumn {
           VStack(alignment: .leading, spacing: 26) {
             VStack(alignment: .leading, spacing: 8) {
-              Text("A place for every universe.").font(.studio(size: 30, weight: .semibold))
+              Text("A place for every universe.").font(.studio(.title))
                 .tracking(
                   -0.8)
               Text("Open a world, pick up a thought, or take your work with you.")
@@ -101,21 +101,21 @@ struct WorldsScreen: View {
                   if let cover = covers[world.id] {
                     Color.clear.aspectRatio(16.0 / 9, contentMode: .fit)
                       .overlay { Image(nsImage: cover).resizable().scaledToFill() }
-                      .clipShape(RoundedRectangle(cornerRadius: 10))
+                      .clipShape(RoundedRectangle(cornerRadius: Metric.floatingRadius))
                       .accessibilityLabel("Cover of \(world.name)")
                   }
                   HStack {
                     StudioIcon("globe", size: 26).foregroundStyle(studio.t.accent)
                     Spacer()
                     if world.id == studio.worldID {
-                      Text("Current").font(.studio(size: 12, weight: .medium)).foregroundStyle(
+                      Text("Current").font(.studio(.captionStrong)).foregroundStyle(
                         studio.t.accent)
                     }
                     if world.demo {
-                      Text("Sample").font(.studio(size: 12)).foregroundStyle(studio.t.muted)
+                      Text("Sample").font(.studio(.caption)).foregroundStyle(studio.t.muted)
                     }
                     if studio.branchParents[world.id] != nil {
-                      StudioLabel("What-if", icon: "tuningfork").font(.studio(size: 12))
+                      StudioLabel("What-if", icon: "tuningfork").font(.studio(.caption))
                         .foregroundStyle(studio.t.warning)
                     }
                     PlainMenu {
@@ -151,7 +151,7 @@ struct WorldsScreen: View {
                     studio.navigate(studio.mode == .manual ? .library : .chat)
                   } label: {
                     VStack(alignment: .leading, spacing: 8) {
-                      Text(world.name).font(.studio(size: 20, weight: .semibold)).lineLimit(2)
+                      Text(world.name).font(.studio(.section)).lineLimit(2)
                       if !world.description.isEmpty {
                         Text(world.description).font(.studio(size: 14)).foregroundStyle(
                           studio.t.secondary
@@ -161,13 +161,13 @@ struct WorldsScreen: View {
                         Text("\(summary.records) records · \(summary.conversations) conversations")
                           .font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
                         Text("Updated \(relativeDate(summary.updatedAt).lowercased())")
-                          .font(.studio(size: 12)).foregroundStyle(studio.t.muted)
+                          .font(.studio(.caption)).foregroundStyle(studio.t.muted)
                       }
                       HStack {
                         Text(world.id == studio.worldID ? "Continue creating" : "Open world")
                         Spacer()
                         StudioIcon("arrow.up.forward")
-                      }.font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
+                      }.font(.studio(.label)).foregroundStyle(studio.t.accent)
                         .padding(.top, 12)
                     }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
                   }.buttonStyle(.plain)

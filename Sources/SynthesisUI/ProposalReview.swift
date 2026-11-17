@@ -25,7 +25,7 @@ struct ProposalCard: View {
         Text(
           proposal.pending == 0
             ? "Reviewed" : "\(proposal.pending) to review"
-        ).font(.studio(size: 12, weight: .medium)).fixedSize()
+        ).font(.studio(.captionStrong)).fixedSize()
           .foregroundStyle(proposal.pending == 0 ? t.muted : t.accent)
       }.padding(.horizontal, 14).padding(.vertical, 12)
       ForEach(proposal.changes) { change in
@@ -42,7 +42,7 @@ struct ProposalCard: View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
           StudioIcon("lock.shield", size: 11).foregroundStyle(t.muted)
           Text("Accepted changes are saved as drafts. Nothing becomes canon here.")
-            .font(.studio(size: 12)).foregroundStyle(t.muted)
+            .font(.studio(.caption)).foregroundStyle(t.muted)
             .fixedSize(horizontal: false, vertical: true)
         }
         if !narrow { Spacer(minLength: 8) }
@@ -162,13 +162,13 @@ struct ProposalCard: View {
           .foregroundStyle(t.category(change.category ?? "")).frame(width: 18).padding(.top, 2)
         VStack(alignment: .leading, spacing: 3) {
           Text(info.kind).font(.studio(size: 11.5, weight: .medium)).foregroundStyle(t.muted)
-          Text(info.title).font(.studio(size: 14, weight: .medium))
+          Text(info.title).font(.studio(.control))
             .fixedSize(horizontal: false, vertical: true)
           if let lane = change.laneID, !lane.isEmpty {
             Text("Inside \(laneName(lane))").font(.studio(size: 12.5)).foregroundStyle(t.secondary)
           }
           if change.action == "add_event", change.source == nil {
-            Text("Creates a linked draft source document").font(.studio(size: 12)).foregroundStyle(
+            Text("Creates a linked draft source document").font(.studio(.caption)).foregroundStyle(
               t.secondary)
           }
           if let reason = change.reason {
@@ -182,7 +182,7 @@ struct ProposalCard: View {
               "This record changed after the proposal was made.",
               icon: "exclamationmark.triangle"
             )
-            .font(.studio(size: 12)).foregroundStyle(t.warning)
+            .font(.studio(.caption)).foregroundStyle(t.warning)
           }
           if detail, let text = change.body, !text.isEmpty {
             Button {
@@ -196,7 +196,7 @@ struct ProposalCard: View {
                     ? "Hide"
                     : (["revise_record", "revise_rule"].contains(change.action)
                       ? "Show what changes" : "Show text")
-                ).font(.studio(size: 12, weight: .medium))
+                ).font(.studio(.captionStrong))
               }.foregroundStyle(t.accent)
             }.buttonStyle(.plain)
           }
@@ -243,7 +243,7 @@ struct ProposalCard: View {
     switch change.status {
     case "accepted":
       HStack(spacing: 8) {
-        StudioLabel("Saved", icon: "checkmark").font(.studio(size: 12, weight: .medium))
+        StudioLabel("Saved", icon: "checkmark").font(.studio(.captionStrong))
           .foregroundStyle(t.positive).fixedSize()
         if ["create_board", "place_record"].contains(change.action), let id = change.resultID {
           Button("Open canvas") {
@@ -283,7 +283,7 @@ struct ProposalCard: View {
         }
       }
     case "rejected":
-      Text("Dismissed").font(.studio(size: 12, weight: .medium)).foregroundStyle(t.muted)
+      Text("Dismissed").font(.studio(.captionStrong)).foregroundStyle(t.muted)
         .fixedSize()
     default:
       HStack(spacing: 6) {
@@ -366,12 +366,12 @@ struct ProposalCard: View {
           .background((tint ?? .clear).opacity(tint == nil ? 0 : 0.12))
       }
       if lines.count > 60 {
-        Text("… \(lines.count - 60) more lines").font(.studio(size: 12)).foregroundStyle(t.muted)
+        Text("… \(lines.count - 60) more lines").font(.studio(.caption)).foregroundStyle(t.muted)
           .padding(.horizontal, 10).padding(.vertical, 4)
       }
     }.padding(.vertical, 6)
-      .background(t.background.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
-      .overlay(RoundedRectangle(cornerRadius: 8).stroke(t.hairline, lineWidth: 1))
+      .background(t.background.opacity(0.55), in: RoundedRectangle(cornerRadius: Metric.radius))
+      .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.hairline, lineWidth: 1))
   }
 }
 
@@ -396,7 +396,7 @@ struct ContextDisclosure: View {
             }
           }.padding(.trailing, 4)
           Text("Used \(sources.count) lore \(sources.count == 1 ? "reference" : "references")")
-            .font(.studio(size: 13, weight: .medium))
+            .font(.studio(.label))
           StudioIcon("chevron.right", size: 10).rotationEffect(.degrees(open ? 90 : 0))
         }.foregroundStyle(t.secondary).padding(.horizontal, 8).frame(height: 26)
           .hoverFill(t, radius: 6)
@@ -411,8 +411,8 @@ struct ContextDisclosure: View {
               HStack(spacing: 8) {
                 StudioIcon(recordIcon(source.record), size: 11.5)
                   .foregroundStyle(t.category(source.record.category)).frame(width: 16)
-                Text(source.record.title).font(.studio(size: 13, weight: .medium)).lineLimit(1)
-                Text(source.reason).font(.studio(size: 12)).foregroundStyle(t.muted)
+                Text(source.record.title).font(.studio(.label)).lineLimit(1)
+                Text(source.reason).font(.studio(.caption)).foregroundStyle(t.muted)
                   .lineLimit(1)
                 Spacer(minLength: 0)
                 StateBadge(state: source.record.state, t: t)
@@ -420,8 +420,11 @@ struct ContextDisclosure: View {
             }.buttonStyle(.plain)
           }
         }.padding(6)
-          .background(t.surface.opacity(0.45), in: RoundedRectangle(cornerRadius: 10))
-          .overlay(RoundedRectangle(cornerRadius: 10).stroke(t.hairline, lineWidth: 1))
+          .background(
+            t.surface.opacity(0.45), in: RoundedRectangle(cornerRadius: Metric.floatingRadius)
+          )
+          .overlay(
+            RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(t.hairline, lineWidth: 1))
       }
     }
   }

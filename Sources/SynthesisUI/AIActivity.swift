@@ -24,7 +24,7 @@ struct AIActivityView: View {
             steps.last(where: { $0.state == .running })?.title
               ?? (finished ? "World context prepared" : "Preparing your conversation")
           )
-          .font(.studio(size: 13, weight: .medium)).foregroundStyle(t.secondary)
+          .font(.studio(.label)).foregroundStyle(t.secondary)
           .lineLimit(1)
           StudioIcon("chevron.right", size: 10).rotationEffect(.degrees(expanded ? 90 : 0))
             .foregroundStyle(t.muted)
@@ -39,10 +39,10 @@ struct AIActivityView: View {
                 .foregroundStyle(step.state == .failed ? t.danger : t.accent)
                 .frame(width: 16, height: 18)
               VStack(alignment: .leading, spacing: 4) {
-                Text(step.title).font(.studio(size: 13, weight: .medium))
+                Text(step.title).font(.studio(.label))
                   .foregroundStyle(step.state == .running ? t.text : t.secondary)
                 if !step.detail.isEmpty {
-                  Text(step.detail).font(.studio(size: 12)).foregroundStyle(t.muted)
+                  Text(step.detail).font(.studio(.caption)).foregroundStyle(t.muted)
                     .lineLimit(3).fixedSize(horizontal: false, vertical: true)
                 }
               }

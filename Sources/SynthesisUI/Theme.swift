@@ -66,8 +66,57 @@ enum Metric {
   static let radius: CGFloat = 8
   static let cardRadius: CGFloat = 12
   static let panelRadius: CGFloat = 14
+  static let smallRadius: CGFloat = 7
+  static let floatingRadius: CGFloat = 10
+  static let contentInset: CGFloat = 28
+  static let contentWidth: CGFloat = 880
   /// Width reserved at the top-left for the window controls and navigation toggle.
   static let chrome: CGFloat = 124
+}
+
+/// Four-point rhythm for shared controls and page composition.
+enum Space {
+  static let xs: CGFloat = 4
+  static let sm: CGFloat = 8
+  static let md: CGFloat = 12
+  static let lg: CGFloat = 16
+  static let xl: CGFloat = 24
+  static let xxl: CGFloat = 32
+}
+
+enum Motion {
+  static let feedback = 0.15
+  static let panel = 0.22
+  static let workspace = 0.22
+}
+
+/// Shadow geometry belongs to the surface role, not an individual workspace.
+enum Elevation {
+  case floating, card, companion, composer, compactComposer
+  var radius: CGFloat {
+    switch self {
+    case .floating: 14
+    case .card: 12
+    case .companion: 24
+    case .composer, .compactComposer: 16
+    }
+  }
+  var offset: CGFloat {
+    switch self {
+    case .card: 4
+    case .companion: 8
+    default: 6
+    }
+  }
+  var opacity: Double {
+    switch self {
+    case .floating: 0.6
+    case .card: 1
+    case .companion: 0.7
+    case .composer: 0.25
+    case .compactComposer: 0.5
+    }
+  }
 }
 
 /// Navigation is neutral; artwork and the workspace retain their own semantic colour.

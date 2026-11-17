@@ -14,7 +14,7 @@ struct FloatingCompanion: View {
       )
       .clipShape(RoundedRectangle(cornerRadius: 18))
       .overlay(RoundedRectangle(cornerRadius: 18).stroke(studio.t.border, lineWidth: 1))
-      .shadow(color: studio.t.shadow.opacity(0.7), radius: 24, y: 8)
+      .elevation(.companion, t: studio.t)
       .overlay(alignment: .leading) {
         Color.clear.frame(width: 10).contentShape(Rectangle())
           .gesture(

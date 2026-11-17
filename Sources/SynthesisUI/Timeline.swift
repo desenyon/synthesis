@@ -82,11 +82,11 @@ struct TimelineScreen: View {
           }
         } label: {
           Text(lanes.first { $0.id == selectedLane }?.name ?? "All history").font(
-            .studio(size: 13, weight: .medium))
+            .studio(.label))
         }.frame(maxWidth: 260, alignment: .leading)
         if let lane = lanes.first(where: { $0.id == selectedLane }) {
           Text([lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — ")).font(
-            .studio(size: 12)
+            .studio(.caption)
           ).foregroundStyle(studio.t.secondary)
           IconButton(icon: "pencil.line", label: "Edit history", t: studio.t) {
             edit(lane)
@@ -217,7 +217,7 @@ struct TimelineScreen: View {
                 Spacer(minLength: 8)
                 Text("\(events.filter { family.contains(placements[$0.id] ?? "") }.count)")
                   .monospacedDigit().foregroundStyle(studio.t.secondary)
-              }.font(.studio(size: 13, weight: .medium))
+              }.font(.studio(.label))
                 .padding(.trailing, 10).frame(height: 30)
                 .contentShape(Rectangle())
             }.buttonStyle(.plain).help("Show \(entry.lane.name) and its nested history")
@@ -305,7 +305,7 @@ struct TimelineScreen: View {
               StudioIcon(
                 group.lane?.kind == "branch" ? "arrow.triangle.branch" : "calendar", size: 13
               ).foregroundStyle(studio.t.accent)
-              Text(group.lane?.name ?? "Not in a period").font(.studio(size: 16, weight: .semibold))
+              Text(group.lane?.name ?? "Not in a period").font(.studio(.cardTitle))
                 .lineLimit(1)
               if let lane = group.lane, !(lane.start + lane.end).isEmpty {
                 Text([lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — "))
@@ -313,7 +313,7 @@ struct TimelineScreen: View {
               }
               Spacer(minLength: 8)
               Text("\(group.events.count) \(group.events.count == 1 ? "event" : "events")")
-                .font(.studio(size: 12)).monospacedDigit().foregroundStyle(studio.t.muted)
+                .font(.studio(.caption)).monospacedDigit().foregroundStyle(studio.t.muted)
             }.contentShape(Rectangle())
           }.buttonStyle(.plain)
             .accessibilityLabel(
@@ -333,7 +333,7 @@ struct TimelineScreen: View {
     let unknown = event.dateLabel == "unknown" || event.dateLabel.isEmpty
     let lane = lanes.first { $0.id == placements[event.id] }
     return HStack(spacing: 12) {
-      Text(unknown ? "Date unknown" : event.dateLabel).font(.studio(size: 12, weight: .medium))
+      Text(unknown ? "Date unknown" : event.dateLabel).font(.studio(.captionStrong))
         .foregroundStyle(unknown ? studio.t.muted : studio.t.accent).lineLimit(1)
         .frame(width: 132, alignment: .trailing)
       Circle().fill(unknown ? studio.t.muted : studio.t.accent).frame(width: 6, height: 6)
@@ -350,7 +350,7 @@ struct TimelineScreen: View {
           HStack(spacing: 5) {
             StudioIcon(recordIcon(source), size: 10).foregroundStyle(
               studio.t.category(source.category))
-            Text(source.title).font(.studio(size: 12)).lineLimit(1)
+            Text(source.title).font(.studio(.caption)).lineLimit(1)
           }.foregroundStyle(studio.t.secondary)
         }.buttonStyle(.plain).help("Open the source record")
       }
@@ -491,7 +491,7 @@ struct TimelineScreen: View {
           .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
       } else {
         VStack(alignment: .leading, spacing: 6) {
-          Text("Source record").font(.studio(size: 12, weight: .medium))
+          Text("Source record").font(.studio(.captionStrong))
             .foregroundStyle(studio.t.secondary)
           Button {
             sourcePicker = true
@@ -616,7 +616,7 @@ private struct EventCard: View {
     let t = studio.t
     HStack(alignment: .top, spacing: 10) {
       VStack(alignment: .leading, spacing: 8) {
-        Text(event.title).font(.studio(size: 16, weight: .semibold))
+        Text(event.title).font(.studio(.cardTitle))
           .fixedSize(horizontal: false, vertical: true)
         HStack(spacing: 10) {
           if let source {

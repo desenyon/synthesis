@@ -75,7 +75,7 @@ struct AssistantContextPanel: View {
       Text(
         "Live references from \(studio.world?.name ?? "this universe"). Nothing is copied or sent yet."
       )
-      .font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+      .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
       HStack(spacing: 4) {
         ForEach(["Records", "Canvas", "Atlas", "History"], id: \.self) { name in
           Button {
@@ -158,7 +158,7 @@ struct AssistantContextPanel: View {
             ? "Earlier messages are withheld for restricted context, so they cannot reintroduce excluded lore. Your new message is still sent."
             : "Up to 20 earlier messages accompany this request. Excerpts and the world index are bounded; this is not a token or cost estimate."
         )
-        .font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+        .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
         if let failure {
           Text(failure).font(.studio(size: 13)).foregroundStyle(studio.t.warning)
         } else if let preview {
@@ -188,14 +188,14 @@ struct AssistantContextPanel: View {
               }.buttonStyle(QuietButton(t: studio.t))
             } label: {
               VStack(alignment: .leading, spacing: 3) {
-                Text(source.record.title).font(.studio(size: 13, weight: .medium)).lineLimit(1)
+                Text(source.record.title).font(.studio(.label)).lineLimit(1)
                 Text(source.reason).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
               }
             }.tint(studio.t.secondary)
           }
           DisclosureGroup("Exact lore excerpts") {
             Text(preview.lore.isEmpty ? "No excerpts." : preview.lore)
-              .font(.studio(size: 12)).textSelection(.enabled)
+              .font(.studio(.caption)).textSelection(.enabled)
               .frame(maxWidth: .infinity, alignment: .leading)
           }.font(.studio(size: 12.5)).tint(studio.t.secondary)
           DisclosureGroup("Structured workspace index") {
@@ -283,7 +283,7 @@ struct AssistantContextPanel: View {
       HStack(spacing: 9) {
         StudioIcon(icon, size: 16).foregroundStyle(studio.t.secondary)
         VStack(alignment: .leading, spacing: 3) {
-          Text(title).font(.studio(size: 13, weight: .medium)).lineLimit(1)
+          Text(title).font(.studio(.label)).lineLimit(1)
           Text(subtitle).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(2)
         }
         Spacer(minLength: 6)

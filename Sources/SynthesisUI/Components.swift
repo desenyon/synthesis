@@ -8,8 +8,8 @@ struct ContentColumn<Content: View>: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 0, content: content)
       .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(.horizontal, 28)
-      .frame(maxWidth: 880)
+      .padding(.horizontal, Metric.contentInset)
+      .frame(maxWidth: Metric.contentWidth)
       .frame(maxWidth: .infinity)
   }
 }
@@ -17,7 +17,7 @@ struct ContentColumn<Content: View>: View {
 struct ContentHeader<Content: View>: View {
   @ViewBuilder var content: () -> Content
   var body: some View {
-    ContentColumn { HStack(spacing: 8, content: content) }
+    ContentColumn { HStack(spacing: Space.sm, content: content) }
       .padding(.vertical, 10)
   }
 }
@@ -45,8 +45,8 @@ struct PreferenceRow<Control: View>: View {
   let t: Theme
   @ViewBuilder var control: () -> Control
   private var label: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text(title).font(.studio(size: 14, weight: .medium)).foregroundStyle(t.text)
+    VStack(alignment: .leading, spacing: Space.xs) {
+      Text(title).font(.studio(.control)).foregroundStyle(t.text)
       if !detail.isEmpty {
         Text(detail).font(.studio(size: 12.5)).foregroundStyle(t.secondary)
           .fixedSize(horizontal: false, vertical: true)
@@ -55,15 +55,15 @@ struct PreferenceRow<Control: View>: View {
   }
   var body: some View {
     ViewThatFits(in: .horizontal) {
-      HStack(spacing: 24) {
+      HStack(spacing: Space.xl) {
         label.frame(minWidth: 200)
         control().fixedSize(horizontal: true, vertical: false)
       }
-      VStack(alignment: .leading, spacing: 12) {
+      VStack(alignment: .leading, spacing: Space.md) {
         label
         control()
       }
-    }.padding(.vertical, 16)
+    }.padding(.vertical, Space.lg)
       .overlay(alignment: .bottom) { t.hairline.frame(height: 1) }
   }
 }
@@ -91,12 +91,12 @@ struct PreferenceMenu<Value: Hashable>: View {
         }
       }
     } label: {
-      HStack(spacing: 8) {
+      HStack(spacing: Space.sm) {
         Text(options.first { $0.0 == value }?.1 ?? title).lineLimit(1)
         Spacer(minLength: 4)
         StudioIcon("chevron.up.chevron.down", size: 12).foregroundStyle(t.secondary)
-      }.font(.studio(size: 13, weight: .medium)).foregroundStyle(t.text)
-        .padding(.horizontal, 12).frame(width: 176, height: 34)
+      }.font(.studio(.label)).foregroundStyle(t.text)
+        .padding(.horizontal, Space.md).frame(width: 176, height: 34)
         .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
         .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.hairline, lineWidth: 1))
     }.accessibilityLabel(title)
@@ -128,9 +128,9 @@ struct QuietButton: ButtonStyle {
     @State private var hover = false
     @Environment(\.isEnabled) private var enabled
     var body: some View {
-      configuration.label.font(.studio(size: 13, weight: .medium)).lineLimit(1)
+      configuration.label.font(.studio(.label)).lineLimit(1)
         .fixedSize(horizontal: true, vertical: false)
-        .padding(.horizontal, 12).frame(height: Metric.control)
+        .padding(.horizontal, Space.md).frame(height: Metric.control)
         .foregroundStyle(foreground)
         .background(fill, in: RoundedRectangle(cornerRadius: Metric.radius))
         .overlay(
@@ -174,9 +174,9 @@ struct IconButton: View {
         .frame(width: size, height: size)
         .background(
           active ? t.accentSoft : (hover && enabled ? t.hover : .clear),
-          in: RoundedRectangle(cornerRadius: 7)
+          in: RoundedRectangle(cornerRadius: Metric.smallRadius)
         )
-        .contentShape(RoundedRectangle(cornerRadius: 7))
+        .contentShape(RoundedRectangle(cornerRadius: Metric.smallRadius))
         .opacity(enabled ? 1 : 0.35)
     }.buttonStyle(.plain).onHover { hover = $0 }.help(label).accessibilityLabel(label)
   }
@@ -280,7 +280,7 @@ private struct DropdownButtonStyle: PrimitiveButtonStyle {
       configuration.trigger()
     } label: {
       configuration.label.frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 10).padding(.vertical, 8).contentShape(Rectangle())
+        .padding(.horizontal, 10).padding(.vertical, Space.sm).contentShape(Rectangle())
         .hoverFill(t, radius: 7)
     }.buttonStyle(.plain)
   }
@@ -314,8 +314,10 @@ struct IconMenu<Items: View>: View {
     PlainMenu(items: items) {
       StudioIcon(icon, size: size * 0.5)
         .foregroundStyle(hover ? t.text : t.secondary).frame(width: size, height: size)
-        .background(hover ? t.hover : .clear, in: RoundedRectangle(cornerRadius: 7))
-        .contentShape(RoundedRectangle(cornerRadius: 7))
+        .background(
+          hover ? t.hover : .clear, in: RoundedRectangle(cornerRadius: Metric.smallRadius)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: Metric.smallRadius))
     }.onHover { hover = $0 }.help(label).accessibilityLabel(label)
   }
 }
@@ -323,7 +325,7 @@ struct IconMenu<Items: View>: View {
 /// Adds the standard row hover fill.
 struct HoverFill: ViewModifier {
   let t: Theme
-  var radius: CGFloat = 7
+  var radius: CGFloat = Metric.smallRadius
   var selected = false
   @State private var hover = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -340,18 +342,23 @@ struct HoverFill: ViewModifier {
       }
       .onChange(of: selected) { _, _ in hover = false }
       .onDisappear { hover = false }
-      .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: hover)
+      .animation(reduceMotion ? nil : .easeOut(duration: Motion.feedback), value: hover)
   }
 }
 extension View {
-  func hoverFill(_ t: Theme, radius: CGFloat = 7, selected: Bool = false) -> some View {
+  func elevation(_ level: Elevation, t: Theme) -> some View {
+    shadow(color: t.shadow.opacity(level.opacity), radius: level.radius, y: level.offset)
+  }
+  func hoverFill(_ t: Theme, radius: CGFloat = Metric.smallRadius, selected: Bool = false)
+    -> some View
+  {
     modifier(HoverFill(t: t, radius: radius, selected: selected))
   }
   /// Floating panel surface used by toolbars, palettes and inspectors.
-  func floatingPanel(_ t: Theme, radius: CGFloat = 10) -> some View {
+  func floatingPanel(_ t: Theme, radius: CGFloat = Metric.floatingRadius) -> some View {
     background { FrostedSurface(t: t, radius: radius) }
       .overlay(RoundedRectangle(cornerRadius: radius).stroke(t.hairline, lineWidth: 1))
-      .shadow(color: t.shadow.opacity(0.6), radius: 14, y: 6)
+      .elevation(.floating, t: t)
   }
 }
 
@@ -363,7 +370,7 @@ struct StateBadge: View {
   var body: some View {
     HStack(spacing: 5) {
       Circle().fill(t.state(state)).frame(width: 6, height: 6)
-      Text(Vocabulary.stateLabel(state)).font(.studio(size: 12, weight: .medium))
+      Text(Vocabulary.stateLabel(state)).font(.studio(.captionStrong))
         .foregroundStyle(state == "canon" ? t.positive : t.secondary)
     }.accessibilityElement(children: .combine)
       .accessibilityLabel("State: \(Vocabulary.stateLabel(state))")
@@ -378,7 +385,9 @@ struct CategoryTile: View {
     let tint = t.category(record.category)
     StudioIcon(recordIcon(record), size: size * 0.44)
       .foregroundStyle(tint).frame(width: size, height: size)
-      .background(tint.opacity(t.dark ? 0.14 : 0.1), in: RoundedRectangle(cornerRadius: 8))
+      .background(
+        tint.opacity(t.dark ? 0.14 : 0.1), in: RoundedRectangle(cornerRadius: Metric.radius)
+      )
       .accessibilityHidden(true)
   }
 }
@@ -387,7 +396,7 @@ struct SectionLabel: View {
   let title: String
   let t: Theme
   var body: some View {
-    Text(title).font(.studio(size: 11, weight: .semibold)).tracking(0.3)
+    Text(title).font(.studio(.sectionLabel)).tracking(0.3)
       .foregroundStyle(t.muted).frame(maxWidth: .infinity, alignment: .leading)
   }
 }
@@ -473,7 +482,7 @@ struct FormField: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
       if let label {
-        Text(label).font(.studio(size: 12, weight: .medium)).foregroundStyle(t.secondary)
+        Text(label).font(.studio(.captionStrong)).foregroundStyle(t.secondary)
       }
       TextField(placeholder, text: $text)
         .textFieldStyle(.plain).font(.studio(size: 14)).onSubmit(submit)
@@ -501,7 +510,7 @@ struct EmptyState<Actions: View>: View {
           .multilineTextAlignment(.center).lineSpacing(3).fixedSize(
             horizontal: false, vertical: true)
       }
-      HStack(spacing: 8) { actions() }.padding(.top, 4)
+      HStack(spacing: Space.sm) { actions() }.padding(.top, 4)
     }.frame(maxWidth: 420).padding(28)
   }
 }
@@ -515,7 +524,7 @@ struct ZoomControls: View {
   var body: some View {
     HStack(spacing: 2) {
       IconButton(icon: "minus", label: "Zoom out", t: t, action: zoomOut)
-      Text("\(Int((zoom * 100).rounded()))%").font(.studio(size: 12, weight: .medium))
+      Text("\(Int((zoom * 100).rounded()))%").font(.studio(.captionStrong))
         .monospacedDigit().foregroundStyle(t.secondary).frame(width: 42)
       IconButton(icon: "plus", label: "Zoom in", t: t, action: zoomIn)
       Rectangle().fill(t.hairline).frame(width: 1, height: 16).padding(.horizontal, 2)
@@ -559,7 +568,7 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
     }.frame(height: Metric.bar).background(WindowDragArea())
   }
   private func row(compact: Bool) -> some View {
-    HStack(spacing: 8) {
+    HStack(spacing: Space.sm) {
       leading()
       Spacer(minLength: 8)
       trailing()
@@ -569,7 +578,8 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
             studio.sheet = .components
           }
         }
-        Rectangle().fill(studio.t.hairline).frame(width: 1, height: 18).padding(.horizontal, 4)
+        Rectangle().fill(studio.t.hairline).frame(width: 1, height: 18).padding(
+          .horizontal, Space.xs)
         ModeSwitch(studio: studio, compact: compact)
         IconButton(icon: "magnifyingglass", label: "Search and commands · ⌘K", t: studio.t) {
           studio.palette = true
@@ -589,7 +599,7 @@ struct RecordBreadcrumb: View {
   var back: () -> Void
   @Environment(\.barCompact) private var compact
   var body: some View {
-    HStack(spacing: 8) {
+    HStack(spacing: Space.sm) {
       Button(action: back) {
         HStack(spacing: 5) {
           StudioIcon("chevron.left", size: 11)
@@ -605,7 +615,7 @@ struct RecordBreadcrumb: View {
         Circle().fill(status.contains("Not saved") ? t.danger : t.muted)
           .frame(width: 5, height: 5).help(status).accessibilityLabel(status)
       } else {
-        Text(status).font(.studio(size: 12)).lineLimit(1)
+        Text(status).font(.studio(.caption)).lineLimit(1)
           .foregroundStyle(status.contains("Not saved") ? t.danger : t.muted)
           .padding(.leading, 4)
       }
@@ -684,11 +694,11 @@ struct SegmentedSwitch<Value: Hashable>: View {
             .foregroundStyle(active ? t.text : t.muted)
             .background {
               if active {
-                RoundedRectangle(cornerRadius: 7).fill(t.secondarySurface)
+                RoundedRectangle(cornerRadius: Metric.smallRadius).fill(t.secondarySurface)
                   .matchedGeometryEffect(id: "selection", in: space)
               }
             }
-            .contentShape(RoundedRectangle(cornerRadius: 7))
+            .contentShape(RoundedRectangle(cornerRadius: Metric.smallRadius))
         }.buttonStyle(.plain).help(choice.help.isEmpty ? choice.title : choice.help)
           .accessibilityLabel(choice.title).accessibilityAddTraits(active ? .isSelected : [])
       }
@@ -735,10 +745,10 @@ struct CaptureSheetPanel<Content: View>: View {
   @Environment(\.colorScheme) private var colorScheme
   var body: some View {
     let t = Theme(dark: colorScheme == .dark)
-    content().background(t.background, in: RoundedRectangle(cornerRadius: 14))
+    content().background(t.background, in: RoundedRectangle(cornerRadius: Metric.panelRadius))
       .background(CaptureSheetAnchor())
-      .clipShape(RoundedRectangle(cornerRadius: 14))
-      .overlay(RoundedRectangle(cornerRadius: 14).stroke(t.hairline, lineWidth: 1))
+      .clipShape(RoundedRectangle(cornerRadius: Metric.panelRadius))
+      .overlay(RoundedRectangle(cornerRadius: Metric.panelRadius).stroke(t.hairline, lineWidth: 1))
       .shadow(color: .black.opacity(0.3), radius: 30)
   }
 }
@@ -775,8 +785,8 @@ struct SheetScaffold<Content: View, Footer: View>: View {
         IconButton(icon: "xmark", label: "Close", t: t, size: 26, action: close)
           .keyboardShortcut(.cancelAction)
       }.padding(.horizontal, 22).padding(.top, 20).padding(.bottom, 16)
-      VStack(alignment: .leading, spacing: 16) { content() }.padding(.horizontal, 22)
-      HStack(spacing: 8) { footer() }.padding(.horizontal, 22).padding(.vertical, 18)
+      VStack(alignment: .leading, spacing: Space.lg) { content() }.padding(.horizontal, 22)
+      HStack(spacing: Space.sm) { footer() }.padding(.horizontal, 22).padding(.vertical, 18)
     }.frame(width: width).background(t.background).foregroundStyle(t.text)
   }
 }

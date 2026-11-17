@@ -5,16 +5,16 @@ The accepted graphite foundation, applied as one system. Tokens live in `Theme.s
 ## Shell
 
 - Native titled window, content under a transparent title bar. Traffic lights centred in a 56-point integrated header; no separate OS title bar.
-- Navigation: 220-point labelled panel or 56-point rail with tooltips. World switcher at the top, seven workspaces (Review shows a count when something waits), category lenses with counts, recent conversations, Settings.
+- Navigation: 284-point labelled panel or 72-point rail with tooltips. World switcher at the top, seven workspaces (Review shows a count when something waits), category lenses with counts, recent conversations, Settings.
 - Every workspace begins with `WorkspaceBar`: icon and title on the left, workspace actions, then the persistent AI Assisted / Manual switch and search. Titles truncate; when the full bar does not fit, labelled actions become icons.
 - ⌘K opens the command palette. Removal shows a toast with Undo.
 
 ## Tokens
 
-- Dark surfaces #17191C / #1D2024 / #262A30 / #30353D; text #ECEBED, secondary #BEC5CE, muted #929CAA; accent #A9C7DB. Light counterparts cover every token.
+- Dark graphite surfaces #111315 / #1A1D21 / #24282E, stroke #353B43; text #E6E9EF, secondary #B6BBC5, muted #8F96A3; accent #A9C7FF. OLED is an explicit true-black option. Light counterparts cover every token.
 - Semantic accents are muted and limited: characters, factions, places, power systems, cosmology; canon green, warning amber, danger red.
-- Type is the system sans at 11.5–17 for interface text, 26–32 for the two display lines. No serif. Monospace only for code.
-- Radii: 7–8 controls, 12 cards, 14 panels. Controls are 28–30 points tall.
+- Bundled Inter is shared by native views and Canvas. Semantic `TextRole` values live in Typography.swift: title 30, section 20, card title/body 16, control 14, label 13, caption 12, section label 11. Rich document text retains the creator’s saved formatting. Monospace is for code.
+- `Metric` centralizes radii, control heights, reading widths and page insets; `Space` defines the four-point spacing rhythm. `Elevation` distinguishes cards, floating controls, companions and composers. Surface, stroke opacity and interaction colors resolve through Theme. Shared controls use these tokens; dimensions inherent to map/graph geometry remain local.
 
 ## Workspaces
 
@@ -28,6 +28,6 @@ The accepted graphite foundation, applied as one system. Tokens live in `Theme.s
 
 Short transitions (0.14–0.2 s), no looping animation beyond the system progress indicator, reduced motion respected. Save failures stay visible. Authored capture fixtures are labelled and never presented as model output. No performance claim without a measurement.
 
-### 2026-11-15 refinement
+### Historical 2026-11-15 refinement
 
-The current shell uses flat neutral charcoal, restrained blue selection, 248-point grouped navigation (64-point rail), real world categories and recent conversations. Lucide replaces SF Symbols and authored Canvas SVG icons; no generated icons. Shared native light/dark tokens remain authoritative. Canvas has compact edge-docked tools, a Synthesis-owned drawing style panel, and smaller filled relationship arrowheads with monotonic tangent routes. The owner design brief remains unmodified. Exact match to the latest mentioned attachment cannot be certified because no file arrived with that message.
+The current shell uses flat neutral charcoal, restrained blue selection, 248-point grouped navigation (64-point rail), real world categories and recent conversations. At that checkpoint Lucide replaced SF Symbols; the current native and Canvas icon family is Phosphor, with no generated icons. Shared native light/dark tokens remain authoritative. Canvas has compact edge-docked tools, a Synthesis-owned drawing style panel, and smaller filled relationship arrowheads with monotonic tangent routes. The owner design brief remains unmodified. Exact match to the latest mentioned attachment cannot be certified because no file arrived with that message.

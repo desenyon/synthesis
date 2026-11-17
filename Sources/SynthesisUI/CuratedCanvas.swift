@@ -179,10 +179,10 @@ struct CuratedCanvas: View {
       }.padding(.leading, -4).help("Switch, rename or archive boards")
       if let failure = session.failure {
         StudioLabel("Not saved", icon: "exclamationmark.triangle")
-          .font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.warning).fixedSize()
+          .font(.studio(.captionStrong)).foregroundStyle(studio.t.warning).fixedSize()
           .help(failure)
       } else {
-        Text("Saved").font(.studio(size: 12)).foregroundStyle(studio.t.muted).fixedSize()
+        Text("Saved").font(.studio(.caption)).foregroundStyle(studio.t.muted).fixedSize()
           .help("This board is saved on this device")
       }
     } trailing: {
@@ -216,7 +216,7 @@ struct CuratedCanvas: View {
           }
         }
       } label: {
-        StudioLabel("Add", icon: "plus").font(.studio(size: 13, weight: .medium)).fixedSize()
+        StudioLabel("Add", icon: "plus").font(.studio(.label)).fixedSize()
           .padding(.horizontal, 10).frame(height: Metric.control)
           .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
           .overlay(
@@ -391,7 +391,7 @@ struct CuratedCanvas: View {
       FormField(label: "Name", placeholder: "Name", text: $formTitle, t: studio.t)
       if formKind == "entity" {
         VStack(alignment: .leading, spacing: 6) {
-          Text("Type").font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+          Text("Type").font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary)
           FlowLayout(spacing: 6) {
             ForEach(Vocabulary.categories, id: \.self) { type in
               FilterChip(title: type, selected: formCategory == type, t: studio.t) {
@@ -402,7 +402,7 @@ struct CuratedCanvas: View {
         }
       }
       VStack(alignment: .leading, spacing: 6) {
-        Text("Notes").font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+        Text("Notes").font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary)
         TextEditor(text: $formBody).font(.studio(size: 14)).scrollContentBackground(.hidden)
           .padding(8).frame(height: 120)
           .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
@@ -541,10 +541,10 @@ struct RelationEditor: View {
   }
   private var valid: Bool { !label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
   private func endpoint(_ name: String) -> some View {
-    Text(name).font(.studio(size: 13, weight: .medium)).lineLimit(1)
+    Text(name).font(.studio(.label)).lineLimit(1)
       .padding(.horizontal, 10).frame(height: 28)
-      .background(t.surface, in: RoundedRectangle(cornerRadius: 7))
-      .overlay(RoundedRectangle(cornerRadius: 7).stroke(t.hairline, lineWidth: 1))
+      .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.smallRadius))
+      .overlay(RoundedRectangle(cornerRadius: Metric.smallRadius).stroke(t.hairline, lineWidth: 1))
   }
 }
 

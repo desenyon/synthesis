@@ -65,7 +65,7 @@ struct SettingsScreen: View {
                       let items = matches.filter { $0.section == section }
                       if !items.isEmpty {
                         VStack(alignment: .leading, spacing: 0) {
-                          Text(section.rawValue).font(.studio(size: 16, weight: .semibold))
+                          Text(section.rawValue).font(.studio(.cardTitle))
                             .padding(.bottom, 8)
                           ForEach(items) { item in setting(item) }
                         }
@@ -85,7 +85,7 @@ struct SettingsScreen: View {
                           : studio.settingsSection == .assistant
                             ? "Provider preferences apply on this Mac. Nothing is generated automatically."
                             : "Preferences are saved on this Mac as you change them."
-                    ).font(.studio(size: 12)).foregroundStyle(t.muted)
+                    ).font(.studio(.caption)).foregroundStyle(t.muted)
                   }
                 }.id("top").frame(maxWidth: 720, alignment: .leading)
                   .padding(.horizontal, wide ? 32 : 24).padding(.bottom, 40)
@@ -123,7 +123,7 @@ struct SettingsScreen: View {
         } label: {
           HStack(spacing: 10) {
             StudioIcon(section.icon, size: 16)
-            Text(section.rawValue).font(.studio(size: 14, weight: .medium))
+            Text(section.rawValue).font(.studio(.control))
             Spacer()
           }.foregroundStyle(studio.settingsSection == section && !searching ? t.text : t.secondary)
             .padding(.horizontal, 12).frame(height: 40)
@@ -227,7 +227,7 @@ struct SettingsScreen: View {
     case .assistance: row(item) { ModeSwitch(studio: studio) }
     case .connection:
       VStack(alignment: .leading, spacing: 16) {
-        Text(item.title).font(.studio(size: 14, weight: .medium))
+        Text(item.title).font(.studio(.control))
         AssistantConnection(studio: studio, advanced: true)
       }.padding(.vertical, 20)
         .overlay(alignment: .bottom) { t.hairline.frame(height: 1) }
@@ -302,8 +302,8 @@ struct AssistantConnection: View {
     VStack(alignment: .leading, spacing: 16) {
       HStack(spacing: 12) {
         VStack(alignment: .leading, spacing: 4) {
-          Text("Provider").font(.studio(size: 14, weight: .medium))
-          Text("Codex recommended").font(.studio(size: 12)).foregroundStyle(t.secondary)
+          Text("Provider").font(.studio(.control))
+          Text("Codex recommended").font(.studio(.caption)).foregroundStyle(t.secondary)
         }
         Spacer()
         PreferenceMenu(
@@ -324,7 +324,7 @@ struct AssistantConnection: View {
         AssistantAdvancedSettings(studio: studio).id(studio.provider)
       } else {
         Text("Optional. Every manual tool works without an assistant.")
-          .font(.studio(size: 12)).foregroundStyle(t.muted)
+          .font(.studio(.caption)).foregroundStyle(t.muted)
       }
     }
   }
@@ -360,7 +360,7 @@ private struct AssistantAdvancedSettings: View {
         )
       }.font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
         .fixedSize(horizontal: false, vertical: true).padding(.top, 12)
-    }.font(.studio(size: 13, weight: .medium)).tint(studio.t.secondary)
+    }.font(.studio(.label)).tint(studio.t.secondary)
   }
 }
 
@@ -414,7 +414,7 @@ private struct WorldCategorySettings: View {
   }
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Text(SettingsItem.category.title).font(.studio(size: 14, weight: .medium))
+      Text(SettingsItem.category.title).font(.studio(.control))
       Text(SettingsItem.category.detail).font(.studio(size: 12.5)).foregroundStyle(
         studio.t.secondary)
       HStack(spacing: 8) {

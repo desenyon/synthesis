@@ -19,7 +19,7 @@ struct AtlasMapEditor: View {
     ) {
       FormField(label: "Name", placeholder: "The northern coast", text: $name, t: studio.t)
       VStack(alignment: .leading, spacing: 7) {
-        Text("Place record").font(.studio(size: 12, weight: .medium)).foregroundStyle(
+        Text("Place record").font(.studio(.captionStrong)).foregroundStyle(
           studio.t.secondary)
         HStack {
           Button {

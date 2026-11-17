@@ -17,8 +17,8 @@ struct RecordSectionsPage: View {
       ContentColumn {
         VStack(alignment: .leading, spacing: 24) {
           HStack {
-            Text("Sections").font(.studio(size: 16, weight: .semibold))
-            Text("\(sections.count + components.count)").font(.studio(size: 12)).foregroundStyle(
+            Text("Sections").font(.studio(.cardTitle))
+            Text("\(sections.count + components.count)").font(.studio(.caption)).foregroundStyle(
               studio.t.secondary)
             Spacer()
             Button("Add component") { studio.sheet = .components }.buttonStyle(
@@ -114,8 +114,9 @@ struct RecordSectionsPage: View {
           .foregroundStyle(studio.t.secondary).lineLimit(5).textSelection(.enabled)
       }
     }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
-      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 14))
-      .overlay(RoundedRectangle(cornerRadius: 14).stroke(studio.t.hairline, lineWidth: 1))
+      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.panelRadius))
+      .overlay(
+        RoundedRectangle(cornerRadius: Metric.panelRadius).stroke(studio.t.hairline, lineWidth: 1))
   }
 
   private func load() {
@@ -197,8 +198,11 @@ struct NewRecordSection: View {
       Text("Notes").font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.secondary)
       TextEditor(text: $notes).font(.studio(size: 15)).scrollContentBackground(.hidden)
         .padding(8).frame(height: 160)
-        .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(studio.t.hairline, lineWidth: 1))
+        .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.floatingRadius))
+        .overlay(
+          RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
+            studio.t.hairline, lineWidth: 1)
+        )
         .accessibilityLabel("Section notes")
       Text("Saved as a draft with its own history and canon review.")
         .font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)

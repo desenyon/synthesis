@@ -46,9 +46,9 @@ struct ArtworkPicker: View {
                     width: mapOnly ? 420 : 204,
                     height: mapOnly ? (studio == nil ? 230 : 140) : (studio == nil ? 150 : 110)
                   )
-                  .clipped().clipShape(RoundedRectangle(cornerRadius: 12))
+                  .clipped().clipShape(RoundedRectangle(cornerRadius: Metric.cardRadius))
                 Text(art.title).font(.studio(size: 15, weight: .medium))
-                Text(art.subtitle).font(.studio(size: 12)).foregroundStyle(t.secondary)
+                Text(art.subtitle).font(.studio(.caption)).foregroundStyle(t.secondary)
               }.padding(8).background(t.surface, in: RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(t.hairline, lineWidth: 1))
             }.buttonStyle(.plain).help("Use \(art.title)")
@@ -91,7 +91,7 @@ private struct GenerateImageSection: View {
         studio.mode == .manual
           ? "Manual is on, so nothing can be sent. Switch to AI Assisted to generate."
           : "Sends only this description to Codex using your ChatGPT subscription allowance. No world lore is included. Codex also keeps its own copy in its generated_images folder."
-      ).font(.studio(size: 12)).foregroundStyle(t.muted).fixedSize(
+      ).font(.studio(.caption)).foregroundStyle(t.muted).fixedSize(
         horizontal: false, vertical: true)
       HStack(spacing: 8) {
         if studio.generatingImage {

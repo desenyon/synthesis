@@ -302,3 +302,7 @@ The owner clarified that all 394 numbered requirements must be implemented indiv
 ### Expansion #2 — frosted floating surfaces (verified, 2026-11-17)
 
 Shared native in-window vibrancy for floating toolbars, inspectors, popovers and every composer variant. Reduce Transparency and Increase Contrast use opaque fallbacks; nonfloating content remains opaque. Menus inherit the actual graphite/OLED/light theme. Canvas now ignores unrelated preference changes instead of repainting its theme. `./scripts/check.sh`: 175 tests / 42 suites, strict lint and optimized build passed. 16 background captures across two sizes inspected, including opaque, selected Graph, composer context and light variants. No foreground input or model call. [Evidence](verification/expansion-002/README.md). Next #3; the rest of the brief is not complete.
+
+### Expansion #3 — design tokens (verified, 2026-11-17)
+
+Added semantic typography roles over bundled Inter and shared spacing/elevation roles; common page geometry, radii, controls, captions and card headings now resolve through the same definitions. Updated stale UI_DIRECTION values to the actual source. `./scripts/check.sh`: 175 tests / 42 suites, strict lint and optimized build passed. 16 captures inspected across two sizes: editor, Library, Settings, Worlds, Graph, Canvas, and light editor/Library. This is a presentation refactor; saved rich text and layout behavior remain intact. [Evidence](verification/expansion-003/README.md).

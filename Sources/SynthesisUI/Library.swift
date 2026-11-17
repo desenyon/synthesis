@@ -227,7 +227,7 @@ struct RecordRow: View {
       HStack(spacing: 12) {
         CategoryTile(record: record, t: studio.t, size: 34)
         VStack(alignment: .leading, spacing: 3) {
-          Text(record.title).font(.studio(size: 14, weight: .medium))
+          Text(record.title).font(.studio(.control))
             .foregroundStyle(studio.t.text).lineLimit(1)
           if studio.preferences.libraryPreviews {
             Text(
@@ -238,7 +238,7 @@ struct RecordRow: View {
         }
         Spacer(minLength: 16)
         Text(categoryLabel)
-          .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+          .font(.studio(.caption)).foregroundStyle(studio.t.muted).lineLimit(1)
           .frame(width: 150, alignment: .leading)
         if archived {
           Button("Restore") {
@@ -246,7 +246,7 @@ struct RecordRow: View {
             changed()
           }.buttonStyle(QuietButton(t: studio.t))
         } else {
-          Text(relativeDate(record.updatedAt)).font(.studio(size: 12)).monospacedDigit()
+          Text(relativeDate(record.updatedAt)).font(.studio(.caption)).monospacedDigit()
             .foregroundStyle(studio.t.muted).frame(width: 72, alignment: .trailing)
         }
       }.padding(.horizontal, 10).frame(height: studio.preferences.libraryPreviews ? 54 : 44)

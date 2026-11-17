@@ -127,7 +127,7 @@ struct ConversationStudio: View {
         VStack(alignment: .leading, spacing: 12) {
           HStack(spacing: 9) {
             WorldBadge(studio: studio, radius: 6).frame(width: 24, height: 24)
-            Text(studio.world?.name ?? "Your world").font(.studio(size: 13, weight: .medium))
+            Text(studio.world?.name ?? "Your world").font(.studio(.label))
               .foregroundStyle(studio.t.secondary)
           }
           Text(
@@ -170,12 +170,15 @@ struct ConversationStudio: View {
                     record.body.isEmpty
                       ? Vocabulary.displayCategory(record.category)
                       : record.body.replacingOccurrences(of: "\n", with: " ")
-                  ).font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+                  ).font(.studio(.caption)).foregroundStyle(studio.t.muted).lineLimit(1)
                 }
                 Spacer(minLength: 4)
                 StudioIcon("at", size: 11).foregroundStyle(studio.t.muted)
               }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
-                .background(studio.t.surface.opacity(0.55), in: RoundedRectangle(cornerRadius: 10))
+                .background(
+                  studio.t.surface.opacity(0.55),
+                  in: RoundedRectangle(cornerRadius: Metric.floatingRadius)
+                )
                 .hoverFill(studio.t, radius: 10)
             }.buttonStyle(.plain).help("Reference \(record.title) in your message")
               .contextMenu { Button("Open record") { studio.openRecord(record) } }
@@ -192,8 +195,11 @@ struct ConversationStudio: View {
       Button("Switch to AI Assisted") { studio.setMode(.assisted) }
         .buttonStyle(QuietButton(t: studio.t))
     }.padding(.leading, 14).padding(.trailing, 8).frame(height: 46)
-      .background(studio.t.surface.opacity(0.6), in: RoundedRectangle(cornerRadius: 12))
-      .overlay(RoundedRectangle(cornerRadius: 12).stroke(studio.t.hairline, lineWidth: 1))
+      .background(
+        studio.t.surface.opacity(0.6), in: RoundedRectangle(cornerRadius: Metric.cardRadius)
+      )
+      .overlay(
+        RoundedRectangle(cornerRadius: Metric.cardRadius).stroke(studio.t.hairline, lineWidth: 1))
   }
 
   // MARK: Transcript
@@ -306,10 +312,14 @@ struct ChatRow: View {
         studio.prepareRetry(after: message.id)
       }.buttonStyle(QuietButton(t: studio.t, role: .ghost)).disabled(studio.busy)
       Button("Model settings") { studio.openAssistantSettings() }.buttonStyle(.plain)
-        .font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
+        .font(.studio(.label)).foregroundStyle(studio.t.accent)
     }.padding(.horizontal, 14).padding(.vertical, 11)
-      .background(studio.t.surface.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
-      .overlay(RoundedRectangle(cornerRadius: 10).stroke(studio.t.hairline, lineWidth: 1))
+      .background(
+        studio.t.surface.opacity(0.5), in: RoundedRectangle(cornerRadius: Metric.floatingRadius)
+      )
+      .overlay(
+        RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
+          studio.t.hairline, lineWidth: 1))
   }
   private var assistant: some View {
     let sample = message.state == "imported-example"
@@ -323,7 +333,7 @@ struct ChatRow: View {
             : (message.state == "interrupted"
               ? "Incomplete response" : "Suggestion · not canon")
         )
-        .font(.studio(size: 12)).foregroundStyle(studio.t.muted)
+        .font(.studio(.caption)).foregroundStyle(studio.t.muted)
       }
       MarkdownContent(text: message.body, t: studio.t)
         .environment(\.openURL, recordLinkAction(studio))
@@ -358,7 +368,7 @@ struct ChatRow: View {
         } else {
           StudioLabel(title, icon: icon).fixedSize()
         }
-      }.font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.muted)
+      }.font(.studio(.captionStrong)).foregroundStyle(studio.t.muted)
         .padding(.horizontal, 8).frame(height: 26).hoverFill(studio.t, radius: 6)
     }.buttonStyle(.plain).accessibilityLabel(title)
       .help(title == "Copy" || title == "Copied" ? "Copy the text" : "\(title) for your review")

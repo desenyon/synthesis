@@ -201,7 +201,7 @@ struct RelationshipGraph: View {
               label = edge.label
               panel = .edit
             } label: {
-              Text(edge.label).font(.studio(size: 12, weight: .medium)).lineLimit(1)
+              Text(edge.label).font(.studio(.captionStrong)).lineLimit(1)
                 .foregroundStyle(strong ? studio.t.accent : studio.t.muted)
                 .padding(.horizontal, 8).frame(height: 22)
                 .background(studio.t.background, in: Capsule())
@@ -281,7 +281,7 @@ struct RelationshipGraph: View {
         HStack(spacing: 7) {
           Circle().fill(tint).frame(width: 5, height: 5)
           Text(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category))
-            .font(.studio(size: 12, weight: .medium)).foregroundStyle(
+            .font(.studio(.captionStrong)).foregroundStyle(
               studio.t.secondary
             ).lineLimit(1)
           Spacer(minLength: 4)
@@ -316,12 +316,12 @@ struct RelationshipGraph: View {
         .padding(.horizontal, 13).frame(height: 29)
         .overlay(alignment: .top) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
     }.frame(width: GraphLayout.cardSize.width, height: GraphLayout.cardSize.height)
-      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 14))
+      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.panelRadius))
       .overlay(
-        RoundedRectangle(cornerRadius: 14).stroke(
+        RoundedRectangle(cornerRadius: Metric.panelRadius).stroke(
           isSelected ? tint : studio.t.border, lineWidth: isSelected ? 1.5 : 1)
       )
-      .shadow(color: studio.t.shadow, radius: 12, y: 4)
+      .elevation(.card, t: studio.t)
       .overlay(alignment: .leading) { port(entity, tint: tint).offset(x: -6) }
       .overlay(alignment: .trailing) { port(entity, tint: tint).offset(x: 6) }
       .scaleEffect(zoom).frame(
@@ -401,7 +401,7 @@ struct RelationshipGraph: View {
           Text(entity.title).font(.studio(size: 15, weight: .semibold)).lineLimit(2)
           HStack(spacing: 8) {
             if !entity.category.isEmpty {
-              Text(Vocabulary.displayCategory(entity.category)).font(.studio(size: 12))
+              Text(Vocabulary.displayCategory(entity.category)).font(.studio(.caption))
                 .foregroundStyle(studio.t.muted)
             }
             StateBadge(state: entity.state, t: studio.t)
@@ -549,7 +549,7 @@ struct RelationshipGraph: View {
   }
   private func picker(_ title: String, selection: Binding<String>) -> some View {
     VStack(alignment: .leading, spacing: 6) {
-      Text(title).font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+      Text(title).font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary)
       PlainMenu {
         ForEach(entities) { entity in Button(entity.title) { selection.wrappedValue = entity.id } }
       } label: {

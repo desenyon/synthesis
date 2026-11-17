@@ -66,7 +66,7 @@ struct RulesLab: View {
           if filter == nil { treeSection }
           VStack(alignment: .leading, spacing: 14) {
             HStack {
-              Text("Scenarios").font(.studio(size: 20, weight: .semibold))
+              Text("Scenarios").font(.studio(.section))
               Spacer()
               Button("Add scenario") {
                 editingScenario = nil
@@ -81,13 +81,13 @@ struct RulesLab: View {
             ForEach(scenarios) { scenario in
               VStack(alignment: .leading, spacing: 9) {
                 HStack {
-                  Text(scenario.title).font(.studio(size: 16, weight: .semibold)).lineLimit(2)
+                  Text(scenario.title).font(.studio(.cardTitle)).lineLimit(2)
                   Spacer()
                   Text(
                     scenario.expectation == "unclear"
                       ? "Open question" : "Expected: \(scenario.expectation)"
                   )
-                  .font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+                  .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
                   IconButton(icon: "pencil.line", label: "Edit scenario", t: studio.t) {
                     editingScenario = scenario
                     scenarioForm = true
@@ -104,22 +104,23 @@ struct RulesLab: View {
                   )
                   .background(studio.t.accent.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
                 }
-              }.padding(18).background(studio.t.surface, in: RoundedRectangle(cornerRadius: 14))
+              }.padding(18).background(
+                studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.panelRadius))
             }
           }
           DisclosureGroup {
             Text(
               "Local structure checks only. These do not determine whether your lore is consistent or true."
             )
-            .font(.studio(size: 12)).foregroundStyle(studio.t.secondary).padding(.vertical, 8)
+            .font(.studio(.caption)).foregroundStyle(studio.t.secondary).padding(.vertical, 8)
             ForEach(findings) { finding in
               VStack(alignment: .leading, spacing: 5) {
-                Text(finding.title).font(.studio(size: 14, weight: .medium))
+                Text(finding.title).font(.studio(.control))
                 Text(finding.detail).font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
               }.padding(.vertical, 5)
             }
           } label: {
-            Text("Open considerations · \(findings.count)").font(.studio(size: 14, weight: .medium))
+            Text("Open considerations · \(findings.count)").font(.studio(.control))
           }.tint(studio.t.secondary)
         }.padding(.vertical, 28)
       }
@@ -158,7 +159,7 @@ struct RulesLab: View {
     if rules.filter({ WorkspaceStore.treeKinds.contains($0.kind) }).count >= 2 {
       VStack(alignment: .leading, spacing: 12) {
         HStack(alignment: .firstTextBaseline) {
-          Text("Technique tree").font(.studio(size: 20, weight: .semibold))
+          Text("Technique tree").font(.studio(.section))
           Spacer()
           Text(
             edges.isEmpty
@@ -176,7 +177,7 @@ struct RulesLab: View {
   private func ruleCard(_ rule: WorldRule) -> some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack {
-        Text(rule.kind.title).font(.studio(size: 12, weight: .medium)).foregroundStyle(
+        Text(rule.kind.title).font(.studio(.captionStrong)).foregroundStyle(
           studio.t.accent)
         Spacer()
         IconMenu(icon: "ellipsis", label: "Rule actions", t: studio.t) {
@@ -302,18 +303,18 @@ private struct RuleCanonReview: View {
     ) {
       ScrollView {
         VStack(alignment: .leading, spacing: 18) {
-          Text("Accepted wording").font(.studio(size: 12, weight: .medium)).foregroundStyle(
+          Text("Accepted wording").font(.studio(.captionStrong)).foregroundStyle(
             studio.t.secondary)
           Text(rule.accepted.map { "\($0.title)\n\($0.body)" } ?? "No accepted wording yet.").font(
             .studio(size: 14)
           ).textSelection(.enabled)
           Divider()
-          Text("Proposed wording").font(.studio(size: 12, weight: .medium)).foregroundStyle(
+          Text("Proposed wording").font(.studio(.captionStrong)).foregroundStyle(
             studio.t.accent)
           Text("\(rule.title)\n\(rule.body)").font(.studio(size: 14)).lineSpacing(4).textSelection(
             .enabled)
           Text("Only this rule will become canon. The entity and its other rules stay unchanged.")
-            .font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+            .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
         }
       }.frame(maxHeight: 300)
       if let error { Text(error).font(.studio(size: 13)).foregroundStyle(studio.t.danger) }
@@ -376,13 +377,13 @@ private struct RuleHistorySheet: View {
                 }.buttonStyle(QuietButton(t: studio.t))
               }
             }.padding(16).frame(maxWidth: .infinity, alignment: .leading).background(
-              studio.t.surface, in: RoundedRectangle(cornerRadius: 12))
+              studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.cardRadius))
           }
         }
       }.frame(height: 350)
       if let error { Text(error).font(.studio(size: 13)).foregroundStyle(studio.t.danger) }
     } footer: {
-      Text("Restoring preserves the accepted canon snapshot.").font(.studio(size: 12))
+      Text("Restoring preserves the accepted canon snapshot.").font(.studio(.caption))
         .foregroundStyle(studio.t.secondary)
       Spacer()
       Button("Done", action: close).buttonStyle(QuietButton(t: studio.t))

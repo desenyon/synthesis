@@ -273,7 +273,7 @@ struct EditorScreen: View {
         }
       }.padding(.bottom, 10)
       TextField("Untitled", text: $title, axis: .vertical)
-        .font(.studio(size: 30, weight: .semibold)).tracking(-0.4).textFieldStyle(.plain)
+        .font(.studio(.title)).tracking(-0.4).textFieldStyle(.plain)
         .onChange(of: title) { _, _ in changed() }.accessibilityLabel("Title")
       HStack(spacing: 2) {
         IconButton(icon: "bold", label: "Bold · ⌘B", t: studio.t) { handle.send("toggleBoldface:") }
@@ -290,7 +290,7 @@ struct EditorScreen: View {
         Spacer()
         if studio.preferences.wordCount {
           Text("\(bodyText.split { $0.isWhitespace || $0.isNewline }.count) words")
-            .font(.studio(size: 12)).monospacedDigit().foregroundStyle(studio.t.muted)
+            .font(.studio(.caption)).monospacedDigit().foregroundStyle(studio.t.muted)
         }
       }.padding(.top, 14).padding(.bottom, 8)
         .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
@@ -531,8 +531,12 @@ struct EditorScreen: View {
           }
         }.padding(.vertical, 6)
       }.frame(height: min(320, max(84, CGFloat(diff.count) * 27 + 14)))
-        .background(studio.t.surface.opacity(0.6), in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(studio.t.hairline, lineWidth: 1))
+        .background(
+          studio.t.surface.opacity(0.6), in: RoundedRectangle(cornerRadius: Metric.floatingRadius)
+        )
+        .overlay(
+          RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
+            studio.t.hairline, lineWidth: 1))
       Text(
         "Only you can accept canon. Earlier versions, including the current canon, stay in history."
       )
@@ -581,7 +585,7 @@ struct EditorScreen: View {
                 HStack(spacing: 8) {
                   Text("Revision \(revision.version)").font(.studio(size: 13.5, weight: .medium))
                   StateBadge(state: revision.snapshot.state, t: studio.t)
-                  Text(relativeDate(revision.createdAt)).font(.studio(size: 12))
+                  Text(relativeDate(revision.createdAt)).font(.studio(.caption))
                     .foregroundStyle(studio.t.muted)
                   if revision.version == record.version {
                     Text("Current").font(.studio(size: 11.5, weight: .medium))
@@ -634,7 +638,7 @@ struct RecordInspector: View {
           HStack(spacing: 8) {
             StateBadge(state: record.state, t: t)
             Spacer()
-            Text("Revision \(record.version)").font(.studio(size: 12)).monospacedDigit()
+            Text("Revision \(record.version)").font(.studio(.caption)).monospacedDigit()
               .foregroundStyle(t.muted)
           }
           Text(statusNote).font(.studio(size: 12.5)).foregroundStyle(t.secondary).lineSpacing(2)
@@ -689,8 +693,8 @@ struct RecordInspector: View {
                     Text(rule.kind.title).foregroundStyle(t.secondary)
                     Spacer()
                     StateBadge(state: rule.state, t: t)
-                  }.font(.studio(size: 12))
-                  Text(rule.title).font(.studio(size: 13, weight: .medium))
+                  }.font(.studio(.caption))
+                  Text(rule.title).font(.studio(.label))
                   Text(rule.body).font(.studio(size: 13)).foregroundStyle(t.secondary).lineLimit(3)
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(8).hoverFill(t)
               }.buttonStyle(.plain).help("Edit rule as draft")
@@ -733,9 +737,9 @@ struct RecordInspector: View {
                 studio.navigate(.timeline)
               } label: {
                 VStack(alignment: .leading, spacing: 2) {
-                  Text(event.title).font(.studio(size: 13, weight: .medium)).lineLimit(1)
+                  Text(event.title).font(.studio(.label)).lineLimit(1)
                   Text(event.dateLabel == "unknown" ? "Date unknown" : event.dateLabel)
-                    .font(.studio(size: 12)).foregroundStyle(t.muted)
+                    .font(.studio(.caption)).foregroundStyle(t.muted)
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 8)
                   .padding(.vertical, 5).hoverFill(t)
               }.buttonStyle(.plain).padding(.horizontal, -8)
@@ -789,7 +793,7 @@ struct RecordInspector: View {
             if let prefix {
               Text(prefix).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(1)
             }
-            Text(linked.title).font(.studio(size: 13, weight: .medium)).lineLimit(1)
+            Text(linked.title).font(.studio(.label)).lineLimit(1)
           }
           Spacer(minLength: 0)
         }.padding(.horizontal, 8).padding(.vertical, 5).hoverFill(studio.t)
@@ -835,8 +839,12 @@ struct RecordInspector: View {
           if !values.contains(value) { commit((values + [value]).sorted()) }
         }
         .padding(.horizontal, 8).frame(height: 28)
-        .background(studio.t.surface.opacity(0.6), in: RoundedRectangle(cornerRadius: 7))
-        .overlay(RoundedRectangle(cornerRadius: 7).stroke(studio.t.hairline, lineWidth: 1))
+        .background(
+          studio.t.surface.opacity(0.6), in: RoundedRectangle(cornerRadius: Metric.smallRadius)
+        )
+        .overlay(
+          RoundedRectangle(cornerRadius: Metric.smallRadius).stroke(studio.t.hairline, lineWidth: 1)
+        )
     }
   }
   private func saveMetadata(tags: [String], aliases: [String]) {
@@ -938,7 +946,7 @@ struct RecordRuleEditor: View {
         text: $bodyText, t: studio.t)
       if WorkspaceStore.treeKinds.contains(kind) && !candidates.isEmpty {
         VStack(alignment: .leading, spacing: 6) {
-          Text("Requires first").font(.studio(size: 12, weight: .medium))
+          Text("Requires first").font(.studio(.captionStrong))
             .foregroundStyle(studio.t.secondary)
           ScrollView {
             VStack(alignment: .leading, spacing: 2) {
@@ -956,7 +964,7 @@ struct RecordRuleEditor: View {
                     ).foregroundStyle(
                       requires.contains(other.id) ? studio.t.accent : studio.t.muted)
                     Text(other.title).font(.studio(size: 13.5)).lineLimit(1)
-                    Text(other.kind.singular).font(.studio(size: 12))
+                    Text(other.kind.singular).font(.studio(.caption))
                       .foregroundStyle(studio.t.muted)
                     Spacer(minLength: 0)
                   }.padding(.horizontal, 8).frame(height: 30).contentShape(Rectangle())

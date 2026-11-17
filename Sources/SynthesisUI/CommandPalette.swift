@@ -26,7 +26,7 @@ struct CommandPalette: View {
           StudioIcon("magnifyingglass", size: 15)
             .foregroundStyle(studio.t.muted)
           TextField("Search your world or run a command", text: $query)
-            .textFieldStyle(.plain).font(.studio(size: 16)).focused($focused)
+            .textFieldStyle(.plain).font(.studio(.body)).focused($focused)
             .onSubmit { run(items) }
             .onKeyPress(.downArrow) {
               index = min(items.count - 1, index + 1)
@@ -103,10 +103,11 @@ struct CommandPalette: View {
         .foregroundStyle(item.tint ?? studio.t.secondary).frame(width: 22)
       Text(item.title).font(.studio(size: 14)).lineLimit(1)
       Spacer(minLength: 12)
-      Text(item.detail).font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+      Text(item.detail).font(.studio(.caption)).foregroundStyle(studio.t.muted).lineLimit(1)
     }.padding(.horizontal, 10).frame(height: 34)
       .background(
-        selected ? studio.t.secondarySurface : .clear, in: RoundedRectangle(cornerRadius: 7)
+        selected ? studio.t.secondarySurface : .clear,
+        in: RoundedRectangle(cornerRadius: Metric.smallRadius)
       )
       .contentShape(Rectangle())
       .accessibilityElement(children: .combine).accessibilityAddTraits(.isButton)

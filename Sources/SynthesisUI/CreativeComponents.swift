@@ -45,7 +45,7 @@ struct CreativeComponentsSheet: View {
             Text(instructions).font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
             TextEditor(text: $content).font(.studio(size: 14)).scrollContentBackground(.hidden)
               .padding(10).frame(height: 150).background(
-                studio.t.surface, in: RoundedRectangle(cornerRadius: 12)
+                studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.cardRadius)
               )
               .accessibilityLabel("Component content")
             HStack {
@@ -92,7 +92,7 @@ struct CreativeComponentsSheet: View {
         }
       }.frame(height: creating ? 340 : (components.isEmpty ? 180 : 440))
     } footer: {
-      Text("Saved as versioned lore").font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+      Text("Saved as versioned lore").font(.studio(.caption)).foregroundStyle(studio.t.secondary)
       Spacer()
       if !creating {
         Button("Add component") { creating = true }.buttonStyle(
@@ -156,7 +156,7 @@ struct CreativeComponentCard: View {
     VStack(alignment: .leading, spacing: 14) {
       HStack {
         VStack(alignment: .leading, spacing: 4) {
-          Text(component.kind.rawValue.capitalized).font(.studio(size: 12, weight: .medium))
+          Text(component.kind.rawValue.capitalized).font(.studio(.captionStrong))
             .foregroundStyle(studio.t.secondary)
           Text(record.title).font(.studio(size: 18, weight: .semibold)).lineLimit(2)
         }
@@ -194,7 +194,7 @@ struct CreativeComponentCard: View {
           }
         }
         if lines.count > 40 {
-          Text("\(lines.count - 40) more lines in the document").font(.studio(size: 12))
+          Text("\(lines.count - 40) more lines in the document").font(.studio(.caption))
             .foregroundStyle(studio.t.secondary)
         }
       }

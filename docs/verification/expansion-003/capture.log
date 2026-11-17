@@ -1,0 +1,28 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.15s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.iw2V4W/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.iw2V4W/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.iw2V4W/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE canvas 1440x900, bitmap 1440x900, 169ms
+CAPTURE graph-selected 1440x900, bitmap 1440x900, 566ms
+CAPTURE library 1440x900, bitmap 1440x900, 132ms
+CAPTURE editor 1440x900, bitmap 1440x900, 124ms
+CAPTURE light-library 1440x900, bitmap 1440x900, 135ms
+CAPTURE light-editor 1440x900, bitmap 1440x900, 126ms
+CAPTURE worlds 1440x900, bitmap 1440x900, 49ms
+CAPTURE settings 1440x900, bitmap 1440x900, 61ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 103ms
+CAPTURE graph-selected 1024x768, bitmap 1024x768, 259ms
+CAPTURE library 1024x768, bitmap 1024x768, 101ms
+CAPTURE editor 1024x768, bitmap 1024x768, 104ms
+CAPTURE light-library 1024x768, bitmap 1024x768, 103ms
+CAPTURE light-editor 1024x768, bitmap 1024x768, 103ms
+CAPTURE worlds 1024x768, bitmap 1024x768, 46ms
+CAPTURE settings 1024x768, bitmap 1024x768, 52ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-003
+Native captures: docs/verification/expansion-003
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py 'docs/verification/expansion-003' [--prune]

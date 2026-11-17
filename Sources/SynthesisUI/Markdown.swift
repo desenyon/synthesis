@@ -190,8 +190,9 @@ struct MarkdownContent: View {
         Text(code).font(.studio(size: size - 2, design: .monospaced)).lineSpacing(3)
           .textSelection(.enabled).padding(14)
       }.frame(maxWidth: .infinity, alignment: .leading)
-        .background(t.surface, in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(t.hairline, lineWidth: 1))
+        .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.floatingRadius))
+        .overlay(
+          RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(t.hairline, lineWidth: 1))
     case .table(let rows):
       table(rows)
     case .rule:
@@ -215,8 +216,10 @@ struct MarkdownContent: View {
           Rectangle().fill(t.hairline).frame(height: 1).gridCellUnsizedAxes(.horizontal)
         }
       }
-    }.clipShape(RoundedRectangle(cornerRadius: 10))
-      .overlay(RoundedRectangle(cornerRadius: 10).stroke(t.hairline, lineWidth: 1))
+    }.clipShape(RoundedRectangle(cornerRadius: Metric.floatingRadius))
+      .overlay(
+        RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(t.hairline, lineWidth: 1)
+      )
       .fixedSize(horizontal: false, vertical: true)
   }
   private func inline(_ value: String) -> AttributedString {

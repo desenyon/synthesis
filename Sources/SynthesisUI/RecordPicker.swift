@@ -32,13 +32,13 @@ struct SearchableRecordPicker: View {
               HStack(spacing: 10) {
                 CategoryTile(record: record, t: t, size: 28)
                 VStack(alignment: .leading, spacing: 2) {
-                  Text(record.title).font(.studio(size: 14, weight: .medium)).lineLimit(1)
+                  Text(record.title).font(.studio(.control)).lineLimit(1)
                   Text(
                     record.category.isEmpty
                       ? Vocabulary.kindLabel(record.kind)
                       : Vocabulary.displayCategory(record.category)
                   )
-                  .font(.studio(size: 12)).foregroundStyle(t.secondary).lineLimit(1)
+                  .font(.studio(.caption)).foregroundStyle(t.secondary).lineLimit(1)
                 }
                 Spacer(minLength: 0)
               }.padding(8).contentShape(Rectangle()).hoverFill(t)

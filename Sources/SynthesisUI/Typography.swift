@@ -2,6 +2,30 @@ import AppKit
 import CoreText
 import SwiftUI
 
+/// Semantic type roles, shared by native pages and controls. Rich document text retains
+/// the creator's saved font size; these roles describe application chrome and hierarchy.
+enum TextRole {
+  case title, section, cardTitle, body, control, label, caption, captionStrong, sectionLabel
+  var size: CGFloat {
+    switch self {
+    case .title: 30
+    case .section: 20
+    case .cardTitle, .body: 16
+    case .control: 14
+    case .label: 13
+    case .caption, .captionStrong: 12
+    case .sectionLabel: 11
+    }
+  }
+  var weight: Font.Weight {
+    switch self {
+    case .title, .section, .cardTitle, .sectionLabel: .semibold
+    case .control, .label, .captionStrong: .medium
+    case .body, .caption: .regular
+    }
+  }
+}
+
 /// One locally bundled type family in native controls and the offline canvas.
 enum StudioTypography {
   static let registered: Void = {
@@ -30,6 +54,10 @@ enum StudioTypography {
   }
 }
 extension Font {
+  static func studio(_ role: TextRole) -> Font {
+    studio(size: role.size, weight: role.weight)
+  }
+
   static func studio(size: CGFloat, weight: Font.Weight = .regular, design: Font.Design = .default)
     -> Font
   {

@@ -52,7 +52,7 @@ struct AtlasScreen: View {
         } label: {
           HStack(spacing: 8) {
             StudioIcon("map", size: 16)
-            Text(currentBoard?.name ?? "Atlas").font(.studio(size: 16, weight: .semibold))
+            Text(currentBoard?.name ?? "Atlas").font(.studio(.cardTitle))
               .lineLimit(1)
             StudioIcon("chevron.down", size: 10)
           }.foregroundStyle(studio.t.text)
@@ -67,7 +67,7 @@ struct AtlasScreen: View {
             markerPicker = true
           } label: {
             StudioLabel("Place marker", icon: "mappin.and.ellipse")
-              .font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.onAccent)
+              .font(.studio(.label)).foregroundStyle(studio.t.onAccent)
               .padding(.horizontal, 12).frame(height: Metric.control)
               .background(studio.t.accent, in: RoundedRectangle(cornerRadius: Metric.radius))
           }.buttonStyle(.plain).disabled(studio.records.isEmpty)
@@ -298,8 +298,10 @@ struct AtlasScreen: View {
           return true
         })
       Image(nsImage: image).resizable().frame(width: width, height: height)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(studio.t.hairline, lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: Metric.radius))
+        .overlay(
+          RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.hairline, lineWidth: 1)
+        )
         .shadow(color: studio.t.shadow.opacity(0.5), radius: 18, y: 6)
         .position(origin).allowsHitTesting(placing != nil || drawingRecord != nil)
         .gesture(
@@ -359,7 +361,7 @@ struct AtlasScreen: View {
               ForEach(children) { child in Button(child.name) { switchMap(child.id) } }
             } label: {
               StudioLabel("Local maps · \(children.count)", icon: "chevron.down")
-                .font(.studio(size: 13, weight: .medium)).padding(.horizontal, 12)
+                .font(.studio(.label)).padding(.horizontal, 12)
                 .frame(height: Metric.control).floatingPanel(studio.t)
             }
           }
@@ -388,7 +390,7 @@ struct AtlasScreen: View {
             )
             .font(.studio(size: 13))
             Button("Cancel") { placing = nil }.buttonStyle(.plain)
-              .font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
+              .font(.studio(.label)).foregroundStyle(studio.t.accent)
           }.padding(.horizontal, 14).frame(height: 36).floatingPanel(studio.t)
         }
         Spacer()
@@ -401,7 +403,7 @@ struct AtlasScreen: View {
                 Text(
                   record.body.isEmpty ? Vocabulary.displayCategory(record.category) : record.body
                 )
-                .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+                .font(.studio(.caption)).foregroundStyle(studio.t.muted).lineLimit(1)
               }.frame(maxWidth: 240, alignment: .leading)
               Button("Open") { studio.openRecord(record) }
                 .buttonStyle(QuietButton(t: studio.t))
@@ -461,7 +463,7 @@ struct AtlasScreen: View {
           lineWidth: active ? 2 : 1.2, lineJoin: .round, dash: active ? [] : [6, 4]))
       // A marker for the same record already carries its name.
       if !(showMarkers && map.markers.contains { $0.recordID == region.recordID }) {
-        Text(record?.title ?? "Archived record").font(.studio(size: 11, weight: .semibold))
+        Text(record?.title ?? "Archived record").font(.studio(.sectionLabel))
           .foregroundStyle(studio.t.text).padding(.horizontal, 6).frame(height: 18)
           .background(studio.t.surface.opacity(0.85), in: Capsule()).position(center)
           .allowsHitTesting(false)

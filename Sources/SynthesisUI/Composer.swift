@@ -50,7 +50,7 @@ struct UnifiedComposer: View {
         ).stroke(
           focused ? studio.t.accent.opacity(0.35) : studio.t.border, lineWidth: 1)
       )
-      .shadow(color: studio.t.shadow.opacity(collapsed ? 0.5 : 0.25), radius: 16, y: 6)
+      .elevation(collapsed ? .compactComposer : .composer, t: studio.t)
       .overlay(alignment: .topLeading) {
         if !mentionMatches.isEmpty {
           // Sits just above the field so it never covers what is being typed.
@@ -104,7 +104,7 @@ struct UnifiedComposer: View {
   private var fullField: some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 8) {
-        Text("World assistant").font(.studio(size: 13, weight: .medium))
+        Text("World assistant").font(.studio(.label))
           .foregroundStyle(studio.t.secondary)
         if studio.composerAttachments.count > 3 {
           Text("\(studio.composerAttachments.count) attached")
@@ -136,7 +136,7 @@ struct UnifiedComposer: View {
               ForEach(selectedReferences) { record in
                 HStack(spacing: 6) {
                   StudioIcon(categoryIcon(record.category), size: 12)
-                  Text(record.title).font(.studio(size: 12)).lineLimit(1).frame(maxWidth: 150)
+                  Text(record.title).font(.studio(.caption)).lineLimit(1).frame(maxWidth: 150)
                   Text("Selected").font(.studio(size: 11)).foregroundStyle(studio.t.muted)
                 }.padding(.horizontal, 8).frame(height: 28)
                   .foregroundStyle(studio.t.secondary).background(
@@ -229,7 +229,7 @@ struct UnifiedComposer: View {
         } label: {
           VStack(alignment: .leading, spacing: 4) {
             HStack {
-              Text(intent.title).font(.studio(size: 13, weight: .medium))
+              Text(intent.title).font(.studio(.label))
               Spacer()
               if studio.contextOptions.intent == intent { StudioIcon("checkmark", size: 12) }
             }
@@ -238,7 +238,7 @@ struct UnifiedComposer: View {
                 ? "Discuss possibilities. No changes are staged."
                 : "Prepare draft changes for you to review."
             )
-            .font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+            .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
           }
         }
       }
@@ -365,11 +365,11 @@ struct UnifiedComposer: View {
               record.category.isEmpty
                 ? Vocabulary.kindLabel(record.kind) : Vocabulary.displayCategory(record.category)
             )
-            .font(.studio(size: 12)).foregroundStyle(studio.t.muted).lineLimit(1)
+            .font(.studio(.caption)).foregroundStyle(studio.t.muted).lineLimit(1)
           }.padding(.horizontal, 8).frame(height: 34)
             .background(
               offset == mentionIndex ? studio.t.secondarySurface : .clear,
-              in: RoundedRectangle(cornerRadius: 7)
+              in: RoundedRectangle(cornerRadius: Metric.smallRadius)
             )
             .contentShape(Rectangle())
         }.buttonStyle(.plain).onHover { if $0 { mentionIndex = offset } }
@@ -417,7 +417,7 @@ struct UnifiedComposer: View {
               Spacer()
               if studio.preset == mode.name { StudioIcon("checkmark", size: 12) }
             }
-            Text(mode.summary).font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+            Text(mode.summary).font(.studio(.caption)).foregroundStyle(studio.t.secondary)
               .fixedSize(horizontal: false, vertical: true)
           }.padding(.vertical, 3)
         }

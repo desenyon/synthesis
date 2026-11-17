@@ -86,7 +86,7 @@ struct SendWhatIfSheet: View {
       StudioIcon(icon, size: 13)
         .foregroundStyle(change.sendable ? studio.t.accent : studio.t.warning)
         .frame(width: 26, height: 26)
-        .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 7))
+        .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.smallRadius))
       VStack(alignment: .leading, spacing: 2) {
         HStack(spacing: 6) {
           Text(label).font(.studio(size: 11.5, weight: .medium)).foregroundStyle(studio.t.muted)
