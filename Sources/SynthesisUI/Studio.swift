@@ -387,6 +387,19 @@ public struct Toast: Identifiable {
       self.error = error.localizedDescription
     }
   }
+  /// After a crash or forced quit, points the creator at pages whose typing never reached a
+  /// saved revision. Nothing is restored until they open the page and choose Restore.
+  public func announceRecoveredText() {
+    guard let entries = try? store.journals(worldID: worldID), let first = entries.first,
+      let record = records.first(where: { $0.id == first.recordID })
+    else { return }
+    show(
+      entries.count == 1
+        ? "Recovered unsaved text in “\(record.title)”"
+        : "Recovered unsaved text in \(entries.count) pages",
+      icon: "lifepreserver", actionTitle: "Open"
+    ) { [weak self] in self?.openRecord(record) }
+  }
   public func show(
     _ message: String, icon: String = "checkmark.circle", actionTitle: String? = nil,
     action: (() -> Void)? = nil

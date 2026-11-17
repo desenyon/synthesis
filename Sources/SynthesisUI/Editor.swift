@@ -57,6 +57,8 @@ struct EditorScreen: View {
   @State private var dirty = false
   @State private var status = "Saved"
   @State private var saving: Task<Void, Never>?
+  @State private var journaling: Task<Void, Never>?
+  @State private var recovered: JournalEntry?
   @State private var reloadToken = 0
   @State private var panel: Panel?
   @State private var revisions: [RecordRevision] = []
@@ -114,6 +116,7 @@ struct EditorScreen: View {
       if studio.captureHint.contains("mechanics") { mechanicsVisible = true }
       studio.perform {
         sectionParent = try studio.store.sectionParent(worldID: record.worldID, recordID: record.id)
+        recovered = try studio.store.journal(worldID: record.worldID, recordID: record.id)
       }
       if studio.reviewCanon == record.id {
         studio.reviewCanon = nil
@@ -122,7 +125,11 @@ struct EditorScreen: View {
       if studio.captureHint == "sheet-canon" { panel = .canon }
       if studio.captureHint == "sheet-history" { openHistory() }
     }
-    .onDisappear { saving?.cancel() }
+    .onDisappear {
+      saving?.cancel()
+      journaling?.cancel()
+      if dirty { journal() }
+    }
     .onChange(of: studio.worldRevision) { _, _ in
       // A reviewed agent revision may land while this record is open. Refresh clean editors;
       // never replace unsaved typing. The version check still rejects conflicting saves.
@@ -242,6 +249,7 @@ struct EditorScreen: View {
 
   private var writing: some View {
     VStack(alignment: .leading, spacing: 0) {
+      if let entry = recovered { recoveryBanner(entry) }
       if let parent = sectionParent {
         Button {
           if save() { studio.openRecord(parent) }
@@ -352,6 +360,12 @@ struct EditorScreen: View {
   private func changed() {
     dirty = true
     status = "Saving…"
+    journaling?.cancel()
+    journaling = Task { @MainActor in
+      try? await Task.sleep(for: .milliseconds(200))
+      guard !Task.isCancelled, dirty else { return }
+      journal()
+    }
     saving?.cancel()
     saving = Task { @MainActor in
       try? await Task.sleep(for: .milliseconds(650))
@@ -368,13 +382,74 @@ struct EditorScreen: View {
         body: bodyText, rtf: richText, category: category)
       dirty = false
       status = "Saved"
+      journaling?.cancel()
+      try? studio.store.clearJournal(worldID: record.worldID, recordID: record.id)
       try studio.reload()
       return true
     } catch {
+      journal()
       status = "Not saved · your text is kept here"
       studio.error = error.localizedDescription
       return false
     }
+  }
+  /// Device-local recovery copy, so a crash or failed save cannot lose typing.
+  private func journal() {
+    try? studio.store.writeJournal(
+      worldID: record.worldID, recordID: record.id, title: title, body: bodyText, rtf: richText,
+      category: category, baseVersion: record.version)
+  }
+  private func restoreRecovered(_ entry: JournalEntry) {
+    title = entry.title
+    bodyText = entry.body
+    richText = entry.rtf
+    category = entry.category
+    reloadToken += 1
+    recovered = nil
+    changed()
+  }
+  private func discardRecovered(_ entry: JournalEntry) {
+    recovered = nil
+    studio.perform { try studio.store.clearJournal(worldID: record.worldID, recordID: record.id) }
+    studio.show("Discarded the recovered text", icon: "archivebox", actionTitle: "Undo") {
+      studio.perform {
+        try studio.store.writeJournal(
+          worldID: entry.worldID, recordID: entry.recordID, title: entry.title, body: entry.body,
+          rtf: entry.rtf, category: entry.category, baseVersion: entry.baseVersion)
+        recovered = entry
+      }
+    }
+  }
+  private func recoveryBanner(_ entry: JournalEntry) -> some View {
+    let words = entry.body.split { $0.isWhitespace || $0.isNewline }.count
+    return HStack(alignment: .top, spacing: 12) {
+      StudioIcon("lifepreserver", size: 15).foregroundStyle(studio.t.warning).padding(.top, 2)
+      VStack(alignment: .leading, spacing: 4) {
+        Text("Unsaved text was recovered").font(.studio(size: 13.5, weight: .semibold))
+        Text(
+          "\(words) words from \(relativeDate(entry.updatedAt).lowercased()) never reached a saved revision."
+            + (entry.baseVersion == record.version
+              ? ""
+              : " This page has been saved since; restoring adds a new revision and history keeps both.")
+        ).font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+        HStack(spacing: 8) {
+          Button("Restore") { restoreRecovered(entry) }
+            .buttonStyle(QuietButton(t: studio.t, primary: true))
+          Button("Discard") { discardRecovered(entry) }
+            .buttonStyle(QuietButton(t: studio.t, role: .ghost))
+        }.padding(.top, 6)
+      }
+      Spacer(minLength: 0)
+    }.padding(12).background(
+      studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.cardRadius)
+    )
+    .overlay(
+      RoundedRectangle(cornerRadius: Metric.cardRadius).stroke(
+        studio.t.warning.opacity(0.35), lineWidth: 1)
+    )
+    .padding(.bottom, 14).accessibilityElement(children: .contain)
+    .accessibilityLabel("Unsaved text was recovered")
   }
   private func openHistory() {
     guard save() else { return }

@@ -31,7 +31,7 @@ extension Studio {
     "manual-settings", "settings-collapsed", "settings-model-search", "preferences-editor",
     "preferences-library",
     "conversation-interrupted", "review-edits", "timeline-edit", "timeline-companion",
-    "graph-companion", "atlas-companion", "light-atlas-companion",
+    "graph-companion", "atlas-companion", "light-atlas-companion", "editor-recovered",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -512,6 +512,17 @@ extension Studio {
       inspector = false
       selectedRecord = records.first { $0.title == "Oren Ashe" }
       if let id = selectedRecord?.id { recordSectionTabs[id] = true }
+    case "editor-recovered":
+      destination = .library
+      if let record = records.first(where: { $0.title == "The Glass Sea" }) {
+        // A recovery copy as a crash would leave it: typed against the saved version.
+        try? store.writeJournal(
+          worldID: worldID, recordID: record.id, title: record.title,
+          body: record.body
+            + "\n\nWhen the glass holds, the drowned lamps can be counted. Mira never counts the same number twice.",
+          rtf: nil, category: record.category, baseVersion: record.version)
+        selectedRecord = record
+      }
     case "editor", "light-editor", "sheet-rule", "preferences-editor":
       destination = .library
       if state == "preferences-editor" { inspector = false }

@@ -109,6 +109,7 @@ final class StudioWindow: NSWindow {
       window.center()
       if !capturing { window.setFrameAutosaveName("SynthesisMainWindow") }
       buildMenu()
+      if !capturing { studio.announceRecoveredText() }
       if let directory = ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"],
         capturing
       {
