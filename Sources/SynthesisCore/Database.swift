@@ -31,6 +31,32 @@ final class Database {
             ).rawValue)
         }, nil) == SQLITE_OK
     else { throw failure() }
+    // Durable activity triggers need portable UUIDs; generated once for each committed change.
+    guard
+      sqlite3_create_function_v2(
+        handle, "synthesis_uuid", 0, SQLITE_UTF8, nil,
+        { context, _, _ in
+          UUID().uuidString.withCString {
+            sqlite3_result_text(
+              context, $0, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+          }
+        }, nil, nil, nil) == SQLITE_OK
+    else { throw failure() }
+    guard
+      sqlite3_create_function_v2(
+        handle, "synthesis_board_changed", 2, SQLITE_UTF8 | SQLITE_DETERMINISTIC, nil,
+        { context, _, values in
+          guard let values,
+            let old = sqlite3_value_text(values[0]), let new = sqlite3_value_text(values[1])
+          else {
+            sqlite3_result_int(context, 1)
+            return
+          }
+          sqlite3_result_int(
+            context,
+            BoardActivity.changed(String(cString: old), String(cString: new)) ? 1 : 0)
+        }, nil, nil, nil) == SQLITE_OK
+    else { throw failure() }
     try execute("PRAGMA foreign_keys=ON")
     try execute("PRAGMA journal_mode=WAL")
     try execute(
@@ -51,6 +77,9 @@ final class Database {
         try transaction {
           let sql = try String(contentsOf: file, encoding: .utf8)
           guard sqlite3_exec(handle, sql, nil, nil, nil) == SQLITE_OK else { throw failure() }
+          if file.lastPathComponent == "0015_world_activity.sql" {
+            try ActivityHistoryMigration.backfill(self)
+          }
           try execute(
             "INSERT INTO schema_migrations VALUES(?,?)", [file.lastPathComponent, timestamp()])
         }

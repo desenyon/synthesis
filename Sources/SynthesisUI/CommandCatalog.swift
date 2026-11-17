@@ -147,6 +147,7 @@ extension CommandPalette {
         studio.dark ? "sun.max" : "moon", "", { studio.toggleTheme() }
       ),
       ("Workspace layouts", "square.stack", "⌥⌘L", { studio.sheet = .layouts }),
+      ("World activity history", "clock.arrow.circlepath", "", { studio.sheet = .activity }),
       ("Open settings", "gearshape", "⌘,", { studio.navigate(.settings) }),
       (
         "Import Markdown or text files…", "square.and.arrow.down", "⇧⌘I",
@@ -182,12 +183,14 @@ extension CommandPalette {
           })
       }
     }
-    // Latest saved object activity, not a synthetic audit log. The complete history is #25.
+    // Quick links to current objects; the full editing history has its own searchable view.
     for change in activity.filter({
       $0.worldID == worldID && matches("\($0.title) \($0.detail) recent changes activity")
     }).prefix(query.isEmpty ? 6 : 50) {
       let icon: String =
         switch change.kind {
+        case .world: "globe"
+        case .conversation: "bubble.left"
         case .record: "doc.text"
         case .board: change.boardKind == "atlas" ? "map" : "rectangle.on.rectangle"
         case .relationship: Destination.knowledge.icon

@@ -10,6 +10,7 @@
 | [Atlas](ATLAS.md) | Named maps, place hierarchy, markers and regions |
 | [Creative components](CREATIVE_COMPONENTS.md) | Notes, facts, checklists and progression tracks |
 | [Search and commands](SEARCH.md) | Universal ⌘K palette, real destinations and local search |
+| [World activity](ACTIVITY.md) | Committed edits, approvals, connections, source navigation and portable history |
 | [Settings](SETTINGS.md) | What each preference does and where it is stored |
 
 ## Understanding the project

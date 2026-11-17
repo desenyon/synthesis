@@ -14,11 +14,11 @@ Start here when picking up Synthesis.
 1. [AGENTS.md](../AGENTS.md): the product contract and protected rules (canon approval, archive-not-delete, privacy, verification honesty).
 2. [STATE](STATE.md): what is verified, with exact checks.
 3. [EXPANSION](EXPANSION.md) and [EXPANSION_SOURCE](EXPANSION_SOURCE.md): all 394 requirements, individual acceptance and exact source. Then [ROADMAP](ROADMAP.md) and [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md).
-4. [ARCHITECTURE](ARCHITECTURE.md): modules, migrations (0001–0014), portable format v8, JSON schema 11.
+4. [ARCHITECTURE](ARCHITECTURE.md): modules, migrations (0001–0015), portable format v9, JSON schema 12.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#24 verified; #25 recent activity history is next.** Latest check: 235 tests / 59 suites, strict lint and optimized build. #24 has 26 final inspected states. SidebarConfiguration stores per-world local arrangements and stable record favorites. Favorites survive closing tabs and archive/restore; keep archived IDs while resolving only current-world live records. Corrupt preferences remain preserved until explicit reset. Shared advanced search preserves world/archive/canon boundaries and applies Library scopes before LIMIT. Keep the materialized FTS CTE: the scale test caught repeated scans without it. No foreground events, owner-app restart or subscription requests.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#25 verified; #26 split workspace is next.** Latest check: 244 tests / 61 suites, strict lint and optimized build. #25 has 22 final inspected states. World activity is appended inside source transactions. Imports suppress synthetic insert history, validate/remap saved sources and reconstruct older available revisions. BoardActivity ignores viewport/serialization noise without changing the actual saved board. SidebarConfiguration stores per-world local arrangements and stable record favorites. Favorites survive closing tabs and archive/restore; keep archived IDs while resolving only current-world live records. Corrupt preferences remain preserved until explicit reset. Shared advanced search preserves world/archive/canon boundaries and applies Library scopes before LIMIT. Keep the materialized FTS CTE: the scale test caught repeated scans without it. No foreground events, owner-app restart or subscription requests.
 
 ## Current shape
 
@@ -43,7 +43,7 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#22 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
+- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#25 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.

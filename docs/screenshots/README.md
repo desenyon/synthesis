@@ -1,6 +1,6 @@
 # Screenshots
 
-README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png` `document-tabs.png`, `palette.png`, `navigation.png` and `favorites.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
+README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png` `document-tabs.png`, `palette.png`, `navigation.png`, `favorites.png` and `activity.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
 
 | File | Capture state |
 | --- | --- |
@@ -47,3 +47,5 @@ Document tabs: expansion #16, `verification/expansion-016`, with pinned and real
 `navigation.png` comes from expansion #23’s final Categories tab at 1440×900. The section order, hidden categories and pins are real isolated preferences. [Evidence](../verification/expansion-023/README.md).
 
 `favorites.png` comes from expansion #24’s final Favorites manager at 1440×900. All names and pins resolve to persisted records/collections in the isolated sample world. [Evidence](../verification/expansion-024/README.md).
+
+Activity: `activity.png` is `changes-search` at 1440×900 from [expansion-025](../verification/expansion-025/README.md), showing actual fixture mutations recorded through the database triggers.

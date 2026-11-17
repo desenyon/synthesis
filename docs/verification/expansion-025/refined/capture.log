@@ -1,0 +1,21 @@
+CAPTURE changes-history 1440x900, bitmap 1440x900, 176ms
+CAPTURE light-changes-history 1440x900, bitmap 1440x900, 176ms
+CAPTURE manual-changes-history 1440x900, bitmap 1440x900, 87ms
+CAPTURE changes-approvals 1440x900, bitmap 1440x900, 158ms
+CAPTURE changes-relations 1440x900, bitmap 1440x900, 171ms
+CAPTURE changes-search 1440x900, bitmap 1440x900, 164ms
+CAPTURE changes-empty 1440x900, bitmap 1440x900, 166ms
+CAPTURE changes-archived 1440x900, bitmap 1440x900, 166ms
+CAPTURE changes-dashboard 1440x900, bitmap 1440x900, 134ms
+CAPTURE changes-reconstructed 1440x900, bitmap 1440x900, 162ms
+CAPTURE changes-history 1024x620, bitmap 1024x620, 114ms
+CAPTURE light-changes-history 1024x620, bitmap 1024x620, 116ms
+CAPTURE manual-changes-history 1024x620, bitmap 1024x620, 49ms
+CAPTURE changes-approvals 1024x620, bitmap 1024x620, 113ms
+CAPTURE changes-relations 1024x620, bitmap 1024x620, 115ms
+CAPTURE changes-search 1024x620, bitmap 1024x620, 108ms
+CAPTURE changes-empty 1024x620, bitmap 1024x620, 110ms
+CAPTURE changes-archived 1024x620, bitmap 1024x620, 112ms
+CAPTURE changes-dashboard 1024x620, bitmap 1024x620, 88ms
+CAPTURE changes-reconstructed 1024x620, bitmap 1024x620, 117ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-025/refined

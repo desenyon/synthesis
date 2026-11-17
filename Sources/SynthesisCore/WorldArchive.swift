@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 8
+  var version = 9
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -16,7 +16,7 @@ extension WorkspaceStore {
     "proposals", "message_context", "boards", "rules", "rule_history", "rule_scenarios",
     "chronology_lanes",
     "chronology_placements", "record_sections", "creative_components", "rule_prerequisites",
-    "record_artwork",
+    "record_artwork", "world_activity",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
     _ = try world(worldID)
@@ -62,7 +62,8 @@ extension WorkspaceStore {
     if (1...5).contains(archive.version) { archive.tables["rule_history"] = [] }
     if (1...6).contains(archive.version) { archive.tables["rule_prerequisites"] = [] }
     if (1...7).contains(archive.version) { archive.tables["record_artwork"] = [] }
-    guard archive.format == "dev.synthesis.world", (1...8).contains(archive.version),
+    if (1...8).contains(archive.version) { archive.tables["world_activity"] = [] }
+    guard archive.format == "dev.synthesis.world", (1...9).contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -104,6 +105,8 @@ extension WorkspaceStore {
       return result as String
     }
     return try db.transaction {
+      let newWorld = ids[oldWorld]!
+      try db.execute("INSERT INTO activity_imports(world_id) VALUES(?)", [newWorld])
       for table in Self.archiveTables {
         for source in archive.tables[table] ?? [] {
           var row = source.mapValues(remap)
@@ -133,7 +136,10 @@ extension WorkspaceStore {
             columns.map { row[$0] })
         }
       }
-      let newWorld = ids[oldWorld]!
+      if (archive.tables["world_activity"] ?? []).isEmpty {
+        try ActivityHistoryMigration.backfill(db, worldID: newWorld)
+      }
+      try validateActivitySources(worldID: newWorld)
       // Membership is presentation data, but must still obey the entity -> lore contract.
       // Validate imports as well as interactive writes to prevent recursive/cyclic pages.
       guard
@@ -169,6 +175,10 @@ extension WorkspaceStore {
             "\(key):\(newWorld)", value: key == "world-cover" ? value : remap(value))
         }
       }
+      try db.execute("DELETE FROM activity_imports WHERE world_id=?", [newWorld])
+      try db.execute(
+        "INSERT INTO world_activity(id,world_id,object_id,kind,action,title,detail,created_at) VALUES(?,?,?,'world','created',?,'World imported',?)",
+        [UUID().uuidString, newWorld, newWorld, try world(newWorld).name, timestamp()])
       return (try world(newWorld), ids)
     }
   }

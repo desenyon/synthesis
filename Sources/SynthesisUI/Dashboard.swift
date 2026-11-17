@@ -33,6 +33,19 @@ extension Studio {
     perform {
       let target: InspectionTarget
       switch item.kind {
+      case .world:
+        navigate(.settings)
+        settingsSection = .world
+        settingsQuery = ""
+        return
+      case .conversation:
+        guard
+          let chat = try store.conversations(worldID: worldID).first(where: {
+            $0.id == item.objectID
+          })
+        else { throw SynthesisError.notFound }
+        openChat(chat)
+        return
       case .record:
         let record = try store.record(worldID: worldID, id: item.objectID)
         guard try !store.isArchived(worldID: worldID, recordID: record.id) else {
@@ -183,7 +196,9 @@ struct DashboardScreen: View {
     }
   }
   private var activitySection: some View {
-    group("World activity") {
+    group("World activity", action: "View history") {
+      studio.sheet = .activity
+    } content: {
       if let failure {
         HStack {
           Text(failure).font(.studio(.label)).foregroundStyle(t.danger)
@@ -261,6 +276,8 @@ struct DashboardScreen: View {
   }
   private func activityIcon(_ kind: WorldActivity.Kind) -> String {
     switch kind {
+    case .world: "globe"
+    case .conversation: "bubble.left"
     case .record: "doc.text"
     case .relationship: Destination.knowledge.icon
     case .event, .lane: Destination.timeline.icon

@@ -2,7 +2,9 @@ import Foundation
 
 /// Latest saved activity for each object, not a fabricated chronological narrative.
 public struct WorldActivity: Identifiable, Equatable, Sendable {
-  public enum Kind: String, Sendable { case record, relationship, event, board, proposal, lane }
+  public enum Kind: String, CaseIterable, Sendable {
+    case record, relationship, event, board, proposal, lane, world, conversation
+  }
   public var worldID: String
   public var objectID: String
   public var kind: Kind

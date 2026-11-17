@@ -16,7 +16,7 @@ Examples:
 
 Matches precede the optional Capture/Start a conversation actions. Starting a conversation only prepares a draft; it does not submit it. Opening a result validates its current source and respects unsaved-writing guards. Archived or other-world objects cannot be reopened through stale results.
 
-Recent changes currently shows the latest saved state of up to 100 world objects, with at most 50 matching rows. It is not a complete edit log; expansion #25 tracks that capability. Existing scenes remain portable lore records; narrative-studio expansion requirements are separate.
+Recent changes shows the latest saved state of up to 100 world objects, with at most 50 matching rows. For the retained edit log, use the **World activity history** command: searchable edits, approvals, connections and archived-source history. See [World activity](ACTIVITY.md). Existing scenes remain portable lore records; narrative-studio expansion requirements are separate.
 
 ## Structured lore search
 

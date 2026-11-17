@@ -70,6 +70,9 @@ extension Studio {
     "favorites-inspector", "favorites-rail", "favorites-options", "light-favorites-options",
     "favorites-empty", "favorites-long",
     "favorites-collection",
+    "changes-history", "light-changes-history", "manual-changes-history", "changes-approvals",
+    "changes-relations", "changes-search", "changes-empty", "changes-archived",
+    "changes-dashboard", "changes-reconstructed",
     "light-editor",
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
@@ -291,6 +294,10 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("changes-") {
+      configureActivityCapture(state, board: board, conversation: conversation)
+      return
+    }
     if state.contains("favorites-") {
       configureConnectedCapture("library", board: board, conversation: conversation)
       dark = !state.hasPrefix("light-")

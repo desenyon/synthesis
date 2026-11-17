@@ -217,7 +217,7 @@ public struct Toast: Identifiable {
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
     case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts, project,
-      navigation
+      navigation, activity
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }

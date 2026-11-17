@@ -88,7 +88,7 @@ Canvas still uses the published OSS engine rather than a fork. Synthesis owns th
 
 ## Portable worlds and chronology — 2026-11-15
 
-`WorldArchive.swift` exports `.synthesis` format version 8: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v8, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 11 includes chronology (including archived lanes), technique prerequisites and artwork revisions.
+`WorldArchive.swift` exports `.synthesis` format version 9: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v9, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 12 includes chronology (including archived lanes), technique prerequisites, artwork revisions and activity history.
 
 Migration 0007 adds nested chronology lanes (branch/period) and event placements. Events retain actual source records and free-form dates. A grouping is not a canon branch: no speculative merge or inheritance is implied. Reviewed agent actions can create a branch/period and assign new events to existing lanes or earlier branch/period changes in the same proposal. Dependencies resolve only after creator acceptance. Events may create a draft source atomically when none is supplied. Request context includes lane IDs and memberships.
 
@@ -191,3 +191,9 @@ Project outlines are ordinary entity records with category `Projects`: draft/can
 ## Structured search
 
 `LoreSearchQuery.swift` parses bounded free text, quoted phrases and typed filters. `LoreSearch.swift` composes parameterized, world-scoped queries over existing records/FTS/relationships, with explicit archive scope. Database registers a Unicode case/diacritic-insensitive collation for exact creator-authored names, categories, tags and aliases. FTS candidates are materialized once before joining records; the existing scale test caught repeated virtual-table scans without that boundary. Library and ⌘K share this core path; structured queries bypass name-only/capture fallbacks. Invalid filters display locally. Agent retrieval retains its separate retrieval query; this change neither widens agent context nor adds a provider call.
+
+## Committed world activity — expansion #25
+
+Migration 0015 appends source-scoped history through SQLite triggers in the same transaction as the mutation. `synthesis_uuid()` gives each entry a portable stable identifier. `WorldChangeHistory` provides world validation, source availability, parameterized search/filters and stable date/rowid pagination. `BoardActivity` compares parsed board content while excluding viewport and engine revision bookkeeping; the complete original content is still saved. Message streaming, provider/device preferences and no-op updates do not log.
+
+`ActivityHistoryMigration` reconstructs preserved native/original record revisions, relationship history and rule snapshots, with labeled saved-state baselines elsewhere. Migration is atomic and runs once. v9 archives include history; import suppresses synthetic trigger entries, remaps/validates every source, reconstructs older files and appends one import entry. Dashboard, ⌘K and View menu open `WorldActivitySheet`; current sources resolve through existing navigation/save guards. History is independent of fictional chronology and cannot promote canon.
