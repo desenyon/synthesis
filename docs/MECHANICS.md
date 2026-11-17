@@ -13,3 +13,8 @@ Open a rule’s **History** menu to inspect saved snapshots and restore earlier 
 The assistant can propose rules and scenarios through the existing Review queue. No agent action can approve a rule or write the creator's scenario verdict. Subscription access and Manual-mode cancellation stay at the existing core boundary.
 
 This is a structured rules studio. A spatial technique tree, automatic combat simulator, mathematical constraint engine, and canon branch merging are not implemented by this workspace.
+
+
+## Technique tree
+
+Edit a technique or progression step and tick what it **requires first** (other techniques and steps of the same system). Mechanics draws the tree top to bottom from those choices; with the Techniques or Progression filter it appears above the cards. Loops are refused, a rejected save changes nothing, removing a requirement archives the edge, and an archived rule drops out of the tree without losing its edges. The tree is a map of what you wrote, not a simulation. The assistant cannot yet propose requirements.

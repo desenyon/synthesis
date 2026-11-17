@@ -6,6 +6,7 @@ struct RulesLab: View {
   @ObservedObject var studio: Studio
   let record: LoreRecord
   @State private var rules: [WorldRule] = []
+  @State private var edges: [RulePrerequisite] = []
   @State private var scenarios: [RuleScenario] = []
   @State private var findings: [RuleFinding] = []
   @State private var filter: WorldRule.Kind?
@@ -46,6 +47,7 @@ struct RulesLab: View {
               }
             }
           }.scrollIndicators(.never)
+          if let filter, WorkspaceStore.treeKinds.contains(filter) { treeSection }
           if rules.isEmpty {
             Text(
               "No mechanics have been established. Start with a source, a cost, a limit — or a technique you want to explore."
@@ -61,6 +63,7 @@ struct RulesLab: View {
               }
             }
           }
+          if filter == nil { treeSection }
           VStack(alignment: .leading, spacing: 14) {
             HStack {
               Text("Scenarios").font(.studio(size: 20, weight: .semibold))
@@ -128,6 +131,11 @@ struct RulesLab: View {
         historyRule = rules.first { $0.kind == .cost }
       }
       if studio.captureHint == "mechanics-review" { review = rules.first { $0.kind == .cost } }
+      if studio.captureHint == "mechanics-tree" { filter = .technique }
+      if studio.captureHint == "mechanics-requires" {
+        editing = rules.first { $0.title == "The drowned chart" }
+        ruleForm = editing != nil
+      }
     }
     .onChange(of: studio.worldRevision) { _, _ in load() }
     .studioSheet(isPresented: $ruleForm) {
@@ -144,6 +152,25 @@ struct RulesLab: View {
     }
     .studioSheet(item: $review) { rule in
       RuleCanonReview(studio: studio, rule: rule) { review = nil }
+    }
+  }
+  @ViewBuilder private var treeSection: some View {
+    if rules.filter({ WorkspaceStore.treeKinds.contains($0.kind) }).count >= 2 {
+      VStack(alignment: .leading, spacing: 12) {
+        HStack(alignment: .firstTextBaseline) {
+          Text("Technique tree").font(.studio(size: 20, weight: .semibold))
+          Spacer()
+          Text(
+            edges.isEmpty
+              ? "Edit a technique and choose what it requires first."
+              : "Arrows run from a requirement to what it unlocks."
+          ).font(.studio(size: 12.5)).foregroundStyle(studio.t.muted)
+        }
+        TechniqueTreeView(studio: studio, rules: rules, edges: edges) { rule in
+          editing = rule
+          ruleForm = true
+        }
+      }
     }
   }
   private func ruleCard(_ rule: WorldRule) -> some View {
@@ -173,6 +200,7 @@ struct RulesLab: View {
   private func load() {
     studio.perform {
       rules = try studio.store.rules(worldID: record.worldID, systemID: record.id)
+      edges = try studio.store.prerequisites(worldID: record.worldID, systemID: record.id)
       scenarios = try studio.store.scenarios(worldID: record.worldID, systemID: record.id)
       findings = try studio.store.ruleChecks(worldID: record.worldID, systemID: record.id)
     }

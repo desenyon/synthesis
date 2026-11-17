@@ -920,6 +920,8 @@ struct RecordRuleEditor: View {
   @State private var bodyText = ""
   @State private var error: String?
   @State private var kind: WorldRule.Kind = .limit
+  @State private var requires: Set<String> = []
+  @State private var candidates: [WorldRule] = []
   var body: some View {
     SheetScaffold(
       title: existing == nil ? "Add a rule" : "Edit rule",
@@ -934,6 +936,39 @@ struct RecordRuleEditor: View {
       FormTextArea(
         label: "Rule", placeholder: "Describe how this rule works and where it applies.",
         text: $bodyText, t: studio.t)
+      if WorkspaceStore.treeKinds.contains(kind) && !candidates.isEmpty {
+        VStack(alignment: .leading, spacing: 6) {
+          Text("Requires first").font(.studio(size: 12, weight: .medium))
+            .foregroundStyle(studio.t.secondary)
+          ScrollView {
+            VStack(alignment: .leading, spacing: 2) {
+              ForEach(candidates) { other in
+                Button {
+                  if requires.contains(other.id) {
+                    requires.remove(other.id)
+                  } else {
+                    requires.insert(other.id)
+                  }
+                } label: {
+                  HStack(spacing: 9) {
+                    StudioIcon(
+                      requires.contains(other.id) ? "checkmark.square.fill" : "square", size: 14
+                    ).foregroundStyle(
+                      requires.contains(other.id) ? studio.t.accent : studio.t.muted)
+                    Text(other.title).font(.studio(size: 13.5)).lineLimit(1)
+                    Text(other.kind.singular).font(.studio(size: 12))
+                      .foregroundStyle(studio.t.muted)
+                    Spacer(minLength: 0)
+                  }.padding(.horizontal, 8).frame(height: 30).contentShape(Rectangle())
+                    .hoverFill(studio.t)
+                }.buttonStyle(.plain)
+                  .accessibilityLabel("Requires \(other.title)")
+                  .accessibilityAddTraits(requires.contains(other.id) ? .isSelected : [])
+              }
+            }
+          }.frame(maxHeight: 150)
+        }
+      }
       if let error { Text(error).font(.studio(size: 13)).foregroundStyle(studio.t.danger) }
     } footer: {
       Spacer()
@@ -943,14 +978,10 @@ struct RecordRuleEditor: View {
           if let existing {
             let current = try studio.store.rule(worldID: record.worldID, id: existing.id)
             guard current == existing else { throw SynthesisError.stale }
-            _ = try studio.store.updateRule(
-              worldID: record.worldID, id: existing.id, kind: kind, title: title, body: bodyText,
-              expected: existing)
-          } else {
-            _ = try studio.store.addRule(
-              worldID: record.worldID, systemID: record.id, kind: kind, title: title, body: bodyText
-            )
           }
+          try studio.store.saveRule(
+            worldID: record.worldID, systemID: record.id, existing: existing, kind: kind,
+            title: title, body: bodyText, requires: Array(requires))
           try studio.reload()
           close()
         } catch { self.error = error.localizedDescription }
@@ -962,6 +993,14 @@ struct RecordRuleEditor: View {
       title = existing?.title ?? ""
       bodyText = existing?.body ?? ""
       kind = existing?.kind ?? initialKind
+      if let rules = try? studio.store.rules(worldID: record.worldID, systemID: record.id),
+        let edges = try? studio.store.prerequisites(worldID: record.worldID, systemID: record.id)
+      {
+        candidates = rules.filter {
+          WorkspaceStore.treeKinds.contains($0.kind) && $0.id != existing?.id
+        }
+        requires = Set(edges.filter { $0.ruleID == existing?.id }.map(\.requiresID))
+      }
     }
   }
 }

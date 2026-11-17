@@ -33,7 +33,7 @@ extension Studio {
     "conversation-interrupted", "review-edits", "timeline-edit", "timeline-companion",
     "graph-companion", "atlas-companion", "light-atlas-companion", "editor-recovered",
     "what-if-new", "what-if-send",
-    "review-what-if", "worlds-what-if",
+    "review-what-if", "worlds-what-if", "mechanics-tree", "mechanics-requires",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -347,7 +347,8 @@ extension Studio {
     case "sidebar-folded", "sidebar-opaque", "light-sidebar-opaque":
       destination = .knowledge
     case "mechanics", "light-mechanics", "manual-mechanics", "mechanics-empty",
-      "mechanics-scenario", "mechanics-review", "mechanics-history":
+      "mechanics-scenario", "mechanics-review", "mechanics-history", "mechanics-tree",
+      "mechanics-requires":
       destination = .library
       inspector = false
       selectedRecord = records.first {
@@ -378,6 +379,34 @@ extension Studio {
           _ = try? store.addRule(
             worldID: worldID, systemID: record.id, kind: example.0, title: example.1,
             body: example.2)
+        }
+        // A small tree: one step, two techniques built on the recall, one built on both.
+        let tree: [(WorldRule.Kind, String, String)] = [
+          (.progression, "First surrender", "Give up one memory and feel its absence settle."),
+          (.technique, "Borrowed hands", "Use a stranger's practised skill for a single task."),
+          (.technique, "Tide sight", "See a place as it stood on the day it was remembered."),
+          (
+            .technique, "The drowned chart",
+            "Map a coastline that no longer exists, from every witness at once."
+          ),
+        ]
+        let created = tree.compactMap {
+          try? store.addRule(
+            worldID: worldID, systemID: record.id, kind: $0.0, title: $0.1, body: $0.2)
+        }
+        if created.count == 4,
+          let recall = try? store.rules(worldID: worldID, systemID: record.id).first(where: {
+            $0.title == "A cartographer’s recall"
+          })
+        {
+          try? store.setPrerequisites(
+            worldID: worldID, ruleID: recall.id, requires: [created[0].id])
+          try? store.setPrerequisites(
+            worldID: worldID, ruleID: created[1].id, requires: [created[0].id])
+          try? store.setPrerequisites(
+            worldID: worldID, ruleID: created[2].id, requires: [recall.id])
+          try? store.setPrerequisites(
+            worldID: worldID, ruleID: created[3].id, requires: [recall.id, created[2].id])
         }
         _ = try? store.saveScenario(
           worldID: worldID, systemID: record.id, title: "Cross without forgetting her sister",

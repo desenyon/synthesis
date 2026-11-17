@@ -16,6 +16,8 @@ enum StudioIcons {
     return CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
   }()
   static let glyphs: [String: String] = [
+    "square": "\u{e45e}",
+    "checkmark.square.fill": "\u{e186}",
     "tag": "\u{e478}",
     "arrow.left.arrow.right": "\u{e0a0}",
     "arrow.triangle.merge": "\u{e280}",

@@ -84,7 +84,7 @@ Canvas still uses the published OSS engine rather than a fork. Synthesis owns th
 
 ## Portable worlds and chronology — 2026-11-15
 
-`WorldArchive.swift` exports `.synthesis` format version 6: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v6, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 9 includes chronology, including archived lanes.
+`WorldArchive.swift` exports `.synthesis` format version 7: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v7, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 10 includes chronology (including archived lanes) and technique prerequisites.
 
 Migration 0007 adds nested chronology lanes (branch/period) and event placements. Events retain actual source records and free-form dates. A grouping is not a canon branch: no speculative merge or inheritance is implied. Reviewed agent actions can create a branch/period and assign new events to existing lanes or earlier branch/period changes in the same proposal. Dependencies resolve only after creator acceptance. Events may create a draft source atomically when none is supplied. Request context includes lane IDs and memberships.
 
@@ -134,3 +134,12 @@ Studio approval resets chronology filtering to All history, selects affected map
 Canvas load commits the engine viewport before sending `loaded`. Stored relationship elements stay locked, share one route builder with converted arrows, and place labels on the route midpoint. Canvas and Graph add exterior curves for close parallel nodes and basic intervening-card detours; this is not a general obstacle-routing guarantee for dense boards. Graph reuses computed routes within a render. The offline CSP and bundled engine boundary remain unchanged.
 
 `HarnessSelection` is a lock-protected, per-Studio runtime cache captured by the provider router. SQLite remains the persistence authority. Production provider/model selection no longer reads or writes shared `UserDefaults`, so isolated capture/test instances cannot redirect another running app’s requests. Canvas initial fitting is committed before its load acknowledgement, just like saved viewport restoration.
+
+
+## 2026-11-16 additions
+
+- Migration 0011 `editor_journal`: device-local recovery copy of unsaved editor text, cleared on save, never exported.
+- Migration 0012 `world_branches`, `branch_origins`, `branch_items`: what-if branches are independent world copies made through the archive import with its ID map; `proposeBranchMerge` stages their clean changes as one `branch-merge` proposal in the original, reviewed per change. Conflicts, archives and title/category-only edits are previewed, never sent.
+- Migration 0013 `rule_prerequisites`: technique/progression requirement edges within one system, loop-checked, archived on removal, included in `.synthesis` v7 and JSON schema 10. Mechanics derives the tree with the bundled Dagre layout (node size and spacing are parameters).
+- `WorldChecks` adds contradictory relationships, timeline order against comparable same-era dates, and tag spelling variants with a reversible merge.
+- `.synthesis` is an exported document type (`dev.desenyon.synthesis.world`); Finder opens confirm before importing a copy.

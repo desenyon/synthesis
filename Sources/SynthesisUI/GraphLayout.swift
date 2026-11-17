@@ -16,9 +16,10 @@ enum GraphLayout {
     return nil
   }()
   static var engineAvailable: Bool { script != nil }
-  static func positions(nodes: [String], edges: [(String, String)], landscape: Bool = true)
-    -> [String: CGPoint]
-  {
+  static func positions(
+    nodes: [String], edges: [(String, String)], landscape: Bool = true,
+    size: CGSize = cardSize, nodeSeparation: Double = 56, rankSeparation: Double = 112
+  ) -> [String: CGPoint] {
     guard !nodes.isEmpty, !Task.isCancelled else { return [:] }
     guard let script, let context = JSContext() else { return grid(nodes, landscape) }
     // JavaScriptCore has no browser structuredClone. Dagre only clones the JSON-safe
@@ -29,11 +30,11 @@ enum GraphLayout {
     context.evaluateScript(script)
     let function = context.evaluateScript(
       """
-      (function(nodes, edges, landscape) {
+      (function(nodes, edges, landscape, width, height, nodesep, ranksep) {
         const graph = new dagre.graphlib.Graph({ multigraph: true });
-        graph.setGraph({rankdir: landscape ? 'LR' : 'TB', nodesep: 56, ranksep: 112, edgesep: 32});
+        graph.setGraph({rankdir: landscape ? 'LR' : 'TB', nodesep, ranksep, edgesep: 32});
         graph.setDefaultEdgeLabel(() => ({}));
-        nodes.forEach(id => graph.setNode(id, {width: 270, height: 176}));
+        nodes.forEach(id => graph.setNode(id, {width, height}));
         edges.forEach((pair, index) => {
           if(graph.hasNode(pair[0]) && graph.hasNode(pair[1])) graph.setEdge(pair[0], pair[1], {}, String(index));
         });
@@ -42,8 +43,11 @@ enum GraphLayout {
       })
       """)
     guard
-      let rows = function?.call(withArguments: [nodes, edges.map { [$0.0, $0.1] }, landscape])?
-        .toArray() as? [[String: Any]],
+      let rows = function?.call(withArguments: [
+        nodes, edges.map { [$0.0, $0.1] }, landscape, Double(size.width), Double(size.height),
+        nodeSeparation, rankSeparation,
+      ])?
+      .toArray() as? [[String: Any]],
       rows.count == nodes.count, context.exception == nil
     else { return grid(nodes, landscape) }
     var points: [String: CGPoint] = [:]
