@@ -1,0 +1,28 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.14s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.g2HuzI/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.g2HuzI/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.g2HuzI/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE composer-context 1440x900, bitmap 1440x900, 202ms
+CAPTURE light-composer-context 1440x900, bitmap 1440x900, 200ms
+CAPTURE opaque-conversation 1440x900, bitmap 1440x900, 151ms
+CAPTURE opaque-graph 1440x900, bitmap 1440x900, 384ms
+CAPTURE light-opaque-graph 1440x900, bitmap 1440x900, 382ms
+CAPTURE conversation-home 1440x900, bitmap 1440x900, 150ms
+CAPTURE light-conversation-home 1440x900, bitmap 1440x900, 155ms
+CAPTURE graph-selected 1440x900, bitmap 1440x900, 605ms
+CAPTURE composer-context 1024x768, bitmap 1024x768, 116ms
+CAPTURE light-composer-context 1024x768, bitmap 1024x768, 141ms
+CAPTURE opaque-conversation 1024x768, bitmap 1024x768, 115ms
+CAPTURE opaque-graph 1024x768, bitmap 1024x768, 174ms
+CAPTURE light-opaque-graph 1024x768, bitmap 1024x768, 177ms
+CAPTURE conversation-home 1024x768, bitmap 1024x768, 95ms
+CAPTURE light-conversation-home 1024x768, bitmap 1024x768, 105ms
+CAPTURE graph-selected 1024x768, bitmap 1024x768, 250ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-002
+Native captures: docs/verification/expansion-002
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py 'docs/verification/expansion-002' [--prune]

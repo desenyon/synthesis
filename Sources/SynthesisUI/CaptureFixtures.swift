@@ -9,6 +9,7 @@ extension Studio {
     "composer-browser", "composer-overflow", "composer-expanded",
     "composer-companion", "light-composer-companion", "composer-command-return",
     "composer-unavailable", "oled-conversation", "oled-canvas", "oled-settings",
+    "opaque-conversation", "opaque-graph", "light-opaque-graph",
     "sidebar-long", "light-sidebar-long", "sidebar-history", "sidebar-folded",
     "sidebar-opaque", "light-sidebar-opaque", "empty-sidebar", "light-collapsed",
     "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
@@ -304,7 +305,8 @@ extension Studio {
     updateContext { $0 = AssistantContextOptions() }
     conversationID = state.hasSuffix("conversation-home") ? nil : conversation
     perform { try reload() }
-    let viewState = state.hasPrefix("oled-") ? String(state.dropFirst(5)) : state
+    let viewState = state.replacingOccurrences(of: "oled-", with: "")
+      .replacingOccurrences(of: "opaque-", with: "")
     switch viewState {
     case "composer-attached", "light-composer-attached", "composer-context",
       "light-composer-context",

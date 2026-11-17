@@ -1,4 +1,4 @@
-# Handoff — 2026-11-17, composer refinement after 0.0.3
+# Handoff — 2026-11-17, full expansion in progress
 
 Start here when picking up Synthesis.
 
@@ -13,7 +13,7 @@ Start here when picking up Synthesis.
 
 1. [AGENTS.md](../AGENTS.md): the product contract and protected rules (canon approval, archive-not-delete, privacy, verification honesty).
 2. [STATE](STATE.md): what is verified, with exact checks.
-3. [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md), [NEXT_PASS](NEXT_PASS.md) and [ROADMAP](ROADMAP.md): latest expansion brief, implemented slice and what remains.
+3. [EXPANSION](EXPANSION.md) and [EXPANSION_SOURCE](EXPANSION_SOURCE.md): all 394 requirements, individual acceptance and exact source. Then [ROADMAP](ROADMAP.md) and [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md).
 4. [ARCHITECTURE](ARCHITECTURE.md): modules, migrations (0001–0013), portable format v7, JSON schema 10.
 
 ## Current shape
@@ -39,11 +39,11 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- Continue the expansion brief in bounded slices: typed entity attributes/facts and provenance first, then shared temporal projections and richer operations. The 394-item brief is a roadmap, not a claim of implemented functionality. Preserve the approved sidebar and subscription-only boundary.
+- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1 and #2 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.
 - Not built: three-way text merge for what-ifs, drag-to-reorder events, assistant proposals for technique requirements and regions, cosmology-specific tools, continuous file sync, notarized distribution.
-- Audit C2 (lighter palette) is unapproved because it reverses the owner's black-studio direction.
+- The renewed expansion explicitly authorizes graphite with optional OLED (#1); this supersedes the previous content-background choice. It does not authorize relaxing privacy, approval or subscription-only rules.
 
 Next agent: use [RUN_PROMPT](RUN_PROMPT.md).

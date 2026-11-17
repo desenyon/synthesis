@@ -40,11 +40,10 @@ struct UnifiedComposer: View {
       Group {
         if collapsed { compactField } else { fullField }
       }
-      .background(
-        studio.t.surface,
-        in: RoundedRectangle(
-          cornerRadius: collapsed ? ComposerMetric.compactRadius : ComposerMetric.radius)
-      )
+      .background {
+        FrostedSurface(
+          t: studio.t, radius: collapsed ? ComposerMetric.compactRadius : ComposerMetric.radius)
+      }
       .overlay(
         RoundedRectangle(
           cornerRadius: collapsed ? ComposerMetric.compactRadius : ComposerMetric.radius

@@ -4,7 +4,7 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 ## Active — complete expansion brief
 
-The owner explicitly requires all 394 items, one by one. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the full supplied brief. Earlier composer work does not constitute completion. #1 is now verified: graphite default and persistent OLED option across native UI, Canvas and export; 175 native tests, 13 Canvas tests, lint/typecheck/build and 14 inspected captures. Continue #2. No new release or live provider request. The owner's running app is left alone during background checks.
+The owner explicitly requires all 394 items, one by one. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the full supplied brief. Earlier composer work does not constitute completion. #1 is now verified: graphite default and persistent OLED option across native UI, Canvas and export; 175 native tests, 13 Canvas tests, lint/typecheck/build and 14 inspected captures. #2 is verified: native frosted floating surfaces with Reduce Transparency/Increase Contrast fallbacks; 175 tests and 16 inspected captures. Continue #3. No new release or live provider request. The owner's running app is left alone during background checks.
 
 ## Latest — chatbox refinement (unreleased)
 

@@ -14,6 +14,8 @@ Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bun
 
 The sidebar uses `SidebarPalette` and `SidebarMetric` in Theme, with `SidebarControlStyle` and `NavigationGlass` in Components. Its 284pt expanded surface (72pt rail) has fixed identity/actions and utilities around one scrolling navigation/history region. Native vibrancy has an explicit appearance and an opaque accessibility fallback. Studio's destinations, category lenses and conversation actions are unchanged.
 
+`FrostedSurface` applies an in-window `NSVisualEffectView` only to floating tools, inspectors, menus and composers. Explicit theme appearance and a lightly tinted fill keep text readable; Reduce Transparency and Increase Contrast use an opaque surface. Menus inherit the active Theme, including OLED, from the root environment. Canvas only receives a theme bridge update when the resolved palette changes.
+
 ## Workspaces
 
 - `Conversation.swift`: `ConversationStudio` (full width or companion) and `ChatRow`. `Composer.swift` supplies the shared full/compact `UnifiedComposer`; `AssistantContextPanel.swift` provides attachment browsing and local request inspection. The composer owns keystrokes locally, measures its own height and debounces draft persistence. `Markdown.swift` parses answers into blocks with a pure, tested parser.

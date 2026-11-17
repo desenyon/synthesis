@@ -152,11 +152,12 @@ struct CanvasBoardContent {
     studio.$mode.dropFirst().removeDuplicates().sink { [weak self] mode in
       self?.call("setAssistance", [mode == .assisted])
     }.store(in: &observers)
-    studio.$dark.combineLatest(studio.$preferences).dropFirst().sink {
-      [weak self] dark, preferences in
-      let theme = Theme(dark: dark, oled: preferences.darkPalette == .oled)
-      self?.call("setTheme", [theme.canvasTheme])
-    }.store(in: &observers)
+    studio.$dark.combineLatest(studio.$preferences)
+      .map { dark, preferences in
+        Theme(dark: dark, oled: preferences.darkPalette == .oled).canvasTheme
+      }.removeDuplicates().dropFirst().sink { [weak self] theme in
+        self?.call("setTheme", [theme])
+      }.store(in: &observers)
   }
 
   // MARK: Boards

@@ -183,3 +183,20 @@ enum ComposerMetric {
   static let bodySize: CGFloat = 16
   static let transition: Double = 0.16
 }
+
+private struct StudioThemeKey: EnvironmentKey {
+  static let defaultValue: Theme? = nil
+}
+private struct OpaqueMaterialsKey: EnvironmentKey {
+  static let defaultValue = false
+}
+extension EnvironmentValues {
+  var studioTheme: Theme? {
+    get { self[StudioThemeKey.self] }
+    set { self[StudioThemeKey.self] = newValue }
+  }
+  var studioOpaqueMaterials: Bool {
+    get { self[OpaqueMaterialsKey.self] }
+    set { self[OpaqueMaterialsKey.self] = newValue }
+  }
+}

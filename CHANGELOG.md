@@ -19,6 +19,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 - Narrow composers measure attachment wrapping instead of hiding a third chip. Multiline input remeasures after native layout and clears a stale scroll offset when the whole draft fits, preserving the caret and longer drafts' scroll positions.
 
 ### Changed
+- Expansion #2: shared native frosted materials for floating toolbars, inspectors, menus and composers, with opaque Reduce Transparency and Increase Contrast fallbacks.
 - Expansion #1: graphite dark surfaces by default with a persistent true-black OLED option shared by native workspaces, Canvas and board image export.
 - Refined the shared chatbox to match the app's controls: larger Inter writing text, quieter references, an adaptive toolbar, subtle Send/Stop feedback and a shortcut hint that follows the saved preference. Canon protection and provider disclosure remain available below the writing surface.
 - Composer placeholder and typed text now use the same bundled font; ordinary line growth responds immediately, and shared hover feedback honors Reduce Motion.

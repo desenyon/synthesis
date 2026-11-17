@@ -235,8 +235,9 @@ struct PlainMenu<Label: View, Items: View>: View {
   @ViewBuilder var label: () -> Label
   @State private var open = false
   @Environment(\.colorScheme) private var scheme
+  @Environment(\.studioTheme) private var inheritedTheme
   var body: some View {
-    let t = Theme(dark: scheme == .dark)
+    let t = inheritedTheme ?? Theme(dark: scheme == .dark)
     trigger.fixedSize(horizontal: !flexible, vertical: true)
       .accessibilityValue(open ? "Expanded" : "Collapsed")
       .popover(isPresented: $open, arrowEdge: .bottom) {
@@ -247,7 +248,8 @@ struct PlainMenu<Label: View, Items: View>: View {
             .padding(7)
         }.scrollBounceBehavior(.basedOnSize).fixedSize(horizontal: false, vertical: true)
           .frame(width: 280).frame(maxHeight: 420)
-          .background(sidebarTheme?.navigation.elevated ?? t.surface).preferredColorScheme(scheme)
+          .background { FrostedSurface(t: sidebarTheme ?? t, radius: Metric.radius) }
+          .preferredColorScheme(scheme)
           .onExitCommand { open = false }
       }
   }
@@ -347,7 +349,7 @@ extension View {
   }
   /// Floating panel surface used by toolbars, palettes and inspectors.
   func floatingPanel(_ t: Theme, radius: CGFloat = 10) -> some View {
-    background(t.surface, in: RoundedRectangle(cornerRadius: radius))
+    background { FrostedSurface(t: t, radius: radius) }
       .overlay(RoundedRectangle(cornerRadius: radius).stroke(t.hairline, lineWidth: 1))
       .shadow(color: t.shadow.opacity(0.6), radius: 14, y: 6)
   }
@@ -972,5 +974,38 @@ struct SidebarControlStyle: PrimitiveButtonStyle {
         configuration.isPressed ? palette.pressed : .clear,
         in: RoundedRectangle(cornerRadius: SidebarMetric.radius))
     }
+  }
+}
+
+/// Localized material for floating tools; content and document surfaces remain opaque.
+struct FrostedSurface: View {
+  let t: Theme
+  var radius: CGFloat = Metric.panelRadius
+  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+  @Environment(\.colorSchemeContrast) private var contrast
+  @Environment(\.studioOpaqueMaterials) private var forceOpaque
+  var body: some View {
+    Group {
+      if reduceTransparency || contrast == .increased || forceOpaque {
+        t.surface
+      } else {
+        FloatingVibrancy(dark: t.dark)
+          .overlay(t.surface.opacity(t.dark ? 0.84 : 0.9))
+      }
+    }.clipShape(RoundedRectangle(cornerRadius: radius))
+      .allowsHitTesting(false).accessibilityHidden(true)
+  }
+}
+private struct FloatingVibrancy: NSViewRepresentable {
+  let dark: Bool
+  func makeNSView(context: Context) -> NSVisualEffectView {
+    let view = NSVisualEffectView()
+    view.material = .popover
+    view.blendingMode = .withinWindow
+    view.state = .active
+    return view
+  }
+  func updateNSView(_ view: NSVisualEffectView, context: Context) {
+    view.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
   }
 }

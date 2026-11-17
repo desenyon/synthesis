@@ -89,6 +89,8 @@ public struct ConnectedRoot: View {
       .animation(.easeOut(duration: 0.14), value: studio.palette)
     }
     .foregroundStyle(studio.t.text)
+    .environment(\.studioTheme, studio.t)
+    .environment(\.studioOpaqueMaterials, studio.captureHint.contains("opaque"))
     .ignoresSafeArea()
     .preferredColorScheme(studio.dark ? .dark : .light)
     .studioSheet(item: $studio.sheet) { StudioSheet(studio: studio, sheet: $0).id($0) }
