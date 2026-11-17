@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "mechanics", "light-mechanics", "manual-mechanics", "mechanics-empty", "mechanics-scenario",
+    "mechanics-review", "mechanics-history",
     "components", "light-components", "manual-components", "components-empty", "entity-components",
     "component-new",
     "conversation-home", "light-conversation-home", "conversation-loading", "conversation",
@@ -191,6 +193,57 @@ extension Studio {
     conversationID = state.hasSuffix("conversation-home") ? nil : conversation
     perform { try reload() }
     switch state {
+    case "mechanics", "light-mechanics", "manual-mechanics", "mechanics-empty",
+      "mechanics-scenario", "mechanics-review", "mechanics-history":
+      destination = .library
+      inspector = false
+      selectedRecord = records.first {
+        $0.title == (state == "mechanics-empty" ? "Oren Ashe" : "The art of remembrance")
+      }
+      if let record = selectedRecord, state != "mechanics-empty",
+        (try? store.rules(worldID: worldID, systemID: record.id).isEmpty) == true
+      {
+        let examples: [(WorldRule.Kind, String, String)] = [
+          (
+            .source, "A memory freely offered",
+            "Remembrance begins with an echo willingly entrusted to the tide."
+          ),
+          (
+            .cost, "The price of a crossing",
+            "One memory of your own is surrendered for each borrowed skill."
+          ),
+          (
+            .limit, "The past remains",
+            "A borrowed life can be witnessed. Its events cannot be changed."
+          ),
+          (
+            .technique, "A cartographer’s recall",
+            "Trace a coastline as its original witness saw it, for the span of one tide."
+          ),
+        ]
+        for example in examples {
+          _ = try? store.addRule(
+            worldID: worldID, systemID: record.id, kind: example.0, title: example.1,
+            body: example.2)
+        }
+        _ = try? store.saveScenario(
+          worldID: worldID, systemID: record.id, title: "Cross without forgetting her sister",
+          situation:
+            "Mira offers the memory of her first map instead. Does the tide accept a memory chosen by the traveller?",
+          expectation: "unclear")
+      }
+      if ["mechanics-review", "mechanics-history"].contains(state), let record = selectedRecord,
+        let cost = try? store.rules(worldID: worldID, systemID: record.id).first(where: {
+          $0.kind == .cost
+        }), cost.accepted == nil
+      {
+        _ = try? store.promoteRule(worldID: worldID, id: cost.id, confirmation: cost.id)
+        _ = try? store.updateRule(
+          worldID: worldID, id: cost.id, kind: .cost, title: cost.title,
+          body:
+            "One memory of your own is surrendered for each borrowed skill. The traveller chooses which memory to offer."
+        )
+      }
     case "components", "component-new", "light-components", "manual-components", "components-empty",
       "entity-components":
       destination = state == "entity-components" ? .library : .timeline

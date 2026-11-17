@@ -13,6 +13,6 @@ Workspace scopes: Conversation, Canvas, Library, Graph, Timeline, Atlas and Revi
 
 The assistant receives component IDs, record IDs, scope, kind and entity membership in its bounded world index. It can propose `create_component`, revise the content with `revise_record`, and place the resulting record using the existing `place_record` action. The Review UI names the presentation and destination and exposes the proposed text before approval. Unknown kinds/scopes and cross-world parents are rejected.
 
-Migration `0009` stores presentation metadata. `.synthesis` v5 preserves it; v1–v4 imports remain supported. JSON export is schema 8. Markdown exports the ordinary underlying content, including entity section relationships.
+Migration `0009` stores presentation metadata. `.synthesis` v6 preserves it alongside rule history; v1–v5 imports remain supported. JSON export is schema 9. Markdown exports the ordinary underlying content, including entity section relationships.
 
 This is the first constrained component vocabulary. It is not arbitrary generative UI, a dedicated map engine, a simulation system, or a replacement for the specialized workspaces. Those remain separate milestones.

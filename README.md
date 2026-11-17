@@ -7,7 +7,7 @@ A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Con
 *Canvas — arrange real world records and explore their relationships.*
 
 <details>
-<summary>More app screenshots: Conversation, editor, Graph, Atlas and Settings</summary>
+<summary>More app screenshots: Conversation, editor, Graph, Mechanics, Atlas and Settings</summary>
 
 **Conversation** — start with a thought and reference existing lore.
 
@@ -20,6 +20,10 @@ A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Con
 **Graph** — explore relationships derived from the same saved world.
 
 ![Knowledge Graph showing seven entities connected by labeled relationships](docs/screenshots/graph.png)
+
+**Mechanics** — develop rules, costs, techniques and scenarios, then review exact wording for canon.
+
+![Mechanics workspace with rules for the Art of Remembrance](docs/screenshots/mechanics.png)
 
 **Atlas** — place linked locations on a map. This example uses bundled sample artwork.
 
@@ -52,6 +56,7 @@ Requires macOS 14+ and Swift 6 Command Line Tools. The canvas bundle is committe
 - **Canvas** runs on the [Excalidraw](https://github.com/excalidraw/excalidraw) engine: draw freely, add shapes, text, images and frames, and place record cards that stay linked to your library. Relationships between entities appear as labelled arrows, and an arrow you draw between two entity cards can become a relationship. An explicit Arrange action uses Dagre and can be undone; PNG export includes Synthesis card styling and artwork. It works offline; nothing is loaded from the network. Synthesis supplies the visible world-record cards, colored connection ports, image previews and compact toolbars; Excalidraw supplies gestures and history. A compact composer expands into a resizable docked companion that shares the conversation.
 - **Graph** uses the open-source Dagre engine to arrange native record cards from entity relationships. Select an entity for its details, edit relationships, or copy a neighbourhood into an editable board.
 - **Library** holds every document, entity and idea with full-text search, filters and an archive. The editor has rich text, a details inspector (tags, aliases, links, relationships, timeline) and canon review as a line diff.
+- **Mechanics** is an entity tab for power systems, cosmology, organizations or your own categories. Write rules, scenarios and conclusions; inspect history and restore a draft. Rule canon review compares accepted and proposed wording. Assistant revisions enter Review and cannot silently replace canon. [Mechanics guide](docs/MECHANICS.md).
 - **Timeline** orders sourced events with free-form dates, nested branches and periods. Branches organize alternate histories; they do not duplicate or merge canon. **Atlas** pins records to a map image you supply or explicitly choose from the bundled sample illustration library. Replacing a map offers Undo.
 - **Review** gathers what is waiting on you: AI proposals from every conversation, drafts that have moved past accepted canon, and a local consistency check (clashing names, unlinked mentions, unconnected entities) that needs no model.
 
@@ -94,7 +99,7 @@ On Canvas, double-click a card to open its record. Draw an arrow from one entity
 uv run --with pillow python scripts/contact-sheets.py docs/verification/latest --prune
 ```
 
-The native suite (includes the rules backend) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Eight additional Node tests cover canvas geometry, relationship state, nested groups and session isolation (`cd CanvasWeb && npm test`). Visual checks use the real native window and bundled WebKit engine, never HTML previews. The background runner builds a temporary app, requires a fresh isolated database and refuses model requests. It does not overwrite the running bundle. Background sheets render their real content inline to avoid modal activation; native modal interaction requires the explicit foreground test. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the current audit and limits are in [INTEGRATION_OVERHAUL](docs/INTEGRATION_OVERHAUL.md). Full strict lint, the native suite and optimized build pass on the consolidated checkout. Rules can be added and edited as drafts in system/cosmology details and on entities already holding rules; the dedicated Rules Lab remains unfinished.
+The native suite (includes the rules backend) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Nine additional Node tests cover canvas geometry, relationship state, nested groups and session isolation (`cd CanvasWeb && npm test`). Visual checks use the real native window and bundled WebKit engine, never HTML previews. The background runner builds a temporary app, requires a fresh isolated database and refuses model requests. It does not overwrite the running bundle. Background sheets render their real content inline to avoid modal activation; native modal interaction requires the explicit foreground test. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the current audit and limits are in [INTEGRATION_OVERHAUL](docs/INTEGRATION_OVERHAUL.md). Full strict lint, the native suite and optimized build pass on the consolidated checkout. Mechanics provides rule and scenario editing, review and history on every entity. Spatial technique trees and automatic simulations remain future work.
 
 The assistant uses only Claude Code or Codex with your subscription. Direct API settings and transport have been removed; see [AI setup](docs/AI_SETUP.md).
 
@@ -102,12 +107,12 @@ Data: `~/Library/Application Support/Synthesis/synthesis.sqlite`, overridable wi
 
 Typing in ⌘K also offers to capture the text as an idea. Worlds export as a folder of Markdown files or as complete JSON; Markdown and text files import as drafts.
 
-Current limits: Claude’s earlier handoff records one live request per subscription harness; this audit makes no model-provider calls. Live streaming/Stop UI, large boards/graphs, trackpad and VoiceOver remain unverified. PNG export uses engine-rendered cards and does not yet reproduce the DOM card material exactly. Bundled AI-generated sample artwork is optional; on-demand image generation is not implemented. Earlier evidence under `docs/verification` is historical.
+Current limits: Claude’s earlier handoff records one live request per subscription harness; this audit makes no model-provider calls. Live streaming/Stop UI, large boards/graphs, trackpad and VoiceOver remain unverified. PNG export includes actual card typography, state and artwork; editor controls and ports are not part of the exported illustration. Bundled AI-generated sample artwork is optional; on-demand image generation is not implemented. Earlier evidence under `docs/verification` is historical.
 
 To build a separate review bundle without replacing a running app: `./scripts/build.sh release dist/Synthesis-review.app`. Use the primary checkout above; historical worktree paths in old verification logs are not current launch targets.
 
 Audit repairs are tracked in [AUDIT.md](docs/AUDIT.md) and [PROGRESS.md](docs/PROGRESS.md), with per-item native captures. Entity sections remain searchable but have their own Library filter; entities open on Overview and remember the selected tab for the session. Saved `Factions` categories display as **Systems** without altering their stored value. Canvas Fit reserves space for its composer and tools.
 
-The current audit has completed 19 items; A2 still needs its live Canvas theme check, and C2/C3 are excluded pending owner approval. Worlds now shows saved covers and activity with editable descriptions. Timeline can create an event in an empty world with its source draft. Markdown export preserves supported rich formatting and entity sections. Settings now uses searchable sections and individually explained import/export actions; provider details stay behind a disclosure. See [STATE](docs/STATE.md) for exact verification limits, including the unrun foreground modal test.
+The current audit has completed 19 items; A2 still needs its live Canvas theme check, and C2 remains excluded pending owner approval. The latest composer directive authorizes the shared composer rebuild; the old C3-specific pill proposal was not adopted. Worlds now shows saved covers and activity with editable descriptions. Timeline can create an event in an empty world with its source draft. Markdown export preserves supported rich formatting and entity sections. Settings now uses searchable sections and individually explained import/export actions; provider details stay behind a disclosure. See [STATE](docs/STATE.md) for exact verification limits, including the unrun foreground modal test.
 
 Creative components let you add notes, facts, checklists and progression tracks to workspaces and entity pages. They are ordinary versioned lore, usable in Manual mode and available to reviewed assistant proposals. [Usage and data contract](docs/CREATIVE_COMPONENTS.md).

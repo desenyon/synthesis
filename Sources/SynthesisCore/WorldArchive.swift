@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 5
+  var version = 6
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -13,7 +13,8 @@ extension WorkspaceStore {
   private static let archiveTables = [
     "worlds", "records", "rich_documents", "revisions", "native_revisions", "links",
     "relationships", "relationship_history", "events", "conversations", "messages",
-    "proposals", "message_context", "boards", "rules", "rule_scenarios", "chronology_lanes",
+    "proposals", "message_context", "boards", "rules", "rule_history", "rule_scenarios",
+    "chronology_lanes",
     "chronology_placements", "record_sections", "creative_components",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
@@ -53,7 +54,8 @@ extension WorkspaceStore {
     }
     if [1, 2].contains(archive.version) { archive.tables["record_sections"] = [] }
     if (1...4).contains(archive.version) { archive.tables["creative_components"] = [] }
-    guard archive.format == "dev.synthesis.world", [1, 2, 3, 4, 5].contains(archive.version),
+    if (1...5).contains(archive.version) { archive.tables["rule_history"] = [] }
+    guard archive.format == "dev.synthesis.world", [1, 2, 3, 4, 5, 6].contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],

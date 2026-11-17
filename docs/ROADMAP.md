@@ -12,15 +12,15 @@
 ## Active — connected studio audit and UI overhaul
 
 - 2026-11-16: shared composers, real activity rows, themed app menus, Dagre entity-card Graph and undoable Canvas arrangement implemented. Canvas PNG now exports styled cards and local artwork. Evidence and remaining interaction limits: [STATE](STATE.md).
-- Creative components implemented: Notes, Facts, Checklist and Progression backed by ordinary revisioned lore, manual creation, reviewed agent proposals and portable persistence. Next: dedicated Mechanics workspace, scenarios and rule review, then map hierarchy and richer chronology.
+- Creative components implemented: Notes, Facts, Checklist and Progression backed by ordinary revisioned lore, manual creation, reviewed agent proposals and portable persistence. Mechanics now provides rule/scenario editing, explicit rule canon review and restorable history. Next: map hierarchy and richer chronology.
 
 - Settings refinement (2026-11-15): searchable sections and typed writing/navigation preferences, with portable per-world entity/chat defaults. Final verification is recorded in [STATE](STATE.md); no additional theme or composer overhaul is implied.
 
 - Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).
 - Implemented 2026-11-15: subscription-only authentication, stale-revision rejection, structured world context, reviewed spatial/link/rule actions, source-aware Canvas capture/relationship controls, Phosphor icons and grouped navigation. Current evidence/limits: [INTEGRATION_OVERHAUL](INTEGRATION_OVERHAUL.md).
-- Next: persist the full world-index trace and test a live subscription run with the updated flags; expand interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Match live/export card appearance; measure large boards and derived graphs.
+- Next: persist the full world-index trace and test a live subscription run with the updated flags; expand interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Measure large boards and derived graphs; live/export card content now shares the Synthesis presentation.
 - Then: streamed-response/Stop behavior with controlled transport, editor crash recovery, accessibility/trackpad walkthrough, deeper Timeline and Atlas operations.
-- Rules now have manual add/edit draft controls in entity details and a reviewed agent action. Dedicated Rules Lab, scenario UI and rule canon review remain incomplete.
+- Mechanics is available on every entity: kind-filtered rules, scenarios, explicit canon review and restorable snapshots. Agent rule revisions are stale-checked; proposed scenarios leave conclusions to the creator. Spatial technique trees and automatic simulations remain incomplete.
 - Reference parity and complete product acceptance remain open; screenshots alone do not certify all interactions.
 
 ## Then — finish M3
@@ -31,7 +31,7 @@
 
 ## Next — M4 creative tools
 
-- Rules and power-system lab: structured costs, limits and progression with conflict checks.
+- Power-system depth beyond Mechanics: spatial technique trees and richer linked progression; structural considerations are not semantic conflict detection.
 - Hypothetical branches: explore a what-if without touching the main line, then discard or merge through review.
 - Canvas depth (resize, snapping, named groups); Timeline reordering and canon state for events; several maps and draggable markers in Atlas.
 - Measured large-board and large-graph pass; accessibility walk-through; crash recovery for unsaved text.
@@ -46,6 +46,6 @@ Next acceptance gates: explicit-use subscription image artifacts; reusable edita
 
 ## 2026-11-15 audit repair checkpoint
 
-19 items in the owner's master audit are completed with individual check/capture/commit/push evidence. A2 remains open for live Canvas dark/light inspection after a macOS capture failure. C2/C3 remain unapproved. D2's opaque sheet capture is repaired and the real-modal Escape test is added, but its foreground execution remains opt-in. See [STATE](STATE.md) and [PROGRESS](PROGRESS.md).
+19 items in the owner's master audit are completed with individual check/capture/commit/push evidence. A2 remains open for live Canvas dark/light inspection after a macOS capture failure. C2 remains unapproved. The latest owner instruction authorizes the composer rebuild, but the older C3-specific pill design was not adopted. D2's opaque sheet capture is repaired and the real-modal Escape test is added, but its foreground execution remains opt-in. See [STATE](STATE.md) and [PROGRESS](PROGRESS.md).
 
 Entity sections, empty-world event creation, rich Markdown/section export, world summaries and description editing are implemented. Next verification work is the A2 live check and native modal test, followed by the feature ledger above; these audit fixes do not establish complete interaction coverage.

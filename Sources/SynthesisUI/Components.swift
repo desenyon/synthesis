@@ -783,3 +783,37 @@ struct WorldBadge: View {
     return image(data)
   }
 }
+
+/// Shared themed selection field for forms; avoids unrelated system popup styling.
+struct ChoiceField<Value: Hashable>: View {
+  let title: String
+  @Binding var selection: Value
+  let choices: [(Value, String)]
+  let t: Theme
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text(title).font(.studio(size: 12.5, weight: .medium)).foregroundStyle(t.secondary)
+      PlainMenu(flexible: true) {
+        ForEach(choices.indices, id: \.self) { index in
+          Button {
+            selection = choices[index].0
+          } label: {
+            HStack {
+              Text(choices[index].1)
+              Spacer()
+              if selection == choices[index].0 { StudioIcon("checkmark", size: 12) }
+            }
+          }
+        }
+      } label: {
+        HStack {
+          Text(choices.first { $0.0 == selection }?.1 ?? "Choose…").lineLimit(1)
+          Spacer()
+          StudioIcon("chevron.down", size: 11).foregroundStyle(t.secondary)
+        }.font(.studio(size: 14)).padding(.horizontal, 11).frame(height: 35)
+          .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
+          .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.hairline, lineWidth: 1))
+      }.accessibilityLabel(title)
+    }
+  }
+}

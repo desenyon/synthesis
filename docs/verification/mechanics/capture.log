@@ -1,0 +1,15 @@
+CAPTURE mechanics 1440x900, bitmap 2880x1800, 915ms
+CAPTURE light-mechanics 1440x900, bitmap 2880x1800, 916ms
+CAPTURE manual-mechanics 1440x900, bitmap 2880x1800, 79ms
+CAPTURE mechanics-empty 1440x900, bitmap 2880x1800, 900ms
+CAPTURE mechanics-scenario 1440x900, bitmap 2880x1800, 1136ms
+CAPTURE mechanics-review 1440x900, bitmap 2880x1800, 1103ms
+CAPTURE mechanics-history 1440x900, bitmap 2880x1800, 1102ms
+CAPTURE mechanics 1024x768, bitmap 2048x1536, 599ms
+CAPTURE light-mechanics 1024x768, bitmap 2048x1536, 571ms
+CAPTURE manual-mechanics 1024x768, bitmap 2048x1536, 64ms
+CAPTURE mechanics-empty 1024x768, bitmap 2048x1536, 594ms
+CAPTURE mechanics-scenario 1024x768, bitmap 2048x1536, 757ms
+CAPTURE mechanics-review 1024x768, bitmap 2048x1536, 750ms
+CAPTURE mechanics-history 1024x768, bitmap 2048x1536, 745ms
+Native captures complete: /private/tmp/synthesis-mechanics-final

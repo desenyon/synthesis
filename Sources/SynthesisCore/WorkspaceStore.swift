@@ -550,7 +550,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 8
+      var schemaVersion = 9
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -570,6 +570,7 @@ public final class WorkspaceStore {
       var proposals: [Proposal]
       var messageContext: [[String: String]]
       var rules: [[String: String]]
+      var ruleHistory: [[String: String]]
       var ruleScenarios: [[String: String]]
       var chronology: [[String: String]]
       var chronologyPlacements: [[String: String]]
@@ -600,6 +601,7 @@ public final class WorkspaceStore {
       proposals: proposals(worldID: id),
       messageContext: db.rows("SELECT * FROM message_context WHERE world_id=?", [id]),
       rules: db.rows("SELECT * FROM rules WHERE world_id=?", [id]),
+      ruleHistory: db.rows("SELECT * FROM rule_history WHERE world_id=?", [id]),
       ruleScenarios: db.rows("SELECT * FROM rule_scenarios WHERE world_id=?", [id]),
       chronology: db.rows("SELECT * FROM chronology_lanes WHERE world_id=?", [id]),
       chronologyPlacements: db.rows("SELECT * FROM chronology_placements WHERE world_id=?", [id]),

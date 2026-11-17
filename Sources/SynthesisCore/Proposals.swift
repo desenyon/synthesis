@@ -206,12 +206,48 @@ extension WorkspaceStore {
         change.source = source
         change.title = title
         change.body = body
+      case "revise_rule":
+        guard let id = item["id"] as? String,
+          let before = try? rule(worldID: worldID, id: id),
+          let body = text(item["body"], limit: 4_000),
+          let owner = known[before.systemID], owner.kind == "entity",
+          try rules(worldID: worldID, systemID: before.systemID).contains(where: { $0.id == id })
+        else { continue }
+        let kind = (item["kind"] as? String) ?? before.kind.rawValue
+        guard WorldRule.Kind(rawValue: kind) != nil else { continue }
+        change.recordID = id
+        change.source = before.systemID
+        change.ruleBefore = before
+        change.title = text(item["title"], limit: 160) ?? before.title
+        change.kind = kind
+        change.body = body
+      case "add_scenario":
+        guard let source = resolve(item["source"]), let title = text(item["title"], limit: 160),
+          let body = text(item["body"], limit: 4_000),
+          let expectation = item["expectation"] as? String,
+          ["works", "fails", "unclear"].contains(expectation)
+        else { continue }
+        if let parent = known[source], parent.kind != "entity" { continue }
+        if source.hasPrefix("change:"),
+          changes.first(where: { "change:\($0.id)" == source })?.kind != "entity"
+        {
+          continue
+        }
+        change.source = source
+        change.title = title
+        change.body = body
+        change.kind = expectation
       case "add_rule":
         guard let source = resolve(item["source"]), let title = text(item["title"], limit: 160),
-          let body = text(item["body"], limit: 100_000),
+          let body = text(item["body"], limit: 4_000),
           let kind = item["kind"] as? String, WorldRule.Kind(rawValue: kind) != nil
         else { continue }
         if let record = known[source], record.kind != "entity" { continue }
+        if source.hasPrefix("change:"),
+          changes.first(where: { "change:\($0.id)" == source })?.kind != "entity"
+        {
+          continue
+        }
         change.source = source
         change.title = title
         change.body = body
@@ -259,7 +295,12 @@ extension WorkspaceStore {
         return id
       }
       if accept {
-        for reference in [change.recordID, change.source, change.target].compactMap({ $0 }) {
+        // Rule revisions identify a rule, not a lore record. Its owner is checked here;
+        // the exact active rule and captured revision are checked in the rule branch below.
+        let recordReferences =
+          change.action == "revise_rule"
+          ? [change.source, change.target] : [change.recordID, change.source, change.target]
+        for reference in recordReferences.compactMap({ $0 }) {
           let id = try resolved(reference)
           _ = try record(worldID: worldID, id: id)
           guard try !isArchived(worldID: worldID, recordID: id) else {
@@ -335,6 +376,20 @@ extension WorkspaceStore {
             worldID: worldID, parentID: resolved(change.source),
             title: change.title ?? "Section", body: change.body ?? "", origin: "ai-proposed"
           ).record.id
+        case "revise_rule":
+          guard let before = change.ruleBefore, let id = change.recordID,
+            try rule(worldID: worldID, id: id) == before,
+            let kind = WorldRule.Kind(rawValue: change.kind ?? "")
+          else { throw SynthesisError.stale }
+          change.resultID = try updateRule(
+            worldID: worldID, id: id, kind: kind, title: change.title ?? before.title,
+            body: change.body ?? before.body, expected: before
+          ).id
+        case "add_scenario":
+          change.resultID = try saveScenario(
+            worldID: worldID, systemID: resolved(change.source), title: change.title ?? "Scenario",
+            situation: change.body ?? "", expectation: change.kind ?? "unclear"
+          ).id
         case "add_rule":
           guard let kind = WorldRule.Kind(rawValue: change.kind ?? "") else {
             throw SynthesisError.invalid("Unknown rule kind.")

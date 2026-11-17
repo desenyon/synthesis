@@ -94,3 +94,7 @@ Store validated device presentation preferences separately from per-world creati
 ## 2026-11-16 — native creative components over ordinary lore
 
 The owner requested intelligent, customizable UI across creative workspaces. Use a validated native component vocabulary (Notes, Facts, Checklist, Progression) whose content is ordinary revisioned lore. An entity component is also an entity section. The assistant proposes descriptors and content through the existing approval pipeline; it never supplies executable UI or changes canon autonomously. This keeps Manual mode complete and content searchable/exportable. Workspace-level components are shared across that world's destination; per-board positioning and a larger component vocabulary remain later work. Existing specialized Canvas, Graph, Timeline and Atlas data models remain authoritative.
+
+## 2026-11-16 — Mechanics history and safe agent revisions
+
+Rule history is an additive, world-scoped snapshot table, written in the same transaction as a rule mutation. Restoring history makes a draft; accepting canon remains a separate exact-snapshot action. The proposal pipeline validates rule IDs independently from lore IDs and compares the staged rule before-state before applying changes. Scenarios preserve creator-authored conclusions; model proposals can describe a hypothetical situation and expectation only. Native typed components continue to provide customization without executing model-produced UI code.

@@ -103,6 +103,10 @@ struct ProposalCard: View {
         "doc.text", "Section of \(studio.name(for: change.source, in: proposal))",
         change.title ?? "Section"
       )
+    case "revise_rule":
+      return ("pencil.line", "Revise rule · \(change.kind ?? "")", change.title ?? "Rule")
+    case "add_scenario":
+      return ("lightbulb", "Scenario · \(change.kind ?? "unclear")", change.title ?? "Scenario")
     case "add_rule": return ("bolt", "New rule · \(change.kind ?? "")", change.title ?? "Rule")
     default:
       return (
@@ -117,7 +121,9 @@ struct ProposalCard: View {
     let open = expanded.contains(change.id)
     let current = studio.records.first { $0.id == change.recordID }
     let detail = [
-      "create_record", "create_component", "revise_record", "add_rule", "add_section",
+      "create_record", "create_component", "revise_record", "revise_rule", "add_rule",
+      "add_scenario",
+      "add_section",
       "create_branch", "create_period",
     ]
     .contains(change.action)
@@ -152,7 +158,8 @@ struct ProposalCard: View {
                 Text(
                   open
                     ? "Hide"
-                    : (change.action == "revise_record" ? "Show what changes" : "Show text")
+                    : (["revise_record", "revise_rule"].contains(change.action)
+                      ? "Show what changes" : "Show text")
                 ).font(.studio(size: 12, weight: .medium))
               }.foregroundStyle(t.accent)
             }.buttonStyle(.plain)
@@ -163,8 +170,12 @@ struct ProposalCard: View {
       }
       if narrow { status(change).padding(.leading, 28) }
       if open, let text = change.body {
-        preview(text, against: change.action == "revise_record" ? current?.body : nil)
-          .padding(.leading, 28)
+        preview(
+          text,
+          against: change.action == "revise_rule"
+            ? change.ruleBefore?.body : (change.action == "revise_record" ? current?.body : nil)
+        )
+        .padding(.leading, 28)
       }
       if !change.evidence.isEmpty {
         FlowLayout(spacing: 6) {

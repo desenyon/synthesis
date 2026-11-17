@@ -121,51 +121,70 @@ extension WorkspaceStore {
     worldID: String, systemID: String, kind: WorldRule.Kind, title: String, body: String,
     origin: String = "user-authored"
   ) throws -> WorldRule {
-    let system = try record(worldID: worldID, id: systemID)
-    guard system.kind == "entity" else {
-      throw SynthesisError.invalid("Rules belong to an entity such as a power system.")
+    return try db.transaction {
+      let system = try record(worldID: worldID, id: systemID)
+      guard system.kind == "entity", try !isArchived(worldID: worldID, recordID: systemID) else {
+        throw SynthesisError.invalid("Rules belong to an entity such as a power system.")
+      }
+      let (title, body) = try validate(title: title, body: body)
+      let id = UUID().uuidString
+      let now = timestamp()
+      let position =
+        try db.rows(
+          "SELECT COALESCE(MAX(position),0)+1 AS next FROM rules WHERE world_id=? AND system_id=?",
+          [worldID, systemID]
+        ).first?["next"] ?? "1"
+      try db.execute(
+        "INSERT INTO rules(id,world_id,system_id,kind,title,body,state,origin,canonical,position,archived,created_at,updated_at) VALUES(?,?,?,?,?,?,'draft',?,NULL,?,0,?,?)",
+        [id, worldID, systemID, kind.rawValue, title, body, origin, position, now, now])
+      let created = try rule(worldID: worldID, id: id)
+      try snapshotRule(created)
+      return created
     }
-    let (title, body) = try validate(title: title, body: body)
-    let id = UUID().uuidString
-    let now = timestamp()
-    let position =
-      try db.rows(
-        "SELECT COALESCE(MAX(position),0)+1 AS next FROM rules WHERE world_id=? AND system_id=?",
-        [worldID, systemID]
-      ).first?["next"] ?? "1"
-    try db.execute(
-      "INSERT INTO rules(id,world_id,system_id,kind,title,body,state,origin,canonical,position,archived,created_at,updated_at) VALUES(?,?,?,?,?,?,'draft',?,NULL,?,0,?,?)",
-      [id, worldID, systemID, kind.rawValue, title, body, origin, position, now, now])
-    return try rule(worldID: worldID, id: id)
   }
   /// Edits a rule. An accepted rule becomes a draft again; its accepted wording is kept.
   public func updateRule(
-    worldID: String, id: String, kind: WorldRule.Kind, title: String, body: String
+    worldID: String, id: String, kind: WorldRule.Kind, title: String, body: String,
+    expected: WorldRule? = nil
   )
     throws -> WorldRule
   {
-    _ = try rule(worldID: worldID, id: id)
-    let (title, body) = try validate(title: title, body: body)
-    try db.execute(
-      "UPDATE rules SET kind=?,title=?,body=?,state='draft',updated_at=? WHERE world_id=? AND id=?",
-      [kind.rawValue, title, body, timestamp(), worldID, id])
-    return try rule(worldID: worldID, id: id)
+    return try db.transaction {
+      let before = try activeRule(worldID: worldID, id: id)
+      if let expected, expected != before { throw SynthesisError.stale }
+      try snapshotRule(before)
+      let (title, body) = try validate(title: title, body: body)
+      try db.execute(
+        "UPDATE rules SET kind=?,title=?,body=?,state='draft',updated_at=? WHERE world_id=? AND id=?",
+        [kind.rawValue, title, body, timestamp(), worldID, id])
+      let updated = try rule(worldID: worldID, id: id)
+      try snapshotRule(updated)
+      return updated
+    }
   }
   /// Accepts a rule's current wording as canon. Requires the rule's own ID as confirmation,
   /// so only an explicit, scoped creator action can reach it.
-  public func promoteRule(worldID: String, id: String, confirmation: String) throws -> WorldRule {
-    guard confirmation == id else {
-      throw SynthesisError.invalid("Explicit approval of this exact rule is required.")
+  public func promoteRule(
+    worldID: String, id: String, confirmation: String, expected: WorldRule? = nil
+  ) throws -> WorldRule {
+    return try db.transaction {
+      guard confirmation == id else {
+        throw SynthesisError.invalid("Explicit approval of this exact rule is required.")
+      }
+      let current = try activeRule(worldID: worldID, id: id)
+      if let expected, expected != current { throw SynthesisError.stale }
+      try snapshotRule(current)
+      let accepted = String(
+        decoding: try JSONSerialization.data(
+          withJSONObject: ["title": current.title, "body": current.body], options: [.sortedKeys]),
+        as: UTF8.self)
+      try db.execute(
+        "UPDATE rules SET state='canon',canonical=?,updated_at=? WHERE world_id=? AND id=?",
+        [accepted, timestamp(), worldID, id])
+      let updated = try rule(worldID: worldID, id: id)
+      try snapshotRule(updated)
+      return updated
     }
-    let current = try rule(worldID: worldID, id: id)
-    let accepted = String(
-      decoding: try JSONSerialization.data(
-        withJSONObject: ["title": current.title, "body": current.body], options: [.sortedKeys]),
-      as: UTF8.self)
-    try db.execute(
-      "UPDATE rules SET state='canon',canonical=?,updated_at=? WHERE world_id=? AND id=?",
-      [accepted, timestamp(), worldID, id])
-    return try rule(worldID: worldID, id: id)
   }
   public func setRuleArchived(worldID: String, id: String, archived: Bool) throws {
     _ = try rule(worldID: worldID, id: id)
@@ -194,7 +213,10 @@ extension WorkspaceStore {
     worldID: String, systemID: String, id: String? = nil, title: String, situation: String,
     expectation: String, verdict: String = ""
   ) throws -> RuleScenario {
-    _ = try record(worldID: worldID, id: systemID)
+    let owner = try record(worldID: worldID, id: systemID)
+    guard owner.kind == "entity", try !isArchived(worldID: worldID, recordID: systemID) else {
+      throw SynthesisError.invalid("Scenarios belong to an active entity.")
+    }
     let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !title.isEmpty, title.count <= 160, situation.count <= 4000, verdict.count <= 4000,
       ["works", "fails", "unclear"].contains(expectation)
@@ -203,7 +225,7 @@ extension WorkspaceStore {
     if let id {
       guard
         try !db.rows(
-          "SELECT id FROM rule_scenarios WHERE world_id=? AND system_id=? AND id=?",
+          "SELECT id FROM rule_scenarios WHERE world_id=? AND system_id=? AND id=? AND archived=0",
           [worldID, systemID, id]
         ).isEmpty
       else { throw SynthesisError.notFound }
@@ -333,5 +355,43 @@ extension WorkspaceStore {
           "- \($0.title)\($0.body.isEmpty ? "" : ": \($0.body)") [\($0.state)]"
         }.joined(separator: "\n")
     }.joined(separator: "\n")
+  }
+}
+
+extension WorkspaceStore {
+  private func activeRule(worldID: String, id: String) throws -> WorldRule {
+    let current = try rule(worldID: worldID, id: id)
+    guard try !isArchived(worldID: worldID, recordID: current.systemID),
+      try !db.rows("SELECT id FROM rules WHERE world_id=? AND id=? AND archived=0", [worldID, id])
+        .isEmpty
+    else { throw SynthesisError.invalid("Restore this rule and its entity before changing it.") }
+    return current
+  }
+  private func snapshotRule(_ rule: WorldRule) throws {
+    let data = try JSONEncoder().encode(rule)
+    if let last = try db.rows(
+      "SELECT snapshot FROM rule_history WHERE world_id=? AND rule_id=? ORDER BY rowid DESC LIMIT 1",
+      [rule.worldID, rule.id]
+    ).first?["snapshot"],
+      let previous = try? JSONDecoder().decode(WorldRule.self, from: Data(last.utf8)),
+      previous == rule
+    {
+      return
+    }
+    try db.execute(
+      "INSERT INTO rule_history VALUES(?,?,?,?,?)",
+      [
+        UUID().uuidString, rule.worldID, rule.id, String(decoding: data, as: UTF8.self),
+        timestamp(),
+      ])
+  }
+  public func ruleHistory(worldID: String, id: String) throws -> [WorldRule] {
+    _ = try rule(worldID: worldID, id: id)
+    return try db.rows(
+      "SELECT snapshot FROM rule_history WHERE world_id=? AND rule_id=? ORDER BY rowid DESC",
+      [worldID, id]
+    ).map {
+      try JSONDecoder().decode(WorldRule.self, from: Data(($0["snapshot"] ?? "").utf8))
+    }
   }
 }

@@ -52,7 +52,7 @@ A model answer may end with one fenced `synthesis-proposal` JSON block. `Proposa
 
 ## Data notes
 
-Page references use the world-scoped `links` table; incoming references are queried independently of semantic relationships. Tags and aliases participate in FTS and versioned snapshots. Canvas and atlas serialize typed Codable documents into world-scoped boards; images are bounded base64 inside the local board. World covers are scoped preferences. Exports (schema version 6) include records, conversations, revisions, relationships and their history, events, boards, links and everything archived.
+Page references use the world-scoped `links` table; incoming references are queried independently of semantic relationships. Tags and aliases participate in FTS and versioned snapshots. Canvas and atlas serialize typed Codable documents into world-scoped boards; images are bounded base64 inside the local board. World covers are scoped preferences. Exports (schema version 9) include records, conversations, revisions, relationships and their history, events, boards, links and everything archived.
 
 ## Canvas presentation and isolation — refinement audit
 
@@ -66,9 +66,9 @@ Every load carries a unique session ID echoed on bridge messages. Native and web
 
 The capture runner uses a fresh explicit database, a transport that always rejects model requests and accessory activation with non-key/non-main, mouse-transparent capture windows below normal window level. `SynthesisApplication` ignores activation requests only for background captures. Background sheet content renders inline through `SheetPresentation.swift`; real AppKit sheet presentation is retained in normal use and the explicit foreground runner. `verify-ui.sh` packages into a temporary bundle, leaving the user's app alone. Native compositing combines the window snapshot with the actual WebKit snapshot. `window.synthesis.audit()` exercises the engine in this isolated fixture; it does not claim physical event or animation performance coverage.
 
-## Preserved rules backend
+## Mechanics and rule history
 
-The previously unfinished core work is now checkpointed: migration 0006 adds world-scoped `rules` and `rule_scenarios`. `Rules.swift` supports rule/scenario storage, explicit rule approval, accepted wording, reversible archive and local structural checks. Rules are included with selected records in assistant context and Markdown export; JSON export schema 7 retains rules and scenarios. The dedicated UI is unfinished and is not claimed as a completed workspace.
+Migration 0006 stores world-scoped rules and scenarios. The entity Mechanics tab provides rule cards, kind filters, editing, reversible removal, scenarios, structural considerations and explicit rule canon review. Migration 0010 adds transactional rule snapshots before and after changes; history can restore an earlier wording as a draft without replacing accepted canon. Rule edits and approvals can require an exact expected snapshot to reject stale UI or agent changes. Existing rules acquire history on their first change. Rules and scenarios enter bounded assistant context; Markdown exports rule wording, JSON schema 9 and portable worlds retain complete history. Scenarios are creator-authored hypothetical exercises, not deterministic simulations. [Usage](MECHANICS.md).
 
 ## Connected action and presentation changes — 2026-11-15
 
@@ -78,11 +78,11 @@ The assistant receives `workspaceContext` in addition to retrieved lore: bounded
 
 `StudioIcon.swift` maps semantic identifiers to the bundled upstream Phosphor regular font. Canvas uses `@phosphor-icons/react`; alias mappings and licenses are committed. Inter is bundled in native OTF and web font assets. `Typography.swift` centralizes native fonts and the translucent sidebar material with a reduce-transparency fallback. Dark uses a pure-black workspace; light remains supported.
 
-Canvas still uses the published OSS engine rather than a fork. Synthesis owns the card presentation, relationship routes, source actions and drawing-style panel; the engine owns scene operations, pointer gestures, selection, history and serialization. `Save as idea` explicitly converts board text into a Library capture and linked card. Shared relationship inspection uses native domain edits. Rules are readable/addable/editable as drafts in entity details; the larger Rules Lab is not complete.
+Canvas still uses the published OSS engine rather than a fork. Synthesis owns the card presentation, relationship routes, source actions and drawing-style panel; the engine owns scene operations, pointer gestures, selection, history and serialization. `Save as idea` explicitly converts board text into a Library capture and linked card. Shared relationship inspection uses native domain edits. Mechanics supplies the structured rule/scenario UI for any entity category. A spatial technique tree, simulation engine and branch merging remain separate work.
 
 ## Portable worlds and chronology — 2026-11-15
 
-`WorldArchive.swift` exports `.synthesis` format version 4: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v4, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 7 includes chronology, including archived lanes.
+`WorldArchive.swift` exports `.synthesis` format version 6: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v6, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 9 includes chronology, including archived lanes.
 
 Migration 0007 adds nested chronology lanes (branch/period) and event placements. Events retain actual source records and free-form dates. A grouping is not a canon branch: no speculative merge or inheritance is implied. Reviewed agent actions can create a branch/period and assign new events to existing lanes. Request context includes lane IDs and memberships.
 
@@ -106,4 +106,6 @@ Conversation, the docked companion and the compact workspace input share `Unifie
 
 ## Creative components — 2026-11-16
 
-Migration 0009 adds a closed presentation descriptor (notes/facts/checklist/progression; workspace scope or entity parent) pointing to an ordinary lore record. Entity components use existing section membership. Content is revisioned/searchable/citable and retains the normal canon boundary; component removal archives presentation only. A version-checked checklist edit cannot replace accepted canon. No model code is executed. `create_component` stages through the existing proposal pipeline and produces a draft only after scoped approval. `.synthesis` v5 / JSON schema 8 include descriptors; older archives import with no components. [Usage and limits](CREATIVE_COMPONENTS.md).
+Migration 0009 adds a closed presentation descriptor (notes/facts/checklist/progression; workspace scope or entity parent) pointing to an ordinary lore record. Entity components use existing section membership. Content is revisioned/searchable/citable and retains the normal canon boundary; component removal archives presentation only. A version-checked checklist edit cannot replace accepted canon. No model code is executed. `create_component` stages through the existing proposal pipeline and produces a draft only after scoped approval. `.synthesis` v6 / JSON schema 9 include descriptors and rule history; archives before v5 import with no components, and archives before v6 import with no rule history. [Usage and limits](CREATIVE_COMPONENTS.md).
+
+The reviewed action vocabulary includes `revise_rule` with its captured before-state and `add_scenario` with an expectation, never an agent-written verdict. Acceptance checks the rule ID separately from lore record IDs and validates its active owner. Agent approval cannot promote a rule to canon. Form choices use the same themed `ChoiceField`/`PlainMenu` as the rest of the application.

@@ -213,10 +213,9 @@ struct TimelineScreen: View {
         FormField(label: "Position", placeholder: "Optional", text: $order, t: studio.t)
           .frame(width: 110)
       }
-      Picker("Branch or period", selection: $eventLane) {
-        Text("Unassigned").tag("")
-        ForEach(lanes) { lane in Text(lane.name).tag(lane.id) }
-      }
+      ChoiceField(
+        title: "Branch or period", selection: $eventLane,
+        choices: [("", "Unassigned")] + lanes.map { ($0.id, $0.name) }, t: studio.t)
       Toggle("Write a new document for this event", isOn: $newSource)
         .font(.studio(size: 13.5)).tint(studio.t.accent)
       if newSource {

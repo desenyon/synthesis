@@ -64,6 +64,7 @@ struct EditorScreen: View {
   @State private var handle = EditorHandle()
   @State private var editingRule: WorldRule?
   @State private var ruleSheet = false
+  @State private var mechanicsVisible = false
   private var sectionsVisible: Bool {
     get { studio.recordSectionTabs[record.id] ?? false }
     nonmutating set { studio.recordSectionTabs[record.id] = newValue }
@@ -84,13 +85,16 @@ struct EditorScreen: View {
         bar
         if record.kind == "entity" { entityTabs }
         HStack(spacing: 0) {
-          if record.kind == "entity" && sectionsVisible {
+          if record.kind == "entity" && mechanicsVisible {
+            RulesLab(studio: studio, record: record).frame(
+              maxWidth: .infinity, maxHeight: .infinity)
+          } else if record.kind == "entity" && sectionsVisible {
             RecordSectionsPage(studio: studio, parent: record)
               .frame(maxWidth: .infinity, maxHeight: .infinity)
           } else {
             writing.frame(maxWidth: .infinity, maxHeight: .infinity)
           }
-          if studio.inspector {
+          if studio.inspector && !mechanicsVisible {
             Rectangle().fill(studio.t.hairline).frame(width: 1)
             RecordInspector(
               studio: studio, record: record, flush: { save() },
@@ -107,6 +111,7 @@ struct EditorScreen: View {
     }
     .onAppear {
       studio.editorSave = { save() }
+      if studio.captureHint.contains("mechanics") { mechanicsVisible = true }
       studio.perform {
         sectionParent = try studio.store.sectionParent(worldID: record.worldID, recordID: record.id)
       }
@@ -196,11 +201,23 @@ struct EditorScreen: View {
 
   private var entityTabs: some View {
     ContentHeader {
-      FilterChip(title: "Overview", selected: !sectionsVisible, t: studio.t) {
-        if save() { sectionsVisible = false }
+      FilterChip(title: "Overview", selected: !sectionsVisible && !mechanicsVisible, t: studio.t) {
+        if save() {
+          sectionsVisible = false
+          mechanicsVisible = false
+        }
       }
-      FilterChip(title: "Sections", count: sectionCount, selected: sectionsVisible, t: studio.t) {
-        if save() { sectionsVisible = true }
+      FilterChip(
+        title: "Sections", count: sectionCount, selected: sectionsVisible && !mechanicsVisible,
+        t: studio.t
+      ) {
+        if save() {
+          sectionsVisible = true
+          mechanicsVisible = false
+        }
+      }
+      FilterChip(title: "Mechanics", selected: mechanicsVisible, t: studio.t) {
+        if save() { mechanicsVisible = true }
       }
       Spacer()
     }
@@ -804,13 +821,15 @@ struct FlowLayout: Layout {
 }
 
 /// Manual and proposed rules share the same records and draft boundary.
-private struct RecordRuleEditor: View {
+struct RecordRuleEditor: View {
   @ObservedObject var studio: Studio
   let record: LoreRecord
   let existing: WorldRule?
+  var initialKind: WorldRule.Kind = .limit
   var close: () -> Void
   @State private var title = ""
   @State private var bodyText = ""
+  @State private var error: String?
   @State private var kind: WorldRule.Kind = .limit
   var body: some View {
     SheetScaffold(
@@ -818,24 +837,26 @@ private struct RecordRuleEditor: View {
       subtitle: "Rules of \(record.title). Saving keeps this a draft.", t: studio.t, width: 520,
       close: close
     ) {
-      Picker("Kind", selection: $kind) {
-        ForEach(WorldRule.Kind.allCases, id: \.self) { Text($0.title).tag($0) }
-      }
+      ChoiceField(
+        title: "Kind", selection: $kind, choices: WorldRule.Kind.allCases.map { ($0, $0.title) },
+        t: studio.t)
       FormField(
         label: "Title", placeholder: "A constraint, cost or technique", text: $title, t: studio.t)
       FormTextArea(
         label: "Rule", placeholder: "Describe how this rule works and where it applies.",
         text: $bodyText, t: studio.t)
+      if let error { Text(error).font(.studio(size: 13)).foregroundStyle(studio.t.danger) }
     } footer: {
       Spacer()
       Button("Cancel", action: close).buttonStyle(QuietButton(t: studio.t))
       Button("Save draft") {
-        studio.perform {
+        do {
           if let existing {
             let current = try studio.store.rule(worldID: record.worldID, id: existing.id)
             guard current == existing else { throw SynthesisError.stale }
             _ = try studio.store.updateRule(
-              worldID: record.worldID, id: existing.id, kind: kind, title: title, body: bodyText)
+              worldID: record.worldID, id: existing.id, kind: kind, title: title, body: bodyText,
+              expected: existing)
           } else {
             _ = try studio.store.addRule(
               worldID: record.worldID, systemID: record.id, kind: kind, title: title, body: bodyText
@@ -843,7 +864,7 @@ private struct RecordRuleEditor: View {
           }
           try studio.reload()
           close()
-        }
+        } catch { self.error = error.localizedDescription }
       }.buttonStyle(QuietButton(t: studio.t, primary: true))
         .disabled(
           title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -851,7 +872,7 @@ private struct RecordRuleEditor: View {
     }.onAppear {
       title = existing?.title ?? ""
       bodyText = existing?.body ?? ""
-      kind = existing?.kind ?? .limit
+      kind = existing?.kind ?? initialKind
     }
   }
 }

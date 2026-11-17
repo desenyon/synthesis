@@ -4,7 +4,7 @@ This is an implementation ledger, not an acceptance claim. Preserve real lore an
 
 ## Implemented checkpoint (verification in STATE.md)
 
-- Black surfaces, translucent native navigation, bundled Inter and Phosphor (native + Canvas), capitalized brand with collapse control after it.
+- Black surfaces, opaque native navigation, bundled Inter and Phosphor (native + Canvas), capitalized brand with collapse control after it.
 - Contextual conversation composer and companion across document, Library, Graph, Timeline, Atlas and Review workspaces. Open documents enter request context; Manual retains the provider-boundary block.
 - Canvas shell no longer paints an opaque workspace over WebKit. Export reports engine failures instead of silently failing.
 - Portable `.synthesis` snapshot and transactional import into an independent world with remapped IDs. Includes archived content, rich text, boards, rules, history, chat and proposals. Never includes device credentials/provider preferences.
@@ -23,7 +23,7 @@ This is an implementation ledger, not an acceptance claim. Preserve real lore an
 1. First-install-only onboarding and full-page application/world settings implemented. Expand useful, wired preferences in subsequent slices.
 2. Close-node routing and independently labelled reverse relationships implemented. Dense obstacle routing and large-board performance remain.
 3. Saved nested branches/periods and reviewed agent creation implemented. Zoom, era navigation refinements and true canon branches remain.
-4. Customizable entity sections/notes; richer character, Systems, places, power-system and cosmology workspaces. Shared chat must preserve selection and content.
+4. Entity sections and native Notes/Facts/Checklist/Progression components are implemented across workspaces. Mechanics adds rules, scenarios and canon/history UI to every entity category. Richer spatial technique/cosmology tools remain; no arbitrary model code is executed.
 5. Image-only export and portable world snapshots implemented. File association and continuous save synchronization remain.
 6. Explicit-click subscription image generation, with usage disclosure. Text chat must not invoke image generation implicitly. Verify Codex's actual output contract before claiming support.
 7. Coherent Atlas layers and local place-map hierarchy. Evaluate editable geometry plus optional generated imagery; never promise literal imagination-to-map accuracy or silently regenerate established geography.

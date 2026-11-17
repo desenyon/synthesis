@@ -1,13 +1,13 @@
 # README screenshots
 
-Conversation home, Canvas, Graph and editor were refreshed on 2026-11-16 in the connected-presentation commit; Atlas and Settings remain from `0148d8a`. Captured from the real native application, using an isolated database and the clearly labeled Aster sample world. Logical window size: 1440×900; PNG backing resolution: 2880×1800. Original capture pixels are preserved. These are not mockups or generated UI images. The Atlas and Canvas contain optional bundled sample artwork; this does not demonstrate runtime image generation.
+All seven screenshots were refreshed on 2026-11-16 from the Mechanics implementation checkpoint (parent `9af7229`, plus the Mechanics commit changes). Mechanics uses its separate verification capture; the other six share the capture log here. Captured from the real native application, using an isolated database and the clearly labeled Aster sample world. Logical window size: 1440×900; PNG backing resolution: 2880×1800. Original capture pixels are preserved. These are not mockups or generated UI images. The Atlas and Canvas contain optional bundled sample artwork; this does not demonstrate runtime image generation.
 
-Capture runs stayed in the background, rejected model requests and did not access the owner's working database. All six images were inspected in a contact sheet. Background captures establish appearance, not physical interaction coverage.
+Capture runs stayed in the background, rejected model requests and did not access the owner's working database. All seven images were inspected in contact sheets, including `docs/verification/mechanics`. Background captures establish appearance, not physical interaction coverage.
 
 To refresh after a visual change:
 
 ```sh
-SYNTHESIS_CAPTURE_STATES=conversation-home,canvas,editor,graph,atlas,settings \
+SYNTHESIS_CAPTURE_STATES=conversation-home,canvas,editor,graph,atlas,settings,mechanics \
 SYNTHESIS_CAPTURE_SIZES=1440x900 \
 ./scripts/verify-ui.sh /tmp/synthesis-readme-screenshots
 uv run --with pillow python scripts/contact-sheets.py /tmp/synthesis-readme-screenshots
