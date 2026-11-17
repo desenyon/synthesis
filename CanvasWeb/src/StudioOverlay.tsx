@@ -2,7 +2,7 @@ import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound
 import { CaptureUpdateAction, newElementWith } from '@excalidraw/excalidraw';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { isCard, kindLabel, stateName, type RecordInfo, type RelationInfo } from './cards';
-import { cardFrame, visibleFrame } from './sceneRules';
+import { cardFrame, visibleFrame, drawingStyleContext } from './sceneRules';
 import { palette, displayPalette, categoryColor, categoryKey, type Theme } from './palette';
 type Props = {
     api: any;
@@ -80,7 +80,8 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
     const chooseTool = (type: string) => { setConnecting(null); api.setActiveTool({ type }); };
     const command = (name: string) => (window as any).synthesis?.command(name);
     const active = state.activeTool?.type;
-    const selectedDrawing = elements.filter((e:any) => state.selectedElementIds[e.id] && !e.customData?.synthesis);
+    const styleContext = drawingStyleContext<any>(elements, state.selectedElementIds, active);
+    const selectedDrawing = styleContext.targets;
     const note = selectedDrawing.length === 1 && selectedDrawing[0].type === 'text' ? selectedDrawing[0] : null;
     const selectedRelation = elements.find((e:any) => state.selectedElementIds[e.id] && e.customData?.synthesis === 'relation');
     const storedRelation = relations().find(r => r.id === selectedRelation?.customData.relationID);
@@ -155,7 +156,7 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
      <Tool label="Board text · T" icon="note" active={active === 'text'} action={() => chooseTool('text')}/><Tool label="Draw · P" icon="draw" active={active === 'freedraw'} action={() => chooseTool('freedraw')}/>
      <Tool label="Group in a frame · F" icon="frame" active={active === 'frame'} action={() => chooseTool('frame')}/>
      <span className="tool-separator"/>
-     <Tool label="Drawing style" icon="settings" active={styles} disabled={!Object.keys(state.selectedElementIds).length && ["selection", "hand"].includes(active)} action={() => setStyles(v => !v)}/>
+     <Tool label="Drawing style" icon="settings" active={styles && styleContext.available} disabled={!styleContext.available} action={() => setStyles(v => !v)}/>
    </div>
    <div className="studio-viewport glass" role="toolbar" aria-label="Canvas viewport">
      <Tool label="Undo · ⌘Z" icon="undo" action={() => command('undo')}/><Tool label="Redo · ⇧⌘Z" icon="redo" action={() => command('redo')}/>
@@ -163,13 +164,13 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
      <button className="zoom-label" title="Reset zoom to 100%" onClick={() => command('resetZoom')}>{Math.round(state.zoom.value * 100)}%</button>
      <Tool label="Zoom in" icon="plus" action={() => command('zoomIn')}/><Tool label="Fit to content" icon="fit" action={() => command('fit')}/><Tool label="Arrange linked records · undoable" icon="arrange" disabled={cards.length < 2} action={() => command('arrange')}/>
    </div>
-   {styles && <section className="studio-style glass" aria-label="Drawing appearance"><header>Drawing appearance<Tool label="Close appearance" icon="close" action={() => setStyles(false)}/></header>
-     {chosen.length ? <p>Record cards follow your world. Open the record to edit its content.</p> : <>
-       <span>Stroke</span><div className="style-options">{[palette(theme).text,palette(theme).accent,palette(theme).positive,palette(theme).categories.characters].map((color,i) => <button key={color} title={['Neutral','Blue','Green','Warm'][i]} aria-label={['Neutral stroke','Blue stroke','Green stroke','Warm stroke'][i]} style={{background:theme!=='light'?['#eff0f2','#aec7ef','#8fc3a6','#d7b899'][i]:color}} onClick={()=>style('strokeColor',color)}/>)}</div>
-       <span>Weight</span><div className="style-options">{[1,2,4].map(w=><button key={w} onClick={()=>style('strokeWidth',w)}>{w}px</button>)}</div>
+   {styles && styleContext.available && <section className="studio-style glass" aria-label="Drawing appearance"><header>Drawing appearance<Tool label="Close appearance" icon="close" action={() => setStyles(false)}/></header>
+     {chosen.length > 0 && <p>Styles apply to the selected drawings. Record cards keep their world identity.</p>}
+       <span>{styleContext.text ? 'Text color' : 'Stroke'}</span><div className="style-options">{[palette(theme).text,palette(theme).accent,palette(theme).positive,palette(theme).categories.characters].map((color,i) => <button key={color} title={['Neutral','Blue','Green','Warm'][i]} aria-label={['Neutral stroke','Blue stroke','Green stroke','Warm stroke'][i]} style={{background:theme!=='light'?['#eff0f2','#aec7ef','#8fc3a6','#d7b899'][i]:color}} onClick={()=>style('strokeColor',color)}/>)}</div>
+       {styleContext.shapes && <><span>Weight</span><div className="style-options">{[1,2,4].map(w=><button key={w} onClick={()=>style('strokeWidth',w)}>{w}px</button>)}</div>
        <span>Line</span><div className="style-options">{['solid','dashed','dotted'].map(v=><button key={v} onClick={()=>style('strokeStyle',v)}>{v}</button>)}</div>
        <span>Fill</span><div className="style-options"><button onClick={()=>style('backgroundColor','transparent')}>None</button><button onClick={()=>style('backgroundColor',palette(theme).surface)}>Surface</button></div>
-     </>}
+       </>}
    </section>}
    {note && <div className="studio-selection glass"><span>Board text · not in Library</span><button className="text-action" onClick={()=>post({type:'captureText',elementID:note.id,body:note.originalText ?? note.text})}>Save as idea <Icon name="capture"/></button></div>}
    {storedRelation && <div className="studio-selection glass"><span>{recordMap.get(storedRelation.sourceID)?.title} → {recordMap.get(storedRelation.targetID)?.title}</span><button className="text-action" onClick={()=>post({type:'inspectRelation',relationID:storedRelation.id})}>{storedRelation.label}<Icon name="open"/></button></div>}

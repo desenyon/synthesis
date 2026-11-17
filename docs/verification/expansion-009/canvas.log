@@ -1,0 +1,211 @@
+
+> synthesis-canvas@0.1.0 typecheck
+> tsc --noEmit
+
+
+> synthesis-canvas@0.1.0 test
+> node --test tests/*.test.ts
+
+✔ graphite, OLED and light share a display/export palette without changing engine mode (0.8035ms)
+✔ category aliases retain one readable identity in every appearance (0.186709ms)
+Canvas routing benchmark: 600 connections, 300 cards: 9.2 ms
+✔ routing 600 connections across a 300-card board stays interactive (10.126875ms)
+✔ a relationship and its label detour around an intervening card (0.694625ms)
+✔ close parallel connections keep their labels on separate outside curves (0.520083ms)
+✔ overlay stays attached through pan, zoom and a nonzero webview offset (0.370583ms)
+✔ offscreen cards are culled but partially visible cards survive (0.055917ms)
+✔ archived and retargeted relationships cannot remain as false lore (0.077542ms)
+✔ delayed messages must not write into a newly opened board (0.042875ms)
+✔ nested board groups keep each record group separate (0.051709ms)
+✔ rotated record hit testing follows the visible card instead of its old bounds (0.084542ms)
+✔ connection routes leave the correct card face and separate parallel relationships (0.20725ms)
+✔ overlapping cards route above the content rather than folding into it (0.169208ms)
+✔ Dagre arrangement separates real cards and respects relationship direction (5.672292ms)
+✔ drawing tools never offer styles that change lore-owned cards or images (0.20475ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 84.746042
+
+> synthesis-canvas@0.1.0 build
+> vite build
+
+vite v7.3.8 building client environment for production...
+transforming...
+✓ 6382 modules transformed.
+rendering chunks...
+computing gzip size...
+../Sources/SynthesisUI/CanvasBundle/index.html                                      0.52 kB │ gzip:   0.33 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-vietnamese-400-normal.woff2        4.97 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-vietnamese-600-normal.woff2        5.10 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-vietnamese-500-normal.woff2        5.11 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-ext-400-normal.woff2         5.26 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-ext-500-normal.woff2         5.43 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-ext-600-normal.woff2         5.43 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-vietnamese-400-normal.woff         6.50 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-vietnamese-500-normal.woff         6.60 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-vietnamese-600-normal.woff         6.64 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-ext-400-normal.woff          7.06 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-ext-500-normal.woff          7.19 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-ext-600-normal.woff          7.21 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-400-normal.woff2          7.71 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-400-normal.woff2             7.78 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-500-normal.woff2          7.90 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-500-normal.woff2             7.92 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-600-normal.woff2             7.94 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-600-normal.woff2          7.97 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-400-normal.woff           9.78 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-400-normal.woff              9.92 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-600-normal.woff           9.94 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-500-normal.woff           9.94 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-500-normal.woff              9.98 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-greek-600-normal.woff             10.03 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-ext-400-normal.woff2     10.23 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-ext-500-normal.woff2     10.43 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-ext-600-normal.woff2     10.48 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-ext-400-normal.woff      13.34 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-ext-500-normal.woff      13.45 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-cyrillic-ext-600-normal.woff      13.46 kB
+../Sources/SynthesisUI/CanvasBundle/assets/Assistant-SemiBold.woff2                20.21 kB
+../Sources/SynthesisUI/CanvasBundle/assets/Assistant-Regular.woff2                 20.23 kB
+../Sources/SynthesisUI/CanvasBundle/assets/Assistant-Medium.woff2                  20.32 kB
+../Sources/SynthesisUI/CanvasBundle/assets/Assistant-Bold.woff2                    20.38 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-400-normal.woff2            23.66 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-500-normal.woff2            24.27 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-600-normal.woff2            24.45 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-400-normal.woff             30.70 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-600-normal.woff             31.26 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-500-normal.woff             31.28 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-ext-400-normal.woff2        35.00 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-ext-500-normal.woff2        36.02 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-ext-600-normal.woff2        36.26 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-ext-400-normal.woff         47.56 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-ext-500-normal.woff         48.49 kB
+../Sources/SynthesisUI/CanvasBundle/assets/inter-latin-ext-600-normal.woff         48.67 kB
+../Sources/SynthesisUI/CanvasBundle/assets/index.css                              162.16 kB │ gzip:  26.08 kB
+../Sources/SynthesisUI/CanvasBundle/assets/channel.js                               0.10 kB │ gzip:   0.11 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-2Q5K7J3B.js                        0.18 kB │ gzip:   0.15 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-JWPE2WC7.js                        0.21 kB │ gzip:   0.16 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-XXDRQBXY.js                        0.22 kB │ gzip:   0.19 kB
+../Sources/SynthesisUI/CanvasBundle/assets/subset-worker.chunk.js                   0.35 kB │ gzip:   0.26 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-5VM5RSS4.js                        0.35 kB │ gzip:   0.26 kB
+../Sources/SynthesisUI/CanvasBundle/assets/stateDiagram-v2-MP3YSRHH.js              0.37 kB │ gzip:   0.25 kB
+../Sources/SynthesisUI/CanvasBundle/assets/classDiagram-ZZMXUADV.js                 0.40 kB │ gzip:   0.26 kB
+../Sources/SynthesisUI/CanvasBundle/assets/classDiagram-v2-VYDZK3BY.js              0.40 kB │ gzip:   0.26 kB
+../Sources/SynthesisUI/CanvasBundle/assets/file-open-7c801643.js                    0.45 kB │ gzip:   0.32 kB
+../Sources/SynthesisUI/CanvasBundle/assets/swimlanesDiagram-VR7AAH4N.js             0.47 kB │ gzip:   0.30 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-POPQ4Y6H.js                        0.49 kB │ gzip:   0.35 kB
+../Sources/SynthesisUI/CanvasBundle/assets/file-open-002ab408.js                    0.54 kB │ gzip:   0.33 kB
+../Sources/SynthesisUI/CanvasBundle/assets/infoDiagram-27XIBGKW.js                  0.55 kB │ gzip:   0.37 kB
+../Sources/SynthesisUI/CanvasBundle/assets/directory-open-01563666.js               0.59 kB │ gzip:   0.36 kB
+../Sources/SynthesisUI/CanvasBundle/assets/file-save-3189631c.js                    0.71 kB │ gzip:   0.46 kB
+../Sources/SynthesisUI/CanvasBundle/assets/file-save-745eba88.js                    0.87 kB │ gzip:   0.50 kB
+../Sources/SynthesisUI/CanvasBundle/assets/sizeCapture-INFHLROL.js                  0.91 kB │ gzip:   0.51 kB
+../Sources/SynthesisUI/CanvasBundle/assets/directory-open-4ed118d0.js               1.55 kB │ gzip:   0.79 kB
+../Sources/SynthesisUI/CanvasBundle/assets/railroadDiagram-O6MQD6OU.js              1.56 kB │ gzip:   0.70 kB
+../Sources/SynthesisUI/CanvasBundle/assets/abnfDiagram-VCTEODGH.js                  1.76 kB │ gzip:   0.84 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-F27PBJKO.js                        1.86 kB │ gzip:   0.81 kB
+../Sources/SynthesisUI/CanvasBundle/assets/pegDiagram-XKGWAZYB.js                   1.91 kB │ gzip:   0.87 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ebnfDiagram-PWID7BFC.js                  1.95 kB │ gzip:   0.83 kB
+../Sources/SynthesisUI/CanvasBundle/assets/roundRect.js                             2.90 kB │ gzip:   1.04 kB
+../Sources/SynthesisUI/CanvasBundle/assets/diagram-Z3DM3KII.js                      4.17 kB │ gzip:   1.79 kB
+../Sources/SynthesisUI/CanvasBundle/assets/pieDiagram-E7YTZNPT.js                   5.03 kB │ gzip:   2.11 kB
+../Sources/SynthesisUI/CanvasBundle/assets/diagram-UQ7AKVKN.js                      6.04 kB │ gzip:   2.58 kB
+../Sources/SynthesisUI/CanvasBundle/assets/diagram-S7CK7UJ4.js                      8.17 kB │ gzip:   3.62 kB
+../Sources/SynthesisUI/CanvasBundle/assets/si-LK-N5RQ5JYF.js                        8.57 kB │ gzip:   3.32 kB
+../Sources/SynthesisUI/CanvasBundle/assets/az-AZ-76LH7QW2.js                        8.59 kB │ gzip:   3.55 kB
+../Sources/SynthesisUI/CanvasBundle/assets/zh-HK-E62DVLB3.js                        9.07 kB │ gzip:   4.05 kB
+../Sources/SynthesisUI/CanvasBundle/assets/cynefinDiagram-5FMLGOSQ.js              10.06 kB │ gzip:   3.59 kB
+../Sources/SynthesisUI/CanvasBundle/assets/kk-KZ-P5N5QNE5.js                       10.11 kB │ gzip:   4.16 kB
+../Sources/SynthesisUI/CanvasBundle/assets/kaa-6HZHGXH3.js                         10.15 kB │ gzip:   4.14 kB
+../Sources/SynthesisUI/CanvasBundle/assets/stateDiagram-D77RDMKH.js                10.29 kB │ gzip:   3.56 kB
+../Sources/SynthesisUI/CanvasBundle/assets/dagre-GXQ25YYZ.js                       10.64 kB │ gzip:   3.99 kB
+../Sources/SynthesisUI/CanvasBundle/assets/diagram-VSXAHHWV.js                     10.67 kB │ gzip:   4.09 kB
+../Sources/SynthesisUI/CanvasBundle/assets/lt-LT-XHIRWOB4.js                       12.49 kB │ gzip:   5.32 kB
+../Sources/SynthesisUI/CanvasBundle/assets/vi-VN-M7AON7JQ.js                       13.85 kB │ gzip:   5.75 kB
+../Sources/SynthesisUI/CanvasBundle/assets/da-DK-5WZEPLOC.js                       14.40 kB │ gzip:   6.02 kB
+../Sources/SynthesisUI/CanvasBundle/assets/th-TH-HPSO5L25.js                       15.51 kB │ gzip:   5.16 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-SVP7TREG.js                       15.72 kB │ gzip:   4.38 kB
+../Sources/SynthesisUI/CanvasBundle/assets/nn-NO-6E72VCQL.js                       15.94 kB │ gzip:   6.67 kB
+../Sources/SynthesisUI/CanvasBundle/assets/diagram-VX7I27RA.js                     16.24 kB │ gzip:   5.75 kB
+../Sources/SynthesisUI/CanvasBundle/assets/nl-NL-IS3SIHDZ.js                       16.71 kB │ gzip:   6.88 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ishikawaDiagram-5VMMS53U.js             17.44 kB │ gzip:   6.62 kB
+../Sources/SynthesisUI/CanvasBundle/assets/my-MM-5M5IBNSE.js                       17.56 kB │ gzip:   5.28 kB
+../Sources/SynthesisUI/CanvasBundle/assets/hu-HU-A5ZG7DT2.js                       18.07 kB │ gzip:   7.55 kB
+../Sources/SynthesisUI/CanvasBundle/assets/fi-FI-Z5N7JZ37.js                       18.39 kB │ gzip:   7.48 kB
+../Sources/SynthesisUI/CanvasBundle/assets/kab-KAB-ZGHBKWFO.js                     18.77 kB │ gzip:   7.49 kB
+../Sources/SynthesisUI/CanvasBundle/assets/zh-TW-RAJ6MFWO.js                       18.98 kB │ gzip:   8.83 kB
+../Sources/SynthesisUI/CanvasBundle/assets/zh-CN-LNUGB5OW.js                       19.04 kB │ gzip:   8.85 kB
+../Sources/SynthesisUI/CanvasBundle/assets/lv-LV-5QDEKY6T.js                       19.13 kB │ gzip:   7.74 kB
+../Sources/SynthesisUI/CanvasBundle/assets/gl-ES-HMX3MZ6V.js                       19.37 kB │ gzip:   7.70 kB
+../Sources/SynthesisUI/CanvasBundle/assets/tr-TR-DEFEU3FU.js                       19.49 kB │ gzip:   7.93 kB
+../Sources/SynthesisUI/CanvasBundle/assets/cs-CZ-2BRQDIVT.js                       19.51 kB │ gzip:   8.35 kB
+../Sources/SynthesisUI/CanvasBundle/assets/pt-PT-UZXXM6DQ.js                       19.64 kB │ gzip:   7.74 kB
+../Sources/SynthesisUI/CanvasBundle/assets/id-ID-SAP4L64H.js                       19.67 kB │ gzip:   7.65 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ca-ES-6MX7JW3Y.js                       19.78 kB │ gzip:   7.86 kB
+../Sources/SynthesisUI/CanvasBundle/assets/oc-FR-POXYY2M6.js                       19.83 kB │ gzip:   7.78 kB
+../Sources/SynthesisUI/CanvasBundle/assets/nb-NO-T6EIAALU.js                       20.09 kB │ gzip:   8.17 kB
+../Sources/SynthesisUI/CanvasBundle/assets/kanban-definition-UXKFOSKX.js           20.26 kB │ gzip:   7.17 kB
+../Sources/SynthesisUI/CanvasBundle/assets/he-IL-6SHJWFNN.js                       20.31 kB │ gzip:   7.53 kB
+../Sources/SynthesisUI/CanvasBundle/assets/bg-BG-XCXSNQG7.js                       20.75 kB │ gzip:   7.35 kB
+../Sources/SynthesisUI/CanvasBundle/assets/pt-BR-5N22H2LF.js                       21.03 kB │ gzip:   8.16 kB
+../Sources/SynthesisUI/CanvasBundle/assets/eu-ES-A7QVB2H4.js                       21.19 kB │ gzip:   8.18 kB
+../Sources/SynthesisUI/CanvasBundle/assets/es-ES-U4NZUMDT.js                       21.34 kB │ gzip:   8.43 kB
+../Sources/SynthesisUI/CanvasBundle/assets/sl-SI-NN7IZMDC.js                       21.35 kB │ gzip:   8.52 kB
+../Sources/SynthesisUI/CanvasBundle/assets/sv-SE-XGPEYMSR.js                       21.50 kB │ gzip:   8.51 kB
+../Sources/SynthesisUI/CanvasBundle/assets/it-IT-JPQ66NNP.js                       22.05 kB │ gzip:   8.53 kB
+../Sources/SynthesisUI/CanvasBundle/assets/sk-SK-C5VTKIMK.js                       22.30 kB │ gzip:   9.05 kB
+../Sources/SynthesisUI/CanvasBundle/assets/pl-PL-T2D74RX3.js                       22.46 kB │ gzip:   9.18 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ro-RO-JPDTUUEW.js                       23.13 kB │ gzip:   8.89 kB
+../Sources/SynthesisUI/CanvasBundle/assets/mindmap-definition-YA3MSWOX.js          23.14 kB │ gzip:   7.77 kB
+../Sources/SynthesisUI/CanvasBundle/assets/de-DE-XR44H4JA.js                       23.33 kB │ gzip:   8.94 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ja-JP-DBVTYXUO.js                       23.39 kB │ gzip:   8.78 kB
+../Sources/SynthesisUI/CanvasBundle/assets/fr-FR-RHASNOE6.js                       23.43 kB │ gzip:   8.84 kB
+../Sources/SynthesisUI/CanvasBundle/assets/journeyDiagram-3NMN7TZE.js              23.50 kB │ gzip:   8.29 kB
+../Sources/SynthesisUI/CanvasBundle/assets/bn-BD-2XOGV67Q.js                       23.59 kB │ gzip:   6.67 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ko-KR-MTYHY66A.js                       23.87 kB │ gzip:   9.14 kB
+../Sources/SynthesisUI/CanvasBundle/assets/fa-IR-HGAKTJCU.js                       24.23 kB │ gzip:   8.42 kB
+../Sources/SynthesisUI/CanvasBundle/assets/wardleyDiagram-VM6X3IG4.js              25.46 kB │ gzip:   6.75 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ar-SA-G6X2FPQ2.js                       25.66 kB │ gzip:   9.09 kB
+../Sources/SynthesisUI/CanvasBundle/assets/pa-IN-N4M65BXN.js                       27.96 kB │ gzip:   7.95 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ku-TR-6OUDTVRD.js                       29.31 kB │ gzip:   9.24 kB
+../Sources/SynthesisUI/CanvasBundle/assets/gitGraphDiagram-WWUBYQGX.js             29.37 kB │ gzip:   8.65 kB
+../Sources/SynthesisUI/CanvasBundle/assets/el-GR-BZB4AONW.js                       29.66 kB │ gzip:   9.58 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ru-RU-B4JR7IUQ.js                       30.73 kB │ gzip:   9.86 kB
+../Sources/SynthesisUI/CanvasBundle/assets/erDiagram-RLTQ6QDP.js                   30.74 kB │ gzip:  10.54 kB
+../Sources/SynthesisUI/CanvasBundle/assets/timeline-definition-24CTP7MA.js         30.78 kB │ gzip:  10.11 kB
+../Sources/SynthesisUI/CanvasBundle/assets/requirementDiagram-BXWQKSXE.js          30.95 kB │ gzip:   9.69 kB
+../Sources/SynthesisUI/CanvasBundle/assets/uk-UA-QMV73CPH.js                       31.63 kB │ gzip:  10.09 kB
+../Sources/SynthesisUI/CanvasBundle/assets/hi-IN-IWLTKZ5I.js                       32.34 kB │ gzip:   9.13 kB
+../Sources/SynthesisUI/CanvasBundle/assets/pica.js                                 32.58 kB │ gzip:  12.95 kB
+../Sources/SynthesisUI/CanvasBundle/assets/quadrantDiagram-AXDQQJYC.js             33.92 kB │ gzip:   9.90 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ta-IN-2NMHFXQM.js                       35.25 kB │ gzip:   8.53 kB
+../Sources/SynthesisUI/CanvasBundle/assets/layout.js                               35.42 kB │ gzip:  12.73 kB
+../Sources/SynthesisUI/CanvasBundle/assets/km-KH-HSX4SM5Z.js                       36.63 kB │ gzip:   9.27 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-IMKFNOWR.js                       38.04 kB │ gzip:  12.45 kB
+../Sources/SynthesisUI/CanvasBundle/assets/sankeyDiagram-P5KCCOFB.js               39.89 kB │ gzip:  15.07 kB
+../Sources/SynthesisUI/CanvasBundle/assets/d3-scale.js                             41.33 kB │ gzip:  15.14 kB
+../Sources/SynthesisUI/CanvasBundle/assets/blockDiagram-I7D4REHJ.js                41.69 kB │ gzip:  13.54 kB
+../Sources/SynthesisUI/CanvasBundle/assets/vennDiagram-4TSXK5OY.js                 41.94 kB │ gzip:  15.67 kB
+../Sources/SynthesisUI/CanvasBundle/assets/mr-IN-CRQNXWMA.js                       42.23 kB │ gzip:  10.67 kB
+../Sources/SynthesisUI/CanvasBundle/assets/xychartDiagram-S5SC5T6Z.js              43.10 kB │ gzip:  11.93 kB
+../Sources/SynthesisUI/CanvasBundle/assets/image-blob-reduce.esm.js                45.80 kB │ gzip:  16.70 kB
+../Sources/SynthesisUI/CanvasBundle/assets/chunk-TICWLB2K.js                       49.13 kB │ gzip:  15.69 kB
+../Sources/SynthesisUI/CanvasBundle/assets/ganttDiagram-EL5Y4UJY.js                52.42 kB │ gzip:  17.96 kB
+../Sources/SynthesisUI/CanvasBundle/assets/flowDiagram-HODETNUW.js                 61.78 kB │ gzip:  19.82 kB
+../Sources/SynthesisUI/CanvasBundle/assets/c4Diagram-7LVT6UL2.js                   65.44 kB │ gzip:  18.75 kB
+../Sources/SynthesisUI/CanvasBundle/assets/cose-bilkent-JH36ORCC.js                81.67 kB │ gzip:  22.44 kB
+../Sources/SynthesisUI/CanvasBundle/assets/swimlanes-42K2YHIH.js                  115.77 kB │ gzip:  42.49 kB
+../Sources/SynthesisUI/CanvasBundle/assets/sequenceDiagram-WJ2MYXX4.js            116.91 kB │ gzip:  31.07 kB
+../Sources/SynthesisUI/CanvasBundle/assets/architectureDiagram-5GKGNRK7.js        151.78 kB │ gzip:  43.07 kB
+../Sources/SynthesisUI/CanvasBundle/assets/katex.js                               260.98 kB │ gzip:  77.67 kB
+../Sources/SynthesisUI/CanvasBundle/assets/cytoscape.esm.js                       450.32 kB │ gzip: 144.03 kB
+../Sources/SynthesisUI/CanvasBundle/assets/cynefin-OW5HDTMX.js                    687.73 kB │ gzip: 151.77 kB
+../Sources/SynthesisUI/CanvasBundle/assets/index2.js                              716.45 kB │ gzip: 179.15 kB
+../Sources/SynthesisUI/CanvasBundle/assets/index.js                             1,530.96 kB │ gzip: 492.39 kB
+../Sources/SynthesisUI/CanvasBundle/assets/subset-shared.chunk.js               1,820.49 kB │ gzip: 735.69 kB
+✓ built in 4.53s

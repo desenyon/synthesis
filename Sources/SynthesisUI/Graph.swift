@@ -58,10 +58,7 @@ struct RelationshipGraph: View {
           title: "Relationship", icon: "plus", t: studio.t, primary: true,
           help: nodes.count < 2 ? "Create two entities first" : "Connect two entities"
         ) {
-          source = selected ?? nodes.first?.id ?? ""
-          target = nodes.first { $0.id != source }?.id ?? ""
-          label = ""
-          panel = .create
+          beginRelationship(from: selected ?? nodes.first?.id ?? "")
         }.disabled(nodes.count < 2)
       }
       if nodes.isEmpty {
@@ -356,10 +353,7 @@ struct RelationshipGraph: View {
       .contextMenu {
         Button("Open record") { studio.openRecord(entity) }
         Button("Connect from here…") {
-          source = entity.id
-          target = entities.first { $0.id != entity.id }?.id ?? ""
-          label = ""
-          panel = .create
+          beginRelationship(from: entity.id)
         }.disabled(entities.count < 2)
       }
       .help(entity.title)
@@ -369,16 +363,20 @@ struct RelationshipGraph: View {
       )
       .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
   }
+  private func beginRelationship(from id: String, to other: String? = nil) {
+    source = id
+    target = other ?? entities.first { $0.id != id }?.id ?? ""
+    label = ""
+    inverseLabel = ""
+    twoWay = false
+    connecting = nil
+    editing = nil
+    panel = .create
+  }
   private func port(_ entity: LoreRecord, tint: Color) -> some View {
     Button {
       if let first = connecting, first != entity.id {
-        source = first
-        target = entity.id
-        label = ""
-        inverseLabel = ""
-        twoWay = false
-        connecting = nil
-        panel = .create
+        beginRelationship(from: first, to: entity.id)
       } else {
         connecting = connecting == entity.id ? nil : entity.id
       }

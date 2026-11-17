@@ -33,6 +33,19 @@ export function relationDisposition(id: string, source: string | undefined, targ
     return hidden.has(id) ? 'hide' : 'keep';
 }
 export function acceptsSession(current: string, incoming: unknown) { return current.length > 0 && incoming === current; }
+
+/** Only ordinary authoring elements may be styled; lore cards/edges retain their world identity. */
+export function drawingStyleContext<T extends { id: string; type: string; isDeleted?: boolean; customData?: { synthesis?: unknown } | null }>(
+    elements: readonly T[], selected: Record<string, boolean>, activeTool: string | undefined
+) {
+    const shapes = new Set(['rectangle', 'ellipse', 'diamond', 'arrow', 'line', 'freedraw']);
+    const supportsStyle = (type: string) => type === 'text' || shapes.has(type);
+    const chosen = elements.filter(e => selected[e.id] && !e.isDeleted);
+    const targets = chosen.filter(e => !e.customData?.synthesis && supportsStyle(e.type));
+    const kinds = targets.length ? targets.map(e => e.type) : chosen.length ? [] : activeTool && supportsStyle(activeTool) ? [activeTool] : [];
+    return { targets, available: kinds.length > 0, text: kinds.length > 0 && kinds.every(t => t === 'text'),
+        shapes: kinds.length > 0 && kinds.every(t => shapes.has(t)) };
+}
 /** Excalidraw stores innermost group first; outer board groups must never own record parts. */
 export function cardGroup(element: {
     groupIds?: string[];

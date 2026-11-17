@@ -15,6 +15,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 - Explore enforced in the core: model proposal blocks are discarded with a notice. Propose still stages draft changes for explicit review; neither mode changes canon.
 
 ### Fixed
+- Expansion #9: Atlas drawing and marker tools cannot conflict; marker placement supports Undo. New relationships clear prior reverse settings. Canvas styles target editable drawings only and adapt to selection.
 - Expansion #8: transient hover feedback clears after navigation, disabling and focus loss. Shared restrained transitions honor Reduce Motion; confirmation toasts stay above compact composers.
 - Expansion #5: Canvas category accents now match native views, including readable light colors; Graph and Canvas use consistent Phosphor category glyphs. Historical events share a calendar identity across Library and Timeline.
 - Restricted context filters indexed rules, relationships and placements as well as retrieved records, and withholds prior messages that could reintroduce excluded lore.

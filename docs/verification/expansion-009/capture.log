@@ -1,0 +1,55 @@
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT PASS first-fit acknowledgement contains the committed viewport
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS unacknowledged canvas save blocks shutdown
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+CAPTURE canvas 1440x900, bitmap 1440x900, 163ms
+CAPTURE light 1440x900, bitmap 1440x900, 147ms
+CAPTURE graph 1440x900, bitmap 1440x900, 371ms
+CAPTURE graph-selected 1440x900, bitmap 1440x900, 567ms
+CAPTURE library 1440x900, bitmap 1440x900, 120ms
+CAPTURE timeline 1440x900, bitmap 1440x900, 107ms
+CAPTURE atlas 1440x900, bitmap 1440x900, 219ms
+CAPTURE empty-atlas 1440x900, bitmap 1440x900, 123ms
+CAPTURE sheet-relation 1440x900, bitmap 1440x900, 404ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+CAPTURE atlas-drawing 1440x900, bitmap 1440x900, 253ms
+CAPTURE atlas-placing 1440x900, bitmap 1440x900, 237ms
+CAPTURE light-atlas-drawing 1440x900, bitmap 1440x900, 260ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 108ms
+CAPTURE light 1024x768, bitmap 1024x768, 112ms
+CAPTURE graph 1024x768, bitmap 1024x768, 166ms
+CAPTURE graph-selected 1024x768, bitmap 1024x768, 262ms
+CAPTURE library 1024x768, bitmap 1024x768, 104ms
+CAPTURE timeline 1024x768, bitmap 1024x768, 105ms
+CAPTURE atlas 1024x768, bitmap 1024x768, 146ms
+CAPTURE empty-atlas 1024x768, bitmap 1024x768, 94ms
+CAPTURE sheet-relation 1024x768, bitmap 1024x768, 196ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+CAPTURE atlas-drawing 1024x768, bitmap 1024x768, 162ms
+CAPTURE atlas-placing 1024x768, bitmap 1024x768, 156ms
+CAPTURE light-atlas-drawing 1024x768, bitmap 1024x768, 169ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-009

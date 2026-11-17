@@ -326,3 +326,7 @@ Optional writing prompts, artwork, actual relationship navigation and sourced-ev
 ### Expansion #8 — shared microinteractions (2026-11-17)
 
 Restrained shared motion for selection, panels, companions, relationship navigation and proposal review; reduced-motion support; transient hover resets on navigation, disabled state and focus loss. Fixed the capture runner suppressing its toast fixture, then a real confirmation/composer overlap. 180 tests / 44 suites, lint and optimized build passed; 20 final captures inspected at both sizes. An unwindowed native regression covers hover lifecycle; physical animation pacing is not claimed. [Evidence](verification/expansion-008/README.md). No model usage or foreground interruption. Next #9.
+
+### Expansion #9 — contextual tools (2026-11-17)
+
+Audited workspace toolbars and fixed conflicting Atlas modes, missing marker Undo, empty marker pickers, stale Graph relationship form settings and ineffective Canvas drawing-style controls. 181 native tests / 45 suites, lint and optimized build; Canvas typecheck, 15 tests, bundle build and 28 embedded engine checks passed. 24 captures inspected at both sizes. [Evidence](verification/expansion-009/README.md). Next #10: optional contextual inspectors across workspaces.

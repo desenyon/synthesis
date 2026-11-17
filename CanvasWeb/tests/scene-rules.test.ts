@@ -91,3 +91,28 @@ test('Dagre arrangement separates real cards and respects relationship direction
     assert.ok(result.get('c')!.x - result.get('b')!.x >= 300);
     assert.deepEqual(cards.map(c=>c.x),[0,0,0], 'layout calculation never mutates saved cards');
 });
+
+
+test('drawing tools never offer styles that change lore-owned cards or images', async () => {
+    const { drawingStyleContext } = await import('../src/sceneRules.ts');
+    const elements = [
+        {id:'card',type:'rectangle',customData:{synthesis:'record'}},
+        {id:'edge',type:'arrow',customData:{synthesis:'relation'}},
+        {id:'image',type:'image'}, {id:'frame',type:'frame'},
+        {id:'note',type:'text'}, {id:'shape',type:'ellipse'},
+        {id:'removed',type:'text',isDeleted:true},
+    ];
+    for (const id of ['card','edge','image','frame','removed']) {
+        assert.equal(drawingStyleContext(elements,{[id]:true},'selection').available,false);
+    }
+    const mixed=drawingStyleContext(elements,{card:true,note:true,edge:true,shape:true},'selection');
+    assert.deepEqual(mixed.targets.map(e=>e.id),['note','shape']);
+    assert.equal(mixed.available,true);
+    assert.equal(mixed.text,false);
+    assert.equal(mixed.shapes,false);
+    assert.equal(drawingStyleContext(elements,{note:true},'selection').text,true);
+    assert.equal(drawingStyleContext(elements,{},'rectangle').shapes,true);
+    assert.equal(drawingStyleContext(elements,{},'text').text,true);
+    assert.equal(drawingStyleContext(elements,{},'hand').available,false);
+    assert.equal(drawingStyleContext(elements,{},undefined).available,false);
+});

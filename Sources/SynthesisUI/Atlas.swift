@@ -22,12 +22,16 @@ struct AtlasScreen: View {
   @State private var zoom = 1.0
   @State private var pan = CGSize.zero
   @State private var panAnchor: CGPoint?
-  @State private var placing: String?
+  @State private var authoring = AtlasAuthoring()
+  private var placing: String? { authoring.markerID }
   @State private var regionPicker = false
-  /// Record being outlined, and the region being redrawn if this replaces one.
-  @State private var drawingRecord: String?
-  @State private var redrawing: String?
-  @State private var drawingPoints: [CGPoint] = []
+  private var drawingRecord: String? { authoring.regionRecordID }
+  private var redrawing: String? { authoring.replacedRegionID }
+  private var drawingPoints: [CGPoint] { authoring.points }
+  private var unmarkedRecords: [LoreRecord] {
+    let placed = Set(map.markers.map(\.recordID))
+    return studio.records.filter { !placed.contains($0.id) }
+  }
   @State private var selectedRegion: String?
   @State private var reshapeBefore: Board?
   @State private var showMarkers = true
@@ -68,18 +72,17 @@ struct AtlasScreen: View {
             markerPicker = true
           } label: {
             StudioLabel("Place marker", icon: "mappin.and.ellipse")
-              .font(.studio(.label)).foregroundStyle(studio.t.onAccent)
-              .padding(.horizontal, 12).frame(height: Metric.control)
-              .background(studio.t.accent, in: RoundedRectangle(cornerRadius: Metric.radius))
-          }.buttonStyle(.plain).disabled(studio.records.isEmpty)
-            .help("Choose a record, then click the map")
+          }.buttonStyle(QuietButton(t: studio.t, primary: true)).disabled(unmarkedRecords.isEmpty)
+            .help(
+              unmarkedRecords.isEmpty
+                ? "Every record already has a marker on this map"
+                : "Choose a record, then click the map"
+            )
             .popover(isPresented: $markerPicker) {
               SearchableRecordPicker(
-                records: studio.records.filter { record in
-                  !map.markers.contains { $0.recordID == record.id }
-                }, t: studio.t
+                records: unmarkedRecords, t: studio.t
               ) { record in
-                placing = record.id
+                startPlacing(record.id)
                 markerPicker = false
               }
             }
@@ -193,14 +196,19 @@ struct AtlasScreen: View {
         selectedRegion = map.regions.first?.id
         selected = map.regions.first?.recordID
       }
-      if studio.captureHint == "atlas-drawing",
+      if studio.captureHint.hasSuffix("atlas-drawing"),
         let city = studio.records.first(where: { $0.title == "The Drowned City" })
       {
         startDrawing(city.id, replacing: nil)
-        drawingPoints = [
+        for point in [
           CGPoint(x: 0.64, y: 0.6), CGPoint(x: 0.76, y: 0.58), CGPoint(x: 0.79, y: 0.7),
           CGPoint(x: 0.67, y: 0.74),
-        ]
+        ] { authoring.addPoint(point) }
+      }
+      if studio.captureHint == "atlas-placing",
+        let city = studio.records.first(where: { $0.title == "The Drowned City" })
+      {
+        startPlacing(city.id)
       }
       if studio.captureHint == "atlas-new" {
         newMap = true
@@ -235,7 +243,8 @@ struct AtlasScreen: View {
         zoom = 1
         pan = .zero
         selected = nil
-        placing = nil
+        selectedRegion = nil
+        authoring.choose(.browse)
       }
       loadFailed = false
     } catch {
@@ -279,7 +288,7 @@ struct AtlasScreen: View {
           guard drawingRecord == nil else { return }
           selected = nil
           selectedRegion = nil
-          placing = nil
+          authoring.choose(.browse)
         },
         onDrag: { start, current, phase in
           let last = panAnchor ?? start
@@ -293,7 +302,7 @@ struct AtlasScreen: View {
             cancelDrawing()
             return true
           }
-          placing = nil
+          authoring.choose(.browse)
           selected = nil
           selectedRegion = nil
           return true
@@ -308,23 +317,23 @@ struct AtlasScreen: View {
         .gesture(
           SpatialTapGesture().onEnded { value in
             if drawingRecord != nil {
-              guard drawingPoints.count < 200 else { return }
-              drawingPoints.append(
+              authoring.addPoint(
                 CGPoint(
                   x: min(1, max(0, value.location.x / width)),
                   y: min(1, max(0, value.location.y / height))))
               return
             }
             guard let id = placing else { return }
+            let before = currentBoard
             let previousID = map.markers.first { $0.recordID == id }?.id ?? UUID().uuidString
             map.markers.removeAll { $0.recordID == id }
             map.markers.append(
               MapMarker(
                 id: previousID, recordID: id, x: min(1, max(0, value.location.x / width)),
                 y: min(1, max(0, value.location.y / height))))
-            placing = nil
+            authoring.choose(.browse)
             selected = id
-            persist()
+            if persist() { offerUndo(before, title: "Marker placed") }
           }
         )
         .accessibilityLabel("World map")
@@ -374,7 +383,7 @@ struct AtlasScreen: View {
             Text(
               "Click around “\(studio.records.first { $0.id == id }?.title ?? "record")” · \(drawingPoints.count) \(drawingPoints.count == 1 ? "point" : "points")"
             ).font(.studio(size: 13)).lineLimit(1)
-            Button("Undo point") { _ = drawingPoints.popLast() }
+            Button("Undo point") { authoring.undoPoint() }
               .buttonStyle(QuietButton(t: studio.t, role: .ghost)).disabled(drawingPoints.isEmpty)
             Button("Cancel") { cancelDrawing() }
               .buttonStyle(QuietButton(t: studio.t, role: .ghost))
@@ -390,7 +399,7 @@ struct AtlasScreen: View {
               "Click the map to place “\(studio.records.first { $0.id == id }?.title ?? "record")”"
             )
             .font(.studio(size: 13))
-            Button("Cancel") { placing = nil }.buttonStyle(.plain)
+            Button("Cancel") { authoring.choose(.browse) }.buttonStyle(.plain)
               .font(.studio(.label)).foregroundStyle(studio.t.accent)
           }.padding(.horizontal, 14).frame(height: 36).floatingPanel(studio.t)
         }
@@ -534,19 +543,19 @@ struct AtlasScreen: View {
       }
     }.allowsHitTesting(false)
   }
-  private func startDrawing(_ recordID: String, replacing: String?) {
-    placing = nil
+  private func startPlacing(_ recordID: String) {
+    guard studio.records.contains(where: { $0.id == recordID }) else { return }
+    authoring.choose(.marker(recordID))
     selected = nil
     selectedRegion = nil
-    redrawing = replacing
-    drawingPoints = []
-    drawingRecord = recordID
   }
-  private func cancelDrawing() {
-    drawingRecord = nil
-    redrawing = nil
-    drawingPoints = []
+  private func startDrawing(_ recordID: String, replacing: String?) {
+    guard studio.records.contains(where: { $0.id == recordID }) else { return }
+    selected = nil
+    selectedRegion = nil
+    authoring.choose(.region(record: recordID, replacing: replacing))
   }
+  private func cancelDrawing() { authoring.choose(.browse) }
   private func finishDrawing() {
     guard let recordID = drawingRecord, drawingPoints.count >= 3 else { return }
     let before = currentBoard
@@ -598,8 +607,7 @@ struct AtlasScreen: View {
     .contextMenu {
       if let record { Button("Open record") { studio.openRecord(record) } }
       Button("Move marker") {
-        placing = marker.recordID
-        selected = nil
+        startPlacing(marker.recordID)
       }
       Button("Remove marker") {
         let before = currentBoard
