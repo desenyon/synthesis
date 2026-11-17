@@ -41,3 +41,5 @@ Records can be dragged from world Search, Favorites and Library into either edit
 Atlas remembers map framing, layer visibility and selection independently of lore, across documents, tools, maps and normal restarts. History and saved layouts restore the same geographic context. See [Atlas navigation](ATLAS_NAVIGATION.md).
 
 Global [Back/Forward](NAVIGATION.md) restores document tabs, maps, conversations and tool subpages, including Library filters, Settings sections, chronology branches and Review focus. Current saved sources and both editor save guards remain authoritative.
+
+Startup can open the creator’s chosen Atlas, Conversation, Dashboard, Canvas, Library, Worlds or last workspace. This device preference follows the last selected universe and preserves Manual mode; it is separate from portable world content. [Usage](STARTUP.md).

@@ -103,7 +103,8 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .companionWidth: "Docked and floating conversations. Default: 400 pt."
     case .counts: "Show record totals beside world categories."
     case .recents: "How many chats appear in navigation."
-    case .launch: "Choose your starting workspace on this Mac."
+    case .launch:
+      "Applies next launch on this Mac. Conversation opens Library while Manual is enabled."
     case .previews: "Show a line of writing beneath each Library title."
     case .textSize: "For unformatted writing and the Body style. Existing formatting is preserved."
     case .readingWidth: "The maximum width of the document column."

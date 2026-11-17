@@ -639,8 +639,6 @@ public struct Toast: Identifiable {
       }
       libraryCategory = nil
       mobileNavigation = false
-      try? store.setPreference("destination", value: value.rawValue)
-
     }
   }
   /// Profile entry points keep unsaved editor content and world isolation intact.
@@ -677,8 +675,6 @@ public struct Toast: Identifiable {
       canvasUndo = nil
       canvasFit = nil
       mobileNavigation = false
-      try? store.setPreference("destination", value: Destination.library.rawValue)
-
     }
   }
   public func switchWorld(_ id: String) {
@@ -990,6 +986,7 @@ public struct Toast: Identifiable {
       if !keepWorkspace {
         selectedRecord = nil
         destination = .chat
+        rememberWorkspace()
       }
       running = Task { [weak self] in
         guard let self, !Task.isCancelled, self.requestID == request else { return }

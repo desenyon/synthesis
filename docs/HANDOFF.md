@@ -18,7 +18,9 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#30 verified; #31 custom home views is next.** Latest check: 271 tests / 66 suites, strict lint and optimized build. #30 has 36 inspected frames and 99 native key-equivalent assertions across three sizes. Earlier #27 Canvas evidence remains 17 tests and 49 engine checks.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#31 verified; #32 focusable workspaces is next.** Latest check: 275 tests / 67 suites, strict lint and optimized build. #31 has 33 inspected reconstructed-root frames and startup assertions across three sizes. #30 has 99 native key-equivalent assertions. Earlier #27 Canvas evidence remains 17 tests and 49 engine checks.
+
+`StartupWorkspace` is the shared home catalog. `withNavigation` remembers direct routes; history replay persists its destination separately. Manual startup keeps the Library fallback for Conversation. Startup capture roots are reconstructed from preferences, not assigned a destination. Preserve this alongside the full session restoration planned in #33.
 
 `RecordCreation.swift` owns guarded creation and linking. Graph, menu and palette use `RecordLinkSheet`; reference links can connect any records, semantic relationships only entities. Re-resolve endpoints before saving. Searchable pickers handle Up/Down and Return. Capture verification dispatches local NSMenu key equivalents without making the window key; it is not physical input coverage.
 
@@ -55,7 +57,7 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#30 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
+- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#31 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.

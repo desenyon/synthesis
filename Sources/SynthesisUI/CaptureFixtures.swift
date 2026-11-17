@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "startup-settings", "light-startup-settings", "startup-atlas", "light-startup-atlas",
+    "manual-startup-atlas", "startup-conversation", "manual-startup-conversation",
+    "startup-canvas", "startup-dashboard", "startup-last", "startup-empty-atlas",
     "keyboard-entity", "light-keyboard-entity", "manual-keyboard-entity", "keyboard-created",
     "keyboard-link", "light-keyboard-link", "manual-keyboard-link", "keyboard-reference",
     "keyboard-inspector", "keyboard-mode", "keyboard-empty",

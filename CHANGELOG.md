@@ -4,6 +4,8 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
+- Choose Atlas, Conversation, Dashboard, Canvas, Library, Your worlds or the last workspace at startup. Direct chat/board routes remember their workspace; Manual keeps provider calls disabled and opens Library instead of Conversation.
+
 - Optional Dashboard: actual recent entities, unfinished writing, pending proposals, project outlines and saved world activity. Project outlines reuse revisioned entities, sections and portable exports; no generation or canon changes occur on opening.
 
 - Saved workspace layouts (⌥⌘L): per-world views, panels, density, reading width and entity tabs, with rename, update, archive and Undo. Applying uses current lore and preserves Manual mode.

@@ -217,10 +217,7 @@ struct SettingsScreen: View {
       row(item) {
         PreferenceMenu(
           title: item.title, value: preference(\.launchWorkspace),
-          options: [
-            ("remember", "Last workspace"), ("Conversation", "Conversation"), ("Canvas", "Canvas"),
-            ("Library", "Library"), ("Dashboard", "Dashboard"), ("Worlds", "Your worlds"),
-          ], t: t)
+          options: StartupWorkspace.allCases.map { ($0.rawValue, $0.title) }, t: t)
       }
     case .textSize:
       row(item) {

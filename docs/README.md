@@ -15,6 +15,7 @@
 | [Keyboard creation](KEYBOARD.md) | New entities, source links, typed relationships and native shortcuts |
 | [Navigation history](NAVIGATION.md) | Shared Back/Forward across documents, maps, conversations and tool subpages |
 | [Drag records](DRAG_RECORDS.md) | Drag current lore into editor panes or onto Canvas |
+| [Startup](STARTUP.md) | Choose a device-local home or reopen the last workspace |
 | [Settings](SETTINGS.md) | What each preference does and where it is stored |
 
 ## Understanding the project

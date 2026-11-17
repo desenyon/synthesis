@@ -528,8 +528,16 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       for (width, height) in sizes {
         for state in Studio.captureStates where only?.contains(state) ?? true {
           window.setContentSize(NSSize(width: width, height: height))
-          studio.configureConnectedCapture(
-            state, board: fixture.board, conversation: fixture.conversation)
+          if state.contains("startup-") {
+            guard studio.flushEditor(), await studio.flushCanvas() else {
+              throw SynthesisError.invalid("Could not save the prior capture workspace.")
+            }
+            studio = try studio.reopenedStartupCapture(state, transport: CaptureTransport())
+            window.contentView = NSHostingView(rootView: ConnectedRoot(studio: studio))
+          } else {
+            studio.configureConnectedCapture(
+              state, board: fixture.board, conversation: fixture.conversation)
+          }
           if let error = studio.error {
             throw SynthesisError.invalid("Capture state \(state): \(error)")
           }

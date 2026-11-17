@@ -156,6 +156,8 @@ In the composer, **+** attaches real world context and **World context** preview
 
 The same expanding composer follows you into workspace companions. Its toolbar adapts to narrow panels, attachments wrap, and the footer shows your chosen send shortcut. Change Enter/⌘Enter in **Settings → Writing**.
 
+Choose a starting workspace in **Settings → General → Open at launch**. Atlas, Conversation, Dashboard, Canvas and Last workspace are supported alongside Library and Your worlds. [Startup guide](docs/STARTUP.md).
+
 ## Keyboard shortcuts
 
 | Shortcut | Action |

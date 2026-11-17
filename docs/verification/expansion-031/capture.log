@@ -1,0 +1,78 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.15s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.hXM5Bn/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.hXM5Bn/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.hXM5Bn/Synthesis-Verification.app: 1 (Operation not permitted)
+STARTUP_AUDIT PASS startup-settings: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-settings 1440x900, bitmap 1440x900, 50ms
+STARTUP_AUDIT PASS light-startup-settings: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE light-startup-settings 1440x900, bitmap 1440x900, 52ms
+STARTUP_AUDIT PASS startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-atlas 1440x900, bitmap 1440x900, 224ms
+STARTUP_AUDIT PASS light-startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE light-startup-atlas 1440x900, bitmap 1440x900, 231ms
+STARTUP_AUDIT PASS manual-startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE manual-startup-atlas 1440x900, bitmap 1440x900, 141ms
+STARTUP_AUDIT PASS startup-conversation: new Studio restored Conversation, saved home and world; lore unchanged
+CAPTURE startup-conversation 1440x900, bitmap 1440x900, 153ms
+STARTUP_AUDIT PASS manual-startup-conversation: new Studio restored Library, saved home and world; lore unchanged
+CAPTURE manual-startup-conversation 1440x900, bitmap 1440x900, 55ms
+STARTUP_AUDIT PASS startup-canvas: new Studio restored Canvas, saved home and world; lore unchanged
+CAPTURE startup-canvas 1440x900, bitmap 1440x900, 169ms
+STARTUP_AUDIT PASS startup-dashboard: new Studio restored Dashboard, saved home and world; lore unchanged
+CAPTURE startup-dashboard 1440x900, bitmap 1440x900, 147ms
+STARTUP_AUDIT PASS startup-last: new Studio restored Graph, saved home and world; lore unchanged
+CAPTURE startup-last 1440x900, bitmap 1440x900, 387ms
+STARTUP_AUDIT PASS startup-empty-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-empty-atlas 1440x900, bitmap 1440x900, 130ms
+STARTUP_AUDIT PASS startup-settings: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-settings 1024x768, bitmap 1024x768, 23ms
+STARTUP_AUDIT PASS light-startup-settings: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE light-startup-settings 1024x768, bitmap 1024x768, 48ms
+STARTUP_AUDIT PASS startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-atlas 1024x768, bitmap 1024x768, 158ms
+STARTUP_AUDIT PASS light-startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE light-startup-atlas 1024x768, bitmap 1024x768, 158ms
+STARTUP_AUDIT PASS manual-startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE manual-startup-atlas 1024x768, bitmap 1024x768, 100ms
+STARTUP_AUDIT PASS startup-conversation: new Studio restored Conversation, saved home and world; lore unchanged
+CAPTURE startup-conversation 1024x768, bitmap 1024x768, 120ms
+STARTUP_AUDIT PASS manual-startup-conversation: new Studio restored Library, saved home and world; lore unchanged
+CAPTURE manual-startup-conversation 1024x768, bitmap 1024x768, 54ms
+STARTUP_AUDIT PASS startup-canvas: new Studio restored Canvas, saved home and world; lore unchanged
+CAPTURE startup-canvas 1024x768, bitmap 1024x768, 111ms
+STARTUP_AUDIT PASS startup-dashboard: new Studio restored Dashboard, saved home and world; lore unchanged
+CAPTURE startup-dashboard 1024x768, bitmap 1024x768, 99ms
+STARTUP_AUDIT PASS startup-last: new Studio restored Graph, saved home and world; lore unchanged
+CAPTURE startup-last 1024x768, bitmap 1024x768, 148ms
+STARTUP_AUDIT PASS startup-empty-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-empty-atlas 1024x768, bitmap 1024x768, 85ms
+STARTUP_AUDIT PASS startup-settings: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-settings 720x800, bitmap 720x800, 27ms
+STARTUP_AUDIT PASS light-startup-settings: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE light-startup-settings 720x800, bitmap 720x800, 20ms
+STARTUP_AUDIT PASS startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-atlas 720x800, bitmap 720x800, 131ms
+STARTUP_AUDIT PASS light-startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE light-startup-atlas 720x800, bitmap 720x800, 125ms
+STARTUP_AUDIT PASS manual-startup-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE manual-startup-atlas 720x800, bitmap 720x800, 85ms
+STARTUP_AUDIT PASS startup-conversation: new Studio restored Conversation, saved home and world; lore unchanged
+CAPTURE startup-conversation 720x800, bitmap 720x800, 113ms
+STARTUP_AUDIT PASS manual-startup-conversation: new Studio restored Library, saved home and world; lore unchanged
+CAPTURE manual-startup-conversation 720x800, bitmap 720x800, 17ms
+STARTUP_AUDIT PASS startup-canvas: new Studio restored Canvas, saved home and world; lore unchanged
+CAPTURE startup-canvas 720x800, bitmap 720x800, 105ms
+STARTUP_AUDIT PASS startup-dashboard: new Studio restored Dashboard, saved home and world; lore unchanged
+CAPTURE startup-dashboard 720x800, bitmap 720x800, 60ms
+STARTUP_AUDIT PASS startup-last: new Studio restored Graph, saved home and world; lore unchanged
+CAPTURE startup-last 720x800, bitmap 720x800, 117ms
+STARTUP_AUDIT PASS startup-empty-atlas: new Studio restored Atlas, saved home and world; lore unchanged
+CAPTURE startup-empty-atlas 720x800, bitmap 720x800, 81ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-031/final
+Native captures: docs/verification/expansion-031/final
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py 'docs/verification/expansion-031/final' [--prune]

@@ -12,6 +12,25 @@ public enum SendShortcut: String, Codable, CaseIterable, Sendable {
   case enter, commandEnter
 }
 
+/// One catalog for validation and Settings. Keep the persisted strings compatible with older builds.
+public enum StartupWorkspace: String, CaseIterable, Sendable {
+  case remember
+  case conversation = "Conversation"
+  case atlas = "Atlas"
+  case dashboard = "Dashboard"
+  case canvas = "Canvas"
+  case library = "Library"
+  case worlds = "Worlds"
+
+  public var title: String {
+    switch self {
+    case .remember: "Last workspace"
+    case .worlds: "Your worlds"
+    default: rawValue
+    }
+  }
+}
+
 /// Local presentation preferences. These never change lore or the canon approval boundary.
 public struct StudioPreferences: Codable, Equatable, Sendable {
   public var darkPalette = DarkPalette.graphite
@@ -59,9 +78,7 @@ public struct StudioPreferences: Codable, Equatable, Sendable {
     if ![14, 16, 18, 20].contains(bodySize) { value.bodySize = 16 }
     if ![640, 780, 960].contains(readingWidth) { value.readingWidth = 780 }
     if ![0, 5, 12, 20].contains(recentChats) { value.recentChats = 12 }
-    if !["remember", "Conversation", "Canvas", "Library", "Worlds", "Dashboard"].contains(
-      launchWorkspace)
-    {
+    if StartupWorkspace(rawValue: launchWorkspace) == nil {
       value.launchWorkspace = "remember"
     }
     return value

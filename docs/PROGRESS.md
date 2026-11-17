@@ -455,3 +455,9 @@ Initial native captures caught empty Places results and compact Library overflow
 New Entity ⌥⌘N and Link Records ⇧⌘K share native menu/palette routes and editor-save guards. Graph now uses the common searchable reference/relationship form, replacing its duplicate create UI. Labels and endpoints are validated, references remain idempotent, reverse relationships save atomically, and canon stays unchanged. Record pickers focus search and support Up/Down/Return.
 
 `./scripts/check.sh`: **271 tests / 66 suites**, strict lint and optimized build passed. **36 final frames inspected** at three sizes, dark/light/Manual, including Graph integration and empty-world availability. **99 native key-equivalent assertions** verify commands, state, source integrity and inactive-window execution. [Evidence](verification/expansion-030/README.md). README/shortcut guide updated. No foreground input, model call, owner-app restart or release; physical popovers, keyboard feel and VoiceOver remain untested. AGENTS unchanged. Continue #31.
+
+### Expansion #31 — custom home views (verified, 2026-11-17)
+
+Added Atlas to the shared startup catalog and fixed Last workspace for direct chat routes. Device-local homes include every requested option plus existing Library/Worlds. Manual and world selection survive; switching the setting does not navigate immediately or spend model allowance.
+
+`./scripts/check.sh`: **275 tests / 67 suites**, lint and optimized build. Four new restart/navigation/isolation tests cover all choices in both modes with a recording transport. **33 final frames inspected** at three sizes; **33 assertions** reconstruct native roots from persisted preferences, check destination/world/data and idle state. [Evidence](verification/expansion-031/README.md). Docs and screenshot updated. No foreground input, live model request, owner-app restart or release; AGENTS unchanged. Continue #32; complete view-session restoration remains #33.

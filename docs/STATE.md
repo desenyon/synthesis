@@ -4,13 +4,13 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#30 verified; #31 custom home views is next.** The full expansion is unfinished.
+The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#31 verified; #32 focusable workspaces is next.** The full expansion is unfinished.
 
-Latest: [keyboard-first creation](KEYBOARD.md) adds New Entity (⌥⌘N) and Link Records (⇧⌘K) to the native menu and command palette. Graph shares the same searchable linking form. References and typed draft relationships stay distinct; optional reverse relationships are atomic. Save failures, archived/foreign records and changed worlds are guarded.
+Latest: [custom home views](STARTUP.md) include Atlas, Conversation, Dashboard, Canvas, Library, Worlds and Last workspace. Validation and Settings share one catalog. Direct conversation routes now remember their workspace; companion chats and failed saves preserve the underlying destination. The setting applies next launch, remains device-local and preserves Manual mode.
 
-`./scripts/check.sh` passed **271 tests / 66 suites**, strict lint and optimized ad-hoc build. **36 native frames inspected** across 1440×900, 1024×768 and 720×800; **99 native-menu assertions** exercise key-equivalent dispatch for creation, linking, Inspector, mode and Back/Forward while preserving original lore. [Exact evidence](verification/expansion-030/README.md). README includes the linking form. No live request, foreground input, owner-app restart or release; AGENTS.md unchanged.
+`./scripts/check.sh` passed **275 tests / 67 suites**, strict lint and optimized ad-hoc build. **33 native frames inspected** across 1440×900, 1024×768 and 720×800; each reconstructs a new Studio/root from persisted preferences and asserts its expected world/home, unchanged lore and idle state. Disk-reopen tests cover all choices in both modes and zero model requests. [Exact evidence](verification/expansion-031/README.md). No live request, foreground input, owner-app restart or release; AGENTS.md unchanged.
 
-Earlier slices include global Back/Forward, split editing, record drag and per-map Atlas context; #27 retains 17 Canvas tests and 49 engine checks. Physical keyboard/trackpad feel, popovers, animation pacing and VoiceOver remain unverified by background checks. Full session restoration remains #33.
+Earlier #30 includes shared keyboard-first creation/linking, 36 inspected frames and 99 native-menu assertions. #27 retains 17 Canvas tests and 49 engine checks. Physical keyboard/trackpad feel, popovers, animation pacing and VoiceOver remain unverified by background checks. Full session restoration remains #33.
 
 ## Latest — chatbox refinement (unreleased)
 

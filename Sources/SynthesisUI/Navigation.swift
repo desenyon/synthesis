@@ -99,9 +99,14 @@ extension Studio {
         navigationBack.append(before)
         navigationBack = Array(navigationBack.suffix(100))
         navigationForward.removeAll()
+        rememberWorkspace()
       }
     }
     action()
+  }
+  /// Direct chat, board and palette routes use the same remembered workspace as sidebar clicks.
+  func rememberWorkspace() {
+    perform { try store.setPreference("destination", value: destination.rawValue) }
   }
   public var canNavigateBack: Bool { !navigationBack.isEmpty }
   public var canNavigateForward: Bool { !navigationForward.isEmpty }
