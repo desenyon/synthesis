@@ -449,3 +449,9 @@ Back/Forward now retains entity subpages, Settings/search, Library query/filter/
 Initial native captures caught empty Places results and compact Library overflow. A failing core regression isolated inconsistent case/diacritic ordering; normalization before ordering fixes the actual search. Library controls now adapt/scroll. The final icon pass corrected two unsupported Phosphor aliases.
 
 `./scripts/check.sh`: **267 tests / 65 suites**, strict lint and optimized build. **33 final frames** inspected across three sizes; **66 native-menu audit assertions** passed. Evidence includes the initial failures, contact sheets, logs and a refreshed README screenshot. [Evidence](verification/expansion-029/README.md), [usage](NAVIGATION.md). No model allowance, foreground input, owner-app restart, dependency/migration, release or AGENTS.md change. Next: #30; the full brief remains unfinished.
+
+### Expansion #30 — keyboard-first creation (verified, 2026-11-17)
+
+New Entity ⌥⌘N and Link Records ⇧⌘K share native menu/palette routes and editor-save guards. Graph now uses the common searchable reference/relationship form, replacing its duplicate create UI. Labels and endpoints are validated, references remain idempotent, reverse relationships save atomically, and canon stays unchanged. Record pickers focus search and support Up/Down/Return.
+
+`./scripts/check.sh`: **271 tests / 66 suites**, strict lint and optimized build passed. **36 final frames inspected** at three sizes, dark/light/Manual, including Graph integration and empty-world availability. **99 native key-equivalent assertions** verify commands, state, source integrity and inactive-window execution. [Evidence](verification/expansion-030/README.md). README/shortcut guide updated. No foreground input, model call, owner-app restart or release; physical popovers, keyboard feel and VoiceOver remain untested. AGENTS unchanged. Continue #31.

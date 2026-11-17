@@ -216,6 +216,7 @@ public struct Toast: Identifiable {
   @Published var sidebarConfiguration = SidebarConfiguration()
   @Published var sidebarConfigurationError: String?
   @Published public var newRecordKind = "lore"
+  @Published var recordLinkDraft: RecordLinkDraft?
   @Published public var inspector = true
   @Published var workspaceInspector = false
   @Published var inspectionTarget: InspectionTarget?
@@ -235,7 +236,7 @@ public struct Toast: Identifiable {
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
     case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts, project,
-      navigation, activity, splitRecord
+      navigation, activity, splitRecord, linkRecords
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
@@ -790,6 +791,7 @@ public struct Toast: Identifiable {
   public func createRecord(
     title: String, kind: String = "lore", body: String = "", category: String = ""
   ) {
+    guard flushEditor() else { return }
     perform {
       let name = title.trimmingCharacters(in: .whitespacesAndNewlines)
       let record = try store.createRecord(

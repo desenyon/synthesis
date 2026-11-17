@@ -3,7 +3,7 @@ import SynthesisCore
 
 struct RelationshipGraph: View {
   enum Panel: String, Identifiable {
-    case create, edit
+    case edit
     var id: String { rawValue }
   }
   @ObservedObject var studio: Studio
@@ -28,11 +28,7 @@ struct RelationshipGraph: View {
   @State private var dragNode: (id: String, origin: CGPoint)?
   @State private var area = CGSize(width: 900, height: 600)
   @State private var panel: Panel?
-  @State private var source = ""
-  @State private var target = ""
   @State private var label = ""
-  @State private var inverseLabel = ""
-  @State private var twoWay = false
   @State private var editing: Relation?
   @State private var framed = false
   private var entities: [LoreRecord] { studio.records.filter { $0.kind == "entity" } }
@@ -85,10 +81,10 @@ struct RelationshipGraph: View {
       if studio.captureHint == "graph-selected" {
         selected = entities.first { $0.title == "Mira Vale" }?.id
       } else if studio.captureHint == "sheet-relation" {
-        source = entities.first { $0.title == "Oren Ashe" }?.id ?? ""
-        target = entities.first { $0.title == "The Glass Sea" }?.id ?? ""
-        label = "fears"
-        panel = .create
+        studio.beginRelationship(
+          sourceID: entities.first { $0.title == "Oren Ashe" }?.id,
+          targetID: entities.first { $0.title == "The Glass Sea" }?.id, entitiesOnly: true)
+        studio.recordLinkDraft?.label = "fears"
       }
     }
     .onChange(of: selected) { _, _ in hoveredEdge = nil }
@@ -102,7 +98,6 @@ struct RelationshipGraph: View {
     }
     .studioSheet(item: $panel) { item in
       switch item {
-      case .create: createSheet
       case .edit: editSheet
       }
     }
@@ -409,15 +404,11 @@ struct RelationshipGraph: View {
       .accessibilityAction(named: "Open record") { studio.openRecord(entity) }
   }
   private func beginRelationship(from id: String, to other: String? = nil) {
-    source = id
-    target = other ?? entities.first { $0.id != id }?.id ?? ""
-    label = ""
-    inverseLabel = ""
-    twoWay = false
     connecting = nil
     editing = nil
-    panel = .create
+    studio.beginRelationship(sourceID: id, targetID: other, entitiesOnly: true)
   }
+
   private func port(_ entity: LoreRecord, tint: Color) -> some View {
     Button {
       if let first = connecting, first != entity.id {
@@ -608,74 +599,7 @@ struct RelationshipGraph: View {
   private var suggestions: [String] {
     Array(Set(relationships.map(\.label))).sorted().prefix(6).map { $0 }
   }
-  private func picker(_ title: String, selection: Binding<String>) -> some View {
-    VStack(alignment: .leading, spacing: 6) {
-      Text(title).font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary)
-      PlainMenu {
-        ForEach(entities) { entity in Button(entity.title) { selection.wrappedValue = entity.id } }
-      } label: {
-        HStack {
-          Text(name(selection.wrappedValue)).font(.studio(size: 14)).lineLimit(1)
-          Spacer()
-          StudioIcon("chevron.up.chevron.down", size: 10)
-            .foregroundStyle(studio.t.muted)
-        }.padding(.horizontal, 10).frame(width: 196, height: 34)
-          .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
-          .overlay(
-            RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.border, lineWidth: 1))
-      }
-    }
-  }
   private func closePanel() { panel = nil }
-  private var createSheet: some View {
-    let valid =
-      source != target && !label.trimmingCharacters(in: .whitespaces).isEmpty
-      && (!twoWay || !inverseLabel.trimmingCharacters(in: .whitespaces).isEmpty)
-    let save = {
-      studio.perform {
-        try studio.store.addRelationshipPair(
-          worldID: studio.worldID, source: source, target: target,
-          label: label, inverse: twoWay ? inverseLabel : nil)
-        try studio.reload()
-        panel = nil
-        refresh()
-      }
-    }
-    return SheetScaffold(title: "New relationship", t: studio.t, close: closePanel) {
-      HStack(alignment: .bottom, spacing: 10) {
-        picker("From", selection: $source)
-        StudioIcon("arrow.right", size: 11)
-          .foregroundStyle(studio.t.muted).padding(.bottom, 11)
-        picker("To", selection: $target)
-      }
-      FormField(
-        label: "How are they connected?", placeholder: "guided by, rules, born in…", text: $label,
-        t: studio.t, submit: { if valid { save() } })
-      Toggle("Also describe the reverse relationship", isOn: $twoWay).toggleStyle(.checkbox)
-        .font(.studio(size: 13))
-      if twoWay {
-        FormField(
-          label: "From \(name(target)) to \(name(source))",
-          placeholder: "mentored by, belongs to, protects…", text: $inverseLabel, t: studio.t)
-      }
-      if !suggestions.isEmpty {
-        ScrollView(.horizontal) {
-          HStack(spacing: 6) {
-            ForEach(suggestions, id: \.self) { value in
-              FilterChip(title: value, selected: label == value, t: studio.t) { label = value }
-            }
-          }
-        }.scrollIndicators(.never)
-      }
-      Text("Saved as a draft relationship. It is not canon.").font(.studio(size: 12.5))
-        .foregroundStyle(studio.t.muted)
-    } footer: {
-      Spacer()
-      Button("Cancel") { panel = nil }.buttonStyle(QuietButton(t: studio.t, role: .ghost))
-      Button("Connect", action: save).buttonStyle(QuietButton(t: studio.t, primary: true))
-        .keyboardShortcut(.defaultAction).disabled(!valid)
-    }
-  }
   @ViewBuilder private var editSheet: some View {
     if let relation = editing {
       RelationEditor(

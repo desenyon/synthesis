@@ -99,6 +99,12 @@ Drag from Search, Favorites or Library; Canvas places a linked card at the point
 
 Back/Forward retains filters and tool subpages while resolving current lore.
 
+**Link records from anywhere**
+
+![Native linking form with forward and reverse draft relationships](docs/screenshots/keyboard-link.png)
+
+Use ⇧⌘K for source references or typed entity relationships. [Keyboard guide](docs/KEYBOARD.md).
+
 **Saved workspace layouts**
 
 ![Named Research, Writing, Cartography and Simulation arrangements in the native layout manager](docs/screenshots/layouts.png)
@@ -117,7 +123,7 @@ Back/Forward retains filters and tool subpages while resolving current lore.
 
 </details>
 
-Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard, command-palette, navigation, favorites, activity, split-workspace, record-drag, Atlas-context and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard, command-palette, navigation, favorites, activity, split-workspace, record-drag, Atlas-context, keyboard-linking and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
 
 The complete 394-item expansion is tracked individually in [the implementation ledger](docs/EXPANSION.md). It is **not yet complete**. Dark surfaces now default to graphite; **Settings → General → Dark surfaces** retains true-black OLED as an option.
 
@@ -158,6 +164,8 @@ The same expanding composer follows you into workspace companions. Its toolbar a
 | ⌘1 – ⌘7 | Conversation, Canvas, Library, Graph, Timeline, Atlas, Review |
 | ⌘8 / ⌘9 | Worlds / Settings |
 | ⌘N / ⇧⌘N | New record / new conversation |
+| ⌥⌘N | New entity |
+| ⇧⌘K | Link records: references or draft relationships |
 | ⌘O / ⇧⌘S | Open / save a `.synthesis` world file |
 | ⇧⌘I | Import Markdown or text files |
 | ⇧⌘M | Toggle AI Assisted / Manual |
@@ -166,6 +174,8 @@ The same expanding composer follows you into workspace companions. Its toolbar a
 | ⌥⌘I | Contextual inspector |
 | ⌥⌘L | Saved workspace layouts |
 | `@` in a message | Reference lore (↑↓ choose, ↵ insert) |
+
+[Creation and linking guide](docs/KEYBOARD.md).
 
 Canvas also supports Excalidraw's own shortcuts (V select, H hand, A arrow, ⌘D duplicate, ⌘G group).
 

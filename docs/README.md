@@ -12,6 +12,7 @@
 | [Search and commands](SEARCH.md) | Universal ⌘K palette, real destinations and local search |
 | [World activity](ACTIVITY.md) | Committed edits, approvals, connections, source navigation and portable history |
 | [Split workspace](SPLIT_WORKSPACE.md) | Open and edit a source beside a spatial tool or another document |
+| [Keyboard creation](KEYBOARD.md) | New entities, source links, typed relationships and native shortcuts |
 | [Navigation history](NAVIGATION.md) | Shared Back/Forward across documents, maps, conversations and tool subpages |
 | [Drag records](DRAG_RECORDS.md) | Drag current lore into editor panes or onto Canvas |
 | [Settings](SETTINGS.md) | What each preference does and where it is stored |

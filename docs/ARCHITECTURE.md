@@ -212,3 +212,5 @@ Canvas remains mounted once in the shell. Its visibility and overlay insets acco
 ### Atlas view sessions (expansion #28)
 
 `AtlasViewSession` outlives the SwiftUI Atlas view. Versioned `atlas-view:<world>:<map>` preferences store image-relative framing, layer visibility and selection; `atlas-last-map:<world>` remembers the active map. Save/navigation boundaries persist changes, with no per-input database writes or lore revisions. The session validates world ownership and reconciles archived/removed selections against fresh map data. Invalid preferences are preserved before replacement. Optional `NavigationLocation.atlasView` snapshots make history and existing saved layouts restore the exact visit; older layouts remain readable.
+
+`RecordCreation.swift` owns guarded creation commands and world-bound link drafts. `RecordLinkSheet.swift` is shared by the native menu, palette and Graph; references use existing `links`, semantic entity pairs use transactional `relationships`. Submission resolves live endpoints and does not modify canon. Native menu key equivalents are verified without posting OS-wide events or activating the app.

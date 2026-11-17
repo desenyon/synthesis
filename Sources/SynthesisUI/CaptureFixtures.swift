@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "keyboard-entity", "light-keyboard-entity", "manual-keyboard-entity", "keyboard-created",
+    "keyboard-link", "light-keyboard-link", "manual-keyboard-link", "keyboard-reference",
+    "keyboard-inspector", "keyboard-mode", "keyboard-empty",
     "global-history-settings", "light-global-history-settings", "global-history-timeline",
     "global-history-record", "manual-global-history-record", "global-history-review",
     "global-history-map", "global-history-canvas", "global-history-graph",
@@ -307,6 +310,10 @@ extension Studio {
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
     endRecordDrag()
+    if state.contains("keyboard-") {
+      configureKeyboardCreationCapture(state, board: board, conversation: conversation)
+      return
+    }
     if state.contains("global-history-") {
       configureGlobalNavigationCapture(state, board: board, conversation: conversation)
       return

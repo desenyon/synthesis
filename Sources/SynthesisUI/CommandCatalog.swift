@@ -38,24 +38,15 @@ extension CommandPalette {
     let create: [(String, String, String, String, () -> Void)] = [
       (
         "New document", "doc.badge.plus", "⌘N", "lore",
-        {
-          studio.newRecordKind = "lore"
-          studio.sheet = .document
-        }
+        { studio.beginRecordCreation() }
       ),
       (
-        "New entity", "circle.hexagongrid", "", "entity",
-        {
-          studio.newRecordKind = "entity"
-          studio.sheet = .document
-        }
+        "New entity", "circle.hexagongrid", "⌥⌘N", "entity",
+        { studio.beginRecordCreation(kind: "entity") }
       ),
       (
         "Capture an idea", "lightbulb", "", "capture",
-        {
-          studio.newRecordKind = "capture"
-          studio.sheet = .document
-        }
+        { studio.beginRecordCreation(kind: "capture") }
       ),
       ("New conversation", "square.and.pencil", "⇧⌘N", "chat", { studio.newChat() }),
       ("New world…", "globe", "", "world", { studio.sheet = .world }),
@@ -65,6 +56,13 @@ extension CommandPalette {
         Item(
           id: "new-\(entry.3)", section: "Create", icon: entry.1, title: entry.0, detail: entry.2,
           run: entry.4))
+    }
+    if studio.canBeginLinking && matches("Link records relationship connect") {
+      items.append(
+        Item(
+          id: "link-records", section: "Create", icon: "link",
+          title: "Link records…", detail: "⇧⌘K"
+        ) { studio.beginLinkRecords() })
     }
     if !query.isEmpty {
       let categories =

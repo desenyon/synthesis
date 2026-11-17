@@ -441,10 +441,13 @@ struct SearchField: View {
   @Binding var text: String
   var placeholder: String
   let t: Theme
+  var autofocus = false
+  @FocusState private var focused: Bool
   var body: some View {
     HStack(spacing: 7) {
       StudioIcon("magnifyingglass", size: 12).foregroundStyle(t.muted)
       TextField(placeholder, text: $text).textFieldStyle(.plain).font(.studio(size: 13))
+        .focused($focused)
       if !text.isEmpty {
         Button {
           text = ""
@@ -455,6 +458,7 @@ struct SearchField: View {
     }.padding(.horizontal, 9).frame(height: Metric.control)
       .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
       .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.hairline, lineWidth: 1))
+      .onAppear { if autofocus { focused = true } }
   }
 }
 
@@ -488,7 +492,9 @@ struct FormField: View {
   var placeholder: String
   @Binding var text: String
   let t: Theme
+  var autofocus = false
   var submit: () -> Void = {}
+  @FocusState private var focused: Bool
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
       if let label {
@@ -496,10 +502,11 @@ struct FormField: View {
       }
       TextField(placeholder, text: $text)
         .textFieldStyle(.plain).font(.studio(size: 14)).onSubmit(submit)
+        .focused($focused)
         .padding(.horizontal, 10).frame(height: 34)
         .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
         .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.border, lineWidth: 1))
-    }
+    }.onAppear { if autofocus { focused = true } }
   }
 }
 

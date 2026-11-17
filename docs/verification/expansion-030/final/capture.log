@@ -1,0 +1,139 @@
+KEYBOARD_AUDIT 1440x900 PASS keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-entity 1440x900, bitmap 1440x900, 153ms
+KEYBOARD_AUDIT 1440x900 PASS light-keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS light-keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS light-keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE light-keyboard-entity 1440x900, bitmap 1440x900, 153ms
+KEYBOARD_AUDIT 1440x900 PASS manual-keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS manual-keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS manual-keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE manual-keyboard-entity 1440x900, bitmap 1440x900, 72ms
+KEYBOARD_AUDIT 1440x900 PASS keyboard-created: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS keyboard-created: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS keyboard-created: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-created 1440x900, bitmap 1440x900, 116ms
+KEYBOARD_AUDIT 1440x900 PASS keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-link 1440x900, bitmap 1440x900, 151ms
+KEYBOARD_AUDIT 1440x900 PASS light-keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS light-keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS light-keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE light-keyboard-link 1440x900, bitmap 1440x900, 152ms
+KEYBOARD_AUDIT 1440x900 PASS manual-keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS manual-keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS manual-keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE manual-keyboard-link 1440x900, bitmap 1440x900, 66ms
+KEYBOARD_AUDIT 1440x900 PASS keyboard-reference: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS keyboard-reference: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS keyboard-reference: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-reference 1440x900, bitmap 1440x900, 128ms
+KEYBOARD_AUDIT 1440x900 PASS keyboard-inspector: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS keyboard-inspector: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS keyboard-inspector: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-inspector 1440x900, bitmap 1440x900, 122ms
+KEYBOARD_AUDIT 1440x900 PASS keyboard-mode: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS keyboard-mode: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS keyboard-mode: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-mode 1440x900, bitmap 1440x900, 30ms
+KEYBOARD_AUDIT 1440x900 PASS keyboard-empty: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1440x900 PASS keyboard-empty: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1440x900 PASS keyboard-empty: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-empty 1440x900, bitmap 1440x900, 94ms
+CAPTURE sheet-relation 1440x900, bitmap 1440x900, 449ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+KEYBOARD_AUDIT 1024x768 PASS keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-entity 1024x768, bitmap 1024x768, 116ms
+KEYBOARD_AUDIT 1024x768 PASS light-keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS light-keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS light-keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE light-keyboard-entity 1024x768, bitmap 1024x768, 108ms
+KEYBOARD_AUDIT 1024x768 PASS manual-keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS manual-keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS manual-keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE manual-keyboard-entity 1024x768, bitmap 1024x768, 35ms
+KEYBOARD_AUDIT 1024x768 PASS keyboard-created: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS keyboard-created: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS keyboard-created: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-created 1024x768, bitmap 1024x768, 86ms
+KEYBOARD_AUDIT 1024x768 PASS keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-link 1024x768, bitmap 1024x768, 114ms
+KEYBOARD_AUDIT 1024x768 PASS light-keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS light-keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS light-keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE light-keyboard-link 1024x768, bitmap 1024x768, 109ms
+KEYBOARD_AUDIT 1024x768 PASS manual-keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS manual-keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS manual-keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE manual-keyboard-link 1024x768, bitmap 1024x768, 54ms
+KEYBOARD_AUDIT 1024x768 PASS keyboard-reference: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS keyboard-reference: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS keyboard-reference: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-reference 1024x768, bitmap 1024x768, 111ms
+KEYBOARD_AUDIT 1024x768 PASS keyboard-inspector: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS keyboard-inspector: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS keyboard-inspector: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-inspector 1024x768, bitmap 1024x768, 107ms
+KEYBOARD_AUDIT 1024x768 PASS keyboard-mode: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS keyboard-mode: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS keyboard-mode: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-mode 1024x768, bitmap 1024x768, 30ms
+KEYBOARD_AUDIT 1024x768 PASS keyboard-empty: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 1024x768 PASS keyboard-empty: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 1024x768 PASS keyboard-empty: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-empty 1024x768, bitmap 1024x768, 96ms
+CAPTURE sheet-relation 1024x768, bitmap 1024x768, 175ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+KEYBOARD_AUDIT 720x800 PASS keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-entity 720x800, bitmap 720x800, 96ms
+KEYBOARD_AUDIT 720x800 PASS light-keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS light-keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS light-keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE light-keyboard-entity 720x800, bitmap 720x800, 87ms
+KEYBOARD_AUDIT 720x800 PASS manual-keyboard-entity: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS manual-keyboard-entity: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS manual-keyboard-entity: source world, saved drafts and assistance boundary preserved
+CAPTURE manual-keyboard-entity 720x800, bitmap 720x800, 51ms
+KEYBOARD_AUDIT 720x800 PASS keyboard-created: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS keyboard-created: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS keyboard-created: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-created 720x800, bitmap 720x800, 70ms
+KEYBOARD_AUDIT 720x800 PASS keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-link 720x800, bitmap 720x800, 93ms
+KEYBOARD_AUDIT 720x800 PASS light-keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS light-keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS light-keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE light-keyboard-link 720x800, bitmap 720x800, 79ms
+KEYBOARD_AUDIT 720x800 PASS manual-keyboard-link: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS manual-keyboard-link: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS manual-keyboard-link: source world, saved drafts and assistance boundary preserved
+CAPTURE manual-keyboard-link 720x800, bitmap 720x800, 49ms
+KEYBOARD_AUDIT 720x800 PASS keyboard-reference: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS keyboard-reference: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS keyboard-reference: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-reference 720x800, bitmap 720x800, 91ms
+KEYBOARD_AUDIT 720x800 PASS keyboard-inspector: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS keyboard-inspector: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS keyboard-inspector: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-inspector 720x800, bitmap 720x800, 96ms
+KEYBOARD_AUDIT 720x800 PASS keyboard-mode: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS keyboard-mode: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS keyboard-mode: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-mode 720x800, bitmap 720x800, 14ms
+KEYBOARD_AUDIT 720x800 PASS keyboard-empty: Back/Forward key equivalents restore the current document/tool
+KEYBOARD_AUDIT 720x800 PASS keyboard-empty: native key-equivalent dispatch and expected command/form state
+KEYBOARD_AUDIT 720x800 PASS keyboard-empty: source world, saved drafts and assistance boundary preserved
+CAPTURE keyboard-empty 720x800, bitmap 720x800, 76ms
+CAPTURE sheet-relation 720x800, bitmap 720x800, 178ms
+CAPTURE sheet-relation content inline; native modal presentation not exercised
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-030/final

@@ -34,6 +34,8 @@ struct StudioSheet: View {
       case .layouts: WorkspaceLayoutsSheet(studio: studio)
       case .navigation: SidebarCustomizationSheet(studio: studio)
       case .activity: WorldActivitySheet(studio: studio)
+      case .linkRecords:
+        if let draft = studio.recordLinkDraft { RecordLinkSheet(studio: studio, draft: draft) }
       case .splitRecord: SplitRecordPicker(studio: studio)
       case .project: NewProjectSheet(studio: studio)
       case .world: world
@@ -140,7 +142,7 @@ struct StudioSheet: View {
       }
       FormField(
         label: "Title", placeholder: kind == "entity" ? "Name" : "Untitled", text: $name,
-        t: studio.t, submit: create)
+        t: studio.t, autofocus: true, submit: create)
       if kind == "entity" {
         VStack(alignment: .leading, spacing: 6) {
           Text("Type").font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary)

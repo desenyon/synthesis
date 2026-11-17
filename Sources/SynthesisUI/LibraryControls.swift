@@ -5,7 +5,6 @@ struct LibrarySearchControl: View {
   @ObservedObject var studio: Studio
   @Environment(\.barCompact) private var compact
   @State private var expanded = false
-  @FocusState private var focused: Bool
   var body: some View {
     if compact {
       IconButton(
@@ -14,10 +13,9 @@ struct LibrarySearchControl: View {
       ) { expanded.toggle() }
       .popover(isPresented: $expanded) {
         HStack(spacing: Space.sm) {
-          search.frame(width: 250).focused($focused)
+          search.frame(width: 250)
           SearchSyntaxMenu(query: $studio.libraryQuery, t: studio.t)
         }.padding(12).background(studio.t.surface)
-          .onAppear { focused = true }
       }
     } else {
       search.frame(minWidth: 140, idealWidth: 240, maxWidth: 240)
@@ -26,7 +24,8 @@ struct LibrarySearchControl: View {
   }
   private var search: some View {
     SearchField(
-      text: $studio.libraryQuery, placeholder: "Search lore or type:character", t: studio.t)
+      text: $studio.libraryQuery, placeholder: "Search lore or type:character", t: studio.t,
+      autofocus: compact)
   }
 }
 

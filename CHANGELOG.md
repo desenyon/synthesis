@@ -16,6 +16,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 
 ### Added
+- Expansion #30: native New Entity (⌥⌘N) and Link Records (⇧⌘K), shared with the palette. One Graph/global form supports references, typed relationships and optional reverse directions; searchable record pickers support arrow/Return selection and creation preserves failed-save guards.
 - Expansion #29: shared Back/Forward retains entity tabs, Settings sections/search, Library search/filter/sort, Timeline branches, Review tabs/proposals and inspected objects. Same-mounted editors keep save guards; invalid optional sources clear safely.
 - Expansion #28: Atlas restores per-map zoom, image-relative center, layers and selection across navigation and normal restarts. History/layouts retain visit framing; map-switch save registration, unreadable preferences and removed selections are handled safely.
 - Expansion #27: drag real records from Search, Favorites or Library into either editor pane or onto Canvas. Local-only addresses, fresh-source/save guards, transient targets, exact pan/zoom placement, grouped moves, Undo and confirmed persistence.

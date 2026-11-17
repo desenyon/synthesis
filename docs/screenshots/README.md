@@ -57,3 +57,5 @@ Record drag: `drag-records.png` is `drag-targets` at 1440×900 from [expansion #
 `atlas-context.png`: expansion #28, `atlas-context-return` at 1440×900, captured after opening the linked source and returning through Back. All three nine-state contact sheets were inspected.
 
 `library-history.png`: expansion #29, `global-history-library`, 1440×900 from the final compact-control refinement. [Evidence](../verification/expansion-029/README.md).
+
+`keyboard-link.png`: expansion #30, `keyboard-link`, 1440×900, unreleased main. [Evidence](../verification/expansion-030/README.md).

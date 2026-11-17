@@ -246,6 +246,8 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     item(file, "Save World File…", #selector(saveWorldFile), "s", [.command, .shift])
     file.addItem(.separator())
     item(file, "New Record…", #selector(newItem), "n")
+    item(file, "New Entity…", #selector(newEntity), "n", [.command, .option])
+    item(file, "Link Records…", #selector(linkRecords), "k", [.command, .shift])
     item(file, "New Conversation", #selector(newConversation), "n", [.command, .shift])
     file.addItem(.separator())
     item(file, "Search and Commands…", #selector(search), "k")
@@ -341,10 +343,9 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       window.performClose(nil)
     }
   }
-  @objc func newItem() {
-    studio.newRecordKind = "lore"
-    studio.sheet = .document
-  }
+  @objc func newItem() { studio.beginRecordCreation() }
+  @objc func newEntity() { studio.beginRecordCreation(kind: "entity") }
+  @objc func linkRecords() { studio.beginLinkRecords() }
   @objc func newConversation() { studio.newChat() }
   @objc func importFiles() { studio.importDocuments() }
   @objc func exportMarkdown() { studio.exportMarkdown() }
@@ -354,6 +355,10 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     if all.indices.contains(sender.tag) { studio.navigate(all[sender.tag]) }
   }
   func validateMenuItem(_ item: NSMenuItem) -> Bool {
+    if item.action == #selector(newItem) || item.action == #selector(newEntity) {
+      return studio?.canBeginCreation ?? false
+    }
+    if item.action == #selector(linkRecords) { return studio?.canBeginLinking ?? false }
     if item.action == #selector(goBack) { return studio?.canNavigateBack ?? false }
     if item.action == #selector(goForward) { return studio?.canNavigateForward ?? false }
     return true
@@ -599,6 +604,14 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
               forward: { try self.dispatchHistoryMenu(backward: false) })
             { print("NAVIGATION_AUDIT \(width)x\(height) \(line)") }
           }
+          if state.contains("keyboard-") {
+            for line in try await studio.auditKeyboardCreationCapture(
+              state, invoke: { try self.dispatchCreationKey($0) },
+              enabled: { try self.creationMenuEnabled($0) })
+            {
+              print("KEYBOARD_AUDIT \(width)x\(height) \(line)")
+            }
+          }
           let start = CFAbsoluteTimeGetCurrent()
           let pixels = try await shot(
             frameView, to: folder.appendingPathComponent("\(state)-\(width)x\(height).png"),
@@ -662,6 +675,34 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       }
       print("SIDEBAR_AUDIT PASS shortcut registration and native action: \(entry.0)")
     }
+  }
+
+  private func creationMenuItem(_ title: String) throws -> NSMenuItem {
+    func entries(_ menu: NSMenu) -> [NSMenuItem] {
+      menu.items.flatMap { [$0] + ($0.submenu.map(entries) ?? []) }
+    }
+    guard let menu = NSApp.mainMenu,
+      let item = entries(menu).first(where: { $0.title == title })
+    else { throw SynthesisError.invalid("Missing native command: \(title)") }
+    return item
+  }
+  private func creationMenuEnabled(_ title: String) throws -> Bool {
+    validateMenuItem(try creationMenuItem(title))
+  }
+  private func dispatchCreationKey(_ title: String) throws {
+    let item = try creationMenuItem(title)
+    let characters =
+      item.keyEquivalentModifierMask.contains(.shift)
+      ? item.keyEquivalent.uppercased() : item.keyEquivalent
+    guard validateMenuItem(item), !item.keyEquivalent.isEmpty,
+      let event = NSEvent.keyEvent(
+        with: .keyDown, location: .zero, modifierFlags: item.keyEquivalentModifierMask,
+        timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: window.windowNumber,
+        context: nil, characters: characters, charactersIgnoringModifiers: item.keyEquivalent,
+        isARepeat: false, keyCode: 0),
+      NSApp.mainMenu?.performKeyEquivalent(with: event) == true,
+      !NSApp.isActive, !window.isKeyWindow
+    else { throw SynthesisError.invalid("Native shortcut dispatch failed: \(title)") }
   }
 
   private func dispatchHistoryMenu(backward: Bool) throws {
