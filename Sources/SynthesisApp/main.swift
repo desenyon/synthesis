@@ -74,6 +74,17 @@ final class StudioWindow: NSWindow {
   private var capturing: Bool {
     ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil
   }
+  /// World files opened from Finder before the studio finished launching.
+  private var pendingWorldFiles: [URL] = []
+  func application(_ application: NSApplication, open urls: [URL]) {
+    let files = urls.filter { $0.pathExtension.lowercased() == "synthesis" }
+    guard !capturing, !files.isEmpty else { return }
+    guard studio != nil else {
+      pendingWorldFiles += files
+      return
+    }
+    for url in files { studio.confirmOpenWorldFile(url) }
+  }
   func applicationDidFinishLaunching(_ notification: Notification) {
     do {
       // Set before creating any hosting view: a first-screen sheet can otherwise request focus.
@@ -110,6 +121,13 @@ final class StudioWindow: NSWindow {
       if !capturing { window.setFrameAutosaveName("SynthesisMainWindow") }
       buildMenu()
       if !capturing { studio.announceRecoveredText() }
+      if !pendingWorldFiles.isEmpty {
+        let files = pendingWorldFiles
+        pendingWorldFiles = []
+        DispatchQueue.main.async { [weak self] in
+          for url in files { self?.studio.confirmOpenWorldFile(url) }
+        }
+      }
       if let directory = ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"],
         capturing
       {

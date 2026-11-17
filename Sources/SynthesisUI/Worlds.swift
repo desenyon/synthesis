@@ -1,4 +1,5 @@
 import AppKit
+import UniformTypeIdentifiers
 import SwiftUI
 import SynthesisCore
 
@@ -28,7 +29,24 @@ extension Studio {
     panel.message = "Opens an independent copy. Existing worlds are preserved."
     panel.allowsMultipleSelection = false
     panel.canChooseDirectories = false
+    panel.allowedContentTypes = [UTType(filenameExtension: "synthesis") ?? .data]
     guard panel.runModal() == .OK, let url = panel.url else { return }
+    importPortableWorld(at: url)
+  }
+  /// Opens a world file from Finder (double-click, drag onto the Dock icon, Open With). The
+  /// creator confirms first, because each open makes another independent copy.
+  public func confirmOpenWorldFile(_ url: URL) {
+    guard flushEditor() else { return }
+    let alert = NSAlert()
+    alert.messageText = "Open “\(url.deletingPathExtension().lastPathComponent)” as a new world?"
+    alert.informativeText =
+      "Synthesis imports an independent copy. Your existing worlds, including any earlier copy of this file, are not changed."
+    alert.addButton(withTitle: "Open World")
+    alert.addButton(withTitle: "Cancel")
+    guard alert.runModal() == .alertFirstButtonReturn else { return }
+    importPortableWorld(at: url)
+  }
+  func importPortableWorld(at url: URL) {
     perform {
       let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
       guard size <= 200_000_000 else {
