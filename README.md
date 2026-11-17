@@ -40,7 +40,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 | **Atlas**: named maps linked to places, with markers and drawn regions you can reshape. | **Review**: proposals, canon decisions and local consistency checks in one place, including changes sent back from what-if worlds. |
 | ![Atlas map with a selected region](docs/screenshots/atlas.png) | ![Review with consistency checks](docs/screenshots/review-checks.png) |
 
-**Also:** a world dashboard with project outlines · saved workspace layouts (⌥⌘L) · reversible navigation history · resizable navigation, inspectors and conversation panels · consistent entity selection across workspaces · adjustable information density · portable entity artwork · what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a ⌘K command palette · Finder integration for `.synthesis` files.
+**Also:** a world dashboard with project outlines · saved workspace layouts (⌥⌘L) · reversible navigation history · resizable navigation, inspectors and conversation panels · consistent entity selection across workspaces · adjustable information density · portable entity artwork · what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a [universal ⌘K palette](docs/SEARCH.md) for lore, maps, tools, settings and recent changes · Finder integration for `.synthesis` files.
 
 <details>
 <summary>More screenshots</summary>
@@ -61,6 +61,10 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 ![Pinned and open world documents above the native editor](docs/screenshots/document-tabs.png)
 
+**Find lore and commands**
+
+![World-scoped lore and recent changes in the native command palette](docs/screenshots/palette.png)
+
 **Saved workspace layouts**
 
 ![Named Research, Writing, Cartography and Simulation arrangements in the native layout manager](docs/screenshots/layouts.png)
@@ -79,7 +83,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 </details>
 
-Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard, command-palette and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
 
 The complete 394-item expansion is tracked individually in [the implementation ledger](docs/EXPANSION.md). It is **not yet complete**. Dark surfaces now default to graphite; **Settings → General → Dark surfaces** retains true-black OLED as an option.
 

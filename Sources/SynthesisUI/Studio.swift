@@ -146,7 +146,10 @@ public struct Toast: Identifiable {
   @Published public var error: String?
   @Published public var toast: Toast?
   @Published public var sheet: Sheet?
-  @Published public var palette = false
+  @Published public var palette = false {
+    didSet { if !palette { paletteQuery = "" } }
+  }
+  @Published var paletteQuery = ""
   @Published public var providerConfigured = false
   @Published public var provider = ProviderKind.claudeCode
   @Published public var providerStatus: ProviderStatus?

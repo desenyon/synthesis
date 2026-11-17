@@ -1,0 +1,5 @@
+CAPTURE palette-body 1440x900, bitmap 1440x900, 257ms
+CAPTURE palette-search 1440x900, bitmap 1440x900, 252ms
+CAPTURE palette-body 1024x768, bitmap 1024x768, 173ms
+CAPTURE palette-search 1024x768, bitmap 1024x768, 173ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-021/body

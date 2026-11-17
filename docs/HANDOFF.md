@@ -18,7 +18,7 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#20 verified; #21 universal command palette is next.** Latest check: 216 tests / 54 suites, strict lint and optimized build. #20 has 22 final inspected states, 15 Canvas tests and 37 embedded-engine checks. Selection and hover use common native/Canvas tokens; engine handles use the inverse-filter palette. No foreground events, owner-app restart or subscription requests.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#21 verified; #22 advanced search syntax is next.** Latest check: 219 tests / 55 suites, strict lint and optimized build. #21 has 30 final inspected native states covering maps/scenes/settings/tools/activity, full-text-only matches, long titles, light/Manual and narrow windows. Palette navigation revalidates current objects and preserves failed-save guards. No foreground events, owner-app restart or subscription requests.
 
 ## Current shape
 
@@ -43,7 +43,7 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#18 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
+- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#21 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.

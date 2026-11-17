@@ -1,0 +1,5 @@
+CAPTURE palette 520x620, bitmap 520x620, 112ms
+CAPTURE palette-settings 520x620, bitmap 520x620, 95ms
+CAPTURE light-palette-search 520x620, bitmap 520x620, 110ms
+CAPTURE palette-long 520x620, bitmap 520x620, 117ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-021/narrow

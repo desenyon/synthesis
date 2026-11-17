@@ -56,7 +56,11 @@ extension Studio {
     "sheet-artwork", "canvas", "companion", "manual",
     "collapsed", "light",
     "graph", "graph-selected", "library", "editor", "timeline", "atlas",
-    "palette", "light-conversation", "light-library", "light-graph", "light-editor",
+    "palette", "palette-body", "palette-search", "palette-maps", "palette-scenes",
+    "palette-settings",
+    "palette-tools", "palette-recent", "light-palette-search", "manual-palette-search",
+    "palette-long", "palette-unmatched", "light-conversation", "light-library", "light-graph",
+    "light-editor",
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
     "empty-graph", "empty-timeline", "empty-atlas", "sheet-record",
@@ -277,6 +281,36 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("palette-") {
+      configureConnectedCapture("palette", board: board, conversation: conversation)
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      let kind = state.components(separatedBy: "-").last ?? ""
+      let queries = [
+        "search": "Mira", "body": "coastline", "maps": "maps", "scenes": "scenes",
+        "settings": "spelling",
+        "tools": "power systems", "recent": "recent changes", "long": "Unfinished Charts",
+        "unmatched": "the sea remembers names",
+      ]
+      if kind == "scenes" || kind == "long" {
+        perform {
+          let title =
+            kind == "scenes"
+            ? "The ferryman's bargain"
+            : "Mira Vale, Keeper of the Unfinished Charts of the Western Glass Sea"
+          if !records.contains(where: { $0.title == title }) {
+            _ = try store.createRecord(
+              worldID: worldID, title: title,
+              body: "A quiet negotiation at the edge of the crossing.", kind: "lore",
+              category: "Scenes")
+            try reload()
+          }
+        }
+      }
+      paletteQuery = queries[kind] ?? ""
+      captureHint = state
+      return
+    }
     if state.contains("selection-") {
       let bases = [
         "graph": "graph-selected", "canvas": "canvas", "atlas": "atlas",

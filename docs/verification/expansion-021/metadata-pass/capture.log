@@ -1,0 +1,23 @@
+CAPTURE palette 1440x900, bitmap 1440x900, 248ms
+CAPTURE palette-search 1440x900, bitmap 1440x900, 263ms
+CAPTURE palette-maps 1440x900, bitmap 1440x900, 260ms
+CAPTURE palette-scenes 1440x900, bitmap 1440x900, 268ms
+CAPTURE palette-settings 1440x900, bitmap 1440x900, 250ms
+CAPTURE palette-tools 1440x900, bitmap 1440x900, 242ms
+CAPTURE palette-recent 1440x900, bitmap 1440x900, 254ms
+CAPTURE light-palette-search 1440x900, bitmap 1440x900, 262ms
+CAPTURE manual-palette-search 1440x900, bitmap 1440x900, 158ms
+CAPTURE palette-long 1440x900, bitmap 1440x900, 249ms
+CAPTURE palette-unmatched 1440x900, bitmap 1440x900, 257ms
+CAPTURE palette 1024x768, bitmap 1024x768, 187ms
+CAPTURE palette-search 1024x768, bitmap 1024x768, 175ms
+CAPTURE palette-maps 1024x768, bitmap 1024x768, 180ms
+CAPTURE palette-scenes 1024x768, bitmap 1024x768, 182ms
+CAPTURE palette-settings 1024x768, bitmap 1024x768, 181ms
+CAPTURE palette-tools 1024x768, bitmap 1024x768, 188ms
+CAPTURE palette-recent 1024x768, bitmap 1024x768, 179ms
+CAPTURE light-palette-search 1024x768, bitmap 1024x768, 171ms
+CAPTURE manual-palette-search 1024x768, bitmap 1024x768, 110ms
+CAPTURE palette-long 1024x768, bitmap 1024x768, 181ms
+CAPTURE palette-unmatched 1024x768, bitmap 1024x768, 183ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-021/final

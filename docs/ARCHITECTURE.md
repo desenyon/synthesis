@@ -183,3 +183,7 @@ Project outlines are ordinary entity records with category `Projects`: draft/can
 ## Shared entity selection — expansion #20
 
 `EntitySurface` in Interaction.swift applies Theme selection/hover tokens to graph cards, timeline events, inspected Library rows and Atlas shapes/labels without affecting layout. Native hover uses the existing focus/context lifecycle. Canvas articles mirror actual Excalidraw selection; pointer-transparent bodies retain engine drag/history, while keyboard events update the grouped engine elements. CSS uses the display palette for cards and inverse-filter palette for engine handles. Selection alone never writes lore or approves proposals.
+
+## Universal command palette
+
+`CommandCatalog.swift` builds ⌘K results from the actual workspace, category and Settings catalogs, selected-world records and FTS results, named boards/maps, conversations and recent object activity. `CommandPalette.swift` owns read refresh/error state, adaptive result-list geometry and keyboard selection. Activity refreshes on world revision rather than every keystroke. Actions resolve through Studio navigation/save guards; stale or foreign sources cannot recreate archived data. Recent activity is the latest saved state per object, not a complete audit log. Search and command navigation work in Manual mode without model calls.

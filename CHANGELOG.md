@@ -17,6 +17,8 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ### Added
 
+- Expansion #21: universal ⌘K search for lore, scenes, maps/boards, category tools, individual settings and recent world changes. Guarded source navigation, keyboard results and compact sizing preserve Manual mode and unsaved writing.
+
 - Expansion #20: common entity selection and transient hover across Graph, Canvas, Atlas, Library and Timeline. Engine resize handles match the application accent; keyboard Canvas selection and map marker contrast improved.
 - Expansion #19: persisted resizable navigation, inspectors and conversation panels, with native splitters, keyboard/accessibility adjustment, Settings controls and saved-layout support. Narrow editors float the inspector to preserve writing space.
 - Expansion #18: accurate autosave/search feedback, named review progress and partial-failure counts, visible AI failures and elapsed hypothetical generation. World changes stop unapplied review decisions.
