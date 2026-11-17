@@ -1,0 +1,21 @@
+CAPTURE graph 1440x900, bitmap 1440x900, 388ms
+CAPTURE graph-selected 1440x900, bitmap 1440x900, 562ms
+CAPTURE editor 1440x900, bitmap 1440x900, 134ms
+CAPTURE light-graph 1440x900, bitmap 1440x900, 390ms
+CAPTURE light-editor 1440x900, bitmap 1440x900, 136ms
+CAPTURE toast 1440x900, bitmap 1440x900, 164ms
+CAPTURE review 1440x900, bitmap 1440x900, 127ms
+CAPTURE review-canon 1440x900, bitmap 1440x900, 122ms
+CAPTURE sections 1440x900, bitmap 1440x900, 130ms
+CAPTURE graph-companion 1440x900, bitmap 1440x900, 365ms
+CAPTURE graph 1024x768, bitmap 1024x768, 178ms
+CAPTURE graph-selected 1024x768, bitmap 1024x768, 257ms
+CAPTURE editor 1024x768, bitmap 1024x768, 95ms
+CAPTURE light-graph 1024x768, bitmap 1024x768, 167ms
+CAPTURE light-editor 1024x768, bitmap 1024x768, 97ms
+CAPTURE toast 1024x768, bitmap 1024x768, 122ms
+CAPTURE review 1024x768, bitmap 1024x768, 103ms
+CAPTURE review-canon 1024x768, bitmap 1024x768, 87ms
+CAPTURE sections 1024x768, bitmap 1024x768, 98ms
+CAPTURE graph-companion 1024x768, bitmap 1024x768, 168ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-008

@@ -121,6 +121,14 @@ enum Motion {
   static let feedback = 0.15
   static let panel = 0.22
   static let workspace = 0.22
+  static var feedbackAnimation: Animation { .easeOut(duration: feedback) }
+  static var panelAnimation: Animation { .easeInOut(duration: panel) }
+  static var workspaceAnimation: Animation { .easeInOut(duration: workspace) }
+  static var panelTransition: AnyTransition { .opacity.combined(with: .offset(x: 8)) }
+  static var companionTransition: AnyTransition {
+    .opacity.combined(with: .scale(scale: 0.98, anchor: .bottomTrailing)).combined(
+      with: .offset(y: 8))
+  }
 }
 
 /// Shadow geometry belongs to the surface role, not an individual workspace.

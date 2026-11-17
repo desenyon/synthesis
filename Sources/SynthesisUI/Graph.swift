@@ -7,6 +7,7 @@ struct RelationshipGraph: View {
     var id: String { rawValue }
   }
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var relationships: [Relation] = []
   @State private var layout: [String: CGPoint] = [:]
   @State private var signature = ""
@@ -90,6 +91,7 @@ struct RelationshipGraph: View {
         panel = .create
       }
     }
+    .onChange(of: selected) { _, _ in hoveredEdge = nil }
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .onDisappear {
       layoutTask?.cancel()
@@ -237,7 +239,7 @@ struct RelationshipGraph: View {
             detail(entity).frame(
               maxWidth: .infinity, alignment: studio.companionExpanded ? .leading : .trailing
             )
-            .transition(.move(edge: .trailing).combined(with: .opacity))
+            .id(entity.id).transition(Motion.panelTransition)
           }
           Spacer(minLength: 0)
           HStack {
@@ -246,7 +248,7 @@ struct RelationshipGraph: View {
               zoom: zoom, t: studio.t, zoomOut: { stepZoom(1 / 1.2) },
               zoomIn: { stepZoom(1.2) }, fit: { frame(geo.size) })
           }
-        }.padding(14).animation(.easeOut(duration: 0.14), value: selected)
+        }.padding(14).animation(reduceMotion ? nil : Motion.panelAnimation, value: selected)
       }
       .coordinateSpace(name: "graph").clipped()
       .onAppear {
@@ -328,6 +330,8 @@ struct RelationshipGraph: View {
         width: GraphLayout.cardSize.width * zoom, height: GraphLayout.cardSize.height * zoom
       )
       .opacity(dim ? 0.35 : 1)
+      .animation(reduceMotion ? nil : Motion.feedbackAnimation, value: dim)
+      .animation(reduceMotion ? nil : Motion.feedbackAnimation, value: isSelected)
       .contentShape(Rectangle())
       .onTapGesture {
         if NSApp.currentEvent?.clickCount == 2 {
@@ -490,7 +494,7 @@ struct RelationshipGraph: View {
     hoveredEdge = nil
   }
   private func stepZoom(_ factor: Double) {
-    withAnimation(.easeOut(duration: 0.18)) { changeZoom(factor) }
+    withAnimation(reduceMotion ? nil : Motion.panelAnimation) { changeZoom(factor) }
   }
   /// Centres and scales the whole graph into the visible area.
   private func frame(_ size: CGSize, animated: Bool = true) {
@@ -508,7 +512,11 @@ struct RelationshipGraph: View {
         width: -(xs.max()! + xs.min()!) / 2 * scale,
         height: -(ys.max()! + ys.min()!) / 2 * scale - 10)
     }
-    if animated { withAnimation(.easeOut(duration: 0.2)) { apply() } } else { apply() }
+    if animated {
+      withAnimation(reduceMotion ? nil : Motion.panelAnimation) { apply() }
+    } else {
+      apply()
+    }
   }
   private func transferToCanvas() {
     studio.perform {

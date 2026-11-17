@@ -5,6 +5,7 @@ import SynthesisCore
 /// A creator-supplied map with markers that open real records. The image stays on this device.
 struct AtlasScreen: View {
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var markerPicker = false
   @State private var artworkPicker = false
   @State private var boardID: String?
@@ -414,7 +415,7 @@ struct AtlasScreen: View {
             zoom: zoom, t: studio.t, zoomOut: { stepZoom(1 / 1.25) },
             zoomIn: { stepZoom(1.25) },
             fit: {
-              withAnimation(.easeOut(duration: 0.2)) {
+              withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
                 zoom = 1
                 pan = .zero
               }
@@ -571,7 +572,7 @@ struct AtlasScreen: View {
     pan = next.pan
   }
   private func stepZoom(_ factor: Double) {
-    withAnimation(.easeOut(duration: 0.18)) { changeZoom(factor) }
+    withAnimation(reduceMotion ? nil : Motion.panelAnimation) { changeZoom(factor) }
   }
   private func markerView(_ marker: MapMarker) -> some View {
     let record = studio.records.first { $0.id == marker.recordID }

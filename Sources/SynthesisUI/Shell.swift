@@ -5,6 +5,7 @@ import SynthesisCore
 /// Application shell: integrated header zone, navigation, the active workspace and global overlays.
 public struct ConnectedRoot: View {
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var canvasFrame: CGRect?
   @State private var lastCanvasFrame = CGRect(x: 0, y: 0, width: 900, height: 600)
   public init(studio: Studio) { self.studio = studio }
@@ -48,9 +49,11 @@ public struct ConnectedRoot: View {
               Rectangle().fill(studio.t.hairline).frame(width: 1).allowsHitTesting(false)
             }
             .environment(\.barInset, max(0, Metric.chrome - column - 12))
-            .animation(.easeInOut(duration: 0.22), value: studio.destination)
-            .animation(.easeInOut(duration: 0.2), value: studio.selectedRecord?.id)
-            .animation(.easeInOut(duration: 0.22), value: studio.companionExpanded)
+            .animation(reduceMotion ? nil : Motion.workspaceAnimation, value: studio.destination)
+            .animation(
+              reduceMotion ? nil : Motion.workspaceAnimation, value: studio.selectedRecord?.id
+            )
+            .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.companionExpanded)
         }
         HStack(spacing: 0) {
           Color.clear.frame(width: 84, height: 1)
@@ -59,7 +62,7 @@ public struct ConnectedRoot: View {
               .foregroundStyle(studio.t.text).padding(.trailing, 10)
           }
           Button {
-            withAnimation(.easeInOut(duration: 0.18)) {
+            withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
               if compact { studio.mobileNavigation.toggle() } else { studio.toggleSidebar() }
             }
           } label: {
@@ -69,7 +72,9 @@ public struct ConnectedRoot: View {
         }.frame(height: Metric.bar)
         if compact && studio.mobileNavigation {
           studio.t.scrim.ignoresSafeArea().onTapGesture {
-            withAnimation(.easeOut(duration: 0.16)) { studio.mobileNavigation = false }
+            withAnimation(reduceMotion ? nil : Motion.feedbackAnimation) {
+              studio.mobileNavigation = false
+            }
           }
           Sidebar(studio: studio, collapsed: false).padding(.top, Metric.bar)
             .background { NavigationGlass(theme: studio.t) }.padding(8)
@@ -86,10 +91,18 @@ public struct ConnectedRoot: View {
         if let frame { lastCanvasFrame = frame }
       }
       .overlay(alignment: .bottom) { toast }
-      .animation(.easeOut(duration: 0.14), value: studio.palette)
+      .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.palette)
+      .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.toast?.id)
     }
     .foregroundStyle(studio.t.text)
     .environment(\.studioTheme, studio.t)
+    .environment(
+      \.interactionScope,
+      [
+        studio.worldID, studio.destination.rawValue,
+        studio.selectedRecord?.id ?? "", studio.graphSelectedID ?? "", studio.atlasSelectedID ?? "",
+      ].joined(separator: ":")
+    )
     .environment(\.studioDensity, DensityMetric(value: studio.preferences.density))
     .environment(\.studioOpaqueMaterials, studio.captureHint.contains("opaque"))
     .ignoresSafeArea()
@@ -138,7 +151,7 @@ public struct ConnectedRoot: View {
             if studio.mode == .assisted && studio.companionExpanded {
               FloatingCompanion(studio: studio, available: geometry.size)
                 .padding(14)
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+                .transition(Motion.companionTransition)
             }
           }
       }
@@ -175,11 +188,13 @@ public struct ConnectedRoot: View {
         }
         IconButton(icon: "xmark", label: "Dismiss", t: studio.t, size: 22) { studio.toast = nil }
       }.padding(.leading, 14).padding(.trailing, 8).frame(height: 40).floatingPanel(studio.t)
-        // On Canvas the bottom centre belongs to the composer, so confirmations sit above it.
+        // Keep feedback above every compact composer, not over its input or Send control.
         .padding(
           .bottom,
-          studio.destination == .canvas && studio.selectedRecord == nil && studio.mode == .assisted
-            && !studio.companionExpanded ? 96 : 22
+          studio.mode == .assisted && !studio.companionExpanded
+            && (studio.selectedRecord != nil
+              || ![.chat, .worlds, .settings].contains(studio.destination))
+            ? 106 : 22
         ).transition(.move(edge: .bottom).combined(with: .opacity))
         .id(toast.id).accessibilityElement(children: .contain)
     }

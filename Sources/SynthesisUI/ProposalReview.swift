@@ -5,6 +5,7 @@ import SynthesisCore
 /// produces drafts only, and canon keeps its own separate review.
 struct ProposalCard: View {
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   let proposal: Proposal
   var narrow = false
   @State private var expanded: Set<String> = []
@@ -62,6 +63,8 @@ struct ProposalCard: View {
     .accessibilityElement(children: .contain)
     .accessibilityLabel("Proposed changes: \(proposal.summary)")
     .disabled(studio.reviewingProposal)
+    .animation(reduceMotion ? nil : Motion.panelAnimation, value: expanded)
+    .animation(reduceMotion ? nil : Motion.panelAnimation, value: proposal.changes.map(\.status))
   }
   private func describe(_ change: ProposedChange) -> (icon: String, kind: String, title: String) {
     switch change.action {

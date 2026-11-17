@@ -148,6 +148,7 @@ struct QuietButton: ButtonStyle {
     let configuration: Configuration
     @State private var hover = false
     @Environment(\.isEnabled) private var enabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
       configuration.label.font(.studio(.label)).lineLimit(1)
         .fixedSize(horizontal: true, vertical: false)
@@ -160,7 +161,8 @@ struct QuietButton: ButtonStyle {
         )
         .opacity(enabled ? (configuration.isPressed ? 0.8 : 1) : 0.45)
         .contentShape(RoundedRectangle(cornerRadius: Metric.radius))
-        .onHover { hover = $0 }
+        .trackedHover($hover)
+        .animation(reduceMotion ? nil : Motion.feedbackAnimation, value: configuration.isPressed)
     }
     private var foreground: Color {
       switch role {
@@ -199,7 +201,9 @@ struct IconButton: View {
         )
         .contentShape(RoundedRectangle(cornerRadius: Metric.smallRadius))
         .opacity(enabled ? 1 : 0.35)
-    }.buttonStyle(.plain).onHover { hover = $0 }.help(label).accessibilityLabel(label)
+    }.buttonStyle(.plain).trackedHover($hover)
+      .onChange(of: active) { _, _ in hover = false }
+      .help(label).accessibilityLabel(label)
   }
 }
 
@@ -225,17 +229,7 @@ struct ComposerSendStyle: ButtonStyle {
         .contentShape(RoundedRectangle(cornerRadius: Metric.radius))
         .scaleEffect(configuration.isPressed && !reduceMotion ? 0.96 : 1)
         .opacity(configuration.isPressed ? 0.85 : 1)
-        .onContinuousHover { phase in
-          switch phase {
-          case .active: hovered = enabled
-          case .ended: hovered = false
-          }
-        }
-        .onChange(of: enabled) { _, _ in hovered = false }
-        .onDisappear { hovered = false }
-        .animation(
-          reduceMotion ? nil : .easeOut(duration: ComposerMetric.transition), value: hovered
-        )
+        .trackedHover($hovered)
         .animation(
           reduceMotion ? nil : .easeOut(duration: ComposerMetric.transition),
           value: configuration.isPressed
@@ -339,7 +333,7 @@ struct IconMenu<Items: View>: View {
           hover ? t.hover : .clear, in: RoundedRectangle(cornerRadius: Metric.smallRadius)
         )
         .contentShape(RoundedRectangle(cornerRadius: Metric.smallRadius))
-    }.onHover { hover = $0 }.help(label).accessibilityLabel(label)
+    }.trackedHover($hover).help(label).accessibilityLabel(label)
   }
 }
 
@@ -349,21 +343,14 @@ struct HoverFill: ViewModifier {
   var radius: CGFloat = Metric.smallRadius
   var selected = false
   @State private var hover = false
-  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   func body(content: Content) -> some View {
     content.background(
       selected ? t.secondarySurface : (hover ? t.hover : .clear),
       in: RoundedRectangle(cornerRadius: radius)
     ).contentShape(RoundedRectangle(cornerRadius: radius))
-      .onContinuousHover { phase in
-        switch phase {
-        case .active: hover = true
-        case .ended: hover = false
-        }
-      }
+      .trackedHover($hover)
       .onChange(of: selected) { _, _ in hover = false }
-      .onDisappear { hover = false }
-      .animation(reduceMotion ? nil : .easeOut(duration: Motion.feedback), value: hover)
+
   }
 }
 extension View {
@@ -443,7 +430,8 @@ struct FilterChip: View {
         .background(selected ? t.accentSoft : (hover ? t.hover : .clear), in: Capsule())
         .overlay(Capsule().stroke(selected ? .clear : t.hairline, lineWidth: 1))
         .contentShape(Capsule())
-    }.buttonStyle(.plain).onHover { hover = $0 }
+    }.buttonStyle(.plain).trackedHover($hover)
+      .onChange(of: selected) { _, _ in hover = false }
       .accessibilityAddTraits(selected ? .isSelected : [])
   }
 }
@@ -697,13 +685,13 @@ struct SegmentedSwitch<Value: Hashable>: View {
   let label: String
   let t: Theme
   var select: (Value) -> Void
-  @Namespace private var space
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   var body: some View {
     HStack(spacing: 2) {
       ForEach(choices, id: \.value) { choice in
         let active = selected == choice.value
         Button {
-          withAnimation(.easeOut(duration: 0.16)) { select(choice.value) }
+          withAnimation(reduceMotion ? nil : Motion.feedbackAnimation) { select(choice.value) }
         } label: {
           HStack(spacing: 6) {
             if choice.indicator {
@@ -716,7 +704,7 @@ struct SegmentedSwitch<Value: Hashable>: View {
             .background {
               if active {
                 RoundedRectangle(cornerRadius: Metric.smallRadius).fill(t.secondarySurface)
-                  .matchedGeometryEffect(id: "selection", in: space)
+                  .transition(.opacity)
               }
             }
             .contentShape(RoundedRectangle(cornerRadius: Metric.smallRadius))
@@ -974,15 +962,8 @@ struct SidebarControlStyle: PrimitiveButtonStyle {
         }
         .focusable().focused($focused).focusEffectDisabled()
         .opacity(enabled ? 1 : 0.4)
-        .onContinuousHover { phase in
-          switch phase {
-          case .active: hover = true
-          case .ended: hover = false
-          }
-        }
+        .trackedHover($hover)
         .onChange(of: selected) { _, _ in hover = false }
-        .onDisappear { hover = false }
-        .animation(reduceMotion ? nil : .easeOut(duration: SidebarMetric.transition), value: hover)
         .animation(
           reduceMotion ? nil : .easeOut(duration: SidebarMetric.transition), value: selected)
     }

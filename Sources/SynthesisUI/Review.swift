@@ -10,6 +10,7 @@ struct ReviewScreen: View {
     case checks = "Checks"
   }
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var tab = Tab.proposals
   @State private var findings: [WorldFinding] = []
   @State private var dismissed = 0
@@ -67,6 +68,10 @@ struct ReviewScreen: View {
             case .checks: checks
             }
           }.padding(.vertical, 18)
+            .animation(
+              reduceMotion ? nil : Motion.panelAnimation, value: studio.pendingProposals.map(\.id)
+            )
+            .animation(reduceMotion ? nil : Motion.panelAnimation, value: tab)
         }
       }
     }

@@ -348,12 +348,7 @@ struct ConversationRow: View {
       selected || hover ? studio.t.navigation.hover : .clear,
       in: RoundedRectangle(cornerRadius: SidebarMetric.radius)
     )
-    .onContinuousHover { phase in
-      switch phase {
-      case .active: hover = true
-      case .ended: hover = false
-      }
-    }
+    .trackedHover($hover)
     .onChange(of: studio.destination) { _, _ in hover = false }
     .onChange(of: studio.conversationID) { _, _ in hover = false }
     .onDisappear { hover = false }

@@ -518,7 +518,7 @@ final class StudioWindow: NSWindow {
             }
           }
           try await Task.sleep(for: .milliseconds(200))
-          studio.toast = nil
+          if state != "toast" { studio.toast = nil }
           window.layoutTrafficLights()
           guard !NSApp.isActive, !window.isKeyWindow else {
             throw SynthesisError.invalid(

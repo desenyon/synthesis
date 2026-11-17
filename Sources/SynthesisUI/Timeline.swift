@@ -17,6 +17,7 @@ enum TimelineDensity: String, CaseIterable {
 
 struct TimelineScreen: View {
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var lanes: [ChronologyLane] = []
   @State private var placements: [String: String] = [:]
   @State private var foldedLanes: Set<String> = []
@@ -113,7 +114,7 @@ struct TimelineScreen: View {
             .init(value: $0, title: $0.title, help: "Show \($0.title.lowercased())")
           }, selected: density, label: "Timeline zoom", t: studio.t
         ) { value in
-          withAnimation(.easeOut(duration: 0.16)) { density = value }
+          withAnimation(reduceMotion ? nil : Motion.panelAnimation) { density = value }
           try? studio.store.setPreference("timeline-density", value: value.rawValue)
         }
         Button("New branch") {
@@ -191,7 +192,7 @@ struct TimelineScreen: View {
           HStack(spacing: 4) {
             if lanes.contains(where: { $0.parentID == entry.lane.id }) {
               Button {
-                withAnimation(.easeOut(duration: 0.16)) {
+                withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
                   if !foldedLanes.insert(entry.lane.id).inserted {
                     foldedLanes.remove(entry.lane.id)
                   }
@@ -206,7 +207,7 @@ struct TimelineScreen: View {
               Color.clear.frame(width: 20, height: 28)
             }
             Button {
-              withAnimation(.easeOut(duration: 0.18)) {
+              withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
                 selectedLane = selectedLane == entry.lane.id ? "" : entry.lane.id
               }
             } label: {
@@ -287,7 +288,9 @@ struct TimelineScreen: View {
                 title: group.lane?.name ?? "Not in a period", count: group.events.count,
                 selected: false, t: studio.t
               ) {
-                withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(group.id, anchor: .top) }
+                withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
+                  proxy.scrollTo(group.id, anchor: .top)
+                }
               }
               .help("Jump to \(group.lane?.name ?? "events outside any period")")
             }
@@ -297,7 +300,7 @@ struct TimelineScreen: View {
       ForEach(groups, id: \.id) { group in
         VStack(alignment: .leading, spacing: 8) {
           Button {
-            withAnimation(.easeOut(duration: 0.16)) {
+            withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
               if !foldedEras.insert(group.id).inserted { foldedEras.remove(group.id) }
             }
           } label: {
@@ -664,7 +667,7 @@ private struct EventCard: View {
         t.surface.opacity(hover ? 1 : 0.7), in: RoundedRectangle(cornerRadius: Metric.cardRadius)
       )
       .overlay(RoundedRectangle(cornerRadius: Metric.cardRadius).stroke(t.hairline, lineWidth: 1))
-      .onHover { hover = $0 }
+      .trackedHover($hover)
       .contextMenu {
         Button("Edit…", action: edit)
         if let source { Button("Open source record") { studio.openRecord(source) } }

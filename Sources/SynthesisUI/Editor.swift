@@ -49,6 +49,7 @@ struct EditorScreen: View {
     var id: String { rawValue }
   }
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var record: LoreRecord
   @State private var title: String
   @State private var bodyText: String
@@ -111,9 +112,13 @@ struct EditorScreen: View {
                 ruleSheet = true
               }
             ).frame(width: min(300, geo.size.width * 0.42))
+              .transition(Motion.panelTransition)
           }
         }
       }
+      .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.inspector)
+      .animation(reduceMotion ? nil : Motion.panelAnimation, value: mechanicsVisible)
+      .animation(reduceMotion ? nil : Motion.panelAnimation, value: sectionsVisible)
     }
     .onAppear {
       studio.editorSave = { save() }
@@ -220,7 +225,7 @@ struct EditorScreen: View {
       IconButton(
         icon: "sidebar.right", label: studio.inspector ? "Hide details" : "Show details",
         t: studio.t, active: studio.inspector
-      ) { withAnimation(.easeOut(duration: 0.16)) { studio.toggleInspector() } }
+      ) { studio.toggleInspector() }
     }
   }
 

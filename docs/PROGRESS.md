@@ -322,3 +322,7 @@ Persisted Compact/Comfortable/Immersive option with shared density environment. 
 ### Expansion #7 — intentional empty profiles (2026-11-17)
 
 Optional writing prompts, artwork, actual relationship navigation and sourced-event creation replace the empty entity editor. Prompts never become lore automatically. Added entity artwork revisions (0014), validation, guarded Undo, v8 portable import/export, JSON11, embedded Markdown imagery and image-export collection. 179 tests / 43 suites, strict lint and optimized build passed; 16 background captures inspected after fixing an icon fallback and cross-state fixture text. No live provider call, foreground automation or AGENTS change. Evidence: verification/expansion-007. Next: #8, shared microinteractions.
+
+### Expansion #8 — shared microinteractions (2026-11-17)
+
+Restrained shared motion for selection, panels, companions, relationship navigation and proposal review; reduced-motion support; transient hover resets on navigation, disabled state and focus loss. Fixed the capture runner suppressing its toast fixture, then a real confirmation/composer overlap. 180 tests / 44 suites, lint and optimized build passed; 20 final captures inspected at both sizes. An unwindowed native regression covers hover lifecycle; physical animation pacing is not claimed. [Evidence](verification/expansion-008/README.md). No model usage or foreground interruption. Next #9.

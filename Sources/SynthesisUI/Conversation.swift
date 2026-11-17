@@ -6,6 +6,7 @@ import SynthesisCore
 /// read and write the same persisted conversation.
 struct ConversationStudio: View {
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   var companion = false
   /// False when the companion replaces the canvas in a narrow window.
   var docked = true
@@ -103,7 +104,9 @@ struct ConversationStudio: View {
           icon: "arrow.up.left.and.arrow.down.right", label: "Open in Conversation", t: studio.t
         ) { studio.navigate(.chat) }
         IconButton(icon: "sidebar.right", label: "Hide companion", t: studio.t) {
-          withAnimation(.easeOut(duration: 0.18)) { studio.companionExpanded = false }
+          withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
+            studio.companionExpanded = false
+          }
         }
       }
     }
@@ -234,7 +237,9 @@ struct ConversationStudio: View {
         if !followLatest {
           Button {
             followLatest = true
-            withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("latest", anchor: .bottom) }
+            withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
+              proxy.scrollTo("latest", anchor: .bottom)
+            }
           } label: {
             StudioLabel("Latest", icon: "arrow.down").font(.studio(size: 12.5, weight: .medium))
               .padding(.horizontal, 12).padding(.vertical, 8).floatingPanel(studio.t)
@@ -245,7 +250,9 @@ struct ConversationStudio: View {
       .onAppear { proxy.scrollTo("latest", anchor: .bottom) }
       .onChange(of: studio.messages.count) { _, _ in
         if followLatest {
-          withAnimation(.easeOut(duration: 0.18)) { proxy.scrollTo("latest", anchor: .bottom) }
+          withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
+            proxy.scrollTo("latest", anchor: .bottom)
+          }
         }
       }
       .onChange(of: studio.streamed) { _, _ in
