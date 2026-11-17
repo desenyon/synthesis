@@ -200,3 +200,23 @@ The first implementation checkpoint was committed/pushed as `2bbff4b`. A new fai
 Final `./scripts/check.sh`: **140 native tests / 30 suites**, strict lint and optimized build passed. Canvas typecheck, **11 Node tests**, bundle build passed. Packaged and extracted the final Apple Silicon ZIP; strict code signature verification and executable comparison passed. Its real native run passed **28 engine checks** and produced **16 captures** at 1440×900 and 1024×768; inspected both package contact sheets. This supplements the earlier 48 source captures. Exactly one approved live Codex request remains the total. Release publication follows the checked source commit; 0.0.1 stays immutable.
 
 Published [v0.0.2](https://github.com/desenyon/synthesis/releases/tag/v0.0.2) as a non-draft prerelease from `2b792637553ed6d940b0f9d5d4540a6b2b7694a8`. Verified the remote tag, all three uploaded assets and GitHub’s matching ZIP digest `c86f0c3eba8046612d1f3441b22d2aa065b6bddc1bb74bb4e35a440c172e4a89`. The v0.0.1 tag remains unchanged. Final documentation confirmation is a separate commit; owner brief remains untracked and the running app was not interrupted.
+
+## 2026-11-16 — completion pass (no release)
+
+Owner instruction: complete remaining tasks, no new release, launch the app for review. Plan, one verified commit per slice:
+
+1. Extended local checks: contradictory relationships, timeline ordering, tag spellings with reversible merge.
+2. Crash recovery for unsaved editor text.
+3. `.synthesis` file association (double-click opens import).
+4. Large-world performance measurements (search, graph layout, checks).
+5. What-if branches: fork a world as a hypothetical branch, then propose its changes back through review.
+6. Technique trees in Mechanics (prerequisite graph).
+7. Atlas regions: editable polygon areas linked to places.
+8. Timeline zoom/density and era navigation.
+9. A2 live check, accessibility label audit, app launch for owner review.
+
+C2 (lift the black palette) contradicts the owner's recorded black-studio direction and stays unapproved; C3's pill was superseded by the owner's composer rebuild. Subscription image generation requires a live, billed request and a verified Codex output contract; it is investigated, not assumed.
+
+### Slice 1 — extended consistency checks (verified)
+
+Review → Checks now flags the same relationship recorded twice, a one-way label used in both directions (symmetric labels such as "allied with" are exempt), Timeline order that contradicts comparable dates in the same era, and tag spellings that differ only by case, punctuation or a plural "s". "Merge tags" rewrites spellings in one transaction as new metadata revisions (canon untouched) with Undo. Registered missing Phosphor glyphs; the first capture showed fallback circles, the recapture shows the right icons. Checks: 3 new tests failed-first-free; `./scripts/check.sh` passed with **143 tests / 31 suites**; `review-checks` captured at 1440×900 and 1024×768 and inspected.

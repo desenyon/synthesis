@@ -50,6 +50,14 @@ extension Studio {
       let sea = records.first(where: { $0.title == "The Glass Sea" }),
       let city = records.first(where: { $0.title == "The Drowned City" })
     else { throw SynthesisError.notFound }
+    // Review fixtures: a tag spelt two ways and a one-way relationship recorded in both
+    // directions, so Checks shows the newer observations.
+    if let oren = records.first(where: { $0.title == "Oren Ashe" }), (oren.tags ?? []).isEmpty {
+      _ = try store.saveMetadata(
+        worldID: worldID, id: oren.id, version: oren.version, tags: ["Cartography"], aliases: [])
+      _ = try store.addRelation(
+        worldID: worldID, source: mira.id, target: oren.id, label: "mentors")
+    }
     if try store.recordSections(worldID: worldID, parentID: mira.id).isEmpty {
       try store.createRecordSection(
         worldID: worldID, parentID: mira.id, title: "What she is searching for",

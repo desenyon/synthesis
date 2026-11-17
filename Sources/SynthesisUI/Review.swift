@@ -182,6 +182,9 @@ struct ReviewScreen: View {
     case .isolatedEntity: return "circle.dashed"
     case .orphanedEvent: return "calendar.badge.exclamationmark"
     case .emptyRecord: return "doc"
+    case .conflictingRelationship: return "arrow.left.arrow.right"
+    case .timelineOrder: return "clock.arrow.circlepath"
+    case .tagVariant: return "tag"
     }
   }
   @ViewBuilder private var checks: some View {
@@ -189,7 +192,7 @@ struct ReviewScreen: View {
       EmptyState(
         icon: "checkmark.circle", title: "Nothing to flag",
         message:
-          "This check runs on your device and looks for clashing names, unlinked mentions, unconnected entities and events without a source.",
+          "This check runs on your device and looks for clashing names, contradictory relationships, out-of-order dates, tag spellings, unlinked mentions, unconnected entities and events without a source.",
         t: studio.t
       ) {
         if dismissed > 0 {
@@ -220,7 +223,8 @@ struct ReviewScreen: View {
     return HStack(alignment: .top, spacing: 12) {
       StudioIcon(icon(finding.kind), size: 14)
         .foregroundStyle(
-          finding.kind == .duplicateName || finding.kind == .orphanedEvent ? t.warning : t.secondary
+          [.duplicateName, .orphanedEvent, .conflictingRelationship, .timelineOrder].contains(
+            finding.kind) ? t.warning : t.secondary
         )
         .frame(width: 34, height: 34).background(t.surface, in: RoundedRectangle(cornerRadius: 8))
       VStack(alignment: .leading, spacing: 3) {
@@ -235,7 +239,17 @@ struct ReviewScreen: View {
           Button("Link them") { link(involved[0], involved[1]) }
             .buttonStyle(QuietButton(t: t, primary: true))
         }
-        if finding.kind == .orphanedEvent {
+        if finding.kind == .tagVariant, let preferred = finding.value {
+          Button("Merge tags") { mergeTags(preferred) }
+            .buttonStyle(QuietButton(t: t, primary: true))
+            .help("Use “\(preferred)” everywhere. Changed records get a new draft revision.")
+        }
+        if finding.kind == .timelineOrder {
+          Button("Open Timeline") { studio.navigate(.timeline) }.buttonStyle(QuietButton(t: t))
+        }
+        if finding.kind == .tagVariant || finding.kind == .timelineOrder {
+          EmptyView()
+        } else if finding.kind == .orphanedEvent {
           Button("Open Timeline") { studio.navigate(.timeline) }.buttonStyle(QuietButton(t: t))
         } else if involved.count == 1 || finding.kind == .unlinkedMention,
           let first = involved.first
@@ -264,6 +278,24 @@ struct ReviewScreen: View {
         }
       }
     }.padding(.horizontal, 10).padding(.vertical, 10).hoverFill(t, radius: 9)
+  }
+  private func mergeTags(_ preferred: String) {
+    studio.perform {
+      let previous = try studio.store.mergeTagVariants(
+        worldID: studio.worldID, preferred: preferred)
+      try studio.reload()
+      refresh()
+      studio.show(
+        "Merged tags into “\(preferred)” on \(previous.count) \(previous.count == 1 ? "record" : "records")",
+        icon: "tag", actionTitle: "Undo"
+      ) {
+        studio.perform {
+          try studio.store.restoreTags(worldID: studio.worldID, previous: previous)
+          try studio.reload()
+          refresh()
+        }
+      }
+    }
   }
   private func link(_ source: LoreRecord, _ target: LoreRecord) {
     studio.perform {
