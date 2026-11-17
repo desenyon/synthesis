@@ -25,7 +25,9 @@ struct CuratedCanvas: View {
     session = studio.canvas()
   }
   private var assistantDocked: Bool { studio.mode == .assisted && studio.companionExpanded }
-  private var composerVisible: Bool { studio.mode == .assisted && !studio.companionExpanded }
+  private var composerVisible: Bool {
+    studio.mode == .assisted && !studio.companionExpanded && !studio.splitUsesSharedComposer
+  }
 
   var body: some View {
     GeometryReader { geo in
@@ -63,6 +65,7 @@ struct CuratedCanvas: View {
     }
     .onChange(of: studio.mode) { _, _ in session.updateFitInsets() }
     .onChange(of: studio.companionExpanded) { _, _ in session.updateFitInsets() }
+    .onChange(of: studio.splitRecord?.id) { _, _ in session.updateFitInsets() }
     .onPreferenceChange(CanvasComposerHeightKey.self) {
       session.updateFitInsets(composerHeight: $0)
     }

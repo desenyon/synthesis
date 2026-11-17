@@ -14,6 +14,8 @@ struct WorkspaceArrangement: Codable, Equatable {
   var companionWidth: Double
   var sidebarWidth: Double?
   var inspectorWidth: Double?
+  var splitWidth: Double?
+  var splitInspector: Bool?
   var density: InformationDensity
   var readingWidth: Int
   var entityTab: RecordPageTab
@@ -38,6 +40,7 @@ extension Studio {
       workspaceInspector: workspaceInspector, inspectionTarget: inspectionTarget,
       companion: companionExpanded, companionWidth: companionWidth,
       sidebarWidth: sidebarWidth, inspectorWidth: inspectorWidth,
+      splitWidth: splitWidth, splitInspector: splitInspector,
       density: preferences.density, readingWidth: preferences.readingWidth,
       entityTab: selectedRecord.flatMap { recordTabs[$0.id] } ?? .overview)
   }
@@ -179,6 +182,8 @@ extension Studio {
         if let width = arrangement.inspectorWidth {
           setPanelWidth(.inspector, to: width, persist: false)
         }
+        if let width = arrangement.splitWidth { setPanelWidth(.split, to: width, persist: false) }
+        splitInspector = arrangement.splitInspector ?? false
         if let record = selectedRecord { recordTabs[record.id] = arrangement.entityTab }
         var nextPreferences = preferences
         nextPreferences.density = arrangement.density
@@ -191,6 +196,7 @@ extension Studio {
           "companion-width": String(companionWidth),
           "sidebar-width": String(sidebarWidth),
           "inspector-width": String(inspectorWidth),
+          "split-width": String(splitWidth),
           "studio-preferences": String(
             decoding: JSONEncoder().encode(nextPreferences), as: UTF8.self),
         ])

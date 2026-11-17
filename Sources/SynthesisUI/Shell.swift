@@ -43,54 +43,64 @@ public struct ConnectedRoot: View {
                 }
               }
           }
-          HStack(spacing: 0) {
-            workspace.id("\(studio.worldID)#\(studio.captureNonce)")
-              .frame(maxWidth: .infinity, maxHeight: .infinity)
-              // Canvas is mounted underneath this native layout. An opaque background
-              // here hides the entire engine while its accessibility tree stays alive.
-              .background(
-                studio.destination == .canvas && studio.selectedRecord == nil
-                  ? Color.clear : studio.t.background
-              )
-              .overlay(alignment: .leading) {
-                Rectangle().fill(studio.t.hairline).frame(width: 1).allowsHitTesting(false)
-              }
-              .environment(\.barInset, max(0, Metric.chrome - column - 12))
-              .animation(reduceMotion ? nil : Motion.workspaceAnimation, value: studio.destination)
-              .animation(
-                reduceMotion ? nil : Motion.workspaceAnimation, value: studio.selectedRecord?.id
-              )
-              .animation(
-                reduceMotion ? nil : Motion.panelAnimation, value: studio.companionExpanded)
-            if dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
-              ObjectInspector(studio: studio)
-                .frame(width: studio.inspectorWidth)
+          SplitWorkspace(studio: studio) {
+            HStack(spacing: 0) {
+              workspace.id("\(studio.worldID)#\(studio.captureNonce)")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Canvas is mounted underneath this native layout. An opaque background
+                // here hides the entire engine while its accessibility tree stays alive.
+                .background(
+                  studio.destination == .canvas && studio.selectedRecord == nil
+                    ? Color.clear : studio.t.background
+                )
                 .overlay(alignment: .leading) {
-                  PanelResizeHandle(studio: studio, panel: .inspector)
+                  Rectangle().fill(studio.t.hairline).frame(width: 1).allowsHitTesting(false)
                 }
-                .transition(Motion.panelTransition)
-            }
-          }.overlay(alignment: .trailing) {
-            if !dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
-              ObjectInspector(studio: studio).frame(
-                width: min(studio.inspectorWidth, geo.size.width - column - 28)
-              )
-              .overlay(alignment: .leading) {
-                PanelResizeHandle(
-                  studio: studio, panel: .inspector,
-                  displayedWidth: min(studio.inspectorWidth, geo.size.width - column - 28),
-                  maximum: geo.size.width - column - 28, divider: false)
+                .environment(\.barInset, max(0, Metric.chrome - column - 12))
+                .animation(
+                  reduceMotion ? nil : Motion.workspaceAnimation, value: studio.destination
+                )
+                .animation(
+                  reduceMotion ? nil : Motion.workspaceAnimation, value: studio.selectedRecord?.id
+                )
+                .animation(
+                  reduceMotion ? nil : Motion.panelAnimation, value: studio.companionExpanded)
+              if dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
+                ObjectInspector(studio: studio)
+                  .frame(width: studio.inspectorWidth)
+                  .overlay(alignment: .leading) {
+                    PanelResizeHandle(studio: studio, panel: .inspector)
+                  }
+                  .transition(Motion.panelTransition)
               }
-              .clipShape(RoundedRectangle(cornerRadius: Metric.floatingRadius))
-              .overlay(
-                RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
-                  studio.t.hairline, lineWidth: 1)
-              )
-              .shadow(color: studio.t.shadow, radius: 12, x: -4, y: 4)
-              .padding(.top, Metric.bar + 10).padding([.trailing, .bottom], 12)
-              .transition(Motion.panelTransition)
-            }
-          }.animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.workspaceInspector)
+            }.overlay(alignment: .trailing) {
+              if !dockInspector && studio.workspaceInspector && studio.selectedRecord == nil {
+                ObjectInspector(studio: studio).frame(
+                  width: min(
+                    studio.inspectorWidth,
+                    studio.primaryContentWidth(windowWidth: geo.size.width) - 28)
+                )
+                .overlay(alignment: .leading) {
+                  PanelResizeHandle(
+                    studio: studio, panel: .inspector,
+                    displayedWidth: min(
+                      studio.inspectorWidth,
+                      studio.primaryContentWidth(windowWidth: geo.size.width) - 28),
+                    maximum: studio.primaryContentWidth(windowWidth: geo.size.width) - 28,
+                    divider: false)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: Metric.floatingRadius))
+                .overlay(
+                  RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(
+                    studio.t.hairline, lineWidth: 1)
+                )
+                .shadow(color: studio.t.shadow, radius: 12, x: -4, y: 4)
+                .padding(.top, Metric.bar + 10).padding([.trailing, .bottom], 12)
+                .transition(Motion.panelTransition)
+              }
+            }.animation(
+              reduceMotion ? nil : Motion.panelAnimation, value: studio.workspaceInspector)
+          }
 
         }
         HStack(spacing: 0) {
@@ -175,7 +185,7 @@ public struct ConnectedRoot: View {
       GeometryReader { geometry in
         content.transition(.opacity).frame(maxWidth: .infinity, maxHeight: .infinity)
           .safeAreaInset(edge: .bottom, spacing: 0) {
-            if studio.mode == .assisted {
+            if studio.mode == .assisted && !studio.splitUsesSharedComposer {
               UnifiedComposer(studio: studio, companion: true, collapsed: true)
                 .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
                 .frame(maxWidth: .infinity).background(studio.t.background)

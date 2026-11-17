@@ -108,6 +108,9 @@ body,
 .studio-empty{position:absolute;left:50%;top:43%;transform:translate(-50%,-50%);text-align:center;width:320px}.empty-orbit{font-size:42px;color:var(--quiet);opacity:.5}.studio-empty h1{font-weight:500;font-size:25px;letter-spacing:-.7px;margin:18px 0 8px}.studio-empty p{font-size:13px;color:var(--quiet);margin:0 0 22px}.studio-empty button{pointer-events:auto;border:1px solid var(--line);border-radius:9px;padding:10px 14px;color:var(--ink);background:var(--glass);font:500 12px -apple-system,sans-serif;cursor:pointer}.studio-empty button span{padding-left:22px}
 @keyframes surface-in{from{opacity:0;margin-top:-4px}to{opacity:1;margin-top:0}}
 @media(max-width:800px){.studio-selection{top:74px;max-width:calc(100% - 110px)}.studio-add-bar{left:12px;top:12px}.studio-drawing-bar{right:12px}.studio-viewport{right:12px;bottom:12px}.studio-tool{width:31px;height:31px}}
+/* A split workspace can be wide and short: keep every drawing tool reachable. */
+@media(max-height:440px) and (min-width:620px){.studio-drawing-bar{top:12px;right:12px;transform:none;flex-direction:row}.studio-drawing-bar .tool-separator{width:1px;height:19px;margin:0 3px}.studio-drawing-bar .studio-tooltip{top:calc(100% + 10px);right:0}.studio-selection{top:62px}}
+@media(max-height:440px) and (max-width:619px){.studio-drawing-bar{max-height:calc(100% - 120px);overflow-y:auto;scrollbar-width:thin}}
 @media(prefers-reduced-motion:reduce){.studio-overlay *{animation:none!important;transition:none!important}}
 /* Establish one stacking context above both engine canvas layers. */
 .studio-overlay{z-index:5}

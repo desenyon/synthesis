@@ -27,6 +27,7 @@ import { acceptsSession, containsCardPoint } from "./sceneRules";
 import { arrangeCards } from "./layout";
 import { exportBoard } from "./exportBoard";
 import { StudioOverlay } from "./StudioOverlay";
+import { fitOptions, type FitInsets } from "./viewport";
 
 type El = any;
 type Api = any;
@@ -43,7 +44,6 @@ function post(message: Record<string, unknown>) {
 
 type LegacyCard = { id: string; text: string; recordID?: string; image?: string; x: number; y: number; group?: string };
 type LegacyEdge = { label?: string; source: string; target: string };
-type FitInsets = { top: number; right: number; bottom: number; left: number };
 type LoadPayload = {
   fitInsets?: FitInsets;
   sessionID: string;
@@ -336,7 +336,9 @@ export function App() {
         s.loaded = true;
         synchronise();
         if (fit && api.getSceneElements().length) {
-          flushSync(() => api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.94, canvasOffsets: s.fitInsets, animate: false }));
+          const state = api.getAppState();
+          const options = fitOptions(getCommonBounds(api.getSceneElements()), state.width, state.height, s.fitInsets);
+          flushSync(() => api.scrollToContent(undefined, { ...options, animate: false }));
         }
         const snapshot = serialise(true);
         post({ type: "loaded", migrated: Boolean(payload.legacy && !payload.scene), ...snapshot });
@@ -540,7 +542,9 @@ export function App() {
           api.updateScene({appState: {zoom: {value: zoom}, scrollX: state.scrollX + state.width / 2 * (1/zoom - 1/old), scrollY: state.scrollY + state.height / 2 * (1/zoom - 1/old)}, captureUpdate: CaptureUpdateAction.NEVER});
         }
         else if (name === "fit" && api.getSceneElements().length) {
-          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.94, canvasOffsets: s.fitInsets, animate: true, duration: 180 });
+          const state = api.getAppState();
+          const options = fitOptions(getCommonBounds(api.getSceneElements()), state.width, state.height, s.fitInsets);
+          api.scrollToContent(undefined, { ...options, animate: true, duration: 180 });
         } else if (name === "flush") {
           window.clearTimeout(s.saveTimer);
           window.clearTimeout(s.analyzeTimer);

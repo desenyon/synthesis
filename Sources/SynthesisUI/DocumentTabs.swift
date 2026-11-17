@@ -51,7 +51,13 @@ extension Studio {
     openRecord(documents[next])
   }
   public func closeActiveDocument() {
-    if let id = selectedRecord?.id { closeDocument(id) }
+    if focusedEditorPlacement == .beside, let id = splitRecord?.id {
+      closeDocument(id)
+    } else if let id = selectedRecord?.id {
+      closeDocument(id)
+    } else if let id = splitRecord?.id {
+      closeDocument(id)
+    }
   }
   func editorHandle(for record: LoreRecord) -> EditorHandle {
     if let handle = documentEditors[record.id] { return handle }
@@ -117,7 +123,8 @@ extension Studio {
   func closeDocument(_ id: String) {
     guard documentSession.open.contains(id) else { return }
     let active = selectedRecord?.id == id
-    guard !active || flushEditor() else { return }
+    let beside = splitRecord?.id == id
+    guard !(active || beside) || flushEditor() else { return }
     let old = openDocuments.map(\.id)
     let index = old.firstIndex(of: id) ?? 0
     withNavigation {
@@ -129,11 +136,12 @@ extension Studio {
         next.recent.insert(id, at: 0)
         next.recent = Array(next.recent.prefix(50))
         try persistDocuments(next)
+        if beside { try setSplitRecord(nil) }
         documentEditors.removeValue(forKey: id)
         if active {
           editorSave = nil
           selectedRecord = nil
-          let remaining = openDocuments
+          let remaining = openDocuments.filter { $0.id != splitRecord?.id }
           if !remaining.isEmpty { openRecord(remaining[min(index, remaining.count - 1)]) }
         }
       }
@@ -143,7 +151,7 @@ extension Studio {
     guard documentSession.open.contains(id), flushEditor() else { return }
     perform {
       var next = documentSession
-      next.open = next.open.filter { $0 == id || next.pinned.contains($0) }
+      next.open = next.open.filter { $0 == id || $0 == splitRecord?.id || next.pinned.contains($0) }
       try persistDocuments(next)
       documentEditors = documentEditors.filter { next.open.contains($0.key) }
       if let record = records.first(where: { $0.id == id }) { openRecord(record) }
@@ -226,6 +234,7 @@ struct DocumentTabBar: View {
     .hoverFill(studio.t, radius: 7).help(record.title + (pinned ? " · Pinned" : ""))
     .contextMenu {
       RecordFavoriteAction(studio: studio, record: record)
+      SplitRecordAction(studio: studio, record: record)
       Button(pinned ? "Unpin document tab" : "Pin document tab") {
         studio.toggleDocumentPin(record.id)
       }

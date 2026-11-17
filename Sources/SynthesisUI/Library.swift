@@ -307,6 +307,7 @@ struct RecordRow: View {
           }
         } else {
           Button("Open") { studio.openRecord(record) }
+          SplitRecordAction(studio: studio, record: record)
           Button("Inspect") { studio.inspect(.record(record.id)) }
           RecordFavoriteAction(studio: studio, record: record)
           if studio.mode == .assisted {

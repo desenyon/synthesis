@@ -1,6 +1,6 @@
 # Screenshots
 
-README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png` `document-tabs.png`, `palette.png`, `navigation.png`, `favorites.png` and `activity.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
+README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png`, `document-tabs.png`, `palette.png`, `navigation.png`, `favorites.png`, `activity.png` and `split-workspace.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
 
 | File | Capture state |
 | --- | --- |
@@ -49,3 +49,5 @@ Document tabs: expansion #16, `verification/expansion-016`, with pinned and real
 `favorites.png` comes from expansion #24’s final Favorites manager at 1440×900. All names and pins resolve to persisted records/collections in the isolated sample world. [Evidence](../verification/expansion-024/README.md).
 
 Activity: `activity.png` is `changes-search` at 1440×900 from [expansion-025](../verification/expansion-025/README.md), showing actual fixture mutations recorded through the database triggers.
+
+Split workspace: `split-workspace.png` is `split-atlas` at 1440×900 from expansion #26's final `verified` set. Both panes refer to actual sample-world records; no model request was made. [Evidence](../verification/expansion-026/README.md).

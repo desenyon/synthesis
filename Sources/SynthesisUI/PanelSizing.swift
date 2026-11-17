@@ -3,13 +3,14 @@ import SwiftUI
 
 /// Device-local presentation bounds; narrow windows constrain display, not the saved preference.
 enum StudioPanel: String, CaseIterable {
-  case sidebar, inspector, companion
+  case sidebar, inspector, companion, split
   var key: String { "\(rawValue)-width" }
   var title: String {
     switch self {
     case .sidebar: "Navigation"
     case .inspector: "Inspector"
     case .companion: "Conversation"
+    case .split: "Second document"
     }
   }
   var limits: ClosedRange<Double> {
@@ -17,6 +18,7 @@ enum StudioPanel: String, CaseIterable {
     case .sidebar: 240...360
     case .inspector: 260...480
     case .companion: 320...600
+    case .split: 380...720
     }
   }
   var standard: Double {
@@ -24,6 +26,7 @@ enum StudioPanel: String, CaseIterable {
     case .sidebar: Double(Metric.sidebar)
     case .inspector: 300
     case .companion: 400
+    case .split: 460
     }
   }
   func bounded(_ value: Double) -> Double {
@@ -37,6 +40,7 @@ extension Studio {
     case .sidebar: sidebarWidth
     case .inspector: inspectorWidth
     case .companion: companionWidth
+    case .split: splitWidth
     }
   }
   func setPanelWidth(_ panel: StudioPanel, to value: Double, persist: Bool = true) {
@@ -45,6 +49,7 @@ extension Studio {
     case .sidebar: sidebarWidth = next
     case .inspector: inspectorWidth = next
     case .companion: companionWidth = next
+    case .split: splitWidth = next
     }
     if persist { perform { try store.setPreference(panel.key, value: String(next)) } }
   }

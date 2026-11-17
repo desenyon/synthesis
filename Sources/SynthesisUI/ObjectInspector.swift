@@ -110,6 +110,10 @@ struct ObjectInspector: View {
               HStack(spacing: 8) {
                 Button("Open record") { studio.openRecord(record) }
                   .buttonStyle(QuietButton(t: studio.t))
+                IconButton(icon: "square.stack.3d.up", label: "Open beside workspace", t: studio.t)
+                {
+                  studio.openBeside(record)
+                }
                 if studio.mode == .assisted {
                   IconButton(icon: "at", label: "Reference in conversation", t: studio.t) {
                     studio.reference(record)

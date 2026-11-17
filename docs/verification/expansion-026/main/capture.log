@@ -1,0 +1,27 @@
+CAPTURE split-atlas 1440x900, bitmap 1440x900, 209ms
+CAPTURE light-split-atlas 1440x900, bitmap 1440x900, 199ms
+CAPTURE manual-split-atlas 1440x900, bitmap 1440x900, 126ms
+CAPTURE split-timeline 1440x900, bitmap 1440x900, 139ms
+CAPTURE split-graph 1440x900, bitmap 1440x900, 204ms
+CAPTURE split-editor 1440x900, bitmap 1440x900, 129ms
+CAPTURE light-split-editor 1440x900, bitmap 1440x900, 134ms
+CAPTURE split-picker 1440x900, bitmap 1440x900, 166ms
+CAPTURE split-inspector 1440x900, bitmap 1440x900, 166ms
+CAPTURE split-closed 1440x900, bitmap 1440x900, 123ms
+CAPTURE split-swapped 1440x900, bitmap 1440x900, 138ms
+CAPTURE split-long 1440x900, bitmap 1440x900, 128ms
+CAPTURE split-canvas 1440x900, bitmap 1440x900, 161ms
+CAPTURE split-atlas 1024x768, bitmap 1024x768, 134ms
+CAPTURE light-split-atlas 1024x768, bitmap 1024x768, 122ms
+CAPTURE manual-split-atlas 1024x768, bitmap 1024x768, 89ms
+CAPTURE split-timeline 1024x768, bitmap 1024x768, 107ms
+CAPTURE split-graph 1024x768, bitmap 1024x768, 115ms
+CAPTURE split-editor 1024x768, bitmap 1024x768, 101ms
+CAPTURE light-split-editor 1024x768, bitmap 1024x768, 109ms
+CAPTURE split-picker 1024x768, bitmap 1024x768, 127ms
+CAPTURE split-inspector 1024x768, bitmap 1024x768, 125ms
+CAPTURE split-closed 1024x768, bitmap 1024x768, 104ms
+CAPTURE split-swapped 1024x768, bitmap 1024x768, 107ms
+CAPTURE split-long 1024x768, bitmap 1024x768, 98ms
+CAPTURE split-canvas 1024x768, bitmap 1024x768, 116ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-026/main

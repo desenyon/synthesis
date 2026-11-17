@@ -147,6 +147,10 @@ extension CommandPalette {
         studio.dark ? "sun.max" : "moon", "", { studio.toggleTheme() }
       ),
       ("Workspace layouts", "square.stack", "⌥⌘L", { studio.sheet = .layouts }),
+      (
+        "Open document beside workspace", "rectangle.on.rectangle", "",
+        { studio.sheet = .splitRecord }
+      ),
       ("World activity history", "clock.arrow.circlepath", "", { studio.sheet = .activity }),
       ("Open settings", "gearshape", "⌘,", { studio.navigate(.settings) }),
       (

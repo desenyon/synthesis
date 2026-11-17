@@ -11,6 +11,7 @@
 | [Creative components](CREATIVE_COMPONENTS.md) | Notes, facts, checklists and progression tracks |
 | [Search and commands](SEARCH.md) | Universal ⌘K palette, real destinations and local search |
 | [World activity](ACTIVITY.md) | Committed edits, approvals, connections, source navigation and portable history |
+| [Split workspace](SPLIT_WORKSPACE.md) | Open and edit a source beside a spatial tool or another document |
 | [Settings](SETTINGS.md) | What each preference does and where it is stored |
 
 ## Understanding the project

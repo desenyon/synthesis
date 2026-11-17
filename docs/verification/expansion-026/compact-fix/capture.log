@@ -1,0 +1,16 @@
+CAPTURE canvas 1440x900, bitmap 1440x900, 175ms
+CAPTURE split-atlas 1440x900, bitmap 1440x900, 195ms
+CAPTURE light-split-atlas 1440x900, bitmap 1440x900, 174ms
+CAPTURE split-closed 1440x900, bitmap 1440x900, 126ms
+CAPTURE split-canvas 1440x900, bitmap 1440x900, 149ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 124ms
+CAPTURE split-atlas 1024x768, bitmap 1024x768, 138ms
+CAPTURE light-split-atlas 1024x768, bitmap 1024x768, 124ms
+CAPTURE split-closed 1024x768, bitmap 1024x768, 102ms
+CAPTURE split-canvas 1024x768, bitmap 1024x768, 112ms
+CAPTURE canvas 720x800, bitmap 720x800, 106ms
+CAPTURE split-atlas 720x800, bitmap 720x800, 116ms
+CAPTURE light-split-atlas 720x800, bitmap 720x800, 114ms
+CAPTURE split-closed 720x800, bitmap 720x800, 72ms
+CAPTURE split-canvas 720x800, bitmap 720x800, 87ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-026/compact-fix

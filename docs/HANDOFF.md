@@ -18,7 +18,11 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#25 verified; #26 split workspace is next.** Latest check: 244 tests / 61 suites, strict lint and optimized build. #25 has 22 final inspected states. World activity is appended inside source transactions. Imports suppress synthetic insert history, validate/remap saved sources and reconstruct older available revisions. BoardActivity ignores viewport/serialization noise without changing the actual saved board. SidebarConfiguration stores per-world local arrangements and stable record favorites. Favorites survive closing tabs and archive/restore; keep archived IDs while resolving only current-world live records. Corrupt preferences remain preserved until explicit reset. Shared advanced search preserves world/archive/canon boundaries and applies Library scopes before LIMIT. Keep the materialized FTS CTE: the scale test caught repeated scans without it. No foreground events, owner-app restart or subscription requests.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#26 verified; #27 drag-to-open is next.** Latest check: 251 tests / 62 suites, strict lint and optimized build. Canvas: 17 tests, typecheck/build, 37 engine checks. #26 has 37 final inspected native states across four sizes.
+
+`SplitWorkspace.swift` uses the shared native editor in both panes, never two views of the same record. Keep both save guards, separate editor handles and focus-sensitive ⌘W/inspector routing. A secondary record remains open when closing the primary. Short windows stack scrollable content and share one composer; narrow bars group utility actions. The secondary address is per-world, preferred width device-wide; layouts and Back/Forward include both. Canvas is still mounted once in the shell. Its exact-fit helper avoids engine floor rounding; short toolbars remain accessible. Capture fixtures clear prior split state so subsequent workspaces are not contaminated.
+
+Activity remains migration 0015 / portable v9 / JSON12. Preserve its transaction triggers, import validation and viewport-noise filtering. Search keeps the materialized FTS CTE; the scale test caught repeated scans without it. Favorites/preferences preserve archived addresses and unreadable data without exposing foreign-world sources. No foreground events, owner-app restart, model allowance or release in this pass.
 
 ## Current shape
 

@@ -137,6 +137,7 @@ struct Sidebar: View {
     .help("\(record.title) · \(favoriteRecordDetail(record))")
     .contextMenu {
       Button("Open") { studio.openRecord(record) }
+      SplitRecordAction(studio: studio, record: record)
       Button("Inspect") { studio.inspect(.record(record.id)) }
       Divider()
       Button("Move favorite up") { studio.moveFavorite(record, by: -1) }

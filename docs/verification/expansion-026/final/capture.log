@@ -1,0 +1,17 @@
+CAPTURE canvas 1440x900, bitmap 1440x900, 184ms
+CAPTURE split-atlas 1440x900, bitmap 1440x900, 192ms
+CAPTURE split-closed 1440x900, bitmap 1440x900, 135ms
+CAPTURE split-canvas 1440x900, bitmap 1440x900, 154ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 125ms
+CAPTURE split-atlas 1024x768, bitmap 1024x768, 131ms
+CAPTURE split-closed 1024x768, bitmap 1024x768, 95ms
+CAPTURE split-canvas 1024x768, bitmap 1024x768, 111ms
+CAPTURE canvas 1920x1080, bitmap 1920x1080, 237ms
+CAPTURE split-atlas 1920x1080, bitmap 1920x1080, 316ms
+CAPTURE split-closed 1920x1080, bitmap 1920x1080, 174ms
+CAPTURE split-canvas 1920x1080, bitmap 1920x1080, 228ms
+CAPTURE canvas 720x800, bitmap 720x800, 103ms
+CAPTURE split-atlas 720x800, bitmap 720x800, 115ms
+CAPTURE split-closed 720x800, bitmap 720x800, 82ms
+CAPTURE split-canvas 720x800, bitmap 720x800, 90ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-026/final

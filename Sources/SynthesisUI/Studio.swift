@@ -124,6 +124,12 @@ public struct Toast: Identifiable {
   @Published public var selectedRecord: LoreRecord? {
     didSet { if let record = selectedRecord, oldValue?.id != record.id { retainDocument(record) } }
   }
+  @Published var splitRecord: LoreRecord?
+  @Published var splitEditorSave: (() -> Bool)?
+  @Published var splitInspector = false
+  var activeEditorPlacement = EditorPlacement.main
+  @Published var splitWidth = 460.0
+  var splitWorldID = ""
   @Published var documentSession = OpenDocuments()
   var documentWorldID = ""
   var documentEditors: [String: EditorHandle] = [:]
@@ -171,7 +177,9 @@ public struct Toast: Identifiable {
   private var pendingSubmission: (world: String, conversation: String, text: String)?
   let harnessSelection: HarnessSelection
   var contextualRecordIDs: [String] {
-    if let selectedRecord { return [selectedRecord.id] }
+    if let selectedRecord {
+      return [selectedRecord.id] + (splitRecord.map { [$0.id] } ?? [])
+    }
     let selection: [String]
     switch destination {
     case .canvas: selection = canvasSession?.selection ?? []
@@ -180,9 +188,13 @@ public struct Toast: Identifiable {
     default: selection = []
     }
     let active = Set(records.map(\.id))
-    return selection.filter(active.contains)
+    return Array(Set(selection + (splitRecord.map { [$0.id] } ?? []))).filter(active.contains)
+      .sorted()
   }
   var contextLabel: String {
+    if let beside = splitRecord {
+      return "\(selectedRecord?.title ?? libraryCategory ?? destination.rawValue) · \(beside.title)"
+    }
     if let selectedRecord { return selectedRecord.title }
     if let id = contextualRecordIDs.first, let record = records.first(where: { $0.id == id }) {
       return record.title
@@ -217,18 +229,19 @@ public struct Toast: Identifiable {
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
     case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts, project,
-      navigation, activity
+      navigation, activity, splitRecord
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
   func dockedInspectorWidth(windowWidth: Double) -> Double {
     let sidebar = windowWidth < 760 ? 0 : (collapsed ? Double(Metric.rail) : sidebarWidth)
-    return workspaceInspector && selectedRecord == nil
+    return splitRecord == nil && workspaceInspector && selectedRecord == nil
       && windowWidth - sidebar - inspectorWidth >= 640 ? inspectorWidth : 0
   }
   public func canvasVisible(windowWidth: Double) -> Bool {
-    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Double(Metric.rail) : sidebarWidth)
-    let contentWidth = windowWidth - sidebar - dockedInspectorWidth(windowWidth: windowWidth)
+    let contentWidth =
+      primaryContentWidth(windowWidth: windowWidth)
+      - dockedInspectorWidth(windowWidth: windowWidth)
     let takeover = mode == .assisted && companionExpanded && contentWidth < 860
     return destination == .canvas && selectedRecord == nil && !takeover
   }
@@ -400,6 +413,7 @@ public struct Toast: Identifiable {
     records = try store.records(worldID: worldID)
     refreshSidebarConfiguration()
     try syncDocumentSession()
+    try syncSplitWorkspace()
     contextBoards = try store.assistantBoards(worldID: worldID)
     contextLanes = try store.chronologyLanes(worldID: worldID)
     contextOptions = try store.assistantContextOptions(worldID: worldID)
@@ -598,13 +612,17 @@ public struct Toast: Identifiable {
       worldDefaults = next.validated
     }
   }
-  public func flushEditor() -> Bool { editorSave?() ?? true }
+  public func flushEditor() -> Bool {
+    guard editorSave?() ?? true else { return false }
+    return splitEditorSave?() ?? true
+  }
   public func navigate(_ value: Destination) {
     withNavigation {
       guard flushEditor() else { return }
       selectedRecord = nil
       editorSave = nil
       destination = value
+      activeEditorPlacement = .main
       if value != .timeline { pendingEventSourceID = nil }
       if value != .review { reviewFocusID = nil }
       if value != .canvas {
@@ -737,7 +755,14 @@ public struct Toast: Identifiable {
         error = "This record is no longer available in this universe."
         return
       }
+      if splitRecord?.id == fresh.id {
+        do { try setSplitRecord(nil) } catch {
+          self.error = error.localizedDescription
+          return
+        }
+      }
       selectedRecord = fresh
+      activeEditorPlacement = .main
       editorSave = nil
       mobileNavigation = false
 
@@ -812,6 +837,7 @@ public struct Toast: Identifiable {
   // MARK: Reversible removal
 
   public func archive(_ record: LoreRecord) {
+    if splitRecord?.id == record.id && !flushEditor() { return }
     if selectedRecord?.id == record.id {
       guard flushEditor() else { return }
       selectedRecord = nil
@@ -929,10 +955,7 @@ public struct Toast: Identifiable {
       destination == .canvas ? canvasSession?.boardID : (destination == .atlas ? mapBoardID : nil)
     let selectedIDs = contextualRecordIDs
     let laneID = destination == .timeline ? timelineLaneID : nil
-    let workspaceName =
-      selectedRecord == nil
-      ? (libraryCategory ?? destination.rawValue)
-      : "Editor in \(destination.rawValue)"
+    let workspaceName = agentWorkspaceName
     let prompt = draft
     let wid = worldID
     perform {

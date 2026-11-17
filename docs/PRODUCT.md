@@ -30,3 +30,8 @@ The assistant can propose revisions to existing event dates/placement, history b
 ## Optional profile beginnings
 
 An unwritten entity offers free writing, category-specific prompts, an optional portrait/visual reference, a relationship map and sourced events. Prompts never become saved lore automatically. Imported or explicitly selected illustrations remain separate from written canon; replacement/removal supports guarded Undo. The same artwork control remains available after prose is written.
+
+
+## Connected reading and writing
+
+A record can remain open beside Atlas, Timeline, Graph, Canvas or another document. Both views reference the same saved universe, retain independent native editing state, and preserve explicit canon approval. Wide windows resize the second pane; narrow windows stack it. Navigation and closing respect both draft-save guards. See [Split workspace](SPLIT_WORKSPACE.md).

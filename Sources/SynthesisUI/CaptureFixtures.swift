@@ -70,6 +70,9 @@ extension Studio {
     "favorites-inspector", "favorites-rail", "favorites-options", "light-favorites-options",
     "favorites-empty", "favorites-long",
     "favorites-collection",
+    "split-atlas", "light-split-atlas", "manual-split-atlas", "split-timeline", "split-graph",
+    "split-editor", "light-split-editor", "split-picker", "split-inspector", "split-closed",
+    "split-swapped", "split-long", "split-canvas",
     "changes-history", "light-changes-history", "manual-changes-history", "changes-approvals",
     "changes-relations", "changes-search", "changes-empty", "changes-archived",
     "changes-dashboard", "changes-reconstructed",
@@ -294,6 +297,11 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("split-") {
+      configureSplitCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if splitRecord != nil { closeSplitWorkspace() }
     if state.contains("changes-") {
       configureActivityCapture(state, board: board, conversation: conversation)
       return

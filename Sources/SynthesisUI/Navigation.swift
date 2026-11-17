@@ -11,6 +11,7 @@ struct NavigationLocation: Codable, Equatable {
   var boardID: String?
   var selectionID: String?
   var laneID: String?
+  var splitRecordID: String?
 }
 struct NavigationEntry: Identifiable, Equatable {
   let id = UUID()
@@ -32,7 +33,7 @@ extension Studio {
       selectionID: destination == .knowledge
         ? graphSelectedID
         : (destination == .atlas ? atlasSelectedID : nil),
-      laneID: destination == .timeline ? timelineLaneID : nil)
+      laneID: destination == .timeline ? timelineLaneID : nil, splitRecordID: splitRecord?.id)
   }
   var navigationEntry: NavigationEntry {
     var title = selectedRecord?.title ?? libraryCategory ?? destination.rawValue
@@ -106,11 +107,14 @@ extension Studio {
     guard try store.worlds().contains(where: { $0.id == address.worldID }) else {
       throw SynthesisError.invalid("This universe is no longer available.")
     }
-    for id in [address.recordID, address.selectionID].compactMap({ $0 }) {
+    for id in [address.recordID, address.selectionID, address.splitRecordID].compactMap({ $0 }) {
       _ = try store.record(worldID: address.worldID, id: id)
       guard try !store.isArchived(worldID: address.worldID, recordID: id) else {
         throw SynthesisError.invalid("This record is no longer available in that universe.")
       }
+    }
+    guard address.splitRecordID == nil || address.splitRecordID != address.recordID else {
+      throw SynthesisError.invalid("The same document cannot occupy both panes.")
     }
     if let id = address.conversationID {
       guard try store.conversations(worldID: address.worldID).contains(where: { $0.id == id })
@@ -146,6 +150,8 @@ extension Studio {
       }
       if address.destination == .chat && conversationID != address.conversationID { stop() }
       editorSave = nil
+      try setSplitRecord(
+        try address.splitRecordID.map { try store.record(worldID: worldID, id: $0) })
       selectedRecord = fresh
       destination = address.destination
       libraryCategory = address.category
@@ -223,28 +229,35 @@ struct NavigationButtons: View {
   }
 }
 
-/// The last two records in this visit's trail, with a menu for the complete history.
-struct RecordTrail: View {
-  @ObservedObject var studio: Studio
-  let origin: String
-  @Environment(\.barCompact) private var compact
-  private var ancestors: [Int] {
+extension Studio {
+  /// Pane changes remain in Back/Forward without repeating the same source breadcrumb.
+  var recordTrailIndices: [Int] {
     var trail: [Int] = []
-    for index in studio.navigationBack.indices.reversed() {
-      let entry = studio.navigationBack[index]
-      guard entry.location.worldID == studio.worldID, entry.location.recordID != nil else { break }
+    var last = selectedRecord?.id
+    for index in navigationBack.indices.reversed() {
+      let entry = navigationBack[index]
+      guard entry.location.worldID == worldID, let id = entry.location.recordID else { break }
+      if id == last { continue }
+      last = id
       trail.insert(index, at: 0)
       if trail.count == 2 { break }
     }
     return trail
   }
+}
+
+/// The last two records in this visit's trail, with a menu for the complete history.
+struct RecordTrail: View {
+  @ObservedObject var studio: Studio
+  let origin: String
+  @Environment(\.barCompact) private var compact
   var body: some View {
     HStack(spacing: 6) {
       if !compact {
         Button(origin) { studio.closeRecord() }.buttonStyle(.plain)
           .font(.studio(.label)).foregroundStyle(studio.t.secondary).lineLimit(1)
           .frame(maxWidth: 100).help("Return to \(origin)")
-        ForEach(ancestors, id: \.self) { index in
+        ForEach(studio.recordTrailIndices, id: \.self) { index in
           StudioIcon("chevron.right", size: 9).foregroundStyle(studio.t.muted)
           Button(studio.navigationBack[index].title) { studio.goBack(to: index) }
             .buttonStyle(.plain).font(.studio(.label)).foregroundStyle(studio.t.secondary)

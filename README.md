@@ -77,6 +77,10 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 ![Native Favorites manager with real characters, places, documents and collections](docs/screenshots/favorites.png)
 
+**A document beside your world**
+
+![Mira Vale open in a native editor beside the Glass Sea atlas](docs/screenshots/split-workspace.png)
+
 **Saved workspace layouts**
 
 ![Named Research, Writing, Cartography and Simulation arrangements in the native layout manager](docs/screenshots/layouts.png)
@@ -95,7 +99,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 </details>
 
-Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard, command-palette, navigation, favorites, activity and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard, command-palette, navigation, favorites, activity, split-workspace and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
 
 The complete 394-item expansion is tracked individually in [the implementation ledger](docs/EXPANSION.md). It is **not yet complete**. Dark surfaces now default to graphite; **Settings → General → Dark surfaces** retains true-black OLED as an option.
 

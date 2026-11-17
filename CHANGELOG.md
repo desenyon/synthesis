@@ -16,6 +16,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 
 ### Added
+- Expansion #26: real split workspace with a second native editor beside Atlas, Timeline, Graph, Canvas or another record. Independent caret/undo, dual-save guards, layouts/history, a shared contextual composer and adaptive compact controls. Canvas fit now uses precise zoom in short panes.
 - Expansion #25: durable world-scoped editing history with search, source/action filters, pagination and current-source navigation. Approvals, relationships and archived-source history survive portable v9 / JSON12 exports; older saved revisions reconstruct honestly. Viewport-only saves stay out of the log.
 - Expansion #24: favorite characters, places and documents alongside collections; shared pin controls, ordering, current-source navigation and archive/restore retention, independent of open tabs.
 - Expansion #23: per-universe sidebar section ordering, category visibility and pinned collections; native customization in Settings and sidebar menus, with safe preference recovery.

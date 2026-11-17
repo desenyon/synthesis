@@ -278,6 +278,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     }
     view.addItem(.separator())
     item(view, "Workspace Layouts…", #selector(workspaceLayouts), "l", [.command, .option])
+    item(view, "Open Document Beside Workspace…", #selector(splitDocument), "")
     item(view, "World Activity History…", #selector(worldActivity), "")
     item(view, "Toggle Navigation", #selector(toggleSidebar), "\\")
     item(view, "Toggle Inspector", #selector(toggleInspector), "i", [.command, .option])
@@ -334,7 +335,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
   @objc func nextDocument() { studio.cycleDocument() }
   @objc func previousDocument() { studio.cycleDocument(backward: true) }
   @objc func closeWindow() {
-    if studio.selectedRecord != nil {
+    if studio.hasVisibleDocument {
       studio.closeActiveDocument()
     } else {
       window.performClose(nil)
@@ -360,15 +361,10 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
   @objc func goBack() { studio.goBack() }
   @objc func goForward() { studio.goForward() }
   @objc func workspaceLayouts() { studio.sheet = .layouts }
+  @objc func splitDocument() { studio.sheet = .splitRecord }
   @objc func worldActivity() { studio.sheet = .activity }
   @objc func toggleSidebar() { studio.toggleSidebar() }
-  @objc func toggleInspector() {
-    if studio.selectedRecord == nil {
-      studio.toggleWorkspaceInspector()
-    } else {
-      studio.toggleInspector()
-    }
-  }
+  @objc func toggleInspector() { studio.toggleActiveInspector() }
   @objc func toggleMode() { studio.setMode(studio.mode == .assisted ? .manual : .assisted) }
   @objc func toggleTheme() {
     studio.toggleTheme()

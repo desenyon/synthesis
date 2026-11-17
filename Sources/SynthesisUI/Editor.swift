@@ -49,6 +49,7 @@ struct EditorScreen: View {
     var id: String { rawValue }
   }
   @ObservedObject var studio: Studio
+  let placement: EditorPlacement
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var record: LoreRecord
   @State private var title: String
@@ -77,8 +78,9 @@ struct EditorScreen: View {
   private var sectionsVisible: Bool { tab == .sections }
   private var sectionCount: Int { studio.sectionParents.values.filter { $0 == record.id }.count }
   @State private var sectionParent: LoreRecord?
-  init(studio: Studio, record: LoreRecord) {
+  init(studio: Studio, record: LoreRecord, placement: EditorPlacement = .main) {
     self.studio = studio
+    self.placement = placement
     _record = State(initialValue: record)
     _handle = State(initialValue: studio.editorHandle(for: record))
     _writingStarted = State(
@@ -100,7 +102,7 @@ struct EditorScreen: View {
           }.padding(.horizontal, 20).padding(.vertical, 10)
             .background(studio.t.surface)
         }
-        DocumentTabBar(studio: studio)
+        if placement == .main { DocumentTabBar(studio: studio) }
         if record.kind == "entity" { entityTabs }
         HStack(spacing: 0) {
           if record.kind == "entity" && mechanicsVisible {
@@ -109,10 +111,13 @@ struct EditorScreen: View {
           } else if record.kind == "entity" && sectionsVisible {
             RecordSectionsPage(studio: studio, parent: record)
               .frame(maxWidth: .infinity, maxHeight: .infinity)
+          } else if geo.size.height < 520 {
+            ScrollView { writing(minimumBodyHeight: 180).padding(.bottom, 16) }
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
           } else {
-            writing.frame(maxWidth: .infinity, maxHeight: .infinity)
+            writing().frame(maxWidth: .infinity, maxHeight: .infinity)
           }
-          if studio.inspector && studio.editorInspectorDocked(available: geo.size.width) {
+          if inspectorShown && studio.editorInspectorDocked(available: geo.size.width) {
             inspectorPanel.frame(width: studio.inspectorDisplayWidth(available: geo.size.width))
               .overlay(alignment: .leading) {
                 PanelResizeHandle(
@@ -123,7 +128,7 @@ struct EditorScreen: View {
               .transition(Motion.panelTransition)
           }
         }.overlay(alignment: .trailing) {
-          if studio.inspector && !studio.editorInspectorDocked(available: geo.size.width) {
+          if inspectorShown && !studio.editorInspectorDocked(available: geo.size.width) {
             inspectorPanel.frame(width: min(studio.inspectorWidth, geo.size.width - 24))
               .overlay(alignment: .leading) {
                 PanelResizeHandle(
@@ -137,12 +142,17 @@ struct EditorScreen: View {
           }
         }
       }
-      .animation(reduceMotion ? nil : Motion.panelAnimation, value: studio.inspector)
+      .animation(reduceMotion ? nil : Motion.panelAnimation, value: inspectorShown)
       .animation(reduceMotion ? nil : Motion.panelAnimation, value: mechanicsVisible)
       .animation(reduceMotion ? nil : Motion.panelAnimation, value: sectionsVisible)
     }
+    .simultaneousGesture(TapGesture().onEnded { studio.activeEditorPlacement = placement })
     .onAppear {
-      studio.editorSave = { save() }
+      if placement == .beside {
+        studio.splitEditorSave = { save() }
+      } else {
+        studio.editorSave = { save() }
+      }
       if studio.captureHint.contains("status-save-waiting") { status = .waiting }
       if studio.captureHint.contains("status-save-running") { status = .saving }
       if studio.captureHint.contains("status-save-failed") { status = .failed }
@@ -187,6 +197,9 @@ struct EditorScreen: View {
     }
   }
 
+  private var inspectorShown: Bool {
+    placement == .beside ? studio.splitInspector : studio.inspector
+  }
   private var inspectorPanel: some View {
     RecordInspector(
       studio: studio, record: record, flush: { save() },
@@ -200,65 +213,99 @@ struct EditorScreen: View {
   // MARK: Bar
 
   private var origin: String { studio.libraryCategory ?? studio.destination.rawValue }
-  private var bar: some View {
-    WorkspaceBar(studio: studio) {
-      RecordBreadcrumb(studio: studio, origin: origin, title: title, status: status, t: studio.t)
-        .layoutPriority(1)
-    } trailing: {
-      RecordFavoriteButton(studio: studio, record: record)
-      if record.state == "canon" {
-        StateBadge(state: "canon", t: studio.t).padding(.horizontal, 6)
-          .help("This revision is accepted canon. Editing starts a new draft.")
-      } else {
-        BarAction(
-          title: "Review for canon", icon: "checkmark.seal", t: studio.t,
-          help: record.kind == "capture"
-            ? "Turn this idea into a document before canon review"
-            : "Compare this draft with accepted canon and decide"
-        ) { if save() { panel = .canon } }.disabled(record.kind == "capture")
+  @ViewBuilder private var bar: some View {
+    if placement == .beside {
+      WorkspaceBar(studio: studio, global: false, inset: false) {
+        HStack(spacing: 8) {
+          StudioIcon(recordIcon(record), size: 16).foregroundStyle(studio.t.secondary)
+          Text(title).font(.studio(.control)).lineLimit(1).help(title)
+          OperationFeedbackView(
+            feedback: status.feedback, t: studio.t, compact: true, showDetail: false)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+      } trailing: {
+        IconButton(icon: "magnifyingglass", label: "Choose another document", t: studio.t) {
+          studio.sheet = .splitRecord
+        }
+        IconButton(icon: "arrow.left", label: "Move to main workspace", t: studio.t) {
+          studio.swapSplitWorkspace()
+        }
+        moreActions
+        IconButton(
+          icon: "sidebar.right", label: "Toggle document details", t: studio.t,
+          active: inspectorShown
+        ) { studio.splitInspector.toggle() }
+        IconButton(icon: "xmark", label: "Close second document", t: studio.t) {
+          studio.closeSplitWorkspace()
+        }
       }
-      IconMenu(icon: "ellipsis", label: "More actions", t: studio.t) {
-        Button("Revision history") { openHistory() }
-        if record.kind == "capture" {
-          Button("Turn into a document") {
-            if save() {
-              studio.perform {
-                record = try studio.store.convertCapture(worldID: studio.worldID, id: record.id)
-                try studio.reload()
+    } else {
+      WorkspaceBar(studio: studio) {
+        RecordBreadcrumb(studio: studio, origin: origin, title: title, status: status, t: studio.t)
+          .layoutPriority(1)
+      } trailing: {
+        RecordFavoriteButton(studio: studio, record: record)
+        if record.state == "canon" {
+          StateBadge(state: "canon", t: studio.t).padding(.horizontal, 6)
+            .help("This revision is accepted canon. Editing starts a new draft.")
+        } else {
+          BarAction(
+            title: "Review for canon", icon: "checkmark.seal", t: studio.t,
+            help: record.kind == "capture"
+              ? "Turn this idea into a document before canon review"
+              : "Compare this draft with accepted canon and decide"
+          ) { if save() { panel = .canon } }.disabled(record.kind == "capture")
+        }
+        moreActions
+        IconButton(
+          icon: "sidebar.right", label: inspectorShown ? "Hide details" : "Show details",
+          t: studio.t, active: inspectorShown
+        ) { studio.toggleInspector() }
+      }
+    }
+  }
+  private var moreActions: some View {
+    IconMenu(icon: "ellipsis", label: "More actions", t: studio.t) {
+      if placement == .main { SplitRecordAction(studio: studio, record: record) }
+      if placement == .beside && record.state != "canon" {
+        Button("Review for canon") { if save() { panel = .canon } }
+          .disabled(record.kind == "capture")
+      }
+      Button("Revision history") { openHistory() }
+      if record.kind == "capture" {
+        Button("Turn into a document") {
+          if save() {
+            studio.perform {
+              record = try studio.store.convertCapture(worldID: studio.worldID, id: record.id)
+              try studio.reload()
+            }
+          }
+        }
+      }
+      if studio.mode == .assisted {
+        Button("Reference in conversation") {
+          if save() {
+            studio.reference(record)
+            studio.navigate(.chat)
+          }
+        }
+      }
+      if let maps = try? studio.store.mapsForRecord(worldID: record.worldID, recordID: record.id),
+        !maps.isEmpty
+      {
+        MenuSection("Maps") {
+          ForEach(maps) { map in
+            Button("Open \(map.name)") {
+              if save() {
+                studio.openBoard(map.id, kind: "atlas")
               }
             }
           }
         }
-        if studio.mode == .assisted {
-          Button("Reference in conversation") {
-            if save() {
-              studio.reference(record)
-              studio.navigate(.chat)
-            }
-          }
-        }
-        if let maps = try? studio.store.mapsForRecord(worldID: record.worldID, recordID: record.id),
-          !maps.isEmpty
-        {
-          MenuSection("Maps") {
-            ForEach(maps) { map in
-              Button("Open \(map.name)") {
-                if save() {
-                  studio.openBoard(map.id, kind: "atlas")
-                }
-              }
-            }
-          }
-        }
-        Button("Show on canvas") { if save() { studio.showOnCanvas(record) } }
-        Button("Export as Markdown…") { export() }
-        Divider()
-        Button("Archive") { if save() { studio.archive(record) } }
       }
-      IconButton(
-        icon: "sidebar.right", label: studio.inspector ? "Hide details" : "Show details",
-        t: studio.t, active: studio.inspector
-      ) { studio.toggleInspector() }
+      Button("Show on canvas") { if save() { studio.showOnCanvas(record) } }
+      Button("Export as Markdown…") { export() }
+      Divider()
+      Button("Archive") { if save() { studio.archive(record) } }
     }
   }
 
@@ -287,7 +334,7 @@ struct EditorScreen: View {
 
   // MARK: Writing
 
-  private var writing: some View {
+  private func writing(minimumBodyHeight: CGFloat? = nil) -> some View {
     VStack(alignment: .leading, spacing: 0) {
       if let entry = recovered { recoveryBanner(entry) }
       if let parent = sectionParent {
@@ -314,6 +361,7 @@ struct EditorScreen: View {
       }.padding(.bottom, 10)
       TextField("Untitled", text: $title, axis: .vertical)
         .font(.studio(.entityTitle)).tracking(-0.4).textFieldStyle(.plain)
+        .fixedSize(horizontal: false, vertical: true)
         .accessibilityLabel("Record title")
         .onChange(of: title) { _, _ in changed() }.accessibilityLabel("Title")
       if record.kind == "entity" && bodyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -366,10 +414,10 @@ struct EditorScreen: View {
           bodyText = text
           richText = rtf
           changed()
-        }.frame(maxHeight: .infinity)
-          .onAppear { if writingStarted { handle.focus() } }
+        }.frame(minHeight: minimumBodyHeight, maxHeight: .infinity)
+          .onAppear { if writingStarted && placement == .main { handle.focus() } }
       }
-    }.padding(.horizontal, 36).padding(.top, 18).frame(
+    }.padding(.horizontal, placement == .beside ? 24 : 36).padding(.top, 18).frame(
       maxWidth: CGFloat(studio.preferences.readingWidth)
     )
     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -425,6 +473,7 @@ struct EditorScreen: View {
   // MARK: Persistence
 
   private func changed() {
+    studio.activeEditorPlacement = placement
     dirty = true
     status = .waiting
     journaling?.cancel()

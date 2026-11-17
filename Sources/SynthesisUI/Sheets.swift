@@ -34,6 +34,7 @@ struct StudioSheet: View {
       case .layouts: WorkspaceLayoutsSheet(studio: studio)
       case .navigation: SidebarCustomizationSheet(studio: studio)
       case .activity: WorldActivitySheet(studio: studio)
+      case .splitRecord: SplitRecordPicker(studio: studio)
       case .project: NewProjectSheet(studio: studio)
       case .world: world
       case .document: document

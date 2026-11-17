@@ -380,6 +380,7 @@ struct StateBadge: View {
       Circle().fill(t.state(state)).frame(width: 6, height: 6)
       Text(Vocabulary.stateLabel(state)).font(.studio(.captionStrong))
         .foregroundStyle(state == "canon" ? t.positive : t.secondary)
+        .lineLimit(1).fixedSize()
     }.accessibilityElement(children: .combine)
       .accessibilityLabel("State: \(Vocabulary.stateLabel(state))")
   }
@@ -583,15 +584,33 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
       Spacer(minLength: 8)
       trailing()
       if global {
-        if studio.selectedRecord == nil {
+        if compact {
+          IconMenu(icon: "square.stack.3d.up", label: "Workspace tools", t: studio.t) {
+            Button("Open document beside workspace…") { studio.sheet = .splitRecord }
+            if studio.selectedRecord == nil {
+              Button(studio.workspaceInspector ? "Hide inspector" : "Show inspector") {
+                studio.toggleWorkspaceInspector()
+              }
+            }
+            if studio.creativeScope != nil {
+              Button("Creative components…") { studio.sheet = .components }
+            }
+          }
+        } else {
           IconButton(
-            icon: "sidebar.right", label: "Toggle inspector", t: studio.t,
-            active: studio.workspaceInspector
-          ) { studio.toggleWorkspaceInspector() }
-        }
-        if studio.creativeScope != nil {
-          IconButton(icon: "rectangle.on.rectangle", label: "Creative components", t: studio.t) {
-            studio.sheet = .components
+            icon: "square.stack.3d.up", label: "Open a document beside this workspace", t: studio.t,
+            active: studio.splitRecord != nil
+          ) { studio.sheet = .splitRecord }
+          if studio.selectedRecord == nil {
+            IconButton(
+              icon: "sidebar.right", label: "Toggle inspector", t: studio.t,
+              active: studio.workspaceInspector
+            ) { studio.toggleWorkspaceInspector() }
+          }
+          if studio.creativeScope != nil {
+            IconButton(icon: "rectangle.on.rectangle", label: "Creative components", t: studio.t) {
+              studio.sheet = .components
+            }
           }
         }
         Rectangle().fill(studio.t.hairline).frame(width: 1, height: 18).padding(
