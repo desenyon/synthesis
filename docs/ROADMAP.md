@@ -42,7 +42,7 @@ Owner-directed native sidebar refinement preserves the existing routes and state
 - Canvas depth (resize, snapping, named groups); Timeline reordering and canon state for events; richer Atlas layers and draggable markers; named map hierarchy and click-to-move markers are implemented.
 - Measured large-board and large-graph pass; accessibility walk-through; crash recovery for unsaved text.
 
-No releases or public deployment.
+Owner-authorized development prereleases begin at 0.0.1. The public product launch remains 1.0; no public deployment is implied.
 
 ## 2026-11-15 owner refinement checkpoint
 

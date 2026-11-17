@@ -17,6 +17,7 @@ struct AtlasScreen: View {
   @State private var newMap = false
   @State private var loadFailed = false
   @State private var map = AtlasDocument()
+  @State private var mapImage: NSImage?
   @State private var zoom = 1.0
   @State private var pan = CGSize.zero
   @State private var panAnchor: CGPoint?
@@ -102,7 +103,7 @@ struct AtlasScreen: View {
           ) {
             Button("Retry") { loadMap() }.buttonStyle(QuietButton(t: studio.t))
           }.frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let image = ImageCache.image(base64: map.image) {
+        } else if let image = mapImage {
           mapView(image, size: geo.size)
         } else {
           EmptyState(
@@ -177,6 +178,7 @@ struct AtlasScreen: View {
       let next =
         try board.map { try JSONDecoder().decode(AtlasDocument.self, from: Data($0.content.utf8)) }
         ?? AtlasDocument()
+      mapImage = ImageCache.image(base64: next.image)
       boardID = board?.id
       currentBoard = board
       map = next
@@ -223,12 +225,9 @@ struct AtlasScreen: View {
           pan.height += $0.height
         },
         onZoom: { factor, location in
-          let next = min(5, max(0.5, zoom * factor))
-          let ratio = next / zoom
-          let anchor = CGPoint(x: location.x - size.width / 2, y: location.y - size.height / 2)
-          pan.width = anchor.x - (anchor.x - pan.width) * ratio
-          pan.height = anchor.y - (anchor.y - pan.height) * ratio
-          zoom = next
+          changeZoom(
+            factor,
+            anchor: CGPoint(x: location.x - size.width / 2, y: location.y - size.height / 2))
         },
         onClick: {
           selected = nil
@@ -323,8 +322,8 @@ struct AtlasScreen: View {
           }
           Spacer()
           ZoomControls(
-            zoom: zoom, t: studio.t, zoomOut: { zoom = max(0.5, zoom / 1.25) },
-            zoomIn: { zoom = min(5, zoom * 1.25) },
+            zoom: zoom, t: studio.t, zoomOut: { stepZoom(1 / 1.25) },
+            zoomIn: { stepZoom(1.25) },
             fit: {
               withAnimation(.easeOut(duration: 0.2)) {
                 zoom = 1
@@ -334,6 +333,15 @@ struct AtlasScreen: View {
         }
       }.padding(14)
     }.clipped()
+  }
+  private func changeZoom(_ factor: Double, anchor: CGPoint = .zero) {
+    let next = SpatialViewport.zoom(
+      scale: zoom, pan: pan, factor: factor, anchor: anchor, limits: 0.5...5)
+    zoom = next.scale
+    pan = next.pan
+  }
+  private func stepZoom(_ factor: Double) {
+    withAnimation(.easeOut(duration: 0.18)) { changeZoom(factor) }
   }
   private func markerView(_ marker: MapMarker) -> some View {
     let record = studio.records.first { $0.id == marker.recordID }
@@ -383,6 +391,7 @@ struct AtlasScreen: View {
   private func replaceImage(_ image: String) {
     let previous = currentBoard
     map.image = image
+    mapImage = ImageCache.image(base64: image)
     zoom = 1
     pan = .zero
     if persist() {

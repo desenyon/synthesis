@@ -1,0 +1,28 @@
+[0/1] Planning build
+Building for debugging...
+[0/5] Write sources
+[1/5] Write swift-version--1AB21518FC5DEDBE.txt
+[3/5] Emitting module SynthesisUITests
+[4/5] Compiling SynthesisUITests GraphGeometryTests.swift
+[4/6] Write Objects.LinkFileList
+[5/6] Linking SynthesisPackageTests
+Build complete! (1.88s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite GraphGeometryTests started.
+◇ Test invalidGestureCoordinatesCannotPoisonTheViewport() started.
+✘ Test invalidGestureCoordinatesCannotPoisonTheViewport() recorded an issue at GraphGeometryTests.swift:11:7: Expectation failed: next.scale == 1 && next.pan == pan
+↳ next.scale == 1 && next.pan == pan → false
+↳   next.scale == 1 → false
+↳   next.pan == pan → <not evaluated>
+✘ Test invalidGestureCoordinatesCannotPoisonTheViewport() recorded an issue at GraphGeometryTests.swift:11:7: Expectation failed: next.scale == 1 && next.pan == pan
+↳ next.scale == 1 && next.pan == pan → false
+↳   next.scale == 1 → false
+↳   next.pan == pan → <not evaluated>
+✘ Test invalidGestureCoordinatesCannotPoisonTheViewport() failed after 0.001 seconds with 2 issues.
+✘ Suite GraphGeometryTests failed after 0.001 seconds with 2 issues.
+✘ Test run with 1 test in 1 suite failed after 0.001 seconds with 2 issues.
+Note: Some test targets reported failures:
+  - SynthesisPackageTests (Swift Testing)

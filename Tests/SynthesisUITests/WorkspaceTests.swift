@@ -6,6 +6,49 @@ import Testing
 @testable import SynthesisUI
 
 @MainActor struct WorkspaceTests {
+  @Test func acceptedMarkersRefreshTheActiveAtlasWithoutReplacingItsImageOrOtherMaps() async throws
+  {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    let place = try store.createRecord(
+      worldID: studio.worldID, title: "Harbour", kind: "entity", category: "Places")
+    let first = try store.createAtlasMap(worldID: studio.worldID, name: "Open map")
+    let target = try store.saveAtlasMap(
+      worldID: studio.worldID, name: "Coast", content: #"{"image":"preserved-image","markers":[]}"#)
+    studio.destination = .atlas
+    studio.mapBoardID = first.id
+    // First acceptance switches to the affected map; the next refreshes that same map.
+    for x in [0.25, 0.75] {
+      let proposal = try #require(
+        try store.stageProposal(
+          worldID: studio.worldID, conversationID: nil, messageID: nil,
+          payload: [
+            "changes": [
+              [
+                "action": "place_marker", "board": target.id, "source": place.id, "x": x, "y": 0.4,
+              ]
+            ]
+          ]))
+      let revision = studio.worldRevision
+      studio.resolveAll(proposal, accept: true)
+      for _ in 0..<100 where studio.reviewingProposal {
+        try await Task.sleep(for: .milliseconds(10))
+      }
+      #expect(!studio.reviewingProposal && studio.error == nil)
+      #expect(studio.destination == .atlas && studio.mapBoardID == target.id)
+      #expect(studio.worldRevision > revision)
+      let saved = try store.board(worldID: studio.worldID, id: target.id, kind: "atlas")
+      let document = try JSONDecoder().decode(AtlasDocument.self, from: Data(saved.content.utf8))
+      #expect(document.image == "preserved-image")
+      #expect(document.markers.count == 1)
+      #expect(document.markers.first?.recordID == place.id && document.markers.first?.x == x)
+      #expect(studio.pendingProposals.isEmpty)
+    }
+    let unchanged = try store.board(worldID: studio.worldID, id: first.id, kind: "atlas")
+    #expect(unchanged.content == first.content && unchanged.name == first.name)
+    #expect(try store.record(worldID: studio.worldID, id: place.id) == place)
+  }
+
   @Test func acceptingWorkspaceChangesRefreshesHistoryAndSelectsTheCreatedMap() async throws {
     let store = try WorkspaceStore(path: ":memory:")
     let studio = try Studio(store: store)

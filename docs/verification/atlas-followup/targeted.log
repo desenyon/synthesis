@@ -1,0 +1,40 @@
+[0/1] Planning build
+Building for debugging...
+[0/7] Write sources
+[1/7] Write swift-version--1AB21518FC5DEDBE.txt
+[2/8] Linking Synthesis
+[3/8] Applying Synthesis
+[5/8] Emitting module SynthesisUITests
+[6/8] Compiling SynthesisUITests WorkspaceTests.swift
+[6/8] Write Objects.LinkFileList
+[7/8] Linking SynthesisPackageTests
+Build complete! (2.41s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite WorkspaceTests started.
+◇ Suite GraphGeometryTests started.
+◇ Test acceptedMarkersRefreshTheActiveAtlasWithoutReplacingItsImageOrOtherMaps() started.
+◇ Test bundledEngineLaysOutCyclesWithoutCardOverlap() started.
+◇ Test nearAndCoincidentCardsRouteOutsideTheirContent() started.
+◇ Test fittedCardsKeepDirectRoutes() started.
+◇ Test directedChainUsesDagreInsteadOfEmergencyGrid() started.
+◇ Test parallelEdgesSeparateAndPortsRespectZoom() started.
+◇ Test atlasButtonZoomKeepsAPannedLandmarkAtTheViewportCentre() started.
+◇ Test invalidGestureCoordinatesCannotPoisonTheViewport() started.
+◇ Test atlasZoomLimitsKeepThePointerAnchoredWithoutDrift() started.
+◇ Test zoomPreservesTheAnchoredWorldPointAtEveryScale() started.
+✔ Test parallelEdgesSeparateAndPortsRespectZoom() passed after 0.001 seconds.
+✔ Test fittedCardsKeepDirectRoutes() passed after 0.001 seconds.
+✔ Test atlasZoomLimitsKeepThePointerAnchoredWithoutDrift() passed after 0.001 seconds.
+✔ Test atlasButtonZoomKeepsAPannedLandmarkAtTheViewportCentre() passed after 0.001 seconds.
+✔ Test invalidGestureCoordinatesCannotPoisonTheViewport() passed after 0.001 seconds.
+✔ Test nearAndCoincidentCardsRouteOutsideTheirContent() passed after 0.001 seconds.
+✔ Test zoomPreservesTheAnchoredWorldPointAtEveryScale() passed after 0.001 seconds.
+✔ Test acceptedMarkersRefreshTheActiveAtlasWithoutReplacingItsImageOrOtherMaps() passed after 0.041 seconds.
+✔ Suite WorkspaceTests passed after 0.041 seconds.
+✔ Test directedChainUsesDagreInsteadOfEmergencyGrid() passed after 0.052 seconds.
+✔ Test bundledEngineLaysOutCyclesWithoutCardOverlap() passed after 0.052 seconds.
+✔ Suite GraphGeometryTests passed after 0.052 seconds.
+✔ Test run with 10 tests in 2 suites passed after 0.052 seconds.

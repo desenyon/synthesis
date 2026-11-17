@@ -4,6 +4,8 @@ The Atlas title is a map selector. **New map** creates a named, saved map; **Map
 
 Choose an image or an optional bundled sample illustration for each map. **Place marker** selects an existing record, then a click places it. A marker's context menu opens its record, moves it with another click, or removes it with Undo. Image replacement also offers Undo. Each map keeps independent imagery and markers.
 
+Zoom buttons preserve the place at the viewport centre, including after panning. Pinch and Command-scroll preserve the point beneath the pointer. Both use the same bounded transform (50–500%); **Fit** restores the whole map. The decoded image is retained while navigating the map, so panning and zooming do not repeatedly decode its base64 payload.
+
 A parent link appears in the workspace bar. Maps with children offer a **Local maps** menu. A linked place opens its lore from the map; a record's action menu lists maps that describe or contain it. Removing a map archives it with Undo. Move or remove child maps before archiving their parent.
 
 Save and Undo compare the exact loaded map name/content in a transaction. They cannot overwrite a newer save or target another map after switching. Unsaved conflicts keep their local changes; **Reload saved map** explicitly confirms discarding them. A failed load leaves stored content untouched and allows navigation away.

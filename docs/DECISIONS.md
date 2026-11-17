@@ -104,3 +104,7 @@ Rule history is an additive, world-scoped snapshot table, written in the same tr
 The owner requested a 304–320pt graphite sidebar with restrained native translucency, monochrome navigation and the existing world artwork as its identity. Implemented at 312pt, retaining Inter, Phosphor, all Studio actions and the native titled window. This updates the sidebar portion of the earlier black/opaque presentation decision; the workspace palette and C2's broader theme proposal remain unchanged.
 
 Use an explicitly themed `NSVisualEffectView` with an 88% opaque tint, never adaptive Liquid Glass. Reduce Transparency/Increase Contrast use the opaque token. One scrolling middle prevents history from competing with fixed top and bottom controls. Shared 150ms interaction states honor Reduce Motion. No new navigation model, world data or database migration is introduced. [Design and verification contract](SIDEBAR.md).
+
+## 2026-11-16 — narrower sidebar and development releases (owner protected)
+
+The owner's follow-up requested horizontal compaction without another redesign and explicitly authorized the first development release. The accepted sidebar composition is retained at 284pt; 0.0.1 is published as a prerelease. This supersedes the earlier width target and no-release restriction. The public product launch remains 1.0. Subsequent fixes on main do not silently replace the published tag or binary.

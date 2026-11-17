@@ -455,7 +455,7 @@ struct RelationshipGraph: View {
     }
   }
   private func changeZoom(_ factor: Double, anchor: CGPoint = .zero) {
-    let next = GraphViewport.zoom(scale: zoom, pan: pan, factor: factor, anchor: anchor)
+    let next = SpatialViewport.zoom(scale: zoom, pan: pan, factor: factor, anchor: anchor)
     zoom = next.scale
     pan = next.pan
     hoveredEdge = nil

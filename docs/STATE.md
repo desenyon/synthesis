@@ -2,6 +2,12 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. Development prerelease 0.0.1 is owner-authorized; the 1.0 public product launch remains later. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits. AGENTS.md changes only the former no-releases sentence to reflect that explicit authorization.
 
+## Follow-up on main — Atlas interaction audit
+
+After the published release, corrected Atlas button zoom drift after panning. Graph and Atlas now share `SpatialViewport`, with separate zoom limits and guards against invalid gesture coordinates. Atlas retains its decoded image between loads/replacements so pan/zoom renders no longer decode the base64 payload repeatedly. The accepted sidebar composition is unchanged.
+
+Verified `./scripts/check.sh`: strict lint, **124 tests / 27 suites**, optimized build. Ten focused geometry/approval tests passed; marker acceptance now has explicit regression coverage for both switching to an affected map and refreshing the already-active map while retaining artwork, source records and other maps. **12 native captures** inspected at 1440×900 and 1024×768 across dark/light/Manual Atlas, empty child map and Graph. [Evidence](verification/atlas-followup). No foreground input, animation benchmark or live provider call. No user-data edits or app restart. The Aeronia attachment remains a private reference. AGENTS.md unchanged in this follow-up; the published tag/assets below remain intact, so these additional fixes are on main and in the local development build.
+
 ## 0.0.1 — connected interaction fixes
 
 Published [v0.0.1](https://github.com/desenyon/synthesis/releases/tag/v0.0.1), prerelease (not draft), from `88a6c2eef805afa1ae4506596450bc2e78e5b1c6`. Apple Silicon ZIP, SHA256SUMS and third-party notices uploaded. GitHub's ZIP digest matches the tested local artifact: `ff22a54271450d77df5d3cb078a35fa054343c3a1ffb164a721af5e12d76a67a`.

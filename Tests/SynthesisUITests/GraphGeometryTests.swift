@@ -4,12 +4,49 @@ import Testing
 @testable import SynthesisUI
 
 struct GraphGeometryTests {
+  @Test func atlasButtonZoomKeepsAPannedLandmarkAtTheViewportCentre() {
+    let inward = SpatialViewport.zoom(
+      scale: 1, pan: CGSize(width: 200, height: -80), factor: 1.25, anchor: .zero,
+      limits: 0.5...5)
+    // The map point (-200, 80) was at the centre. It must stay there.
+    #expect(inward.scale == 1.25)
+    #expect(inward.pan == CGSize(width: 250, height: -100))
+    #expect(-200 * inward.scale + inward.pan.width == 0)
+    #expect(80 * inward.scale + inward.pan.height == 0)
+    let outward = SpatialViewport.zoom(
+      scale: inward.scale, pan: inward.pan, factor: 0.8, anchor: .zero, limits: 0.5...5)
+    #expect(outward.scale == 1 && outward.pan == CGSize(width: 200, height: -80))
+  }
+
+  @Test func atlasZoomLimitsKeepThePointerAnchoredWithoutDrift() {
+    let inward = SpatialViewport.zoom(
+      scale: 4, pan: CGSize(width: 60, height: -20), factor: 2,
+      anchor: CGPoint(x: 100, y: 60), limits: 0.5...5)
+    #expect(inward.scale == 5 && inward.pan == CGSize(width: 50, height: -40))
+    let atLimit = SpatialViewport.zoom(
+      scale: inward.scale, pan: inward.pan, factor: 2,
+      anchor: CGPoint(x: 100, y: 60), limits: 0.5...5)
+    #expect(atLimit.scale == 5 && atLimit.pan == inward.pan)
+    let outward = SpatialViewport.zoom(
+      scale: 1, pan: CGSize(width: 60, height: -20), factor: 0.1,
+      anchor: CGPoint(x: 100, y: 60), limits: 0.5...5)
+    #expect(outward.scale == 0.5 && outward.pan == CGSize(width: 80, height: 20))
+  }
+
+  @Test func invalidGestureCoordinatesCannotPoisonTheViewport() {
+    let pan = CGSize(width: 40, height: -12)
+    for anchor in [CGPoint(x: Double.nan, y: 0), CGPoint(x: 0, y: Double.infinity)] {
+      let next = SpatialViewport.zoom(scale: 1, pan: pan, factor: 1.2, anchor: anchor)
+      #expect(next.scale == 1 && next.pan == pan)
+    }
+  }
+
   @Test func zoomPreservesTheAnchoredWorldPointAtEveryScale() {
     for scale in [0.1, 0.18, 0.4, 1.0, 2.2] {
       for factor in [1 / 1.2, 1.2, 100.0, 0.001] {
         let pan = CGSize(width: 213, height: -82)
         let anchor = CGPoint(x: 100, y: -46)
-        let next = GraphViewport.zoom(scale: scale, pan: pan, factor: factor, anchor: anchor)
+        let next = SpatialViewport.zoom(scale: scale, pan: pan, factor: factor, anchor: anchor)
         #expect(
           abs((anchor.x - pan.width) / scale - (anchor.x - next.pan.width) / next.scale) < 0.00001)
         #expect(
@@ -18,7 +55,7 @@ struct GraphGeometryTests {
         #expect((0.1...2.2).contains(next.scale))
       }
     }
-    let out = GraphViewport.zoom(scale: 0.18, pan: .zero, factor: 1 / 1.2, anchor: .zero)
+    let out = SpatialViewport.zoom(scale: 0.18, pan: .zero, factor: 1 / 1.2, anchor: .zero)
     #expect(out.scale < 0.18, "Zoom out after Fit must not jump inward to 40 percent")
   }
 

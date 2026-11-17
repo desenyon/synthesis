@@ -1,0 +1,13 @@
+CAPTURE atlas-linked 1440x900, bitmap 2880x1800, 1585ms
+CAPTURE light-atlas-linked 1440x900, bitmap 2880x1800, 1582ms
+CAPTURE manual-atlas-linked 1440x900, bitmap 2880x1800, 796ms
+CAPTURE atlas-local 1440x900, bitmap 2880x1800, 908ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 2649ms
+CAPTURE light-graph 1440x900, bitmap 2880x1800, 2655ms
+CAPTURE atlas-linked 1024x768, bitmap 2048x1536, 968ms
+CAPTURE light-atlas-linked 1024x768, bitmap 2048x1536, 970ms
+CAPTURE manual-atlas-linked 1024x768, bitmap 2048x1536, 450ms
+CAPTURE atlas-local 1024x768, bitmap 2048x1536, 631ms
+CAPTURE graph 1024x768, bitmap 2048x1536, 1088ms
+CAPTURE light-graph 1024x768, bitmap 2048x1536, 1079ms
+Native captures complete: /private/tmp/synthesis-atlas-followup
