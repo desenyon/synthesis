@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Optional illustrations, generated with GPT Image. Installing artwork is an explicit action;
+/// Bundled sample illustrations (AI-generated). Installing artwork is an explicit action;
 /// neither a record nor a canonical fact is created by selecting an image.
 enum StudioArtwork: String, CaseIterable, Identifiable {
   case atlas = "drowned-atlas-gpt"
@@ -23,6 +23,8 @@ enum StudioArtwork: String, CaseIterable, Identifiable {
 struct ArtworkPicker: View {
   let t: Theme
   var mapOnly = false
+  /// When set, the picker also offers an explicit Codex image request.
+  var studio: Studio?
   var select: (Data) -> Void
   var close: () -> Void
   var body: some View {
@@ -40,7 +42,10 @@ struct ArtworkPicker: View {
             } label: {
               VStack(alignment: .leading, spacing: 8) {
                 Image(nsImage: image).resizable().scaledToFill()
-                  .frame(width: mapOnly ? 420 : 204, height: mapOnly ? 230 : 150)
+                  .frame(
+                    width: mapOnly ? 420 : 204,
+                    height: mapOnly ? (studio == nil ? 230 : 140) : (studio == nil ? 150 : 110)
+                  )
                   .clipped().clipShape(RoundedRectangle(cornerRadius: 12))
                 Text(art.title).font(.studio(size: 15, weight: .medium))
                 Text(art.subtitle).font(.studio(size: 12)).foregroundStyle(t.secondary)
@@ -50,9 +55,65 @@ struct ArtworkPicker: View {
           }
         }
       }
+      if let studio { GenerateImageSection(studio: studio, mapOnly: mapOnly, select: select) }
     } footer: {
       Spacer()
-      Button("Cancel", action: close).buttonStyle(QuietButton(t: t))
+      Button("Cancel") {
+        studio?.stopImageGeneration()
+        close()
+      }.buttonStyle(QuietButton(t: t))
+    }
+  }
+}
+
+/// Describe an image and generate it with the creator's own Codex subscription. The description
+/// is the only content sent; world lore is not included.
+private struct GenerateImageSection: View {
+  @ObservedObject var studio: Studio
+  let mapOnly: Bool
+  var select: (Data) -> Void
+  @State private var description = ""
+  var body: some View {
+    let t = studio.t
+    VStack(alignment: .leading, spacing: 10) {
+      Rectangle().fill(t.hairline).frame(height: 1).padding(.vertical, 4)
+      Text("Generate with Codex").font(.studio(size: 14, weight: .semibold))
+      TextField(
+        mapOnly
+          ? "A hand-drawn map of a drowned archipelago, seen from above, muted inks"
+          : "A cartographer on a cliff at dawn, holding a damp chart",
+        text: $description, axis: .vertical
+      ).lineLimit(2...4).textFieldStyle(.plain).font(.studio(size: 14)).padding(10)
+        .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
+        .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.border, lineWidth: 1))
+        .accessibilityLabel("Image description")
+      Text(
+        studio.mode == .manual
+          ? "Manual is on, so nothing can be sent. Switch to AI Assisted to generate."
+          : "Sends only this description to Codex using your ChatGPT subscription allowance. No world lore is included. Codex also keeps its own copy in its generated_images folder."
+      ).font(.studio(size: 12)).foregroundStyle(t.muted).fixedSize(
+        horizontal: false, vertical: true)
+      HStack(spacing: 8) {
+        if studio.generatingImage {
+          ProgressView().controlSize(.small)
+          Text("Generating… this can take a minute").font(.studio(size: 12.5))
+            .foregroundStyle(t.secondary)
+          Spacer()
+          Button("Stop") { studio.stopImageGeneration() }.buttonStyle(QuietButton(t: t))
+        } else {
+          Spacer()
+          Button("Generate image") {
+            studio.generateImage(description) { data in select(data) }
+          }.buttonStyle(QuietButton(t: t, primary: true))
+            .disabled(
+              studio.mode == .manual
+                || description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+      }
+    }.onAppear {
+      if studio.captureHint == "sheet-generate" {
+        description = "A hand-drawn map of a drowned archipelago, seen from above, muted inks"
+      }
     }
   }
 }

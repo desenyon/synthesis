@@ -95,7 +95,7 @@ struct CuratedCanvas: View {
       case .rename: renameForm
       case .artwork:
         ArtworkPicker(
-          t: studio.t,
+          t: studio.t, studio: studio,
           select: { data in
             if let id = session.selection.first, session.selection.count == 1 {
               session.setArtwork(data.base64EncodedString(), for: id)

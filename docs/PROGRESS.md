@@ -256,3 +256,9 @@ Timeline has three zoom levels in its header: **Detailed** (the existing cards),
 ### Slice 9 — Timeline reordering (verified)
 
 Every event menu (Detailed, Compact and By era) has **Move earlier** / **Move later**, with Undo. The first move numbers all active events 1…n in their current order so unordered events gain a stable place; Undo restores the exact previous order, including "no order". Review's new timeline-order check uses this order. Checks: new `EventOrderTests`; `./scripts/check.sh` passed with **154 tests / 38 suites**. The change adds menu items only, which background captures cannot open; drag-to-reorder is not built.
+
+### Slice 10 — explicit Codex image generation (implemented; live run pending approval)
+
+The installed Codex 0.169 lists `image_generation` as stable, and its own tool instructions state that `image_gen` writes to `$CODEX_HOME/generated_images`. `CodexImageGenerator` runs only from **Generate image** in the illustration library (Canvas and Atlas): sign-in check, empty scratch folder, read-only sandbox, shell/apps/plugins/browser/memories disabled, `image_generation` enabled for this request only, description-only prompt treated as data. It imports the newest PNG/JPEG/WebP written during the request (header-checked, ≤ 12 MB) and ignores older files. Chat still passes `--disable image_generation`. Manual mode refuses; injected transports (tests, background capture) get a generator with no executable.
+
+Checks: 3 stand-in tests (arguments, prompt, environment allowlist and CODEX_HOME, old files ignored, missing/non-image output refused, chat flag unchanged); `./scripts/check.sh` passed with **157 tests / 39 suites**. `sheet-generate` and `sheet-artwork` captured at both sizes: the first 1024 capture overflowed the sheet, so the preview and description field were made compact and recaptured. **No live image request was made**: it spends subscription allowance and needs the owner's go-ahead.

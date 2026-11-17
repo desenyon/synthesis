@@ -49,3 +49,11 @@ One live request through each harness on 2026-11-13 (`SYNTHESIS_LIVE_HARNESS=cla
 ## Reviewable operations
 
 The supported contract is create/revise record, relate entities, add event, create canvas, place/move a linked card, place/move a marker on an existing map, link records, and add a draft rule. The native layer validates world membership, dependencies and coordinates before staging. Acceptance rejects stale revisions and archived source records. Rules appear in the entity details inspector and remain manually editable. Every operation needs an explicit UI review; canon needs its separate approval. This is single-shot retrieval and proposal execution, not unrestricted autonomous control over every tool.
+
+## Generating an illustration (explicit, Codex only)
+
+Canvas (**Add → illustration**) and Atlas (**Sample illustrations…** / **Choose an illustration…**) open the illustration library, which now has **Generate with Codex**. Type a description and press **Generate image**. That one press makes one Codex request with your ChatGPT subscription; nothing else triggers it, chat keeps image generation disabled, and Manual mode refuses before any request.
+
+The request contains only your description, never world lore. It runs read-only in an empty scratch folder with shell, apps, plugins, browsing and memories disabled, and only Codex's built-in image tool enabled. Codex saves its output under `$CODEX_HOME/generated_images` (the CLI's own documented location); Synthesis imports the newest PNG, JPEG or WebP written there during the request, up to 12 MB, and adds it to the board or map where you started. Codex keeps its own copy in that folder. **Stop** cancels the request. An image is never canon.
+
+Verification status: covered by stand-in executable tests (arguments, prompt, environment, ignoring older files, rejecting non-images). A live generation has not been run, because it uses subscription allowance and needs your go-ahead.

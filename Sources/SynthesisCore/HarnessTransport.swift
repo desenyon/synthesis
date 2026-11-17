@@ -66,7 +66,7 @@ enum HarnessProcess {
   }
   static func run(
     executable: String, arguments: [String], input: String, directory: URL,
-    timeout: Duration = .seconds(180),
+    timeout: Duration = .seconds(180), extraEnvironment: [String: String] = [:],
     onLine: @escaping @Sendable (String) async throws -> Void
   ) async throws -> (status: Int32, errors: String) {
     let process = Process()
@@ -75,7 +75,8 @@ enum HarnessProcess {
     process.currentDirectoryURL = directory
     // Authentication stays with the subscription CLI. Never inherit arbitrary shell,
     // editor, project, prompt, API or agent-session variables into the model process.
-    process.environment = environment(ProcessInfo.processInfo.environment)
+    process.environment = environment(ProcessInfo.processInfo.environment).merging(
+      extraEnvironment.filter { $0.key == "CODEX_HOME" }, uniquingKeysWith: { _, new in new })
     let stdin = Pipe()
     let stdout = Pipe()
     let stderr = Pipe()

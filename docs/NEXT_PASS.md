@@ -22,12 +22,12 @@ This is an implementation ledger, not an acceptance claim. Preserve real lore an
 
 1. First-install-only onboarding and full-page application/world settings implemented. Expand useful, wired preferences in subsequent slices.
 2. Close-node routing and independently labelled reverse relationships implemented. Basic intervening-card detours now work; dense obstacle routing and large-board performance remain.
-3. Saved nested branches/periods, collapsible history trees, manual editing and reviewed agent creation/revision implemented. Zoom, era navigation refinements and true canon branches remain.
-4. Entity sections and native Notes/Facts/Checklist/Progression components are implemented across workspaces. Mechanics adds rules, scenarios and canon/history UI to every entity category. Richer spatial technique/cosmology tools remain; no arbitrary model code is executed.
-5. Image-only export and portable world snapshots implemented. File association and continuous save synchronization remain.
-6. Explicit-click subscription image generation, with usage disclosure. Text chat must not invoke image generation implicitly. Verify Codex's actual output contract before claiming support.
-7. Named maps and place/parent hierarchy are implemented, with scoped save/Undo and reviewed creation. Coherent Atlas layers remain. Evaluate editable geometry plus optional generated imagery; never promise literal imagination-to-map accuracy or silently regenerate established geography.
+3. Saved nested branches/periods, collapsible history trees, manual editing, reviewed agent creation/revision, Timeline zoom levels with an era overview, event reordering, and what-if world branches with reviewed merge-back are implemented. Three-way text merging remains.
+4. Entity sections, creative components, Mechanics and technique trees (loop-checked prerequisites) are implemented. Cosmology-specific tools and agent-proposed prerequisites remain; no arbitrary model code is executed.
+5. Image-only export, portable world snapshots and `.synthesis` file association implemented. Continuous save synchronization remains.
+6. Explicit-click Codex image generation implemented (2026-11-16) from the CLI's documented `$CODEX_HOME/generated_images` contract, with usage disclosure; chat keeps image generation disabled. Stand-in tests only: one live generation still needs owner approval before support is claimed.
+7. Named maps, place/parent hierarchy, and editable record-linked regions with marker/region layer switches are implemented. Evaluate editable geometry plus optional generated imagery; never promise literal imagination-to-map accuracy or silently regenerate established geography.
 8. Review filtering/sorting and improved proposal browsing; real conversation context summaries and richer interactions.
-9. Search performance measurements on a large world; broaden native menu actions; reduce-motion-aware transitions.
+9. Large-world measurements recorded in PERFORMANCE.md; editor crash recovery implemented. Native menu breadth and foreground interaction checks remain.
 
 Run checks and update STATE with exact evidence at each checkpoint. The owner's untracked DESIGN_AGENT_BRIEF.md is not agent-owned.

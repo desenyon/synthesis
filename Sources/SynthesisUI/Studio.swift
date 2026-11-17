@@ -186,6 +186,37 @@ public struct Toast: Identifiable {
     return destination == .canvas && selectedRecord == nil && !takeover
   }
   public var t: Theme { Theme(dark: dark) }
+  public let imageGenerator: CodexImageGenerator
+  @Published public var generatingImage = false
+  private var imageTask: Task<Void, Never>?
+  /// Runs one Codex image request for a description the creator typed and confirmed. Never
+  /// called by chat, page changes or the assistant; Manual mode refuses before any request.
+  public func generateImage(_ description: String, completion: @escaping (Data) -> Void) {
+    guard mode == .assisted else {
+      error = SynthesisError.manualMode.localizedDescription
+      return
+    }
+    guard !generatingImage else { return }
+    generatingImage = true
+    let generator = imageGenerator
+    imageTask = Task { @MainActor [weak self] in
+      defer { self?.generatingImage = false }
+      do {
+        let data = try await generator.generate(description)
+        guard !Task.isCancelled else { return }
+        completion(data)
+      } catch is CancellationError {
+      } catch {
+        guard !Task.isCancelled else { return }
+        self?.error = error.localizedDescription
+      }
+    }
+  }
+  public func stopImageGeneration() {
+    imageTask?.cancel()
+    imageTask = nil
+    generatingImage = false
+  }
   public var conversationTitle: String {
     conversations.first { $0.id == conversationID }?.title ?? "New conversation"
   }
@@ -198,6 +229,12 @@ public struct Toast: Identifiable {
     let setting: @Sendable (String) -> String = {
       selection.string(forKey: $0)
     }
+    // Explicit-click illustrations use Codex separately from chat. Injected transports mean
+    // tests or background verification, where no subscription request may run.
+    imageGenerator =
+      transport == nil
+      ? CodexImageGenerator(model: { setting("Synthesis.model.codex") })
+      : CodexImageGenerator(executable: { nil })
     self.engine = AgentEngine(
       store: store,
       transport: transport

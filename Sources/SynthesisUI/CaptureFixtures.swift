@@ -34,7 +34,7 @@ extension Studio {
     "graph-companion", "atlas-companion", "light-atlas-companion", "editor-recovered",
     "what-if-new", "what-if-send",
     "review-what-if", "worlds-what-if", "mechanics-tree", "mechanics-requires", "atlas-regions",
-    "atlas-drawing", "timeline-compact", "timeline-overview",
+    "atlas-drawing", "timeline-compact", "timeline-overview", "sheet-generate",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -591,7 +591,8 @@ extension Studio {
         mapBoardID =
           state == "atlas-local" ? maps.first { $0.name == "The drowned harbour" }?.id : original.id
       }
-    case "atlas", "empty-atlas", "atlas-regions", "atlas-drawing": destination = .atlas
+    case "atlas", "empty-atlas", "atlas-regions", "atlas-drawing", "sheet-generate":
+      destination = .atlas
     case "sections", "light-sections", "manual-sections", "sections-companion", "sheet-section",
       "section-editor":
       destination = .library

@@ -177,7 +177,7 @@ struct AtlasScreen: View {
     }
     .studioSheet(isPresented: $artworkPicker) {
       ArtworkPicker(
-        t: studio.t, mapOnly: true,
+        t: studio.t, mapOnly: true, studio: studio,
         select: { data in
           replaceImage(data.base64EncodedString())
           artworkPicker = false
@@ -187,6 +187,7 @@ struct AtlasScreen: View {
       studio.editorSave = { persist() }
       loadMap()
       if studio.captureHint == "atlas-details" { details = true }
+      if studio.captureHint == "sheet-generate" { artworkPicker = true }
       if studio.captureHint == "atlas-regions" {
         selectedRegion = map.regions.first?.id
         selected = map.regions.first?.recordID
