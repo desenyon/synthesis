@@ -12,7 +12,12 @@ extension CommandPalette {
       terms.allSatisfy { text.localizedStandardContains($0) }
     }
     var items: [Item] = []
-    let t = studio.t
+    // Structured queries are record searches. Title/command fallbacks must not bypass filters.
+    if LoreSearchQuery.usesFilters(query) {
+      var seen = Set<String>()
+      return indexed.filter { $0.worldID == worldID && seen.insert($0.id).inserted }
+        .map { recordItem($0, studio: studio, section: "Filtered lore") }
+    }
     for (offset, destination) in Destination.allCases.enumerated()
     where matches(
       "\(destination.rawValue) \(destination.summary) \(destination == .knowledge ? "knowledge graph" : "") tool workspace"
@@ -94,15 +99,9 @@ extension CommandPalette {
     for record in found {
       let scene = ["scene", "scenes"].contains(record.category.lowercased())
       items.append(
-        Item(
-          id: "record-\(record.id)",
-          section: query.isEmpty ? "Recent lore" : (scene ? "Scenes" : "Lore"),
-          icon: recordIcon(record), title: record.title,
-          detail: [
-            Vocabulary.displayCategory(record.category), Vocabulary.stateLabel(record.state),
-          ].filter { !$0.isEmpty }
-            .joined(separator: " · "), tint: t.category(record.category)
-        ) { studio.openRecord(record) })
+        recordItem(
+          record, studio: studio,
+          section: query.isEmpty ? "Recent lore" : (scene ? "Scenes" : "Lore")))
     }
     // Boards have stable IDs in the same world store. Opening revalidates availability;
     // a stale palette must never recreate an archived map or board.
@@ -226,5 +225,15 @@ extension CommandPalette {
       }
     }
     return items + keep
+  }
+
+  @MainActor private static func recordItem(_ record: LoreRecord, studio: Studio, section: String)
+    -> Item
+  {
+    Item(
+      id: "record-\(record.id)", section: section, icon: recordIcon(record), title: record.title,
+      detail: [Vocabulary.displayCategory(record.category), Vocabulary.stateLabel(record.state)]
+        .filter { !$0.isEmpty }.joined(separator: " · "), tint: studio.t.category(record.category)
+    ) { studio.openRecord(record) }
   }
 }

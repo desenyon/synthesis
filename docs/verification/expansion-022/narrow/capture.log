@@ -1,0 +1,3 @@
+CAPTURE search-faction 520x620, bitmap 520x620, 97ms
+CAPTURE search-invalid 520x620, bitmap 520x620, 118ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-022/narrow

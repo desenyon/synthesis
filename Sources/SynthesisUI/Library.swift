@@ -19,8 +19,9 @@ struct LibraryScreen: View {
     case title = "Title"
   }
   @ObservedObject var studio: Studio
-  @State private var query = ""
+  private var query: String { studio.libraryQuery }
   @State private var indexed = Set<String>()
+  @State private var searchFailure: String?
   @State private var filter = Filter.all
   @State private var order = Order.recent
   @State private var archived: [LoreRecord] = []
@@ -43,17 +44,15 @@ struct LibraryScreen: View {
         ? studio.records : studio.topLevelRecords)
     return source.filter {
       studio.libraryCategory == nil
-        || Vocabulary.matchesCategory($0.category, studio.libraryCategory ?? "")
+        || Vocabulary.categoryKey($0.category)
+          == Vocabulary.categoryKey(studio.libraryCategory ?? "")
     }
   }
   private var visible: [LoreRecord] {
     var result = scoped.filter { belongs($0, to: filter) }
     let text = query.trimmingCharacters(in: .whitespaces)
     if !text.isEmpty {
-      result = result.filter {
-        indexed.contains($0.id) || $0.title.localizedCaseInsensitiveContains(text)
-          || $0.category.localizedCaseInsensitiveContains(text)
-      }
+      result = result.filter { indexed.contains($0.id) }
     }
     if order == .title {
       result.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
@@ -75,8 +74,11 @@ struct LibraryScreen: View {
         }
       } trailing: {
         DocumentHistoryMenu(studio: studio)
-        SearchField(text: $query, placeholder: "Search titles, text, tags", t: studio.t)
-          .frame(minWidth: 140, idealWidth: 240, maxWidth: 240)
+        SearchField(
+          text: $studio.libraryQuery, placeholder: "Search lore or type:character", t: studio.t
+        )
+        .frame(minWidth: 140, idealWidth: 240, maxWidth: 240)
+        SearchSyntaxMenu(query: $studio.libraryQuery, t: studio.t)
         BarAction(title: "New", icon: "plus", t: studio.t, primary: true, help: "New record · ⌘N") {
           studio.newRecordKind = studio.libraryCategory == nil ? "lore" : "entity"
           studio.sheet = .document
@@ -120,7 +122,14 @@ struct LibraryScreen: View {
         }.help("Sort order")
       }
       Rectangle().fill(studio.t.hairline).frame(height: 1)
-      if rows.isEmpty {
+      if let searchFailure {
+        EmptyState(
+          icon: "magnifyingglass", title: "Check your search", message: searchFailure, t: studio.t
+        ) {
+          Button("Clear search") { studio.libraryQuery = "" }.buttonStyle(QuietButton(t: studio.t))
+          Button("Retry") { refreshSearch() }.buttonStyle(QuietButton(t: studio.t))
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+      } else if rows.isEmpty {
         emptyState.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
         ScrollView {
@@ -136,12 +145,18 @@ struct LibraryScreen: View {
         }
       }
     }
-    .onAppear { refreshArchive() }
+    .onAppear {
+      refreshArchive()
+      refreshSearch()
+    }
     .onChange(of: studio.records) { _, _ in
       refreshArchive()
       refreshSearch()
     }
     .onChange(of: query) { _, _ in refreshSearch() }
+    .onChange(of: filter) { _, _ in refreshSearch() }
+    .onChange(of: studio.libraryCategory) { _, _ in refreshSearch() }
+    .onChange(of: studio.worldRevision) { _, _ in refreshSearch() }
     .dropDestination(for: URL.self) { urls, _ in
       // Dropped Markdown or text files become imported drafts.
       let files = urls.filter {
@@ -153,8 +168,27 @@ struct LibraryScreen: View {
     }
   }
   private func refreshSearch() {
-    indexed = Set(
-      ((try? studio.store.search(worldID: studio.worldID, query: query)) ?? []).map(\.id))
+    do {
+      let kind: String? =
+        switch filter {
+        case .documents: "lore"
+        case .entities: "entity"
+        case .ideas: "capture"
+        default: nil
+        }
+      indexed = Set(
+        try studio.store.search(
+          worldID: studio.worldID, query: query,
+          archived: filter == .archived,
+          scope: LoreSearchScope(
+            kind: kind, category: studio.libraryCategory,
+            hasCanon: filter == .canon, sectionsOnly: filter == .sections)
+        ).map(\.id))
+      searchFailure = nil
+    } catch {
+      indexed = []
+      searchFailure = error.localizedDescription
+    }
   }
   private func refreshArchive() {
     archived = (try? studio.store.archivedRecords(worldID: studio.worldID)) ?? []
@@ -169,7 +203,7 @@ struct LibraryScreen: View {
           : "No records match “\(query)” in this view.", t: studio.t
       ) {
         Button("Clear filters") {
-          query = ""
+          studio.libraryQuery = ""
           filter = .all
         }.buttonStyle(QuietButton(t: studio.t))
       }

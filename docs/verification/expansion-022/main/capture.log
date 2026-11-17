@@ -1,0 +1,19 @@
+CAPTURE search-faction 1440x900, bitmap 1440x900, 274ms
+CAPTURE search-canon 1440x900, bitmap 1440x900, 270ms
+CAPTURE search-quoted 1440x900, bitmap 1440x900, 275ms
+CAPTURE search-invalid 1440x900, bitmap 1440x900, 297ms
+CAPTURE search-no-results 1440x900, bitmap 1440x900, 273ms
+CAPTURE light-search-faction 1440x900, bitmap 1440x900, 275ms
+CAPTURE manual-search-faction 1440x900, bitmap 1440x900, 160ms
+CAPTURE search-library 1440x900, bitmap 1440x900, 126ms
+CAPTURE search-library-error 1440x900, bitmap 1440x900, 125ms
+CAPTURE search-faction 1024x768, bitmap 1024x768, 188ms
+CAPTURE search-canon 1024x768, bitmap 1024x768, 191ms
+CAPTURE search-quoted 1024x768, bitmap 1024x768, 176ms
+CAPTURE search-invalid 1024x768, bitmap 1024x768, 200ms
+CAPTURE search-no-results 1024x768, bitmap 1024x768, 190ms
+CAPTURE light-search-faction 1024x768, bitmap 1024x768, 186ms
+CAPTURE manual-search-faction 1024x768, bitmap 1024x768, 130ms
+CAPTURE search-library 1024x768, bitmap 1024x768, 95ms
+CAPTURE search-library-error 1024x768, bitmap 1024x768, 96ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-022/main

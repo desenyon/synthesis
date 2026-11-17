@@ -194,6 +194,7 @@ public struct Toast: Identifiable {
   @Published var sidebarWidth = Double(Metric.sidebar)
   @Published var inspectorWidth = 300.0
   @Published public var libraryCategory: String?
+  @Published var libraryQuery = ""
   @Published public var newRecordKind = "lore"
   @Published public var inspector = true
   @Published var workspaceInspector = false
@@ -666,6 +667,7 @@ public struct Toast: Identifiable {
         inspectionTarget = nil
         companionExpanded = false
         libraryCategory = nil
+        libraryQuery = ""
         let nextDefaults = try store.worldPreferences(worldID: id)
         worldID = id
         worldDefaults = nextDefaults

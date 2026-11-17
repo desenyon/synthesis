@@ -241,18 +241,6 @@ public final class WorkspaceStore {
         createdAt: $0["created_at"]!)
     }
   }
-  public func search(worldID: String, query: String) throws -> [LoreRecord] {
-    _ = try world(worldID)
-    let tokens = query.components(separatedBy: CharacterSet.alphanumerics.inverted).filter {
-      !$0.isEmpty
-    }.prefix(20)
-    guard !tokens.isEmpty else { return [] }
-    let match = tokens.map { "\"\($0)\"*" }.joined(separator: " AND ")
-    return try db.rows(
-      "SELECT r.*,d.rtf FROM records_fts JOIN records r ON r.id=records_fts.id LEFT JOIN rich_documents d ON d.record_id=r.id WHERE records_fts MATCH ? AND records_fts.world_id=? AND r.world_id=? AND r.archived=0 ORDER BY records_fts.rank LIMIT 50",
-      [match, worldID, worldID]
-    ).map(decodeRecord)
-  }
   public func conversations(worldID: String, archived: Bool = false) throws -> [Conversation] {
     _ = try world(worldID)
     return try db.rows(

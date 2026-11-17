@@ -60,6 +60,8 @@ extension Studio {
     "palette-settings",
     "palette-tools", "palette-recent", "light-palette-search", "manual-palette-search",
     "palette-long", "palette-unmatched", "light-conversation", "light-library", "light-graph",
+    "search-faction", "search-canon", "search-quoted", "search-invalid", "search-no-results",
+    "light-search-faction", "manual-search-faction", "search-library", "search-library-error",
     "light-editor",
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
@@ -281,6 +283,34 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("search-") {
+      let library = state.contains("library")
+      configureConnectedCapture(
+        library ? "library" : "palette", board: board, conversation: conversation)
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      var query = "type:character faction:Tidekeepers"
+      if state == "search-canon" {
+        perform {
+          if let record = records.first(where: { $0.title == "Mira Vale" }), record.state != "canon"
+          {
+            _ = try store.promote(
+              worldID: worldID, id: record.id, version: record.version, confirmation: record.id)
+            try reload()
+          }
+        }
+        query = "status:canon updated:7d"
+      } else if state == "search-quoted" {
+        query = "type:character related:\"The Glass Sea\""
+      } else if state == "search-invalid" || state == "search-library-error" {
+        query = "status:approved updated:7d"
+      } else if state == "search-no-results" {
+        query = "type:character faction:Unknown"
+      }
+      if library { libraryQuery = query } else { paletteQuery = query }
+      captureHint = state
+      return
+    }
     if state.contains("palette-") {
       configureConnectedCapture("palette", board: board, conversation: conversation)
       dark = !state.hasPrefix("light-")
@@ -739,6 +769,7 @@ extension Studio {
     navigationBack = []
     navigationForward = []
     libraryCategory = nil
+    libraryQuery = ""
     canvasBoardID = board.isEmpty ? nil : board
     companionExpanded = state.hasSuffix("-companion") || state == "companion"
     companionWidth = 400

@@ -17,6 +17,8 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ### Added
 
+- Expansion #22: structured local search in ⌘K and Library for types, current canon state, real faction/entity relationships, tags, aliases and saved-edit dates. Quoted names, honest query errors, archive scope and pre-limit Library filters preserve result accuracy.
+
 - Expansion #21: universal ⌘K search for lore, scenes, maps/boards, category tools, individual settings and recent world changes. Guarded source navigation, keyboard results and compact sizing preserve Manual mode and unsaved writing.
 
 - Expansion #20: common entity selection and transient hover across Graph, Canvas, Atlas, Library and Timeline. Engine resize handles match the application accent; keyboard Canvas selection and map marker contrast improved.

@@ -1,0 +1,7 @@
+CAPTURE search-invalid 1440x900, bitmap 1440x900, 297ms
+CAPTURE search-library 1440x900, bitmap 1440x900, 127ms
+CAPTURE search-library-error 1440x900, bitmap 1440x900, 127ms
+CAPTURE search-invalid 1024x768, bitmap 1024x768, 196ms
+CAPTURE search-library 1024x768, bitmap 1024x768, 93ms
+CAPTURE search-library-error 1024x768, bitmap 1024x768, 93ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-022/refined

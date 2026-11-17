@@ -68,7 +68,7 @@ struct CommandPalette: View {
                   .accessibilityAddTraits(offset == index ? .isSelected : [])
                   .help([item.title, item.detail].filter { !$0.isEmpty }.joined(separator: " · "))
                 }
-                if items.isEmpty {
+                if items.isEmpty && searchFailure == nil {
                   Text("Nothing matches “\(query)”.").font(.studio(size: 13))
                     .foregroundStyle(studio.t.secondary).frame(maxWidth: .infinity)
                     .padding(.vertical, 28)
@@ -80,18 +80,22 @@ struct CommandPalette: View {
                     .onChange(of: size.size.height) { _, height in contentHeight = height }
                 }
               }
-            }.frame(height: max(80, min(contentHeight, 380, geometry.size.height - top - 144)))
-              .onChange(of: index) { _, value in
-                if items.indices.contains(value) { proxy.scrollTo(items[value].id) }
-              }
-              .onChange(of: items.map(\.id)) { _, _ in
-                index = 0
-                if let first = items.first { proxy.scrollTo(first.id, anchor: .top) }
-              }
+            }.frame(
+              height: searchFailure != nil && items.isEmpty
+                ? 0
+                : max(80, min(contentHeight, 380, geometry.size.height - top - 144))
+            )
+            .onChange(of: index) { _, value in
+              if items.indices.contains(value) { proxy.scrollTo(items[value].id) }
+            }
+            .onChange(of: items.map(\.id)) { _, _ in
+              index = 0
+              if let first = items.first { proxy.scrollTo(first.id, anchor: .top) }
+            }
           }
           if searchFailure != nil || activityFailure != nil {
             HStack {
-              Text("Some results could not be loaded.").font(.studio(.caption))
+              Text(searchFailure ?? "Recent changes could not be loaded.").font(.studio(.caption))
                 .foregroundStyle(studio.t.warning)
               Spacer()
               Button("Retry") { refresh(activity: true) }.buttonStyle(QuietButton(t: studio.t))
@@ -102,6 +106,7 @@ struct CommandPalette: View {
             hint("↑↓", "Navigate")
             hint("↵", "Open")
             Spacer(minLength: 8)
+            SearchSyntaxMenu(query: $studio.paletteQuery, t: studio.t)
             Text(studio.world?.name ?? "").font(.studio(size: 11.5))
               .foregroundStyle(studio.t.muted).lineLimit(1)
           }.padding(.horizontal, 14).frame(height: 34)

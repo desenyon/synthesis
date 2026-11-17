@@ -42,4 +42,4 @@ Detailed Graph: expansion #15, `verification/expansion-015/refined`, using actua
 
 Document tabs: expansion #16, `verification/expansion-016`, with pinned and real opened records.
 
-`palette.png` comes from expansion #21's final 1440×900 native capture. The full set covers actual maps/scenes/settings/activity and narrow, light and Manual states; see [evidence](../verification/expansion-021/README.md).
+`palette.png` comes from expansion #22's 1440×900 native faction-filter capture. [Search evidence](../verification/expansion-022/README.md) covers real relationship and status/date filters. [#21 evidence](../verification/expansion-021/README.md) additionally covers maps/scenes/settings/activity. Both include narrow, light and Manual states.

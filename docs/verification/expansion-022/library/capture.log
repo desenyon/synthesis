@@ -1,0 +1,5 @@
+CAPTURE search-library 1440x900, bitmap 1440x900, 142ms
+CAPTURE search-library-error 1440x900, bitmap 1440x900, 126ms
+CAPTURE search-library 1024x768, bitmap 1024x768, 103ms
+CAPTURE search-library-error 1024x768, bitmap 1024x768, 103ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-022/library

@@ -187,3 +187,7 @@ Project outlines are ordinary entity records with category `Projects`: draft/can
 ## Universal command palette
 
 `CommandCatalog.swift` builds ⌘K results from the actual workspace, category and Settings catalogs, selected-world records and FTS results, named boards/maps, conversations and recent object activity. `CommandPalette.swift` owns read refresh/error state, adaptive result-list geometry and keyboard selection. Activity refreshes on world revision rather than every keystroke. Actions resolve through Studio navigation/save guards; stale or foreign sources cannot recreate archived data. Recent activity is the latest saved state per object, not a complete audit log. Search and command navigation work in Manual mode without model calls.
+
+## Structured search
+
+`LoreSearchQuery.swift` parses bounded free text, quoted phrases and typed filters. `LoreSearch.swift` composes parameterized, world-scoped queries over existing records/FTS/relationships, with explicit archive scope. Database registers a Unicode case/diacritic-insensitive collation for exact creator-authored names, categories, tags and aliases. FTS candidates are materialized once before joining records; the existing scale test caught repeated virtual-table scans without that boundary. Library and ⌘K share this core path; structured queries bypass name-only/capture fallbacks. Invalid filters display locally. Agent retrieval retains its separate retrieval query; this change neither widens agent context nor adds a provider call.

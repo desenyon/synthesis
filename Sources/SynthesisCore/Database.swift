@@ -15,6 +15,22 @@ final class Database {
         == SQLITE_OK
     else { throw SynthesisError.database("Could not open the local database.") }
     sqlite3_busy_timeout(handle, 5000)
+    // Match creator-authored names consistently, including accented/non-ASCII aliases.
+    guard
+      sqlite3_create_collation_v2(
+        handle, "synthesis_search", SQLITE_UTF8, nil,
+        { _, aCount, a, bCount, b in
+          let left = String(
+            decoding: UnsafeRawBufferPointer(start: a, count: Int(aCount)), as: UTF8.self)
+          let right = String(
+            decoding: UnsafeRawBufferPointer(start: b, count: Int(bCount)), as: UTF8.self)
+          return Int32(
+            left.compare(
+              right, options: [.caseInsensitive, .diacriticInsensitive],
+              locale: Locale(identifier: "en_US_POSIX")
+            ).rawValue)
+        }, nil) == SQLITE_OK
+    else { throw failure() }
     try execute("PRAGMA foreign_keys=ON")
     try execute("PRAGMA journal_mode=WAL")
     try execute(
