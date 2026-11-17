@@ -48,6 +48,11 @@ struct StudioSheet: View {
       width: 560, close: finishSetup
     ) {
       FormField(label: "Your first world", placeholder: "World name", text: $worldName, t: studio.t)
+      {
+        // Return in the name field means "Start creating", like the default button.
+        studio.renameWorld(worldName)
+        if studio.error == nil { studio.completeOnboarding() }
+      }
       HStack {
         Text("Start creating").font(.studio(size: 14, weight: .medium))
         Spacer()

@@ -118,10 +118,11 @@ struct CommandPalette: View {
     close()
     item.run()
   }
-  private func matches(_ text: String) -> Bool {
-    query.isEmpty || text.localizedCaseInsensitiveContains(query)
-  }
-  private var results: [Item] {
+  private var results: [Item] { Self.results(studio: studio, query: query, indexed: indexed) }
+  @MainActor static func results(studio: Studio, query: String, indexed: [LoreRecord]) -> [Item] {
+    func matches(_ text: String) -> Bool {
+      query.isEmpty || text.localizedCaseInsensitiveContains(query)
+    }
     var items: [Item] = []
     let t = studio.t
     for (offset, destination) in Destination.allCases.enumerated()
@@ -162,27 +163,6 @@ struct CommandPalette: View {
         Item(
           id: "new-\(entry.3)", section: "Create", icon: entry.1, title: entry.0, detail: entry.2,
           run: entry.4))
-    }
-    let typed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-    if typed.count >= 3 {
-      // Anything typed here can be kept without filling in a form.
-      items.append(
-        Item(
-          id: "capture-text", section: "Keep this", icon: "lightbulb",
-          title: "Capture “\(typed.prefix(48))\(typed.count > 48 ? "…" : "")” as an idea",
-          detail: "Saved to Library"
-        ) { studio.capture(typed) })
-      if studio.mode == .assisted {
-        items.append(
-          Item(
-            id: "ask-text", section: "Keep this", icon: "bubble.left",
-            title: "Start a conversation with this", detail: "Nothing is sent yet"
-          ) {
-            studio.newChat()
-            studio.draft = typed
-            studio.persistComposer()
-          })
-      }
     }
     let found: [LoreRecord]
     if query.trimmingCharacters(in: .whitespaces).isEmpty {
@@ -243,6 +223,30 @@ struct CommandPalette: View {
           id: "set-\(entry.0)", section: "Preferences", icon: entry.1, title: entry.0,
           detail: entry.2, run: entry.3))
     }
-    return items
+    // Commands and lore that match come first, so typing a command's name and pressing Return
+    // runs it. Keeping typed text as an idea is last, and first only when nothing else matches.
+    var keep: [Item] = []
+    let typed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+    if typed.count >= 3 {
+      // Anything typed here can be kept without filling in a form.
+      keep.append(
+        Item(
+          id: "capture-text", section: "Keep this", icon: "lightbulb",
+          title: "Capture “\(typed.prefix(48))\(typed.count > 48 ? "…" : "")” as an idea",
+          detail: "Saved to Library"
+        ) { studio.capture(typed) })
+      if studio.mode == .assisted {
+        keep.append(
+          Item(
+            id: "ask-text", section: "Keep this", icon: "bubble.left",
+            title: "Start a conversation with this", detail: "Nothing is sent yet"
+          ) {
+            studio.newChat()
+            studio.draft = typed
+            studio.persistComposer()
+          })
+      }
+    }
+    return items + keep
   }
 }

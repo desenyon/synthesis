@@ -418,3 +418,17 @@ import Testing
     #expect(try Studio(store: existing).sheet == nil)
   }
 }
+
+@MainActor struct CommandPaletteRankingTests {
+  @Test func typedCommandNamesRunTheCommandBeforeCapture() throws {
+    let studio = try Studio(store: try WorkspaceStore(path: ":memory:"))
+    studio.dark = true
+    let command = CommandPalette.results(studio: studio, query: "light appearance", indexed: [])
+    #expect(command.first?.title == "Use light appearance")
+    #expect(command.last?.id == "capture-text" || command.last?.id == "ask-text")
+    // Free text that matches nothing still captures first.
+    let thought = CommandPalette.results(
+      studio: studio, query: "the sea remembers names", indexed: [])
+    #expect(thought.first?.id == "capture-text")
+  }
+}
