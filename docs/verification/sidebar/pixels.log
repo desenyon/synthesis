@@ -1,0 +1,13 @@
+PASS graph-1024x640.png: correct theme and selected destination
+PASS graph-1440x900.png: correct theme and selected destination
+PASS light-graph-1024x640.png: correct theme and selected destination
+PASS light-graph-1440x900.png: correct theme and selected destination
+PASS light-sidebar-long-1024x640.png: correct theme and selected destination
+PASS light-sidebar-long-1440x900.png: correct theme and selected destination
+PASS light-sidebar-opaque-1024x640.png: correct theme and selected destination
+PASS light-sidebar-opaque-1440x900.png: correct theme and selected destination
+PASS sidebar-long-1024x640.png: correct theme and selected destination
+PASS sidebar-long-1440x900.png: correct theme and selected destination
+PASS sidebar-opaque-1024x640.png: correct theme and selected destination
+PASS sidebar-opaque-1440x900.png: correct theme and selected destination
+12 native sidebar pixel checks passed

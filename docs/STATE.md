@@ -2,6 +2,12 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. Development only. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits. AGENTS.md is unchanged.
 
+## Sidebar refinement — current checkpoint
+
+The owner-directed sidebar is implemented in the actual native shell: 312pt expanded / 72pt rail, graphite vibrancy with explicit appearance and opaque accessibility fallbacks, 40pt world artwork, matched New Chat/Search actions, monochrome 38pt navigation, aligned counts, scrolling history with stable action slots, and persistent Settings/current-appearance controls. Existing Studio navigation, world files, conversation management and data are preserved. [Design details](SIDEBAR.md).
+
+Latest check: `./scripts/check.sh` passed strict lint, **115 tests / 27 suites** and the optimized development build. New regressions cover preference restart/content preservation and unsaved-editor guards across sidebar destinations. **25 sidebar captures** at 1440×900, 1024×640 and 1024×520 were inspected, alongside seven refreshed README screens. **12 native screenshot pixel checks** and four shortcut-registration/action checks passed. Evidence is in `verification/sidebar`; visual verification does not establish foreground Tab, pointer, popover or VoiceOver behavior. No model calls or user-database access occurred. The working application was not restarted.
+
 ## Current implemented slices
 
 - Shared full, companion and compact lore-aware composers; themed app menus and form choices; Reduce Motion-aware workspace transitions. Native Kokonut-inspired activity uses actual retrieval, response and proposal events, never demo playback. [Usage](AI_COMPONENTS.md).
@@ -13,7 +19,7 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 Migrations 0009 (components) and 0010 (rule history) are additive. Portable `.synthesis` format **v6** imports v1–v5 as independent copies; JSON export is **schema 9**. History starts on the first edit/promotion for legacy rules. Archives include lore and history, never provider/device credentials.
 
-## Latest verification
+## Earlier feature verification
 
 - `./scripts/check.sh`: strict Swift lint, **113 tests / 26 suites**, optimized ad-hoc development build passed. Tests cover map hierarchy, stale Undo, world isolation, reviewed map creation and import rollback, alongside rule-history round trip, earlier canon preservation, stale rule proposals, successful draft acceptance, invalid parents and empty scenario verdicts. They caught and fixed a rule-ID/document-ID mismatch in proposal acceptance.
 - **14 Atlas captures** at 1440×900 and 1024×768 inspected: linked maps in dark/light/Manual, map details, creation, local and empty states. Evidence: `verification/atlas-maps`. The last core-only import-validation change did not alter the captured UI.

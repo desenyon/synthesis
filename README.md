@@ -86,7 +86,7 @@ Every content workspace has the shared contextual composer in Assisted mode. Exp
 | ⌘[ | Back from a record |
 | Canvas | Excalidraw's shortcuts: 1–0 tools, V select, H hand, A arrow, ⌫ delete, ⌘Z undo, ⌘D duplicate, ⌘G group |
 
-The sidebar groups workspaces, world categories and real conversation history. Authored controls use bundled Phosphor icons and Inter typography in both native views and Canvas. The Graph shares stored relationships with Canvas, but keeps its own derived layout.
+The 312pt sidebar groups workspaces, world categories and real conversation history on a restrained graphite material. It collapses to a 72pt rail; Search and appearance remain available. Native transparency has an opaque accessibility fallback, and reduced-motion preferences are respected. [Sidebar design and verification](docs/SIDEBAR.md). Authored controls use bundled Phosphor icons and Inter typography in both native views and Canvas. The Graph shares stored relationships with Canvas, but keeps its own derived layout.
 
 On Canvas, double-click a card to open its record. Draw an arrow from one entity card to another to propose a relationship. Select cards and choose Reference to mention them in the conversation; Add ▸ Artwork puts a picture on the selected card. "Show on canvas" in a record's menu finds or places its card. Board text is explicitly board-only until you select **Save as idea**, which creates a linked Library record. Selecting a relationship opens its shared native inspector. The assistant can propose a new board, card placement or an Atlas marker; approval flushes and reloads the live scene without discarding other drawings.
 

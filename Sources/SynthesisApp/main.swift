@@ -55,7 +55,7 @@ final class StudioWindow: NSWindow {
     if container.frame != bar { container.frame = bar }
     for (index, button) in [close, minimise, zoom].enumerated() {
       let origin = NSPoint(
-        x: 20 + CGFloat(index) * 20, y: (Self.headerHeight - button.frame.height) / 2)
+        x: 16 + CGFloat(index) * 20, y: (Self.headerHeight - button.frame.height) / 2)
       if button.frame.origin != origin { button.setFrameOrigin(origin) }
     }
   }
@@ -471,6 +471,9 @@ final class StudioWindow: NSWindow {
           window.setContentSize(NSSize(width: width, height: height))
           studio.configureConnectedCapture(
             state, board: fixture.board, conversation: fixture.conversation)
+          if let error = studio.error {
+            throw SynthesisError.invalid("Capture state \(state): \(error)")
+          }
           window.appearance = NSAppearance(named: studio.dark ? .darkAqua : .aqua)
           window.backgroundColor = NSColor(studio.t.background)
           window.layoutTrafficLights()
@@ -515,6 +518,11 @@ final class StudioWindow: NSWindow {
           print(
             "CAPTURE \(state) \(width)x\(height), bitmap \(pixels.0)x\(pixels.1), \(Int((CFAbsoluteTimeGetCurrent() - start) * 1000))ms"
           )
+          if state == "graph", width == 1440,
+            ProcessInfo.processInfo.environment["SYNTHESIS_SIDEBAR_AUDIT"] == "1"
+          {
+            try await auditNavigationShortcuts()
+          }
           if let sheet = window.attachedSheet, let sheetView = sheet.contentView {
             _ = try snapshot(
               sheetView, to: folder.appendingPathComponent("\(state)-panel-\(width)x\(height).png"))
@@ -532,6 +540,42 @@ final class StudioWindow: NSWindow {
     fflush(stdout)
     exit(0)
   }
+
+  /// Validate native shortcut registrations and dispatch their actual menu actions without
+  /// posting synthetic keystrokes to the user's active application.
+  private func auditNavigationShortcuts() async throws {
+    func entries(_ menu: NSMenu) -> [NSMenuItem] {
+      menu.items.flatMap { item in [item] + (item.submenu.map(entries) ?? []) }
+    }
+    guard let menu = NSApp.mainMenu else { throw SynthesisError.invalid("Missing main menu") }
+    let actions = [
+      ("Search and Commands…", "k", NSEvent.ModifierFlags.command),
+      ("New Conversation", "n", NSEvent.ModifierFlags([.command, .shift])),
+      ("Toggle Navigation", "\\", NSEvent.ModifierFlags.command),
+      ("Toggle Navigation", "\\", NSEvent.ModifierFlags.command),
+    ]
+    for (index, entry) in actions.enumerated() {
+      guard let item = entries(menu).first(where: { $0.title == entry.0 }),
+        item.keyEquivalent == entry.1, item.keyEquivalentModifierMask == entry.2,
+        let action = item.action,
+        NSApp.sendAction(action, to: item.target, from: item)
+      else { throw SynthesisError.invalid("Shortcut registration or action failed: \(entry.0)") }
+      try await Task.sleep(for: .milliseconds(100))
+      let correct: Bool
+      switch index {
+      case 0: correct = studio.palette
+      case 1: correct = studio.destination == .chat && studio.conversationID == nil
+      case 2: correct = studio.collapsed
+      default: correct = !studio.collapsed
+      }
+      studio.palette = false
+      guard correct, !NSApp.isActive, !window.isKeyWindow else {
+        throw SynthesisError.invalid("Shortcut action or background focus check failed: \(entry.0)")
+      }
+      print("SIDEBAR_AUDIT PASS shortcut registration and native action: \(entry.0)")
+    }
+  }
+
 }
 MainActor.assumeIsolated {
   let app = SynthesisApplication.shared

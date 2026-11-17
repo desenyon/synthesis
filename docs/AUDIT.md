@@ -6,6 +6,8 @@ Repair status: **19 items completed**. A2 is implemented but awaiting its requir
 
 Later owner-requested Settings refinement replaces the C5 long form with searchable sections. The obsolete Settings modal and its `sheet-settings` capture are retired; current evidence is recorded in [STATE](STATE.md). Historical per-item capture evidence below is preserved. C2/C3 remain excluded.
 
+The 2026-11-16 sidebar directive separately authorizes graphite navigation and explicitly themed native vibrancy with opaque fallbacks. It does not approve C2's global palette change or the old C3 pill. See [SIDEBAR](SIDEBAR.md).
+
 ## How this was produced
 
 - Built the real app and rendered all 47 capture states at 1440×900 and 1024×768 with `./scripts/verify-ui.sh` (94 screenshots, isolated database, sample world "Aster" and an empty world).

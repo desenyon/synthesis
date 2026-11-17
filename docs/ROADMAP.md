@@ -23,6 +23,10 @@
 - Mechanics is available on every entity: kind-filtered rules, scenarios, explicit canon review and restorable snapshots. Agent rule revisions are stale-checked; proposed scenarios leave conclusions to the creator. Spatial technique trees and automatic simulations remain incomplete.
 - Reference parity and complete product acceptance remain open; screenshots alone do not certify all interactions.
 
+## 2026-11-16 — sidebar refinement
+
+Owner-directed native sidebar refinement preserves the existing routes and state. Shared graphite material, monochrome rows, aligned actions/counts, stable history action slots and persistent footer utilities are implemented. Background stress captures and shortcut checks are tracked in [STATE](STATE.md); a focused pointer/keyboard/VoiceOver walkthrough remains separate.
+
 ## Then — finish M3
 
 1. Exercise the live provider path in a controlled test session; request explicit approval before paid calls: streaming, stop, errors, and whether the model follows the proposal contract. Adjust the prompt from what is observed.

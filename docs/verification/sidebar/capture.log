@@ -1,0 +1,27 @@
+CAPTURE sidebar-long 1440x900, bitmap 2880x1800, 1015ms
+CAPTURE light-sidebar-long 1440x900, bitmap 2880x1800, 1014ms
+CAPTURE sidebar-history 1440x900, bitmap 2880x1800, 1055ms
+CAPTURE sidebar-folded 1440x900, bitmap 2880x1800, 2402ms
+CAPTURE sidebar-opaque 1440x900, bitmap 2880x1800, 2393ms
+CAPTURE light-sidebar-opaque 1440x900, bitmap 2880x1800, 2408ms
+CAPTURE empty-sidebar 1440x900, bitmap 2880x1800, 997ms
+CAPTURE light-collapsed 1440x900, bitmap 2880x1800, 1002ms
+CAPTURE collapsed 1440x900, bitmap 2880x1800, 1035ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 2429ms
+SIDEBAR_AUDIT PASS shortcut registration and native action: Search and Commands…
+SIDEBAR_AUDIT PASS shortcut registration and native action: New Conversation
+SIDEBAR_AUDIT PASS shortcut registration and native action: Toggle Navigation
+SIDEBAR_AUDIT PASS shortcut registration and native action: Toggle Navigation
+CAPTURE light-graph 1440x900, bitmap 2880x1800, 2444ms
+CAPTURE sidebar-long 1024x640, bitmap 2048x1280, 543ms
+CAPTURE light-sidebar-long 1024x640, bitmap 2048x1280, 559ms
+CAPTURE sidebar-history 1024x640, bitmap 2048x1280, 581ms
+CAPTURE sidebar-folded 1024x640, bitmap 2048x1280, 857ms
+CAPTURE sidebar-opaque 1024x640, bitmap 2048x1280, 853ms
+CAPTURE light-sidebar-opaque 1024x640, bitmap 2048x1280, 853ms
+CAPTURE empty-sidebar 1024x640, bitmap 2048x1280, 531ms
+CAPTURE light-collapsed 1024x640, bitmap 2048x1280, 673ms
+CAPTURE collapsed 1024x640, bitmap 2048x1280, 571ms
+CAPTURE graph 1024x640, bitmap 2048x1280, 877ms
+CAPTURE light-graph 1024x640, bitmap 2048x1280, 860ms
+Native captures complete: /private/tmp/synthesis-sidebar-final-evidence

@@ -6,7 +6,8 @@ import SynthesisCore
 public struct Theme {
   public let dark: Bool
   public var background: Color { Color(hex: dark ? 0x000000 : 0xF8F9FB) }
-  public var sidebar: Color { Color(hex: dark ? 0x050505 : 0xF0F2F5) }
+  public var sidebar: Color { navigation.background }
+  var navigation: SidebarPalette { SidebarPalette(dark: dark) }
   public var surface: Color { Color(hex: dark ? 0x111111 : 0xFFFFFF) }
   public var secondarySurface: Color { Color(hex: dark ? 0x1B1B1B : 0xECEFF3) }
   public var text: Color { Color(hex: dark ? 0xE6E9EF : 0x20232B) }
@@ -57,14 +58,40 @@ extension Color {
 /// Shared geometry. Radii and control heights are deliberately few.
 enum Metric {
   static let bar: CGFloat = 56
-  static let sidebar: CGFloat = 248
-  static let rail: CGFloat = 64
+  static let sidebar: CGFloat = 312
+  static let rail: CGFloat = 72
   static let control: CGFloat = 30
   static let radius: CGFloat = 8
   static let cardRadius: CGFloat = 12
   static let panelRadius: CGFloat = 14
   /// Width reserved at the top-left for the window controls and navigation toggle.
   static let chrome: CGFloat = 124
+}
+
+/// Navigation is neutral; artwork and the workspace retain their own semantic colour.
+struct SidebarPalette {
+  let dark: Bool
+  var background: Color { Color(hex: dark ? 0x121416 : 0xEFF1F4) }
+  var elevated: Color { Color(hex: dark ? 0x1C1F22 : 0xFAFBFC) }
+  var selected: Color { Color(hex: dark ? 0x2B3035 : 0xDDE2E8) }
+  var text: Color { Color(hex: dark ? 0xEBEDF0 : 0x20262E) }
+  var secondary: Color { Color(hex: dark ? 0xB9BEC6 : 0x505B69) }
+  var muted: Color { Color(hex: dark ? 0x929AA5 : 0x596575) }
+  var hover: Color { text.opacity(dark ? 0.055 : 0.045) }
+  var pressed: Color { text.opacity(0.10) }
+  var edge: Color { (dark ? Color.white : .black).opacity(dark ? 0.07 : 0.08) }
+  var focus: Color { Color(hex: dark ? 0xBDCBDD : 0x526A87) }
+}
+
+enum SidebarMetric {
+  static let inset: CGFloat = 16
+  static let row: CGFloat = 38
+  static let action: CGFloat = 36
+  static let history: CGFloat = 34
+  static let icon: CGFloat = 17
+  static let radius: CGFloat = 8
+  static let section: CGFloat = 24
+  static let transition: Double = 0.15
 }
 
 enum Vocabulary {

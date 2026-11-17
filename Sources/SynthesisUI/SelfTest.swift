@@ -95,7 +95,10 @@ extension Studio {
 
     // 1. Controls inside the integrated header receive clicks beneath the title bar.
     let before = collapsed
-    await click(CGPoint(x: 98, y: Metric.bar / 2))
+    let wordmark = ("Synthesis" as NSString).size(withAttributes: [
+      .font: StudioTypography.native(size: 14, bold: true)
+    ]).width
+    await click(CGPoint(x: 84 + wordmark + 10 + 14, y: Metric.bar / 2))
     check("header control under title bar is clickable", collapsed != before)
     if collapsed != before { toggleSidebar() }
     await pause(400)

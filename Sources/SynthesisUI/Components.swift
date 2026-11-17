@@ -186,28 +186,42 @@ struct IconButton: View {
 struct PlainMenu<Label: View, Items: View>: View {
   /// Flexible menus may shrink so a long title truncates instead of widening its bar.
   var flexible = false
+  var sidebarTheme: Theme? = nil
+  var sidebarRole: SidebarControlStyle.Role = .identity
   @ViewBuilder var items: () -> Items
   @ViewBuilder var label: () -> Label
   @State private var open = false
   @Environment(\.colorScheme) private var scheme
   var body: some View {
     let t = Theme(dark: scheme == .dark)
-    Button {
-      open.toggle()
-    } label: {
-      label()
-    }
-    .buttonStyle(.plain).fixedSize(horizontal: !flexible, vertical: true)
-    .popover(isPresented: $open, arrowEdge: .bottom) {
-      ScrollView {
-        VStack(alignment: .leading, spacing: 3) { items() }
-          .font(.studio(size: 13)).foregroundStyle(t.text)
-          .buttonStyle(DropdownButtonStyle(t: t, close: { open = false }))
-          .padding(7)
-      }.scrollBounceBehavior(.basedOnSize).fixedSize(horizontal: false, vertical: true)
-        .frame(width: 280).frame(maxHeight: 420)
-        .background(t.surface).preferredColorScheme(scheme)
-        .onExitCommand { open = false }
+    trigger.fixedSize(horizontal: !flexible, vertical: true)
+      .accessibilityValue(open ? "Expanded" : "Collapsed")
+      .popover(isPresented: $open, arrowEdge: .bottom) {
+        ScrollView {
+          VStack(alignment: .leading, spacing: 3) { items() }
+            .font(.studio(size: 13)).foregroundStyle(t.text)
+            .buttonStyle(DropdownButtonStyle(t: t, close: { open = false }))
+            .padding(7)
+        }.scrollBounceBehavior(.basedOnSize).fixedSize(horizontal: false, vertical: true)
+          .frame(width: 280).frame(maxHeight: 420)
+          .background(sidebarTheme?.navigation.elevated ?? t.surface).preferredColorScheme(scheme)
+          .onExitCommand { open = false }
+      }
+  }
+  @ViewBuilder private var trigger: some View {
+    if let sidebarTheme {
+      Button {
+        open.toggle()
+      } label: {
+        label()
+      }
+      .buttonStyle(SidebarControlStyle(t: sidebarTheme, role: sidebarRole, selected: open))
+    } else {
+      Button {
+        open.toggle()
+      } label: {
+        label()
+      }.buttonStyle(.plain)
     }
   }
 }
@@ -729,18 +743,6 @@ struct WindowDragArea: NSViewRepresentable {
   }
 }
 
-struct AppearanceButton: View {
-  @ObservedObject var studio: Studio
-  var body: some View {
-    IconButton(
-      icon: studio.dark ? "sun" : "moon",
-      label: studio.dark ? "Switch to light appearance" : "Switch to dark appearance", t: studio.t,
-      size: 32
-    ) {
-      withAnimation(.easeOut(duration: 0.18)) { studio.toggleTheme() }
-    }
-  }
-}
 struct WorldEmblem: View {
   let t: Theme
   var radius: CGFloat = 8
@@ -814,6 +816,98 @@ struct ChoiceField<Value: Hashable>: View {
           .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
           .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.hairline, lineWidth: 1))
       }.accessibilityLabel(title)
+    }
+  }
+}
+
+// MARK: Navigation materials and controls
+
+/// Explicit appearance prevents adaptive glass from flipping against desktop content.
+/// The opaque tint keeps the navigation legible even over a bright wallpaper.
+struct NavigationGlass: View {
+  let theme: Theme
+  var forceOpaque = false
+  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+  @Environment(\.colorSchemeContrast) private var contrast
+  var body: some View {
+    if forceOpaque || reduceTransparency || contrast == .increased {
+      theme.navigation.background
+    } else {
+      SidebarVibrancy(dark: theme.dark)
+        .overlay(theme.navigation.background.opacity(0.88))
+        .allowsHitTesting(false).accessibilityHidden(true)
+    }
+  }
+}
+
+private struct SidebarVibrancy: NSViewRepresentable {
+  let dark: Bool
+  func makeNSView(context: Context) -> NSVisualEffectView {
+    let view = NSVisualEffectView()
+    view.material = .sidebar
+    view.blendingMode = .behindWindow
+    view.state = .active
+    return view
+  }
+  func updateNSView(_ view: NSVisualEffectView, context: Context) {
+    view.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+  }
+}
+
+/// Shared navigation interaction, including keyboard focus and reduced-motion support.
+struct SidebarControlStyle: PrimitiveButtonStyle {
+  enum Role { case navigation, history, action, identity, quiet }
+  let t: Theme
+  var role: Role = .quiet
+  var selected = false
+  func makeBody(configuration: Configuration) -> some View {
+    Control(configuration: configuration, palette: t.navigation, role: role, selected: selected)
+  }
+  private struct Control: View {
+    let configuration: PrimitiveButtonStyleConfiguration
+    let palette: SidebarPalette
+    let role: Role
+    let selected: Bool
+    @State private var hover = false
+    @FocusState private var focused: Bool
+    @Environment(\.isEnabled) private var enabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    var body: some View {
+      Button(action: configuration.trigger) {
+        configuration.label
+          .foregroundStyle(selected || hover ? palette.text : palette.secondary)
+          .contentShape(RoundedRectangle(cornerRadius: SidebarMetric.radius))
+      }.buttonStyle(PressStyle(palette: palette))
+        .background(fill, in: RoundedRectangle(cornerRadius: SidebarMetric.radius))
+        .overlay {
+          RoundedRectangle(cornerRadius: SidebarMetric.radius)
+            .strokeBorder(edge, lineWidth: focused ? 2 : 1).allowsHitTesting(false)
+        }
+        .focusable().focused($focused).focusEffectDisabled()
+        .opacity(enabled ? 1 : 0.4)
+        .onHover { hover = $0 }
+        .animation(reduceMotion ? nil : .easeOut(duration: SidebarMetric.transition), value: hover)
+        .animation(
+          reduceMotion ? nil : .easeOut(duration: SidebarMetric.transition), value: selected)
+    }
+    private var fill: Color {
+      // History's selection belongs to the complete row, including its action slot.
+      if selected { return role == .history ? .clear : palette.selected }
+      if hover && enabled { return palette.hover }
+      return role == .action || role == .identity ? palette.elevated.opacity(0.65) : .clear
+    }
+    private var edge: Color {
+      if focused { return palette.focus }
+      return (selected && role != .history) || role == .action || role == .identity
+        ? palette.edge : .clear
+    }
+  }
+  private struct PressStyle: ButtonStyle {
+    let palette: SidebarPalette
+    func makeBody(configuration: Configuration) -> some View {
+      configuration.label.background(
+        configuration.isPressed ? palette.pressed : .clear,
+        in: RoundedRectangle(cornerRadius: SidebarMetric.radius))
     }
   }
 }

@@ -1,0 +1,4 @@
+CAPTURE sidebar-history 1024x520, bitmap 2048x1040, 501ms
+CAPTURE sidebar-folded 1024x520, bitmap 2048x1040, 687ms
+CAPTURE collapsed 1024x520, bitmap 2048x1040, 511ms
+Native captures complete: /private/tmp/synthesis-sidebar-short

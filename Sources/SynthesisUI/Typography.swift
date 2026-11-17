@@ -38,12 +38,3 @@ extension Font {
     return .custom(StudioTypography.name(weight), fixedSize: size)
   }
 }
-
-/// Deterministic sidebar surface. Native adaptive glass can invert against desktop content.
-struct NavigationGlass: View {
-  let theme: Theme
-  var body: some View {
-    theme.sidebar
-      .overlay(alignment: .trailing) { theme.hairline.frame(width: 1) }
-  }
-}

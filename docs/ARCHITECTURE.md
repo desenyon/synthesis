@@ -6,17 +6,19 @@ Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bun
 
 `SynthesisApp` hosts `ConnectedRoot` (Shell.swift) in `StudioWindow`, a titled window with full-size content and a transparent title bar. The window keeps native controls, resizing, full screen and frame autosave; `layoutTrafficLights()` centres the buttons in the 56-point header and is reapplied from `update()`.
 
-`ConnectedRoot` lays out the navigation (`Sidebar`), the active workspace and global overlays: the command palette, toasts and the error alert. Navigation, assistance mode and the open record are independent pieces of `Studio` state. A record opens over the current workspace (`selectedRecord`), so closing it returns to where the creator was.
+`ConnectedRoot` lays out the navigation (`Sidebar.swift`), the active workspace and global overlays: the command palette, toasts and the error alert. Navigation, assistance mode and the open record are independent pieces of `Studio` state. A record opens over the current workspace (`selectedRecord`), so closing it returns to where the creator was.
 
 ## Design system
 
 `Theme.swift` holds colour tokens for both themes, shared metrics and vocabulary (categories, modes, state labels). `Components.swift` holds the pieces every screen uses: `WorkspaceBar` (context, actions, the persistent `ModeSwitch`, search), `BarTitle`, `BarAction`, `QuietButton`, `IconButton`, `PlainMenu`, `FilterChip`, `SearchField`, `FormField`, `StateBadge`, `CategoryTile`, `EmptyState`, `SheetScaffold`, `ZoomControls` and the floating-panel surface. `WorkspaceBar` uses `ViewThatFits` to collapse labelled actions to icons when space is short.
 
+The sidebar uses `SidebarPalette` and `SidebarMetric` in Theme, with `SidebarControlStyle` and `NavigationGlass` in Components. Its 312pt expanded surface (72pt rail) has fixed identity/actions and utilities around one scrolling navigation/history region. Native vibrancy has an explicit appearance and an opaque accessibility fallback. Studio's destinations, category lenses and conversation actions are unchanged.
+
 ## Workspaces
 
 - `Conversation.swift`: `ConversationStudio` (full width or companion), `ChatRow`, `UnifiedComposer`. The composer owns keystrokes locally, measures its own height and debounces draft persistence. `Markdown.swift` parses answers into blocks with a pure, tested parser.
 - `CuratedCanvas.swift` with `CanvasSession` (CanvasHost.swift): the board is the Excalidraw editor, built from `CanvasWeb/` into `CanvasBundle` and loaded in a `WKWebView` from the application bundle through the `synthesis-canvas://` scheme. A content security policy and the navigation delegate forbid every other origin; nothing is fetched from the network. A JSON bridge loads scenes, syncs record cards and relationship arrows, and receives changes, link activations and connection requests. Board rows store `{format:"excalidraw", scene, hiddenRelations, legacy?}`; earlier `CanvasDocument` layouts are converted on first open and kept. One session lives for the whole run so late edits still save; quitting waits for a flush. Canonical relationships cannot be relabelled from the canvas. Details: HANDOFF.md.
-- `Graph.swift`: `GraphLayout` is a deterministic Fruchterman–Reingold layout inside a frame shaped like the window. Layouts above 80 nodes run in a cancellable background task. Nothing is stored. Copying to canvas creates a separate board referencing the same records.
+- `Graph.swift`: `GraphLayout` uses bundled Dagre 3.1.3 through JavaScriptCore, with native cards and port routing. The derived layout is not stored. Copying to canvas creates a separate board referencing the same records.
 - `Library.swift`, `Editor.swift`: list with full-text search and archive; editor with `RecordInspector` and `TextDiff`-based canon review. `Timeline.swift`, `Atlas.swift`: sourced events and map markers.
 - `CommandPalette.swift`, `Sheets.swift`: ⌘K and new-record, new-world, rename and first-run sheets.
 - `Settings.swift`, `SettingsCatalog.swift`: one searchable Settings workspace, compact section navigation, shared onboarding/provider connection control and explicit world-detail saves. Settings entry points in chat navigate here; the old modal is removed.

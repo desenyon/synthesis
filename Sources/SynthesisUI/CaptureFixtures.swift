@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "sidebar-long", "light-sidebar-long", "sidebar-history", "sidebar-folded",
+    "sidebar-opaque", "light-sidebar-opaque", "empty-sidebar", "light-collapsed",
     "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
     "atlas-local",
     "mechanics", "light-mechanics", "manual-mechanics", "mechanics-empty", "mechanics-scenario",
@@ -138,15 +140,48 @@ extension Studio {
         "Keep both possibilities open. I want the [Tidekeepers](synthesis://record/\(order.id)) to disagree about what the crossing costs.",
       state: "complete")
     try reload()
+    if ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_STATES"]?.contains("sidebar") ?? true
+    {
+      let stress = try store.createWorld(
+        name: "Aster — chronicles of the wandering archipelago beyond the remembered sea")
+      if let cover = try store.preference("world-cover:\(worldID)") {
+        try store.setPreference("world-cover:\(stress.id)", value: cover)
+      }
+      for index in 1...1024 {
+        _ = try store.createRecord(
+          worldID: stress.id, title: "Archive character \(index)", kind: "entity",
+          category: "Characters")
+      }
+      for title in [
+        "Who remembers the first crossing?",
+        "The maps beneath the city",
+        "A treaty between the coastal orders",
+        "The story we have not written yet",
+        "How the Tidekeepers lost their names — a conversation about memory, inheritance and the sea",
+        "Northern kingdoms",
+        "The limits of remembrance",
+        "Two possible histories of the same island",
+      ] {
+        let history = try store.createConversation(worldID: stress.id, title: title)
+        try store.appendMessage(
+          worldID: stress.id, conversationID: history.id, role: "user",
+          body: "A saved idea for later: \(title)", state: "complete")
+      }
+      try reload()
+    }
     return (board.id, chat.id)
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
     _ = flushEditor()
     editorSave = nil
-    let wanted = worlds.first { state.hasPrefix("empty-") ? $0.name == "Halcyon" : $0.demo }
+    let stress = state.contains("sidebar-long") || state == "sidebar-history"
+    let wanted = worlds.first {
+      if stress { return $0.name.hasPrefix("Aster — chronicles") }
+      return state.hasPrefix("empty-") ? $0.name == "Halcyon" : $0.demo
+    }
     if let wanted, wanted.id != worldID { switchWorld(wanted.id) }
-    let board = state.hasPrefix("empty-") ? "" : board
-    let conversation = state.hasPrefix("empty-") ? nil : Optional(conversation)
+    let board = state.hasPrefix("empty-") || stress ? "" : board
+    let conversation = state.hasPrefix("empty-") || stress ? nil : Optional(conversation)
     // Each capture represents opening this board at the requested window size.
     // Clear only the isolated fixture viewport; normal workspaces retain theirs.
     perform {
@@ -184,7 +219,7 @@ extension Studio {
     stop()
     setMode(state.hasPrefix("manual") ? .manual : .assisted)
     dark = !state.hasPrefix("light")
-    collapsed = ["collapsed", "settings-collapsed"].contains(state)
+    collapsed = ["collapsed", "light-collapsed", "settings-collapsed"].contains(state)
     inspector = true
     libraryCategory = nil
     canvasBoardID = board.isEmpty ? nil : board
@@ -195,6 +230,14 @@ extension Studio {
     conversationID = state.hasSuffix("conversation-home") ? nil : conversation
     perform { try reload() }
     switch state {
+    case "sidebar-long", "light-sidebar-long", "sidebar-history", "empty-sidebar":
+      destination = .chat
+      conversationID = nil
+      if state == "sidebar-history", let recent = conversations.first {
+        openChat(recent)
+      }
+    case "sidebar-folded", "sidebar-opaque", "light-sidebar-opaque":
+      destination = .knowledge
     case "mechanics", "light-mechanics", "manual-mechanics", "mechanics-empty",
       "mechanics-scenario", "mechanics-review", "mechanics-history":
       destination = .library

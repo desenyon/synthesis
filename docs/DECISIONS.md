@@ -98,3 +98,9 @@ The owner requested intelligent, customizable UI across creative workspaces. Use
 ## 2026-11-16 — Mechanics history and safe agent revisions
 
 Rule history is an additive, world-scoped snapshot table, written in the same transaction as a rule mutation. Restoring history makes a draft; accepting canon remains a separate exact-snapshot action. The proposal pipeline validates rule IDs independently from lore IDs and compares the staged rule before-state before applying changes. Scenarios preserve creator-authored conclusions; model proposals can describe a hypothetical situation and expectation only. Native typed components continue to provide customization without executing model-produced UI code.
+
+## 2026-11-16 — owner-directed sidebar refinement (protected)
+
+The owner requested a 304–320pt graphite sidebar with restrained native translucency, monochrome navigation and the existing world artwork as its identity. Implemented at 312pt, retaining Inter, Phosphor, all Studio actions and the native titled window. This updates the sidebar portion of the earlier black/opaque presentation decision; the workspace palette and C2's broader theme proposal remain unchanged.
+
+Use an explicitly themed `NSVisualEffectView` with an 88% opaque tint, never adaptive Liquid Glass. Reduce Transparency/Increase Contrast use the opaque token. One scrolling middle prevents history from competing with fixed top and bottom controls. Shared 150ms interaction states honor Reduce Motion. No new navigation model, world data or database migration is introduced. [Design and verification contract](SIDEBAR.md).
