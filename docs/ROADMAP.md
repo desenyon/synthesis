@@ -5,6 +5,7 @@
 The owner's 2026-11-16 expansion brief describes 394 improvements and explicitly prioritizes shared foundations over simultaneous feature expansion. Keep the approved native shell and subscription-only/canon safeguards.
 
 - **Implemented on main, unreleased:** reference-guided shared composer, world-scoped attachments, local request preview, scope/exclusions and core-enforced Explore/Propose. Details and verification: [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md), [STATE](STATE.md).
+- **2026-11-17 refinement:** the shared composer follows the accepted app controls and typography, with an adaptive toolbar, readable writing surface and saved-shortcut feedback. The sidebar and navigation remain unchanged.
 - **Next:** typed entity attributes/facts with provenance, revision history, world isolation and portable export. Connect the same fields to the editor, agent proposals and Graph inspection before expanding UI vocabulary.
 - **Following:** shared temporal validity and world-state queries across Timeline, Atlas and Graph; richer multi-step proposal previews; live Canvas components; geography layers and chronology dependencies.
 - **Later:** small reproducible rule simulations with explicit assumptions, three-way branch merges, modules and collaboration. These are planned, not capabilities claimed by the composer work.

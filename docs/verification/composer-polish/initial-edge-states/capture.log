@@ -1,0 +1,9 @@
+CAPTURE composer-companion 1440x900, bitmap 2880x1800, 562ms
+CAPTURE light-composer-companion 1440x900, bitmap 2880x1800, 572ms
+CAPTURE composer-command-return 1440x900, bitmap 2880x1800, 896ms
+CAPTURE composer-unavailable 1440x900, bitmap 2880x1800, 895ms
+CAPTURE composer-companion 1024x768, bitmap 2048x1536, 461ms
+CAPTURE light-composer-companion 1024x768, bitmap 2048x1536, 468ms
+CAPTURE composer-command-return 1024x768, bitmap 2048x1536, 555ms
+CAPTURE composer-unavailable 1024x768, bitmap 2048x1536, 544ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/composer-polish/edge-states

@@ -1,0 +1,7 @@
+CAPTURE composer-overflow 1440x900, bitmap 2880x1800, 939ms
+CAPTURE composer-companion 1440x900, bitmap 2880x1800, 578ms
+CAPTURE light-composer-companion 1440x900, bitmap 2880x1800, 583ms
+CAPTURE composer-overflow 1024x768, bitmap 2048x1536, 569ms
+CAPTURE composer-companion 1024x768, bitmap 2048x1536, 460ms
+CAPTURE light-composer-companion 1024x768, bitmap 2048x1536, 465ms
+Native captures complete: /private/tmp/synthesis-composer-wrap-final

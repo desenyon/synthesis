@@ -4,6 +4,16 @@ First implementation slice of the owner's 394-item expansion brief. Keep the nat
 
 The supplied reference guides the shared composer: quiet World assistant heading, roomy expanding input, removable context chips, Explore/Propose choice, Canon protected disclosure and World context inspection. Full Conversation, companion and compact workspace bars share the same persisted state. Do not copy the reference's illustrative badge or hardcoded lore.
 
+## Refinement direction
+
+Product: a conversational worldbuilding workspace for an individual creator.
+Character: quiet, deliberate and tactile, using the app's existing typography and palette.
+Material: a graphite writing surface with restrained borders and consistent control geometry.
+Emphasis: the creator's words and real lore references, followed by Send or Stop.
+Signature: inspectable world context, with creation controls grouped in one adaptive toolbar.
+
+The 2026-11-17 refinement uses 16pt bundled Inter for both placeholder and typed text, one 32pt toolbar, 8pt reference/control corners and a quieter 20pt outer surface. Attach, assistant preset and Explore/Propose sit together; World context and Send sit at the other end. Narrow companions condense labels without dropping actions. Canon protected remains an actionable explanation below the field, beside the provider disclosure and the saved send-shortcut hint. Ordinary line growth is immediate; expansion and control feedback respect Reduce Motion.
+
 ## Behavior contract
 
 - Attach real records, maps, boards and history branches/periods by stable world-scoped IDs. Text/Markdown import and inline mentions remain available.
@@ -27,7 +37,9 @@ Excerpt limits are 8/16/32 records. The workspace index additionally contains bo
 
 ## Verification
 
-`./scripts/check.sh` passed **174 tests in 41 suites**, strict lint and optimized build. New regressions cover exclusions, attachments-only scope, board/history membership and index limits, archive/foreign IDs, disk persistence, preview/send parity, Explore enforcement, selected entity neighbours and stale draft writes. Existing Manual/canon/Propose coverage remains green.
+The 2026-11-17 refinement passed `./scripts/check.sh`: **175 tests / 42 suites**, strict lint and optimized build. The new native layout regression preserves the caret and intentional scrolling while clearing stale offsets after a growing composer reveals every line. **40 final background captures** at two sizes were inspected, including multiline drafts, unavailable provider, two-row companion attachments and light theme. Attachment wrapping and first-line clipping were found visually, corrected and recaptured. [Current evidence](verification/composer-polish/README.md).
+
+The initial 2026-11-16 implementation passed `./scripts/check.sh` with **174 tests in 41 suites**, strict lint and optimized build. Its regressions cover exclusions, attachments-only scope, board/history membership and index limits, archive/foreign IDs, disk persistence, preview/send parity, Explore enforcement, selected entity neighbours and stale draft writes. Existing Manual/canon/Propose coverage remains green.
 
 **32 final background native captures** were inspected at 1440×900 and 1024×768, including dark/light, full/compact/companion, attachments, context inspection, overflow and expanded writing. A missing icon, misleading history checkbox and stale-draft overwrite found during iteration were corrected and recaptured. [Evidence](verification/composer-context/README.md). No live model call, foreground interaction or animation/VoiceOver claim; capture-only popover content uses the same native panel without activating a real popover.
 

@@ -7,6 +7,8 @@ extension Studio {
   public static let captureStates = [
     "composer-attached", "light-composer-attached", "composer-context", "light-composer-context",
     "composer-browser", "composer-overflow", "composer-expanded",
+    "composer-companion", "light-composer-companion", "composer-command-return",
+    "composer-unavailable",
     "sidebar-long", "light-sidebar-long", "sidebar-history", "sidebar-folded",
     "sidebar-opaque", "light-sidebar-opaque", "empty-sidebar", "light-collapsed",
     "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
@@ -265,6 +267,7 @@ extension Studio {
       }
     }
     updatePreferences { $0 = StudioPreferences() }
+    refreshProviderAvailability()
     if state.hasPrefix("preferences-") {
       updatePreferences {
         $0.bodySize = 20
@@ -303,10 +306,17 @@ extension Studio {
     switch state {
     case "composer-attached", "light-composer-attached", "composer-context",
       "light-composer-context",
-      "composer-browser", "composer-overflow", "composer-expanded":
-      destination = .chat
+      "composer-browser", "composer-overflow", "composer-expanded",
+      "composer-companion", "light-composer-companion", "composer-command-return",
+      "composer-unavailable":
+      destination = state.hasSuffix("-companion") ? .library : .chat
       conversationID = nil
       draft = "What changes if the Glass Sea begins freezing?"
+      if state == "composer-command-return" {
+        updatePreferences { $0.sendShortcut = .commandEnter }
+        draft +=
+          "\n\nExplore what this means for the Tidekeepers and Mira. Keep the cause open; we have not established it yet."
+      }
       perform {
         var lane = try store.chronologyLanes(worldID: worldID).first { $0.name == "Year 60" }
         if lane == nil {
@@ -683,6 +693,7 @@ extension Studio {
       palette = true
     default: destination = .canvas
     }
+    if state == "composer-unavailable" { providerConfigured = false }
     captureHint = state
     captureNonce += 1
   }

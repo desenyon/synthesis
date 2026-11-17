@@ -1,4 +1,4 @@
-# Handoff — 2026-11-16, composer work after 0.0.3
+# Handoff — 2026-11-17, composer refinement after 0.0.3
 
 Start here when picking up Synthesis.
 
@@ -23,6 +23,8 @@ Native SwiftUI/AppKit app over SQLite, with the Canvas on an embedded offline Ex
 0.0.3 added what-if worlds with reviewed merge-back, technique trees, Atlas regions, Timeline views and reordering, extended Review checks, crash recovery, `.synthesis` Finder integration and explicit-click Codex image generation.
 
 Unreleased on main: the supplied World assistant composer reference is implemented across full chat, companions and compact bars. Real lore/map/board/history attachments, local context inspection, per-world persisted scope/exclusions and Explore versus Propose use one core request builder. Restricted context withholds previous messages. Explore discards model proposal blocks in the core; Propose retains explicit review. No API credentials or broader agent filesystem access were introduced. [Usage and boundaries](COMPOSER_CONTEXT.md).
+
+The follow-up chatbox refinement uses the existing app palette and bundled Inter, a single adaptive toolbar, quieter attachment chips and a saved-shortcut hint. Keep Canon protected and provider disclosure below the input; preserve the draft handoff guards when changing presentation. Current evidence is in STATE.
 
 ## How to verify
 

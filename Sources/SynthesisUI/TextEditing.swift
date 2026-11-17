@@ -100,7 +100,8 @@ final class ComposerTextView: NSTextView {
       (placeholder as NSString).draw(
         at: NSPoint(x: textContainerInset.width + 5, y: textContainerInset.height),
         withAttributes: [
-          .font: font ?? StudioTypography.native(size: 15), .foregroundColor: placeholderColor,
+          .font: font ?? StudioTypography.native(size: ComposerMetric.bodySize),
+          .foregroundColor: placeholderColor,
         ])
     }
   }
@@ -144,6 +145,15 @@ final class ComposerTextView: NSTextView {
   }
 }
 
+/// Re-measure after AppKit commits a new viewport, not only before SwiftUI lays it out.
+final class ComposerScrollView: NSScrollView {
+  var contentDidLayout: ((NSTextView) -> Void)?
+  override func layout() {
+    super.layout()
+    if let editor = documentView as? NSTextView { contentDidLayout?(editor) }
+  }
+}
+
 /// Message input honors the saved send shortcut. Shift-Return inserts a line. References appear as tokens
 /// and are stored as Markdown links. Reports its content height and any `@query` being typed.
 struct ComposerInput: NSViewRepresentable {
@@ -167,12 +177,13 @@ struct ComposerInput: NSViewRepresentable {
     let paragraph = NSMutableParagraphStyle()
     paragraph.lineSpacing = 3
     return [
-      .font: StudioTypography.native(size: 15), .foregroundColor: NSColor(color),
+      .font: StudioTypography.native(size: ComposerMetric.bodySize),
+      .foregroundColor: NSColor(color),
       .paragraphStyle: paragraph,
     ]
   }
   func makeNSView(context: Context) -> NSScrollView {
-    let scroll = NSScrollView()
+    let scroll = ComposerScrollView()
     let view = ComposerTextView()
     scroll.drawsBackground = false
     scroll.hasVerticalScroller = false
@@ -182,7 +193,7 @@ struct ComposerInput: NSViewRepresentable {
     view.usesFontPanel = false
     view.usesRuler = false
     view.drawsBackground = false
-    view.font = .systemFont(ofSize: 15)
+    view.font = StudioTypography.native(size: ComposerMetric.bodySize)
     view.textColor = NSColor(color)
     view.insertionPointColor = NSColor(color)
     view.textContainerInset = NSSize(width: 0, height: 4)
@@ -196,6 +207,9 @@ struct ComposerInput: NSViewRepresentable {
     view.setAccessibilityLabel("Message your world")
     view.typingAttributes = baseAttributes
     context.coordinator.view = view
+    scroll.contentDidLayout = { [weak coordinator = context.coordinator] editor in
+      coordinator?.measure(editor)
+    }
     if autofocus {
       DispatchQueue.main.async { [weak view] in view?.window?.makeFirstResponder(view) }
     }
@@ -334,6 +348,14 @@ struct ComposerInput: NSViewRepresentable {
       layout.ensureLayout(for: container)
       let height =
         ceil(layout.usedRect(for: container).height) + editor.textContainerInset.height * 2
+      if let scroll = editor.enclosingScrollView, height <= scroll.contentSize.height,
+        scroll.contentView.bounds.origin != .zero
+      {
+        // AppKit can retain an offset from the shorter field after SwiftUI grows it. Only reset
+        // when every line fits; longer drafts keep their intentional scroll position and caret.
+        scroll.contentView.scroll(to: .zero)
+        scroll.reflectScrolledClipView(scroll.contentView)
+      }
       guard abs(height - reported) > 0.5 else { return }
       reported = height
       let callback = parent.onHeight

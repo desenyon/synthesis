@@ -174,7 +174,10 @@ func relativeDate(_ iso: String) -> String {
 
 /// Shared full/companion composer geometry. Compact workspace bars use the smaller radius.
 enum ComposerMetric {
-  static let radius: CGFloat = 22
-  static let compactRadius: CGFloat = 18
+  static let radius: CGFloat = 20
+  static let compactRadius: CGFloat = 16
   static let inset: CGFloat = 16
+  static let control: CGFloat = 32
+  static let bodySize: CGFloat = 16
+  static let transition: Double = 0.16
 }

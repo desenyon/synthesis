@@ -14,6 +14,7 @@ struct UnifiedComposer: View {
   @State private var syncedDraft = ""
   @State private var saveTask: Task<Void, Never>?
   @State private var inputHeight: CGFloat = 26
+  @State private var referencesHeight: CGFloat = 28
   @State private var referencePicker = false
   @State private var contextPicker = false
   @State private var inspectingContext = false
@@ -35,7 +36,7 @@ struct UnifiedComposer: View {
     return Array((leading + hit.filter { r in !leading.contains { $0.id == r.id } }).prefix(6))
   }
   var body: some View {
-    VStack(alignment: .leading, spacing: 7) {
+    VStack(alignment: .leading, spacing: 8) {
       Group {
         if collapsed { compactField } else { fullField }
       }
@@ -48,9 +49,9 @@ struct UnifiedComposer: View {
         RoundedRectangle(
           cornerRadius: collapsed ? ComposerMetric.compactRadius : ComposerMetric.radius
         ).stroke(
-          focused ? studio.t.accent.opacity(0.5) : studio.t.border.opacity(0.9), lineWidth: 1)
+          focused ? studio.t.accent.opacity(0.35) : studio.t.border, lineWidth: 1)
       )
-      .shadow(color: studio.t.shadow.opacity(collapsed ? 0.6 : 0.3), radius: 22, y: 8)
+      .shadow(color: studio.t.shadow.opacity(collapsed ? 0.5 : 0.25), radius: 16, y: 6)
       .overlay(alignment: .topLeading) {
         if !mentionMatches.isEmpty {
           // Sits just above the field so it never covers what is being typed.
@@ -60,8 +61,7 @@ struct UnifiedComposer: View {
       }
       disclosure
     }
-    .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: focused)
-    .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: inputHeight)
+    .animation(reduceMotion ? nil : .easeOut(duration: ComposerMetric.transition), value: focused)
     .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: expanded)
     .popover(isPresented: $contextPicker) {
       AssistantContextPanel(studio: studio, prompt: text, attachments: true)
@@ -103,19 +103,19 @@ struct UnifiedComposer: View {
     }
   }
   private var fullField: some View {
-    VStack(alignment: .leading, spacing: 16) {
+    VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 8) {
-        StudioIcon("sparkles", size: 16).foregroundStyle(studio.t.secondary)
-        Text("World assistant").font(.studio(size: 14, weight: .semibold))
+        Text("World assistant").font(.studio(size: 13, weight: .medium))
+          .foregroundStyle(studio.t.secondary)
         if studio.composerAttachments.count > 3 {
           Text("\(studio.composerAttachments.count) attached")
-            .font(.studio(size: 11)).foregroundStyle(studio.t.secondary)
+            .font(.studio(size: 11)).foregroundStyle(studio.t.muted)
         }
         Spacer(minLength: 0)
-        modeMenu
         IconButton(
           icon: expanded ? "minus" : "arrow.up.left.and.arrow.down.right",
-          label: expanded ? "Compact composer" : "Expand composer", t: studio.t
+          label: expanded ? "Compact composer" : "Expand composer", t: studio.t,
+          size: ComposerMetric.control
         ) { expanded.toggle() }
       }
       ComposerInput(
@@ -126,46 +126,55 @@ struct UnifiedComposer: View {
         sendShortcut: studio.preferences.sendShortcut, handle: handle,
         onFocus: { focused = $0 }, onHeight: { inputHeight = $0 }, onMention: updateMention,
         onMentionKey: mentionKey, submit: send
-      ).frame(height: expanded ? 220 : min(150, max(54, inputHeight)))
-        .padding(.horizontal, 4).padding(.top, 2)
+      ).frame(height: expanded ? 220 : min(160, max(56, inputHeight)))
+        // NSTextView has its own 5pt line-fragment inset. Align typed text to the heading.
+        .padding(.horizontal, -5)
       if !studio.composerAttachments.isEmpty || !selectedReferences.isEmpty {
-        ScrollView {
-          FlowLayout(spacing: 6) {
-            ForEach(studio.composerAttachments) { item in attachmentChip(item) }
-            ForEach(selectedReferences) { record in
-              HStack(spacing: 5) {
-                StudioIcon(categoryIcon(record.category), size: 12)
-                Text(record.title).font(.studio(size: 12)).lineLimit(1).frame(maxWidth: 150)
-                Text("selected").font(.studio(size: 10)).foregroundStyle(studio.t.muted)
-              }.padding(.horizontal, 9).frame(height: 27)
-                .foregroundStyle(studio.t.secondary).background(
-                  studio.t.secondarySurface.opacity(0.6), in: Capsule()
-                )
-                .help("Included from the current selection. Change this in World context.")
-            }
-          }.frame(maxWidth: .infinity, alignment: .leading)
-        }.scrollBounceBehavior(.basedOnSize).frame(
-          maxHeight: studio.composerAttachments.count + selectedReferences.count > 3 ? 68 : 29)
+        GeometryReader { viewport in
+          ScrollView {
+            FlowLayout(spacing: 6) {
+              ForEach(studio.composerAttachments) { item in attachmentChip(item) }
+              ForEach(selectedReferences) { record in
+                HStack(spacing: 6) {
+                  StudioIcon(categoryIcon(record.category), size: 12)
+                  Text(record.title).font(.studio(size: 12)).lineLimit(1).frame(maxWidth: 150)
+                  Text("Selected").font(.studio(size: 11)).foregroundStyle(studio.t.muted)
+                }.padding(.horizontal, 8).frame(height: 28)
+                  .foregroundStyle(studio.t.secondary).background(
+                    studio.t.secondarySurface.opacity(0.6),
+                    in: RoundedRectangle(cornerRadius: Metric.radius)
+                  )
+                  .help("Included from the current selection. Change this in World context.")
+              }
+            }.frame(width: viewport.size.width, alignment: .leading)
+              .onGeometryChange(for: CGFloat.self) { area in
+                area.size.height
+              } action: { height in
+                referencesHeight = height
+              }
+          }.scrollBounceBehavior(.basedOnSize)
+        }.frame(height: min(62, max(28, referencesHeight)))
       }
       ViewThatFits(in: .horizontal) {
-        controls(labels: true)
-        controls(labels: false)
+        controls(contextLabel: true)
+        controls(contextLabel: false)
+        controls(contextLabel: false, modeLabel: false)
       }
     }.padding(ComposerMetric.inset)
   }
-  private func controls(labels: Bool) -> some View {
-    HStack(spacing: 5) {
+  private func controls(contextLabel: Bool, modeLabel: Bool = true) -> some View {
+    HStack(spacing: 4) {
       attachment
+      modeMenu(labels: modeLabel)
       intentMenu
-      canonNotice(labels: labels)
-      contextControl(labels: labels)
-      Spacer(minLength: 2)
+      Spacer(minLength: 8)
+      contextControl(labels: contextLabel)
       sendButton
     }
   }
   private var compactField: some View {
     HStack(alignment: .bottom, spacing: 4) {
-      attachment.padding(.bottom, 1)
+      attachment
       ComposerInput(
         text: $text,
         placeholder: "Ask about \(studio.contextLabel)…", color: studio.t.text,
@@ -173,16 +182,19 @@ struct UnifiedComposer: View {
         accentSoft: studio.t.accentSoft, sendShortcut: studio.preferences.sendShortcut,
         handle: handle, onFocus: { focused = $0 }, onHeight: { inputHeight = $0 },
         onMention: updateMention, onMentionKey: mentionKey, submit: send
-      ).frame(height: min(96, max(26, inputHeight))).padding(.bottom, 2)
+      ).frame(height: min(96, max(ComposerMetric.control, inputHeight)))
       contextControl(labels: false)
-      IconButton(icon: "sidebar.right", label: "Open the companion conversation", t: studio.t) {
+      IconButton(
+        icon: "sidebar.right", label: "Open the companion conversation", t: studio.t,
+        size: ComposerMetric.control
+      ) {
         commitDraft()
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
           studio.companionExpanded = true
         }
-      }.padding(.bottom, 1)
+      }
       sendButton
-    }.padding(.leading, 11).padding(.trailing, 10).padding(.vertical, 12)
+    }.padding(12)
   }
   private var selectedReferences: [LoreRecord] {
     guard studio.contextOptions.includeSelection else { return [] }
@@ -192,17 +204,23 @@ struct UnifiedComposer: View {
     }
   }
   private func attachmentChip(_ item: ComposerAttachment) -> some View {
-    HStack(spacing: 5) {
+    HStack(spacing: 6) {
       StudioIcon(item.icon, size: 12)
-      Text(item.title).font(.studio(size: 12.5, weight: .medium)).lineLimit(1).frame(maxWidth: 170)
+      Text(item.title).font(.studio(size: 12.5)).lineLimit(1).frame(maxWidth: 170)
       Button {
         studio.removeAttachment(item)
       } label: {
-        StudioIcon("xmark", size: 9).frame(width: 20, height: 24).contentShape(Rectangle())
+        StudioIcon("xmark", size: 9).frame(width: 22, height: 24)
+          .hoverFill(studio.t, radius: 5)
       }.buttonStyle(.plain).help("Remove \(item.title)").accessibilityLabel(
         "Remove attachment \(item.title)")
-    }.padding(.leading, 10).padding(.trailing, 3).frame(height: 28)
-      .foregroundStyle(studio.t.secondary).background(studio.t.secondarySurface, in: Capsule())
+    }.padding(.leading, 8).padding(.trailing, 2).frame(height: 28)
+      .foregroundStyle(studio.t.secondary)
+      .background(studio.t.secondarySurface, in: RoundedRectangle(cornerRadius: Metric.radius))
+      .overlay(
+        RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.hairline, lineWidth: 0.5)
+          .allowsHitTesting(false)
+      ).help(item.title)
   }
   private var intentMenu: some View {
     PlainMenu {
@@ -229,9 +247,11 @@ struct UnifiedComposer: View {
       HStack(spacing: 5) {
         Text(studio.contextOptions.intent == .explore ? "Explore" : "Propose")
         StudioIcon("chevron.down", size: 8)
-      }.font(.studio(size: 12.5, weight: .medium)).padding(.horizontal, 10).frame(height: 28)
-        .background(studio.t.secondarySurface, in: Capsule()).hoverFill(studio.t, radius: 14)
+      }.font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.secondary)
+        .padding(.horizontal, 8).frame(height: ComposerMetric.control)
+        .hoverFill(studio.t, radius: Metric.radius)
     }.help("Whether to explore ideas or stage changes for review")
+      .accessibilityLabel("Assistant intent: \(studio.contextOptions.intent.title)")
   }
   private func canonNotice(labels: Bool) -> some View {
     PlainMenu {
@@ -247,10 +267,10 @@ struct UnifiedComposer: View {
     } label: {
       HStack(spacing: 5) {
         StudioIcon("lock.shield", size: 12)
-        if labels { Text("Canon protected").font(.studio(size: 12)) }
-      }.foregroundStyle(studio.t.secondary).padding(.horizontal, 9).frame(height: 28)
-        .hoverFill(studio.t, radius: 14)
-    }.help("How Synthesis protects canon")
+        if labels { Text("Canon protected").font(.studio(size: 11)) }
+      }.foregroundStyle(studio.t.muted).padding(.horizontal, 4).frame(height: 24)
+        .hoverFill(studio.t, radius: 6)
+    }.help("How Synthesis protects canon").accessibilityLabel("How Synthesis protects canon")
   }
   private func contextControl(labels: Bool) -> some View {
     Button {
@@ -260,31 +280,53 @@ struct UnifiedComposer: View {
       HStack(spacing: 5) {
         StudioIcon("square.stack", size: 13)
         if labels {
-          Text(studio.contextOptions.scope.title).font(.studio(size: 12))
+          Text(studio.contextOptions.scope.title).font(.studio(size: 12.5))
         } else if !studio.composerAttachments.isEmpty {
           Text("\(studio.composerAttachments.count)").font(.studio(size: 11.5)).monospacedDigit()
         }
-      }.foregroundStyle(studio.t.secondary).padding(.horizontal, 9).frame(height: 28)
-        .background(studio.t.secondarySurface.opacity(labels ? 0.65 : 0), in: Capsule())
-        .hoverFill(studio.t, radius: 14)
+      }.foregroundStyle(studio.t.secondary).padding(.horizontal, labels ? 8 : 0)
+        .frame(minWidth: ComposerMetric.control, minHeight: ComposerMetric.control)
+        .hoverFill(studio.t, radius: Metric.radius)
     }.buttonStyle(.plain).help("Inspect and control the context shared with your assistant")
       .accessibilityLabel("Inspect world context")
   }
-  @ViewBuilder private var disclosure: some View {
-    HStack(spacing: 5) {
-      if studio.providerConfigured {
-        Text("Shares world context with your AI provider").help(studio.providerDisclosure)
-      } else {
-        StudioIcon("bolt.slash", size: 10)
-        Text(
-          "Connect your \(studio.provider.title) subscription.")
-        Button("Set up") { studio.openAssistantSettings() }.buttonStyle(.plain)
-          .foregroundStyle(studio.t.accent)
-        if !collapsed && !companion { Text("Messages are kept locally until then.") }
+  private var disclosure: some View {
+    ViewThatFits(in: .horizontal) {
+      disclosureRow(detailed: true)
+      disclosureRow(detailed: false)
+    }.font(.studio(size: 11)).foregroundStyle(studio.t.muted)
+      .padding(.horizontal, 4)
+  }
+  private func disclosureRow(detailed: Bool) -> some View {
+    HStack(spacing: 8) {
+      if !collapsed { canonNotice(labels: detailed) }
+      Group {
+        if studio.providerConfigured {
+          Text(detailed ? "Context is shared with your AI provider" : "Context shared on Send")
+            .help(studio.providerDisclosure)
+        } else {
+          Button {
+            commitDraft()
+            studio.openAssistantSettings()
+          } label: {
+            HStack(spacing: 5) {
+              StudioIcon("bolt.slash", size: 11)
+              Text("Connect \(studio.provider.title)")
+            }.foregroundStyle(studio.t.secondary).frame(height: 24)
+              .hoverFill(studio.t, radius: 6)
+          }.buttonStyle(.plain)
+            .help("Connect your subscription in Settings. Messages stay local until you send.")
+        }
       }
-    }.font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(1)
-      .frame(maxWidth: .infinity, alignment: collapsed ? .center : .leading)
-      .padding(.horizontal, 6)
+      Spacer(minLength: 4)
+      if detailed {
+        Text(
+          studio.preferences.sendShortcut == .enter
+            ? "↵ Send · ⇧↵ New line" : "⌘↵ Send · ↵ New line"
+        )
+        .help("Change the send shortcut in Settings → Writing.")
+      }
+    }.lineLimit(1).fixedSize(horizontal: false, vertical: true)
   }
   private var attachment: some View {
     PlainMenu {
@@ -305,7 +347,8 @@ struct UnifiedComposer: View {
       }
     } label: {
       StudioIcon("plus", size: 16).foregroundStyle(studio.t.secondary)
-        .frame(width: 28, height: 28).hoverFill(studio.t, radius: 14)
+        .frame(width: ComposerMetric.control, height: ComposerMetric.control)
+        .hoverFill(studio.t, radius: Metric.radius)
     }.help("Attach world context or a file").accessibilityLabel("Add context or file")
   }
   private var mentionList: some View {
@@ -362,7 +405,7 @@ struct UnifiedComposer: View {
     }
     return true
   }
-  private var modeMenu: some View {
+  private func modeMenu(labels: Bool) -> some View {
     PlainMenu {
       ForEach(Vocabulary.modes, id: \.name) { mode in
         Button {
@@ -391,26 +434,29 @@ struct UnifiedComposer: View {
       }
     } label: {
       HStack(spacing: 5) {
-        StudioIcon(Vocabulary.modes.first { $0.name == studio.preset }?.icon ?? "sparkles")
-          .font(.studio(size: 12))
-        Text(studio.preset).font(.studio(size: 13, weight: .medium))
+        if labels {
+          Text(studio.preset).font(.studio(size: 12.5, weight: .medium))
+        } else {
+          StudioIcon(
+            Vocabulary.modes.first { $0.name == studio.preset }?.icon ?? "sparkles", size: 14)
+        }
         StudioIcon("chevron.down", size: 8)
-      }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
-        .hoverFill(studio.t)
-    }.help("Assistant mode: \(studio.preset)")
+      }.foregroundStyle(studio.t.secondary).padding(.horizontal, 8)
+        .frame(height: ComposerMetric.control).hoverFill(studio.t, radius: Metric.radius)
+    }.help("Assistant mode: \(studio.preset)").accessibilityLabel(
+      "Assistant mode: \(studio.preset)")
   }
   private var sendButton: some View {
     Button {
       if studio.busy { studio.stop() } else { send() }
     } label: {
-      StudioIcon(studio.busy ? "stop.fill" : "arrow.up")
-        .font(.studio(size: 13, weight: .semibold)).frame(width: 34, height: 34)
-        .foregroundStyle(empty && !studio.busy ? studio.t.muted : studio.t.onAccent)
-        .background(
-          empty && !studio.busy ? studio.t.secondarySurface : studio.t.accent,
-          in: RoundedRectangle(cornerRadius: 11))
-    }.buttonStyle(.plain).disabled((empty && !studio.busy) || studio.mode == .manual)
-      .help(studio.busy ? "Stop generating" : "Send")
+      StudioIcon(studio.busy ? "stop.fill" : "arrow.up", size: 14)
+    }.buttonStyle(ComposerSendStyle(t: studio.t))
+      .disabled((empty && !studio.busy) || studio.mode == .manual)
+      .help(
+        studio.busy
+          ? "Stop generating" : "Send (\(studio.preferences.sendShortcut == .enter ? "↵" : "⌘↵"))"
+      )
       .accessibilityLabel(studio.busy ? "Stop generation" : "Send message")
   }
   private func commitDraft() {

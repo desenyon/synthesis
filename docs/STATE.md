@@ -1,8 +1,20 @@
-# Current state — 2026-11-16
+# Current state — 2026-11-17
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. 0.0.x versions are published as full GitHub releases (owner instruction); v0.0.3 is the latest. Licensed GPL-3.0. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits.
 
-## Latest — shared composer and context (unreleased)
+## Latest — chatbox refinement (unreleased)
+
+The shared composer now follows the rest of the app: 16pt bundled Inter for placeholder and typed text, quiet reference chips, one adaptive 32pt toolbar, restrained focus and Send/Stop feedback, and a send-shortcut hint matching the saved preference. Preset/intent controls sit together; context inspection remains beside Send. Canon protection and provider disclosure sit below the writing surface. Sidebar, navigation, model requests, draft ownership and context permissions are unchanged.
+
+Screenshot iteration found two layout defects: a third attachment could wrap outside the narrow field, and a multiline draft could retain a clipped first line after resizing. Attachment rows now measure their actual available width; the native text scroll view remeasures after layout and clears stale offsets only when all text fits. A regression preserves the caret and the scroll position of genuinely overflowing drafts.
+
+`./scripts/check.sh` passed **175 tests / 42 suites**, strict Swift format lint and the optimized ad-hoc native build. **40 final native capture states** at 1440×900 and 1024×768 were inspected in contact sheets, with focused recaptures after the wrapping fix and a same-size before/after comparison. README images refreshed. [Evidence and exact commands](verification/composer-polish/README.md).
+
+No new dependencies, migrations, live model request or release. Background captures establish rendering; foreground typing, native popover interaction, animation pacing and VoiceOver were not retested in this pass. AGENTS.md unchanged.
+
+Launched the rebuilt canonical `dist/Synthesis.app`, opened Conversation and inspected the running window for the owner's review. No draft was entered or message sent; the app is left open.
+
+## Shared composer and context — 2026-11-16
 
 Implemented the supplied World assistant reference in the actual native app: expanding input, real removable lore/map/board/history chips, Explore/Propose, canon explanation and local context inspection. Full Conversation, floating companions and compact workspace bars use the same composer and per-world persisted choices. The sidebar and navigation model are unchanged. [Usage and scope](COMPOSER_CONTEXT.md).
 

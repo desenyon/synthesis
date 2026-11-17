@@ -1,0 +1,33 @@
+[0/1] Planning build
+Building for debugging...
+[0/6] Write sources
+[2/6] Write swift-version--1AB21518FC5DEDBE.txt
+[4/8] Emitting module SynthesisUI
+[5/8] Compiling SynthesisUI TextEditing.swift
+[5/10] Write Objects.LinkFileList
+[7/12] Emitting module SynthesisUITests
+[8/12] Compiling SynthesisUITests ComposerLayoutTests.swift
+[8/12] Write Objects.LinkFileList
+[9/12] Linking Synthesis
+[10/12] Applying Synthesis
+[11/12] Linking SynthesisPackageTests
+Build complete! (2.18s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite ComposerLayoutTests started.
+◇ Test growingComposerRevealsFirstLineWithoutMovingCaret() started.
+✘ Test growingComposerRevealsFirstLineWithoutMovingCaret() recorded an issue at ComposerLayoutTests.swift:31:5: Expectation failed: scroll.contentView.bounds.origin == .zero
+↳ scroll.contentView.bounds.origin == .zero → false
+↳   scroll.contentView.bounds.origin → (0.0, 24.0)
+↳     x → 0.0
+↳     y → 24.0
+↳   .zero → (0.0, 0.0)
+↳     x → 0.0
+↳     y → 0.0
+✘ Test growingComposerRevealsFirstLineWithoutMovingCaret() failed after 0.136 seconds with 1 issue.
+✘ Suite ComposerLayoutTests failed after 0.136 seconds with 1 issue.
+✘ Test run with 1 test in 1 suite failed after 0.136 seconds with 1 issue.
+Note: Some test targets reported failures:
+  - SynthesisPackageTests (Swift Testing)

@@ -182,6 +182,49 @@ struct IconButton: View {
   }
 }
 
+/// The composer's only filled action: restrained hover/press feedback and a legible disabled state.
+struct ComposerSendStyle: ButtonStyle {
+  let t: Theme
+  func makeBody(configuration: Configuration) -> some View {
+    Surface(t: t, configuration: configuration)
+  }
+  private struct Surface: View {
+    let t: Theme
+    let configuration: Configuration
+    @Environment(\.isEnabled) private var enabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var hovered = false
+    var body: some View {
+      configuration.label.frame(width: ComposerMetric.control, height: ComposerMetric.control)
+        .foregroundStyle(enabled ? t.onAccent : t.muted)
+        .background(
+          enabled ? t.accent.opacity(hovered ? 0.88 : 1) : t.secondarySurface,
+          in: RoundedRectangle(cornerRadius: Metric.radius)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: Metric.radius))
+        .scaleEffect(configuration.isPressed && !reduceMotion ? 0.96 : 1)
+        .opacity(configuration.isPressed ? 0.85 : 1)
+        .onContinuousHover { phase in
+          switch phase {
+          case .active: hovered = enabled
+          case .ended: hovered = false
+          }
+        }
+        .onChange(of: enabled) { _, _ in hovered = false }
+        .onDisappear { hovered = false }
+        .animation(
+          reduceMotion ? nil : .easeOut(duration: ComposerMetric.transition), value: hovered
+        )
+        .animation(
+          reduceMotion ? nil : .easeOut(duration: ComposerMetric.transition),
+          value: configuration.isPressed
+        )
+        .animation(
+          reduceMotion ? nil : .easeOut(duration: ComposerMetric.transition), value: enabled)
+    }
+  }
+}
+
 /// App-themed popover shared by every dropdown. Native context menus remain native.
 struct PlainMenu<Label: View, Items: View>: View {
   /// Flexible menus may shrink so a long title truncates instead of widening its bar.
@@ -281,6 +324,7 @@ struct HoverFill: ViewModifier {
   var radius: CGFloat = 7
   var selected = false
   @State private var hover = false
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   func body(content: Content) -> some View {
     content.background(
       selected ? t.secondarySurface : (hover ? t.hover : .clear),
@@ -294,7 +338,7 @@ struct HoverFill: ViewModifier {
       }
       .onChange(of: selected) { _, _ in hover = false }
       .onDisappear { hover = false }
-      .animation(.easeOut(duration: 0.14), value: hover)
+      .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: hover)
   }
 }
 extension View {

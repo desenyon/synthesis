@@ -1,6 +1,6 @@
 # Screenshots
 
-README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to 1600 px wide. `composer.png`, `composer-context.png` and `conversation.png` were refreshed on 2026-11-16 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
+README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to 1600 px wide. `composer.png`, `composer-context.png` and `conversation.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
 
 | File | Capture state |
 | --- | --- |
@@ -28,4 +28,4 @@ sips -Z 1600 /tmp/synthesis-shots/canvas-1440x900.png --out docs/screenshots/can
 
 Captures run in the background against an isolated database and never touch your worlds. The sample artwork is bundled and AI-generated.
 
-The context inspector capture displays the actual popover content inline so verification never steals focus. Its position is a capture layout; native popover pointer/keyboard behavior requires a separate interaction check. Latest evidence: [composer-context](../verification/composer-context/README.md).
+The context inspector capture displays the actual popover content inline so verification never steals focus. Its position is a capture layout; native popover pointer/keyboard behavior requires a separate interaction check. Latest evidence: [composer-polish](../verification/composer-polish/README.md).

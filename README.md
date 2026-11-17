@@ -63,7 +63,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 </details>
 
-Screenshots are the real app with the bundled **Aster** sample world at 1440×900. The composer and context controls show **unreleased main** work after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context and Conversation images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
 
 ## Install
 
@@ -91,6 +91,8 @@ Your data lives in `~/Library/Application Support/Synthesis/synthesis.sqlite`. S
 Synthesis talks to **Codex** (ChatGPT subscription) or **Claude Code** (Claude subscription) installed on your Mac. There are no API keys to enter: sign in to the CLI once (`codex login`, or run `claude`), then pick it in **Settings → Assistant**. Each request runs in an empty scratch folder with tools, file access and your CLI configuration disabled. Manual mode blocks every request in the core. Details: [AI setup](docs/AI_SETUP.md).
 
 In the composer, **+** attaches real world context and **World context** previews the excerpts and index locally. **Explore** cannot stage changes; **Propose** sends validated draft operations to Review. Restricted scopes omit earlier chat messages, and explicit canon approval remains separate. [Composer guide](docs/COMPOSER_CONTEXT.md).
+
+The same expanding composer follows you into workspace companions. Its toolbar adapts to narrow panels, attachments wrap, and the footer shows your chosen send shortcut. Change Enter/⌘Enter in **Settings → Writing**.
 
 ## Keyboard shortcuts
 
