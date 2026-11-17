@@ -21,3 +21,5 @@ The final `Synthesis-0.0.2-macos-arm64.zip` was extracted into a fresh temporary
 The additional check covers first-fit acknowledgement before native persistence; `first-fit-red.log` records its failure before repair. The source capture log remains the historical 27-check/48-state pass and has not been relabelled. Final native checks also include independent provider caches and untouched host defaults. No extra live model request or foreground interaction occurred.
 
 ZIP SHA-256: `c86f0c3eba8046612d1f3441b22d2aa065b6bddc1bb74bb4e35a440c172e4a89`.
+
+Published [v0.0.2](https://github.com/desenyon/synthesis/releases/tag/v0.0.2) from `2b792637553ed6d940b0f9d5d4540a6b2b7694a8`. GitHub confirms `prerelease: true`, `draft: false`, three assets and the same ZIP SHA-256 above. Remote v0.0.1 still points to its original commit.

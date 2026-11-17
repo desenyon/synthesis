@@ -1,6 +1,6 @@
 # Synthesis
 
-A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. Development prerelease [0.0.2](docs/releases/0.0.2.md). **Conversation, Canvas, Library, Graph, Timeline, Atlas, Review and Worlds** are views of one saved world, sharing one design system.
+A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. Development prerelease [0.0.2](https://github.com/desenyon/synthesis/releases/tag/v0.0.2) ([release notes](docs/releases/0.0.2.md)). **Conversation, Canvas, Library, Graph, Timeline, Atlas, Review and Worlds** are views of one saved world, sharing one design system.
 
 ![Synthesis Canvas with linked character, system and place cards in the Aster sample world](docs/screenshots/canvas.png)
 

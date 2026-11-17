@@ -27,7 +27,7 @@ This ledger tracks the full latest request, not just the Atlas follow-up. Prior 
 
 - [x] Update README screenshots and factual implementation docs.
 - [x] Review the complete diff for data integrity, untrusted inputs, privacy, stale code and regressions.
-- [ ] Commit/push only checked source. Verify the built artifact separately from source checks; do not mislabel the existing 0.0.1 archive as containing later commits.
+- [x] Commit/push only checked source. Verify the built artifact separately from source checks; do not mislabel the existing 0.0.1 archive as containing later commits.
 
 Live subscription and physical foreground gesture checks are distinct from stand-in provider tests, native captures and synthetic engine events. Do not mark them as exercised unless actually run. Existing 0.0.1 is a development prerelease, not the future 1.0 public product launch.
 
@@ -42,3 +42,5 @@ Ticks above describe implemented behavior with the recorded code, test and settl
 - Scope still incomplete: subscription image generation, full editable/coherent map geometry, spatial techniques/cosmology simulation and canon branch merging. Native foreground input/VoiceOver, live-CLI Stop and large-board performance are not certified.
 
 Detailed logs, before/after and contact sheets: [interaction-0.0.2](verification/interaction-0.0.2/README.md). Prior audit A2's physical requirement and unapproved C2/C3 are not ticked by this work.
+
+Published [v0.0.2](https://github.com/desenyon/synthesis/releases/tag/v0.0.2) from `2b792637553ed6d940b0f9d5d4540a6b2b7694a8` after extracted-artifact verification. GitHub asset digest matches the tested ZIP; v0.0.1 remains unchanged.
