@@ -1,6 +1,6 @@
 # Screenshots
 
-README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png` `document-tabs.png` and `palette.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
+README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png` `document-tabs.png` , `palette.png` and `navigation.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
 
 | File | Capture state |
 | --- | --- |
@@ -43,3 +43,5 @@ Detailed Graph: expansion #15, `verification/expansion-015/refined`, using actua
 Document tabs: expansion #16, `verification/expansion-016`, with pinned and real opened records.
 
 `palette.png` comes from expansion #22's 1440×900 native faction-filter capture. [Search evidence](../verification/expansion-022/README.md) covers real relationship and status/date filters. [#21 evidence](../verification/expansion-021/README.md) additionally covers maps/scenes/settings/activity. Both include narrow, light and Manual states.
+
+`navigation.png` comes from expansion #23’s final Categories tab at 1440×900. The section order, hidden categories and pins are real isolated preferences. [Evidence](../verification/expansion-023/README.md).

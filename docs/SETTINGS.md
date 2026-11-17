@@ -45,3 +45,7 @@ Final `./scripts/check.sh`: strict Swift lint, 94 tests in 21 suites, optimized 
 ## Information density
 
 General → Information density saves Compact, Comfortable or Immersive on this Mac. Navigation/history and Library rows change height; record thumbnails, Worlds/Mechanics cards, section padding and reading-edge spacing adapt immediately. Comfortable preserves the standard scale. Fonts stay readable at every density. Authored Canvas positions/sizes and document rich text are not rewritten. Missing or unknown older preference values safely use Comfortable.
+
+## Per-universe navigation content
+
+General → Navigation content opens customization for the current universe on this Mac. Reorder sections, hide unused World categories and pin/reorder collections in Favorites; search remains complete. Arrangement and Categories use separate tabs in the shared sheet. These preferences are not world exports or shared lore. [Sidebar usage and verification](SIDEBAR.md#customizable-navigation--expansion-23).

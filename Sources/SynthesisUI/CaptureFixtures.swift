@@ -62,6 +62,10 @@ extension Studio {
     "palette-long", "palette-unmatched", "light-conversation", "light-library", "light-graph",
     "search-faction", "search-canon", "search-quoted", "search-invalid", "search-no-results",
     "light-search-faction", "manual-search-faction", "search-library", "search-library-error",
+    "navigation-customized", "light-navigation-customized", "manual-navigation-customized",
+    "navigation-options", "light-navigation-options", "navigation-empty", "navigation-rail",
+    "navigation-default", "navigation-error", "navigation-long",
+    "navigation-categories", "light-navigation-categories", "navigation-settings",
     "light-editor",
     "manual-conversation", "toast", "review", "review-canon", "review-checks", "empty-conversation",
     "empty-canvas", "empty-library",
@@ -283,6 +287,50 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("navigation-") {
+      configureConnectedCapture("library", board: board, conversation: conversation)
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      restoreSidebarDefaults()
+      if state != "navigation-default" {
+        updateSidebarConfiguration {
+          $0.sectionOrder = ["favorites", "world", "workspace", "explore", "conversations"]
+          $0.pinnedCategories = ["Characters", "Places"]
+          $0.hiddenCategories = ["Cosmology", "Power systems"]
+        }
+      }
+      if state == "navigation-long" {
+        perform {
+          let category = "Orders of the Uncharted Western Archipelago and the Outer Reaches"
+          if !records.contains(where: { $0.category == category }) {
+            _ = try store.createRecord(
+              worldID: worldID, title: "The Last Cartographers", kind: "entity", category: category)
+            try reload()
+          }
+          pinSidebarCategory(category, pinned: true)
+        }
+      }
+      if state == "navigation-empty" {
+        updateSidebarConfiguration {
+          $0.hiddenCategories = sidebarCategories
+          $0.pinnedCategories = []
+        }
+      }
+      if state.hasSuffix("options") { sheet = .navigation }
+      if state.hasSuffix("categories") { sheet = .navigation }
+      if state == "navigation-settings" {
+        navigate(.settings)
+        settingsQuery = "navigation content"
+      }
+      if state == "navigation-error" {
+        perform { try store.setPreference("navigation:\(worldID)", value: "unreadable fixture") }
+        refreshSidebarConfiguration()
+        sheet = .navigation
+      }
+      if state == "navigation-rail" { collapsed = true }
+      captureHint = state
+      return
+    }
     if state.contains("search-") {
       let library = state.contains("library")
       configureConnectedCapture(
@@ -770,6 +818,7 @@ extension Studio {
     navigationForward = []
     libraryCategory = nil
     libraryQuery = ""
+    restoreSidebarDefaults()
     canvasBoardID = board.isEmpty ? nil : board
     companionExpanded = state.hasSuffix("-companion") || state == "companion"
     companionWidth = 400

@@ -32,6 +32,7 @@ struct StudioSheet: View {
             )
         }
       case .layouts: WorkspaceLayoutsSheet(studio: studio)
+      case .navigation: SidebarCustomizationSheet(studio: studio)
       case .project: NewProjectSheet(studio: studio)
       case .world: world
       case .document: document

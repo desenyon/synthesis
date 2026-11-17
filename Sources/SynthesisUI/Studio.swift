@@ -195,6 +195,8 @@ public struct Toast: Identifiable {
   @Published var inspectorWidth = 300.0
   @Published public var libraryCategory: String?
   @Published var libraryQuery = ""
+  @Published var sidebarConfiguration = SidebarConfiguration()
+  @Published var sidebarConfigurationError: String?
   @Published public var newRecordKind = "lore"
   @Published public var inspector = true
   @Published var workspaceInspector = false
@@ -214,7 +216,8 @@ public struct Toast: Identifiable {
   private var requestID = UUID()
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
-    case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts, project
+    case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts, project,
+      navigation
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
@@ -395,6 +398,7 @@ public struct Toast: Identifiable {
     branch = try store.branchInfo(worldID: worldID)
     branchParents = try store.branchParents()
     records = try store.records(worldID: worldID)
+    refreshSidebarConfiguration()
     try syncDocumentSession()
     contextBoards = try store.assistantBoards(worldID: worldID)
     contextLanes = try store.chronologyLanes(worldID: worldID)
@@ -641,6 +645,7 @@ public struct Toast: Identifiable {
       selectedRecord = nil
       editorSave = nil
       libraryCategory = category
+      libraryQuery = ""
       destination = .library
       canvasUndo = nil
       canvasFit = nil

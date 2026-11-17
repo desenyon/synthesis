@@ -196,6 +196,10 @@ struct SettingsScreen: View {
             })
         ).labelsHidden().toggleStyle(.switch).controlSize(.small).tint(t.accent)
       }
+    case .navigationContent:
+      row(item) {
+        Button("Customize…") { studio.sheet = .navigation }.buttonStyle(QuietButton(t: t))
+      }
     case .navigationWidth: row(item) { PanelWidthControl(studio: studio, panel: .sidebar) }
     case .inspectorWidth: row(item) { PanelWidthControl(studio: studio, panel: .inspector) }
     case .companionWidth: row(item) { PanelWidthControl(studio: studio, panel: .companion) }

@@ -25,3 +25,11 @@ Hover/selection transitions last 150ms and honor Reduce Motion. Keyboard focus u
 Evidence and exact checks are recorded in [the verification ledger](verification/sidebar/README.md), STATE and PROGRESS: 25 sidebar captures and seven README screens inspected, 12 pixel checks, four menu registration/action checks, and 115 tests in 27 suites passing. The isolated capture runner supports long names, 1,024 real fixture records, eight persisted conversations, folded groups and opaque surfaces. These fixtures are never loaded into normal user databases. `SYNTHESIS_SIDEBAR_AUDIT=1` validates shortcut registrations and dispatches the native menu actions in the non-key verification window; it does not represent a foreground pointer/trackpad or VoiceOver walkthrough.
 
 Design refinement used the Unslop workflow by [Damir Sokolovsky](https://heydamir.design/unslop), licensed CC BY 4.0, adapted to the owner's native-sidebar brief.
+
+## Customizable navigation — expansion #23
+
+Open **Settings → General → Navigation content → Customize**, or right-click a sidebar section/category and choose Customize navigation. Arrangement moves sections and pinned collections up/down; Categories searches all known entity categories, toggles their World visibility and pins them into Favorites. Standard categories and custom top-level entity categories share the same rows. Favorites appears only when something is pinned, including in the collapsed rail.
+
+The arrangement belongs to this universe on this Mac and persists after restart. Hiding a category never archives content or removes it from search. Collection navigation clears an old Library query after successfully saving current writing. Existing counts, history, group disclosures, world switching, resizing and native controls are retained. Restore defaults resets only this arrangement. Unreadable preferences stay preserved until that explicit reset.
+
+Verified strict lint, 231 tests / 58 suites, optimized native build, and 26 final background states at 1440×900, 1024×768 and 1024×620. Visual iteration separated category controls from arrangement so they are readily accessible in shorter windows. [Evidence](verification/expansion-023/README.md). Record favorites are the next requirement (#24).

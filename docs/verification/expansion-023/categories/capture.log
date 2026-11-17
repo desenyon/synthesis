@@ -1,0 +1,5 @@
+CAPTURE navigation-categories 1440x900, bitmap 1440x900, 168ms
+CAPTURE light-navigation-categories 1440x900, bitmap 1440x900, 179ms
+CAPTURE navigation-categories 1024x620, bitmap 1024x620, 121ms
+CAPTURE light-navigation-categories 1024x620, bitmap 1024x620, 111ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-023/categories

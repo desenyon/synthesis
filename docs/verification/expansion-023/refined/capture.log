@@ -1,0 +1,13 @@
+CAPTURE navigation-options 1440x900, bitmap 1440x900, 171ms
+CAPTURE light-navigation-options 1440x900, bitmap 1440x900, 173ms
+CAPTURE navigation-error 1440x900, bitmap 1440x900, 158ms
+CAPTURE navigation-categories 1440x900, bitmap 1440x900, 163ms
+CAPTURE light-navigation-categories 1440x900, bitmap 1440x900, 162ms
+CAPTURE navigation-settings 1440x900, bitmap 1440x900, 45ms
+CAPTURE navigation-options 1024x620, bitmap 1024x620, 114ms
+CAPTURE light-navigation-options 1024x620, bitmap 1024x620, 109ms
+CAPTURE navigation-error 1024x620, bitmap 1024x620, 116ms
+CAPTURE navigation-categories 1024x620, bitmap 1024x620, 114ms
+CAPTURE light-navigation-categories 1024x620, bitmap 1024x620, 106ms
+CAPTURE navigation-settings 1024x620, bitmap 1024x620, 37ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-023/refined

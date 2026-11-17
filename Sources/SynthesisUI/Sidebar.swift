@@ -20,6 +20,7 @@ struct Sidebar: View {
   @State private var contentBottom: CGFloat = 0
   @State private var viewportHeight: CGFloat = 0
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @Environment(\.interactionScope) private var interactionScope
   private var palette: SidebarPalette { studio.t.navigation }
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
@@ -28,45 +29,13 @@ struct Sidebar: View {
       ScrollViewReader { scroll in
         ScrollView {
           VStack(alignment: .leading, spacing: density.sectionGap) {
-            section("Workspace", items: [.chat, .canvas, .library, .dashboard])
-            section("Explore", items: [.knowledge, .timeline, .atlas, .review])
-            if !collapsed {
-              VStack(spacing: 0) {
-                disclosure("World", expanded: $worldExpanded)
-                if worldExpanded {
-                  ForEach(Vocabulary.categories, id: \.self) { category in
-                    let count = studio.topLevelRecords.filter {
-                      Vocabulary.matchesCategory($0.category, category)
-                    }.count
-                    NavRow(
-                      t: studio.t, title: category, icon: categoryIcon(category),
-                      selected: studio.destination == .library && studio.libraryCategory == category
-                        && studio.selectedRecord == nil,
-                      collapsed: false,
-                      trailing: studio.preferences.sidebarCounts && count > 0
-                        ? count.formatted() : nil
-                    ) { studio.openLens(category) }
-                  }
-                }
-              }
-              if studio.preferences.recentChats > 0 {
-                VStack(spacing: 0) {
-                  disclosure("Conversations", expanded: $chatsExpanded)
-                  if chatsExpanded {
-                    ForEach(studio.conversations.prefix(studio.preferences.recentChats)) { chat in
-                      ConversationRow(studio: studio, chat: chat)
-                    }
-                    if studio.conversations.isEmpty {
-                      Text("No conversations yet").font(.studio(.caption))
-                        .foregroundStyle(palette.muted)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 10).frame(height: density.historyRow)
-                    }
-                  }
-                }.id("sidebar-history")
-              }
+            ForEach(studio.sidebarConfiguration.sections) { item in
+              navigationSection(item)
             }
           }.padding(.bottom, 12)
+            .animation(
+              reduceMotion ? nil : Motion.feedbackAnimation, value: studio.sidebarConfiguration
+            )
             .background {
               GeometryReader { geometry in
                 Color.clear.preference(
@@ -101,6 +70,96 @@ struct Sidebar: View {
     .padding(.horizontal, SidebarMetric.inset)
     .frame(width: collapsed ? Metric.rail : studio.sidebarWidth).frame(maxHeight: .infinity)
     .accessibilityElement(children: .contain).accessibilityLabel("Navigation")
+    .contextMenu { Button("Customize navigation…") { studio.sheet = .navigation } }
+    .environment(
+      \.interactionScope, "\(interactionScope):navigation:\(studio.sidebarConfiguration.hashValue)")
+  }
+
+  @ViewBuilder private func navigationSection(_ item: SidebarSection) -> some View {
+    switch item {
+    case .workspace: section("Workspace", items: [.chat, .canvas, .library, .dashboard])
+    case .explore: section("Explore", items: [.knowledge, .timeline, .atlas, .review])
+    case .world:
+      if !collapsed {
+        VStack(spacing: 0) {
+          disclosure("World", expanded: $worldExpanded).contextMenu { sectionActions(.world) }
+          if worldExpanded {
+            ForEach(studio.visibleSidebarCategories, id: \.self) { category in categoryRow(category)
+            }
+            if studio.visibleSidebarCategories.isEmpty {
+              Button("Choose categories…") { studio.sheet = .navigation }
+                .font(.studio(.caption)).foregroundStyle(palette.secondary)
+                .buttonStyle(.plain).frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 10).frame(height: density.historyRow)
+            }
+          }
+        }
+      }
+    case .conversations:
+      if !collapsed && studio.preferences.recentChats > 0 {
+        VStack(spacing: 0) {
+          disclosure("Conversations", expanded: $chatsExpanded).contextMenu {
+            sectionActions(.conversations)
+          }
+          if chatsExpanded {
+            ForEach(studio.conversations.prefix(studio.preferences.recentChats)) { chat in
+              ConversationRow(studio: studio, chat: chat)
+            }
+            if studio.conversations.isEmpty {
+              Text("No conversations yet").font(.studio(.caption)).foregroundStyle(palette.muted)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 10).frame(height: density.historyRow)
+            }
+          }
+        }.id("sidebar-history")
+      }
+    case .favorites:
+      if !studio.sidebarConfiguration.pinnedCategories.isEmpty {
+        VStack(spacing: 0) {
+          if !collapsed {
+            heading("Favorites").padding(.horizontal, 10).frame(height: SidebarMetric.section)
+              .contextMenu { sectionActions(.favorites) }
+          }
+          ForEach(studio.sidebarConfiguration.pinnedCategories, id: \.self) { category in
+            categoryRow(category)
+          }
+        }
+      }
+    }
+  }
+  private func categoryRow(_ category: String) -> some View {
+    let count = studio.topLevelRecords.filter {
+      Vocabulary.categoryKey($0.category) == Vocabulary.categoryKey(category)
+    }.count
+    return NavRow(
+      t: studio.t, title: Vocabulary.displayCategory(category), icon: categoryIcon(category),
+      selected: studio.destination == .library
+        && studio.libraryCategory.map {
+          Vocabulary.categoryKey($0) == Vocabulary.categoryKey(category)
+        } == true
+        && studio.selectedRecord == nil, collapsed: collapsed,
+      trailing: studio.preferences.sidebarCounts && count > 0 ? count.formatted() : nil
+    ) { studio.openLens(category) }
+    .contextMenu {
+      Button(studio.sidebarConfiguration.isPinned(category) ? "Unpin collection" : "Pin collection")
+      {
+        studio.pinSidebarCategory(category, pinned: !studio.sidebarConfiguration.isPinned(category))
+      }
+      Button(studio.sidebarConfiguration.isHidden(category) ? "Show in World" : "Hide from World") {
+        studio.setSidebarCategory(category, visible: studio.sidebarConfiguration.isHidden(category))
+      }
+      Divider()
+      Button("Customize navigation…") { studio.sheet = .navigation }
+    }
+  }
+  @ViewBuilder private func sectionActions(_ section: SidebarSection) -> some View {
+    let order = studio.sidebarConfiguration.sections
+    Button("Move section up") { studio.moveSidebarSection(section, by: -1) }
+      .disabled(order.first == section)
+    Button("Move section down") { studio.moveSidebarSection(section, by: 1) }
+      .disabled(order.last == section)
+    Divider()
+    Button("Customize navigation…") { studio.sheet = .navigation }
   }
 
   @ViewBuilder private var actions: some View {
@@ -184,6 +243,7 @@ struct Sidebar: View {
     VStack(spacing: 0) {
       if !collapsed {
         heading(title).padding(.horizontal, 10).frame(height: SidebarMetric.section)
+          .contextMenu { sectionActions(title == "Workspace" ? .workspace : .explore) }
       }
       ForEach(items, id: \.self) { item in
         NavRow(

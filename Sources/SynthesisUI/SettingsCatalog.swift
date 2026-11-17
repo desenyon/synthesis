@@ -29,7 +29,8 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 
 /// One searchable inventory. The same entries label and render the actual controls.
 enum SettingsItem: CaseIterable, Identifiable {
-  case appearance, darkPalette, density, layouts, sidebar, navigationWidth, inspectorWidth,
+  case appearance, darkPalette, density, layouts, sidebar, navigationContent, navigationWidth,
+    inspectorWidth,
     companionWidth, counts, recents, launch, previews
   case textSize, readingWidth, spelling, quotes, dashes, links, words
   case assistance, connection, sendKey
@@ -38,7 +39,8 @@ enum SettingsItem: CaseIterable, Identifiable {
   var id: Self { self }
   var section: SettingsSection {
     switch self {
-    case .appearance, .darkPalette, .density, .layouts, .sidebar, .navigationWidth, .inspectorWidth,
+    case .appearance, .darkPalette, .density, .layouts, .sidebar, .navigationContent,
+      .navigationWidth, .inspectorWidth,
       .companionWidth, .counts, .recents, .launch,
       .previews:
       .general
@@ -55,6 +57,7 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .density: "Information density"
     case .layouts: "Workspace layouts"
     case .sidebar: "Expanded navigation"
+    case .navigationContent: "Navigation content"
     case .navigationWidth: "Navigation width"
     case .inspectorWidth: "Inspector width"
     case .companionWidth: "Conversation panel width"
@@ -93,6 +96,8 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .density: "Compact, comfortable or immersive rows, cards and content spacing."
     case .layouts: "Save and restore views and panels for this universe on this Mac."
     case .sidebar: "Show labels alongside workspace icons."
+    case .navigationContent:
+      "Reorder sections, hide categories and pin collections for this universe on this Mac."
     case .navigationWidth: "Drag the sidebar edge or adjust here. Default: 284 pt."
     case .inspectorWidth: "Shared by document and workspace inspectors. Default: 300 pt."
     case .companionWidth: "Docked and floating conversations. Default: 400 pt."
@@ -127,6 +132,7 @@ enum SettingsItem: CaseIterable, Identifiable {
     switch self {
     case .appearance, .darkPalette: "theme color colour graphite black OLED"
     case .density: "compact comfortable immersive spacing layout"
+    case .navigationContent: "sidebar customize favorites order rearrange visibility"
     case .textSize: "font typography"
     case .readingWidth: "margins layout"
     case .sendKey: "keyboard shortcut enter return"
