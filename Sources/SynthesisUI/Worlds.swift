@@ -1,7 +1,7 @@
 import AppKit
-import UniformTypeIdentifiers
 import SwiftUI
 import SynthesisCore
+import UniformTypeIdentifiers
 
 extension Studio {
   public func savePortableWorld() {
