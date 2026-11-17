@@ -237,6 +237,9 @@ extension Studio {
         if let cover = try store.preference("world-cover:\(worldID)") {
           collect(cover, key: "world-cover")
         }
+        for artwork in try store.recordArtworks(worldID: worldID) {
+          collect(artwork.image, key: "image")
+        }
         for kind in ["canvas", "atlas"] {
           for board in try store.boards(worldID: worldID, kind: kind) {
             if let data = board.content.data(using: .utf8),

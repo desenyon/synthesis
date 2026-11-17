@@ -11,6 +11,8 @@ extension Studio {
     "composer-unavailable", "oled-conversation", "oled-canvas", "oled-settings",
     "opaque-conversation", "opaque-graph", "light-opaque-graph",
     "editor-long", "light-editor-long",
+    "profile-empty", "light-profile-empty", "profile-artwork", "light-profile-artwork",
+    "profile-connected", "profile-writing", "profile-event", "manual-profile-empty",
     "compact-library", "immersive-library", "light-compact-library", "light-immersive-library",
     "compact-worlds", "immersive-worlds", "compact-mechanics", "immersive-mechanics",
     "compact-sections", "immersive-sections",
@@ -696,6 +698,50 @@ extension Studio {
             + "\n\nWhen the glass holds, the drowned lamps can be counted. Mira never counts the same number twice.",
           rtf: nil, category: record.category, baseVersion: record.version)
         selectedRecord = record
+      }
+    case "profile-empty", "light-profile-empty", "profile-artwork", "light-profile-artwork",
+      "profile-connected", "profile-writing", "profile-event", "manual-profile-empty":
+      destination = .library
+      inspector = false
+      perform {
+        let name =
+          viewState.hasSuffix("empty")
+          ? "Neris Vale" : viewState == "profile-writing" ? "Rowan Vale" : "Elian Sable"
+        var record = records.first { $0.title == name }
+        if record == nil {
+          record = try store.createRecord(
+            worldID: worldID, title: name, kind: "entity", category: "Characters")
+        }
+        guard var record else { return }
+        if !viewState.hasSuffix("empty"),
+          try store.recordArtwork(worldID: worldID, recordID: record.id) == nil,
+          let image = StudioArtwork.cartographer.data
+        {
+          _ = try store.saveRecordArtwork(
+            worldID: worldID, recordID: record.id, data: image, origin: "ai-generated",
+            expectedID: nil)
+        }
+        if viewState == "profile-connected",
+          let other = records.first(where: { $0.title == "Tidekeepers" })
+        {
+          _ = try? store.addRelation(
+            worldID: worldID, source: record.id, target: other.id, label: "learned from")
+          if try store.events(worldID: worldID).allSatisfy({ $0.sourceID != record.id }) {
+            _ = try store.addEvent(
+              worldID: worldID, title: "The last chart returned", date: "Year 60", source: record.id
+            )
+          }
+        }
+        if viewState == "profile-writing" {
+          record = try store.saveRecord(
+            worldID: worldID, id: record.id, version: record.version, title: record.title,
+            body:
+              "Elian keeps the charts nobody else can read. On clear mornings, he takes one down to the shore and waits for its coastline to return.",
+            rtf: nil)
+        }
+        try reload()
+        selectedRecord = record
+        if viewState == "profile-event" { beginEvent(for: record) }
       }
     case "editor-long", "light-editor-long":
       destination = .library

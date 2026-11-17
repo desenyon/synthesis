@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 7
+  var version = 8
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -16,6 +16,7 @@ extension WorkspaceStore {
     "proposals", "message_context", "boards", "rules", "rule_history", "rule_scenarios",
     "chronology_lanes",
     "chronology_placements", "record_sections", "creative_components", "rule_prerequisites",
+    "record_artwork",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
     _ = try world(worldID)
@@ -60,7 +61,8 @@ extension WorkspaceStore {
     if (1...4).contains(archive.version) { archive.tables["creative_components"] = [] }
     if (1...5).contains(archive.version) { archive.tables["rule_history"] = [] }
     if (1...6).contains(archive.version) { archive.tables["rule_prerequisites"] = [] }
-    guard archive.format == "dev.synthesis.world", (1...7).contains(archive.version),
+    if (1...7).contains(archive.version) { archive.tables["record_artwork"] = [] }
+    guard archive.format == "dev.synthesis.world", (1...8).contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -105,6 +107,13 @@ extension WorkspaceStore {
       for table in Self.archiveTables {
         for source in archive.tables[table] ?? [] {
           var row = source.mapValues(remap)
+          if table == "record_artwork" {
+            guard let image = source["image"], let data = Data(base64Encoded: image),
+              try Self.validateArtwork(data) == source["mime_type"],
+              ["imported", "user-authored", "ai-generated"].contains(source["origin"] ?? "")
+            else { throw SynthesisError.invalid("The world file contains invalid artwork.") }
+            row["image"] = image
+          }
           // Reject external references even on tables whose historical schema lacks FKs.
           for (key, value) in source where key.hasSuffix("_id") && key != "owner_id" {
             guard ids[value] != nil else {
@@ -139,6 +148,12 @@ extension WorkspaceStore {
           [newWorld]
         ).isEmpty
       else { throw SynthesisError.invalid("The world file contains invalid creative components.") }
+      guard
+        try db.rows(
+          "SELECT a.id FROM record_artwork a JOIN records r ON r.id=a.record_id WHERE a.world_id=? AND (r.kind!='entity' OR r.world_id!=a.world_id) LIMIT 1",
+          [newWorld]
+        ).isEmpty
+      else { throw SynthesisError.invalid("The world file contains invalid artwork owners.") }
       for map in try db.rows(
         "SELECT id,content FROM boards WHERE world_id=? AND kind='atlas'", [newWorld])
       {

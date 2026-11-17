@@ -6,6 +6,31 @@ import Testing
 @testable import SynthesisUI
 
 @MainActor struct WorkspaceTests {
+  @Test func profileEntryPointsKeepTheSourceAndHonorUnsavedEditorGuards() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    let record = try store.createRecord(worldID: studio.worldID, title: "Neris", kind: "entity")
+    try studio.reload()
+    studio.openRecord(record)
+    studio.editorSave = { false }
+    studio.beginEvent(for: record)
+    #expect(studio.selectedRecord?.id == record.id && studio.pendingEventSourceID == nil)
+    studio.showRelationships(for: record)
+    #expect(studio.graphSelectedID == nil)
+    studio.editorSave = { true }
+    studio.beginEvent(for: record)
+    #expect(studio.destination == .timeline && studio.pendingEventSourceID == record.id)
+    #expect(studio.selectedRecord == nil && studio.timelineLaneID == nil)
+    studio.showRelationships(for: record)
+    #expect(studio.destination == .knowledge && studio.graphSelectedID == record.id)
+    let other = try store.createWorld(name: "Other")
+    let foreign = try store.createRecord(worldID: other.id, title: "Foreign", kind: "entity")
+    studio.beginEvent(for: foreign)
+    #expect(studio.destination == .knowledge)
+    studio.switchWorld(other.id)
+    #expect(studio.pendingEventSourceID == nil && studio.graphSelectedID == nil)
+  }
+
   @Test func acceptedMarkersRefreshTheActiveAtlasWithoutReplacingItsImageOrOtherMaps() async throws
   {
     let store = try WorkspaceStore(path: ":memory:")

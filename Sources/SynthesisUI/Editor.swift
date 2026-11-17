@@ -64,6 +64,8 @@ struct EditorScreen: View {
   @State private var revisions: [RecordRevision] = []
   @State private var customCategory = false
   @State private var handle = EditorHandle()
+  @State private var writingStarted = false
+  @State private var writingPrompt: String?
   @State private var editingRule: WorldRule?
   @State private var ruleSheet = false
   @State private var mechanicsVisible = false
@@ -76,6 +78,8 @@ struct EditorScreen: View {
   init(studio: Studio, record: LoreRecord) {
     self.studio = studio
     _record = State(initialValue: record)
+    _writingStarted = State(
+      initialValue: !record.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
     _title = State(initialValue: record.title)
     _bodyText = State(initialValue: record.body)
     _richText = State(initialValue: record.rtf)
@@ -276,33 +280,58 @@ struct EditorScreen: View {
         .font(.studio(.entityTitle)).tracking(-0.4).textFieldStyle(.plain)
         .accessibilityLabel("Record title")
         .onChange(of: title) { _, _ in changed() }.accessibilityLabel("Title")
-      HStack(spacing: 2) {
-        IconButton(icon: "bold", label: "Bold · ⌘B", t: studio.t) { handle.send("toggleBoldface:") }
-        IconButton(icon: "italic", label: "Italic · ⌘I", t: studio.t) {
-          handle.send("toggleItalics:")
+      if record.kind == "entity" && bodyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        && !writingStarted
+      {
+        EntityProfileStart(studio: studio, record: record) { prompt in
+          writingPrompt = prompt
+          writingStarted = true
         }
-        IconButton(icon: "underline", label: "Underline · ⌘U", t: studio.t) {
-          handle.send("underline:")
+      } else {
+        if record.kind == "entity" {
+          EntityArtworkControl(studio: studio, record: record, compact: true).padding(
+            .top, Space.md)
         }
-        Rectangle().fill(studio.t.hairline).frame(width: 1, height: 16).padding(.horizontal, 5)
-        styleButton("Heading", size: 22, bold: true)
-        styleButton("Subheading", size: 18, bold: true)
-        styleButton("Body", size: CGFloat(studio.preferences.bodySize), bold: false)
-        Spacer()
-        if studio.preferences.wordCount {
-          Text("\(bodyText.split { $0.isWhitespace || $0.isNewline }.count) words")
-            .font(.studio(.caption)).monospacedDigit().foregroundStyle(studio.t.muted)
+        if let writingPrompt, bodyText.isEmpty {
+          HStack {
+            Text(writingPrompt).font(.studio(.label)).foregroundStyle(studio.t.secondary)
+            Spacer()
+            IconButton(icon: "xmark", label: "Dismiss writing prompt", t: studio.t) {
+              self.writingPrompt = nil
+            }
+          }.padding(.top, Space.md)
         }
-      }.padding(.top, 14).padding(.bottom, 8)
-        .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
-      RichDocumentEditor(
-        id: record.id, body: bodyText, rtf: richText, t: studio.t, reloadToken: reloadToken,
-        preferences: studio.preferences, handle: handle
-      ) { text, rtf in
-        bodyText = text
-        richText = rtf
-        changed()
-      }.frame(maxHeight: .infinity)
+        HStack(spacing: 2) {
+          IconButton(icon: "bold", label: "Bold · ⌘B", t: studio.t) {
+            handle.send("toggleBoldface:")
+          }
+          IconButton(icon: "italic", label: "Italic · ⌘I", t: studio.t) {
+            handle.send("toggleItalics:")
+          }
+          IconButton(icon: "underline", label: "Underline · ⌘U", t: studio.t) {
+            handle.send("underline:")
+          }
+          Rectangle().fill(studio.t.hairline).frame(width: 1, height: 16).padding(.horizontal, 5)
+          styleButton("Heading", size: 22, bold: true)
+          styleButton("Subheading", size: 18, bold: true)
+          styleButton("Body", size: CGFloat(studio.preferences.bodySize), bold: false)
+          Spacer()
+          if studio.preferences.wordCount {
+            Text("\(bodyText.split { $0.isWhitespace || $0.isNewline }.count) words")
+              .font(.studio(.caption)).monospacedDigit().foregroundStyle(studio.t.muted)
+          }
+        }.padding(.top, 14).padding(.bottom, 8)
+          .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
+        RichDocumentEditor(
+          id: record.id, body: bodyText, rtf: richText, t: studio.t, reloadToken: reloadToken,
+          preferences: studio.preferences, handle: handle
+        ) { text, rtf in
+          bodyText = text
+          richText = rtf
+          changed()
+        }.frame(maxHeight: .infinity)
+          .onAppear { if writingStarted { handle.focus() } }
+      }
     }.padding(.horizontal, 36).padding(.top, 18).frame(
       maxWidth: CGFloat(studio.preferences.readingWidth)
     )

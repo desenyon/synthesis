@@ -1,0 +1,17 @@
+CAPTURE profile-empty 1440x900, bitmap 1440x900, 133ms
+CAPTURE light-profile-empty 1440x900, bitmap 1440x900, 131ms
+CAPTURE profile-artwork 1440x900, bitmap 1440x900, 133ms
+CAPTURE light-profile-artwork 1440x900, bitmap 1440x900, 132ms
+CAPTURE profile-connected 1440x900, bitmap 1440x900, 128ms
+CAPTURE profile-writing 1440x900, bitmap 1440x900, 142ms
+CAPTURE profile-event 1440x900, bitmap 1440x900, 167ms
+CAPTURE manual-profile-empty 1440x900, bitmap 1440x900, 45ms
+CAPTURE profile-empty 1024x768, bitmap 1024x768, 98ms
+CAPTURE light-profile-empty 1024x768, bitmap 1024x768, 98ms
+CAPTURE profile-artwork 1024x768, bitmap 1024x768, 97ms
+CAPTURE light-profile-artwork 1024x768, bitmap 1024x768, 96ms
+CAPTURE profile-connected 1024x768, bitmap 1024x768, 102ms
+CAPTURE profile-writing 1024x768, bitmap 1024x768, 81ms
+CAPTURE profile-event 1024x768, bitmap 1024x768, 124ms
+CAPTURE manual-profile-empty 1024x768, bitmap 1024x768, 39ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-007

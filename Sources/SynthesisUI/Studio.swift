@@ -138,6 +138,7 @@ public struct Toast: Identifiable {
   @Published var graphSelectedID: String?
   @Published var atlasSelectedID: String?
   @Published var timelineLaneID: String?
+  @Published var pendingEventSourceID: String?
   private var pendingSubmission: (world: String, conversation: String, text: String)?
   let harnessSelection: HarnessSelection
   var contextualRecordIDs: [String] {
@@ -537,6 +538,7 @@ public struct Toast: Identifiable {
     selectedRecord = nil
     editorSave = nil
     destination = value
+    if value != .timeline { pendingEventSourceID = nil }
     if value != .canvas {
       canvasUndo = nil
       canvasFit = nil
@@ -544,6 +546,20 @@ public struct Toast: Identifiable {
     if value != .library { libraryCategory = nil }
     mobileNavigation = false
     try? store.setPreference("destination", value: value.rawValue)
+  }
+  /// Profile entry points keep unsaved editor content and world isolation intact.
+  public func showRelationships(for record: LoreRecord) {
+    guard record.worldID == worldID, records.contains(where: { $0.id == record.id }), flushEditor()
+    else { return }
+    navigate(.knowledge)
+    graphSelectedID = record.id
+  }
+  public func beginEvent(for record: LoreRecord) {
+    guard record.worldID == worldID, records.contains(where: { $0.id == record.id }), flushEditor()
+    else { return }
+    navigate(.timeline)
+    timelineLaneID = nil
+    pendingEventSourceID = record.id
   }
   public func openLens(_ category: String?) {
     guard flushEditor() else { return }
@@ -567,6 +583,7 @@ public struct Toast: Identifiable {
       graphSelectedID = nil
       atlasSelectedID = nil
       timelineLaneID = nil
+      pendingEventSourceID = nil
       companionExpanded = false
       libraryCategory = nil
       let nextDefaults = try store.worldPreferences(worldID: id)

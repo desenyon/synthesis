@@ -4,7 +4,7 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 ## Active — complete expansion brief
 
-The owner explicitly requires all 394 items, one by one. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the complete brief. **#1–#6 verified; #7 next.** Implemented graphite/OLED, restrained frosted surfaces, shared tokens/type hierarchy, native/Canvas category identities, and persisted Compact/Comfortable/Immersive density. Each item links exact checks and inspected screenshots. Latest native check: 175 tests / 42 suites, lint, optimized build; item #6 has 24 inspected captures. Latest Canvas check (#5): 14 tests, typecheck, bundle build. The full brief remains unfinished. No new release, live provider request or restart of the owner's running app.
+The owner explicitly requires all 394 items, one by one. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the complete brief. **#1–#7 verified; #8 next.** Implemented graphite/OLED, restrained frosted surfaces, shared tokens/type hierarchy, native/Canvas category identities, persisted Compact/Comfortable/Immersive density, and optional connected entity beginnings with portable artwork. Each item links exact checks and inspected screenshots. Latest native check: 179 tests / 43 suites, lint, optimized build; item #7 has 16 inspected captures. Artwork adds migration 0014, portable v8 and JSON schema 11. Latest Canvas check (#5): 14 tests, typecheck, bundle build. The full brief remains unfinished. No new release, live provider request or restart of the owner's running app.
 
 ## Latest — chatbox refinement (unreleased)
 

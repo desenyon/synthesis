@@ -318,3 +318,7 @@ Removed the divergent Canvas pastel map. Native and Canvas categories use matchi
 ### Expansion #6 — information density (verified, 2026-11-17)
 
 Persisted Compact/Comfortable/Immersive option with shared density environment. Real row heights, thumbnail sizes, card minimum widths, card padding and content gaps adapt across navigation, Library, Worlds, Mechanics and Sections. Existing authored Canvas geometry and rich text remain intact. Disk-reopen and malformed-value preference coverage extended. `./scripts/check.sh`: 175 tests / 42 suites, lint and optimized build. 24 captures across two sizes inspected, including all modes, light extremes, Settings, narrow immersive cards and compact navigation. [Evidence](verification/expansion-006/README.md).
+
+### Expansion #7 — intentional empty profiles (2026-11-17)
+
+Optional writing prompts, artwork, actual relationship navigation and sourced-event creation replace the empty entity editor. Prompts never become lore automatically. Added entity artwork revisions (0014), validation, guarded Undo, v8 portable import/export, JSON11, embedded Markdown imagery and image-export collection. 179 tests / 43 suites, strict lint and optimized build passed; 16 background captures inspected after fixing an icon fallback and cross-state fixture text. No live provider call, foreground automation or AGENTS change. Evidence: verification/expansion-007. Next: #8, shared microinteractions.

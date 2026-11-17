@@ -4,6 +4,9 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
+- Empty entity profiles now offer optional writing prompts, portraits, relationship navigation and sourced history. Artwork revisions persist with guarded Undo and portable v8 / JSON11 exports; accepted prose stays unchanged.
+
+
 ### Added
 - Expansion #6: persisted Compact, Comfortable and Immersive density in Settings. Navigation and history rows, Library previews, Worlds/Mechanics cards and entity-section spacing adapt together.
 - Shared World assistant composer with expandable writing space, removable context chips and matching full, companion and compact layouts.

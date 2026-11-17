@@ -88,7 +88,7 @@ Canvas still uses the published OSS engine rather than a fork. Synthesis owns th
 
 ## Portable worlds and chronology — 2026-11-15
 
-`WorldArchive.swift` exports `.synthesis` format version 7: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v7, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 10 includes chronology (including archived lanes) and technique prerequisites.
+`WorldArchive.swift` exports `.synthesis` format version 8: allowlisted world tables plus cover/composer and validated world-default preferences. Import accepts v1–v8, validates table/column names and foreign-world references, assigns fresh UUIDs, remaps embedded references and writes in one transaction. It does not import device/provider settings or overwrite existing worlds. 200 MB / 100,000-row input bounds. JSON export schema 11 includes chronology (including archived lanes), technique prerequisites and artwork revisions.
 
 Migration 0007 adds nested chronology lanes (branch/period) and event placements. Events retain actual source records and free-form dates. A grouping is not a canon branch: no speculative merge or inheritance is implied. Reviewed agent actions can create a branch/period and assign new events to existing lanes or earlier branch/period changes in the same proposal. Dependencies resolve only after creator acceptance. Events may create a draft source atomically when none is supplied. Request context includes lane IDs and memberships.
 
@@ -147,3 +147,9 @@ Canvas load commits the engine viewport before sending `loaded`. Stored relation
 - Migration 0013 `rule_prerequisites`: technique/progression requirement edges within one system, loop-checked, archived on removal, included in `.synthesis` v7 and JSON schema 10. Mechanics derives the tree with the bundled Dagre layout (node size and spacing are parameters).
 - `WorldChecks` adds contradictory relationships, timeline order against comparable same-era dates, and tag spelling variants with a reversible merge.
 - `.synthesis` is an exported document type (`dev.desenyon.synthesis.world`); Finder opens confirm before importing a copy.
+
+## Entity artwork and empty profiles
+
+Migration 0014 adds world-scoped `record_artwork` revisions with an active-image uniqueness constraint. `RecordArtwork.swift` validates decoded PNG/JPEG bytes, dimensions, size, entity ownership and expected current image before replacement. Removal/replacement archives; stale Undo is rejected. Artwork is an optional visual reference, separate from written canon, and never enters model prompts implicitly. Portable v8 snapshots include all revisions, remap owners and reject invalid images/owners atomically; JSON schema 11 includes archived images. Markdown embeds the active image as a data URI; image export collects active entity artwork alongside maps, boards and world covers.
+
+`EntityProfileStart` offers optional category-specific writing prompts, artwork, real relationship links and sourced history when an entity's body is empty. Start writing enters the existing rich editor without inserting prompt text. Already-active editors remain active if all prose is deleted, preserving Undo. Studio profile-to-Graph/Timeline actions flush unsaved text and reject foreign-world records; new events use the originating entity as source.

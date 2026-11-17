@@ -26,3 +26,7 @@ The world menu opens a Worlds workspace; users can search world names, create wo
 ### Reviewed editing and recovery
 
 The assistant can propose revisions to existing event dates/placement, history branch/period metadata, map identity/hierarchy and relationship labels. Review shows changed fields and rejects stale snapshots. Acceptance refreshes connected views; it does not establish canon. Manual editing remains available. Interrupted replies retain useful prose, retry preserves new draft text, and each request uses the workspace/selection visible when sent. History trees can be collapsed and edited without losing sourced events.
+
+## Optional profile beginnings
+
+An unwritten entity offers free writing, category-specific prompts, an optional portrait/visual reference, a relationship map and sourced events. Prompts never become saved lore automatically. Imported or explicitly selected illustrations remain separate from written canon; replacement/removal supports guarded Undo. The same artwork control remains available after prose is written.

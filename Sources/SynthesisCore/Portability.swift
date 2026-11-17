@@ -85,7 +85,13 @@ extension WorkspaceStore {
       embedded
       ? "> \(record.state) · \(record.origin) · \(record.id)\n\n"
       : front + "\n\n"
-    return metadata + heading + MarkdownText.body(record) + "\n"
+    let artwork =
+      record.kind == "entity" ? try recordArtwork(worldID: worldID, recordID: record.id) : nil
+    let illustration =
+      artwork.map {
+        "![\(MarkdownText.escape(record.title)) artwork](data:\($0.mimeType);base64,\($0.image))\n\n> Visual reference · \($0.origin)\n\n"
+      } ?? ""
+    return metadata + heading + illustration + MarkdownText.body(record) + "\n"
       + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n")
   }
 

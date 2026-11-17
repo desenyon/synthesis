@@ -171,11 +171,13 @@ struct TimelineScreen: View {
       if studio.captureHint == "timeline-compact" { density = .compact }
       if studio.captureHint == "timeline-overview" { density = .overview }
       refresh()
+      consumePendingEvent()
       if studio.captureHint == "timeline-edit", let lane = lanes.first {
         selectedLane = lane.id
         edit(lane)
       }
     }
+    .onChange(of: studio.pendingEventSourceID) { _, _ in consumePendingEvent() }
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .studioSheet(isPresented: $composing) { form }
     .studioSheet(isPresented: $creatingLane) { laneForm }
@@ -411,6 +413,14 @@ struct TimelineScreen: View {
         Button("New event") { begin(nil) }.buttonStyle(QuietButton(t: studio.t, primary: true))
       }
     }
+  }
+  private func consumePendingEvent() {
+    guard let id = studio.pendingEventSourceID else { return }
+    studio.pendingEventSourceID = nil
+    guard studio.records.contains(where: { $0.id == id }) else { return }
+    begin(nil)
+    source = id
+    newSource = false
   }
   private func begin(_ event: WorldEvent?) {
     eventLane = event.flatMap { placements[$0.id] } ?? selectedLane

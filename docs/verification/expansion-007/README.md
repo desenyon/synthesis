@@ -1,0 +1,9 @@
+# Expansion #7 — intentional empty profiles
+
+Empty entities offer optional category-specific prompts, free writing, artwork, real relationships and sourced history. Selecting a prompt opens the rich editor without inserting template text into lore. Clearing an already-open editor keeps its text view and Undo alive. Imported or explicitly selected artwork persists independently of canon, supports archived revisions and stale-checked Undo, and exports with the world. Profile actions preserve unsaved editor guards and world ownership; Add a moment opens the real event form with the entity as source.
+
+`./scripts/check.sh`: strict lint, **179 tests / 43 suites**, optimized build passed. New regressions cover disk restart, image validation, guarded replacement/removal/Undo, unchanged accepted canon, world isolation, independent archive import with history, v7 compatibility, malformed-import rollback, JSON/Markdown portability, and source-preserving profile navigation. Initial compile errors (image-cache symbol and a throwing test assertion) were corrected before passing checks.
+
+`SYNTHESIS_CAPTURE_SIZES=1440x900,1024x768 SYNTHESIS_CAPTURE_STATES=profile-empty,light-profile-empty,profile-artwork,light-profile-artwork,profile-connected,profile-writing,profile-event,manual-profile-empty ./scripts/verify-ui.sh docs/verification/expansion-007`: **16 captures**, both final contact sheets inspected. The first pass caught an unsupported icon and a fixture biography leaking between capture states; both were corrected. Content scrolls within the profile at the narrower height. PNGs pruned after inspection.
+
+No provider call or personal lore access. The illustration is existing, explicitly selected bundled fixture art. Captures verify settled rendering, not live file-picker, keyboard or animation feel. The native image picker and explicit Codex generation retain their existing implementations.
