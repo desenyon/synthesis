@@ -345,6 +345,15 @@ struct CanvasBoardContent {
     let value = try await webView.callAsyncJavaScript(
       "return await window.synthesis.audit()", arguments: [:], in: nil, contentWorld: .page)
     var checks = value as? [String] ?? ["FAIL missing engine audit response"]
+    if let directory = ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"],
+      let png = try await webView.evaluateJavaScript("window.__synthesisAuditPNG ?? null")
+        as? String,
+      let data = Data(base64Encoded: png)
+    {
+      try data.write(
+        to: URL(fileURLWithPath: directory).appendingPathComponent("canvas-export.png"),
+        options: .atomic)
+    }
     await flush()
     checks.append(
       failure == nil ? "PASS scene persisted after engine audit" : "FAIL scene save: \(failure!)")

@@ -12,6 +12,11 @@ function bundleFonts() {
   return {
     name: "synthesis-bundle-fonts",
     closeBundle() {
+      const graph = resolve(__dirname, "../Sources/SynthesisUI/Assets/Graph");
+      mkdirSync(graph, { recursive: true });
+      cpSync(resolve(__dirname, "node_modules/@dagrejs/dagre/dist/dagre.min.js"), resolve(graph, "dagre.min.js"));
+      cpSync(resolve(__dirname, "node_modules/@dagrejs/dagre/LICENSE"), resolve(graph, "LICENSE"));
+      cpSync(resolve(__dirname, "node_modules/@dagrejs/dagre/dist/dagre.min.js.LEGAL.txt"), resolve(graph, "DEPENDENCY_LICENSES.txt"));
       const source = resolve(__dirname, "node_modules/@excalidraw/excalidraw/dist/prod/fonts");
       const target = resolve(out, "fonts");
       mkdirSync(target, { recursive: true });

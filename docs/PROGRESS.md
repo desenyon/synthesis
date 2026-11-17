@@ -122,3 +122,11 @@ No foreground automation, native file-dialog walkthrough, live provider calls or
 ### README app screenshots
 
 Added a current Canvas hero and expandable gallery for Conversation, editor, Graph, Atlas and Settings. Captured all six from the native app at `0148d8a` with isolated sample data at 1440×900; inspected the contact sheet. Original 2× PNGs, provenance, refresh command and capture log are in `docs/screenshots`. Verified README image paths, alternative text and PNG dimensions; `git diff --check` passed. The capture command rebuilt the optimized temporary app successfully. Documentation/assets only: native tests were not rerun, and no browser, foreground interaction or model call was claimed.
+
+## 2026-11-16 — connected conversation, Canvas and Graph
+
+Rebuilt the shared composer hierarchy and theme-aware menus; connected native loading/tool rows to real core activity. Imported Kokonut ai-loading through the requested shadcn command in an isolated staging project, then adapted the interaction to SwiftUI (MIT attribution retained). No React chat runtime or fabricated tool playback.
+
+Bundled Dagre for both native Graph and explicit Canvas Arrange. Removed the old force layout. Tests exposed missing JavaScriptCore structuredClone support; the fixed-script bridge now supplies JSON-safe cloning and a directed-chain test distinguishes Dagre from fallback. Real entity cards, port actions and readable edges replace abstract Graph circles. Inspection exposed clipped fitting and incorrect PNG image inversion; both were repaired. Custom Canvas PNG export preserves artwork colours and actual card content, with world/session guards.
+
+Checks: strict lint, 102 native tests in 23 suites, optimized build; Canvas typecheck, 9 Node tests, bundle build; 22 background WebKit audit checks. Captured and inspected 28 native states at two sizes and the real PNG. Final fitting captures rerun without the audit's viewport mutations. No foreground tests, provider calls or user-data edits. Evidence: `verification/connected-presentation`. User's untracked `docs/DESIGN_AGENT_BRIEF.md` preserved.

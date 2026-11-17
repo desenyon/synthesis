@@ -11,6 +11,9 @@
 
 ## Active — connected studio audit and UI overhaul
 
+- 2026-11-16: shared composers, real activity rows, themed app menus, Dagre entity-card Graph and undoable Canvas arrangement implemented. Canvas PNG now exports styled cards and local artwork. Evidence and remaining interaction limits: [STATE](STATE.md).
+- Next vertical slice: validated, editable creative components backed by ordinary revisioned lore, available to manual creation and reviewed agent proposals. Then deepen the Rules Lab and specialized workspaces.
+
 - Settings refinement (2026-11-15): searchable sections and typed writing/navigation preferences, with portable per-world entity/chat defaults. Final verification is recorded in [STATE](STATE.md); no additional theme or composer overhaul is implied.
 
 - Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).

@@ -11,7 +11,7 @@ A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Con
 
 **Conversation** — start with a thought and reference existing lore.
 
-![Conversation home with creative modes, lore references and a multiline composer](docs/screenshots/conversation-home.png)
+![Conversation home with a shared lore-aware composer and contextual references](docs/screenshots/conversation-home.png)
 
 **Editor** — write with linked records, sections and explicit canon review.
 
@@ -43,14 +43,14 @@ open dist/Synthesis.app
 
 The primary checkout is `/Users/desenyon/Developer/synthesis` on `main`, which is also the GitHub default branch. Build and launch `dist/Synthesis.app` here. Other worktree builds are retired.
 
-Requires macOS 14+ and Swift 6 Command Line Tools. The canvas bundle is committed; Node is only needed to change it (`cd CanvasWeb && npm install && npm run build`). Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md). Scripts select the compatible installed SDK. This is a development build, ad-hoc signed; no releases or deployment.
+Requires macOS 14+ and Swift 6 Command Line Tools. The canvas bundle is committed; Node is only needed to change it (`cd CanvasWeb && npm install && npm run build`). Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md). [Native Kokonut activity component usage](docs/AI_COMPONENTS.md). Scripts select the compatible installed SDK. This is a development build, ad-hoc signed; no releases or deployment.
 
 ## Workspaces
 
-- **Conversation** is the assisted entry point. Pick a mode (Create, Develop, Critique, Simulate, Canonize) and type `@` to reference lore. Each answer shows which records were read. When the assistant proposes changes they arrive as a review card: accept or dismiss each record, revision, relationship, event, rule, link or spatial placement; accepted ones become drafts. Chats persist and can be renamed or archived. Without a configured provider the app says so and keeps your message.
+- **Conversation** is the assisted entry point. Pick a mode (Create, Develop, Critique, Simulate, Canonize) and type `@` to reference lore. The shared composer supports attachments and lore references throughout the studio. Actual context retrieval and proposal staging appear in a compact activity list; each answer shows which records were read. When the assistant proposes changes they arrive as a review card: accept or dismiss each record, revision, relationship, event, rule, link or spatial placement; accepted ones become drafts. Chats persist and can be renamed or archived. Without a configured provider the app says so and keeps your message.
 - **AI Assisted / Manual** sits in every workspace bar and is independent of navigation. Manual persists, cancels active work and blocks provider requests in the native core. Every other tool keeps working.
-- **Canvas** runs on the [Excalidraw](https://github.com/excalidraw/excalidraw) engine: draw freely, add shapes, text, images and frames, and place record cards that stay linked to your library. Relationships between entities appear as labelled arrows, and an arrow you draw between two entity cards can become a relationship. It works offline; nothing is loaded from the network. Synthesis supplies the visible world-record cards, colored connection ports, image previews and compact toolbars; Excalidraw supplies gestures and history. A compact composer expands into a resizable docked companion that shares the conversation.
-- **Graph** draws itself from entity relationships. Select an entity for its details, edit relationships, or copy a neighbourhood into an editable board.
+- **Canvas** runs on the [Excalidraw](https://github.com/excalidraw/excalidraw) engine: draw freely, add shapes, text, images and frames, and place record cards that stay linked to your library. Relationships between entities appear as labelled arrows, and an arrow you draw between two entity cards can become a relationship. An explicit Arrange action uses Dagre and can be undone; PNG export includes Synthesis card styling and artwork. It works offline; nothing is loaded from the network. Synthesis supplies the visible world-record cards, colored connection ports, image previews and compact toolbars; Excalidraw supplies gestures and history. A compact composer expands into a resizable docked companion that shares the conversation.
+- **Graph** uses the open-source Dagre engine to arrange native record cards from entity relationships. Select an entity for its details, edit relationships, or copy a neighbourhood into an editable board.
 - **Library** holds every document, entity and idea with full-text search, filters and an archive. The editor has rich text, a details inspector (tags, aliases, links, relationships, timeline) and canon review as a line diff.
 - **Timeline** orders sourced events with free-form dates, nested branches and periods. Branches organize alternate histories; they do not duplicate or merge canon. **Atlas** pins records to a map image you supply or explicitly choose from the bundled sample illustration library. Replacing a map offers Undo.
 - **Review** gathers what is waiting on you: AI proposals from every conversation, drafts that have moved past accepted canon, and a local consistency check (clashing names, unlinked mentions, unconnected entities) that needs no model.

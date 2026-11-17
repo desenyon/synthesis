@@ -265,7 +265,7 @@ struct CuratedCanvas: View {
     let archived =
       (try? studio.store.boards(worldID: studio.worldID, kind: "canvas", archived: true)) ?? []
     if !archived.isEmpty {
-      Menu("Archived boards") {
+      MenuSection("Archived boards") {
         ForEach(archived) { item in
           Button("Restore “\(item.name)”") {
             studio.perform {

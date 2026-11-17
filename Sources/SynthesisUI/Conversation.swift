@@ -16,19 +16,27 @@ struct ConversationStudio: View {
         bar
         if studio.messages.isEmpty && !studio.busy {
           ScrollView {
-            emptyState(narrow: narrow).frame(maxWidth: 680)
-              .padding(.horizontal, narrow ? 20 : 40).padding(.vertical, 24)
-              .frame(maxWidth: .infinity, minHeight: max(0, geo.size.height - 230))
+            VStack(alignment: .leading, spacing: companion ? 24 : 30) {
+              emptyState(narrow: narrow)
+              if studio.mode == .assisted {
+                UnifiedComposer(studio: studio, companion: companion)
+                if !companion { references }
+              } else {
+                manualNotice
+              }
+            }.frame(maxWidth: 780)
+              .padding(.horizontal, narrow ? 20 : 40).padding(.vertical, 40)
+              .frame(maxWidth: .infinity, minHeight: max(0, geo.size.height - Metric.bar))
           }
         } else {
           transcript(narrow: narrow)
-        }
-        if studio.mode == .assisted {
-          UnifiedComposer(studio: studio, companion: companion).frame(maxWidth: 760)
-            .padding(.horizontal, narrow ? 14 : 32).padding(.top, 6).padding(.bottom, 14)
-        } else {
-          manualNotice.frame(maxWidth: 760).padding(.horizontal, narrow ? 14 : 32)
-            .padding(.bottom, 18)
+          if studio.mode == .assisted {
+            UnifiedComposer(studio: studio, companion: companion).frame(maxWidth: 780)
+              .padding(.horizontal, narrow ? 14 : 32).padding(.top, 6).padding(.bottom, 18)
+          } else {
+            manualNotice.frame(maxWidth: 780).padding(.horizontal, narrow ? 14 : 32)
+              .padding(.bottom, 18)
+          }
         }
       }.frame(width: geo.size.width, height: geo.size.height).clipped()
     }.background(studio.t.background)
@@ -67,7 +75,7 @@ struct ConversationStudio: View {
           (try? studio.store.conversations(worldID: studio.worldID, archived: true)) ?? []
         if !archived.isEmpty {
           Divider()
-          Menu("Archived") {
+          MenuSection("Archived") {
             ForEach(archived) { chat in
               Button("Restore “\(chat.title)”") { studio.restore(conversationID: chat.id) }
             }
@@ -112,62 +120,16 @@ struct ConversationStudio: View {
           Text(
             studio.mode == .assisted
               ? "Give your next idea room." : "Conversation is paused in Manual."
-          ).font(.studio(size: narrow ? 26 : 32, weight: .semibold)).tracking(-0.5)
+          ).font(.studio(size: narrow ? 28 : 38, weight: .semibold)).tracking(-1)
           Text(
             studio.mode == .assisted
-              ? "Explore a possibility, question a rule, or paste a whole page of thoughts. Nothing here becomes canon unless you accept it."
+              ? "A new character. An impossible place. A rule worth breaking. Start anywhere — your world is here to build on."
               : "No model requests are made. Earlier conversations stay readable, and every other workspace keeps working."
           ).font(.studio(size: 15)).lineSpacing(5).foregroundStyle(studio.t.secondary)
             .fixedSize(horizontal: false, vertical: true)
         }
-        if studio.mode == .assisted {
-          HStack(spacing: 24) {
-            Button {
-              studio.navigate(.library)
-            } label: {
-              Text("\(studio.records.count) records").font(.studio(size: 13, weight: .medium))
-            }.buttonStyle(.plain)
-            Button {
-              studio.navigate(.review)
-            } label: {
-              Text("\(studio.reviewCount) awaiting review").font(.studio(size: 13, weight: .medium))
-            }.buttonStyle(.plain)
-          }.foregroundStyle(studio.t.secondary)
-          modePicker
-          references
-        }
       }
     }.frame(maxWidth: .infinity, alignment: .leading)
-  }
-  private var modePicker: some View {
-    VStack(alignment: .leading, spacing: 10) {
-      SectionLabel(title: "How should the assistant help?", t: studio.t)
-      ScrollView(.horizontal) {
-        HStack(spacing: 6) {
-          ForEach(Vocabulary.modes, id: \.name) { mode in
-            let selected = studio.preset == mode.name
-            Button {
-              studio.preset = mode.name
-            } label: {
-              HStack(spacing: 6) {
-                StudioIcon(mode.icon, size: 12)
-                Text(mode.name).font(.studio(size: 13, weight: .medium))
-              }.padding(.horizontal, 11).frame(height: 30)
-                .foregroundStyle(selected ? studio.t.accent : studio.t.secondary)
-                .background(
-                  selected ? studio.t.accentSoft : studio.t.surface.opacity(0.7),
-                  in: RoundedRectangle(cornerRadius: 8)
-                )
-                .overlay(
-                  RoundedRectangle(cornerRadius: 8).stroke(
-                    selected ? studio.t.accent.opacity(0.35) : studio.t.hairline, lineWidth: 1))
-            }.buttonStyle(.plain).accessibilityAddTraits(selected ? .isSelected : [])
-          }
-        }
-      }.scrollIndicators(.never)
-      Text(Vocabulary.modes.first { $0.name == studio.preset }?.summary ?? "")
-        .font(.studio(size: 13)).foregroundStyle(studio.t.muted)
-    }
   }
   @ViewBuilder private var references: some View {
     if studio.topLevelRecords.isEmpty {
@@ -179,11 +141,11 @@ struct ConversationStudio: View {
       }
     } else {
       VStack(alignment: .leading, spacing: 10) {
-        SectionLabel(title: "Bring something from your world", t: studio.t)
+        SectionLabel(title: "From your world", t: studio.t)
         LazyVGrid(
-          columns: [GridItem(.adaptive(minimum: 240), spacing: 8)], alignment: .leading, spacing: 8
+          columns: [GridItem(.adaptive(minimum: 210), spacing: 8)], alignment: .leading, spacing: 8
         ) {
-          ForEach(studio.topLevelRecords.prefix(4)) { record in
+          ForEach(studio.topLevelRecords.prefix(3)) { record in
             Button {
               studio.reference(record)
             } label: {
@@ -232,11 +194,7 @@ struct ConversationStudio: View {
           }
           if studio.busy {
             VStack(alignment: .leading, spacing: 12) {
-              HStack(spacing: 8) {
-                ProgressView().controlSize(.small)
-                Text(studio.streamed.isEmpty ? "Waiting for the model…" : "Writing…")
-                  .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
-              }
+              AIActivityView(steps: studio.activity, t: studio.t)
               if !studio.streamed.isEmpty {
                 // A change set arrives as JSON at the end; show prose, not the raw block.
                 MarkdownContent(text: ProposalParser.visible(studio.streamed), t: studio.t)
@@ -397,14 +355,15 @@ struct UnifiedComposer: View {
       }
       .background(
         LinearGradient(
-          colors: [studio.t.secondarySurface.opacity(0.9), studio.t.surface],
+          colors: [studio.t.surface, studio.t.surface],
           startPoint: .topLeading, endPoint: .bottomTrailing),
-        in: RoundedRectangle(cornerRadius: 14)
+        in: RoundedRectangle(cornerRadius: collapsed ? 18 : 22)
       )
       .overlay(
-        RoundedRectangle(cornerRadius: 14).stroke(studio.t.border.opacity(0.9), lineWidth: 1)
+        RoundedRectangle(cornerRadius: collapsed ? 18 : 22).stroke(
+          studio.t.border.opacity(0.9), lineWidth: 1)
       )
-      .shadow(color: studio.t.shadow.opacity(collapsed ? 0.6 : 0.3), radius: 14, y: 5)
+      .shadow(color: studio.t.shadow.opacity(collapsed ? 0.6 : 0.3), radius: 22, y: 8)
       .overlay(alignment: .topLeading) {
         if !mentionMatches.isEmpty {
           // Sits just above the field so it never covers what is being typed.
@@ -434,7 +393,7 @@ struct UnifiedComposer: View {
     }
   }
   private var fullField: some View {
-    VStack(spacing: 6) {
+    VStack(spacing: 14) {
       ComposerInput(
         text: $text,
         placeholder: companion
@@ -444,26 +403,32 @@ struct UnifiedComposer: View {
         sendShortcut: studio.preferences.sendShortcut, handle: handle,
         onHeight: { inputHeight = $0 }, onMention: updateMention, onMentionKey: mentionKey,
         submit: send
-      ).frame(height: min(190, max(companion ? 26 : 48, inputHeight)))
-        .padding(.horizontal, 14).padding(.top, 12)
+      ).frame(height: min(190, max(companion ? 40 : 64, inputHeight)))
+        .padding(.horizontal, 20).padding(.top, 20)
       HStack(spacing: 4) {
         attachment
         references
         modeMenu
         Spacer(minLength: 0)
-        if !companion && !empty {
-          Text(
-            studio.preferences.sendShortcut == .enter
-              ? "↵ send  ·  ⇧↵ new line" : "⌘↵ send  ·  ↵ new line"
-          ).font(.studio(size: 11.5))
-            .foregroundStyle(studio.t.muted).padding(.trailing, 6)
+        if !companion {
+          PlainMenu {
+            Button("Configure assistant…") { studio.openAssistantSettings() }
+            Text("Uses your linked subscription").foregroundStyle(studio.t.muted)
+          } label: {
+            HStack(spacing: 5) {
+              Text(studio.provider.title).font(.studio(size: 12.5, weight: .medium))
+              StudioIcon("chevron.down", size: 9)
+            }.foregroundStyle(studio.t.secondary).padding(.horizontal, 8).frame(height: 30)
+              .hoverFill(studio.t)
+          }.help("Assistant settings")
         }
         sendButton
-      }.padding(.horizontal, 8).padding(.bottom, 8)
+      }.padding(.horizontal, 12).padding(.bottom, 12)
     }
   }
   private var compactField: some View {
     HStack(alignment: .bottom, spacing: 4) {
+      attachment.padding(.bottom, 1)
       references.padding(.bottom, 1)
       ComposerInput(
         text: $text,
@@ -510,7 +475,7 @@ struct UnifiedComposer: View {
         Text("Create a record in Library first")
       } else {
         ForEach(referenceGroups, id: \.0) { group in
-          Section(group.0) {
+          MenuSection(group.0) {
             ForEach(group.1) { record in
               Button(record.title) { handle.insertReference(title: record.title, id: record.id) }
             }
@@ -591,12 +556,20 @@ struct UnifiedComposer: View {
         Button {
           studio.preset = mode.name
         } label: {
-          Text(mode.name)
-          Text(mode.summary)
+          VStack(alignment: .leading, spacing: 4) {
+            HStack {
+              StudioIcon(mode.icon, size: 14)
+              Text(mode.name).font(.studio(size: 13.5, weight: .medium))
+              Spacer()
+              if studio.preset == mode.name { StudioIcon("checkmark", size: 12) }
+            }
+            Text(mode.summary).font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+              .fixedSize(horizontal: false, vertical: true)
+          }.padding(.vertical, 3)
         }
       }
       Divider()
-      Menu("Guided prompts") {
+      MenuSection("Guided prompts") {
         ForEach(Vocabulary.categories + ["History", "Story threads"], id: \.self) { topic in
           Button(topic) {
             text =
@@ -619,10 +592,11 @@ struct UnifiedComposer: View {
       if studio.busy { studio.stop() } else { send() }
     } label: {
       StudioIcon(studio.busy ? "stop.fill" : "arrow.up")
-        .font(.studio(size: 13, weight: .semibold)).frame(width: 30, height: 30)
+        .font(.studio(size: 13, weight: .semibold)).frame(width: 34, height: 34)
         .foregroundStyle(empty && !studio.busy ? studio.t.muted : studio.t.onAccent)
         .background(
-          empty && !studio.busy ? studio.t.secondarySurface : studio.t.accent, in: Circle())
+          empty && !studio.busy ? studio.t.secondarySurface : studio.t.accent,
+          in: RoundedRectangle(cornerRadius: 11))
     }.buttonStyle(.plain).disabled((empty && !studio.busy) || studio.mode == .manual)
       .help(studio.busy ? "Stop generating" : "Send")
       .accessibilityLabel(studio.busy ? "Stop generation" : "Send message")

@@ -47,6 +47,8 @@ public struct ConnectedRoot: View {
               Rectangle().fill(studio.t.hairline).frame(width: 1).allowsHitTesting(false)
             }
             .environment(\.barInset, max(0, Metric.chrome - column - 12))
+            .animation(.easeInOut(duration: 0.22), value: studio.destination)
+            .animation(.easeInOut(duration: 0.22), value: studio.companionExpanded)
         }
         HStack(spacing: 0) {
           Color.clear.frame(width: 84, height: 1)

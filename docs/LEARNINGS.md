@@ -108,3 +108,7 @@ Adding an opaque black inline sheet did not fix the artwork capture: the WebKit 
 - Evidence: `PreferenceBehaviorTests.writingPreferencesConfigureNativeEditorWithoutReformattingRichText`; final 94-test run and changed-preference captures in `verification/settings-refinement`.
 - World defaults and device defaults need distinct export scope. Archive tests verify portable defaults, old-version imports, exclusion of device/provider values and rollback for malformed world defaults.
 - No AGENTS.md change: existing data-integrity and native-verification rules already cover these practices. Rollback is a normal commit revert; no schema migration or destructive data changes were introduced.
+
+## 2026-11-16 — native Dagre and export verification
+
+JavaScriptCore lacks browser structuredClone; Dagre initially fell back silently to a grid. A JSON-only compatibility function and an asymmetric directed-chain layout assertion now verify the actual bundled engine. The app's Canvas export filter also inverted images painted after Excalidraw export in WebKit: export in literal colours, explicitly transform engine shapes for dark mode, and clear the filter before custom card painting. Actual exported PNGs were inspected. Use the repository check/build wrappers (pinned SDK); bare swift build selected an incompatible SDK macro toolchain. No AGENTS.md edit was needed.

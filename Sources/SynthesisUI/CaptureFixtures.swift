@@ -5,7 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
-    "conversation-home", "conversation", "sheet-artwork", "canvas", "companion", "manual",
+    "conversation-home", "light-conversation-home", "conversation-loading", "conversation",
+    "sheet-artwork", "canvas", "companion", "manual",
     "collapsed", "light",
     "graph", "graph-selected", "library", "editor", "timeline", "atlas",
     "palette", "light-conversation", "light-library", "light-graph", "light-editor",
@@ -185,10 +186,23 @@ extension Studio {
     companionWidth = 400
     draft = ""
     preset = "Create"
-    conversationID = state == "conversation-home" ? nil : conversation
+    conversationID = state.hasSuffix("conversation-home") ? nil : conversation
     perform { try reload() }
     switch state {
-    case "conversation-home", "conversation", "light-conversation", "manual-conversation",
+    case "conversation-loading":
+      destination = .chat
+      busy = true
+      activity = [
+        AgentActivity(
+          id: "lore", title: "World context ready",
+          detail: "3 sample records · isolated capture data", state: .complete,
+          startedAt: Date(timeIntervalSince1970: 0), endedAt: Date(timeIntervalSince1970: 0.1)),
+        AgentActivity(
+          id: "response", title: "Waiting for your assistant",
+          detail: "Loading-state fixture · no provider request", state: .running),
+      ]
+    case "conversation-home", "light-conversation-home", "conversation", "light-conversation",
+      "manual-conversation",
       "empty-conversation":
       destination = .chat
     case "library", "light-library", "empty-library", "preferences-library": destination = .library

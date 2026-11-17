@@ -1,5 +1,15 @@
 # Current state — 2026-11-15
 
+## Connected presentation — 2026-11-16
+
+Shared full, companion and compact composers now use one lore-aware control system. The conversation home places writing beside its heading and real references. App dropdowns use a themed popover; workspace/companion transitions respect Reduce Motion. Native Kokonut-inspired activity reports actual retrieval, response and proposal validation, with observed timings and no demo playback. Usage: [AI_COMPONENTS](AI_COMPONENTS.md).
+
+Graph now renders entity cards from stored records and uses bundled Dagre 3.1.3 for directed layout. Ports open relationship creation; labels open editing; neighbourhood selection and copy-to-Canvas remain connected to the same IDs. Canvas adds an explicit undoable Arrange command. PNG export paints the visible Synthesis card typography, state and local artwork instead of hidden engine text; stale exports after switching boards are rejected.
+
+Verification: `./scripts/check.sh` passed strict lint, **102 tests / 23 suites**, and the optimized development build. Canvas typecheck, **9 Node tests**, and offline bundle build passed. The background WebKit audit passed **22 checks**, including arrangement/undo, PNG export, reload, ownership, relationship edits and save retry. Inspected 28 native state captures at 1440×900 and 1024×768, plus the real exported PNG. Graph fitting and export colours were corrected after inspection; final evidence is in `verification/connected-presentation`. README screenshots were refreshed from those states.
+
+Limits: themed popover keyboard/pointer behaviour and live subscription streaming have not been exercised in a foreground session. No paid generation, native file-dialog walkthrough or foreground self-test ran. The owner's running app and database were untouched. Dedicated creative components and deeper specialized studios are next; this is not completion of the full feature request. AGENTS.md unchanged. C2 remains unapproved; the owner's latest composer directive supersedes the earlier request to skip composer work, without adopting C3's specific 36-point-pill proposal.
+
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`. Build/open `dist/Synthesis.app` here. SwiftUI/AppKit + SQLite and the offline Excalidraw Canvas. Development only; no release or deployment. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` is preserved and excluded from commits.
 
 ## README screenshots
@@ -49,6 +59,6 @@ Worked in the exact [AUDIT](AUDIT.md) master order, with one commit and push per
 
 Connected documents, entities, links, typed relationships, conversations, draft proposals, explicit canon approval, reversible archive, world-scoped search and Manual cancellation remain. Sections use migration 0008 and portable `.synthesis` v4 / JSON schema 7; older world imports remain supported. Nested chronology branches/periods organize events but do not branch or merge canon. The full request and future feature gaps remain in [NEXT_PASS](NEXT_PASS.md).
 
-On-demand subscription image generation, lore-coherent editable map geometry/hierarchy, dedicated power-system/cosmology studios, exhaustive large-board, accessibility and trackpad coverage remain incomplete. PNG output does not reproduce every DOM card decoration. Dependency evidence in [DEPENDENCIES](DEPENDENCIES.md) is from the earlier scoped audit, not a new security audit in this repair pass.
+On-demand subscription image generation, lore-coherent editable map geometry/hierarchy, dedicated power-system/cosmology studios, exhaustive large-board, accessibility and trackpad coverage remain incomplete. PNG output now reproduces card content and artwork; editor-only connection handles and controls are intentionally excluded. Dependency evidence in [DEPENDENCIES](DEPENDENCIES.md) is from the earlier scoped audit, not a new security audit in this repair pass.
 
 Next: expand preference interaction coverage and writing recovery, then finish A2's live dark/light check when native capture is available; run the opt-in modal Escape check when foreground testing will not interrupt the owner. Keep C2/C3 excluded until explicitly approved, then continue the owner-prioritized feature ledger. AGENTS.md unchanged.

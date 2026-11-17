@@ -1,0 +1,20 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.14s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.VlNpCb/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.VlNpCb/Synthesis-Verification.app (development, ad-hoc signed; not a release).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.VlNpCb/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE canvas 1440x900, bitmap 2880x1800, 1105ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 2790ms
+CAPTURE graph-selected 1440x900, bitmap 2880x1800, 1927ms
+CAPTURE light-graph 1440x900, bitmap 2880x1800, 2800ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 725ms
+CAPTURE graph 1024x768, bitmap 2048x1536, 1149ms
+CAPTURE graph-selected 1024x768, bitmap 2048x1536, 1821ms
+CAPTURE light-graph 1024x768, bitmap 2048x1536, 1482ms
+Native captures complete: /private/tmp/synthesis-connected-final
+Native captures: /tmp/synthesis-connected-final
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py '/tmp/synthesis-connected-final' [--prune]

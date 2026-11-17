@@ -29,6 +29,7 @@ public protocol ModelTransport: Sendable {
   public func submit(
     worldID: String, conversationID: String, prompt: String, preset: String,
     boardID: String? = nil, selectedRecordIDs: [String] = [],
+    onActivity: @escaping @MainActor (AgentActivity) -> Void = { _ in },
     onDelta: @escaping @Sendable (String) async -> Void
   ) async throws {
     try Task.checkCancellation()
@@ -42,6 +43,8 @@ public protocol ModelTransport: Sendable {
     }
     _ = try store.world(worldID)
     let history = try store.messages(worldID: worldID, conversationID: conversationID)
+    let retrievalStart = Date()
+    onActivity(.init(id: "lore", title: "Finding relevant lore", state: .running))
     // Retrieval is world-scoped and bounded; the same list is saved with the answer.
     let selected = try selectedRecordIDs.prefix(16).map {
       try store.record(worldID: worldID, id: $0)
@@ -50,6 +53,13 @@ public protocol ModelTransport: Sendable {
       text + selected.map { " [\($0.title)](synthesis://record/\($0.id))" }.joined()
     let sources = try store.contextRecords(worldID: worldID, prompt: retrievalPrompt)
     let workspace = try store.workspaceContext(worldID: worldID, boardID: boardID)
+    onActivity(
+      .init(
+        id: "lore", title: "World context ready",
+        detail: sources.isEmpty
+          ? "No matching records; world index included"
+          : "\(sources.count) \(sources.count == 1 ? "record" : "records") · selected world only",
+        state: .complete, startedAt: retrievalStart, endedAt: Date()))
     let context = sources.map { source in
       let r = source.record
       let canon = r.canonical.flatMap { $0.data(using: .utf8) }.flatMap {
@@ -106,12 +116,16 @@ public protocol ModelTransport: Sendable {
     }
     let token = UUID()
     generation = token
+    let responseStart = Date()
+    onActivity(.init(id: "response", title: "Waiting for your assistant", state: .running))
     let task = Task {
       try Task.checkCancellation()
       return try await transport.generate(
         ModelRequest(instructions: instructions, messages: input), onDelta: onDelta)
     }
     active = task
+    var operation = "response"
+    var operationStart = responseStart
     defer { if generation == token { active = nil } }
     do {
       let answer = try await withTaskCancellationHandler {
@@ -128,6 +142,10 @@ public protocol ModelTransport: Sendable {
           "The model returned no text. Your message is saved; try again.")
       }
       // A change set is staged for review, never applied. The transcript keeps the prose.
+      onActivity(
+        .init(
+          id: "response", title: "Response received", state: .complete,
+          startedAt: responseStart, endedAt: Date()))
       let parsed = ProposalParser.split(answer)
       let staged = parsed.payload != nil
       let prose =
@@ -139,11 +157,37 @@ public protocol ModelTransport: Sendable {
         state: "complete")
       try store.saveMessageContext(worldID: worldID, messageID: message.id, sources: sources)
       if let payload = parsed.payload {
-        try store.stageProposal(
+        let reviewStart = Date()
+        operation = "review"
+        operationStart = reviewStart
+        onActivity(.init(id: "review", title: "Validating proposed changes", state: .running))
+        let proposal = try store.stageProposal(
           worldID: worldID, conversationID: conversationID, messageID: message.id,
           payload: payload)
+        onActivity(
+          .init(
+            id: "review",
+            title: proposal == nil ? "No valid changes returned" : "Changes ready for review",
+            detail: "Nothing applied to your world", state: proposal == nil ? .failed : .complete,
+            startedAt: reviewStart, endedAt: Date()))
+        if proposal == nil {
+          try store.appendMessage(
+            worldID: worldID, conversationID: conversationID, role: "system",
+            body: "The proposed changes could not be validated. No changes were staged.",
+            state: "error")
+        }
       }
     } catch {
+      onActivity(
+        .init(
+          id: operation,
+          title: error is CancellationError
+            ? "Stopped"
+            : (operation == "review" ? "Could not prepare changes" : "Assistant unavailable"),
+          detail: error is CancellationError
+            ? "No further changes will be staged" : error.localizedDescription,
+          state: error is CancellationError ? .cancelled : .failed,
+          startedAt: operationStart, endedAt: Date()))
       if generation == token, !(error is CancellationError) {
         _ = try? store.appendMessage(
           worldID: worldID, conversationID: conversationID, role: "system",

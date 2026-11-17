@@ -2,7 +2,6 @@ import {
   CaptureUpdateAction,
   convertToExcalidrawElements,
   Excalidraw,
-  exportToBlob,
   getCommonBounds,
   MainMenu,
   newElementWith,
@@ -24,6 +23,8 @@ import {
 } from "./cards";
 import { palette, type Theme } from "./palette";
 import { acceptsSession, containsCardPoint } from "./sceneRules";
+import { arrangeCards } from "./layout";
+import { exportBoard } from "./exportBoard";
 import { StudioOverlay } from "./StudioOverlay";
 
 type El = any;
@@ -495,6 +496,20 @@ export function App() {
       },
       setFitInsets(insets: FitInsets) { s.fitInsets = insets; },
       command(name: string, insets?: FitInsets) {
+        if (name === "arrange") {
+          const all: El[] = api.getSceneElementsIncludingDeleted();
+          const cards = all.filter(isCard);
+          const state = api.getAppState();
+          const positions = arrangeCards(cards.map(c => ({...c, recordID: c.customData.recordID})), s.relations, state.width >= state.height);
+          const offsets = new Map(cards.map(card => { const p = positions.get(card.id)!;
+            return [card.groupIds[0], {x: p.x - card.x, y: p.y - card.y}]; }));
+          api.updateScene({elements: all.map(element => {
+            const delta = offsets.get(element.groupIds?.[0]);
+            return delta && !element.isDeleted ? newElementWith(element, {x: element.x + delta.x, y: element.y + delta.y}) : element;
+          }), captureUpdate: CaptureUpdateAction.IMMEDIATELY});
+          synchronise(); save(); bridge.command("fit");
+          return;
+        }
         if (insets) s.fitInsets = insets;
         const key = (k: string, extra: Record<string, unknown> = {}) =>
           document.querySelector(".excalidraw")?.dispatchEvent(new KeyboardEvent("keydown", { key: k, code: `Key${k.toUpperCase()}`, metaKey: true, bubbles: true, ...extra }));
@@ -517,15 +532,13 @@ export function App() {
         }
       },
       async exportImage() {
+        const exportingSession = activeSession;
         try {
           if (!s.loaded) throw new Error("Wait for this board to finish loading, then export again.");
           synchronise();
-          const elements = api.getSceneElements().map((e:El)=>["card","part"].includes(e.customData?.synthesis)?{...e,opacity:100}:e);
-          if (!elements.length) throw new Error("Add something to the board before exporting an image.");
-          const blob = await exportToBlob({
-            elements, appState: { ...api.getAppState(), exportBackground: true, exportWithDarkMode: s.theme === "dark" },
-            files: api.getFiles(), mimeType: "image/png", exportPadding: 32,
-          });
+          const blob = await exportBoard(api.getSceneElements(), api.getAppState(), api.getFiles(),
+            new Map(s.records), [...s.relations], s.theme);
+          if (activeSession !== exportingSession) return;
           const data = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
@@ -533,9 +546,9 @@ export function App() {
             reader.readAsDataURL(blob);
           });
           if (!data) throw new Error("The board image was empty. Please retry.");
-          post({ type: "exported", data });
+          if (activeSession === exportingSession) post({ type: "exported", data });
         } catch (error) {
-          post({ type: "exportFailed", message: error instanceof Error ? error.message : "This board could not be exported." });
+          if (activeSession === exportingSession) post({ type: "exportFailed", message: error instanceof Error ? error.message : "This board could not be exported." });
         }
       },
       /** Deterministic, isolated WebKit integration checks. Never calls a model. */
@@ -600,9 +613,20 @@ export function App() {
         check("manual mode removes canvas AI action",!document.querySelector('[aria-label="Reference in conversation"]'));
         bridge.setAssistance(true); await wait();
         check("assisted mode restores contextual reference",!!document.querySelector('[aria-label="Reference in conversation"]'));
-        await bridge.load(original);
+        await bridge.load(original); await wait();
+        const beforeArrange = api.getSceneElements().filter(isCard).map((c:El) => ({id:c.id,x:c.x,y:c.y}));
+        bridge.command("arrange"); await wait();
+        check("auto arrangement moves existing records without changing identity", beforeArrange.length === api.getSceneElements().filter(isCard).length
+          && beforeArrange.some((old:El) => api.getSceneElements().some((c:El) => c.id === old.id && (c.x !== old.x || c.y !== old.y))));
+        bridge.command("undo"); await wait();
+        check("auto arrangement can be undone", beforeArrange.every((old:El) => api.getSceneElements().some((c:El) => c.id === old.id && c.x === old.x && c.y === old.y)));
+        await bridge.load(original); await wait();
         try {
-          const blob = await exportToBlob({elements:api.getSceneElements().map((e:El)=>["card","part"].includes(e.customData?.synthesis)?{...e,opacity:100}:e),appState:{...api.getAppState(),exportBackground:true},files:api.getFiles(),mimeType:"image/png"});
+          const blob = await exportBoard(api.getSceneElements(), api.getAppState(), api.getFiles(), s.records, s.relations, s.theme);
+          (window as any).__synthesisAuditPNG = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]);
+            reader.onerror = reject; reader.readAsDataURL(blob);
+          });
           const signature = new Uint8Array(await blob.slice(0,8).arrayBuffer());
           check("board export produces a real PNG",blob.size>100 && signature[0]===137 && signature[1]===80 && signature[2]===78 && signature[3]===71);
         } catch { check("board export produces a real PNG",false); }

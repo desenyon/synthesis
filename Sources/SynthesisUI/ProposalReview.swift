@@ -285,11 +285,18 @@ struct ContextDisclosure: View {
         withAnimation(.easeOut(duration: 0.14)) { open.toggle() }
       } label: {
         HStack(spacing: 5) {
-          StudioIcon(open ? "chevron.down" : "chevron.right")
-            .font(.studio(size: 8, weight: .bold))
-          Text("Read \(sources.count) \(sources.count == 1 ? "record" : "records") from your world")
-            .font(.studio(size: 12, weight: .medium))
-        }.foregroundStyle(t.muted).padding(.horizontal, 8).frame(height: 26)
+          HStack(spacing: -5) {
+            ForEach(sources.prefix(3)) { source in
+              StudioIcon(recordIcon(source.record), size: 10)
+                .foregroundStyle(t.category(source.record.category))
+                .frame(width: 22, height: 22).background(t.surface, in: Circle())
+                .overlay(Circle().stroke(t.border, lineWidth: 1))
+            }
+          }.padding(.trailing, 4)
+          Text("Used \(sources.count) lore \(sources.count == 1 ? "reference" : "references")")
+            .font(.studio(size: 13, weight: .medium))
+          StudioIcon("chevron.right", size: 10).rotationEffect(.degrees(open ? 90 : 0))
+        }.foregroundStyle(t.secondary).padding(.horizontal, 8).frame(height: 26)
           .hoverFill(t, radius: 6)
       }.buttonStyle(.plain).padding(.leading, -8)
         .help("The world context that was shared with the model for this answer")

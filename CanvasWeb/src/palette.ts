@@ -32,12 +32,12 @@ export function forDarkCanvas(hex: string): string {
 
 const dark = {
   background: "#17191c",
-  surface: "#262a30",
-  text: "#ecebed",
-  secondary: "#bec5ce",
-  muted: "#929caa",
-  border: "#3c434c",
-  accent: "#a9c7db",
+  surface: "#111111",
+  text: "#e6e9ef",
+  secondary: "#b6bbc5",
+  muted: "#8f96a3",
+  border: "#2a2a2a",
+  accent: "#a9c7ff",
   positive: "#8fc3a6",
   categories: {
     characters: "#d7b899",
@@ -66,6 +66,7 @@ const light = {
 };
 
 export type Palette = typeof dark;
+export function displayPalette(theme: Theme): Palette { return theme === "dark" ? dark : light; }
 
 /** Stored colours for the given theme: literal in light mode, pre-inverted in dark mode. */
 export function palette(theme: Theme): Palette {
@@ -77,5 +78,13 @@ export function palette(theme: Theme): Palette {
   return convert(dark);
 }
 export function categoryColor(p: Palette, category: string): string {
-  return p.categories[category.toLowerCase()] ?? p.accent;
+  return p.categories[category.toLowerCase() === "systems" ? "factions" : category.toLowerCase()] ?? p.accent;
+}
+
+/** The exact CSS dark filter, applied to stored hex colours for WebKit PNG export.
+ * Rendering as light avoids WebKit's missing Canvas2D filter and preserves image colours. */
+export function displayColor(value: string, theme: Theme): string {
+  if (theme !== 'dark' || !/^#[0-9a-f]{6}$/i.test(value)) return value;
+  const inverse = parse(value).map(c => 237.15 - .86 * c);
+  return format(HUE_180.map(row => row.reduce((sum, coefficient, i) => sum + coefficient * inverse[i], 0)));
 }

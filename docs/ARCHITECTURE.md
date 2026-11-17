@@ -93,3 +93,13 @@ World-scoped FTS now returns complete matched records in one query rather than f
 Markdown export now shares `Portability.recordMarkdown` between world files and `exportRecordMarkdown`. Single-record exports embed sections and local anchors. `MarkdownText` decodes native RTF with AppKit and maps editor headings, emphasis, underline and links; plain Markdown is preserved verbatim, and mismatched/invalid RTF falls back to the stored text. `.synthesis` remains the lossless archive for exact rich formatting.
 
 `Preferences.swift` stores validated device presentation preferences separately from per-world creation defaults. Missing or malformed device values fall back safely; world identity updates are transactional. Device/provider settings are excluded from portable archives.
+
+## Connected presentation — 2026-11-16
+
+Conversation, the docked companion and the compact workspace input share `UnifiedComposer`. `PlainMenu` presents app-themed native popovers and `MenuSection` replaces nested system submenus. The shell animates workspace and companion changes; reduced motion cancels those transactions.
+
+`AgentActivity` carries observed native retrieval, request and proposal-staging events to `AIActivityView` (Kokonut UI adaptation). Request/world/conversation guards reject late events. No timed fake tool playback is shipped. Sources remain persisted separately in `message_context`; activity timing is currently live-only. See [AI_COMPONENTS](AI_COMPONENTS.md).
+
+`GraphLayout` runs pinned Dagre 3.1.3 inside a fresh JavaScriptCore context with fixed JSON-safe inputs. The compatibility shim supplies the structured clone used for Dagre’s numeric/string layout values. The graph renderer stays SwiftUI; `GraphRoute` clips cubic paths to rectangular card ports and routes overlapping cards outside their content. A grid is only an emergency fallback; tests distinguish it from the directed engine. Canvas uses the same OSS engine for explicit undoable auto-arrangement, while Excalidraw retains gestures/history and saved placement.
+
+`exportBoard.ts` combines the engine scene with the Synthesis card presentation (Inter text, category, state, relationship count and local artwork). It never mutates the live scene, caps output at 4096 pixels per edge, and only decodes data-image artwork. Export callbacks are session-guarded. Background Canvas audits save the real PNG for visual inspection without a native save dialog.

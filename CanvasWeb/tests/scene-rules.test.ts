@@ -61,3 +61,14 @@ test('overlapping cards route above the content rather than folding into it', as
         assert.ok(Math.min(...route.points.map(p=>p[1]+route.start.y)) < -50);
     }
 });
+
+
+test('Dagre arrangement separates real cards and respects relationship direction', async () => {
+    const {arrangeCards} = await import('../src/layout.ts');
+    const cards = ['a','b','c'].map(id => ({id,recordID:id,x:0,y:0,width:300,height:210}));
+    const result = arrangeCards(cards,[{sourceID:'a',targetID:'b'},{sourceID:'b',targetID:'c'}]);
+    assert.equal(result.size,3);
+    assert.ok(result.get('b')!.x - result.get('a')!.x >= 300);
+    assert.ok(result.get('c')!.x - result.get('b')!.x >= 300);
+    assert.deepEqual(cards.map(c=>c.x),[0,0,0], 'layout calculation never mutates saved cards');
+});

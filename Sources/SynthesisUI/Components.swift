@@ -182,15 +182,64 @@ struct IconButton: View {
   }
 }
 
-/// Custom-drawn label that opens a native menu.
+/// App-themed popover shared by every dropdown. Native context menus remain native.
 struct PlainMenu<Label: View, Items: View>: View {
   /// Flexible menus may shrink so a long title truncates instead of widening its bar.
   var flexible = false
   @ViewBuilder var items: () -> Items
   @ViewBuilder var label: () -> Label
+  @State private var open = false
+  @Environment(\.colorScheme) private var scheme
   var body: some View {
-    Menu(content: items, label: label).menuStyle(.button).buttonStyle(.plain)
-      .menuIndicator(.hidden).fixedSize(horizontal: !flexible, vertical: true)
+    let t = Theme(dark: scheme == .dark)
+    Button {
+      open.toggle()
+    } label: {
+      label()
+    }
+    .buttonStyle(.plain).fixedSize(horizontal: !flexible, vertical: true)
+    .popover(isPresented: $open, arrowEdge: .bottom) {
+      ScrollView {
+        VStack(alignment: .leading, spacing: 3) { items() }
+          .font(.studio(size: 13)).foregroundStyle(t.text)
+          .buttonStyle(DropdownButtonStyle(t: t, close: { open = false }))
+          .padding(7)
+      }.scrollBounceBehavior(.basedOnSize).fixedSize(horizontal: false, vertical: true)
+        .frame(width: 280).frame(maxHeight: 420)
+        .background(t.surface).preferredColorScheme(scheme)
+        .onExitCommand { open = false }
+    }
+  }
+}
+
+private struct DropdownButtonStyle: PrimitiveButtonStyle {
+  let t: Theme
+  var close: () -> Void
+  func makeBody(configuration: Configuration) -> some View {
+    Button {
+      close()
+      configuration.trigger()
+    } label: {
+      configuration.label.frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10).padding(.vertical, 8).contentShape(Rectangle())
+        .hoverFill(t, radius: 7)
+    }.buttonStyle(.plain)
+  }
+}
+
+/// An expandable group inside a dropdown instead of an unrelated system submenu.
+struct MenuSection<Content: View>: View {
+  let title: String
+  @ViewBuilder var content: () -> Content
+  @State private var expanded = false
+  init(_ title: String, @ViewBuilder content: @escaping () -> Content) {
+    self.title = title
+    self.content = content
+  }
+  var body: some View {
+    DisclosureGroup(title, isExpanded: $expanded) {
+      VStack(alignment: .leading, spacing: 2) { content() }.padding(.top, 4)
+    }.padding(.horizontal, 10).padding(.vertical, 7)
   }
 }
 

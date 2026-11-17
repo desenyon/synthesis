@@ -114,6 +114,7 @@ public struct Toast: Identifiable {
   @Published public var draft = ""
   @Published public var preset = "Create"
   @Published public var busy = false
+  @Published public var activity: [AgentActivity] = []
   @Published public var streamed = ""
   @Published public var error: String?
   @Published public var toast: Toast?
@@ -578,6 +579,7 @@ public struct Toast: Identifiable {
     running = nil
     busy = false
     streamed = ""
+    activity = []
   }
   public func send(keepWorkspace: Bool = false) {
     guard mode == .assisted, !busy, !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -602,6 +604,7 @@ public struct Toast: Identifiable {
       let request = UUID()
       requestID = request
       busy = true
+      activity = []
       streamed = ""
       draft = ""
       persistComposer()
@@ -617,7 +620,17 @@ public struct Toast: Identifiable {
           }
           try await self.engine.submit(
             worldID: wid, conversationID: cid, prompt: prompt, preset: chosenPreset,
-            boardID: activeBoard, selectedRecordIDs: selectedIDs
+            boardID: activeBoard, selectedRecordIDs: selectedIDs,
+            onActivity: { [weak self] step in
+              guard let self, self.requestID == request, self.worldID == wid,
+                self.conversationID == cid, self.mode == .assisted
+              else { return }
+              if let index = self.activity.firstIndex(where: { $0.id == step.id }) {
+                self.activity[index] = step
+              } else {
+                self.activity.append(step)
+              }
+            }
           ) { [weak self] output in
             await self?.receive(output, worldID: wid, conversationID: cid, request: request)
           }

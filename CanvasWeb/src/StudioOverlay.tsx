@@ -1,4 +1,4 @@
-import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound, Note as StickyNote, Image as ImageIcon, GitBranch, BoundingBox as Frame, Pencil, Square, Minus, CornersOut as Scan, ArrowCounterClockwise as Undo2, ArrowClockwise as Redo2, ArrowUpRight, At as AtSign, X, SlidersHorizontal, Books as Library, FilePlus as FilePlus2, FileText, type Icon as LucideIcon } from '@phosphor-icons/react';
+import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound, Note as StickyNote, Image as ImageIcon, GitBranch, BoundingBox as Frame, Pencil, Square, Minus, CornersOut as Scan, ArrowCounterClockwise as Undo2, ArrowClockwise as Redo2, ArrowUpRight, At as AtSign, X, SlidersHorizontal, Books as Library, FilePlus as FilePlus2, FileText, Graph, type Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { CaptureUpdateAction, newElementWith } from '@excalidraw/excalidraw';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { isCard, kindLabel, stateName, type RecordInfo, type RelationInfo } from './cards';
@@ -12,9 +12,9 @@ type Props = {
     relations: () => RelationInfo[];
     post: (message: Record<string, unknown>) => void;
 };
-const icons: Record<string, LucideIcon> = { select: MousePointer2, hand: Hand, plus: Plus, entity: ContactRound,
+const icons: Record<string, PhosphorIcon> = { select: MousePointer2, hand: Hand, plus: Plus, entity: ContactRound,
     note: StickyNote, image: ImageIcon, connect: GitBranch, frame: Frame, draw: Pencil, shape: Square,
-    minus: Minus, fit: Scan, undo: Undo2, redo: Redo2, open: ArrowUpRight, reference: AtSign,
+    minus: Minus, fit: Scan, arrange: Graph, undo: Undo2, redo: Redo2, open: ArrowUpRight, reference: AtSign,
     close: X, settings: SlidersHorizontal, library: Library, capture: FilePlus2 };
 function Icon({ name }: { name: string }) {
     const Glyph = icons[name] ?? FileText;
@@ -29,7 +29,7 @@ function Tool({ label, icon, active = false, disabled = false, action }: {
 }) {
     return <button type="button" className={`studio-tool ${active ? 'is-active' : ''}`} title={label} aria-label={label} aria-pressed={active} disabled={disabled} onClick={action}><Icon name={icon}/><span className="studio-tooltip">{label}</span></button>;
 }
-const tones: Record<string, string> = { characters: '#e2b993', factions: '#b5a2e7', places: '#8bd9b7', 'power systems': '#e7d17d', cosmology: '#d6a8dc' };
+const tones: Record<string, string> = { characters: '#e2b993', factions: '#b5a2e7', systems: '#b5a2e7', places: '#8bd9b7', 'power systems': '#e7d17d', cosmology: '#d6a8dc' };
 /** Rich cards are a presentation of engine elements, never a second board model.
  * Pointer-transparent bodies preserve Excalidraw drag, selection, resize and undo.
  * Only explicit record actions and connection ports intercept the pointer. */
@@ -104,11 +104,12 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
             const artURL = art && files[art.fileId]?.dataURL;
             const related = chosen.length === 0 || neighbours.has(card.customData.recordID);
             const color = tones[record?.category.toLowerCase() ?? ''] ?? '#9bbfdd';
+            const connections = relations().filter(r => r.sourceID === record?.id || r.targetID === record?.id).length;
             return <article key={card.id} className={`studio-record ${selected ? 'is-selected' : ''} ${related ? '' : 'is-unrelated'} ${artURL ? 'has-art' : ''}`} style={{ '--record-accent': color, left: bounds.x + (bounds.width - card.width) / 2, top: bounds.y + (bounds.height - card.height) / 2, width: card.width, height: card.height, transform: `scale(${bounds.zoom}) rotate(${card.angle ?? 0}rad)` } as CSSProperties}>
          <div className="record-kicker"><i />{record ? kindLabel(record) : 'Archived record'}</div>
          {artURL && <img className="record-art" src={artURL} alt="" style={{ height: Math.min(art.height, card.height - 90) }} draggable={false}/>}
          <div className="record-copy"><h2>{record?.title ?? 'Archived record'}</h2><p>{record?.body || 'Open this record to begin writing.'}</p></div>
-         <footer><span>{relations().filter(r => r.sourceID === record?.id || r.targetID === record?.id).length} connections</span><span className={`record-state ${record?.state === 'canon' ? 'is-canon' : ''}`}><i />{record ? stateName(record) : 'Archived'}</span></footer>
+         <footer><span>{connections} {connections === 1 ? 'connection' : 'connections'}</span><span className={`record-state ${record?.state === 'canon' ? 'is-canon' : ''}`}><i />{record ? stateName(record) : 'Archived'}</span></footer>
          <div className="record-actions"><Tool label="Open record" icon="open" action={() => post({ type: 'openRecord', id: card.customData.recordID })}/></div>
          {record?.kind === 'entity' && ['in', 'out'].map(side => <button key={side} type="button" className={`record-port ${side} ${connecting === record.id ? 'connecting' : ''}`} title={connecting ? 'Connect to this entity' : 'Connect this entity'} aria-label={`${connecting ? 'Connect to' : 'Connect from'} ${record.title}`} onClick={() => connect(record.id)}/>)}
        </article>;
@@ -136,7 +137,7 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
      <Tool label="Undo · ⌘Z" icon="undo" action={() => command('undo')}/><Tool label="Redo · ⇧⌘Z" icon="redo" action={() => command('redo')}/>
      <span className="tool-separator"/><Tool label="Zoom out" icon="minus" action={() => command('zoomOut')}/>
      <button className="zoom-label" title="Reset zoom to 100%" onClick={() => command('resetZoom')}>{Math.round(state.zoom.value * 100)}%</button>
-     <Tool label="Zoom in" icon="plus" action={() => command('zoomIn')}/><Tool label="Fit to content" icon="fit" action={() => command('fit')}/>
+     <Tool label="Zoom in" icon="plus" action={() => command('zoomIn')}/><Tool label="Fit to content" icon="fit" action={() => command('fit')}/><Tool label="Arrange linked records · undoable" icon="arrange" disabled={cards.length < 2} action={() => command('arrange')}/>
    </div>
    {styles && <section className="studio-style glass" aria-label="Drawing appearance"><header>Drawing appearance<Tool label="Close appearance" icon="close" action={() => setStyles(false)}/></header>
      {chosen.length ? <p>Record cards follow your world. Open the record to edit its content.</p> : <>

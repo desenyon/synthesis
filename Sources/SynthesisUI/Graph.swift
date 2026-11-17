@@ -1,79 +1,6 @@
 import SwiftUI
 import SynthesisCore
 
-/// Deterministic force-directed placement. The same entities and relationships always produce
-/// the same picture; nothing here is stored, because the graph is derived from the world.
-enum GraphLayout {
-  /// Fruchterman–Reingold inside a frame shaped like the workspace, so chains fold to fill the
-  /// available area instead of stretching into a line.
-  static func positions(nodes: [String], edges: [(String, String)], landscape: Bool = true)
-    -> [String: CGPoint]
-  {
-    guard !nodes.isEmpty else { return [:] }
-    if nodes.count == 1 { return [nodes[0]: .zero] }
-    let k = 175.0
-    let count = Double(nodes.count)
-    let area = count * k * k * 1.35
-    let long = (area * 1.7).squareRoot()
-    let short = area / long
-    let half = CGSize(width: (landscape ? long : short) / 2, height: (landscape ? short : long) / 2)
-    var points: [CGPoint] = nodes.indices.map { i in
-      let angle = Double(i) / count * 2 * .pi - .pi / 2
-      return CGPoint(x: cos(angle) * half.width * 0.8, y: sin(angle) * half.height * 0.8)
-    }
-    let index = Dictionary(uniqueKeysWithValues: nodes.enumerated().map { ($1, $0) })
-    let links = edges.compactMap { edge -> (Int, Int)? in
-      guard let a = index[edge.0], let b = index[edge.1], a != b else { return nil }
-      return (a, b)
-    }
-    var temperature = long / 8
-    for _ in 0..<300 {
-      if Task.isCancelled { break }
-      var shift = Array(repeating: CGVector.zero, count: nodes.count)
-      for i in nodes.indices {
-        for j in nodes.indices where j > i {
-          var dx = points[i].x - points[j].x
-          var dy = points[i].y - points[j].y
-          if dx == 0 && dy == 0 {
-            dx = 0.01 * Double(i + 1)
-            dy = 0.01
-          }
-          let distance = max(1, hypot(dx, dy))
-          let force = k * k / distance
-          shift[i].dx += dx / distance * force
-          shift[i].dy += dy / distance * force
-          shift[j].dx -= dx / distance * force
-          shift[j].dy -= dy / distance * force
-        }
-      }
-      for (a, b) in links {
-        let dx = points[a].x - points[b].x
-        let dy = points[a].y - points[b].y
-        let distance = max(1, hypot(dx, dy))
-        let force = distance * distance / k
-        shift[a].dx -= dx / distance * force
-        shift[a].dy -= dy / distance * force
-        shift[b].dx += dx / distance * force
-        shift[b].dy += dy / distance * force
-      }
-      for i in nodes.indices {
-        let length = max(1, hypot(shift[i].dx, shift[i].dy))
-        points[i].x += shift[i].dx / length * min(length, temperature)
-        points[i].y += shift[i].dy / length * min(length, temperature)
-        points[i].x = min(half.width, max(-half.width, points[i].x))
-        points[i].y = min(half.height, max(-half.height, points[i].y))
-      }
-      temperature = max(1, temperature * 0.975)
-    }
-    let cx = (points.map(\.x).max()! + points.map(\.x).min()!) / 2
-    let cy = (points.map(\.y).max()! + points.map(\.y).min()!) / 2
-    return Dictionary(
-      uniqueKeysWithValues: nodes.indices.map {
-        (nodes[$0], CGPoint(x: points[$0].x - cx, y: points[$0].y - cy))
-      })
-  }
-}
-
 struct RelationshipGraph: View {
   enum Panel: String, Identifiable {
     case create, edit
@@ -86,6 +13,7 @@ struct RelationshipGraph: View {
   @State private var layoutTask: Task<Void, Never>?
   @State private var query = ""
   @State private var selected: String?
+  @State private var connecting: String?
   @State private var hoveredEdge: String?
   @State private var zoom = 1.0
   @State private var pan = CGSize.zero
@@ -196,38 +124,11 @@ struct RelationshipGraph: View {
     hoveredEdge == edge.id || selected == nil || selected == edge.sourceID
       || selected == edge.targetID
   }
-  private func curve(_ edge: Relation, _ size: CGSize, lanes: [String: Double])
-    -> (start: CGPoint, control: CGPoint, end: CGPoint)?
-  {
+  private func curve(_ edge: Relation, _ size: CGSize, lanes: [String: Double]) -> GraphRoute? {
     guard layout[edge.sourceID] != nil, layout[edge.targetID] != nil else { return nil }
-    let a = point(edge.sourceID, size)
-    let b = point(edge.targetID, size)
-    let distance = max(1, hypot(b.x - a.x, b.y - a.y))
-    let unit =
-      distance <= 1
-      ? CGVector(dx: 1, dy: 0) : CGVector(dx: (b.x - a.x) / distance, dy: (b.y - a.y) / distance)
-    // Keep a stable normal for both directions of a pair so opposite edges bow apart.
-    let flip: Double = edge.sourceID < edge.targetID ? 1 : -1
-    let normal = CGVector(dx: -unit.dy * flip, dy: unit.dx * flip)
-    let lane = lanes[edge.id] ?? 0
-    if distance < 90 {
-      let start = CGPoint(
-        x: a.x + normal.dx * 30 - unit.dx * 10, y: a.y + normal.dy * 30 - unit.dy * 10)
-      let end = CGPoint(
-        x: b.x + normal.dx * 32 + unit.dx * 10, y: b.y + normal.dy * 32 + unit.dy * 10)
-      return (
-        start,
-        CGPoint(
-          x: (a.x + b.x) / 2 + normal.dx * (105 + abs(lane) * 2),
-          y: (a.y + b.y) / 2 + normal.dy * (105 + abs(lane) * 2)), end
-      )
-    }
-    let start = CGPoint(x: a.x + unit.dx * 27, y: a.y + unit.dy * 27)
-    let end = CGPoint(x: b.x - unit.dx * 30, y: b.y - unit.dy * 30)
-    let control = CGPoint(
-      x: (start.x + end.x) / 2 + normal.dx * lane * 1.9,
-      y: (start.y + end.y) / 2 + normal.dy * lane * 1.9)
-    return (start, control, end)
+    return GraphRoute.between(
+      point(edge.sourceID, size), point(edge.targetID, size),
+      scale: zoom, lane: (lanes[edge.id] ?? 0) * zoom)
   }
   private func graph(_ nodes: [LoreRecord], floating: Bool) -> some View {
     GeometryReader { geo in
@@ -243,11 +144,11 @@ struct RelationshipGraph: View {
             let color = studio.t.accent.opacity(strong ? (hoveredEdge == edge.id ? 1 : 0.7) : 0.16)
             var path = Path()
             path.move(to: c.start)
-            path.addQuadCurve(to: c.end, control: c.control)
+            path.addCurve(to: c.end, control1: c.first, control2: c.second)
             context.stroke(
               path, with: .color(color),
               style: StrokeStyle(lineWidth: hoveredEdge == edge.id ? 2 : 1.4, lineCap: .round))
-            let angle = atan2(c.end.y - c.control.y, c.end.x - c.control.x)
+            let angle = atan2(c.end.y - c.second.y, c.end.x - c.second.x)
             var arrow = Path()
             arrow.move(to: c.end)
             arrow.addLine(
@@ -282,6 +183,7 @@ struct RelationshipGraph: View {
           onKey: { event in
             guard event.keyCode == 53 else { return false }
             selected = nil
+            connecting = nil
             return true
           })
         ForEach(relationships) { edge in
@@ -306,16 +208,19 @@ struct RelationshipGraph: View {
               .help("\(name(edge.sourceID)) \(edge.label) \(name(edge.targetID)). Click to edit.")
               .onHover { hoveredEdge = $0 ? edge.id : (hoveredEdge == edge.id ? nil : hoveredEdge) }
               .position(
-                x: (c.start.x + 2 * c.control.x + c.end.x) / 4,
-                y: (c.start.y + 2 * c.control.y + c.end.y) / 4)
+                x: c.middle.x, y: c.middle.y)
           }
         }
         ForEach(nodes) { entity in node(entity, size: geo.size) }
-        if relationships.isEmpty {
-          Text("Connect two entities to draw the first relationship.")
-            .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
-            .padding(.horizontal, 14).frame(height: 34).floatingPanel(studio.t)
-            .frame(maxHeight: .infinity, alignment: .top).padding(.top, 14)
+        if relationships.isEmpty || connecting != nil {
+          Text(
+            connecting == nil
+              ? "Choose a card’s connector to link two entities."
+              : "Choose another entity’s connector · Escape to cancel"
+          )
+          .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
+          .padding(.horizontal, 14).frame(height: 34).floatingPanel(studio.t)
+          .frame(maxHeight: .infinity, alignment: .top).padding(.top, 14)
         }
         VStack {
           if floating, let entity = nodes.first(where: { $0.id == selected }) {
@@ -361,55 +266,114 @@ struct RelationshipGraph: View {
           || ($0.targetID == selected && $0.sourceID == entity.id)
       }
     let dim = !neighbour || !matches(entity)
-    return VStack(spacing: 7) {
-      StudioIcon(recordIcon(entity), size: 17).foregroundStyle(tint)
-        .frame(width: 46, height: 46).background(studio.t.surface, in: Circle())
-        .overlay(
-          Circle().stroke(tint.opacity(isSelected ? 1 : 0.45), lineWidth: isSelected ? 2 : 1.2)
-        )
-        .shadow(color: studio.t.shadow.opacity(0.4), radius: 6, y: 2)
-      // The backing hugs the text so it never hides a neighbouring relationship label.
-      Text(entity.title).font(.studio(size: 13, weight: .medium)).lineLimit(2)
-        .multilineTextAlignment(.center).padding(.horizontal, 4).padding(.vertical, 1)
-        .background(studio.t.background.opacity(0.85), in: RoundedRectangle(cornerRadius: 4))
-        .frame(width: 140)
-    }
-    .opacity(dim ? 0.35 : 1)
-    .contentShape(Rectangle())
-    .onTapGesture {
-      if NSApp.currentEvent?.clickCount == 2 {
-        studio.openRecord(entity)
-      } else {
-        selected = isSelected ? nil : entity.id
+    let count = relationships.filter { $0.sourceID == entity.id || $0.targetID == entity.id }.count
+    return VStack(alignment: .leading, spacing: 0) {
+      if zoom >= 0.55 {
+        HStack(spacing: 7) {
+          Circle().fill(tint).frame(width: 5, height: 5)
+          Text(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category))
+            .font(.studio(size: 12 / min(1, zoom), weight: .medium)).foregroundStyle(
+              studio.t.secondary
+            ).lineLimit(1)
+          Spacer(minLength: 4)
+          IconButton(icon: "arrow.up.forward", label: "Open \(entity.title)", t: studio.t, size: 22)
+          {
+            studio.openRecord(entity)
+          }
+        }.padding(.horizontal, 13).frame(height: 35)
+        Rectangle().fill(studio.t.hairline).frame(height: 1).padding(.horizontal, 13)
       }
-    }
-    .gesture(
-      DragGesture(minimumDistance: 4, coordinateSpace: .named("graph"))
-        .onChanged { value in
-          if dragNode?.id != entity.id { dragNode = (entity.id, layout[entity.id] ?? .zero) }
-          guard let origin = dragNode?.origin else { return }
-          layout[entity.id] = CGPoint(
-            x: origin.x + value.translation.width / zoom,
-            y: origin.y + value.translation.height / zoom)
+      VStack(alignment: .leading, spacing: 7) {
+        Text(entity.title).font(.studio(size: 16.5 / min(1, zoom), weight: .semibold)).tracking(
+          -0.3
+        ).lineLimit(zoom < 0.55 ? 2 : (zoom < 0.8 ? 1 : 2))
+        if zoom >= 0.55 {
+          Text(entity.body.isEmpty ? "Open this record to begin writing." : entity.body)
+            .font(.studio(size: 13.5 / min(1, zoom))).foregroundStyle(studio.t.secondary)
+            .lineSpacing(
+              3
+            ).lineLimit(zoom < 0.8 ? 1 : 2)
         }
-        .onEnded { _ in dragNode = nil }
-    )
-    .position(x: point(entity.id, size).x, y: point(entity.id, size).y + 14)
-    .contextMenu {
-      Button("Open record") { studio.openRecord(entity) }
-      Button("Connect from here…") {
-        source = entity.id
-        target = entities.first { $0.id != entity.id }?.id ?? ""
+      }.padding(.horizontal, 14).padding(.vertical, 12).frame(
+        maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+      HStack {
+        Text("\(count) \(count == 1 ? "connection" : "connections")")
+        Spacer()
+        Circle().fill(studio.t.state(entity.state)).frame(width: 4, height: 4)
+        Text(entity.state.capitalized)
+      }.font(.studio(size: 11.5 / min(1, zoom))).foregroundStyle(studio.t.secondary)
+        .padding(.horizontal, 13).frame(height: 29)
+        .overlay(alignment: .top) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
+    }.frame(width: GraphLayout.cardSize.width, height: GraphLayout.cardSize.height)
+      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 14))
+      .overlay(
+        RoundedRectangle(cornerRadius: 14).stroke(
+          isSelected ? tint : studio.t.border, lineWidth: isSelected ? 1.5 : 1)
+      )
+      .shadow(color: studio.t.shadow, radius: 12, y: 4)
+      .overlay(alignment: .leading) { port(entity, tint: tint).offset(x: -6) }
+      .overlay(alignment: .trailing) { port(entity, tint: tint).offset(x: 6) }
+      .scaleEffect(zoom).frame(
+        width: GraphLayout.cardSize.width * zoom, height: GraphLayout.cardSize.height * zoom
+      )
+      .opacity(dim ? 0.35 : 1)
+      .contentShape(Rectangle())
+      .onTapGesture {
+        if NSApp.currentEvent?.clickCount == 2 {
+          studio.openRecord(entity)
+        } else {
+          selected = isSelected ? nil : entity.id
+        }
+      }
+      .gesture(
+        DragGesture(minimumDistance: 4, coordinateSpace: .named("graph"))
+          .onChanged { value in
+            if dragNode?.id != entity.id { dragNode = (entity.id, layout[entity.id] ?? .zero) }
+            guard let origin = dragNode?.origin else { return }
+            layout[entity.id] = CGPoint(
+              x: origin.x + value.translation.width / zoom,
+              y: origin.y + value.translation.height / zoom)
+          }
+          .onEnded { _ in dragNode = nil }
+      )
+      .position(x: point(entity.id, size).x, y: point(entity.id, size).y)
+      .contextMenu {
+        Button("Open record") { studio.openRecord(entity) }
+        Button("Connect from here…") {
+          source = entity.id
+          target = entities.first { $0.id != entity.id }?.id ?? ""
+          label = ""
+          panel = .create
+        }.disabled(entities.count < 2)
+      }
+      .help(entity.title)
+      .accessibilityElement(children: .combine)
+      .accessibilityLabel(
+        "\(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category)): \(entity.title)"
+      )
+      .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+  }
+  private func port(_ entity: LoreRecord, tint: Color) -> some View {
+    Button {
+      if let first = connecting, first != entity.id {
+        source = first
+        target = entity.id
         label = ""
+        inverseLabel = ""
+        twoWay = false
+        connecting = nil
         panel = .create
-      }.disabled(entities.count < 2)
-    }
-    .help(entity.title)
-    .accessibilityElement(children: .combine)
-    .accessibilityLabel(
-      "\(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category)): \(entity.title)"
+      } else {
+        connecting = connecting == entity.id ? nil : entity.id
+      }
+    } label: {
+      Circle().fill(tint).frame(width: 7, height: 7).padding(3)
+        .background(studio.t.surface, in: Circle())
+        .overlay(Circle().stroke(tint.opacity(connecting == entity.id ? 1 : 0.55), lineWidth: 1))
+    }.buttonStyle(.plain).help(
+      connecting == nil ? "Connect from \(entity.title)" : "Connect to \(entity.title)"
     )
-    .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    .accessibilityLabel("Connect \(entity.title)")
   }
   @ViewBuilder private func detail(_ entity: LoreRecord, docked: Bool) -> some View {
     if docked {
@@ -515,10 +479,11 @@ struct RelationshipGraph: View {
     guard !layout.isEmpty else { return }
     let xs = layout.values.map(\.x)
     let ys = layout.values.map(\.y)
-    let width = (xs.max()! - xs.min()!) + 250
-    let height = (ys.max()! - ys.min()!) + 190
-    // Below 60% labels collide; keep them readable and let the creator pan instead.
-    let scale = min(1.2, max(0.6, min(size.width / width, (size.height - 40) / height)))
+    let width = (xs.max()! - xs.min()!) + GraphLayout.cardSize.width + 96
+    let height = (ys.max()! - ys.min()!) + GraphLayout.cardSize.height + 96
+    // Fit must not crop cards. At overview scales cards retain their title and state;
+    // selection opens full details and zoom restores the description.
+    let scale = min(1, max(0.1, min(size.width / width, (size.height - 40) / height)))
     let apply = {
       zoom = scale
       pan = CGSize(
@@ -545,8 +510,8 @@ struct RelationshipGraph: View {
       document.cards = entities.filter { ids.contains($0.id) }.map { record in
         var card = CanvasCard(text: record.title, recordID: record.id)
         card.width = 300
-        card.x = (layout[record.id]?.x ?? 0) * 1.9
-        card.y = (layout[record.id]?.y ?? 0) * 1.5
+        card.x = (layout[record.id]?.x ?? 0) * 1.2
+        card.y = (layout[record.id]?.y ?? 0) * 1.3
         return card
       }
       let data = try JSONEncoder().encode(document)
