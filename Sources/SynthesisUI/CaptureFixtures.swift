@@ -33,7 +33,8 @@ extension Studio {
     "conversation-interrupted", "review-edits", "timeline-edit", "timeline-companion",
     "graph-companion", "atlas-companion", "light-atlas-companion", "editor-recovered",
     "what-if-new", "what-if-send",
-    "review-what-if", "worlds-what-if", "mechanics-tree", "mechanics-requires",
+    "review-what-if", "worlds-what-if", "mechanics-tree", "mechanics-requires", "atlas-regions",
+    "atlas-drawing",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -95,6 +96,13 @@ extension Studio {
           MapMarker(recordID: sea.id, x: 0.46, y: 0.52),
           MapMarker(recordID: city.id, x: 0.7, y: 0.66),
           MapMarker(recordID: order.id, x: 0.2, y: 0.36),
+        ],
+        regions: [
+          MapRegion(
+            recordID: sea.id,
+            points: [
+              [0.36, 0.38], [0.52, 0.34], [0.6, 0.46], [0.55, 0.62], [0.41, 0.64], [0.33, 0.52],
+            ])
         ])
       _ = try store.saveBoard(
         worldID: worldID, name: "Atlas", kind: "atlas",
@@ -572,7 +580,7 @@ extension Studio {
         mapBoardID =
           state == "atlas-local" ? maps.first { $0.name == "The drowned harbour" }?.id : original.id
       }
-    case "atlas", "empty-atlas": destination = .atlas
+    case "atlas", "empty-atlas", "atlas-regions", "atlas-drawing": destination = .atlas
     case "sections", "light-sections", "manual-sections", "sections-companion", "sheet-section",
       "section-editor":
       destination = .library

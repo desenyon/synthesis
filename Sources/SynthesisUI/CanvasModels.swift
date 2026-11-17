@@ -38,11 +38,38 @@ struct MapMarker: Identifiable, Codable, Equatable {
   var x: Double
   var y: Double
 }
+/// An area drawn on a map and linked to a record, usually a place. Points are fractions of the
+/// image width and height, so the region stays put when the image is shown at any size.
+struct MapRegion: Identifiable, Codable, Equatable {
+  var id = UUID().uuidString
+  var recordID: String
+  var points: [[Double]]
+}
 struct AtlasDocument: Codable, Equatable {
   var placeID: String?
   var parentMapID: String?
   var image: String?
   var markers: [MapMarker] = []
+  var regions: [MapRegion] = []
+  init(
+    placeID: String? = nil, parentMapID: String? = nil, image: String? = nil,
+    markers: [MapMarker] = [], regions: [MapRegion] = []
+  ) {
+    self.placeID = placeID
+    self.parentMapID = parentMapID
+    self.image = image
+    self.markers = markers
+    self.regions = regions
+  }
+  /// Maps saved before regions existed have no `regions` key.
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    placeID = try container.decodeIfPresent(String.self, forKey: .placeID)
+    parentMapID = try container.decodeIfPresent(String.self, forKey: .parentMapID)
+    image = try container.decodeIfPresent(String.self, forKey: .image)
+    markers = try container.decodeIfPresent([MapMarker].self, forKey: .markers) ?? []
+    regions = try container.decodeIfPresent([MapRegion].self, forKey: .regions) ?? []
+  }
 }
 
 /// A relationship or board link resolved to the cards it joins.

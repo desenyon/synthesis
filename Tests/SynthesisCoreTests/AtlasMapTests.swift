@@ -114,3 +114,41 @@ struct AtlasMapTests {
     }
   }
 }
+
+struct AtlasRegionTests {
+  @Test func regionsAreValidatedAndFindTheirMap() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Regions")
+    let other = try store.createWorld(name: "Other")
+    let sea = try store.createRecord(
+      worldID: world.id, title: "Glass Sea", kind: "entity", category: "Places")
+    let foreign = try store.createRecord(worldID: other.id, title: "Elsewhere", kind: "entity")
+    func content(_ record: String, _ points: [[Any]]) throws -> String {
+      String(
+        decoding: try JSONSerialization.data(withJSONObject: [
+          "markers": [],
+          "regions": [["id": UUID().uuidString, "recordID": record, "points": points]],
+        ]), as: UTF8.self)
+    }
+    let good: [[Any]] = [[0.1, 0.1], [0.5, 0.1], [0.3, 0.6]]
+    let map = try store.saveAtlasMap(
+      worldID: world.id, name: "Coast", content: try content(sea.id, good))
+    #expect(try store.mapsForRecord(worldID: world.id, recordID: sea.id).map(\.id) == [map.id])
+    for bad: [[Any]] in [
+      [[0.1, 0.1], [0.5, 0.1]], [[0.1, 0.1], [1.5, 0.1], [0.3, 0.6]],
+      [[0.1, 0.1], [true, 0.1], [0.3, 0.6]],
+    ] {
+      #expect(throws: SynthesisError.self) {
+        try store.saveAtlasMap(worldID: world.id, name: "Bad", content: try content(sea.id, bad))
+      }
+    }
+    #expect(throws: SynthesisError.self) {
+      try store.saveAtlasMap(
+        worldID: world.id, name: "Foreign", content: try content(foreign.id, good))
+    }
+    // Regions travel with a portable copy and point at the copy's records.
+    let copy = try store.importWorldArchive(try store.exportWorldArchive(worldID: world.id))
+    let copiedSea = try #require(try store.records(worldID: copy.id).first)
+    #expect(try store.mapsForRecord(worldID: copy.id, recordID: copiedSea.id).count == 1)
+  }
+}

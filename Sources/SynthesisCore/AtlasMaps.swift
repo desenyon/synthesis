@@ -60,6 +60,29 @@ extension WorkspaceStore {
           "Map markers must link to this world and stay within the image.")
       }
     }
+    if let raw = object["regions"] {
+      guard let regions = raw as? [[String: Any]], regions.count <= 500 else {
+        throw SynthesisError.invalid("This map has an unreadable region list.")
+      }
+      var regionIDs = Set<String>()
+      for region in regions {
+        guard let id = region["id"] as? String, !id.isEmpty, regionIDs.insert(id).inserted,
+          let record = region["recordID"] as? String, known.contains(record),
+          let points = region["points"] as? [[Any]], (3...200).contains(points.count),
+          points.allSatisfy({ point in
+            guard point.count == 2 else { return false }
+            return point.allSatisfy { value in
+              guard let number = value as? NSNumber, CFGetTypeID(number) != CFBooleanGetTypeID()
+              else { return false }
+              return number.doubleValue.isFinite && (0...1).contains(number.doubleValue)
+            }
+          })
+        else {
+          throw SynthesisError.invalid(
+            "Map regions need 3 to 200 points inside the image and a record from this world.")
+        }
+      }
+    }
     if let place = object["placeID"] {
       guard let place = place as? String, try record(worldID: worldID, id: place).kind == "entity"
       else {
@@ -105,6 +128,9 @@ extension WorkspaceStore {
         try JSONSerialization.jsonObject(with: Data(board.content.utf8)) as? [String: Any]
       return object?["placeID"] as? String == recordID
         || (object?["markers"] as? [[String: Any]] ?? []).contains {
+          $0["recordID"] as? String == recordID
+        }
+        || (object?["regions"] as? [[String: Any]] ?? []).contains {
           $0["recordID"] as? String == recordID
         }
     }

@@ -15,3 +15,9 @@ Assistant context identifies the active Atlas map, place, parent, image availabi
 Optional `placeID` and `parentMapID` fields live in the existing world-scoped board document. They round-trip through `.synthesis` v6 with fresh IDs. Core validation rejects foreign-world links, cyclic map ancestry, invalid coordinates and duplicate markers.
 
 This is a linked image-map workspace. Editable terrain geometry, aligned regional crops, layers, drag handles, automatic lore-driven geography and subscription image generation remain future work. Creation, parenting and marker editing do not imply those capabilities.
+
+## Regions
+
+**Draw region** (Atlas toolbar) asks for a record, then you click around its area on the map; the banner counts points and offers Undo point, Cancel and Done (three or more points, Esc cancels). Regions are filled in the record's category colour with a light outline that stays legible on any image. Click a region to select it and see its record; drag the round handles to reshape it. Right-click to open the record, redraw or remove the region. Every change saves through the same version-checked map save and offers Undo. The map menu has **Show markers** and **Show regions** layer switches.
+
+Regions are stored with the map as points normalised to the image, so they survive resizing, portable copies and record ID remapping. They are drawn by you: nothing is inferred from the image or generated, and a region does not establish canon geography.

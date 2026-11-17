@@ -22,6 +22,15 @@ struct AtlasScreen: View {
   @State private var pan = CGSize.zero
   @State private var panAnchor: CGPoint?
   @State private var placing: String?
+  @State private var regionPicker = false
+  /// Record being outlined, and the region being redrawn if this replaces one.
+  @State private var drawingRecord: String?
+  @State private var redrawing: String?
+  @State private var drawingPoints: [CGPoint] = []
+  @State private var selectedRegion: String?
+  @State private var reshapeBefore: Board?
+  @State private var showMarkers = true
+  @State private var showRegions = true
   private var selected: String? {
     get { studio.atlasSelectedID }
     nonmutating set { studio.atlasSelectedID = newValue }
@@ -74,7 +83,26 @@ struct AtlasScreen: View {
               }
             }
         }
+        if map.image != nil {
+          Button {
+            regionPicker = true
+          } label: {
+            StudioLabel("Draw region", icon: "hexagon")
+          }.buttonStyle(QuietButton(t: studio.t)).disabled(studio.records.isEmpty)
+            .help("Choose a record, then click around its area on the map")
+            .popover(isPresented: $regionPicker) {
+              SearchableRecordPicker(records: studio.records, t: studio.t) { record in
+                startDrawing(record.id, replacing: nil)
+                regionPicker = false
+              }
+            }
+        }
         IconMenu(icon: "ellipsis", label: "Map actions", t: studio.t) {
+          if map.image != nil {
+            Toggle("Show markers", isOn: $showMarkers)
+            Toggle("Show regions", isOn: $showRegions)
+            Divider()
+          }
           Button("New map…") {
             newMap = true
             details = true
@@ -159,6 +187,19 @@ struct AtlasScreen: View {
       studio.editorSave = { persist() }
       loadMap()
       if studio.captureHint == "atlas-details" { details = true }
+      if studio.captureHint == "atlas-regions" {
+        selectedRegion = map.regions.first?.id
+        selected = map.regions.first?.recordID
+      }
+      if studio.captureHint == "atlas-drawing",
+        let city = studio.records.first(where: { $0.title == "The Drowned City" })
+      {
+        startDrawing(city.id, replacing: nil)
+        drawingPoints = [
+          CGPoint(x: 0.64, y: 0.6), CGPoint(x: 0.76, y: 0.58), CGPoint(x: 0.79, y: 0.7),
+          CGPoint(x: 0.67, y: 0.74),
+        ]
+      }
       if studio.captureHint == "atlas-new" {
         newMap = true
         details = true
@@ -233,7 +274,9 @@ struct AtlasScreen: View {
             anchor: CGPoint(x: location.x - size.width / 2, y: location.y - size.height / 2))
         },
         onClick: {
+          guard drawingRecord == nil else { return }
           selected = nil
+          selectedRegion = nil
           placing = nil
         },
         onDrag: { start, current, phase in
@@ -244,17 +287,30 @@ struct AtlasScreen: View {
         },
         onKey: { event in
           guard event.keyCode == 53 else { return false }
+          if drawingRecord != nil {
+            cancelDrawing()
+            return true
+          }
           placing = nil
           selected = nil
+          selectedRegion = nil
           return true
         })
       Image(nsImage: image).resizable().frame(width: width, height: height)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(studio.t.hairline, lineWidth: 1))
         .shadow(color: studio.t.shadow.opacity(0.5), radius: 18, y: 6)
-        .position(origin).allowsHitTesting(placing != nil)
+        .position(origin).allowsHitTesting(placing != nil || drawingRecord != nil)
         .gesture(
           SpatialTapGesture().onEnded { value in
+            if drawingRecord != nil {
+              guard drawingPoints.count < 200 else { return }
+              drawingPoints.append(
+                CGPoint(
+                  x: min(1, max(0, value.location.x / width)),
+                  y: min(1, max(0, value.location.y / height))))
+              return
+            }
             guard let id = placing else { return }
             let previousID = map.markers.first { $0.recordID == id }?.id ?? UUID().uuidString
             map.markers.removeAll { $0.recordID == id }
@@ -268,10 +324,22 @@ struct AtlasScreen: View {
           }
         )
         .accessibilityLabel("World map")
-      ForEach(map.markers) { marker in
-        markerView(marker)
-          .position(
-            x: origin.x + (marker.x - 0.5) * width, y: origin.y + (marker.y - 0.5) * height)
+      if showRegions {
+        ForEach(map.regions) { region in
+          regionView(region, origin: origin, width: width, height: height)
+        }
+      }
+      if drawingRecord != nil {
+        drawingPreview(origin: origin, width: width, height: height)
+      }
+      if showMarkers {
+        ForEach(map.markers) { marker in
+          markerView(marker)
+            .position(
+              x: origin.x + (marker.x - 0.5) * width, y: origin.y + (marker.y - 0.5) * height
+            )
+            .allowsHitTesting(drawingRecord == nil)
+        }
       }
       VStack {
         HStack(spacing: 8) {
@@ -295,6 +363,21 @@ struct AtlasScreen: View {
             }
           }
           Spacer()
+        }
+        if let id = drawingRecord {
+          HStack(spacing: 10) {
+            StudioIcon("hexagon").foregroundStyle(studio.t.accent)
+            Text(
+              "Click around “\(studio.records.first { $0.id == id }?.title ?? "record")” · \(drawingPoints.count) \(drawingPoints.count == 1 ? "point" : "points")"
+            ).font(.studio(size: 13)).lineLimit(1)
+            Button("Undo point") { _ = drawingPoints.popLast() }
+              .buttonStyle(QuietButton(t: studio.t, role: .ghost)).disabled(drawingPoints.isEmpty)
+            Button("Cancel") { cancelDrawing() }
+              .buttonStyle(QuietButton(t: studio.t, role: .ghost))
+            Button("Done") { finishDrawing() }
+              .buttonStyle(QuietButton(t: studio.t, primary: true))
+              .disabled(drawingPoints.count < 3)
+          }.padding(.leading, 14).padding(.trailing, 6).frame(height: 40).floatingPanel(studio.t)
         }
         if let id = placing {
           HStack(spacing: 10) {
@@ -335,7 +418,148 @@ struct AtlasScreen: View {
             })
         }
       }.padding(14)
-    }.clipped()
+    }.coordinateSpace(name: "atlas-map").clipped()
+  }
+  private func point(_ value: [Double], _ origin: CGPoint, _ width: Double, _ height: Double)
+    -> CGPoint
+  {
+    CGPoint(x: origin.x + (value[0] - 0.5) * width, y: origin.y + (value[1] - 0.5) * height)
+  }
+  private func regionPath(
+    _ points: [[Double]], _ origin: CGPoint, _ width: Double, _ height: Double
+  ) -> Path {
+    Path { path in
+      for (index, value) in points.enumerated() where value.count == 2 {
+        let p = point(value, origin, width, height)
+        if index == 0 { path.move(to: p) } else { path.addLine(to: p) }
+      }
+      path.closeSubpath()
+    }
+  }
+  private func regionView(_ region: MapRegion, origin: CGPoint, width: Double, height: Double)
+    -> some View
+  {
+    let record = studio.records.first { $0.id == region.recordID }
+    let tint = record.map { studio.t.category($0.category) } ?? studio.t.muted
+    let active = selectedRegion == region.id
+    let path = regionPath(region.points, origin, width, height)
+    let count = Double(max(1, region.points.count))
+    let center = point(
+      [
+        region.points.map { $0.first ?? 0.5 }.reduce(0, +) / count,
+        region.points.map { $0.last ?? 0.5 }.reduce(0, +) / count,
+      ], origin, width, height)
+    return ZStack {
+      path.fill(tint.opacity(active ? 0.3 : 0.16))
+      // A pale under-stroke keeps the outline legible on dark or busy map imagery.
+      path.stroke(
+        Color.white.opacity(0.55), style: StrokeStyle(lineWidth: active ? 4 : 3, lineJoin: .round))
+      path.stroke(
+        tint.opacity(0.95),
+        style: StrokeStyle(
+          lineWidth: active ? 2 : 1.2, lineJoin: .round, dash: active ? [] : [6, 4]))
+      // A marker for the same record already carries its name.
+      if !(showMarkers && map.markers.contains { $0.recordID == region.recordID }) {
+        Text(record?.title ?? "Archived record").font(.studio(size: 11, weight: .semibold))
+          .foregroundStyle(studio.t.text).padding(.horizontal, 6).frame(height: 18)
+          .background(studio.t.surface.opacity(0.85), in: Capsule()).position(center)
+          .allowsHitTesting(false)
+      }
+      if active && drawingRecord == nil {
+        ForEach(Array(region.points.enumerated()), id: \.offset) { index, value in
+          Circle().fill(studio.t.surface).overlay(Circle().stroke(tint, lineWidth: 2))
+            .frame(width: 11, height: 11).contentShape(Circle().inset(by: -6))
+            .position(point(value, origin, width, height))
+            .gesture(
+              DragGesture(minimumDistance: 1, coordinateSpace: .named("atlas-map"))
+                .onChanged { drag in
+                  guard let i = map.regions.firstIndex(where: { $0.id == region.id }),
+                    map.regions[i].points.indices.contains(index)
+                  else { return }
+                  if reshapeBefore == nil { reshapeBefore = currentBoard }
+                  map.regions[i].points[index] = [
+                    min(1, max(0, (drag.location.x - (origin.x - width / 2)) / width)),
+                    min(1, max(0, (drag.location.y - (origin.y - height / 2)) / height)),
+                  ]
+                }
+                .onEnded { _ in
+                  let before = reshapeBefore
+                  reshapeBefore = nil
+                  if persist() { offerUndo(before, title: "Region reshaped") }
+                }
+            )
+            .help("Drag to reshape").accessibilityLabel("Region point \(index + 1)")
+        }
+      }
+    }
+    .contentShape(path)
+    .onTapGesture {
+      selectedRegion = active ? nil : region.id
+      selected = active ? nil : region.recordID
+    }
+    .contextMenu {
+      if let record { Button("Open record") { studio.openRecord(record) } }
+      Button("Redraw region") { startDrawing(region.recordID, replacing: region.id) }
+      Button("Remove region") {
+        let before = currentBoard
+        map.regions.removeAll { $0.id == region.id }
+        if selectedRegion == region.id { selectedRegion = nil }
+        if persist() { offerUndo(before, title: "Region removed") }
+      }
+    }
+    .allowsHitTesting(drawingRecord == nil && placing == nil)
+    .accessibilityElement(children: .contain)
+    .accessibilityLabel("Region: \(record?.title ?? "archived record")")
+  }
+  private func drawingPreview(origin: CGPoint, width: Double, height: Double) -> some View {
+    let points = drawingPoints.map { point([$0.x, $0.y], origin, width, height) }
+    return ZStack {
+      Path { path in
+        for (index, p) in points.enumerated() {
+          if index == 0 { path.move(to: p) } else { path.addLine(to: p) }
+        }
+        if points.count >= 3 { path.closeSubpath() }
+      }.fill(studio.t.accent.opacity(points.count >= 3 ? 0.14 : 0))
+      Path { path in
+        for (index, p) in points.enumerated() {
+          if index == 0 { path.move(to: p) } else { path.addLine(to: p) }
+        }
+      }.stroke(studio.t.accent, style: StrokeStyle(lineWidth: 2, lineJoin: .round))
+      ForEach(Array(points.enumerated()), id: \.offset) { _, p in
+        Circle().fill(studio.t.accent).frame(width: 8, height: 8).position(p)
+      }
+    }.allowsHitTesting(false)
+  }
+  private func startDrawing(_ recordID: String, replacing: String?) {
+    placing = nil
+    selected = nil
+    selectedRegion = nil
+    redrawing = replacing
+    drawingPoints = []
+    drawingRecord = recordID
+  }
+  private func cancelDrawing() {
+    drawingRecord = nil
+    redrawing = nil
+    drawingPoints = []
+  }
+  private func finishDrawing() {
+    guard let recordID = drawingRecord, drawingPoints.count >= 3 else { return }
+    let before = currentBoard
+    let points = drawingPoints.map { [Double($0.x), Double($0.y)] }
+    if let id = redrawing, let index = map.regions.firstIndex(where: { $0.id == id }) {
+      map.regions[index].points = points
+    } else {
+      map.regions.append(MapRegion(recordID: recordID, points: points))
+    }
+    let created = redrawing ?? map.regions.last?.id
+    let title = redrawing == nil ? "Region added" : "Region redrawn"
+    cancelDrawing()
+    if persist() {
+      selectedRegion = created
+      selected = recordID
+      offerUndo(before, title: title)
+    }
   }
   private func changeZoom(_ factor: Double, anchor: CGPoint = .zero) {
     let next = SpatialViewport.zoom(
