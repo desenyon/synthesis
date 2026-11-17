@@ -28,6 +28,7 @@ import { arrangeCards } from "./layout";
 import { exportBoard } from "./exportBoard";
 import { StudioOverlay } from "./StudioOverlay";
 import { fitOptions, type FitInsets } from "./viewport";
+import { restoredCardSelection } from "./sessionSelection";
 
 type El = any;
 type Api = any;
@@ -46,6 +47,7 @@ type LegacyCard = { id: string; text: string; recordID?: string; image?: string;
 type LegacyEdge = { label?: string; source: string; target: string };
 type LoadPayload = {
   fitInsets?: FitInsets;
+  selectedRecordIDs?: string[];
   sessionID: string;
   assisted: boolean;
   name: string;
@@ -327,7 +329,7 @@ export function App() {
           api.resetScene();
           api.updateScene({
             elements,
-            appState: { ...appState, selectedElementIds: {}, selectedGroupIds: {}, editingGroupId: null, theme: engineTheme(payload.theme), viewBackgroundColor: "transparent" },
+            appState: { ...appState, selectedElementIds: restoredCardSelection(elements, payload.selectedRecordIDs ?? [], new Set(s.records.keys())), selectedGroupIds: {}, editingGroupId: null, theme: engineTheme(payload.theme), viewBackgroundColor: "transparent" },
             captureUpdate: CaptureUpdateAction.NEVER,
           });
         });
@@ -342,6 +344,8 @@ export function App() {
         }
         const snapshot = serialise(true);
         post({ type: "loaded", migrated: Boolean(payload.legacy && !payload.scene), ...snapshot });
+        s.selectionKey = "restoring";
+        reportSelection();
         return snapshot;
       },
       setAssistance(enabled: boolean) { setAssisted(enabled); },
@@ -762,6 +766,8 @@ export function App() {
         }));
         return JSON.stringify({
           cards,
+          selectedRecordIDs: scene.filter((e: El) => isCard(e) && state.selectedElementIds[e.id])
+            .map((e: El) => e.customData.recordID).sort(),
           zoom: state.zoom.value,
           scrollX: state.scrollX, scrollY: state.scrollY,
           relations: api.getSceneElements().filter(isRelation).length,

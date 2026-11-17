@@ -345,7 +345,7 @@ struct CuratedCanvas: View {
           ) { Button("New board") { newBoard() }.buttonStyle(QuietButton(t: studio.t)) }
           .frame(maxWidth: .infinity, maxHeight: .infinity).background(studio.t.background)
         }
-        if composerVisible && studio.recordDrag == nil {
+        if composerVisible {
           UnifiedComposer(studio: studio, collapsed: true)
             .frame(width: min(440, geo.size.width - 40))
             .background(
@@ -356,13 +356,9 @@ struct CuratedCanvas: View {
             // Clear of the engine's zoom and undo controls on narrower canvases.
             .padding(.bottom, 76)
         }
-        if let boardID = session.boardID, let sessionID = session.dropSessionID {
-          RecordDropSurface(
-            studio: studio, title: "Place linked record", icon: "rectangle.on.rectangle"
-          ) {
-            point in .canvas(boardID: boardID, sessionID: sessionID, point: point)
-          }
-        }
+      }.recordDropDestination(studio: studio, enabled: session.dropSessionID != nil) { point in
+        .canvas(
+          boardID: session.boardID ?? "", sessionID: session.dropSessionID ?? "", point: point)
       }
     }
   }

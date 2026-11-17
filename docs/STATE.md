@@ -4,7 +4,19 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#32 verified; #33 full session restoration is next.** The full expansion is unfinished.
+The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **32 Verified, 11 In progress, 351 Open.** The full expansion is unfinished. Parallel work is now frozen at the owner's request for a fresh chat with the configured 50-agent limit. All workers stopped; the checkpoint includes code, tests, errors, preliminary screenshots and a prepared final capture manifest.
+
+**No new release or tag is authorized. The owner requires all 394 requirements completed before another release; completing them does not itself authorize publication.** The current 0.0.3 release is unchanged.
+
+Latest checkpoint: `./scripts/check.sh` passed **334 tests / 81 suites**, strict Swift format lint and the optimized ad-hoc native build. Canvas `npm test && npm run typecheck` passed **18 tests** and TypeScript. Two separate executions of the final built app restored a saved session exactly, without changing lore or Manual mode. [Logs, errors and next actions](verification/expansion-parallel-checkpoint/README.md).
+
+Implemented source pending final visual acceptance: #33 full sessions, #34 native quick capture, #43–44 conversation branches/recipes, #61–66 optional entity schemas/properties/templates. #35 references remain functionally incomplete: Canvas/editor destinations, additional drag sources, token rendering and combined context-budget enforcement are still open. Initial 25 native frames and six capture panels were inspected; corrected panels and schema screens still require the prepared three-size capture run. No additional requirement was marked Verified at this freeze.
+
+The saved Codex agent limit is 50 and strict config validation accepted it. This runtime still rejected a fifth total agent. A new session must recheck the actual tool capacity; do not claim 50 are running or bypass the runtime limit with unrelated provider/CLI jobs. [Ownership and errors](PARALLEL_WORK.md), [handoff](HANDOFF.md), [continue prompt](RUN_PROMPT.md).
+
+The owner's running app was not restarted or controlled. No live provider request, foreground input, image generation, release or tag occurred. AGENTS.md is unchanged; the untracked owner design brief remains untouched and excluded.
+
+## Previous verified item — #32 Focus
 
 Latest: [Focus workspaces](FOCUS.md) temporarily hide navigation, inspectors, companion chat and unrelated document controls. ⌥⌘F, View, the palette and the shared toolbar all use the same save guard. Native editor/caret/Undo, split documents, panel choices, current view and assistance mode survive. Focus does not change startup preferences or initiate requests.
 

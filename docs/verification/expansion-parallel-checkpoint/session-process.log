@@ -1,0 +1,2 @@
+SESSION_PROCESS PASS write: on-disk native session, editors, views and newest draft
+SESSION_PROCESS PASS read: separate process restored exact state; lore and Manual unchanged

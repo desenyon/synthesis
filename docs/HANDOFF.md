@@ -14,13 +14,36 @@ Start here when picking up Synthesis.
 1. [AGENTS.md](../AGENTS.md): the product contract and protected rules (canon approval, archive-not-delete, privacy, verification honesty).
 2. [STATE](STATE.md): what is verified, with exact checks.
 3. [EXPANSION](EXPANSION.md) and [EXPANSION_SOURCE](EXPANSION_SOURCE.md): all 394 requirements, individual acceptance and exact source. Then [ROADMAP](ROADMAP.md) and [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md).
-4. [ARCHITECTURE](ARCHITECTURE.md): modules, migrations (0001–0015), portable format v9, JSON schema 12.
+4. [PARALLEL_WORK](PARALLEL_WORK.md) and the [checkpoint/error record](verification/expansion-parallel-checkpoint/README.md): ownership, stopped workers, exact failed/passing runs, missing wiring and the final capture manifest.
+5. [ARCHITECTURE](ARCHITECTURE.md): modules and persistence. This checkpoint adds migrations 0016–0017, portable format v10 and JSON schema 13.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#32 verified; #33 full session restoration is next.** Latest check: 279 tests / 68 suites, strict lint and optimized build. #32 has 33 final inspected frames and 66 native-menu assertions. Focus is presentation only; preserve panel preferences, native editor handles and both split panes. #31 has 33 inspected reconstructed-root frames and startup assertions across three sizes. #30 has 99 native key-equivalent assertions. Earlier #27 Canvas evidence remains 17 tests and 49 engine checks.
+**Checkpoint frozen by owner request; resume in the new chat.** All 394 requirements remain individually tracked: 32 Verified, 11 In progress, 351 Open. #1–#32 remain verified; no new boxes were ticked in this parallel checkpoint. Final `./scripts/check.sh` passed 334 tests / 81 suites, strict lint and the optimized build. Canvas 18 tests/typecheck passed. The final binary passed the two-process session audit. Failed check11 and all open defects are preserved in the checkpoint record. Final three-size native captures have **not** run.
 
-`StartupWorkspace` is the shared home catalog. `withNavigation` remembers direct routes; history replay persists its destination separately. Manual startup keeps the Library fallback for Conversation. Startup capture roots are reconstructed from preferences, not assigned a destination. Preserve this alongside the full session restoration planned in #33.
+**Do not publish a release or tag.** The owner requires every expansion item finished before another release, and publication still requires explicit owner authorization. Current v0.0.3 remains unchanged. Do not relaunch the owner's working app or run foreground tests while they work.
+
+All three workers stopped after their narrow fixes. Saved configuration already sets50 agent threads and passes strict validation; the old runtime still rejected a fifth total agent. Recheck the new runtime's capacity and launch the requested parallel team only as supported. Do not silently use other providers or separate CLI processes to evade a limit. Root owns integration/builds/commits; assign distinct source ownership, read-only coordination and independent checker/reviewer roles before mutations.
+
+### Resume here
+
+1. Confirm main/current status and leave `docs/DESIGN_AGENT_BRIEF.md` untouched. Read the checkpoint errors before claiming anything fixed.
+2. Assign independent ownership for the remaining #35 reference wiring and for final native inspection of #33/#34/#43/#44/#61–66. The capture manifest has 56 states; the exact quiet three-size command is saved in the checkpoint record. Current-source final images are required before accepting those items.
+3. #35 must consolidate direct-source budget counting, implement editor insertion/modern mention rendering, add persistent/undoable Canvas reference cards and image/board drag sources, register its UTI, and test drop precedence/world isolation. Its current core/composer paths compile and pass tests, but this is not full cross-workspace drag-and-drop.
+4. After final checks and inspected screenshots, update evidence for each requirement separately, log progress, commit and push. Continue the other 351 Open entries in independent groups; no partial capability counts as complete.
+
+### Saved implementation map
+
+- **#33:** `WorkspaceSession.swift`, `SessionCaptureFixtures.swift`, `SessionProcessAudit.swift`, `scripts/verify-session.sh`, `WorkspaceSessionTests.swift`; coordinated Studio/main, native editor, Graph/Timeline/Conversation and Canvas selection hooks. Sessions are device-only; canon/provider permissions are not snapshots.
+- **#34:** core `QuickCapture.swift`; native controller/model/shortcut/fixtures; 9 focused tests; `docs/QUICK_CAPTURE.md`. Normal launches alone register Control–Option–Space. Corrected header/error sizing still needs final captures.
+- **#43–44:** `ConversationBranches.swift`, `PromptRecipes.swift`, `ConversationToolsValidation.swift`, migration 0017, `ConversationTools.swift`, Conversation/Composer integration, 12 capture states and core/UI tests. Prefix copies use new message IDs and preserve lineage without copying proposal authority. Recipes retain frozen world scope.
+- **#61–66:** entity schema/model/formula/property/media core files, migration 0016, native Properties/type/value editors and world-scope guard, 26 capture states and core/UI tests. Optional types inherit defaults, properties have separate frozen canon, history/import/search/export remain connected. The agent reads permitted property text; model-created schemas/typed-field proposals are not implemented.
+- **#35:** `WorldReference.swift`, `WorkspaceReferenceDrag.swift`, `WorldReferenceContextTests.swift`; record/event/artwork/proposal sources; shared Composer/Conversation routing; AssistantContext/AgentEngine and transient Shell/SplitWorkspace/Canvas drop changes. The missing destinations, sources and tests are listed explicitly in the checkpoint record.
+- **Shared portability:** archive v10/JSON13 includes schemas, templates, histories, branch lineage and recipes. Null primary keys and historical oversized payloads are rejected. Image export preserves valid PNG bytes and converts other raster input with explicit failure reporting.
+
+`WorkspaceSession.swift` persists device-local presentation and the newest unsent draft atomically. Separate executions of the actual app have written and restored a session through `scripts/verify-session.sh`, with Manual mode and lore unchanged. Native text Undo remains process-local. Graph publishes a layout signature only after its positions finish and ignores late completions after world changes. Focus remains temporary. Preserve these boundaries alongside #31 startup preferences and #32 editor handles.
+
+`StartupWorkspace` is the shared home catalog. `withNavigation` remembers direct routes; history replay persists its destination separately. Manual startup keeps the Library fallback for Conversation. Startup capture roots are reconstructed from preferences, not assigned a destination. Preserve this alongside #33 session restoration.
 
 `RecordCreation.swift` owns guarded creation and linking. Graph, menu and palette use `RecordLinkSheet`; reference links can connect any records, semantic relationships only entities. Re-resolve endpoints before saving. Searchable pickers handle Up/Down and Return. Capture verification dispatches local NSMenu key equivalents without making the window key; it is not physical input coverage.
 
@@ -32,7 +55,7 @@ All 394 requirements remain individually tracked in EXPANSION. **#1–#32 verifi
 
 `SplitWorkspace.swift` uses the shared native editor in both panes, never two views of the same record. Keep both save guards, separate editor handles and focus-sensitive ⌘W/inspector routing. A secondary record remains open when closing the primary. Short windows stack scrollable content and share one composer; narrow bars group utility actions. The secondary address is per-world, preferred width device-wide; layouts and Back/Forward include both. Canvas is still mounted once in the shell. Its exact-fit helper avoids engine floor rounding; short toolbars remain accessible. Capture fixtures clear prior split state so subsequent workspaces are not contaminated.
 
-Activity remains migration 0015 / portable v9 / JSON12. Preserve its transaction triggers, import validation and viewport-noise filtering. Search keeps the materialized FTS CTE; the scale test caught repeated scans without it. Favorites/preferences preserve archived addresses and unreadable data without exposing foreign-world sources. No foreground events, owner-app restart, model allowance or release in this pass.
+Activity uses migration 0015. Preserve its transaction triggers, import validation and viewport-noise filtering when extending the archive. Search keeps the materialized FTS CTE; the scale test caught repeated scans without it. Favorites/preferences preserve archived addresses and unreadable data without exposing foreign-world sources. No foreground events, owner-app restart, model allowance or release in this pass.
 
 ## Current shape
 
@@ -48,6 +71,7 @@ The follow-up chatbox refinement uses the existing app palette and bundled Inter
 
 ```sh
 ./scripts/check.sh                       # strict lint, native tests, optimized build
+./scripts/verify-session.sh              # two real processes, temporary data, no windows
 ./scripts/verify-ui.sh /tmp/captures     # background captures of every state
 ./scripts/selftest-ui.sh /tmp/selftest   # 19 real pointer/key checks; takes focus briefly
 cd CanvasWeb && npm test && npm run typecheck
@@ -57,7 +81,7 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#32 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
+- The owner requires the entire expansion and now authorizes parallel workers, coordination and independent checking. Keep non-overlapping source ownership, one build queue and separate evidence for each numbered requirement. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation. The saved agent count is 50, but the active runtime currently rejects a fifth total agent; do not claim 50 are running or bypass that limit through other providers or CLI jobs.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.

@@ -43,3 +43,7 @@ Atlas remembers map framing, layer visibility and selection independently of lor
 Global [Back/Forward](NAVIGATION.md) restores document tabs, maps, conversations and tool subpages, including Library filters, Settings sections, chronology branches and Review focus. Current saved sources and both editor save guards remain authoritative.
 
 Startup can open the creator’s chosen Atlas, Conversation, Dashboard, Canvas, Library, Worlds or last workspace. This device preference follows the last selected universe and preserves Manual mode; it is separate from portable world content. [Usage](STARTUP.md).
+
+## Saved expansion checkpoint — 2026-11-17
+
+The unreleased source now retains full working sessions, offers a small nonactivating capture panel, branches conversations at an exact message, and saves reusable prompt recipes. Optional custom entity types support inherited defaults, typed/conditional properties and templates, with property canon reviewed independently from prose. These capabilities share persistence, search and portable worlds; their final visual acceptance remains pending. Generic cross-workspace references are only partly integrated. See [the checkpoint and remaining defects](verification/expansion-parallel-checkpoint/README.md), not this description, for completion claims.

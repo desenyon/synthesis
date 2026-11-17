@@ -1,0 +1,1 @@
+6e3d23ebe8f81467a015230b630cf6416745fa1735d41fd4fab5e018d7e54da3  dist/Synthesis.app/Contents/MacOS/Synthesis

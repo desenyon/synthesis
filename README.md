@@ -202,6 +202,8 @@ The code is split into `SynthesisCore` (SQLite persistence, canon, proposals, re
 
 Synthesis is in early releases (0.0.x): usable and tested on the development Mac, but not yet the 1.0 launch. Current state and verification: [STATE](docs/STATE.md). What's next: [ROADMAP](docs/ROADMAP.md). Release history: [CHANGELOG](CHANGELOG.md).
 
+The current expansion tracks [394 requirements](docs/EXPANSION.md): 32 verified, 11 in progress and 351 open. The latest unreleased checkpoint includes workspace sessions, quick capture, conversation branches/recipes and custom entity schemas; their final visual acceptance is pending. Cross-workspace references remain incomplete. [Checks, known errors and continuation state](docs/verification/expansion-parallel-checkpoint/README.md). No new release is planned before the full expansion is complete and approved.
+
 ## Contributing
 
 Issues and pull requests are welcome. Please read [CONTRIBUTING](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Report security problems privately as described in [SECURITY](SECURITY.md).

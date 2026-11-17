@@ -91,7 +91,9 @@ extension WorkspaceStore {
       artwork.map {
         "![\(MarkdownText.escape(record.title)) artwork](data:\($0.mimeType);base64,\($0.image))\n\n> Visual reference · \($0.origin)\n\n"
       } ?? ""
+    let properties = try entityPropertyText(worldID: worldID, recordID: record.id, limit: 8_000_000)
     return metadata + heading + illustration + MarkdownText.body(record) + "\n"
+      + (properties.isEmpty ? "" : "\n## Structured properties\n\n" + properties + "\n")
       + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n")
   }
 

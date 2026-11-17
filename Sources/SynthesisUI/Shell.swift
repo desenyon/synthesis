@@ -204,9 +204,9 @@ public struct ConnectedRoot: View {
               UnifiedComposer(studio: studio, companion: true, collapsed: true)
                 .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
                 .frame(maxWidth: .infinity).background(studio.t.background)
-                .opacity(studio.companionExpanded || studio.recordDrag != nil ? 0 : 1)
-                .allowsHitTesting(!studio.companionExpanded && studio.recordDrag == nil)
-                .accessibilityHidden(studio.companionExpanded || studio.recordDrag != nil)
+                .opacity(studio.companionExpanded ? 0 : 1)
+                .allowsHitTesting(!studio.companionExpanded)
+                .accessibilityHidden(studio.companionExpanded)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
           }

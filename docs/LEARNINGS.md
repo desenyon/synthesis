@@ -2,6 +2,15 @@
 
 Instruction changes below are evidence-backed owner corrections and operational fixes; protected canon and privacy rules remain intact.
 
+## 2026-11-17 — parallel integration checkpoint (no AGENTS change)
+
+- Independent review found that an accepted proposal's `resultID` can identify a new record or an event whose source record was created implicitly. Before-state endpoints also remain part of a revision's provenance. Reference context must collect those record dependencies before enforcing exclusions. Three final regressions cover accepted/archived results and source reassignment in both world and attachment-only scopes.
+- A valid 1×1 grayscale/alpha PNG passed ImageIO validation but failed AppKit PNG re-encoding with `CGImageDestinationFinalize`. The existing exporter silently dropped it. Preserve validated PNG bytes, convert other raster input with ImageIO, and report actual conversion failures. Exact PNG and JPEG conversion/export regressions passed in the 334-test checkpoint.
+- An unfinished asynchronous Graph layout must not persist its future topology signature. Publish it with completed positions, ignore stale world completions and cancel pending work when topology returns to the last completed layout. The session tests now cover these cases.
+- Source/appearance evidence have separate lifetimes: initial screenshots exposed native-panel sizing bugs; fixes in a later build still require recapture. The owner requested a freeze before that final run, so all 11 new acceptance items remain In progress despite passing tests.
+
+Evidence: [checkpoint logs and findings](verification/expansion-parallel-checkpoint/README.md). These are implementation lessons, not changes to the protected product contract. Root AGENTS.md was not edited; rollback uses ordinary version control while retaining regression tests and canon/privacy guarantees.
+
 ## Owner-directed correction: complete rebuild
 
 Observation: the owner rejected successive HTML studies that preserved the same black three-pane structure. Evidence: latest explicit complete UI rebuild directive plus four supplied references. Change: AGENTS.md now names Synthesis, specifies a light chat-first native studio, core-enforced AI/Manual modes, optional inspector, native stack and periodic commits/docs. Canon ownership/privacy/history rules remain. This is an explicit owner change, not autonomous relaxation. Validation: inspect instruction diff and verify actual native app in subsequent gates. Rollback: revert the operational diff only if owner changes direction; never silently restore the rejected layout.

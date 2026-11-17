@@ -39,8 +39,10 @@ extension WorkspaceStore {
       // Without materialization SQLite reruns the virtual FTS scan for each candidate record.
       // Evaluate it once, then join its indexed IDs while preserving substring-title fallback.
       prefix =
-        "WITH matches AS MATERIALIZED (SELECT id,rank FROM records_fts WHERE records_fts MATCH ? AND world_id=?) "
-      values += [phrases.joined(separator: " AND "), worldID]
+        "WITH matches AS MATERIALIZED (SELECT id,MIN(rank) AS rank FROM (SELECT id,rank FROM records_fts WHERE records_fts MATCH ? AND world_id=? UNION ALL SELECT record_id AS id,rank FROM entity_profile_search WHERE entity_profile_search MATCH ? AND world_id=?) GROUP BY id) "
+      values += [
+        phrases.joined(separator: " AND "), worldID, phrases.joined(separator: " AND "), worldID,
+      ]
       join = " LEFT JOIN matches ON matches.id=r.id"
       order = "COALESCE(matches.rank,0)," + order
     }

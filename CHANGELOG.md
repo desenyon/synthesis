@@ -20,6 +20,10 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 
 ### Added
+- Expansion #33: device-local workspace sessions retain document tabs, editor positions, Graph/Timeline/Atlas/Canvas context, conversation position and the newest unsent draft after restart. Restoring keeps Manual mode and reconciles archived sources.
+- Expansion #34: universal Quick Capture (Control–Option–Space) opens a small nonactivating panel. Per-world scratch drafts, atomic retry-safe saving, failure recovery and the existing Library/search/history paths keep captures connected.
+- Expansion #43–44: branch at a message without changing the original conversation; follow its exact source point and preserve citation lineage. Save, search, edit and reuse world-owned prompt recipes with optimistic updates, archive and Undo.
+- Expansion #61–66: optional custom entity types, inherited defaults, typed properties, conditional fields and reusable templates. Numbers, authored dates, ranges, durations, choices, entity links, coordinates, media and bounded formulas share revision history and explicit property-canon review. Portable v10 / JSON13 exports retain their schemas and accepted snapshots.
 - Expansion #30: native New Entity (⌥⌘N) and Link Records (⇧⌘K), shared with the palette. One Graph/global form supports references, typed relationships and optional reverse directions; searchable record pickers support arrow/Return selection and creation preserves failed-save guards.
 - Expansion #29: shared Back/Forward retains entity tabs, Settings sections/search, Library search/filter/sort, Timeline branches, Review tabs/proposals and inspected objects. Same-mounted editors keep save guards; invalid optional sources clear safely.
 - Expansion #28: Atlas restores per-map zoom, image-relative center, layers and selection across navigation and normal restarts. History/layouts retain visit framing; map-switch save registration, unreadable preferences and removed selections are handled safely.
@@ -45,6 +49,9 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 - Explore enforced in the core: model proposal blocks are discarded with a notice. Propose still stages draft changes for explicit review; neither mode changes canon.
 
 ### Fixed
+- Interrupted Graph layouts cannot publish unfinished position signatures or overwrite another universe's arrangement.
+- Accepted property canon retains a separate assistant-context budget, so a long working draft cannot hide it. Small numeric values remain readable in property editing and review.
+- Schema images participate in the existing world-image export; imported historical property/type/template snapshots receive the same size and reference validation as current records.
 - Category searches normalize case/accents before ordering so multi-alias filters find Places reliably. Compact Library search/categories use native controls and filter rows scroll within the viewport.
 - Expansion #17: background regression audit verifies independent sidebar, document and inspector scrolling while toolbar and composer frames stay fixed.
 - Expansion #14: light Canvas and Graph have a distinct spatial base, white entity/tool surfaces and clearer shared text and boundaries. Native and bundled Canvas palettes agree; dark/OLED styling stays intact.

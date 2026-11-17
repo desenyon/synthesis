@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 9
+  var version = 10
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -16,7 +16,9 @@ extension WorkspaceStore {
     "proposals", "message_context", "boards", "rules", "rule_history", "rule_scenarios",
     "chronology_lanes",
     "chronology_placements", "record_sections", "creative_components", "rule_prerequisites",
-    "record_artwork", "world_activity",
+    "record_artwork", "world_activity", "entity_types", "entity_profiles", "entity_profile_history",
+    "entity_type_history", "entity_templates", "entity_template_history", "conversation_branches",
+    "conversation_message_origins", "prompt_recipes",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
     _ = try world(worldID)
@@ -63,7 +65,15 @@ extension WorkspaceStore {
     if (1...6).contains(archive.version) { archive.tables["rule_prerequisites"] = [] }
     if (1...7).contains(archive.version) { archive.tables["record_artwork"] = [] }
     if (1...8).contains(archive.version) { archive.tables["world_activity"] = [] }
-    guard archive.format == "dev.synthesis.world", (1...9).contains(archive.version),
+    if (1...9).contains(archive.version) {
+      for table in [
+        "entity_types", "entity_profiles", "entity_profile_history", "entity_type_history",
+        "entity_templates", "entity_template_history", "conversation_branches",
+        "conversation_message_origins",
+        "prompt_recipes",
+      ] { archive.tables[table] = [] }
+    }
+    guard archive.format == "dev.synthesis.world", (1...10).contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -73,9 +83,12 @@ extension WorkspaceStore {
     else { throw SynthesisError.invalid("This is not a supported Synthesis world file.") }
     var ids: [String: String] = [:]
     for table in Self.archiveTables {
-      let columns = Set(try db.rows("PRAGMA table_info(\(table))").compactMap { $0["name"] })
+      let info = try db.rows("PRAGMA table_info(\(table))")
+      let columns = Set(info.compactMap { $0["name"] })
+      let primaryKeys = info.filter { Int($0["pk"] ?? "0") ?? 0 > 0 }.compactMap { $0["name"] }
       for row in archive.tables[table] ?? [] {
         guard !row.isEmpty, Set(row.keys).isSubset(of: columns),
+          primaryKeys.allSatisfy({ row[$0].flatMap(UUID.init(uuidString:)) != nil }),
           table == "worlds" || table == "rich_documents" || row["world_id"] == oldWorld
         else {
           throw SynthesisError.invalid("The world file contains invalid or mixed-world records.")
@@ -140,6 +153,9 @@ extension WorkspaceStore {
         try ActivityHistoryMigration.backfill(db, worldID: newWorld)
       }
       try validateActivitySources(worldID: newWorld)
+      try validateEntitySchemas(worldID: newWorld)
+      try refreshEntityPropertySearch(worldID: newWorld)
+      try validateConversationTools(worldID: newWorld)
       // Membership is presentation data, but must still obey the entity -> lore contract.
       // Validate imports as well as interactive writes to prevent recursive/cyclic pages.
       guard

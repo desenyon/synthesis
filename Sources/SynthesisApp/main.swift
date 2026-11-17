@@ -94,6 +94,15 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       NSApp.setActivationPolicy(
         capturing && ProcessInfo.processInfo.environment["SYNTHESIS_SELFTEST_DIR"] == nil
           ? .accessory : .regular)
+      if let phase = ProcessInfo.processInfo.environment["SYNTHESIS_SESSION_AUDIT_PHASE"],
+        let directory = ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"],
+        let token = ProcessInfo.processInfo.environment["SYNTHESIS_SESSION_AUDIT_TOKEN"]
+      {
+        try Studio.auditSessionProcess(
+          phase: phase, directory: directory, token: token, transport: CaptureTransport())
+        fflush(stdout)
+        exit(0)
+      }
       if capturing {
         guard NSApp is SynthesisApplication else {
           throw SynthesisError.invalid("Background activation guard was not installed.")
@@ -123,6 +132,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       window.center()
       if !capturing { window.setFrameAutosaveName("SynthesisMainWindow") }
       buildMenu()
+      if !capturing { studio.quickCapture.installShortcut() }
       if !capturing { studio.announceRecoveredText() }
       if !pendingWorldFiles.isEmpty {
         let files = pendingWorldFiles
@@ -173,15 +183,16 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     window.backgroundColor = NSColor(studio.t.background)
   }
   func windowShouldClose(_ sender: NSWindow) -> Bool {
+    guard studio.quickCapture.flush() else { return false }
     studio.persistPendingComposer()
-    guard studio.flushEditor() else { return false }
+    guard studio.saveSessionForClose() else { return false }
     if closeApproved || studio.canvasWebView == nil { return true }
     guard !closePending else { return false }
     closePending = true
     Task {
       let saved = await studio.flushCanvas()
       closePending = false
-      if saved && studio.flushEditor() {
+      if saved && studio.saveSessionForClose() {
         closeApproved = true
         window.performClose(nil)
       } else if !saved {
@@ -191,8 +202,9 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     return false
   }
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+    guard studio.quickCapture.flush() else { return .terminateCancel }
     studio.persistPendingComposer()
-    guard studio.flushEditor() else { return .terminateCancel }
+    guard studio.saveSessionForClose() else { return .terminateCancel }
     guard studio.canvasWebView != nil else { return .terminateNow }
     // The canvas hands over its latest edits asynchronously; wait for that before quitting.
     Task {
@@ -200,7 +212,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       if !saved {
         studio.error = "The canvas has not confirmed its save. Keep this window open and retry."
       }
-      NSApp.reply(toApplicationShouldTerminate: saved && studio.flushEditor())
+      NSApp.reply(toApplicationShouldTerminate: saved && studio.saveSessionForClose())
     }
     return .terminateLater
   }
@@ -249,6 +261,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     item(file, "New Entity…", #selector(newEntity), "n", [.command, .option])
     item(file, "Link Records…", #selector(linkRecords), "k", [.command, .shift])
     item(file, "New Conversation", #selector(newConversation), "n", [.command, .shift])
+    item(file, "Quick Capture…", #selector(quickCapture), " ", [.control, .option])
     file.addItem(.separator())
     item(file, "Search and Commands…", #selector(search), "k")
     file.addItem(.separator())
@@ -349,6 +362,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
   @objc func newEntity() { studio.beginRecordCreation(kind: "entity") }
   @objc func linkRecords() { studio.beginLinkRecords() }
   @objc func newConversation() { studio.newChat() }
+  @objc func quickCapture() { studio.quickCapture.open() }
   @objc func importFiles() { studio.importDocuments() }
   @objc func exportMarkdown() { studio.exportMarkdown() }
   @objc func exportJSON() { studio.exportWorld() }
@@ -534,7 +548,12 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       for (width, height) in sizes {
         for state in Studio.captureStates where only?.contains(state) ?? true {
           window.setContentSize(NSSize(width: width, height: height))
-          if state.contains("startup-") {
+          if state.contains("session-") {
+            studio = try await studio.reopenedSessionCapture(
+              state, board: fixture.board, conversation: fixture.conversation,
+              transport: CaptureTransport())
+            window.contentView = NSHostingView(rootView: ConnectedRoot(studio: studio))
+          } else if state.contains("startup-") {
             guard studio.flushEditor(), await studio.flushCanvas() else {
               throw SynthesisError.invalid("Could not save the prior capture workspace.")
             }
@@ -567,7 +586,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
               try await Task.sleep(for: .milliseconds(250))
             }
             try await Task.sleep(for: .milliseconds(500))
-            studio.canvasFit?()
+            if !state.contains("session-") { studio.canvasFit?() }
             try await Task.sleep(for: .milliseconds(900))
             if state.contains("selection-canvas") {
               studio.captureCanvasSelection()
@@ -588,6 +607,9 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
             try await Task.sleep(for: .milliseconds(900))
           }
           try await Task.sleep(for: .milliseconds(200))
+          if state == "session-canvas" {
+            try await studio.auditRestoredCanvasSession()
+          }
           if state != "toast" { studio.toast = nil }
           window.layoutTrafficLights()
           guard !NSApp.isActive, !window.isKeyWindow else {
@@ -641,6 +663,10 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
           print(
             "CAPTURE \(state) \(width)x\(height), bitmap \(pixels.0)x\(pixels.1), \(Int((CFAbsoluteTimeGetCurrent() - start) * 1000))ms"
           )
+          if QuickCaptureController.captureStates.contains(state) {
+            try await studio.quickCapture.captureFixture(
+              state, screenSize: NSSize(width: width, height: height), directory: folder)
+          }
           if state == "graph", width == 1440,
             ProcessInfo.processInfo.environment["SYNTHESIS_SIDEBAR_AUDIT"] == "1"
           {

@@ -105,6 +105,7 @@ extension Studio {
     }
     if focusedEditorPlacement == .beside && splitRecord != nil {
       splitInspector.toggle()
+      persistWorkspaceSession()
     } else if selectedRecord != nil {
       toggleInspector()
     } else {
@@ -140,19 +141,18 @@ struct SplitWorkspace<Primary: View>: View {
         horizontal ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
       layout {
         primary().frame(maxWidth: .infinity, maxHeight: .infinity)
-          .overlay {
+          .overlay(alignment: .topLeading) {
             if studio.destination != .canvas || studio.selectedRecord != nil {
               RecordDropSurface(studio: studio, title: "Open here", icon: "doc.text") { _ in .main }
-                .padding(.top, Metric.bar).padding(8)
+                .frame(width: 180, height: 68).padding(.top, Metric.bar).padding(8)
             }
           }
-          .overlay(alignment: horizontal ? .trailing : .bottom) {
+          .overlay(alignment: .topTrailing) {
             if studio.splitRecord == nil && studio.recordDrag != nil {
               RecordDropSurface(studio: studio, title: "Open beside", icon: "sidebar.right") {
                 _ in .beside
               }
-              .frame(width: horizontal ? 220 : nil, height: horizontal ? nil : 128)
-              .padding(.top, horizontal ? Metric.bar : 0).padding(8)
+              .frame(width: 180, height: 68).padding(.top, Metric.bar).padding(8)
             }
           }
         if let record = studio.splitRecord {
@@ -161,10 +161,10 @@ struct SplitWorkspace<Primary: View>: View {
             .frame(width: horizontal ? studio.splitDisplayWidth(available: geo.size.width) : nil)
             .frame(height: horizontal ? nil : max(260, geo.size.height * 0.48))
             .background(studio.t.background)
-            .overlay {
+            .overlay(alignment: .topTrailing) {
               RecordDropSurface(studio: studio, title: "Open in second pane", icon: "doc.text") {
                 _ in .beside
-              }.padding(.top, Metric.bar).padding(8)
+              }.frame(width: 180, height: 68).padding(.top, Metric.bar).padding(8)
             }
             .overlay(alignment: horizontal ? .leading : .top) {
               if horizontal {
@@ -187,9 +187,6 @@ struct SplitWorkspace<Primary: View>: View {
         UnifiedComposer(studio: studio, companion: true, collapsed: true)
           .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
           .frame(maxWidth: .infinity).background(studio.t.background)
-          .opacity(studio.recordDrag == nil ? 1 : 0)
-          .allowsHitTesting(studio.recordDrag == nil)
-          .accessibilityHidden(studio.recordDrag != nil)
       }
     }
   }

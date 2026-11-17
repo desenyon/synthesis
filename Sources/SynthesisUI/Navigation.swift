@@ -29,8 +29,8 @@ struct NavigationContext: Codable, Equatable {
   var inspection: InspectionTarget?
   var inspectorShown: Bool?
 }
-struct NavigationEntry: Identifiable, Equatable {
-  let id = UUID()
+struct NavigationEntry: Identifiable, Equatable, Codable {
+  var id = UUID()
   var location: NavigationLocation
   var title: String
   var world: String
@@ -108,6 +108,7 @@ extension Studio {
   /// Direct chat, board and palette routes use the same remembered workspace as sidebar clicks.
   func rememberWorkspace() {
     perform { try store.setPreference("destination", value: destination.rawValue) }
+    persistWorkspaceSession()
   }
   public var canNavigateBack: Bool { !navigationBack.isEmpty }
   public var canNavigateForward: Bool { !navigationForward.isEmpty }
@@ -202,8 +203,9 @@ extension Studio {
       let sameEditor =
         worldID == address.worldID && selectedRecord?.id == address.recordID
         && destination == address.destination
+      let wasReplaying = replayingNavigation
       replayingNavigation = true
-      defer { replayingNavigation = false }
+      defer { replayingNavigation = wasReplaying }
       if address.worldID != worldID {
         switchWorld(address.worldID)
         guard worldID == address.worldID else { return false }
@@ -260,6 +262,7 @@ extension Studio {
       mobileNavigation = false
       try store.setPreference("destination", value: destination.rawValue)
       if !canFocusWorkspace { focusMode = false }
+      persistWorkspaceSession()
       return true
     } catch {
       self.error = error.localizedDescription

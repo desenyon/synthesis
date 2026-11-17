@@ -45,8 +45,8 @@ extension CommandPalette {
         { studio.beginRecordCreation(kind: "entity") }
       ),
       (
-        "Capture an idea", "lightbulb", "", "capture",
-        { studio.beginRecordCreation(kind: "capture") }
+        "Capture an idea", "lightbulb", "⌃⌥Space", "capture",
+        { studio.quickCapture.open() }
       ),
       ("New conversation", "square.and.pencil", "⇧⌘N", "chat", { studio.newChat() }),
       ("New world…", "globe", "", "world", { studio.sheet = .world }),

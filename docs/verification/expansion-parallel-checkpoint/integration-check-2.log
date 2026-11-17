@@ -1,0 +1,3 @@
+Sources/SynthesisCore/EntityFormula.swift:32:40: error: [OneCasePerLine] move 'number' to its own 'case' declaration
+Sources/SynthesisCore/EntityFormula.swift:32:56: error: [OneCasePerLine] move 'name' to its own 'case' declaration
+Sources/SynthesisCore/EntityFormula.swift:32:70: error: [OneCasePerLine] move 'symbol' to its own 'case' declaration

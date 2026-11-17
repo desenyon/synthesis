@@ -1,7 +1,7 @@
 import SwiftUI
 import SynthesisCore
 
-public enum RecordPageTab: String, Codable { case overview, sections, mechanics }
+public enum RecordPageTab: String, Codable { case overview, sections, mechanics, properties }
 
 /// Device-local presentation, scoped to one universe. No writing or model permissions are saved.
 struct WorkspaceArrangement: Codable, Equatable {

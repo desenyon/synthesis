@@ -1,5 +1,15 @@
 # Architecture
 
+## Current parallel additions — expansion #33–35, #43–44, #61–66
+
+`WorkspaceSession` stores per-world device presentation separately from portable lore: document tabs, editor positions, view framing/selections, filters, inspectors and conversation read positions. It checkpoints the latest composer draft in the same transaction. Restoring filters stale addresses, preserves unreadable preferences and cannot enable AI or replay a request. Native editor Undo remains in-memory. The independent `verify-session.sh` runner exercises two actual executable processes against disposable data.
+
+Quick capture uses an ordinary nonactivating `NSPanel`, a launch-local Carbon shortcut and a world-scoped scratch draft. Record creation, retry receipt and scratch removal share one transaction. No provider, main-window route or canon state is changed. Automated instances do not register the shortcut.
+
+Migration 0016 adds optional entity types, inheritance, typed profile values, templates, accepted property snapshots and revision histories. Derived FTS is rebuilt from validated data. Formulas use a bounded arithmetic parser, never executable code. Structured canon requires a frozen review token; later schema/default edits cannot rewrite the accepted snapshot. Migration 0017 adds conversation lineage, copied-message origins and optimistic prompt recipes. Branches copy a selected message prefix with new IDs; proposal ownership and approvals stay with the original conversation.
+
+Portable archives are v10 and JSON exports schema 13. Nested references are remapped and validated before import commits; device sessions, scratch drafts and provider credentials are excluded. [Entity schema details](ENTITY_SCHEMAS.md), [conversation tools](CONVERSATION_TOOLS.md), [sessions](SESSION_RESTORE.md) and [quick capture](QUICK_CAPTURE.md) describe the new boundaries. #35 reference transport is still in progress; the ledger is authoritative for verification status.
+
 Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bundle: `dist/Synthesis.app`. The former `swift-falcon` worktree is retired.
 
 ## Application shell

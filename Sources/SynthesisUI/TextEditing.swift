@@ -368,6 +368,18 @@ struct ComposerInput: NSViewRepresentable {
 @MainActor final class EditorHandle {
   weak var view: NSTextView?
   var scrollView: NSScrollView?
+  var pendingPosition: EditorPosition?
+  var positionChanged: (() -> Void)?
+  var scrollObservation: NSObjectProtocol?
+  var position: EditorPosition? {
+    guard let view else { return pendingPosition }
+    return EditorPosition(
+      location: view.selectedRange().location, length: view.selectedRange().length,
+      scrollY: Double(scrollView?.contentView.bounds.origin.y ?? 0))
+  }
+  deinit {
+    if let scrollObservation { NotificationCenter.default.removeObserver(scrollObservation) }
+  }
   let undoManager = UndoManager()
   var body: String?
   var rtf: String?
@@ -394,6 +406,28 @@ struct ComposerInput: NSViewRepresentable {
   }
 }
 
+/// Restoring a scroll offset requires the native text container's actual laid-out bounds.
+private final class DocumentScrollView: NSScrollView {
+  weak var editorHandle: EditorHandle?
+  override func layout() {
+    super.layout()
+    guard bounds.width > 0, bounds.height > 0, let handle = editorHandle,
+      let position = handle.pendingPosition, let view = documentView as? NSTextView
+    else { return }
+    handle.pendingPosition = nil
+    let count = (view.string as NSString).length
+    let location = min(count, max(0, position.location))
+    view.setSelectedRange(
+      NSRange(location: location, length: min(count - location, max(0, position.length))))
+    if let container = view.textContainer { view.layoutManager?.ensureLayout(for: container) }
+    let y =
+      position.scrollY.isFinite
+      ? min(max(0, position.scrollY), max(0, view.bounds.height - contentView.bounds.height)) : 0
+    contentView.scroll(to: NSPoint(x: 0, y: y))
+    reflectScrolledClipView(contentView)
+  }
+}
+
 struct RichDocumentEditor: NSViewRepresentable {
   let id: String
   let body: String
@@ -409,7 +443,8 @@ struct RichDocumentEditor: NSViewRepresentable {
   }
   /// Reattach the actual text view so selection, viewport and its undo stack survive tabs.
   func makeEditor(coordinator: Coordinator) -> NSScrollView {
-    let scroll = handle?.scrollView ?? NSScrollView()
+    let scroll = handle?.scrollView ?? DocumentScrollView()
+    (scroll as? DocumentScrollView)?.editorHandle = handle
     let retained = scroll.documentView as? NSTextView
     let view = retained ?? NSTextView()
     scroll.drawsBackground = false
@@ -439,6 +474,14 @@ struct RichDocumentEditor: NSViewRepresentable {
     }
     handle?.view = view
     handle?.scrollView = scroll
+    if let handle, handle.scrollObservation == nil {
+      scroll.contentView.postsBoundsChangedNotifications = true
+      handle.scrollObservation = NotificationCenter.default.addObserver(
+        forName: NSView.boundsDidChangeNotification, object: scroll.contentView, queue: .main
+      ) { [weak handle] _ in
+        MainActor.assumeIsolated { handle?.positionChanged?() }
+      }
+    }
     handle?.body = body
     handle?.rtf = rtf
     coordinator.token = reloadToken
@@ -502,6 +545,10 @@ struct RichDocumentEditor: NSViewRepresentable {
     var updating = false
     init(_ parent: RichDocumentEditor) { self.parent = parent }
     func undoManager(for view: NSTextView) -> UndoManager? { parent.handle?.undoManager }
+    func textViewDidChangeSelection(_ notification: Notification) {
+      guard !updating else { return }
+      parent.handle?.positionChanged?()
+    }
     func textDidChange(_ notification: Notification) {
       guard !updating, let view = notification.object as? NSTextView else { return }
       let data = try? view.attributedString().data(

@@ -203,52 +203,61 @@ struct WorldsScreen: View {
 }
 
 extension Studio {
+  func worldImageExportData(worldID: String) throws -> [Data] {
+    var images: [Data] = []
+    var seen = Set<Data>()
+    func collect(_ value: Any, key: String = "", depth: Int = 0) throws {
+      guard depth < 64 else { return }
+      if let object = value as? [String: Any] {
+        for (key, child) in object { try collect(child, key: key, depth: depth + 1) }
+      } else if let array = value as? [Any] {
+        for child in array { try collect(child, depth: depth + 1) }
+      } else if let raw = value as? String {
+        guard !raw.isEmpty else { return }
+        let base64: String
+        if raw.hasPrefix("data:image/"), let comma = raw.firstIndex(of: ",") {
+          base64 = String(raw[raw.index(after: comma)...])
+        } else if key == "image" || key == "world-cover" {
+          base64 = raw
+        } else {
+          return
+        }
+        guard let data = Data(base64Encoded: base64) else {
+          throw SynthesisError.invalid(
+            "A saved image contains unreadable data. The original world is unchanged.")
+        }
+        let png = try WorldImageExport.pngData(data)
+        guard seen.insert(png).inserted else { return }
+        images.append(png)
+      }
+    }
+    if let cover = try store.preference("world-cover:\(worldID)") {
+      try collect(cover, key: "world-cover")
+    }
+    for artwork in try store.recordArtworks(worldID: worldID) {
+      try collect(artwork.image, key: "image")
+    }
+    for kind in ["canvas", "atlas"] {
+      for board in try store.boards(worldID: worldID, kind: kind) {
+        if let data = board.content.data(using: .utf8),
+          let object = try? JSONSerialization.jsonObject(with: data)
+        {
+          try collect(object)
+        }
+      }
+    }
+    for image in try store.entityPropertyImages(worldID: worldID) {
+      try collect(image.data.base64EncodedString(), key: "image")
+    }
+    return images
+  }
   public func exportWorldImages() {
     guard flushEditor() else { return }
     let requestedWorld = worldID
     Task { @MainActor in
       guard await flushCanvas(), worldID == requestedWorld else { return }
       perform {
-        var images: [Data] = []
-        var seen = Set<Data>()
-        func collect(_ value: Any, key: String = "", depth: Int = 0) {
-          guard depth < 64 else { return }
-          if let object = value as? [String: Any] {
-            for (key, child) in object { collect(child, key: key, depth: depth + 1) }
-          } else if let array = value as? [Any] {
-            for child in array { collect(child, depth: depth + 1) }
-          } else if let raw = value as? String {
-            let base64: String
-            if raw.hasPrefix("data:image/"), let comma = raw.firstIndex(of: ",") {
-              base64 = String(raw[raw.index(after: comma)...])
-            } else if key == "image" || key == "world-cover" {
-              base64 = raw
-            } else {
-              return
-            }
-            guard let data = Data(base64Encoded: base64), data.count <= 20_000_000,
-              let bitmap = NSBitmapImageRep(data: data),
-              let png = bitmap.representation(using: .png, properties: [:]),
-              seen.insert(png).inserted
-            else { return }
-            images.append(png)
-          }
-        }
-        if let cover = try store.preference("world-cover:\(worldID)") {
-          collect(cover, key: "world-cover")
-        }
-        for artwork in try store.recordArtworks(worldID: worldID) {
-          collect(artwork.image, key: "image")
-        }
-        for kind in ["canvas", "atlas"] {
-          for board in try store.boards(worldID: worldID, kind: kind) {
-            if let data = board.content.data(using: .utf8),
-              let object = try? JSONSerialization.jsonObject(with: data)
-            {
-              collect(object)
-            }
-          }
-        }
+        let images = try worldImageExportData(worldID: requestedWorld)
         guard !images.isEmpty else {
           show("This world has no saved images to export.")
           return

@@ -4,7 +4,7 @@ import SynthesisCore
 /// Chronology of sourced events. Date labels keep the world's own language; ordering is an
 /// optional position and never invents calendar precision.
 /// How much of each event Timeline shows. Remembered on this device only.
-enum TimelineDensity: String, CaseIterable {
+enum TimelineDensity: String, CaseIterable, Codable {
   case detailed, compact, overview
   var title: String {
     switch self {
@@ -20,7 +20,10 @@ struct TimelineScreen: View {
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var lanes: [ChronologyLane] = []
   @State private var placements: [String: String] = [:]
-  @State private var foldedLanes: Set<String> = []
+  private var foldedLanes: Set<String> {
+    get { studio.timelineView.foldedLanes }
+    nonmutating set { studio.timelineView.foldedLanes = newValue }
+  }
   private var selectedLane: String {
     get { studio.timelineLaneID ?? "" }
     nonmutating set { studio.timelineLaneID = newValue.isEmpty ? nil : newValue }
@@ -35,9 +38,18 @@ struct TimelineScreen: View {
   @State private var laneStart = ""
   @State private var laneEnd = ""
   @State private var events: [WorldEvent] = []
-  @State private var density = TimelineDensity.detailed
-  @State private var foldedEras: Set<String> = []
-  @State private var query = ""
+  private var density: TimelineDensity {
+    get { studio.timelineView.density }
+    nonmutating set { studio.timelineView.density = newValue }
+  }
+  private var foldedEras: Set<String> {
+    get { studio.timelineView.foldedEras }
+    nonmutating set { studio.timelineView.foldedEras = newValue }
+  }
+  private var query: String {
+    get { studio.timelineView.query }
+    nonmutating set { studio.timelineView.query = newValue }
+  }
   @State private var editing: WorldEvent?
   @State private var composing = false
   @State private var newSource = false
@@ -66,8 +78,10 @@ struct TimelineScreen: View {
           icon: Destination.timeline.icon, title: "Timeline",
           detail: "\(events.count) \(events.count == 1 ? "event" : "events")", t: studio.t)
       } trailing: {
-        SearchField(text: $query, placeholder: "Find an era or event", t: studio.t)
-          .frame(minWidth: 120, idealWidth: 220, maxWidth: 220)
+        SearchField(
+          text: $studio.timelineView.query, placeholder: "Find an era or event", t: studio.t
+        )
+        .frame(minWidth: 120, idealWidth: 220, maxWidth: 220)
         BarAction(
           title: "Event", icon: "plus", t: studio.t, primary: true,
           help: "Add an event, using existing lore or a new draft document"
@@ -165,10 +179,6 @@ struct TimelineScreen: View {
       }
     }
     .onAppear {
-      density =
-        (try? studio.store.preference("timeline-density")).flatMap {
-          TimelineDensity(rawValue: $0)
-        } ?? .detailed
       if studio.captureHint == "timeline-compact" { density = .compact }
       if studio.captureHint == "timeline-overview" { density = .overview }
       refresh()
@@ -677,6 +687,10 @@ private struct EventCard: View {
         }
       }
       .accessibilityAction { studio.selectForInspection(.event(event.id)) }
+      .workspaceReferenceDraggable(
+        WorldReference(worldID: studio.worldID, kind: .event, id: event.id),
+        title: event.title, icon: "calendar", studio: studio
+      )
       .accessibilityAction(named: "Edit event", edit)
       .contextMenu {
         Button("Edit…", action: edit)

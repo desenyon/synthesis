@@ -238,6 +238,14 @@ struct CanvasBoardContent {
       "hiddenRelations": content.hiddenRelations, "records": recordPayload(),
       "relations": relationPayload(),
     ]
+    if let boardID,
+      let raw = try? studio.store.preference("canvas-selection:\(worldID):\(boardID)"),
+      let ids = try? JSONDecoder().decode([String].self, from: Data(raw.utf8))
+    {
+      payload["selectedRecordIDs"] = Array(ids.prefix(500)).filter { id in
+        studio.records.contains { $0.id == id && $0.worldID == worldID }
+      }
+    }
     payload["scene"] = content.scene ?? NSNull()
     if content.scene == nil, let legacy = content.legacy,
       let data = try? JSONEncoder().encode(legacy),
@@ -583,6 +591,13 @@ struct CanvasBoardContent {
     case "selection":
       selection = message["recordIDs"] as? [String] ?? []
       selectionWithArt = message["withArt"] as? [String] ?? []
+      if writable, let boardID {
+        studio.perform {
+          try studio.store.setPreference(
+            "canvas-selection:\(worldID):\(boardID)",
+            value: String(decoding: JSONEncoder().encode(selection), as: UTF8.self))
+        }
+      }
       if studio.destination == .canvas && studio.selectedRecord == nil {
         studio.followInspectionSelection()
       }

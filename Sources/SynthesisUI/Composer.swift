@@ -19,6 +19,10 @@ struct UnifiedComposer: View {
   @State private var contextPicker = false
   @State private var inspectingContext = false
   @State private var expanded = false
+  @State private var recipesPresented = false
+  @State private var recipesWorldID = ""
+  @State private var saveRecipe = false
+  @State private var recipeSeed = ""
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var mentionQuery: String?
   @State private var mentionIndex = 0
@@ -62,6 +66,11 @@ struct UnifiedComposer: View {
     }
     .animation(reduceMotion ? nil : .easeOut(duration: ComposerMetric.transition), value: focused)
     .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: expanded)
+    .workspaceReferenceDrop(studio: studio) { source in
+      saveTask?.cancel()
+      commitDraft()
+      return studio.appendWorkspaceReference(source.reference)
+    }
     .popover(isPresented: $contextPicker) {
       AssistantContextPanel(studio: studio, prompt: text, attachments: true)
     }
@@ -73,6 +82,12 @@ struct UnifiedComposer: View {
         handle.insertReference(title: record.title, id: record.id)
         referencePicker = false
       }
+    }
+    .studioSheet(isPresented: $recipesPresented) {
+      PromptRecipesSheet(
+        studio: studio, worldID: recipesWorldID,
+        initialInstructions: recipeSeed, createOnOpen: saveRecipe,
+        close: { recipesPresented = false })
     }
     .onAppear {
       loadedWorld = studio.worldID
@@ -340,6 +355,9 @@ struct UnifiedComposer: View {
         text = studio.draft
       }
       Divider()
+      Button("Prompt recipes…") { openRecipes() }
+      Button("Save draft as recipe…") { openRecipes(saveDraft: true) }.disabled(empty)
+      Divider()
       Button("Assistant settings…") {
         commitDraft()
         studio.openAssistantSettings()
@@ -423,6 +441,9 @@ struct UnifiedComposer: View {
         }
       }
       Divider()
+      Button("Prompt recipes…") { openRecipes() }
+      Button("Save draft as recipe…") { openRecipes(saveDraft: true) }.disabled(empty)
+      Divider()
       MenuSection("Guided prompts") {
         ForEach(Vocabulary.categories + ["History", "Story threads"], id: \.self) { topic in
           Button(topic) {
@@ -462,6 +483,14 @@ struct UnifiedComposer: View {
     if studio.commitComposer(text: text, worldID: loadedWorld, replacing: syncedDraft) {
       syncedDraft = text
     }
+  }
+  private func openRecipes(saveDraft: Bool = false) {
+    saveTask?.cancel()
+    commitDraft()
+    recipeSeed = saveDraft ? text : ""
+    recipesWorldID = studio.worldID
+    saveRecipe = saveDraft
+    recipesPresented = true
   }
   private func send() {
     guard studio.mode == .assisted, !studio.busy else { return }

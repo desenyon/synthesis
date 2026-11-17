@@ -1,5 +1,16 @@
 # Decisions
 
+## 2026-11-17 — checkpoint and release gate (owner-protected)
+
+The owner requested saving all current parallel work, including errors, committing and pushing main, and stopping so a new chat can use the configured 50-agent limit. All 394 expansion requirements remain individually accountable. No new release or tag is authorized; the owner requires every item finished before another release. Explicit publication approval is still required afterward. Existing v0.0.1–v0.0.3 releases remain untouched. This supersedes earlier release authorization for the current development pass.
+
+## 2026-11-17 — connected foundation choices
+
+- Session snapshots store device-local presentation addresses and unsent drafts; they cannot resume requests or grant AI/canon permission. Explicit startup choice wins over the saved view; invalid sources are reconciled individually.
+- Structured entity property canon is a frozen reviewed snapshot, separate from prose canon. Editing a schema or inherited default creates working changes without rewriting accepted properties. Formulas are a bounded arithmetic grammar.
+- Conversation branches copy the selected prefix with new message IDs and source lineage. Proposal authority stays in the original conversation. Recipes are world-owned instructions, not permission overrides.
+- Cross-workspace transfers carry bounded addresses and resolve current same-world sources. Proposal context follows before/after provenance and implicit event sources so exclusions still apply. Generic editor/Canvas destinations remain unfinished at this checkpoint.
+
 ## 2026-11-12 — owner-protected product decisions
 
 - Product name: Synthesis. A native macOS application; user allows GPUI or another native implementation.

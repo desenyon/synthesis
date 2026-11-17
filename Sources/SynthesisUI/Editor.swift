@@ -105,7 +105,10 @@ struct EditorScreen: View {
         if placement == .main && !studio.focusMode { DocumentTabBar(studio: studio) }
         if record.kind == "entity" && !studio.focusMode { entityTabs }
         HStack(spacing: 0) {
-          if record.kind == "entity" && mechanicsVisible {
+          if record.kind == "entity" && tab == .properties {
+            EntityPropertiesPage(studio: studio, record: record).frame(
+              maxWidth: .infinity, maxHeight: .infinity)
+          } else if record.kind == "entity" && mechanicsVisible {
             RulesLab(studio: studio, record: record).frame(
               maxWidth: .infinity, maxHeight: .infinity)
           } else if record.kind == "entity" && sectionsVisible {
@@ -244,16 +247,18 @@ struct EditorScreen: View {
           .layoutPriority(1)
       } trailing: {
         RecordFavoriteButton(studio: studio, record: record)
-        if record.state == "canon" {
-          StateBadge(state: "canon", t: studio.t).padding(.horizontal, 6)
-            .help("This revision is accepted canon. Editing starts a new draft.")
-        } else {
-          BarAction(
-            title: "Review for canon", icon: "checkmark.seal", t: studio.t,
-            help: record.kind == "capture"
-              ? "Turn this idea into a document before canon review"
-              : "Compare this draft with accepted canon and decide"
-          ) { if save() { panel = .canon } }.disabled(record.kind == "capture")
+        if tab != .properties {
+          if record.state == "canon" {
+            StateBadge(state: "canon", t: studio.t).padding(.horizontal, 6)
+              .help("This revision is accepted canon. Editing starts a new draft.")
+          } else {
+            BarAction(
+              title: "Review for canon", icon: "checkmark.seal", t: studio.t,
+              help: record.kind == "capture"
+                ? "Turn this idea into a document before canon review"
+                : "Compare this draft with accepted canon and decide"
+            ) { if save() { panel = .canon } }.disabled(record.kind == "capture")
+          }
         }
         moreActions
         IconButton(
@@ -267,10 +272,12 @@ struct EditorScreen: View {
     IconMenu(icon: "ellipsis", label: "More actions", t: studio.t) {
       if placement == .main { SplitRecordAction(studio: studio, record: record) }
       if placement == .beside && record.state != "canon" {
-        Button("Review for canon") { if save() { panel = .canon } }
-          .disabled(record.kind == "capture")
+        Button(tab == .properties ? "Review writing for canon" : "Review for canon") {
+          if save() { panel = .canon }
+        }
+        .disabled(record.kind == "capture")
       }
-      Button("Revision history") { openHistory() }
+      Button(tab == .properties ? "Writing history" : "Revision history") { openHistory() }
       if record.kind == "capture" {
         Button("Turn into a document") {
           if save() {
@@ -311,7 +318,7 @@ struct EditorScreen: View {
 
   private var entityTabs: some View {
     ContentHeader {
-      FilterChip(title: "Overview", selected: !sectionsVisible && !mechanicsVisible, t: studio.t) {
+      FilterChip(title: "Overview", selected: tab == .overview, t: studio.t) {
         if save() {
           studio.openRecordTab(.overview, recordID: record.id)
         }
@@ -323,6 +330,9 @@ struct EditorScreen: View {
         if save() {
           studio.openRecordTab(.sections, recordID: record.id)
         }
+      }
+      FilterChip(title: "Properties", selected: tab == .properties, t: studio.t) {
+        if save() { studio.openRecordTab(.properties, recordID: record.id) }
       }
       FilterChip(title: "Mechanics", selected: mechanicsVisible, t: studio.t) {
         if save() { studio.openRecordTab(.mechanics, recordID: record.id) }

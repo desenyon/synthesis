@@ -1,0 +1,305 @@
+[0/1] Planning build
+Building for debugging...
+[0/13] Write sources
+[5/13] Copying Migrations
+[6/13] Copying Assets
+[7/14] Copying CanvasBundle
+[8/14] Write swift-version--1AB21518FC5DEDBE.txt
+[10/28] Compiling SynthesisCore Retrieval.swift
+[11/29] Compiling SynthesisCore PromptRecipes.swift
+[12/29] Compiling SynthesisCore QuickCapture.swift
+[13/29] Compiling SynthesisCore ConversationToolsValidation.swift
+[14/29] Compiling SynthesisCore EntityFormula.swift
+[15/29] Compiling SynthesisCore Portability.swift
+[16/29] Compiling SynthesisCore AssistantContext.swift
+[17/29] Compiling SynthesisCore ConversationBranches.swift
+[18/29] Compiling SynthesisCore WorkspaceStore.swift
+[19/41] Compiling SynthesisCore WorldArchive.swift
+[20/43] Compiling SynthesisCore EntitySchemas.swift
+[21/43] Compiling SynthesisCore LoreSearch.swift
+[22/43] Compiling SynthesisCore EntityPropertyText.swift
+[23/43] Compiling SynthesisCore EntitySchemaModels.swift
+[24/43] Emitting module SynthesisCore
+[25/48] Compiling SynthesisCore WorldSummary.swift
+[26/48] Compiling SynthesisCore WhatIfBranches.swift
+[27/48] Compiling SynthesisCore WorkspaceActions.swift
+[28/48] Compiling SynthesisCore WorkspaceRevisions.swift
+[29/48] Compiling SynthesisCore WorldActivity.swift
+[30/48] Compiling SynthesisCore WorldChangeHistory.swift
+[31/48] Compiling SynthesisCore WorldChecks.swift
+[32/48] Compiling SynthesisCore EditorJournal.swift
+[33/48] Compiling SynthesisCore Preferences.swift
+[34/48] Compiling SynthesisCore RecordSections.swift
+[35/48] Compiling SynthesisCore RelationshipPairs.swift
+[36/48] Compiling SynthesisCore Chronology.swift
+[37/48] Compiling SynthesisCore CreativeComponents.swift
+[38/48] Compiling SynthesisCore Rules.swift
+[39/48] Compiling SynthesisCore TechniqueTree.swift
+[40/48] Compiling SynthesisCore AgentEngine.swift
+[41/48] Compiling SynthesisCore AtlasMaps.swift
+[42/48] Compiling SynthesisCore Proposals.swift
+[43/48] Compiling SynthesisCore RecordArtwork.swift
+[44/151] Compiling SynthesisUI AtlasMapEditor.swift
+[45/151] Compiling SynthesisUI AtlasViewSession.swift
+[46/151] Compiling SynthesisUI CanvasHost.swift
+[47/153] Compiling SynthesisUI AIActivity.swift
+[48/153] Compiling SynthesisUI ActivityCaptureFixtures.swift
+[49/153] Compiling SynthesisUI Artwork.swift
+[50/153] Emitting module SynthesisCoreTests
+[51/153] Compiling SynthesisUI AssistantContextPanel.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AgentTests.swift:53:15: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 51 |     let world = try store.createWorld(name: "Chosen universe")
+ 52 |     let foreign = try store.createWorld(name: "Private other universe")
+ 53 |     try store.createRecord(worldID: foreign.id, title: "PRIVATE_SENTINEL", body: "Never included")
+    |               `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 54 |     let chat = try store.createConversation(worldID: world.id)
+ 55 |     let transport = CountingTransport()
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[52/153] Compiling SynthesisUI Atlas.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AgentTests.swift:53:15: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 51 |     let world = try store.createWorld(name: "Chosen universe")
+ 52 |     let foreign = try store.createWorld(name: "Private other universe")
+ 53 |     try store.createRecord(worldID: foreign.id, title: "PRIVATE_SENTINEL", body: "Never included")
+    |               `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 54 |     let chat = try store.createConversation(worldID: world.id)
+ 55 |     let transport = CountingTransport()
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[53/153] Compiling SynthesisUI AtlasContextCaptureFixtures.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AgentTests.swift:53:15: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 51 |     let world = try store.createWorld(name: "Chosen universe")
+ 52 |     let foreign = try store.createWorld(name: "Private other universe")
+ 53 |     try store.createRecord(worldID: foreign.id, title: "PRIVATE_SENTINEL", body: "Never included")
+    |               `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 54 |     let chat = try store.createConversation(worldID: world.id)
+ 55 |     let transport = CountingTransport()
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[54/153] Compiling SynthesisCoreTests WorldCheckTests.swift
+[55/153] Compiling SynthesisCoreTests WorldSummaryTests.swift
+[56/153] Compiling SynthesisUI Graph.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:14:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 12 |       worldID: world.id, parentID: entity.id, title: "Childhood", body: "Grew up at sea")
+ 13 |     let neighbor = try store.createRecord(worldID: world.id, title: "Harbor", kind: "entity")
+ 14 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:17:17: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+ 17 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+    |                 `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 18 |     }
+ 19 |     var options = AssistantContextOptions()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:71:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 69 |     let hidden = try store.createRecord(
+ 70 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 71 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:73:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 71 |     try store.addRelation(
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 74 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 75 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:106:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+104 |     let world = try store.createWorld(name: "Many boards")
+105 |     for index in 0..<27 {
+106 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+107 |     }
+108 |     let boards = try store.assistantBoards(worldID: world.id)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:188:17: warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+186 |     let world = try store.createWorld(name: "Many histories")
+187 |     for index in 0..<65 {
+188 |       try store.createChronologyLane(worldID: world.id, name: "Period \(index)", kind: "period")
+    |                 `- warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+189 |     }
+190 |     let lane = try #require(store.chronologyLanes(worldID: world.id).last)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ChronologyTests.swift:29:17: warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 27 |     }
+ 28 |     for change in proposal.changes {
+ 29 |       try store.resolveChange(
+    |                 `- warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 30 |         worldID: world.id, proposalID: proposal.id, changeID: change.id, accept: true,
+ 31 |         confirmation: proposal.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[57/153] Compiling SynthesisUI GraphDetail.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:14:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 12 |       worldID: world.id, parentID: entity.id, title: "Childhood", body: "Grew up at sea")
+ 13 |     let neighbor = try store.createRecord(worldID: world.id, title: "Harbor", kind: "entity")
+ 14 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:17:17: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+ 17 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+    |                 `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 18 |     }
+ 19 |     var options = AssistantContextOptions()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:71:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 69 |     let hidden = try store.createRecord(
+ 70 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 71 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:73:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 71 |     try store.addRelation(
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 74 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 75 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:106:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+104 |     let world = try store.createWorld(name: "Many boards")
+105 |     for index in 0..<27 {
+106 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+107 |     }
+108 |     let boards = try store.assistantBoards(worldID: world.id)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:188:17: warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+186 |     let world = try store.createWorld(name: "Many histories")
+187 |     for index in 0..<65 {
+188 |       try store.createChronologyLane(worldID: world.id, name: "Period \(index)", kind: "period")
+    |                 `- warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+189 |     }
+190 |     let lane = try #require(store.chronologyLanes(worldID: world.id).last)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ChronologyTests.swift:29:17: warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 27 |     }
+ 28 |     for change in proposal.changes {
+ 29 |       try store.resolveChange(
+    |                 `- warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 30 |         worldID: world.id, proposalID: proposal.id, changeID: change.id, accept: true,
+ 31 |         confirmation: proposal.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[58/153] Compiling SynthesisUI CreativeComponents.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:14:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 12 |       worldID: world.id, parentID: entity.id, title: "Childhood", body: "Grew up at sea")
+ 13 |     let neighbor = try store.createRecord(worldID: world.id, title: "Harbor", kind: "entity")
+ 14 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:17:17: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+ 17 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+    |                 `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 18 |     }
+ 19 |     var options = AssistantContextOptions()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:71:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 69 |     let hidden = try store.createRecord(
+ 70 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 71 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:73:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 71 |     try store.addRelation(
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 74 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 75 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:106:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+104 |     let world = try store.createWorld(name: "Many boards")
+105 |     for index in 0..<27 {
+106 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+107 |     }
+108 |     let boards = try store.assistantBoards(worldID: world.id)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:188:17: warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+186 |     let world = try store.createWorld(name: "Many histories")
+187 |     for index in 0..<65 {
+188 |       try store.createChronologyLane(worldID: world.id, name: "Period \(index)", kind: "period")
+    |                 `- warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+189 |     }
+190 |     let lane = try #require(store.chronologyLanes(worldID: world.id).last)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ChronologyTests.swift:29:17: warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 27 |     }
+ 28 |     for change in proposal.changes {
+ 29 |       try store.resolveChange(
+    |                 `- warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 30 |         worldID: world.id, proposalID: proposal.id, changeID: change.id, accept: true,
+ 31 |         confirmation: proposal.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[59/153] Compiling SynthesisUI EntityValueEditor.swift
+[60/153] Compiling SynthesisUI Favorites.swift
+[61/153] Compiling SynthesisUI FloatingCompanion.swift
+[62/153] Compiling SynthesisUI CanvasModels.swift
+[63/153] Compiling SynthesisUI CaptureFixtures.swift
+[64/153] Compiling SynthesisUI CommandCatalog.swift
+[65/153] Compiling SynthesisUI Conversation.swift
+[66/153] Compiling SynthesisUI ConversationTools.swift
+[67/153] Compiling SynthesisUI ConversationToolsCaptureFixtures.swift
+[68/153] Compiling SynthesisUI CommandPalette.swift
+[69/153] Compiling SynthesisUI Components.swift
+[70/153] Compiling SynthesisUI Composer.swift
+[71/153] Compiling SynthesisUI FocusCaptureFixtures.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ConversationToolsTests.swift:174:53: error: overlapping accesses to 'malformed.tables', but modification requires exclusive access; consider copying to a local variable [#ExclusivityViolation]
+172 |     #expect(throws: Error.self) { try store.importWorldArchive(JSONEncoder().encode(malformed)) }
+173 |     malformed = try JSONDecoder().decode(WorldArchive.self, from: bytes)
+174 |     malformed.tables["conversation_message_origins"]?[0]["source_message_id"] =
+    |                                                     `- error: overlapping accesses to 'malformed.tables', but modification requires exclusive access; consider copying to a local variable [#ExclusivityViolation]
+175 |       malformed.tables["conversation_message_origins"]?[0]["message_id"]
+    |                                                       `- note: conflicting access is here
+176 |     #expect(throws: Error.self) { try store.importWorldArchive(JSONEncoder().encode(malformed)) }
+177 |     #expect(try store.worlds().count == 2)
+
+[#ExclusivityViolation]: <https://docs.swift.org/compiler/documentation/diagnostics/exclusivity-violation>
+[72/153] Compiling SynthesisUI FocusWorkspace.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ConversationToolsTests.swift:174:53: error: overlapping accesses to 'malformed.tables', but modification requires exclusive access; consider copying to a local variable [#ExclusivityViolation]
+172 |     #expect(throws: Error.self) { try store.importWorldArchive(JSONEncoder().encode(malformed)) }
+173 |     malformed = try JSONDecoder().decode(WorldArchive.self, from: bytes)
+174 |     malformed.tables["conversation_message_origins"]?[0]["source_message_id"] =
+    |                                                     `- error: overlapping accesses to 'malformed.tables', but modification requires exclusive access; consider copying to a local variable [#ExclusivityViolation]
+175 |       malformed.tables["conversation_message_origins"]?[0]["message_id"]
+    |                                                       `- note: conflicting access is here
+176 |     #expect(throws: Error.self) { try store.importWorldArchive(JSONEncoder().encode(malformed)) }
+177 |     #expect(try store.worlds().count == 2)
+
+[#ExclusivityViolation]: <https://docs.swift.org/compiler/documentation/diagnostics/exclusivity-violation>
+[73/153] Compiling SynthesisUI GlobalNavigationCaptureFixtures.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ConversationToolsTests.swift:174:53: error: overlapping accesses to 'malformed.tables', but modification requires exclusive access; consider copying to a local variable [#ExclusivityViolation]
+172 |     #expect(throws: Error.self) { try store.importWorldArchive(JSONEncoder().encode(malformed)) }
+173 |     malformed = try JSONDecoder().decode(WorldArchive.self, from: bytes)
+174 |     malformed.tables["conversation_message_origins"]?[0]["source_message_id"] =
+    |                                                     `- error: overlapping accesses to 'malformed.tables', but modification requires exclusive access; consider copying to a local variable [#ExclusivityViolation]
+175 |       malformed.tables["conversation_message_origins"]?[0]["message_id"]
+    |                                                       `- note: conflicting access is here
+176 |     #expect(throws: Error.self) { try store.importWorldArchive(JSONEncoder().encode(malformed)) }
+177 |     #expect(try store.worlds().count == 2)
+
+[#ExclusivityViolation]: <https://docs.swift.org/compiler/documentation/diagnostics/exclusivity-violation>
+[74/153] Emitting module SynthesisUI
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+error: fatalError

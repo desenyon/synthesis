@@ -62,6 +62,8 @@ extension Studio {
   func editorHandle(for record: LoreRecord) -> EditorHandle {
     if let handle = documentEditors[record.id] { return handle }
     let handle = EditorHandle()
+    handle.pendingPosition = editorPositions[record.id]
+    handle.positionChanged = { [weak self] in self?.queueWorkspaceSessionSave() }
     documentEditors[record.id] = handle
     return handle
   }
@@ -91,6 +93,7 @@ extension Studio {
     }
   }
   func retainDocument(_ record: LoreRecord) {
+    guard !restoringSession else { return }
     guard record.worldID == worldID, records.contains(where: { $0.id == record.id }) else { return }
     perform {
       if documentWorldID != worldID { try syncDocumentSession() }

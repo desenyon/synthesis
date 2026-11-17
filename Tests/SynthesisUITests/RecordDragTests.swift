@@ -41,7 +41,11 @@ import Testing
   @Test func providerCarriesOnlyBoundedLocalAddresses() async throws {
     let (studio, record, _) = try fixture()
     let provider = studio.beginRecordDrag(record, monitor: false)
-    #expect(provider.registeredTypeIdentifiers == [RecordDragAddress.type.identifier])
+    #expect(
+      Set(provider.registeredTypeIdentifiers)
+        == Set([
+          RecordDragAddress.type.identifier, WorkspaceReferenceDrag.type.identifier,
+        ]))
     let payload = try await data(provider)
     let address = try RecordDragAddress.decode(payload)
     #expect(address.worldID == record.worldID && address.recordID == record.id)

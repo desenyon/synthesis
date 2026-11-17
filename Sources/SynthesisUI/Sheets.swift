@@ -8,9 +8,14 @@ struct StudioSheet: View {
   @State private var kind = "lore"
   @State private var category = ""
   @State private var worldName = ""
+  @State private var entityTypeID: String?
+  @State private var entityTemplateID: String?
+  @State private var managingEntityTypes = false
+  @State private var creationScope: EntitySchemaScope
   init(studio: Studio, sheet: Studio.Sheet) {
     self.studio = studio
     self.sheet = sheet
+    _creationScope = State(initialValue: EntitySchemaScope(worldID: studio.worldID))
     _kind = State(initialValue: studio.newRecordKind)
     _category = State(initialValue: studio.libraryCategory ?? studio.worldDefaults.entityCategory)
     _worldName = State(initialValue: studio.world?.name ?? "")
@@ -107,7 +112,28 @@ struct StudioSheet: View {
       ("entity", "Entity", "circle.hexagongrid", "A character, place, faction…"),
       ("capture", "Idea", "lightbulb", "A loose thought for later"),
     ]
+    let types =
+      creationScope.worldID == studio.worldID
+      ? (try? studio.store.entityTypes(worldID: creationScope.worldID)) ?? [] : []
+    let templates =
+      creationScope.worldID == studio.worldID
+      ? (try? studio.store.entityTemplates(worldID: creationScope.worldID)) ?? [] : []
     let create = {
+      guard (try? creationScope.requireCurrentWorld(studio.worldID)) != nil else { return }
+      if kind == "entity", let entityTypeID {
+        guard studio.flushEditor() else { return }
+        studio.perform {
+          let record = try studio.store.createTypedEntity(
+            worldID: creationScope.worldID, typeID: entityTypeID, title: name,
+            templateID: entityTemplateID
+          )
+          try studio.reload()
+          studio.openRecord(record)
+          studio.recordTabs[record.id] = .properties
+          studio.sheet = nil
+        }
+        return
+      }
       studio.createRecord(
         title: name, kind: kind,
         category: kind == "entity" ? category : (kind == "capture" ? "Ideas" : ""))
@@ -116,6 +142,9 @@ struct StudioSheet: View {
       title: "New record", subtitle: "Saved as a draft. A title is optional.", t: studio.t,
       close: close
     ) {
+      if let message = creationScope.mismatchMessage(activeWorldID: studio.worldID) {
+        Text(message).font(.studio(.caption)).foregroundStyle(studio.t.danger)
+      }
       HStack(spacing: 8) {
         ForEach(kinds, id: \.0) { item in
           Button {
@@ -145,23 +174,64 @@ struct StudioSheet: View {
         t: studio.t, autofocus: true, submit: create)
       if kind == "entity" {
         VStack(alignment: .leading, spacing: 6) {
-          Text("Type").font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary)
-          FlowLayout(spacing: 6) {
-            ForEach(Vocabulary.categories, id: \.self) { item in
-              FilterChip(title: item, selected: category == item, t: studio.t) {
-                category = category == item ? "" : item
+          HStack {
+            Text("Type").font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary)
+            Spacer()
+            Button("Manage types & templates") { managingEntityTypes = true }.buttonStyle(
+              QuietButton(t: studio.t, role: .ghost))
+          }
+          if !types.isEmpty {
+            PlainMenu(flexible: true) {
+              Button("Freeform category") {
+                entityTypeID = nil
+                entityTemplateID = nil
               }
+              ForEach(types) { type in
+                Button(type.name) {
+                  entityTypeID = type.id
+                  entityTemplateID = nil
+                  category = type.name
+                }
+              }
+            } label: {
+              StudioLabel(
+                types.first { $0.id == entityTypeID }?.name ?? "Freeform category",
+                icon: "chevron.down")
             }
           }
-          FormField(placeholder: "Or enter your own type", text: $category, t: studio.t)
-            .accessibilityLabel("Entity type")
+          if let entityTypeID {
+            PlainMenu {
+              Button("Blank profile") { entityTemplateID = nil }
+              ForEach(templates.filter { $0.typeID == entityTypeID }) { template in
+                Button(template.name) { entityTemplateID = template.id }
+              }
+            } label: {
+              StudioLabel(
+                templates.first { $0.id == entityTemplateID }?.name ?? "Blank profile",
+                icon: "chevron.down")
+            }
+          } else {
+            FlowLayout(spacing: 6) {
+              ForEach(Vocabulary.categories, id: \.self) { item in
+                FilterChip(title: item, selected: category == item, t: studio.t) {
+                  category = category == item ? "" : item
+                }
+              }
+            }
+            FormField(placeholder: "Or enter your own type", text: $category, t: studio.t)
+              .accessibilityLabel("Entity type")
+          }
         }
       }
     } footer: {
       Spacer()
       Button("Cancel", action: close).buttonStyle(QuietButton(t: studio.t, role: .ghost))
       Button("Create draft", action: create).buttonStyle(QuietButton(t: studio.t, primary: true))
-        .keyboardShortcut(.defaultAction)
+        .keyboardShortcut(.defaultAction).disabled(creationScope.worldID != studio.worldID)
+    }
+    .studioSheet(isPresented: $managingEntityTypes) {
+      EntityTypesSheet(
+        studio: studio, worldID: creationScope.worldID, close: { managingEntityTypes = false })
     }
   }
   private var rename: some View {

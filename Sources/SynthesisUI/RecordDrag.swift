@@ -21,6 +21,8 @@ struct RecordDragAddress: Codable, Equatable, Sendable {
       completion(data, nil)
       return nil
     }
+    try WorkspaceReferenceDrag.register(
+      WorldReference(worldID: worldID, kind: .record, id: recordID), on: provider)
     return provider
   }
   static func decode(_ data: Data) throws -> Self {
@@ -145,6 +147,33 @@ extension View {
   func recordDraggable(_ record: LoreRecord?, studio: Studio) -> some View {
     modifier(RecordDragModifier(studio: studio, record: record))
   }
+  /// Parent drop regions do not sit on top of child inputs. A composer keeps its own typed
+  /// reference receiver, while empty canvas space retains the existing record-placement action.
+  func recordDropDestination(
+    studio: Studio, enabled: Bool = true, target: @escaping (CGPoint) -> RecordDropTarget
+  ) -> some View {
+    modifier(RecordDropDestination(studio: studio, enabled: enabled, target: target))
+  }
+}
+
+private struct RecordDropDestination: ViewModifier {
+  @ObservedObject var studio: Studio
+  let enabled: Bool
+  var target: (CGPoint) -> RecordDropTarget
+  @State private var targeted = false
+  func body(content: Content) -> some View {
+    content.onDrop(
+      of: [RecordDragAddress.type],
+      delegate: RecordDropReceiver(
+        studio: studio, targeted: $targeted, target: target, enabled: enabled)
+    )
+    .overlay {
+      if targeted {
+        RoundedRectangle(cornerRadius: Metric.radius).strokeBorder(studio.t.accent, lineWidth: 1)
+          .allowsHitTesting(false).accessibilityHidden(true)
+      }
+    }
+  }
 }
 
 /// Mounted only for an internal record drag. Normal editor and WebKit input is untouched.
@@ -182,14 +211,16 @@ private struct RecordDropReceiver: DropDelegate {
   let studio: Studio
   @Binding var targeted: Bool
   let target: (CGPoint) -> RecordDropTarget
+  var enabled = true
   func validateDrop(info: DropInfo) -> Bool {
-    studio.recordDrag != nil && info.hasItemsConforming(to: [RecordDragAddress.type])
+    enabled && studio.recordDrag != nil && info.hasItemsConforming(to: [RecordDragAddress.type])
   }
   func dropEntered(info: DropInfo) { targeted = true }
   func dropExited(info: DropInfo) { targeted = false }
   func dropUpdated(info: DropInfo) -> DropProposal? { DropProposal(operation: .copy) }
   func performDrop(info: DropInfo) -> Bool {
     targeted = false
+    guard enabled else { return false }
     let providers = info.itemProviders(for: [RecordDragAddress.type])
     guard providers.count == 1, let provider = providers.first, let drag = studio.recordDrag else {
       return false

@@ -67,7 +67,8 @@ actor RecordingResponse: ModelTransport {
     let studio = try Studio(store: store, transport: transport)
     let selected = try store.createRecord(
       worldID: studio.worldID, title: "Chosen source", body: "Relevant words")
-    try store.createRecord(worldID: studio.worldID, title: "OMITTED_RECORD", body: "PRIVATE_BODY")
+    _ = try store.createRecord(
+      worldID: studio.worldID, title: "OMITTED_RECORD", body: "PRIVATE_BODY")
     try studio.reload()
     studio.updateContext {
       $0.recordIDs = [selected.id]

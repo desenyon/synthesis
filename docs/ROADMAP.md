@@ -2,21 +2,21 @@
 
 ## Execution order — 2026-11-17
 
-The owner's latest instruction is to implement **all 394 requirements individually**, not another selected subset. Use [EXPANSION](EXPANSION.md) for numerical order and evidence. Shared prerequisites may be implemented with their first dependent item; never count partial systems as done. The older foundation phases below describe dependencies, not permission to omit items.
+The owner's latest instruction is to implement **all 394 requirements individually**, not another selected subset. The latest owner instruction authorizes parallel agents on independent requirements. Use [EXPANSION](EXPANSION.md) for item-level acceptance and evidence. Shared prerequisites may be implemented with their first dependent item; never count partial systems as done. The older foundation phases below describe dependencies, not permission to omit items.
 
 ## Current — expansion brief, connected slices
 
-The owner's 2026-11-16 expansion brief describes 394 improvements and explicitly prioritizes shared foundations over simultaneous feature expansion. Keep the approved native shell and subscription-only/canon safeguards.
+The owner's 2026-11-16 expansion brief describes 394 improvements. Shared foundations remain essential; the 2026-11-17 execution update permits independent work in parallel. Keep the approved native shell and subscription-only/canon safeguards.
 
 - **Implemented on main, unreleased:** reference-guided shared composer, world-scoped attachments, local request preview, scope/exclusions and core-enforced Explore/Propose. Details and verification: [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md), [STATE](STATE.md).
 - **2026-11-17 refinement:** the shared composer follows the accepted app controls and typography, with an adaptive toolbar, readable writing surface and saved-shortcut feedback. The sidebar and navigation remain unchanged.
 - **Verified #1–#32:** shared visual foundation, contextual tools/inspectors, navigation history, saved layouts, Dashboard, semantic Graph zoom, retained document tabs, operation feedback, panel resizing, selection, universal/structured search, customizable navigation, Favorites, durable activity, split editing, local record drag context-preserving Atlas navigation and consistent global Back/Forward across tool subpages, shared keyboard-first creation/linking, custom startup homes and temporary Focus workspaces. Evidence is linked per item.
-- **Next:** #33 full session restoration, then the first unverified numbered item in EXPANSION. Typed entity attributes/facts remain required at their numbered entries; do not skip earlier requirements to reach them.
+- **Saved checkpoint:** #33 full session restoration, #34 universal quick capture, #43–44 conversation branching and recipes, #61–66 typed entity schemas/templates await final visual acceptance. #35 references have functioning core/composer paths but incomplete Canvas/editor destinations and context-budget accounting. All workers stopped at the owner's request for a new chat. Final check: 334 native tests / 81 suites and optimized build;18 Canvas tests/typecheck. Resume from [HANDOFF](HANDOFF.md), preserving the exact [open-error list](verification/expansion-parallel-checkpoint/README.md).
 - **Following:** shared temporal validity and world-state queries across Timeline, Atlas and Graph; richer multi-step proposal previews; live Canvas components; geography layers and chronology dependencies.
 - **Later:** small reproducible rule simulations with explicit assumptions, three-way branch merges, modules and collaboration. These are planned, not capabilities claimed by the composer work.
 - Preserve the existing command palette, rich editor, reviewed operations, technique trees, Atlas regions and what-if worlds while extending them. Context is single-shot retrieval; autonomous multi-step tool execution and immutable request snapshots remain open.
 
-No new release is authorized for this slice. Foreground composer/VoiceOver/animation walkthroughs remain separate from background capture and state tests.
+No new release or tag is authorized. The owner requires all 394 expansion items completed before another release, with explicit publication approval still required. Foreground composer/VoiceOver/animation walkthroughs remain separate from background capture and state tests.
 
 ## Done
 

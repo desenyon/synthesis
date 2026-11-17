@@ -1,0 +1,779 @@
+[0/1] Planning build
+Building for debugging...
+[0/5] Write sources
+[1/5] Write swift-version--1AB21518FC5DEDBE.txt
+[3/5] Emitting module SynthesisCoreTests
+[4/5] Compiling SynthesisCoreTests CreativeComponentTests.swift
+[4/6] Write Objects.LinkFileList
+[5/6] Linking SynthesisPackageTests
+Build complete! (1.72s)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite DocumentTabTests started.
+◇ Suite InspectionTests started.
+◇ Suite RecordDragTests started.
+◇ Suite InteractionTests started.
+◇ Suite WorkspaceSessionTests started.
+◇ Suite WhatIfBranchTests started.
+◇ Suite RecordSectionTests started.
+◇ Suite ImageGenerationTests started.
+◇ Suite WorldSummaryTests started.
+◇ Suite GlobalNavigationTests started.
+◇ Suite QuickCaptureModelTests started.
+◇ Suite SidebarTests started.
+◇ Suite LayoutTests started.
+◇ Suite AgentRecoveryTests started.
+◇ Suite AdvancedSearchTests started.
+◇ Suite DashboardDataTests started.
+◇ Suite KeyboardCreationTests started.
+◇ Suite QuickCaptureTests started.
+◇ Suite ConversationToolsUITests started.
+◇ Suite HarnessTests started.
+◇ Suite MechanicsTests started.
+◇ Suite UniversalPaletteTests started.
+◇ Suite OnboardingTests started.
+◇ Suite WorldActivityNavigationTests started.
+◇ Suite WorldCheckTests started.
+◇ Suite OperationFeedbackTests started.
+◇ Suite AtlasRegionTests started.
+◇ Suite FavoritesTests started.
+◇ Suite SearchScaleTests started.
+◇ Suite WorldArchiveTests started.
+◇ Suite SplitWorkspaceTests started.
+◇ Suite MarkdownExportTests started.
+◇ Suite SidebarCustomizationTests started.
+◇ Suite AgentTests started.
+◇ Suite CreativeComponentTests started.
+◇ Suite WorldChangeHistoryTests started.
+◇ Suite ChronologyTests started.
+◇ Suite AtlasViewSessionTests started.
+◇ Suite AtlasAuthoringTests started.
+◇ Suite TechniqueTreeTests started.
+◇ Suite ComposerLayoutTests started.
+◇ Suite FocusWorkspaceTests started.
+◇ Suite WorkspaceTests started.
+◇ Suite GraphDetailTests started.
+◇ Suite RecordSectionBoundaryTests started.
+◇ Suite GraphScaleTests started.
+◇ Suite PreferenceBehaviorTests started.
+◇ Suite LiveHarnessTests started.
+◇ Suite NavigationTests started.
+◇ Suite CanvasBoundaryTests started.
+◇ Suite ExportPathTests started.
+◇ Suite DashboardTests started.
+◇ Suite AgentActivityTests started.
+◇ Suite AssistantContextTests started.
+◇ Suite StartupWorkspaceTests started.
+◇ Suite LoreSearchTests started.
+◇ Suite GraphGeometryTests started.
+◇ Suite RecordSectionPersistenceTests started.
+◇ Suite CommandPaletteRankingTests started.
+◇ Suite PanelSizingTests started.
+◇ Suite ScaleTests started.
+◇ Suite WorkspaceActionTests started.
+◇ Suite RelationshipPairTests started.
+◇ Suite AtlasMapTests started.
+◇ Suite WorkspaceEditTests started.
+◇ Suite EditorJournalTests started.
+◇ Suite ConversationFlowTests started.
+◇ Suite ChronologyAgentTests started.
+◇ Suite ConversationToolsTests started.
+◇ Suite StoreTests started.
+◇ Suite RecordArtworkTests started.
+◇ Suite EventOrderTests started.
+◇ Suite PreferencesTests started.
+◇ Test inspectionPreservesTheWorkspaceAndCannotCrossUniverses() started.
+◇ Test dockedInspectorKeepsCanvasHiddenBehindCompanionTakeover() started.
+◇ Test inspectorProjectsSavedRelationshipsHistoryMapsAndProposals() started.
+◇ Test selectingAnEventIsReadOnlyAndClearsWhenTheWorkspaceChanges() started.
+◇ Test editorFailuresAndCancellationNeverDiscardWork() started.
+◇ Test transientHoverClearsWhenContextFocusOrAvailabilityChanges() started.
+◇ Test nativeEditorKeepsCaretScrollFormattingAndIndependentUndoAcrossTabs() started.
+◇ Test failedSaveBlocksTabSwitchCloseAndBulkCloseAndArchivePrunesAddresses() started.
+◇ Test searchAndFavoriteSourcesResolveFreshLoreInEitherPane() started.
+◇ Test lateForeignArchivedOrMalformedDropsAreRejected() started.
+◇ Test emptyBranchCannotBeSent() started.
+◇ Test oldDeliveryCannotCancelANewGestureAndUnloadedCanvasCannotPretendToSave() started.
+◇ Test tabsPinReopenPersistAndStayInTheirWorld() started.
+◇ Test staleAndForeignAddressesDropIndividuallyWithoutLosingLiveWork() started.
+◇ Test summariesAreScopedAndReflectArchiveAndDescription() started.
+◇ Test nativeEditorRestoresClampedSelectionAfterRestart() started.
+◇ Test mergeProposesOnlyCleanChangesAndAcceptanceStaysDraft() started.
+◇ Test sectionProposalStaysPendingUntilScopedApproval() started.
+◇ Test diskRestartRestoresBothEditorsViewsAndNewestDraftWithoutRequests() started.
+◇ Test providerCarriesOnlyBoundedLocalAddresses() started.
+◇ Test corruptSessionsAreBackedUpAndUnsavedEditorsPreventClose() started.
+◇ Test sessionsStayWorldScopedAndDoNotOverrideExplicitHomeOrManual() started.
+◇ Test documentsMapsChatsAndToolSubpagesReplayThroughOneHistory() started.
+◇ Test branchIsAnIndependentCopyThatNeverTouchesTheOriginal() started.
+◇ Test corruptOrForeignTabDataCannotBlockAccessOrLeakRecords() started.
+◇ Test sidebarDestinationsKeepTheUnsavedEditorGuard() started.
+◇ Test quietAutosaveIncludesSelectionAndLatestPendingTyping() started.
+◇ Test importsOnlyTheImageWrittenDuringThisRequest() started.
+◇ Test refusesWhenNothingNewOrNotAnImage() started.
+◇ Test utilityPreferencesSurviveRestartWithoutChangingWorldContent() started.
+◇ Test membershipsAreScopedAndOnlyActive() started.
+◇ Test activityInspectorReturnsAndRemovedOrForeignOptionalSourcesClear() started.
+◇ Test failedSaveAndCloseRetainTextAndWorldForRetry() started.
+◇ Test nativeEditorRemainsSaveableAfterBackBetweenToolPages() started.
+◇ Test invalidNamesArchivesUndoAndWorldIsolationAreExplicit() started.
+◇ Test updatingALayoutHasGuardedUndoAndApplyingIsReversibleNavigation() started.
+◇ Test incompleteProposalFenceNeverFlashesMachineText() started.
+◇ Test failedSavesAndMissingTargetsLeaveTheCurrentWorkspaceIntact() started.
+◇ Test restoredDraftAndMissingTargetAreSafe() started.
+◇ Test stopPreservesVisibleProseWithoutStagingIncompleteChanges() started.
+◇ Test activityReflectsRealChangesExcludesArchivesAndStaysWorldScoped() started.
+◇ Test arrangementsSurviveRestartAndRestoreCurrentRecordsWithoutRestoringAI() started.
+◇ Test failedSavesAndStaleOrForeignEndpointsCannotCreateLinks() started.
+◇ Test nativePanelDoesNotActivateOrBecomeTheMainWorkspace() started.
+◇ Test sameWorkspaceVisitsKeepSaveGuardsAndLibraryRootClearsTheCategory() started.
+◇ Test differentEditsFromTheSameRestoredIdentityAreNotDiscarded() started.
+◇ Test openRecipeActionsStayBoundToTheirOriginalUniverse() started.
+◇ Test searchExamplesParseAndWorldSwitchClearsLibraryScope() started.
+◇ Test linkingUsesTheFocusedRecordOrCurrentSpatialSelection() started.
+◇ Test referencesAndDirectionalRelationshipsPersistWithoutChangingCanon() started.
+◇ Test recipeEditUndoCannotClobberANewerEdit() started.
+◇ Test chatStillDisablesImageGeneration() started.
+◇ Test projectOutlinesArePortableRevisionedEntitiesWithLinkedSections() started.
+◇ Test invalidCaptureNeverCreatesContentOrOverwritesScratch() started.
+◇ Test approvedMechanicsStayDraftsAndRejectDocumentParents() started.
+◇ Test recipeAppendsPendingKeystrokesInManualAndNeverSends() started.
+◇ Test structuredQueriesNeverFallBackToNamesCommandsOrCapture() started.
+◇ Test capturePersistsOnceAndKeepsWorldsAndCanonSeparate() started.
+◇ Test branchingOpensTheNewThreadAndSourceRevealWithoutModelRequests() started.
+◇ Test switchingTargetKeepsSeparateScratchAndDoesNotNavigateStudio() started.
+◇ Test failedScratchRemovalRollsBackTheIdeaAndReceipt() started.
+◇ Test paletteActivityOpensFreshObjectsAndExcludesForeignOrArchivedData() started.
+◇ Test processDeadlineTerminatesAnUnresponsiveHarness() started.
+◇ Test reviewedRulesRejectStaleProposalsAndScenariosDoNotInventVerdicts() started.
+◇ Test harnessEnvironmentExcludesUnrelatedAgentAndSecretVariables() started.
+◇ Test apiOnlyHarnessCannotStartGeneration() started.
+◇ Test ruleHistoryPreservesEarlierCanonAndRoundTrips() started.
+◇ Test harnessFailuresAreExplainedAndMissingHarnessIsUnavailable() started.
+◇ Test keyboardSelectionStaysBoundedAndCommandsRemainAheadOfCapture() started.
+◇ Test setupOnlyAppearsForANewInstallationAndExistingProviderChoiceSurvives() started.
+◇ Test lateRetryDoesNotEraseANewerDraft() started.
+◇ Test failedProcessCannotReturnAPartialAnswerAsSuccess() started.
+◇ Test paletteFindsAndOpensMapsBoardsScenesSettingsAndTools() started.
+◇ Test claudeCodeStreamIsParsedIntoDeltasAndAResult() started.
+◇ Test timelineOrderConflictsOnlyCompareTheSameEra() started.
+◇ Test mutualOneWayRelationshipsAreFlaggedButSymmetricOnesAreNot() started.
+◇ Test codexEventsAreParsedIntoMessagesAndFailures() started.
+◇ Test locatorStatusAndRouterFollowTheChosenProvider() started.
+◇ Test claudeCodeRunsLockedDownAndStreamsTheAnswer() started.
+◇ Test codexRunsReadOnlyInAnEmptyFolderWithoutUserConfig() started.
+◇ Test malformedProposalRetainsProseAndReportsFailureWithoutStaging() started.
+◇ Test cancellingARequestTerminatesTheHarness() started.
+◇ Test historyConnectsMapsConversationsWorldSettingsAndThePalette() started.
+◇ Test favoritesPersistIndependentlyOfOpenTabsAndTrackRenames() started.
+◇ Test reviewedBatchReportsCommittedChangesAndPreservesCanon() started.
+◇ Test creationCommandsShareTheFormAndRespectUnsavedWriting() started.
+◇ Test orderingSkipsArchivedItemsAndStalePreferenceWritesCompose() started.
+◇ Test openingFavoritesUsesFreshLoreAndPreservesFailedWriting() started.
+◇ Test activityErrorsAndCancellationsNeverBecomeSuccessLabels() started.
+◇ Test roundTripIsIndependentAndPreservesConnections() started.
+◇ Test successfulSaveIncludesTheSearchIndexAndFailedSaveDoesNotReplaceIt() started.
+◇ Test tagVariantsMergeAsRevisionsAndUndoRestoresThem() started.
+◇ Test apiAuthenticationIsNotASubscription() started.
+◇ Test savedLayoutsAndHistoryRestoreTwoFreshSourcesWithoutApprovingThem() started.
+◇ Test archiveAndRestoreKeepFavoritesWithoutLeakingBetweenWorlds() started.
+◇ Test maliciousCrossWorldImportRollsBack() started.
+◇ Test historyOpensCurrentSourcesPreservesWritingAndNeverApprovesCanon() started.
+◇ Test corruptSettingsArePreservedUntilExplicitResetAndStaleChangesCompose() started.
+◇ Test changingWorldBeforeReviewCannotApplyDecisionsIntoEitherWorld() started.
+◇ Test regionsAreValidatedAndFindTheirMap() started.
+◇ Test partiallyFailedBatchReportsActualCountAndLeavesLaterDecisionsPending() started.
+◇ Test hidingAndPinningLeaveCollectionsSearchableAndRespectUnsavedWriting() started.
+◇ Test diskRestoreAndWorldSwitchNeverDisplayForeignOrArchivedSources() started.
+◇ Test splitStaysConnectedAcrossToolsAndResolvesUpdatedLore() started.
+◇ Test twoNativeEditorsKeepIndependentContentCaretAndUndoWhenSwapped() started.
+◇ Test standaloneExportHasSafeNameMetadataAndSections() started.
+◇ Test navigationPersistsOnDiskPerWorldAndNeverChangesContentOrMode() started.
+◇ Test categoryAliasesAndInvalidOrderingDoNotDuplicateRows() started.
+◇ Test bothSaveGuardsProtectCloseSwapNavigationArchiveAndWorldChanges() started.
+◇ Test modelChangeSetIsStagedForReviewAndNeverApplied() started.
+◇ Test documentCommandsTargetTheSelectedPaneAndKeepFailedWritingOpen() started.
+◇ Test cancellationBeforeQueuedSubmitNeverStartsTransport() started.
+◇ Test simulationActivityRemainsExplicitlyHypothetical() started.
+◇ Test committedEditsApprovalsAndArchivesRetainTheirOwnHistory() started.
+◇ Test bothExportsPreserveNativeFormatting() started.
+◇ Test componentsPersistAndRoundTripWithoutCrossWorldReferences() started.
+◇ Test canonicalContextExcludesRichTextPayload() started.
+◇ Test indexedSearchRemainsWorldScopedAtScale() started.
+◇ Test checklistRevisionsPreserveCanonAndRejectStaleOrForeignEdits() started.
+◇ Test splitGeometryKeepsBothWorkspacesUsableAndTheCanvasHiddenDuringTakeover() started.
+◇ Test proposalsValidatePresentationAndRequireExplicitApproval() started.
+◇ Test staleProposalCannotOverwriteNewWriting() started.
+◇ Test responsesPersistWithoutChangingCanon() started.
+◇ Test connectedChangesAreLoggedWithoutProviderOrPreferenceNoise() started.
+◇ Test streamingTextHidesAnUnfinishedChangeSet() started.
+◇ Test corruptAndForeignViewPreferencesArePreservedAndCannotLeakSelection() started.
+◇ Test boardNavigationAndSerializationDoNotCrowdOutCreativeEdits() started.
+◇ Test remountingTheRealAtlasViewRestoresSelectionAndLayers() started.
+◇ Test switchingToManualCancelsInFlightAndDoesNotPersistAssistant() started.
+◇ Test failedTransactionsAndStaleSavesDoNotLeaveActivity() started.
+◇ Test branchesPeriodsAndSourcedEventsSurvivePortableRoundTrip() started.
+◇ Test archivedOrRemovedSelectionsClearWithoutLosingTheMapAndFraming() started.
+◇ Test paginationRemainsStableWhileNewChangesArriveAndSearchEscapesWildcards() started.
+◇ Test foreignBranchCannotCreatePartialEvent() started.
+◇ Test saveRuleIsAtomicAndTreeSurvivesPortableCopy() started.
+◇ Test workspaceContextChangesWithoutLeakingOtherUniverses() started.
+◇ Test additiveMigrationReconstructsExistingRevisionsOnceWithoutChangingLore() started.
+◇ Test reviewedHistoryResolvesParentsAndEventsInOneProposal() started.
+◇ Test historyAndLayoutsRestoreVisitFramingAndSaveFailuresDoNotConsumeIt() started.
+◇ Test imageRelativeFramingKeepsZoomAnchorsAndSurvivesPaneResize() started.
+◇ Test prerequisitesRejectLoopsAndOtherSystemsAndArchiveRemovals() started.
+◇ Test growingComposerRevealsFirstLineWithoutMovingCaret() started.
+◇ Test manualModeBlocksTransportAtCoreBoundary() started.
+◇ Test sampleWorldIsIdempotentAndLeavesOtherWorldsAlone() started.
+◇ Test oldArchivesImportAndMalformedComponentMembershipRollsBack() started.
+◇ Test eachMapAndUniverseRestoresItsOwnViewAcrossDiskRestartWithoutChangingLore() started.
+◇ Test pendingDraftSurvivesImmediateWorldSwitch() started.
+◇ Test focusRestoresPanelsWithoutChangingTheirSavedConfiguration() started.
+◇ Test nativeWritingKeepsItsEditorCaretUndoAndSaveCallbackThroughFocus() started.
+◇ Test saveFailuresAndOpenFormsPreventFocusAndManualRemainsIndependent() started.
+◇ Test quickCaptureAndImportCreateLabelledDrafts() started.
+◇ Test pendingSectionCannotAttachToAnArchivedParent() started.
+◇ Test loreReferencesRoundTripBetweenTokensAndMarkdown() started.
+◇ Test mapToolsCannotLeakAnUnfinishedRegionIntoMarkerPlacement() started.
+◇ Test emptyWorldEventCreatesDraftSourceAtomically() started.
+◇ Test explicitNavigationAndInspectionCanLeaveFocusWithoutLosingLayout() started.
+◇ Test archivesPreserveHistoryWithNewReferencesAndRejectMixedTargetsAtomically() started.
+◇ Test oldSnapshotsImportAndMalformedMembershipRollsBack() started.
+◇ Test graphLayoutIsDeterministicSeparatedAndFollowsOrientation() started.
+◇ Test openingARecordKeepsTheWorkspaceItCameFrom() started.
+◇ Test settingsSearchFindsActualControlsAcrossSections() started.
+◇ Test sectionChildrenDoNotInflateCharacterNavigation() started.
+◇ Test overviewRoutesStillAvoidVisibleObstacles() started.
+◇ Test markdownBlocksCoverListsQuotesTablesAndFencedCode() started.
+◇ Test companionConversationSwitchKeepsBoardSaveProtection() started.
+◇ Test realHarnessAnswersFromWorldContextAndStagesAProposal() started.
+◇ Test semanticBoundsStayInsideLayoutAndConnectionsMeetVisibleCards() started.
+◇ Test savedAssistantOutputIsAnAIProposedDraftNeverCanon() started.
+◇ Test canonDiffMarksOnlyChangedLines() started.
+◇ Test acceptingWorkspaceChangesRefreshesHistoryAndSelectsTheCreatedMap() started.
+◇ Test worldSwitchAndNewChatUseTheirOwnDefaults() started.
+◇ Test acceptedMarkersRefreshTheActiveAtlasWithoutReplacingItsImageOrOtherMaps() started.
+◇ Test dagreLayoutHandlesHundredsOfEntities() started.
+◇ Test boardContentReadsBothFormatsAndNeverGuessesAtDamagedData() started.
+◇ Test writingPreferencesConfigureNativeEditorWithoutReformattingRichText() started.
+◇ Test boardsChatsAndSelectionShareHistoryWithoutEnablingAI() started.
+◇ Test archivingFromTheStudioIsUndoable() started.
+◇ Test newEntitySectionDependsOnItsAcceptedParent() started.
+◇ Test importedTIFFIsActuallyConvertedToPNG() started.
+◇ Test generatedArtworkIsDecodableAndWithinCanvasLimit() started.
+◇ Test providerSelectionAndSettingsNavigationDoNotStartChecksOrGeneration() started.
+◇ Test studioResolvesProposalsOnlyThroughExplicitActionsAndKeepsCanon() started.
+◇ Test connectedRecordTrailIsReversibleAndFailedSavesNeverConsumeHistory() started.
+◇ Test assistanceModePreservesWorkspaceAndEditorGuard() started.
+◇ Test largeArtworkBecomesBoundedThumbnailAndCorruptBytesFailSafely() started.
+◇ Test composerSendShortcutHonorsModifiersAndMentions() started.
+◇ Test corruptAndOversizedImageInputsAreRejected() started.
+◇ Test sectionsUseLiveDataAndActionsPreserveManualAndCanon() started.
+◇ Test reviewMapLinksStartupAndForeignActivityAreGuarded() started.
+◇ Test manualProducesNoActivityAndNoProviderCall() started.
+◇ Test importedCategoryCannotEscapeMarkdownExportFolder() started.
+◇ Test everyHomeChoiceSurvivesDiskRestartWithoutChangingLoreOrMode() started.
+◇ Test repeatedVisitsAreDeduplicatedAndHistoryIsBounded() started.
+◇ Test invalidActionsNeverReportSuccessfulReview() started.
+◇ Test recordPickerCanFindBeyondTheOldMenuLimitAndByAlias() started.
+◇ Test activityReflectsRealRetrievalAndResponse() started.
+◇ Test profileEntryPointsKeepTheSourceAndHonorUnsavedEditorGuards() started.
+◇ Test invalidOrAbsentPreferenceFallsBackWithoutLosingOtherPreferences() started.
+◇ Test lastWorkspaceFollowsDirectChatRoutesAndRespectsFailedSaves() started.
+◇ Test staleCanvasMessagesAreRejected() started.
+◇ Test boardAttachmentsShareLinkedLoreNotImageBytes() started.
+◇ Test attachmentsOnlyDoesNotFallBackToRecentLoreOrForeignIDs() started.
+◇ Test startupUsesSelectedWorldAndLocalChoiceNeverEntersPortableWorld() started.
+◇ Test filtersRemainWorldScopedArchivedAndInjectionSafe() started.
+◇ Test manualLaunchDoesNotLandOnConversation() started.
+◇ Test historyResolvesFreshLoreSkipsArchivedRecordsAndRejectsForeignSources() started.
+◇ Test libraryScopeIsAppliedBeforeTheResultLimit() started.
+◇ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() started.
+◇ Test placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() started.
+◇ Test archivedAttachmentsArePrunedOnReloadButRejectedAtSubmission() started.
+◇ Test worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() started.
+◇ Test contextChoicesPersistPerWorldAndPinnedRecordsCannotSilentlyOverflow() started.
+◇ Test queryValidationDoesNotSilentlyIgnoreBrokenFilters() started.
+◇ Test fittedCardsKeepDirectRoutes() started.
+◇ Test explicitlyAttachedOldBoardsAreNotLostBehindTheIndexLimit() started.
+◇ Test attachedHistoryIncludesDescendantsAndExclusionsStillWin() started.
+◇ Test exploreCannotStageEvenWhenTheModelIgnoresTheInstruction() started.
+◇ Test exclusionsRemoveIndexRulesRelationsAndPriorConversation() started.
+◇ Test atlasZoomLimitsKeepThePointerAnchoredWithoutDrift() started.
+◇ Test atlasButtonZoomKeepsAPannedLandmarkAtTheViewportCentre() started.
+◇ Test parallelEdgesSeparateAndPortsRespectZoom() started.
+◇ Test nearAndCoincidentCardsRouteOutsideTheirContent() started.
+◇ Test explicitlyAttachedHistoryIsPrioritizedOverTheUnfilteredIndex() started.
+◇ Test truncatedBoardPlacementsRetainTheirActualTotal() started.
+◇ Test bundledEngineLaysOutCyclesWithoutCardOverlap() started.
+◇ Test typedRelationshipsUseRealDataInEitherDirection() started.
+◇ Test relationshipsDetourAroundAnInterveningCard() started.
+◇ Test nearbyParallelRelationshipsDoNotCollapseOntoOneCurve() started.
+◇ Test statusAndDatesApplyTogetherWithoutChangingCanon() started.
+◇ Test archivedExclusionsSurviveReloadAndRestoreWithoutReintroducingHistory() started.
+◇ Test sectionsSurviveRestartReorderArchiveAndIndependentImport() started.
+◇ Test referencedEntityBringsItsSectionsIntoBoundedContext() started.
+◇ Test zoomPreservesTheAnchoredWorldPointAtEveryScale() started.
+◇ Test corruptAndOutOfRangeWidthsRecoverWithoutBlockingStartup() started.
+◇ Test nativeDividerKeyboardAndAccessibilityRespectBounds() started.
+◇ Test boardActionsAreWorldScopedReviewedAndKeepExistingScene() started.
+◇ Test sectionEditPreservesBothCanonSnapshotsAndRejectsStaleWrites() started.
+◇ Test directedChainUsesDagreInsteadOfEmergencyGrid() started.
+◇ Test invalidGestureCoordinatesCannotPoisonTheViewport() started.
+◇ Test dimensionsPersistButWindowConstraintsDoNotReplaceThePreference() started.
+◇ Test inverseRelationshipsSaveTogetherAndCannotCrossWorlds() started.
+◇ Test nativeDividerTracksGesturesAndCommitsOnlyWhenFinished() started.
+◇ Test agentReceivesRealRelationshipsChronologyAndBoardMembership() started.
+◇ Test typedCommandNamesRunTheCommandBeforeCapture() started.
+◇ Test importingForeignMapMetadataRollsBackAndInvalidMarkersAreRejected() started.
+◇ Test agentMapCreationRequiresReviewAndDoesNotInventArtwork() started.
+◇ Test markerChangesRejectStaleUndoAndPreserveOtherMaps() started.
+◇ Test hierarchyAndPlaceLinksRemainWorldScopedAndPortable() started.
+◇ Test ambiguousTitlesNeverChooseAnArbitraryRecord() started.
+◇ Test invalidParentAndStaleOrderNeverLeavePartialData() started.
+◇ Test mapPlacementPreservesImageAndRejectsForeignRecords() started.
+◇ Test layoutsRestorePanelWidthsAndLegacyLayoutsRemainReadable() started.
+◇ Test pendingWorkspaceEditsRemainScopedAfterWorldArchiveImport() started.
+◇ Test immediateStopRestoresAnUnsentDraftWithoutCallingTheProvider() started.
+◇ Test journalIsWorldScopedAndExcludedFromExports() started.
+◇ Test requestFollowsSelectedGraphTimelineAtlasAndEditorContext() started.
+◇ Test historyEditsRejectCyclesForeignParentsAndStaleEditors() started.
+◇ Test retryPreservesNewDraftAndCompanionWidthSurvivesRestart() started.
+◇ Test disappearingComposerCannotOverwriteANewerSharedDraft() started.
+◇ Test invalidChangesAreDisclosedAndForeignWorkspaceEditsAreRejected() started.
+◇ Test verificationProviderSettingsCannotChangeAnotherStudioOrHostDefaults() started.
+◇ Test checksRecordsAndSummariesStayResponsiveAtTwoThousandRecords() started.
+◇ Test movingAGroupedCardPreservesOtherCardsAndIndexesEachRecordOnce() started.
+◇ Test transcriptObserverRespectsScrollingAwayAndReturningToLatest() started.
+◇ Test chronologyChangesWaitForExplicitReview() started.
+◇ Test journalSurvivesReopenAndClearsWhenSaved() started.
+◇ Test restrictedComposerSendUsesPreviewAndPreservesOptionsAfterSending() started.
+◇ Test advancedSearchRemainsBoundedAtScale() started.
+◇ Test canvasIsHiddenWhenConversationTakesOverACompactWindow() started.
+◇ Test reviewedWorkspaceEditsChangeExistingStructuresAndRejectStaleSnapshots() started.
+◇ Test rulesStayWorldScopedDraftUntilAcceptedAndReversible() started.
+◇ Test artworkPersistsAndUndoRejectsStaleOrForeignImages() started.
+◇ Test richTextAndCanvasPersistence() started.
+◇ Test composerPermissionsAndAttachmentsFollowTheirUniverseWithoutRequests() started.
+◇ Test exportPreservesArtworkAndImportCreatesAnIndependentHistory() started.
+◇ Test continueIncludesTheSavedInterruptedResponse() started.
+◇ Test relationshipIsolationAndUnknownDates() started.
+◇ Test archivingRecordsIsReversibleAndKeepsCanonAndHistory() started.
+◇ Test branchesAndRecipesRoundTripWithRemappedLineageAndRejectCorruptArchives() started.
+◇ Test spatialArtworkIndexTracksCurrentRevisionsAndArchives() started.
+◇ Test movingNumbersTheTimelineAndUndoRestoresIt() started.
+◇ Test branchRejectsForeignSystemAndArchivedForksWithoutPartialWrites() started.
+◇ Test markdownImportAndExportArePortableAndLabelled() started.
+◇ Test worldIsolation() started.
+◇ Test nestedStoreOperationsRollBackTogether() started.
+◇ Test revisionRestoreIncludesMetadataAndPreservesCanon() started.
+◇ Test invalidArtworkAndInvalidArchiveOwnersNeverLeavePartialWrites() started.
+◇ Test persistenceAcrossReopen() started.
+◇ Test branchCopiesOnlyTheSelectedPrefixAndKeepsSourceReferences() started.
+◇ Test conversationsBoardsAndEventsArchiveWithinTheirWorld() started.
+◇ Test boardsCannotBeOverwrittenFromAnotherWorld() started.
+◇ Test worldRenameValidatesAndLinksCanBeRemoved() started.
+◇ Test linksMetadataAndExportsStayWorldScoped() started.
+◇ Test recipesPersistValidateAndArchiveWithOptimisticUndo() started.
+◇ Test relationshipEditsAreScopedAuditedAndReversible() started.
+◇ Test worldChecksFindRealProblemsLocallyAndRememberDismissals() started.
+◇ Test canonAndStaleSaveBoundary() started.
+◇ Test contextIsRankedExplainedAndWorldScoped() started.
+◇ Test worldDefaultsAreIsolatedPortableAndDoNotExportDevicePreferences() started.
+◇ Test worldIdentitySaveIsAtomic() started.
+◇ Test localPreferencesSurviveRestartAndValidatePartialStoredData() started.
+◇ Test invalidWorldDefaultsRollBackImport() started.
+Graph layout benchmark: 100 entities, 200 relationships: 0.050077917 seconds
+Graph layout benchmark: 300 entities, 600 relationships: 0.146373917 seconds
+✔ Test chatStillDisablesImageGeneration() passed after 0.402 seconds.
+✔ Test summariesAreScopedAndReflectArchiveAndDescription() passed after 0.402 seconds.
+✔ Test sectionProposalStaysPendingUntilScopedApproval() passed after 0.403 seconds.
+✔ Test differentEditsFromTheSameRestoredIdentityAreNotDiscarded() passed after 0.404 seconds.
+✔ Test invalidCaptureNeverCreatesContentOrOverwritesScratch() passed after 0.404 seconds.
+✔ Test branchIsAnIndependentCopyThatNeverTouchesTheOriginal() passed after 0.405 seconds.
+✔ Test harnessEnvironmentExcludesUnrelatedAgentAndSecretVariables() passed after 0.404 seconds.
+✔ Test emptyBranchCannotBeSent() passed after 0.405 seconds.
+✔ Test membershipsAreScopedAndOnlyActive() passed after 0.405 seconds.
+✔ Test claudeCodeStreamIsParsedIntoDeltasAndAResult() passed after 0.404 seconds.
+✔ Test projectOutlinesArePortableRevisionedEntitiesWithLinkedSections() passed after 0.404 seconds.
+✔ Test activityReflectsRealChangesExcludesArchivesAndStaysWorldScoped() passed after 0.404 seconds.
+✔ Test codexEventsAreParsedIntoMessagesAndFailures() passed after 0.404 seconds.
+✔ Test locatorStatusAndRouterFollowTheChosenProvider() passed after 0.404 seconds.
+✔ Test failedScratchRemovalRollsBackTheIdeaAndReceipt() passed after 0.405 seconds.
+✔ Test apiAuthenticationIsNotASubscription() passed after 0.405 seconds.
+✔ Test lateRetryDoesNotEraseANewerDraft() passed after 0.405 seconds.
+✔ Test mergeProposesOnlyCleanChangesAndAcceptanceStaysDraft() passed after 0.406 seconds.
+✔ Test approvedMechanicsStayDraftsAndRejectDocumentParents() passed after 0.405 seconds.
+✔ Test capturePersistsOnceAndKeepsWorldsAndCanonSeparate() passed after 0.405 seconds.
+✔ Test reviewedRulesRejectStaleProposalsAndScenariosDoNotInventVerdicts() passed after 0.405 seconds.
+✔ Test timelineOrderConflictsOnlyCompareTheSameEra() passed after 0.405 seconds.
+✔ Test mutualOneWayRelationshipsAreFlaggedButSymmetricOnesAreNot() passed after 0.405 seconds.
+✔ Test ruleHistoryPreservesEarlierCanonAndRoundTrips() passed after 0.405 seconds.
+✔ Test maliciousCrossWorldImportRollsBack() passed after 0.405 seconds.
+✔ Test roundTripIsIndependentAndPreservesConnections() passed after 0.405 seconds.
+✔ Test committedEditsApprovalsAndArchivesRetainTheirOwnHistory() passed after 0.405 seconds.
+✔ Test standaloneExportHasSafeNameMetadataAndSections() passed after 0.405 seconds.
+✔ Test regionsAreValidatedAndFindTheirMap() passed after 0.405 seconds.
+✔ Test bothExportsPreserveNativeFormatting() passed after 0.405 seconds.
+✔ Test tagVariantsMergeAsRevisionsAndUndoRestoresThem() passed after 0.405 seconds.
+✔ Test checklistRevisionsPreserveCanonAndRejectStaleOrForeignEdits() passed after 0.405 seconds.
+✔ Test proposalsValidatePresentationAndRequireExplicitApproval() passed after 0.405 seconds.
+✔ Test failedTransactionsAndStaleSavesDoNotLeaveActivity() passed after 0.405 seconds.
+✔ Test boardNavigationAndSerializationDoNotCrowdOutCreativeEdits() passed after 0.405 seconds.
+✔ Test foreignBranchCannotCreatePartialEvent() passed after 0.405 seconds.
+✔ Test branchesPeriodsAndSourcedEventsSurvivePortableRoundTrip() passed after 0.405 seconds.
+✔ Test componentsPersistAndRoundTripWithoutCrossWorldReferences() passed after 0.405 seconds.
+✔ Test mapToolsCannotLeakAnUnfinishedRegionIntoMarkerPlacement() passed after 0.405 seconds.
+✔ Test connectedChangesAreLoggedWithoutProviderOrPreferenceNoise() passed after 0.405 seconds.
+✔ Test saveRuleIsAtomicAndTreeSurvivesPortableCopy() passed after 0.405 seconds.
+✔ Test reviewedHistoryResolvesParentsAndEventsInOneProposal() passed after 0.405 seconds.
+✔ Test overviewRoutesStillAvoidVisibleObstacles() passed after 0.405 seconds.
+✔ Test additiveMigrationReconstructsExistingRevisionsOnceWithoutChangingLore() passed after 0.405 seconds.
+✔ Test pendingSectionCannotAttachToAnArchivedParent() passed after 0.405 seconds.
+✔ Test semanticBoundsStayInsideLayoutAndConnectionsMeetVisibleCards() passed after 0.405 seconds.
+✔ Test oldArchivesImportAndMalformedComponentMembershipRollsBack() passed after 0.405 seconds.
+✔ Test prerequisitesRejectLoopsAndOtherSystemsAndArchiveRemovals() passed after 0.405 seconds.
+✔ Test emptyWorldEventCreatesDraftSourceAtomically() passed after 0.405 seconds.
+✔ Test largeArtworkBecomesBoundedThumbnailAndCorruptBytesFailSafely() passed after 0.405 seconds.
+✔ Test oldSnapshotsImportAndMalformedMembershipRollsBack() passed after 0.405 seconds.
+✔ Test archivesPreserveHistoryWithNewReferencesAndRejectMixedTargetsAtomically() passed after 0.405 seconds.
+✔ Test fittedCardsKeepDirectRoutes() passed after 0.404 seconds.
+✔ Test atlasZoomLimitsKeepThePointerAnchoredWithoutDrift() passed after 0.404 seconds.
+✔ Test atlasButtonZoomKeepsAPannedLandmarkAtTheViewportCentre() passed after 0.404 seconds.
+✔ Test parallelEdgesSeparateAndPortsRespectZoom() passed after 0.404 seconds.
+✔ Test nearAndCoincidentCardsRouteOutsideTheirContent() passed after 0.404 seconds.
+✔ Test importedCategoryCannotEscapeMarkdownExportFolder() passed after 0.405 seconds.
+✔ Test newEntitySectionDependsOnItsAcceptedParent() passed after 0.405 seconds.
+✔ Test nearbyParallelRelationshipsDoNotCollapseOntoOneCurve() passed after 0.404 seconds.
+✔ Test relationshipsDetourAroundAnInterveningCard() passed after 0.404 seconds.
+✔ Test bundledEngineLaysOutCyclesWithoutCardOverlap() passed after 0.404 seconds.
+✔ Test filtersRemainWorldScopedArchivedAndInjectionSafe() passed after 0.404 seconds.
+✔ Test queryValidationDoesNotSilentlyIgnoreBrokenFilters() passed after 0.404 seconds.
+✔ Test zoomPreservesTheAnchoredWorldPointAtEveryScale() passed after 0.404 seconds.
+✔ Test placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() passed after 0.404 seconds.
+✔ Test directedChainUsesDagreInsteadOfEmergencyGrid() passed after 0.404 seconds.
+✔ Test invalidGestureCoordinatesCannotPoisonTheViewport() passed after 0.404 seconds.
+✔ Test typedRelationshipsUseRealDataInEitherDirection() passed after 0.404 seconds.
+✔ Test sectionEditPreservesBothCanonSnapshotsAndRejectsStaleWrites() passed after 0.404 seconds.
+✔ Test statusAndDatesApplyTogetherWithoutChangingCanon() passed after 0.404 seconds.
+✔ Test sectionsSurviveRestartReorderArchiveAndIndependentImport() passed after 0.404 seconds.
+✔ Test inverseRelationshipsSaveTogetherAndCannotCrossWorlds() passed after 0.404 seconds.
+✔ Test paginationRemainsStableWhileNewChangesArriveAndSearchEscapesWildcards() passed after 0.405 seconds.
+✔ Test importingForeignMapMetadataRollsBackAndInvalidMarkersAreRejected() passed after 0.404 seconds.
+✔ Test markerChangesRejectStaleUndoAndPreserveOtherMaps() passed after 0.404 seconds.
+✔ Test agentMapCreationRequiresReviewAndDoesNotInventArtwork() passed after 0.404 seconds.
+✔ Test referencedEntityBringsItsSectionsIntoBoundedContext() passed after 0.404 seconds.
+✔ Test hierarchyAndPlaceLinksRemainWorldScopedAndPortable() passed after 0.404 seconds.
+✔ Test invalidParentAndStaleOrderNeverLeavePartialData() passed after 0.404 seconds.
+✔ Test invalidChangesAreDisclosedAndForeignWorkspaceEditsAreRejected() passed after 0.404 seconds.
+✔ Test journalIsWorldScopedAndExcludedFromExports() passed after 0.404 seconds.
+✔ Test historyEditsRejectCyclesForeignParentsAndStaleEditors() passed after 0.404 seconds.
+✔ Test pendingWorkspaceEditsRemainScopedAfterWorldArchiveImport() passed after 0.404 seconds.
+✔ Test chronologyChangesWaitForExplicitReview() passed after 0.404 seconds.
+✔ Test journalSurvivesReopenAndClearsWhenSaved() passed after 0.404 seconds.
+✔ Test libraryScopeIsAppliedBeforeTheResultLimit() passed after 0.405 seconds.
+✔ Test rulesStayWorldScopedDraftUntilAcceptedAndReversible() passed after 0.404 seconds.
+✔ Test richTextAndCanvasPersistence() passed after 0.404 seconds.
+✔ Test reviewedWorkspaceEditsChangeExistingStructuresAndRejectStaleSnapshots() passed after 0.404 seconds.
+✔ Test artworkPersistsAndUndoRejectsStaleOrForeignImages() passed after 0.404 seconds.
+✔ Test relationshipIsolationAndUnknownDates() passed after 0.404 seconds.
+✔ Test exportPreservesArtworkAndImportCreatesAnIndependentHistory() passed after 0.404 seconds.
+✔ Test spatialArtworkIndexTracksCurrentRevisionsAndArchives() passed after 0.404 seconds.
+✔ Test archivingRecordsIsReversibleAndKeepsCanonAndHistory() passed after 0.404 seconds.
+✔ Test movingNumbersTheTimelineAndUndoRestoresIt() passed after 0.404 seconds.
+✔ Test branchesAndRecipesRoundTripWithRemappedLineageAndRejectCorruptArchives() passed after 0.404 seconds.
+✔ Test dagreLayoutHandlesHundredsOfEntities() passed after 0.405 seconds.
+✔ Test branchRejectsForeignSystemAndArchivedForksWithoutPartialWrites() passed after 0.404 seconds.
+✔ Test nestedStoreOperationsRollBackTogether() passed after 0.404 seconds.
+✔ Test worldIsolation() passed after 0.404 seconds.
+✔ Test markdownImportAndExportArePortableAndLabelled() passed after 0.404 seconds.
+✔ Test revisionRestoreIncludesMetadataAndPreservesCanon() passed after 0.404 seconds.
+✔ Test persistenceAcrossReopen() passed after 0.404 seconds.
+✔ Test invalidArtworkAndInvalidArchiveOwnersNeverLeavePartialWrites() passed after 0.404 seconds.
+✔ Test branchCopiesOnlyTheSelectedPrefixAndKeepsSourceReferences() passed after 0.404 seconds.
+✔ Test worldRenameValidatesAndLinksCanBeRemoved() passed after 0.404 seconds.
+✔ Test boardsCannotBeOverwrittenFromAnotherWorld() passed after 0.404 seconds.
+✔ Test conversationsBoardsAndEventsArchiveWithinTheirWorld() passed after 0.404 seconds.
+✔ Test relationshipEditsAreScopedAuditedAndReversible() passed after 0.404 seconds.
+✔ Test canonAndStaleSaveBoundary() passed after 0.404 seconds.
+✔ Test linksMetadataAndExportsStayWorldScoped() passed after 0.404 seconds.
+✔ Test recipesPersistValidateAndArchiveWithOptimisticUndo() passed after 0.404 seconds.
+✔ Suite WorldSummaryTests passed after 0.415 seconds.
+✔ Suite RecordSectionTests passed after 0.415 seconds.
+✔ Suite QuickCaptureTests passed after 0.415 seconds.
+✔ Test contextIsRankedExplainedAndWorldScoped() passed after 0.411 seconds.
+✔ Suite WhatIfBranchTests passed after 0.415 seconds.
+✔ Suite DashboardDataTests passed after 0.415 seconds.
+✔ Suite MechanicsTests passed after 0.417 seconds.
+✔ Suite WorldCheckTests passed after 0.417 seconds.
+✔ Suite WorldArchiveTests passed after 0.417 seconds.
+✔ Suite WorldChangeHistoryTests passed after 0.417 seconds.
+✔ Suite MarkdownExportTests passed after 0.417 seconds.
+✔ Suite AtlasRegionTests passed after 0.417 seconds.
+✔ Suite CreativeComponentTests passed after 0.417 seconds.
+✔ Suite ChronologyTests passed after 0.417 seconds.
+✔ Suite AtlasAuthoringTests passed after 0.417 seconds.
+✔ Suite TechniqueTreeTests passed after 0.417 seconds.
+✔ Suite GraphDetailTests passed after 0.417 seconds.
+✔ Suite RecordSectionBoundaryTests passed after 0.417 seconds.
+✔ Suite GraphGeometryTests passed after 0.417 seconds.
+✔ Suite ExportPathTests passed after 0.417 seconds.
+✔ Suite RecordSectionPersistenceTests passed after 0.417 seconds.
+✔ Suite RelationshipPairTests passed after 0.417 seconds.
+✔ Suite AtlasMapTests passed after 0.417 seconds.
+✔ Suite WorkspaceEditTests passed after 0.417 seconds.
+✔ Suite EditorJournalTests passed after 0.417 seconds.
+✔ Suite ChronologyAgentTests passed after 0.417 seconds.
+✔ Suite RecordArtworkTests passed after 0.417 seconds.
+✔ Suite EventOrderTests passed after 0.417 seconds.
+✔ Suite ConversationToolsTests passed after 0.417 seconds.
+✔ Suite GraphScaleTests passed after 0.417 seconds.
+✔ Test worldDefaultsAreIsolatedPortableAndDoNotExportDevicePreferences() passed after 0.409 seconds.
+✔ Test worldChecksFindRealProblemsLocallyAndRememberDismissals() passed after 0.414 seconds.
+✔ Suite StoreTests passed after 0.418 seconds.
+✔ Test worldIdentitySaveIsAtomic() passed after 0.411 seconds.
+✔ Test invalidWorldDefaultsRollBackImport() passed after 0.386 seconds.
+✔ Test localPreferencesSurviveRestartAndValidatePartialStoredData() passed after 0.393 seconds.
+✔ Suite PreferencesTests passed after 0.426 seconds.
+✔ Test processDeadlineTerminatesAnUnresponsiveHarness() passed after 0.490 seconds.
+✔ Test harnessFailuresAreExplainedAndMissingHarnessIsUnavailable() passed after 0.517 seconds.
+✔ Test apiOnlyHarnessCannotStartGeneration() passed after 0.517 seconds.
+✔ Test codexRunsReadOnlyInAnEmptyFolderWithoutUserConfig() passed after 0.517 seconds.
+✔ Test importsOnlyTheImageWrittenDuringThisRequest() passed after 0.518 seconds.
+✔ Test realHarnessAnswersFromWorldContextAndStagesAProposal() passed after 0.680 seconds.
+✔ Suite LiveHarnessTests passed after 0.682 seconds.
+✔ Test failedProcessCannotReturnAPartialAnswerAsSuccess() passed after 0.681 seconds.
+✔ Test claudeCodeRunsLockedDownAndStreamsTheAnswer() passed after 0.682 seconds.
+✔ Test refusesWhenNothingNewOrNotAnImage() passed after 0.691 seconds.
+✔ Suite ImageGenerationTests passed after 0.692 seconds.
+✔ Test lateForeignArchivedOrMalformedDropsAreRejected() passed after 0.888 seconds.
+✔ Test diskRestartRestoresBothEditorsViewsAndNewestDraftWithoutRequests() passed after 0.890 seconds.
+✔ Test providerCarriesOnlyBoundedLocalAddresses() passed after 0.891 seconds.
+✔ Test openRecipeActionsStayBoundToTheirOriginalUniverse() passed after 0.892 seconds.
+✔ Test recipeAppendsPendingKeystrokesInManualAndNeverSends() passed after 0.893 seconds.
+✔ Test branchingOpensTheNewThreadAndSourceRevealWithoutModelRequests() passed after 0.893 seconds.
+✔ Test changingWorldBeforeReviewCannotApplyDecisionsIntoEitherWorld() passed after 0.893 seconds.
+✔ Test nativeEditorRestoresClampedSelectionAfterRestart() passed after 0.896 seconds.
+✔ Test focusRestoresPanelsWithoutChangingTheirSavedConfiguration() passed after 0.926 seconds.
+✔ Test manualProducesNoActivityAndNoProviderCall() passed after 0.943 seconds.
+✔ Test everyHomeChoiceSurvivesDiskRestartWithoutChangingLoreOrMode() passed after 0.946 seconds.
+✔ Test startupUsesSelectedWorldAndLocalChoiceNeverEntersPortableWorld() passed after 0.948 seconds.
+✘ Test quietAutosaveIncludesSelectionAndLatestPendingTyping() recorded an issue at WorkspaceSessionTests.swift:148:5: Expectation failed: reopened.destination == .knowledge && reopened.graphView.zoom == 1.65
+↳ reopened.destination == .knowledge && reopened.graphView.zoom == 1.65 → false
+↳   reopened.destination == .knowledge → true
+↳   reopened.graphView.zoom == 1.65 → false
+✘ Test quietAutosaveIncludesSelectionAndLatestPendingTyping() recorded an issue at WorkspaceSessionTests.swift:149:5: Expectation failed: reopened.graphView.query == "harbor" && reopened.draft == "Latest pending"
+↳ reopened.graphView.query == "harbor" && reopened.draft == "Latest pending" → false
+↳   reopened.graphView.query == "harbor" → false
+↳   reopened.draft == "Latest pending" → <not evaluated>
+✘ Test quietAutosaveIncludesSelectionAndLatestPendingTyping() failed after 0.972 seconds with 2 issues.
+✔ Test composerPermissionsAndAttachmentsFollowTheirUniverseWithoutRequests() passed after 0.981 seconds.
+✔ Test cancellingARequestTerminatesTheHarness() passed after 0.983 seconds.
+✔ Suite HarnessTests passed after 0.985 seconds.
+✔ Test oldDeliveryCannotCancelANewGestureAndUnloadedCanvasCannotPretendToSave() passed after 1.052 seconds.
+Search benchmark: 20 indexed queries over 2,000 records: 0.095135458 seconds
+✔ Test indexedSearchRemainsWorldScopedAtScale() passed after 1.317 seconds.
+✔ Suite SearchScaleTests passed after 1.319 seconds.
+✔ Test manualModeBlocksTransportAtCoreBoundary() passed after 1.619 seconds.
+Advanced search (2,000 records, 20 filtered queries): 0.143862791 seconds
+✔ Test advancedSearchRemainsBoundedAtScale() passed after 1.731 seconds.
+✔ Suite LoreSearchTests passed after 1.734 seconds.
+Scale benchmark (2,000 records, 1,500 relationships, 300 events): records 0.014276167 seconds, checks 0.108573125 seconds, 20 searches 0.071882666 seconds, relations+events 0.007582958 seconds
+✔ Test checksRecordsAndSummariesStayResponsiveAtTwoThousandRecords() passed after 1.782 seconds.
+✔ Suite ScaleTests passed after 1.785 seconds.
+✔ Test archivedAttachmentsArePrunedOnReloadButRejectedAtSubmission() passed after 1.984 seconds.
+✔ Test inspectionPreservesTheWorkspaceAndCannotCrossUniverses() passed after 2.147 seconds.
+✔ Test immediateStopRestoresAnUnsentDraftWithoutCallingTheProvider() passed after 2.144 seconds.
+✔ Test dockedInspectorKeepsCanvasHiddenBehindCompanionTakeover() passed after 2.153 seconds.
+✔ Test inspectorProjectsSavedRelationshipsHistoryMapsAndProposals() passed after 2.153 seconds.
+✔ Test selectingAnEventIsReadOnlyAndClearsWhenTheWorkspaceChanges() passed after 2.153 seconds.
+✔ Test editorFailuresAndCancellationNeverDiscardWork() passed after 2.153 seconds.
+✔ Test nativeEditorKeepsCaretScrollFormattingAndIndependentUndoAcrossTabs() passed after 2.153 seconds.
+✔ Suite InspectionTests passed after 2.154 seconds.
+✔ Test nativeEditorRemainsSaveableAfterBackBetweenToolPages() passed after 2.159 seconds.
+✔ Test tabsPinReopenPersistAndStayInTheirWorld() passed after 2.161 seconds.
+✔ Test staleAndForeignAddressesDropIndividuallyWithoutLosingLiveWork() passed after 2.161 seconds.
+✔ Test searchAndFavoriteSourcesResolveFreshLoreInEitherPane() passed after 2.161 seconds.
+✔ Suite RecordDragTests passed after 2.162 seconds.
+✔ Test sessionsStayWorldScopedAndDoNotOverrideExplicitHomeOrManual() passed after 2.175 seconds.
+✔ Test documentsMapsChatsAndToolSubpagesReplayThroughOneHistory() passed after 2.187 seconds.
+✔ Test corruptOrForeignTabDataCannotBlockAccessOrLeakRecords() passed after 2.187 seconds.
+✔ Test failedSaveBlocksTabSwitchCloseAndBulkCloseAndArchivePrunesAddresses() passed after 2.187 seconds.
+✔ Test sidebarDestinationsKeepTheUnsavedEditorGuard() passed after 2.187 seconds.
+✔ Test corruptSessionsAreBackedUpAndUnsavedEditorsPreventClose() passed after 2.188 seconds.
+✔ Test utilityPreferencesSurviveRestartWithoutChangingWorldContent() passed after 2.188 seconds.
+✔ Test activityInspectorReturnsAndRemovedOrForeignOptionalSourcesClear() passed after 2.188 seconds.
+✔ Test failedSaveAndCloseRetainTextAndWorldForRetry() passed after 2.188 seconds.
+✔ Test updatingALayoutHasGuardedUndoAndApplyingIsReversibleNavigation() passed after 2.188 seconds.
+✔ Test failedSavesAndMissingTargetsLeaveTheCurrentWorkspaceIntact() passed after 2.188 seconds.
+✔ Test invalidNamesArchivesUndoAndWorldIsolationAreExplicit() passed after 2.189 seconds.
+✔ Test restoredDraftAndMissingTargetAreSafe() passed after 2.190 seconds.
+✔ Test incompleteProposalFenceNeverFlashesMachineText() passed after 2.189 seconds.
+✔ Test arrangementsSurviveRestartAndRestoreCurrentRecordsWithoutRestoringAI() passed after 2.189 seconds.
+✔ Test failedSavesAndStaleOrForeignEndpointsCannotCreateLinks() passed after 2.190 seconds.
+✔ Test nativePanelDoesNotActivateOrBecomeTheMainWorkspace() passed after 2.190 seconds.
+✔ Test sameWorkspaceVisitsKeepSaveGuardsAndLibraryRootClearsTheCategory() passed after 2.190 seconds.
+✔ Test searchExamplesParseAndWorldSwitchClearsLibraryScope() passed after 2.190 seconds.
+✔ Test linkingUsesTheFocusedRecordOrCurrentSpatialSelection() passed after 2.190 seconds.
+✔ Test referencesAndDirectionalRelationshipsPersistWithoutChangingCanon() passed after 2.190 seconds.
+✔ Test recipeEditUndoCannotClobberANewerEdit() passed after 2.190 seconds.
+✔ Test structuredQueriesNeverFallBackToNamesCommandsOrCapture() passed after 2.190 seconds.
+✔ Test switchingTargetKeepsSeparateScratchAndDoesNotNavigateStudio() passed after 2.190 seconds.
+✔ Test paletteActivityOpensFreshObjectsAndExcludesForeignOrArchivedData() passed after 2.192 seconds.
+✔ Test setupOnlyAppearsForANewInstallationAndExistingProviderChoiceSurvives() passed after 2.192 seconds.
+✔ Test keyboardSelectionStaysBoundedAndCommandsRemainAheadOfCapture() passed after 2.192 seconds.
+✔ Test paletteFindsAndOpensMapsBoardsScenesSettingsAndTools() passed after 2.192 seconds.
+✔ Test historyConnectsMapsConversationsWorldSettingsAndThePalette() passed after 2.192 seconds.
+✔ Test favoritesPersistIndependentlyOfOpenTabsAndTrackRenames() passed after 2.192 seconds.
+✔ Test creationCommandsShareTheFormAndRespectUnsavedWriting() passed after 2.192 seconds.
+✔ Test orderingSkipsArchivedItemsAndStalePreferenceWritesCompose() passed after 2.192 seconds.
+✔ Test openingFavoritesUsesFreshLoreAndPreservesFailedWriting() passed after 2.193 seconds.
+✔ Test successfulSaveIncludesTheSearchIndexAndFailedSaveDoesNotReplaceIt() passed after 2.193 seconds.
+✔ Test archiveAndRestoreKeepFavoritesWithoutLeakingBetweenWorlds() passed after 2.197 seconds.
+✔ Test activityErrorsAndCancellationsNeverBecomeSuccessLabels() passed after 2.198 seconds.
+✔ Test savedLayoutsAndHistoryRestoreTwoFreshSourcesWithoutApprovingThem() passed after 2.198 seconds.
+✔ Test historyOpensCurrentSourcesPreservesWritingAndNeverApprovesCanon() passed after 2.199 seconds.
+✔ Test corruptSettingsArePreservedUntilExplicitResetAndStaleChangesCompose() passed after 2.200 seconds.
+✔ Test splitStaysConnectedAcrossToolsAndResolvesUpdatedLore() passed after 2.201 seconds.
+✔ Test hidingAndPinningLeaveCollectionsSearchableAndRespectUnsavedWriting() passed after 2.201 seconds.
+✔ Test twoNativeEditorsKeepIndependentContentCaretAndUndoWhenSwapped() passed after 2.201 seconds.
+✔ Test diskRestoreAndWorldSwitchNeverDisplayForeignOrArchivedSources() passed after 2.202 seconds.
+✔ Test navigationPersistsOnDiskPerWorldAndNeverChangesContentOrMode() passed after 2.202 seconds.
+✔ Test bothSaveGuardsProtectCloseSwapNavigationArchiveAndWorldChanges() passed after 2.202 seconds.
+✔ Test categoryAliasesAndInvalidOrderingDoNotDuplicateRows() passed after 2.202 seconds.
+✔ Test reviewedBatchReportsCommittedChangesAndPreservesCanon() passed after 2.202 seconds.
+✔ Test modelChangeSetIsStagedForReviewAndNeverApplied() passed after 2.202 seconds.
+✔ Test partiallyFailedBatchReportsActualCountAndLeavesLaterDecisionsPending() passed after 2.202 seconds.
+✔ Test documentCommandsTargetTheSelectedPaneAndKeepFailedWritingOpen() passed after 2.202 seconds.
+✔ Test simulationActivityRemainsExplicitlyHypothetical() passed after 2.202 seconds.
+✔ Test cancellationBeforeQueuedSubmitNeverStartsTransport() passed after 2.202 seconds.
+✔ Test splitGeometryKeepsBothWorkspacesUsableAndTheCanvasHiddenDuringTakeover() passed after 2.202 seconds.
+✔ Test responsesPersistWithoutChangingCanon() passed after 2.202 seconds.
+✔ Test staleProposalCannotOverwriteNewWriting() passed after 2.202 seconds.
+✔ Test streamingTextHidesAnUnfinishedChangeSet() passed after 2.202 seconds.
+✔ Test corruptAndForeignViewPreferencesArePreservedAndCannotLeakSelection() passed after 2.202 seconds.
+✔ Test archivedOrRemovedSelectionsClearWithoutLosingTheMapAndFraming() passed after 2.202 seconds.
+✔ Test growingComposerRevealsFirstLineWithoutMovingCaret() passed after 2.202 seconds.
+✔ Test imageRelativeFramingKeepsZoomAnchorsAndSurvivesPaneResize() passed after 2.202 seconds.
+✔ Test historyAndLayoutsRestoreVisitFramingAndSaveFailuresDoNotConsumeIt() passed after 2.202 seconds.
+✔ Test sampleWorldIsIdempotentAndLeavesOtherWorldsAlone() passed after 2.202 seconds.
+✔ Test eachMapAndUniverseRestoresItsOwnViewAcrossDiskRestartWithoutChangingLore() passed after 2.202 seconds.
+✔ Test pendingDraftSurvivesImmediateWorldSwitch() passed after 2.202 seconds.
+✔ Test quickCaptureAndImportCreateLabelledDrafts() passed after 2.202 seconds.
+✔ Test saveFailuresAndOpenFormsPreventFocusAndManualRemainsIndependent() passed after 2.202 seconds.
+✔ Test loreReferencesRoundTripBetweenTokensAndMarkdown() passed after 2.202 seconds.
+✔ Test graphLayoutIsDeterministicSeparatedAndFollowsOrientation() passed after 2.202 seconds.
+✔ Test explicitNavigationAndInspectionCanLeaveFocusWithoutLosingLayout() passed after 2.202 seconds.
+✔ Test openingARecordKeepsTheWorkspaceItCameFrom() passed after 2.202 seconds.
+✔ Test markdownBlocksCoverListsQuotesTablesAndFencedCode() passed after 2.202 seconds.
+✔ Test sectionChildrenDoNotInflateCharacterNavigation() passed after 2.202 seconds.
+✔ Test companionConversationSwitchKeepsBoardSaveProtection() passed after 2.202 seconds.
+✔ Test settingsSearchFindsActualControlsAcrossSections() passed after 2.202 seconds.
+✔ Test worldSwitchAndNewChatUseTheirOwnDefaults() passed after 2.202 seconds.
+✔ Test canonDiffMarksOnlyChangedLines() passed after 2.202 seconds.
+✔ Test savedAssistantOutputIsAnAIProposedDraftNeverCanon() passed after 2.202 seconds.
+✔ Test boardsChatsAndSelectionShareHistoryWithoutEnablingAI() passed after 2.202 seconds.
+✔ Test boardContentReadsBothFormatsAndNeverGuessesAtDamagedData() passed after 2.202 seconds.
+✔ Test writingPreferencesConfigureNativeEditorWithoutReformattingRichText() passed after 2.202 seconds.
+✔ Test archivingFromTheStudioIsUndoable() passed after 2.202 seconds.
+✔ Test importedTIFFIsActuallyConvertedToPNG() passed after 2.202 seconds.
+✔ Test generatedArtworkIsDecodableAndWithinCanvasLimit() passed after 2.202 seconds.
+✔ Test providerSelectionAndSettingsNavigationDoNotStartChecksOrGeneration() passed after 2.202 seconds.
+✔ Test connectedRecordTrailIsReversibleAndFailedSavesNeverConsumeHistory() passed after 2.202 seconds.
+✔ Test assistanceModePreservesWorkspaceAndEditorGuard() passed after 2.202 seconds.
+✔ Test sectionsUseLiveDataAndActionsPreserveManualAndCanon() passed after 2.202 seconds.
+✔ Test reviewMapLinksStartupAndForeignActivityAreGuarded() passed after 2.202 seconds.
+✔ Test composerSendShortcutHonorsModifiersAndMentions() passed after 2.202 seconds.
+✔ Test corruptAndOversizedImageInputsAreRejected() passed after 2.202 seconds.
+✔ Test repeatedVisitsAreDeduplicatedAndHistoryIsBounded() passed after 2.202 seconds.
+✔ Test recordPickerCanFindBeyondTheOldMenuLimitAndByAlias() passed after 2.202 seconds.
+✔ Test invalidActionsNeverReportSuccessfulReview() passed after 2.202 seconds.
+✔ Test invalidOrAbsentPreferenceFallsBackWithoutLosingOtherPreferences() passed after 2.202 seconds.
+✔ Test profileEntryPointsKeepTheSourceAndHonorUnsavedEditorGuards() passed after 2.202 seconds.
+✔ Test lastWorkspaceFollowsDirectChatRoutesAndRespectsFailedSaves() passed after 2.202 seconds.
+✔ Test staleCanvasMessagesAreRejected() passed after 2.202 seconds.
+✔ Test boardAttachmentsShareLinkedLoreNotImageBytes() passed after 2.202 seconds.
+✔ Test manualLaunchDoesNotLandOnConversation() passed after 2.202 seconds.
+✔ Test attachmentsOnlyDoesNotFallBackToRecentLoreOrForeignIDs() passed after 2.202 seconds.
+✔ Test worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() passed after 2.202 seconds.
+✔ Test historyResolvesFreshLoreSkipsArchivedRecordsAndRejectsForeignSources() passed after 2.202 seconds.
+✔ Test explicitlyAttachedHistoryIsPrioritizedOverTheUnfilteredIndex() passed after 2.202 seconds.
+✔ Test exploreCannotStageEvenWhenTheModelIgnoresTheInstruction() passed after 2.202 seconds.
+✔ Test truncatedBoardPlacementsRetainTheirActualTotal() passed after 2.202 seconds.
+✔ Test corruptAndOutOfRangeWidthsRecoverWithoutBlockingStartup() passed after 2.202 seconds.
+✔ Test explicitlyAttachedOldBoardsAreNotLostBehindTheIndexLimit() passed after 2.202 seconds.
+✔ Test nativeDividerKeyboardAndAccessibilityRespectBounds() passed after 2.202 seconds.
+✔ Test archivedExclusionsSurviveReloadAndRestoreWithoutReintroducingHistory() passed after 2.202 seconds.
+✔ Test contextChoicesPersistPerWorldAndPinnedRecordsCannotSilentlyOverflow() passed after 2.202 seconds.
+✔ Test dimensionsPersistButWindowConstraintsDoNotReplaceThePreference() passed after 2.202 seconds.
+✔ Test nativeDividerTracksGesturesAndCommitsOnlyWhenFinished() passed after 2.202 seconds.
+✔ Test ambiguousTitlesNeverChooseAnArbitraryRecord() passed after 2.202 seconds.
+✔ Test mapPlacementPreservesImageAndRejectsForeignRecords() passed after 2.202 seconds.
+✔ Test attachedHistoryIncludesDescendantsAndExclusionsStillWin() passed after 2.203 seconds.
+✔ Test boardActionsAreWorldScopedReviewedAndKeepExistingScene() passed after 2.202 seconds.
+✔ Test typedCommandNamesRunTheCommandBeforeCapture() passed after 2.202 seconds.
+✔ Test unreadableContextSettingsDoNotSilentlyBroadenAccess() passed after 2.203 seconds.
+✔ Test layoutsRestorePanelWidthsAndLegacyLayoutsRemainReadable() passed after 2.202 seconds.
+✔ Test retryPreservesNewDraftAndCompanionWidthSurvivesRestart() passed after 2.202 seconds.
+✔ Test disappearingComposerCannotOverwriteANewerSharedDraft() passed after 2.202 seconds.
+✔ Test verificationProviderSettingsCannotChangeAnotherStudioOrHostDefaults() passed after 2.202 seconds.
+✔ Test canvasIsHiddenWhenConversationTakesOverACompactWindow() passed after 2.202 seconds.
+✔ Test movingAGroupedCardPreservesOtherCardsAndIndexesEachRecordOnce() passed after 2.202 seconds.
+✔ Test transcriptObserverRespectsScrollingAwayAndReturningToLatest() passed after 2.202 seconds.
+✔ Suite GlobalNavigationTests passed after 2.205 seconds.
+✔ Suite SidebarTests passed after 2.205 seconds.
+✔ Suite DocumentTabTests passed after 2.205 seconds.
+✔ Suite LayoutTests passed after 2.205 seconds.
+✔ Suite QuickCaptureModelTests passed after 2.205 seconds.
+✔ Suite KeyboardCreationTests passed after 2.205 seconds.
+✔ Suite AdvancedSearchTests passed after 2.205 seconds.
+✘ Suite WorkspaceSessionTests failed after 2.206 seconds with 2 issues.
+✔ Suite ConversationToolsUITests passed after 2.205 seconds.
+✔ Suite OnboardingTests passed after 2.205 seconds.
+✔ Suite UniversalPaletteTests passed after 2.205 seconds.
+✔ Suite FavoritesTests passed after 2.205 seconds.
+✔ Suite WorldActivityNavigationTests passed after 2.205 seconds.
+✔ Suite OperationFeedbackTests passed after 2.205 seconds.
+✔ Test canonicalContextExcludesRichTextPayload() passed after 2.204 seconds.
+✔ Suite SplitWorkspaceTests passed after 2.205 seconds.
+✔ Suite SidebarCustomizationTests passed after 2.205 seconds.
+✔ Suite ComposerLayoutTests passed after 2.205 seconds.
+✔ Suite NavigationTests passed after 2.205 seconds.
+✔ Suite PreferenceBehaviorTests passed after 2.205 seconds.
+✔ Suite DashboardTests passed after 2.205 seconds.
+✔ Suite StartupWorkspaceTests passed after 2.205 seconds.
+✔ Suite CommandPaletteRankingTests passed after 2.205 seconds.
+✔ Suite PanelSizingTests passed after 2.205 seconds.
+✔ Test exclusionsRemoveIndexRulesRelationsAndPriorConversation() passed after 2.203 seconds.
+✔ Test agentReceivesRealRelationshipsChronologyAndBoardMembership() passed after 2.203 seconds.
+✔ Suite CanvasBoundaryTests passed after 2.205 seconds.
+✔ Test malformedProposalRetainsProseAndReportsFailureWithoutStaging() passed after 2.204 seconds.
+✔ Suite AssistantContextTests passed after 2.205 seconds.
+✔ Suite WorkspaceActionTests passed after 2.205 seconds.
+✔ Test activityReflectsRealRetrievalAndResponse() passed after 2.203 seconds.
+✔ Suite AgentActivityTests passed after 2.206 seconds.
+✔ Test studioResolvesProposalsOnlyThroughExplicitActionsAndKeepsCanon() passed after 2.208 seconds.
+✔ Test switchingToManualCancelsInFlightAndDoesNotPersistAssistant() passed after 2.208 seconds.
+✔ Test workspaceContextChangesWithoutLeakingOtherUniverses() passed after 2.209 seconds.
+✔ Suite AgentTests passed after 2.211 seconds.
+✔ Test stopPreservesVisibleProseWithoutStagingIncompleteChanges() passed after 2.210 seconds.
+✔ Suite AgentRecoveryTests passed after 2.211 seconds.
+✔ Test restrictedComposerSendUsesPreviewAndPreservesOptionsAfterSending() passed after 2.208 seconds.
+✔ Test continueIncludesTheSavedInterruptedResponse() passed after 2.210 seconds.
+✔ Test acceptedMarkersRefreshTheActiveAtlasWithoutReplacingItsImageOrOtherMaps() passed after 2.212 seconds.
+✔ Test acceptingWorkspaceChangesRefreshesHistoryAndSelectsTheCreatedMap() passed after 2.212 seconds.
+✔ Suite WorkspaceTests passed after 2.214 seconds.
+✔ Test requestFollowsSelectedGraphTimelineAtlasAndEditorContext() passed after 2.231 seconds.
+✔ Suite ConversationFlowTests passed after 2.234 seconds.
+✔ Test remountingTheRealAtlasViewarning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+wRestoresSelectionAndLayers() passed after 2.327 seconds.
+✔ Suite AtlasViewSessionTests passed after 2.328 seconds.
+✔ Test nativeWritingKeepsItsEditorCaretUndoAndSaveCallbackThroughFocus() passed after 2.394 seconds.
+✔ Suite FocusWorkspaceTests passed after 2.397 seconds.
+✔ Test transientHoverClearsWhenContextFocusOrAvailabilityChanges() passed after 2.547 seconds.
+✔ Suite InteractionTests passed after 2.548 seconds.
+✘ Test run with 302 tests in 73 suites failed after 2.548 seconds with 2 issues.
+Note: Some test targets reported failures:
+  - SynthesisPackageTests (Swift Testing)

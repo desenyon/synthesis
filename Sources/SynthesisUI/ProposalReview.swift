@@ -67,6 +67,10 @@ struct ProposalCard: View {
     .overlay(RoundedRectangle(cornerRadius: Metric.cardRadius).stroke(t.hairline, lineWidth: 1))
     .accessibilityElement(children: .contain)
     .accessibilityLabel("Proposed changes: \(proposal.summary)")
+    .workspaceReferenceDraggable(
+      WorldReference(worldID: proposal.worldID, kind: .proposal, id: proposal.id),
+      title: proposal.summary, icon: "checkmark.seal", studio: studio
+    )
     .contextMenu { Button("Inspect proposal") { studio.inspect(.proposal(proposal.id)) } }
     .disabled(studio.reviewingProposal)
     .animation(reduceMotion ? nil : Motion.panelAnimation, value: expanded)

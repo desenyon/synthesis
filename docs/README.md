@@ -17,6 +17,10 @@
 | [Drag records](DRAG_RECORDS.md) | Drag current lore into editor panes or onto Canvas |
 | [Focus](FOCUS.md) | Temporarily hide unrelated controls and return to the original layout |
 | [Startup](STARTUP.md) | Choose a device-local home or reopen the last workspace |
+| [Sessions](SESSION_RESTORE.md) | Restore document tabs, views, selections and unsent drafts after restart |
+| [Quick capture](QUICK_CAPTURE.md) | Native small-window capture, per-world scratch drafts and retry-safe saving |
+| [Conversation tools](CONVERSATION_TOOLS.md) | Message branching, exact fork points and reusable prompt recipes |
+| [Entity schemas](ENTITY_SCHEMAS.md) | Custom types, typed/conditional values, inheritance, templates and property canon |
 | [Settings](SETTINGS.md) | What each preference does and where it is stored |
 
 ## Understanding the project
@@ -40,6 +44,9 @@
 | [Next pass](NEXT_PASS.md) | Owner request ledger: done and remaining scope |
 | [Handoff](HANDOFF.md) | Start here when picking the work up |
 | [Run prompt](RUN_PROMPT.md) | Prompt for a coding agent continuing the work |
+| [Expansion ledger](EXPANSION.md) | All 394 requirements and individual acceptance evidence |
+| [Parallel checkpoint](verification/expansion-parallel-checkpoint/README.md) | Saved code/checks, failures, incomplete wiring and next capture commands |
+| [Parallel ownership](PARALLEL_WORK.md) | Worker roles, coordination rules and configured versus actual concurrency |
 | [Progress](PROGRESS.md) | Dated log of each verified slice |
 | [Audit](AUDIT.md) | The UI audit and the status of each item |
 | [Learnings](LEARNINGS.md) | Operational lessons and the AGENTS.md change ledger |

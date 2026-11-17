@@ -1,0 +1,697 @@
+[0/1] Planning build
+Building for debugging...
+[0/11] Write sources
+[4/11] Copying Migrations
+[5/11] Write swift-version--1AB21518FC5DEDBE.txt
+[7/19] Compiling SynthesisCore EntitySchemas.swift
+[8/20] Compiling SynthesisCore WorkspaceStore.swift
+[9/20] Compiling SynthesisCore EntitySchemaModels.swift
+[10/20] Compiling SynthesisCore EntityFormula.swift
+[11/20] Compiling SynthesisCore ConversationToolsValidation.swift
+[12/20] Emitting module SynthesisCore
+[13/20] Compiling SynthesisCore WorldArchive.swift
+[14/20] Compiling SynthesisCore WorldReference.swift
+[15/42] Compiling SynthesisCore EntityPropertyText.swift
+[16/44] Compiling SynthesisCore WhatIfBranches.swift
+[17/44] Compiling SynthesisCore Chronology.swift
+[18/44] Compiling SynthesisCore ConversationBranches.swift
+[19/44] Compiling SynthesisCore CreativeComponents.swift
+[20/44] Compiling SynthesisCore EditorJournal.swift
+[21/44] Compiling SynthesisCore LoreSearch.swift
+[22/44] Compiling SynthesisCore Portability.swift
+[23/46] Compiling SynthesisCore WorldActivity.swift
+[24/46] Compiling SynthesisCore WorldChangeHistory.swift
+[25/46] Compiling SynthesisCore WorkspaceActions.swift
+[26/46] Compiling SynthesisCore WorkspaceRevisions.swift
+[27/46] Compiling SynthesisCore RelationshipPairs.swift
+[28/46] Compiling SynthesisCore Retrieval.swift
+[29/46] Compiling SynthesisCore QuickCapture.swift
+[30/46] Compiling SynthesisCore RecordArtwork.swift
+[31/46] Compiling SynthesisCore RecordSections.swift
+[32/46] Compiling SynthesisCore AgentEngine.swift
+[33/46] Compiling SynthesisCore AssistantContext.swift
+[34/46] Compiling SynthesisCore AtlasMaps.swift
+[35/46] Compiling SynthesisCore Rules.swift
+[36/46] Compiling SynthesisCore TechniqueTree.swift
+[37/46] Compiling SynthesisCore Preferences.swift
+[38/46] Compiling SynthesisCore PromptRecipes.swift
+[39/46] Compiling SynthesisCore Proposals.swift
+[40/46] Compiling SynthesisCore WorldChecks.swift
+[41/46] Compiling SynthesisCore WorldSummary.swift
+[42/154] Compiling SynthesisUI AIActivity.swift
+[43/154] Compiling SynthesisUI ActivityCaptureFixtures.swift
+[44/154] Compiling SynthesisUI Artwork.swift
+[45/157] Emitting module SynthesisCoreTests
+[46/157] Compiling SynthesisUI CommandPalette.swift
+[47/157] Compiling SynthesisUI Components.swift
+[48/157] Compiling SynthesisUI Composer.swift
+[49/157] Compiling SynthesisUI EntityValueEditor.swift
+[50/157] Compiling SynthesisUI Favorites.swift
+[51/157] Compiling SynthesisUI FloatingCompanion.swift
+[52/157] Compiling SynthesisUI AssistantContextPanel.swift
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:32:100: note: expanded code originates here
+ 30 |       expectedVersion: nil)
+ 31 |     let reopened = try WorkspaceStore(path: path)
+ 32 |     let review = try #require(reopened.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(reopened.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("reopened"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 33 |     #expect(review.snapshot.values["strength"] == .number(10))
+ 34 |     #expect(review.snapshot.values["living"] == .boolean(true))
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:80:97: note: expanded code originates here
+ 78 |     let profile = try store.saveEntityProfile(
+ 79 |       worldID: world.id, recordID: record.id, typeID: type.id, values: values, expectedVersion: 1)
+ 80 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 81 |     #expect(review.snapshot.values["power"] == .number(17))
+ 82 |     #expect(profile.values == values)
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:121:97: note: expanded code originates here
+119 |       worldID: world.id, recordID: record.id, typeID: type.id,
+120 |       values: ["cause": .text("The winter crossing")], expectedVersion: 1)
+121 |     var review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+122 |     #expect(!review.snapshot.visibleKeys.contains("cause"))
+123 |     #expect(review.snapshot.values["cause"] == .text("The winter crossing"))
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:133:93: note: expanded code originates here
+131 |       expectedRevision: review.revision)
+132 |     let accepted = profile.canonical
+133 |     review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                  `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+134 |     #expect(review.isCanon)
+135 |     type = try store.saveEntityType(
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:143:98: note: expanded code originates here
+141 |         expectedRevision: review.revision)
+142 |     }
+143 |     let changed = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                       `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+144 |     #expect(!changed.isCanon && changed.snapshot.visibleKeys.contains("cause"))
+145 |     #expect(changed.profile.canonical == accepted)
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:284:97: note: expanded code originates here
+282 |     let record = try store.createTypedEntity(
+283 |       worldID: world.id, typeID: type.id, title: "A test of dependencies")
+284 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+285 |     if case .number(let result) = review.snapshot.values["value_59"] {
+286 |       #expect(result > 1_000_000)
+[53/157] Compiling SynthesisUI Atlas.swift
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:32:100: note: expanded code originates here
+ 30 |       expectedVersion: nil)
+ 31 |     let reopened = try WorkspaceStore(path: path)
+ 32 |     let review = try #require(reopened.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(reopened.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("reopened"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 33 |     #expect(review.snapshot.values["strength"] == .number(10))
+ 34 |     #expect(review.snapshot.values["living"] == .boolean(true))
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:80:97: note: expanded code originates here
+ 78 |     let profile = try store.saveEntityProfile(
+ 79 |       worldID: world.id, recordID: record.id, typeID: type.id, values: values, expectedVersion: 1)
+ 80 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 81 |     #expect(review.snapshot.values["power"] == .number(17))
+ 82 |     #expect(profile.values == values)
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:121:97: note: expanded code originates here
+119 |       worldID: world.id, recordID: record.id, typeID: type.id,
+120 |       values: ["cause": .text("The winter crossing")], expectedVersion: 1)
+121 |     var review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+122 |     #expect(!review.snapshot.visibleKeys.contains("cause"))
+123 |     #expect(review.snapshot.values["cause"] == .text("The winter crossing"))
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:133:93: note: expanded code originates here
+131 |       expectedRevision: review.revision)
+132 |     let accepted = profile.canonical
+133 |     review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                  `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+134 |     #expect(review.isCanon)
+135 |     type = try store.saveEntityType(
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:143:98: note: expanded code originates here
+141 |         expectedRevision: review.revision)
+142 |     }
+143 |     let changed = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                       `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+144 |     #expect(!changed.isCanon && changed.snapshot.visibleKeys.contains("cause"))
+145 |     #expect(changed.profile.canonical == accepted)
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:284:97: note: expanded code originates here
+282 |     let record = try store.createTypedEntity(
+283 |       worldID: world.id, typeID: type.id, title: "A test of dependencies")
+284 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+285 |     if case .number(let result) = review.snapshot.values["value_59"] {
+286 |       #expect(result > 1_000_000)
+[54/157] Compiling SynthesisUI AtlasContextCaptureFixtures.swift
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:32:100: note: expanded code originates here
+ 30 |       expectedVersion: nil)
+ 31 |     let reopened = try WorkspaceStore(path: path)
+ 32 |     let review = try #require(reopened.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(reopened.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("reopened"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 33 |     #expect(review.snapshot.values["strength"] == .number(10))
+ 34 |     #expect(review.snapshot.values["living"] == .boolean(true))
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:80:97: note: expanded code originates here
+ 78 |     let profile = try store.saveEntityProfile(
+ 79 |       worldID: world.id, recordID: record.id, typeID: type.id, values: values, expectedVersion: 1)
+ 80 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 81 |     #expect(review.snapshot.values["power"] == .number(17))
+ 82 |     #expect(profile.values == values)
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:121:97: note: expanded code originates here
+119 |       worldID: world.id, recordID: record.id, typeID: type.id,
+120 |       values: ["cause": .text("The winter crossing")], expectedVersion: 1)
+121 |     var review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+122 |     #expect(!review.snapshot.visibleKeys.contains("cause"))
+123 |     #expect(review.snapshot.values["cause"] == .text("The winter crossing"))
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:133:93: note: expanded code originates here
+131 |       expectedRevision: review.revision)
+132 |     let accepted = profile.canonical
+133 |     review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                  `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+134 |     #expect(review.isCanon)
+135 |     type = try store.saveEntityType(
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:143:98: note: expanded code originates here
+141 |         expectedRevision: review.revision)
+142 |     }
+143 |     let changed = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                       `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+144 |     #expect(!changed.isCanon && changed.snapshot.visibleKeys.contains("cause"))
+145 |     #expect(changed.profile.canonical == accepted)
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaTests.swift:284:97: note: expanded code originates here
+282 |     let record = try store.createTypedEntity(
+283 |       worldID: world.id, typeID: type.id, title: "A test of dependencies")
+284 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: record.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,record.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("record.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+285 |     if case .number(let result) = review.snapshot.values["value_59"] {
+286 |       #expect(result > 1_000_000)
+[55/157] Compiling SynthesisCoreTests WorldCheckTests.swift
+[56/157] Compiling SynthesisCoreTests WorldReferenceTests.swift
+[57/157] Compiling SynthesisCoreTests WorldSummaryTests.swift
+[58/157] Emitting module SynthesisUI
+[59/165] Compiling SynthesisUI AtlasMapEditor.swift
+[60/165] Compiling SynthesisUI AtlasViewSession.swift
+[61/165] Compiling SynthesisUI CanvasHost.swift
+[62/165] Compiling SynthesisUI Conversation.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AgentTests.swift:53:15: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 51 |     let world = try store.createWorld(name: "Chosen universe")
+ 52 |     let foreign = try store.createWorld(name: "Private other universe")
+ 53 |     try store.createRecord(worldID: foreign.id, title: "PRIVATE_SENTINEL", body: "Never included")
+    |               `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 54 |     let chat = try store.createConversation(worldID: world.id)
+ 55 |     let transport = CountingTransport()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:14:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 12 |       worldID: world.id, parentID: entity.id, title: "Childhood", body: "Grew up at sea")
+ 13 |     let neighbor = try store.createRecord(worldID: world.id, title: "Harbor", kind: "entity")
+ 14 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:17:17: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+ 17 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+    |                 `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 18 |     }
+ 19 |     var options = AssistantContextOptions()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:71:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 69 |     let hidden = try store.createRecord(
+ 70 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 71 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:73:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 71 |     try store.addRelation(
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 74 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 75 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:106:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+104 |     let world = try store.createWorld(name: "Many boards")
+105 |     for index in 0..<27 {
+106 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+107 |     }
+108 |     let boards = try store.assistantBoards(worldID: world.id)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:188:17: warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+186 |     let world = try store.createWorld(name: "Many histories")
+187 |     for index in 0..<65 {
+188 |       try store.createChronologyLane(worldID: world.id, name: "Period \(index)", kind: "period")
+    |                 `- warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+189 |     }
+190 |     let lane = try #require(store.chronologyLanes(worldID: world.id).last)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[63/165] Compiling SynthesisUI ConversationTools.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AgentTests.swift:53:15: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 51 |     let world = try store.createWorld(name: "Chosen universe")
+ 52 |     let foreign = try store.createWorld(name: "Private other universe")
+ 53 |     try store.createRecord(worldID: foreign.id, title: "PRIVATE_SENTINEL", body: "Never included")
+    |               `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 54 |     let chat = try store.createConversation(worldID: world.id)
+ 55 |     let transport = CountingTransport()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:14:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 12 |       worldID: world.id, parentID: entity.id, title: "Childhood", body: "Grew up at sea")
+ 13 |     let neighbor = try store.createRecord(worldID: world.id, title: "Harbor", kind: "entity")
+ 14 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:17:17: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+ 17 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+    |                 `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 18 |     }
+ 19 |     var options = AssistantContextOptions()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:71:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 69 |     let hidden = try store.createRecord(
+ 70 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 71 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:73:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 71 |     try store.addRelation(
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 74 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 75 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:106:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+104 |     let world = try store.createWorld(name: "Many boards")
+105 |     for index in 0..<27 {
+106 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+107 |     }
+108 |     let boards = try store.assistantBoards(worldID: world.id)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:188:17: warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+186 |     let world = try store.createWorld(name: "Many histories")
+187 |     for index in 0..<65 {
+188 |       try store.createChronologyLane(worldID: world.id, name: "Period \(index)", kind: "period")
+    |                 `- warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+189 |     }
+190 |     let lane = try #require(store.chronologyLanes(worldID: world.id).last)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[64/165] Compiling SynthesisUI ConversationToolsCaptureFixtures.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AgentTests.swift:53:15: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 51 |     let world = try store.createWorld(name: "Chosen universe")
+ 52 |     let foreign = try store.createWorld(name: "Private other universe")
+ 53 |     try store.createRecord(worldID: foreign.id, title: "PRIVATE_SENTINEL", body: "Never included")
+    |               `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 54 |     let chat = try store.createConversation(worldID: world.id)
+ 55 |     let transport = CountingTransport()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:14:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 12 |       worldID: world.id, parentID: entity.id, title: "Childhood", body: "Grew up at sea")
+ 13 |     let neighbor = try store.createRecord(worldID: world.id, title: "Harbor", kind: "entity")
+ 14 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:17:17: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+ 17 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+    |                 `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 18 |     }
+ 19 |     var options = AssistantContextOptions()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:71:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 69 |     let hidden = try store.createRecord(
+ 70 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 71 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:73:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 71 |     try store.addRelation(
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 74 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 75 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:106:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+104 |     let world = try store.createWorld(name: "Many boards")
+105 |     for index in 0..<27 {
+106 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+107 |     }
+108 |     let boards = try store.assistantBoards(worldID: world.id)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:188:17: warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+186 |     let world = try store.createWorld(name: "Many histories")
+187 |     for index in 0..<65 {
+188 |       try store.createChronologyLane(worldID: world.id, name: "Period \(index)", kind: "period")
+    |                 `- warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+189 |     }
+190 |     let lane = try #require(store.chronologyLanes(worldID: world.id).last)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[65/165] Compiling SynthesisUI ProposalReview.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AgentTests.swift:53:15: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 51 |     let world = try store.createWorld(name: "Chosen universe")
+ 52 |     let foreign = try store.createWorld(name: "Private other universe")
+ 53 |     try store.createRecord(worldID: foreign.id, title: "PRIVATE_SENTINEL", body: "Never included")
+    |               `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 54 |     let chat = try store.createConversation(worldID: world.id)
+ 55 |     let transport = CountingTransport()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:14:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 12 |       worldID: world.id, parentID: entity.id, title: "Childhood", body: "Grew up at sea")
+ 13 |     let neighbor = try store.createRecord(worldID: world.id, title: "Harbor", kind: "entity")
+ 14 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:17:17: warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 15 |       worldID: world.id, source: entity.id, target: neighbor.id, label: "lives in")
+ 16 |     for index in 0..<20 {
+ 17 |       try store.createRecord(worldID: world.id, title: "Unrelated \(index)")
+    |                 `- warning: result of call to 'createRecord(worldID:title:body:kind:category:origin:)' is unused [#NoUsage]
+ 18 |     }
+ 19 |     var options = AssistantContextOptions()
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:71:15: warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 69 |     let hidden = try store.createRecord(
+ 70 |       worldID: world.id, title: "EXCLUDED_SENTINEL", body: "PRIVATE_BODY", kind: "entity")
+ 71 |     try store.addRelation(
+    |               `- warning: result of call to 'addRelation(worldID:source:target:label:origin:)' is unused [#NoUsage]
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:73:15: warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 71 |     try store.addRelation(
+ 72 |       worldID: world.id, source: visible.id, target: hidden.id, label: "SECRET_EDGE")
+ 73 |     try store.addRule(
+    |               `- warning: result of call to 'addRule(worldID:systemID:kind:title:body:origin:)' is unused [#NoUsage]
+ 74 |       worldID: world.id, systemID: hidden.id, kind: .cost, title: "PRIVATE_RULE",
+ 75 |       body: "SECRET_COST")
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:106:17: warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+104 |     let world = try store.createWorld(name: "Many boards")
+105 |     for index in 0..<27 {
+106 |       try store.saveBoard(worldID: world.id, name: "Board \(index)", kind: "canvas", content: "{}")
+    |                 `- warning: result of call to 'saveBoard(worldID:id:name:kind:content:)' is unused [#NoUsage]
+107 |     }
+108 |     let boards = try store.assistantBoards(worldID: world.id)
+
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/AssistantContextTests.swift:188:17: warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+186 |     let world = try store.createWorld(name: "Many histories")
+187 |     for index in 0..<65 {
+188 |       try store.createChronologyLane(worldID: world.id, name: "Period \(index)", kind: "period")
+    |                 `- warning: result of call to 'createChronologyLane(worldID:name:kind:parentID:start:end:notes:)' is unused [#NoUsage]
+189 |     }
+190 |     let lane = try #require(store.chronologyLanes(worldID: world.id).last)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[66/165] Compiling SynthesisUI QuickCapture.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ChronologyTests.swift:29:17: warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 27 |     }
+ 28 |     for change in proposal.changes {
+ 29 |       try store.resolveChange(
+    |                 `- warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 30 |         worldID: world.id, proposalID: proposal.id, changeID: change.id, accept: true,
+ 31 |         confirmation: proposal.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[67/165] Compiling SynthesisUI QuickCaptureCaptureFixtures.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ChronologyTests.swift:29:17: warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 27 |     }
+ 28 |     for change in proposal.changes {
+ 29 |       try store.resolveChange(
+    |                 `- warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 30 |         worldID: world.id, proposalID: proposal.id, changeID: change.id, accept: true,
+ 31 |         confirmation: proposal.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[68/165] Compiling SynthesisUI QuickCaptureModel.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ChronologyTests.swift:29:17: warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 27 |     }
+ 28 |     for change in proposal.changes {
+ 29 |       try store.resolveChange(
+    |                 `- warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 30 |         worldID: world.id, proposalID: proposal.id, changeID: change.id, accept: true,
+ 31 |         confirmation: proposal.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[69/165] Compiling SynthesisUI RecordCreation.swift
+/Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/ChronologyTests.swift:29:17: warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 27 |     }
+ 28 |     for change in proposal.changes {
+ 29 |       try store.resolveChange(
+    |                 `- warning: result of call to 'resolveChange(worldID:proposalID:changeID:accept:confirmation:)' is unused [#NoUsage]
+ 30 |         worldID: world.id, proposalID: proposal.id, changeID: change.id, accept: true,
+ 31 |         confirmation: proposal.id)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[70/165] Compiling SynthesisUI CanvasModels.swift
+[71/165] Compiling SynthesisUI CaptureFixtures.swift
+[72/165] Compiling SynthesisUI CommandCatalog.swift
+[73/165] Compiling SynthesisUI RecordDrag.swift
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaArchiveTests.swift:23:95: note: expanded code originates here
+ 21 |     let mira = try store.createTypedEntity(
+ 22 |       worldID: world.id, typeID: child.id, title: "Mira", templateID: template.id)
+ 23 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: mira.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,mira.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("mira.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 24 |     _ = try store.acceptEntityProperties(
+ 25 |       worldID: world.id, recordID: mira.id, confirmedProfileID: review.profile.id,
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaArchiveTests.swift:33:76: note: expanded code originates here
+ 30 |     let copiedMira = try #require(records.first { $0.title == "Mira" })
+ 31 |     let copiedSea = try #require(records.first { $0.title == "The Glass Sea" })
+ 32 |     let copiedReview = try #require(
+    |                            `- note: in expansion of macro 'require' here
+ 33 |       store.entityProfileReview(worldID: copy.id, recordID: copiedMira.id))
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },copy.id,copiedMira.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("copy.id")),("recordID",.__fromSyntaxNode("copiedMira.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 34 |     #expect(copiedMira.id != mira.id && copiedReview.profile.typeID != child.id)
+ 35 |     #expect(copiedReview.snapshot.values["home"] == .entity(copiedSea.id))
+[74/165] Compiling SynthesisUI RecordDragCaptureFixtures.swift
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaArchiveTests.swift:23:95: note: expanded code originates here
+ 21 |     let mira = try store.createTypedEntity(
+ 22 |       worldID: world.id, typeID: child.id, title: "Mira", templateID: template.id)
+ 23 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: mira.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,mira.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("mira.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 24 |     _ = try store.acceptEntityProperties(
+ 25 |       worldID: world.id, recordID: mira.id, confirmedProfileID: review.profile.id,
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaArchiveTests.swift:33:76: note: expanded code originates here
+ 30 |     let copiedMira = try #require(records.first { $0.title == "Mira" })
+ 31 |     let copiedSea = try #require(records.first { $0.title == "The Glass Sea" })
+ 32 |     let copiedReview = try #require(
+    |                            `- note: in expansion of macro 'require' here
+ 33 |       store.entityProfileReview(worldID: copy.id, recordID: copiedMira.id))
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },copy.id,copiedMira.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("copy.id")),("recordID",.__fromSyntaxNode("copiedMira.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 34 |     #expect(copiedMira.id != mira.id && copiedReview.profile.typeID != child.id)
+ 35 |     #expect(copiedReview.snapshot.values["home"] == .entity(copiedSea.id))
+[75/165] Compiling SynthesisUI RecordLinkSheet.swift
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaArchiveTests.swift:23:95: note: expanded code originates here
+ 21 |     let mira = try store.createTypedEntity(
+ 22 |       worldID: world.id, typeID: child.id, title: "Mira", templateID: template.id)
+ 23 |     let review = try #require(store.entityProfileReview(worldID: world.id, recordID: mira.id))
+    |                      `- note: in expansion of macro 'require' here
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },world.id,mira.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("world.id")),("recordID",.__fromSyntaxNode("mira.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 24 |     _ = try store.acceptEntityProperties(
+ 25 |       worldID: world.id, recordID: mira.id, confirmedProfileID: review.profile.id,
+
+macro expansion #require:2:3: error: call can throw, but it is not marked with 'try' and the error is not handled
+`- /Users/desenyon/Developer/synthesis/Tests/SynthesisCoreTests/EntitySchemaArchiveTests.swift:33:76: note: expanded code originates here
+ 30 |     let copiedMira = try #require(records.first { $0.title == "Mira" })
+ 31 |     let copiedSea = try #require(records.first { $0.title == "The Glass Sea" })
+ 32 |     let copiedReview = try #require(
+    |                            `- note: in expansion of macro 'require' here
+ 33 |       store.entityProfileReview(worldID: copy.id, recordID: copiedMira.id))
+    +--- macro expansion #require --------------------------------------
+    |1 | Testing.__checkFunctionCall(store.self,calling: {
+    |2 |   $0.entityProfileReview(worldID: $1,recordID: $2)
+    |  |   `- error: call can throw, but it is not marked with 'try' and the error is not handled
+    |3 | },copy.id,copiedMira.id,expression: .__fromFunctionCall(.__fromSyntaxNode("store"),"entityProfileReview",("worldID",.__fromSyntaxNode("copy.id")),("recordID",.__fromSyntaxNode("copiedMira.id"))),comments: [],isRequired: true,sourceLocation: Testing.SourceLocation.__here()).__required()
+    +-------------------------------------------------------------------
+ 34 |     #expect(copiedMira.id != mira.id && copiedReview.profile.typeID != child.id)
+ 35 |     #expect(copiedReview.snapshot.values["home"] == .entity(copiedSea.id))
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+error: fatalError

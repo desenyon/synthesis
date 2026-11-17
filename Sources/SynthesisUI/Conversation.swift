@@ -11,6 +11,15 @@ struct ConversationStudio: View {
   /// False when the companion replaces the canvas in a narrow window.
   var docked = true
   @State private var followLatest = true
+  @State private var lineage: ConversationBranch?
+  @State private var branches: [ConversationBranch] = []
+  @State private var recipesPresented = false
+  @State private var recipesWorldID = ""
+  @State private var transcriptSpace = UUID()
+  @State private var displayedConversationID: String?
+  @State private var restoringScroll = false
+  @State private var transcriptViewportHeight: CGFloat = 0
+  @State private var transcriptEnd: CGFloat = 0
   var body: some View {
     GeometryReader { geo in
       let narrow = geo.size.width < 620
@@ -42,6 +51,23 @@ struct ConversationStudio: View {
         }
       }.frame(width: geo.size.width, height: geo.size.height).clipped()
     }.background(studio.t.background)
+      .onAppear {
+        reloadLineage()
+        if studio.captureHint.contains("recipe-") && !studio.captureHint.hasSuffix("applied") {
+          recipesWorldID = studio.worldID
+          recipesPresented = true
+        }
+      }
+      .onChange(of: studio.conversationID) { _, _ in reloadLineage() }
+      .onChange(of: studio.worldRevision) { _, _ in reloadLineage() }
+      .studioSheet(isPresented: $recipesPresented) {
+        PromptRecipesSheet(
+          studio: studio, worldID: recipesWorldID,
+          initialInstructions: studio.captureHint.hasSuffix("editor")
+            ? "Explore the character's motives, private fears and loyalties. Ground the answer in the selected lore and keep alternatives hypothetical."
+            : "",
+          createOnOpen: studio.captureHint.hasSuffix("editor"), close: { recipesPresented = false })
+      }
       .overlay(alignment: .trailing) {
         // Background verification renders the same popover contents without activating macOS.
         if ["composer-context", "light-composer-context", "composer-browser"].contains(
@@ -69,6 +95,30 @@ struct ConversationStudio: View {
             studio.sheet = .rename
           }
           Button("Archive conversation") { studio.archive(chat) }
+          if let lineage {
+            Divider()
+            Button(
+              lineage.parentArchived
+                ? "Restore original & open fork point" : "Open original at fork point"
+            ) {
+              studio.openBranchSource(lineage, keepWorkspace: companion)
+            }.disabled(studio.busy)
+          }
+          if !branches.isEmpty {
+            Divider()
+            MenuSection("Branches") {
+              ForEach(branches) { branch in
+                Button(branch.archived ? "Restore “\(branch.title)”" : branch.title) {
+                  if branch.archived { studio.restore(conversationID: branch.conversationID) }
+                  if let child = studio.conversations.first(where: {
+                    $0.id == branch.conversationID
+                  }) {
+                    studio.openChat(child, keepWorkspace: companion)
+                  }
+                }
+              }
+            }
+          }
         } label: {
           HStack(spacing: 5) {
             Text(chat.title).font(.studio(size: 15, weight: .semibold)).lineLimit(1)
@@ -80,6 +130,11 @@ struct ConversationStudio: View {
         Text("New conversation").font(.studio(size: 15, weight: .semibold)).lineLimit(1)
       }
     } trailing: {
+      IconButton(icon: "books.vertical", label: "Prompt recipes", t: studio.t) {
+        studio.persistPendingComposer()
+        recipesWorldID = studio.worldID
+        recipesPresented = true
+      }
       IconMenu(icon: "clock.arrow.circlepath", label: "Conversation history", t: studio.t) {
         ForEach(studio.conversations.prefix(20)) { chat in
           Button(chat.title) { studio.openChat(chat, keepWorkspace: companion) }
@@ -214,8 +269,19 @@ struct ConversationStudio: View {
     ScrollViewReader { proxy in
       ScrollView {
         VStack(alignment: .leading, spacing: 26) {
+          if let lineage {
+            ConversationLineage(studio: studio, branch: lineage, companion: companion)
+          }
           ForEach(studio.messages) { message in
-            ChatRow(studio: studio, message: message, narrow: narrow)
+            ChatRow(studio: studio, message: message, narrow: narrow, companion: companion)
+              .id(message.id)
+              .background {
+                GeometryReader { geometry in
+                  Color.clear.preference(
+                    key: TranscriptFramePreference.self,
+                    value: [message.id: geometry.frame(in: .named(transcriptSpace))])
+                }
+              }
           }
           if studio.busy
             || studio.activity.contains(where: { $0.state == .failed || $0.state == .cancelled })
@@ -234,12 +300,43 @@ struct ConversationStudio: View {
             }
           }
           Color.clear.frame(height: 1).id("latest")
-            .background(TranscriptScrollObserver { followLatest = $0 })
+            .background(
+              TranscriptScrollObserver { value in
+                if !restoringScroll { followLatest = value }
+              }
+            )
+            .background {
+              GeometryReader { geometry in
+                Color.clear.preference(
+                  key: TranscriptFramePreference.self,
+                  value: ["latest": geometry.frame(in: .named(transcriptSpace))])
+              }
+            }
         }.frame(maxWidth: 720, alignment: .leading).padding(.horizontal, narrow ? 18 : 40)
           .padding(.top, 12).padding(.bottom, 20).frame(maxWidth: .infinity)
       }
+      .coordinateSpace(name: transcriptSpace)
+      .onGeometryChange(for: CGFloat.self) {
+        $0.size.height
+      } action: {
+        transcriptViewportHeight = $0
+      }
+      .onPreferenceChange(TranscriptFramePreference.self) { frames in
+        if let end = frames["latest"]?.maxY, abs(end - transcriptEnd) > 0.5 { transcriptEnd = end }
+        guard !restoringScroll, let id = studio.conversationID, displayedConversationID == id else {
+          return
+        }
+        let anchor =
+          followLatest
+          ? studio.messages.last?.id
+          : frames.filter { $0.key != "latest" && $0.value.maxY > 0 }
+            .min(by: { $0.value.minY < $1.value.minY })?.key
+        if let anchor, studio.conversationScrollAnchors[id] != anchor {
+          studio.conversationScrollAnchors[id] = anchor
+        }
+      }
       .overlay(alignment: .bottomTrailing) {
-        if !followLatest {
+        if !followLatest && transcriptEnd > transcriptViewportHeight + 2 {
           Button {
             followLatest = true
             withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
@@ -252,28 +349,69 @@ struct ConversationStudio: View {
             .opacity.combined(with: .move(edge: .bottom)))
         }
       }
-      .onAppear { proxy.scrollTo("latest", anchor: .bottom) }
+      .onAppear { restoreScroll(proxy) }
       .onChange(of: studio.messages.count) { _, _ in
-        if followLatest {
+        if followLatest, displayedConversationID == studio.conversationID, !restoringScroll {
           withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
             proxy.scrollTo("latest", anchor: .bottom)
           }
         }
       }
       .onChange(of: studio.streamed) { _, _ in
-        if followLatest { proxy.scrollTo("latest", anchor: .bottom) }
+        if followLatest, !restoringScroll { proxy.scrollTo("latest", anchor: .bottom) }
       }
       .onChange(of: studio.conversationID) { _, _ in
-        followLatest = true
-        proxy.scrollTo("latest", anchor: .bottom)
+        restoreScroll(proxy)
+      }
+      .onChange(of: studio.conversationRevealMessageID) { _, value in
+        if value != nil { restoreScroll(proxy) }
       }
     }
+  }
+
+  private func reloadLineage() {
+    lineage = nil
+    branches = []
+    guard let id = studio.conversationID else { return }
+    studio.perform {
+      lineage = try studio.store.conversationBranch(worldID: studio.worldID, conversationID: id)
+      branches = try studio.store.conversationBranches(
+        worldID: studio.worldID, parentConversationID: id)
+    }
+  }
+  private func restoreScroll(_ proxy: ScrollViewProxy) {
+    restoringScroll = true
+    let conversation = studio.conversationID
+    let world = studio.worldID
+    displayedConversationID = conversation
+    // Wait for the newly opened thread's layout, rather than scrolling the previous thread.
+    DispatchQueue.main.async {
+      guard studio.worldID == world, studio.conversationID == conversation else { return }
+      let target = studio.conversationReadTarget()
+      let explicit = studio.conversationRevealMessageID != nil
+      followLatest = target == nil || (!explicit && target == studio.messages.last?.id)
+      if let target, !followLatest {
+        proxy.scrollTo(target, anchor: .top)
+      } else {
+        proxy.scrollTo("latest", anchor: .bottom)
+      }
+      studio.conversationRevealMessageID = nil
+      DispatchQueue.main.async { restoringScroll = false }
+    }
+  }
+}
+
+private struct TranscriptFramePreference: PreferenceKey {
+  static var defaultValue: [String: CGRect] = [:]
+  static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+    value.merge(nextValue(), uniquingKeysWith: { _, new in new })
   }
 }
 
 /// Opens `synthesis://record/<id>` links against the selected world only.
 @MainActor func recordLinkAction(_ studio: Studio) -> OpenURLAction {
   OpenURLAction { url in
+    if studio.openWorkspaceReference(url) { return .handled }
     if url.scheme == "synthesis", url.host == "record",
       let record = studio.records.first(where: { $0.id == url.lastPathComponent })
     {
@@ -291,6 +429,7 @@ struct ChatRow: View {
   @ObservedObject var studio: Studio
   let message: ChatMessage
   var narrow = false
+  var companion = false
   @State private var copied = false
   var body: some View {
     switch message.role {
@@ -300,19 +439,22 @@ struct ChatRow: View {
     }
   }
   private var user: some View {
-    HStack {
-      Spacer(minLength: narrow ? 24 : 80)
-      Text(
-        (try? AttributedString(
-          markdown: message.body,
-          options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
-          ?? AttributedString(message.body)
-      )
-      .environment(\.openURL, recordLinkAction(studio)).tint(studio.t.accent)
-      .font(.studio(size: 15)).lineSpacing(5).textSelection(.enabled)
-      .padding(.horizontal, 15).padding(.vertical, 11)
-      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
-    }.accessibilityElement(children: .combine).accessibilityLabel("You: \(message.body)")
+    VStack(alignment: .trailing, spacing: 4) {
+      HStack {
+        Spacer(minLength: narrow ? 24 : 80)
+        Text(
+          (try? AttributedString(
+            markdown: message.body,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+            ?? AttributedString(message.body)
+        )
+        .environment(\.openURL, recordLinkAction(studio)).tint(studio.t.accent)
+        .font(.studio(size: 15)).lineSpacing(5).textSelection(.enabled)
+        .padding(.horizontal, 15).padding(.vertical, 11)
+        .background(studio.t.surface, in: RoundedRectangle(cornerRadius: 16))
+      }.accessibilityElement(children: .combine).accessibilityLabel("You: \(message.body)")
+      branchAction
+    }
   }
   private var notice: some View {
     HStack(alignment: .firstTextBaseline, spacing: 10) {
@@ -369,8 +511,15 @@ struct ChatRow: View {
         action("Save as entity", "circle.hexagongrid") {
           studio.saveResponse(message, entity: true)
         }
+        branchAction
       }.padding(.leading, -8)
     }
+  }
+  private var branchAction: some View {
+    action("Branch from here", "arrow.triangle.branch") {
+      studio.branchConversation(at: message.id, keepWorkspace: companion)
+    }.disabled(studio.busy).help(
+      "Start an alternative conversation through this message. The original is kept.")
   }
   private func action(_ title: String, _ icon: String, run: @escaping () -> Void) -> some View {
     Button(action: run) {

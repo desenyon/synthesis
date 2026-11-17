@@ -12,26 +12,49 @@ struct RelationshipGraph: View {
   @State private var relationships: [Relation] = []
   @State private var artworkIDs: [String: String] = [:]
   private var detailLevel: GraphDetail { GraphDetail(scale: zoom) }
-  @State private var layout: [String: CGPoint] = [:]
-  @State private var layoutLandscape: Bool?
-  @State private var signature = ""
+  private var layout: [String: CGPoint] {
+    get { studio.graphView.positions }
+    nonmutating set { studio.graphView.positions = newValue }
+  }
+  private var layoutLandscape: Bool? {
+    get { studio.graphView.landscape }
+    nonmutating set { studio.graphView.landscape = newValue }
+  }
+  private var signature: String {
+    get { studio.graphView.signature }
+    nonmutating set { studio.graphView.signature = newValue }
+  }
   @State private var layoutTask: Task<Void, Never>?
-  @State private var query = ""
+  @State private var layoutWorldID: String?
+  @State private var pendingSignature: String?
+  private var query: String {
+    get { studio.graphView.query }
+    nonmutating set { studio.graphView.query = newValue }
+  }
   private var selected: String? {
     get { studio.graphSelectedID }
     nonmutating set { studio.graphSelectedID = newValue }
   }
   @State private var connecting: String?
   @State private var hoveredEdge: String?
-  @State private var zoom = 1.0
-  @State private var pan = CGSize.zero
+  private var zoom: Double {
+    get { studio.graphView.zoom }
+    nonmutating set { studio.graphView.zoom = newValue }
+  }
+  private var pan: CGSize {
+    get { studio.graphView.pan }
+    nonmutating set { studio.graphView.pan = newValue }
+  }
   @State private var panAnchor: CGPoint?
   @State private var dragNode: (id: String, origin: CGPoint)?
   @State private var area = CGSize(width: 900, height: 600)
   @State private var panel: Panel?
   @State private var label = ""
   @State private var editing: Relation?
-  @State private var framed = false
+  private var framed: Bool {
+    get { studio.graphView.framed }
+    nonmutating set { studio.graphView.framed = newValue }
+  }
   private var entities: [LoreRecord] { studio.records.filter { $0.kind == "entity" } }
   private func matches(_ entity: LoreRecord) -> Bool {
     query.isEmpty || entity.title.localizedCaseInsensitiveContains(query)
@@ -47,7 +70,7 @@ struct RelationshipGraph: View {
             "\(nodes.count) \(nodes.count == 1 ? "entity" : "entities") · \(relationships.count) \(relationships.count == 1 ? "relationship" : "relationships")",
           t: studio.t)
       } trailing: {
-        SearchField(text: $query, placeholder: "Find an entity", t: studio.t)
+        SearchField(text: $studio.graphView.query, placeholder: "Find an entity", t: studio.t)
           .frame(minWidth: 120, idealWidth: 200, maxWidth: 200)
         BarAction(
           title: selected == nil ? "Copy to canvas" : "Copy neighbourhood",
@@ -92,7 +115,8 @@ struct RelationshipGraph: View {
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .onDisappear {
       layoutTask?.cancel()
-      signature = ""
+      layoutTask = nil
+      pendingSignature = nil
       hoveredEdge = nil
       connecting = nil
     }
@@ -490,6 +514,9 @@ struct RelationshipGraph: View {
   // MARK: Data
 
   private func refresh() {
+    if layoutWorldID == nil { layoutWorldID = studio.worldID }
+    guard layoutWorldID == studio.worldID else { return }
+    let world = studio.worldID
     studio.perform {
       relationships = try studio.store.relations(worldID: studio.worldID)
       artworkIDs = try studio.store.recordArtworkIDs(worldID: studio.worldID)
@@ -498,13 +525,22 @@ struct RelationshipGraph: View {
       let next =
         nodes.joined(separator: ",") + "|\(landscape)|"
         + relationships.map { "\($0.sourceID)>\($0.targetID)" }.sorted().joined(separator: ",")
-      if next != signature {
-        let initiallyEmpty = layout.isEmpty
-        signature = next
+      if next == signature && pendingSignature != nil {
+        // Undo can return to the completed topology while a newer layout is still running.
         layoutTask?.cancel()
+        layoutTask = nil
+        pendingSignature = nil
+      }
+      if next != signature && next != pendingSignature {
+        let initiallyEmpty = layout.isEmpty
+        layoutTask?.cancel()
+        layoutTask = nil
+        pendingSignature = next
         let edges = relationships.map { ($0.sourceID, $0.targetID) }
         if nodes.count <= 80 {
           layout = GraphLayout.positions(nodes: nodes, edges: edges, landscape: landscape)
+          signature = next
+          pendingSignature = nil
           if framed && initiallyEmpty { frame(area, animated: false) }
         } else {
           let worker = Task.detached(priority: .userInitiated) {
@@ -516,8 +552,13 @@ struct RelationshipGraph: View {
             } onCancel: {
               worker.cancel()
             }
-            guard !Task.isCancelled, signature == next else { return }
+            guard !Task.isCancelled, studio.worldID == world, pendingSignature == next else {
+              return
+            }
             layout = result
+            signature = next
+            layoutTask = nil
+            pendingSignature = nil
             if framed && initiallyEmpty { frame(area, animated: false) }
           }
         }

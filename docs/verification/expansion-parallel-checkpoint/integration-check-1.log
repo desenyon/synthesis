@@ -1,0 +1,834 @@
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:85:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:91:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:206:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:244:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:85:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:91:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:85:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:91:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:65:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:85:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:85:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:91:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:91:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:206:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:206:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:206:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:206:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:206:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:244:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:244:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:236:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:244:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityProperties.swift:31:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:36:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:38:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:40:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:45:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:49:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:51:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:52:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:55:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:56:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:60:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:63:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:65:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:66:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:72:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:73:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:74:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:85:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:90:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:92:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:94:17: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:94:31: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:96:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:98:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:101:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:103:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:105:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:111:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:116:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:129:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:130:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:131:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:131:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:132:98: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:132:130: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:137:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:138:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:141:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:142:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:147:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:151:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:157:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:163:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:176:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:177:44: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:178:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:179:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:185:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:186:92: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:188:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:189:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:189:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:193:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:194:93: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:205:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:220:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:234:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:235:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:239:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:244:16: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:244:94: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityProperties.swift:245:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:246:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityProperties.swift:246:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityProperties.swift:246:111: error: [RemoveLine] remove line break
+Sources/SynthesisUI/EntityProperties.swift:248:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityValueEditor.swift:19:58: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:20:66: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:68: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:91: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:36: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:79: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:45: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:91: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:154:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:19:58: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:20:66: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:68: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:91: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:19:58: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:20:66: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:68: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:91: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:19:58: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:20:66: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:68: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:91: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:36: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:79: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:36: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:79: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:36: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:79: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:36: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:79: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:36: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:99:79: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:45: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:91: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:154:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:45: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:136:91: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:154:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:154:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityValueEditor.swift:21:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:28:99: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityValueEditor.swift:28:176: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityValueEditor.swift:67:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:74:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:77:100: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityValueEditor.swift:81:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:82:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:84:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:99:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:105:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:107:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:112:97: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityValueEditor.swift:118:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:119:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:134:8: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityValueEditor.swift:135:79: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityValueEditor.swift:136:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:140:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:141:44: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityValueEditor.swift:149:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:150:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityValueEditor.swift:150:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:24:48: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:47:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:79:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:103: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:96:20: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:96:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:115:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:115:43: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:116:50: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:117:56: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:145:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:146:53: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:182:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:186:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:45: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:83: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:222:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:223:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:246:97: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:262:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:302:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:334:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:338:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:48: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:47:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:79:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:103: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:96:20: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:96:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:48: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:47:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:79:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:103: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:48: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:47:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:48: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:47:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:48: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:47:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:48: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:48: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:24:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:39:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:47:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:50:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:67:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:79:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:103: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:80:103: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:96:20: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:96:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:96:20: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:96:41: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:115:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:115:43: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:116:50: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:117:56: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:145:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:146:53: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:182:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:186:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:115:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:115:43: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:116:50: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:117:56: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:145:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:146:53: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:182:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:186:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:145:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:146:53: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:145:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:146:53: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:145:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:146:53: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:145:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:146:53: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:146:53: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:157:109: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:164:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:182:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:186:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:186:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:186:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:45: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:83: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:222:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:223:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:246:97: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:262:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:45: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:221:83: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:222:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:223:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:246:97: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:262:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:246:97: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:246:97: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:246:97: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:246:97: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:250:81: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:262:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:302:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:334:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:338:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:301:73: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:302:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:334:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:338:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:334:90: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:338:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:338:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:338:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/EntityTypeEditor.swift:18:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:24:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:25:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:28:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:29:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:35:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:36:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:39:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:40:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:42:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:44:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:50:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:52:23: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:52:65: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:53:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:67:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:68:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:70:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:72:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:79:16: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:79:94: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:80:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:80:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:81:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:82:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:83:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:83:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:84:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:85:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:86:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:86:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:87:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:96:58: error: [RemoveLine] remove line break
+Sources/SynthesisUI/EntityTypeEditor.swift:97:12: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:97:49: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:116:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:117:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:121:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:125:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:125:97: error: [RemoveLine] remove line break
+Sources/SynthesisUI/EntityTypeEditor.swift:131:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:134:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:135:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:141:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:142:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:146:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:153:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:154:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:157:88: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:157:129: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:158:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:160:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:163:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:164:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:169:91: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:169:109: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:172:90: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:172:107: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:174:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:176:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:177:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:185:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:192:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:192:99: error: [RemoveLine] remove line break
+Sources/SynthesisUI/EntityTypeEditor.swift:195:17: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:195:37: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:198:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:200:17: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:200:36: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:220:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:221:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:223:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:230:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:233:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:234:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:236:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:237:21: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:237:67: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:238:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:239:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:241:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:242:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:243:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:246:98: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:249:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:250:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:252:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:256:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:267:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:271:70: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:274:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:283:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:299:8: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:300:69: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:302:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:307:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:310:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:311:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:313:100: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:313:101: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:314:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:314:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:315:1: error: [Indentation] unindent by 2 spaces
+Sources/SynthesisUI/EntityTypeEditor.swift:317:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:326:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:337:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:343:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:343:97: error: [RemoveLine] remove line break
+Sources/SynthesisUI/EntityTypeEditor.swift:347:1: error: [LineLength] line is too long
+Sources/SynthesisUI/EntityTypeEditor.swift:349:17: error: [AddLines] add 1 line break
+Sources/SynthesisUI/EntityTypeEditor.swift:349:31: error: [AddLines] add 1 line break
+Sources/SynthesisUI/Editor.swift:109:1: error: [LineLength] line is too long
+Sources/SynthesisUI/Sheets.swift:120:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:101: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:101: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:101: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:101: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:101: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:120:101: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:168:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:82: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:169:106: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisUI/Sheets.swift:119:1: error: [LineLength] line is too long
+Sources/SynthesisUI/Sheets.swift:120:1: error: [LineLength] line is too long
+Sources/SynthesisUI/Sheets.swift:164:91: error: [AddLines] add 1 line break
+Sources/SynthesisUI/Sheets.swift:168:1: error: [LineLength] line is too long
+Sources/SynthesisUI/Sheets.swift:169:1: error: [LineLength] line is too long
+Sources/SynthesisUI/Sheets.swift:170:1: error: [LineLength] line is too long
+Sources/SynthesisUI/Sheets.swift:175:1: error: [LineLength] line is too long
+Sources/SynthesisUI/Sheets.swift:176:1: error: [LineLength] line is too long
+Sources/SynthesisUI/Sheets.swift:178:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:179:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:180:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:181:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:182:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:183:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:184:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:185:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:186:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisUI/Sheets.swift:196:1: error: [LineLength] line is too long
+Sources/SynthesisCore/AssistantContext.swift:193:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityPropertyText.swift:5:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityPropertyText.swift:6:22: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityPropertyText.swift:7:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityPropertyText.swift:15:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityPropertyText.swift:17:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityPropertyText.swift:29:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityPropertyText.swift:30:13: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityPropertyText.swift:30:93: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityPropertyText.swift:31:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityPropertyText.swift:35:1: error: [LineLength] line is too long
+Sources/SynthesisCore/WorkspaceStore.swift:618:1: error: [LineLength] line is too long
+Sources/SynthesisCore/WorkspaceStore.swift:625:1: error: [LineLength] line is too long
+Sources/SynthesisCore/LoreSearch.swift:44:97: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+Sources/SynthesisCore/LoreSearch.swift:43:1: error: [LineLength] line is too long
+Sources/SynthesisCore/Retrieval.swift:65:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemaModels.swift:49:71: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:19: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:39: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:63:27: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:63:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:24:8: error: [OneCasePerLine] move 'text' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:24:22: error: [OneCasePerLine] move 'number' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:24:38: error: [OneCasePerLine] move 'boolean' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:24:53: error: [OneCasePerLine] move 'date' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:25:8: error: [OneCasePerLine] move 'range' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:25:31: error: [OneCasePerLine] move 'duration' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:25:57: error: [OneCasePerLine] move 'selection' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:25:76: error: [OneCasePerLine] move 'entity' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:26:8: error: [OneCasePerLine] move 'coordinates' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:26:45: error: [OneCasePerLine] move 'media' to its own 'case' declaration
+Sources/SynthesisCore/EntitySchemaModels.swift:49:71: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:49:71: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:19: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:39: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:63:27: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:63:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:19: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:39: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:62:57: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:63:27: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:63:51: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemaModels.swift:60:15: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemaModels.swift:61:89: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:13:33: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:13:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:17:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:19:35: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:19:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:43:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:154:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:328:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:13:33: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:13:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:17:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:19:35: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:19:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:43:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:154:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:13:33: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:13:61: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:17:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:19:35: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:19:78: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:17:25: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:43:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:43:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:154:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:154:49: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:328:30: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntitySchemas.swift:77:33: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+Sources/SynthesisCore/EntitySchemas.swift:84:47: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+Sources/SynthesisCore/EntitySchemas.swift:122:22: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+Sources/SynthesisCore/EntitySchemas.swift:532:45: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+Sources/SynthesisCore/EntitySchemas.swift:6:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:9:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:15:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:19:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:22:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:22:99: error: [RemoveLine] remove line break
+Sources/SynthesisCore/EntitySchemas.swift:29:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:31:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:33:65: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:37:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:38:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:44:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:48:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:50:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:56:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:60:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:65:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:67:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:69:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:74:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:76:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:77:57: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:80:98: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:80:169: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:84:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:88:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:90:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:98:100: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:103:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:103:153: error: [RemoveLine] remove line break
+Sources/SynthesisCore/EntitySchemas.swift:110:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:111:99: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:112:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:115:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:116:29: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:119:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:120:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:121:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:127:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:129:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:130:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:133:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:134:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:135:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:137:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:139:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:141:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:142:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:145:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:147:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:150:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:156:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:158:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:163:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:165:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:167:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:170:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:173:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:176:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:179:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:180:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:188:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:192:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:199:101: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:202:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:206:96: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:206:153: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:207:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:210:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:212:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:216:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:220:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:229:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:230:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:233:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:237:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:238:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:240:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:241:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:244:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:250:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:257:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:258:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:260:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:262:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:263:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:265:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:268:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:270:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:273:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:281:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:285:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:287:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:290:100: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:291:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:300:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:303:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:307:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:310:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:313:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:316:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:319:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:323:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntitySchemas.swift:332:70: error: [RemoveLine] remove line break
+Sources/SynthesisCore/EntitySchemas.swift:333:10: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:333:40: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntitySchemas.swift:333:115: error: [AddLines] add 1 line break
+Sources/SynthesisCore/WorldArchive.swift:72:25: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+Sources/SynthesisCore/WorldArchive.swift:20:1: error: [LineLength] line is too long
+Sources/SynthesisCore/WorldArchive.swift:68:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:30:28: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:30:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:33:33: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:35:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:42:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:45:67: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:59:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:62:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:89:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:99:32: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:30:28: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:30:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:33:33: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:35:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:42:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:45:67: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:59:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:62:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:89:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:99:32: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:27:40: error: [OneCasePerLine] move 'number' to its own 'case' declaration
+Sources/SynthesisCore/EntityFormula.swift:27:56: error: [OneCasePerLine] move 'name' to its own 'case' declaration
+Sources/SynthesisCore/EntityFormula.swift:27:70: error: [OneCasePerLine] move 'symbol' to its own 'case' declaration
+Sources/SynthesisCore/EntityFormula.swift:30:28: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:30:54: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:33:33: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:35:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:42:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:45:67: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:33:33: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:35:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:42:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:45:67: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:33:33: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:35:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:42:22: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:45:67: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:59:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:62:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:89:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:99:32: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:59:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:62:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:89:17: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:99:32: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+Sources/SynthesisCore/EntityFormula.swift:8:16: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:9:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisCore/EntityFormula.swift:10:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisCore/EntityFormula.swift:11:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisCore/EntityFormula.swift:12:1: error: [Indentation] indent by 2 spaces
+Sources/SynthesisCore/EntityFormula.swift:14:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:25:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:29:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:36:94: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:36:101: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:43:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:45:41: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:45:75: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:45:77: error: [RemoveLine] remove line break
+Sources/SynthesisCore/EntityFormula.swift:46:13: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:46:93: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:47:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:66:26: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:66:47: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:66:49: error: [RemoveLine] remove line break
+Sources/SynthesisCore/EntityFormula.swift:67:31: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:67:52: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:67:54: error: [RemoveLine] remove line break
+Sources/SynthesisCore/EntityFormula.swift:68:15: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:68:21: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:75:26: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:75:47: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:75:49: error: [RemoveLine] remove line break
+Sources/SynthesisCore/EntityFormula.swift:78:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:82:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:84:17: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:84:23: error: [AddLines] add 1 line break
+Sources/SynthesisCore/EntityFormula.swift:106:1: error: [LineLength] line is too long
+Sources/SynthesisCore/EntityFormula.swift:114:1: error: [LineLength] line is too long

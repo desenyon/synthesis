@@ -104,12 +104,23 @@ extension WorkspaceStore {
     let lanes = try chronologyLanes(worldID: worldID)
     let events = try events(worldID: worldID)
     let placements = try chronologyPlacements(worldID: worldID)
+    let exclusionIDs = try contextRecordIDs(worldID: worldID)
+    let excluded = Set(options.excludedRecordIDs)
+    // A dropped link is explicit context, including in attachment-only mode. Resolve it
+    // against the active world; a stale or foreign address must never become guessed lore.
+    let referenceSources = try Self.worldReferences(in: prompt).map {
+      try resolveReference($0, worldID: worldID)
+    }.filter { source in Set(source.recordIDs).isDisjoint(with: excluded) }
+    let referenceRecordIDs = referenceSources.flatMap(\.recordIDs).filter { byID[$0] != nil }
+    let referenceBoardIDs = referenceSources.filter { $0.reference.kind == .board }.map {
+      $0.reference.id
+    }
     let selected = options.includeSelection ? selectedRecordIDs : []
     let boardIDs = Set(
-      options.boardIDs + (options.includeSelection ? boardID.map { [$0] } ?? [] : []))
+      options.boardIDs + referenceBoardIDs
+        + (options.includeSelection ? boardID.map { [$0] } ?? [] : []))
     let laneIDs = Set(
       options.laneIDs + (options.includeSelection ? chronologyLaneID.map { [$0] } ?? [] : []))
-    let exclusionIDs = try contextRecordIDs(worldID: worldID)
     guard
       (options.recordIDs + selected).allSatisfy({ byID[$0] != nil }),
       options.excludedRecordIDs.allSatisfy(exclusionIDs.contains),
@@ -121,12 +132,14 @@ extension WorkspaceStore {
     guard boardIDs.count <= 24, laneIDs.count <= 60 else {
       throw SynthesisError.invalid("Attach up to 24 boards and 60 history groups per request.")
     }
-    let excluded = Set(options.excludedRecordIDs)
-    let explicit = Array(NSOrderedSet(array: options.recordIDs)).compactMap { $0 as? String }.filter
-    { !excluded.contains($0) }
-    guard explicit.count <= options.budget.limit else {
+    let typedRecordIDs = Self.referencedRecordIDs(in: prompt).filter { byID[$0] != nil }
+    let explicit = Array(
+      NSOrderedSet(array: options.recordIDs + referenceRecordIDs + typedRecordIDs)
+    ).compactMap { $0 as? String }.filter { !excluded.contains($0) }
+    guard explicit.count <= options.budget.limit, referenceSources.count <= options.budget.limit
+    else {
       throw SynthesisError.invalid(
-        "The \(options.budget.rawValue) context fits \(options.budget.limit) records. Increase context size or remove an attachment."
+        "The \(options.budget.rawValue) context fits \(options.budget.limit) directly referenced sources. Increase context size or remove an attachment."
       )
     }
     var anchors: [ContextSource] = []
@@ -135,9 +148,9 @@ extension WorkspaceStore {
       else { return }
       anchors.append(.init(record: record, reason: reason))
     }
-    for id in explicit { add(id, "Attached by you") }
+    for id in options.recordIDs { add(id, "Attached by you") }
+    for id in referenceRecordIDs + typedRecordIDs { add(id, "You referenced it") }
     for id in selected { add(id, "Current selection") }
-    for id in Self.referencedRecordIDs(in: prompt) { add(id, "You referenced it") }
     for board in boards where boardIDs.contains(board.id) {
       let object =
         (try? JSONSerialization.jsonObject(with: Data(board.content.utf8))) as? [String: Any] ?? [:]
@@ -178,11 +191,35 @@ extension WorkspaceStore {
         sources.append(source)
       }
     }
-    let workspace = try scopedWorkspaceContext(
+    var workspace = try scopedWorkspaceContext(
       worldID: worldID, allowedIDs: allowed, boardIDs: boardIDs, laneIDs: includedLanes,
       boardID: options.includeSelection ? boardID : nil,
       chronologyLaneID: options.includeSelection ? chronologyLaneID : nil,
       restricted: options.restricted)
+    if !referenceSources.isEmpty {
+      guard
+        var object = try JSONSerialization.jsonObject(with: Data(workspace.utf8)) as? [String: Any]
+      else {
+        throw SynthesisError.invalid("The world context could not be prepared.")
+      }
+      // Only text metadata is shared for images. A reference does not enable vision, image
+      // generation, another world, earlier chat history or broader context permissions.
+      object["references"] = referenceSources.map { source -> [String: Any] in
+        let excerpt =
+          source.reference.kind == .record || source.reference.kind == .event ? "" : source.excerpt
+        return [
+          "url": source.reference.url.absoluteString, "kind": source.reference.kind.rawValue,
+          "title": source.title, "detail": source.detail, "state": source.state,
+          "excerpt": String(excerpt.prefix(1000)), "excerptTruncated": excerpt.count > 1000,
+          "recordIDs": source.recordIDs.filter(allowed.contains),
+          "authority": source.reference.kind == .proposal
+            ? "Proposal history; not canon. Accepted changes are drafts." : "World source",
+        ]
+      }
+      workspace = String(
+        decoding: try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys]),
+        as: UTF8.self)
+    }
     let lore = sources.map { source -> String in
       let r = source.record
       let canon = r.canonical.flatMap { $0.data(using: .utf8) }.flatMap {
@@ -190,7 +227,11 @@ extension WorkspaceStore {
       }
       let accepted = canon?["body"] as? String ?? "none"
       let rules = (try? rulesText(worldID: worldID, systemID: r.id)) ?? ""
+      let properties =
+        (try? entityPropertyText(worldID: worldID, recordID: r.id, allowedIDs: allowed, limit: 4000))
+        ?? ""
       return (rules.isEmpty ? "" : "Rules of \(r.title) —\n\(rules)\n")
+        + (properties.isEmpty ? "" : properties + "\n")
         + "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category), state: \(r.state), version: \(r.version). Working draft: \(String(r.body.prefix(3000))). Accepted canon snapshot: \(String(accepted.prefix(6000)))"
     }.joined(separator: "\n\n")
     return AssistantContext(

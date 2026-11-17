@@ -544,7 +544,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 12
+      var schemaVersion = 13
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -573,6 +573,15 @@ public final class WorkspaceStore {
       var creativeComponents: [[String: String]]
       var recordArtwork: [[String: String]]
       var activityHistory: [[String: String]]
+      var entityTypes: [[String: String]]
+      var entityProfiles: [[String: String]]
+      var entityProfileHistory: [[String: String]]
+      var entityTypeHistory: [[String: String]]
+      var entityTemplates: [[String: String]]
+      var entityTemplateHistory: [[String: String]]
+      var conversationBranches: [[String: String]]
+      var conversationMessageOrigins: [[String: String]]
+      var promptRecipes: [[String: String]]
     }
     // Archived material is exported too: archiving hides, it never discards.
     let hiddenChats = try conversations(worldID: id, archived: true)
@@ -607,7 +616,19 @@ public final class WorkspaceStore {
         "SELECT * FROM record_sections WHERE world_id=? ORDER BY parent_id,position", [id]),
       creativeComponents: db.rows("SELECT * FROM creative_components WHERE world_id=?", [id]),
       recordArtwork: db.rows("SELECT * FROM record_artwork WHERE world_id=?", [id]),
-      activityHistory: db.rows("SELECT * FROM world_activity WHERE world_id=? ORDER BY rowid", [id])
+      activityHistory: db.rows(
+        "SELECT * FROM world_activity WHERE world_id=? ORDER BY rowid", [id]),
+      entityTypes: db.rows("SELECT * FROM entity_types WHERE world_id=?", [id]),
+      entityProfiles: db.rows("SELECT * FROM entity_profiles WHERE world_id=?", [id]),
+      entityProfileHistory: db.rows("SELECT * FROM entity_profile_history WHERE world_id=?", [id]),
+      entityTypeHistory: db.rows("SELECT * FROM entity_type_history WHERE world_id=?", [id]),
+      entityTemplates: db.rows("SELECT * FROM entity_templates WHERE world_id=?", [id]),
+      entityTemplateHistory: db.rows(
+        "SELECT * FROM entity_template_history WHERE world_id=?", [id]),
+      conversationBranches: db.rows("SELECT * FROM conversation_branches WHERE world_id=?", [id]),
+      conversationMessageOrigins: db.rows(
+        "SELECT * FROM conversation_message_origins WHERE world_id=?", [id]),
+      promptRecipes: db.rows("SELECT * FROM prompt_recipes WHERE world_id=?", [id])
     )
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

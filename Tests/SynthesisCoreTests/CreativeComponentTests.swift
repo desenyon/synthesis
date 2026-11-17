@@ -42,7 +42,7 @@ struct CreativeComponentTests {
     #expect(copy.record.body == item.record.body)
     let json = try #require(
       JSONSerialization.jsonObject(with: store.exportWorld(world.id)) as? [String: Any])
-    #expect(json["schemaVersion"] as? Int == 12)
+    #expect(json["schemaVersion"] as? Int == 13)
     #expect((json["creativeComponents"] as? [Any])?.count == 8)
     #expect(try store.workspaceContext(worldID: world.id).contains(item.record.id))
   }

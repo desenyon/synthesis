@@ -62,6 +62,12 @@ extension WorkspaceStore {
         "SELECT id FROM records_fts WHERE records_fts MATCH ? AND world_id=? AND id IN (SELECT id FROM records WHERE world_id=? AND archived=0) ORDER BY rank LIMIT 8",
         [match, worldID, worldID])
       for row in rows { add(row["id"]!, "Matches your message") }
+      for row in try db.rows(
+        "SELECT record_id FROM entity_profile_search WHERE entity_profile_search MATCH ? AND world_id=? ORDER BY rank LIMIT 8",
+        [match, worldID])
+      {
+        add(row["record_id"]!, "Matches structured properties")
+      }
     }
     let anchors = result.map(\.id)
     if !anchors.isEmpty {

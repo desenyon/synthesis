@@ -1,6 +1,6 @@
 # Studio refinement — owner request, 2026-11-15
 
-This is an implementation ledger, not an acceptance claim. Preserve real lore and explicit canon approval. Native SwiftUI/AppKit remains the application; Canvas embeds the offline Excalidraw engine. Development prereleases are owner-authorized; model usage requires an explicit request. One isolated Codex verification request was approved and used on 2026-11-16.
+This is the older owner-scope ledger, not an acceptance claim. The current 394-item expansion and saved parallel checkpoint take priority: [EXPANSION](EXPANSION.md), [HANDOFF](HANDOFF.md), [errors and next actions](verification/expansion-parallel-checkpoint/README.md). No new release or tag is authorized until the entire expansion is complete and the owner approves publication. Preserve real lore and explicit canon approval. Native SwiftUI/AppKit remains the application; Canvas embeds the offline Excalidraw engine. Model usage requires an explicit request. One isolated Codex verification request was approved and used on 2026-11-16; it does not authorize another.
 
 ## Implemented checkpoint (verification in STATE.md)
 

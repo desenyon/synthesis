@@ -126,6 +126,9 @@ struct EntityArtworkControl: View {
           .frame(width: compact ? 72 : 112, height: compact ? 72 : 132).clipped()
           .clipShape(RoundedRectangle(cornerRadius: Metric.cardRadius))
           .accessibilityLabel("Artwork for \(record.title)")
+          .workspaceReferenceDraggable(
+            WorldReference(worldID: record.worldID, kind: .artwork, id: artwork.id),
+            title: "Artwork · \(record.title)", icon: "photo", studio: studio)
       }
       VStack(alignment: .leading, spacing: Space.sm) {
         if !compact || artwork != nil {

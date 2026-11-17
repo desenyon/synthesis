@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 import SynthesisCore
 
@@ -56,12 +57,22 @@ public struct Toast: Identifiable {
 @MainActor public final class Studio: ObservableObject {
   public let store: WorkspaceStore
   public let engine: AgentEngine
+  public lazy var quickCapture = QuickCaptureController(studio: self)
   @Published public var worlds: [World] = []
   @Published public var worldID = ""
   @Published var navigationBack: [NavigationEntry] = []
   @Published var navigationForward: [NavigationEntry] = []
   var navigationDepth = 0
   var replayingNavigation = false
+  var sessionReady = false
+  var restoringSession = false
+  var sessionObservation: AnyCancellable?
+  var sessionSaveTask: Task<Void, Never>?
+  var lastSessionSave: String?
+  var sessionSaveFailure: String?
+  var editorPositions: [String: EditorPosition] = [:]
+  @Published var graphView = GraphViewState()
+  @Published var timelineView = TimelineViewState()
   @Published public var worldRevision = 0
   @Published var recordDrag: RecordDragSession?
   var recordDragTimer: Timer?
@@ -124,6 +135,8 @@ public struct Toast: Identifiable {
   /// Records shared with the model for each answer, keyed by assistant message.
   @Published public var contexts: [String: [ContextSource]] = [:]
   @Published public var conversationID: String?
+  @Published var conversationRevealMessageID: String?
+  @Published var conversationScrollAnchors: [String: String] = [:]
   @Published public var selectedRecord: LoreRecord? {
     didSet { if let record = selectedRecord, oldValue?.id != record.id { retainDocument(record) } }
   }
@@ -346,6 +359,8 @@ public struct Toast: Identifiable {
     contextOptions = try store.assistantContextOptions(worldID: worldID)
     refreshProviderAvailability()
     try reload()
+    try restoreWorkspaceSession(restoreLocation: preferences.launchWorkspace == "remember")
+    observeWorkspaceSession()
     if try store.preference("onboarding-completed") == nil {
       if firstLaunch && ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] == nil {
         sheet = .onboarding
@@ -606,6 +621,7 @@ public struct Toast: Identifiable {
     perform {
       try store.setPreference("inspector", value: inspector ? "hidden" : "shown")
       inspector.toggle()
+      persistWorkspaceSession()
     }
   }
   public func updatePreferences(_ change: (inout StudioPreferences) -> Void) {
@@ -683,11 +699,10 @@ public struct Toast: Identifiable {
     }
   }
   public func switchWorld(_ id: String) {
+    guard id != worldID, (try? store.worlds().contains(where: { $0.id == id })) == true,
+      flushEditor(), persistWorkspaceSession(force: true)
+    else { return }
     withNavigation {
-      guard id != worldID, (try? store.worlds().contains(where: { $0.id == id })) == true else {
-        return
-      }
-      guard flushEditor() else { return }
       stop()
       perform {
         persistPendingComposer()
@@ -711,11 +726,13 @@ public struct Toast: Identifiable {
         reviewFocusID = nil
         reviewSection = nil
         conversationID = nil
+        conversationRevealMessageID = nil
         selectedRecord = nil
         editorSave = nil
         try store.setPreference("world", value: id)
         draft = try store.preference("composer:\(id)") ?? ""
         try reload()
+        try restoreWorkspaceSession(restoreLocation: !replayingNavigation, restoreHistory: false)
       }
 
     }
@@ -731,6 +748,7 @@ public struct Toast: Identifiable {
         destination = .chat
       }
       conversationID = nil
+      conversationRevealMessageID = nil
       messages = []
       mobileNavigation = false
 
@@ -745,6 +763,7 @@ public struct Toast: Identifiable {
       stop()
       perform {
         conversationID = chat.id
+        conversationRevealMessageID = nil
         if !keepWorkspace {
           selectedRecord = nil
           editorSave = nil
