@@ -69,11 +69,12 @@ struct EditorScreen: View {
   @State private var writingPrompt: String?
   @State private var editingRule: WorldRule?
   @State private var ruleSheet = false
-  @State private var mechanicsVisible = false
-  private var sectionsVisible: Bool {
-    get { studio.recordSectionTabs[record.id] ?? false }
-    nonmutating set { studio.recordSectionTabs[record.id] = newValue }
+  private var tab: RecordPageTab {
+    get { studio.recordTabs[record.id] ?? .overview }
+    nonmutating set { studio.recordTabs[record.id] = newValue }
   }
+  private var mechanicsVisible: Bool { tab == .mechanics }
+  private var sectionsVisible: Bool { tab == .sections }
   private var sectionCount: Int { studio.sectionParents.values.filter { $0 == record.id }.count }
   @State private var sectionParent: LoreRecord?
   init(studio: Studio, record: LoreRecord) {
@@ -122,7 +123,7 @@ struct EditorScreen: View {
     }
     .onAppear {
       studio.editorSave = { save() }
-      if studio.captureHint.contains("mechanics") { mechanicsVisible = true }
+      if studio.captureHint.contains("mechanics") { tab = .mechanics }
       studio.perform {
         sectionParent = try studio.store.sectionParent(worldID: record.worldID, recordID: record.id)
         recovered = try studio.store.journal(worldID: record.worldID, recordID: record.id)
@@ -231,8 +232,7 @@ struct EditorScreen: View {
     ContentHeader {
       FilterChip(title: "Overview", selected: !sectionsVisible && !mechanicsVisible, t: studio.t) {
         if save() {
-          sectionsVisible = false
-          mechanicsVisible = false
+          tab = .overview
         }
       }
       FilterChip(
@@ -240,12 +240,11 @@ struct EditorScreen: View {
         t: studio.t
       ) {
         if save() {
-          sectionsVisible = true
-          mechanicsVisible = false
+          tab = .sections
         }
       }
       FilterChip(title: "Mechanics", selected: mechanicsVisible, t: studio.t) {
-        if save() { mechanicsVisible = true }
+        if save() { tab = .mechanics }
       }
       Spacer()
     }

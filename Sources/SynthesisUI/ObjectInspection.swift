@@ -1,7 +1,7 @@
 import Foundation
 import SynthesisCore
 
-enum InspectionTarget: Hashable {
+enum InspectionTarget: Hashable, Codable {
   case world
   case record(String)
   case event(String)

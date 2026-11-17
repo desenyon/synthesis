@@ -165,3 +165,7 @@ Migration 0014 adds world-scoped `record_artwork` revisions with an active-image
 ### Navigation history
 
 `NavigationLocation` stores only world-scoped addresses; `NavigationEntry` supplies display labels. `withNavigation` coalesces nested operations into one bounded visit, while failed editor saves and repeated addresses leave history intact. Replay validates targets and resolves current records; archived targets are skipped, database failures are surfaced. The common WorkspaceBar supplies Back/Forward; native menu shortcuts and context menus expose history. Editor breadcrumbs show the immediate connected-record trail. The stack is session-local; complete restart restoration is separately tracked at #33.
+
+## Saved workspace layouts
+
+`WorkspaceLayouts.swift` stores versioned per-world, device-local arrangements in preferences. Layouts carry navigation addresses, panel state, density, reading width and entity tab; never text, canon, theme or model permissions. Restore validates targets and flushes writing before using the shared navigation path, then saves related preferences in one SQLite transaction. Rename, explicit Update, archive/restore and guarded Undo preserve earlier arrangements. Native View → Workspace Layouts (⌥⌘L), Settings and quick-open share one manager. Full application-session restoration is separate (#33).

@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "layouts", "light-layouts", "manual-layouts", "layouts-empty", "layouts-many",
+    "layouts-archived", "layouts-applied", "light-layouts-applied",
     "history-trail", "history-back", "history-map", "manual-history-trail",
     "light-history-trail", "collapsed-history-trail",
     "inspector-library", "light-inspector-library", "manual-inspector-library",
@@ -256,6 +258,59 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("layouts") {
+      configureConnectedCapture(
+        state == "layouts-empty" ? "empty-library" : "library", board: board,
+        conversation: conversation)
+      perform {
+        try store.setPreference(
+          "workspace-layouts:\(worldID)", value: "{\"version\":1,\"layouts\":[]}")
+        if state != "layouts-empty" {
+          navigate(.knowledge)
+          graphSelectedID = records.first { $0.title == "Mira Vale" }?.id
+          workspaceInspector = true
+          let research = try saveLayout(name: "Research")
+          if let mira = records.first(where: { $0.title == "Mira Vale" }) {
+            openRecord(mira)
+            collapsed = true
+            inspector = false
+            preferences.density = .immersive
+            preferences.readingWidth = 640
+            recordTabs[mira.id] = .sections
+          }
+          let writing = try saveLayout(name: "Writing")
+          collapsed = false
+          preferences.density = .comfortable
+          preferences.readingWidth = 780
+          if let map = contextBoards.first(where: { $0.kind == "atlas" }) {
+            openBoard(map.id, kind: "atlas")
+          }
+          try saveLayout(name: "Cartography")
+          if let power = records.first(where: { $0.title == "The art of remembrance" }) {
+            openRecord(power)
+            recordTabs[power.id] = .mechanics
+            inspector = true
+          }
+          try saveLayout(name: "Simulation")
+          if state == "layouts-archived" { try archiveLayout(research.id) }
+          if state == "layouts-many" {
+            for i in 1...16 {
+              try saveLayout(
+                name: "\(i). Eastern Crossing — research into the years before the tide returned")
+            }
+          }
+          navigate(.library)
+          workspaceInspector = false
+          if state.hasSuffix("-applied") { _ = applyLayout(writing.id) }
+        }
+      }
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      dark = !state.hasPrefix("light-")
+      sheet = state.hasSuffix("-applied") ? nil : .layouts
+      toast = nil
+      captureHint = state
+      return
+    }
     if state.contains("history-trail") || state.contains("history-back")
       || state.contains("history-map")
     {
@@ -351,7 +406,7 @@ extension Studio {
     settingsSection = .general
     settingsQuery = ""
     assistantSettingsExpanded = state == "settings-assistant-details"
-    recordSectionTabs = [:]
+    recordTabs = [:]
     selectedRecord = nil
     graphSelectedID = nil
     atlasSelectedID = nil
@@ -562,7 +617,7 @@ extension Studio {
       inspector = false
       if state == "entity-components" {
         selectedRecord = records.first { $0.title == "The art of remembrance" }
-        if let id = selectedRecord?.id { recordSectionTabs[id] = true }
+        if let id = selectedRecord?.id { recordTabs[id] = .sections }
       }
       let scope: CreativeScope = state == "entity-components" ? .entity : .timeline
       let parent = state == "entity-components" ? selectedRecord?.id : nil
@@ -721,7 +776,7 @@ extension Studio {
       destination = .library
       inspector = false
       selectedRecord = records.first { $0.title == "Mira Vale" }
-      if let id = selectedRecord?.id { recordSectionTabs[id] = true }
+      if let id = selectedRecord?.id { recordTabs[id] = .sections }
       if state == "section-editor", let parent = selectedRecord {
         selectedRecord = try? store.recordSections(worldID: worldID, parentID: parent.id).first?
           .record
@@ -730,7 +785,7 @@ extension Studio {
       destination = .library
       inspector = false
       selectedRecord = records.first { $0.title == "Oren Ashe" }
-      if let id = selectedRecord?.id { recordSectionTabs[id] = true }
+      if let id = selectedRecord?.id { recordTabs[id] = .sections }
     case "what-if-new":
       destination = .library
       sheet = .whatIf

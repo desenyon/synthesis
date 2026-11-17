@@ -210,6 +210,7 @@ struct CommandPalette: View {
         studio.dark ? "Use light appearance" : "Use dark appearance",
         studio.dark ? "sun.max" : "moon", "", { studio.toggleTheme() }
       ),
+      ("Workspace layouts", "square.stack", "⌥⌘L", { studio.sheet = .layouts }),
       ("Open settings", "gearshape", "⌘,", { studio.navigate(.settings) }),
       (
         "Import Markdown or text files…", "square.and.arrow.down", "⇧⌘I",

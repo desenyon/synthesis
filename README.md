@@ -40,7 +40,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 | **Atlas**: named maps linked to places, with markers and drawn regions you can reshape. | **Review**: proposals, canon decisions and local consistency checks in one place, including changes sent back from what-if worlds. |
 | ![Atlas map with a selected region](docs/screenshots/atlas.png) | ![Review with consistency checks](docs/screenshots/review-checks.png) |
 
-**Also:** what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a ⌘K command palette · Finder integration for `.synthesis` files.
+**Also:** saved workspace layouts (⌥⌘L) · reversible navigation history · optional contextual inspectors · adjustable information density · portable entity artwork · what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a ⌘K command palette · Finder integration for `.synthesis` files.
 
 <details>
 <summary>More screenshots</summary>
@@ -48,6 +48,10 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 **Inspect context before sending**
 
 ![Local context inspector showing attached sources, scope and conversation-history controls](docs/screenshots/composer-context.png)
+
+**Saved workspace layouts**
+
+![Named Research, Writing, Cartography and Simulation arrangements in the native layout manager](docs/screenshots/layouts.png)
 
 **Canvas with real relationships**
 
@@ -63,7 +67,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 </details>
 
-Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context and Conversation images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
 
 The complete 394-item expansion is tracked individually in [the implementation ledger](docs/EXPANSION.md). It is **not yet complete**. Dark surfaces now default to graphite; **Settings → General → Dark surfaces** retains true-black OLED as an option.
 
@@ -108,7 +112,9 @@ The same expanding composer follows you into workspace companions. Its toolbar a
 | ⇧⌘I | Import Markdown or text files |
 | ⇧⌘M | Toggle AI Assisted / Manual |
 | ⌘\ | Toggle navigation |
-| ⌘[ | Back from a record |
+| ⌘[ / ⌘] | Back / Forward |
+| ⌥⌘I | Contextual inspector |
+| ⌥⌘L | Saved workspace layouts |
 | `@` in a message | Reference lore (↑↓ choose, ↵ insert) |
 
 Canvas also supports Excalidraw's own shortcuts (V select, H hand, A arrow, ⌘D duplicate, ⌘G group).

@@ -62,7 +62,8 @@ public struct Toast: Identifiable {
   @Published public var worldRevision = 0
   @Published public var reviewingProposal = false
   @Published public var records: [LoreRecord] = []
-  @Published public var recordSectionTabs: [String: Bool] = [:]
+  @Published public var recordTabs: [String: RecordPageTab] = [:]
+  @Published var layoutRevision = 0
   @Published public var sectionParents: [String: String] = [:]
   /// Set when the open world is a what-if branch of another world.
   @Published public var branch: WorldBranch?
@@ -195,7 +196,7 @@ public struct Toast: Identifiable {
   private var requestID = UUID()
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
-    case world, document, rename, onboarding, components, whatIf, sendWhatIf
+    case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }

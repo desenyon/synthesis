@@ -18,7 +18,7 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#11 verified; #12 saved workspace layouts is next.** Latest check: 188 tests / 47 suites, strict lint and optimized build. #11 has 24 inspected background captures; no foreground events or subscription requests.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#12 verified; #13 welcome dashboard is next.** Latest check: 192 tests / 48 suites, strict lint and optimized build. #12 has 16 inspected background captures; no foreground events or subscription requests.
 
 ## Current shape
 
@@ -43,7 +43,7 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#11 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
+- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#12 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.

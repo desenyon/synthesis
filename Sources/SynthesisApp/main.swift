@@ -272,6 +272,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       item(view, destination.rawValue, #selector(go(_:)), "\(index + 1)", tag: index)
     }
     view.addItem(.separator())
+    item(view, "Workspace Layouts…", #selector(workspaceLayouts), "l", [.command, .option])
     item(view, "Toggle Navigation", #selector(toggleSidebar), "\\")
     item(view, "Toggle Inspector", #selector(toggleInspector), "i", [.command, .option])
     item(view, "Toggle AI Assisted / Manual", #selector(toggleMode), "m", [.command, .shift])
@@ -343,6 +344,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
   }
   @objc func goBack() { studio.goBack() }
   @objc func goForward() { studio.goForward() }
+  @objc func workspaceLayouts() { studio.sheet = .layouts }
   @objc func toggleSidebar() { studio.toggleSidebar() }
   @objc func toggleInspector() {
     if studio.selectedRecord == nil {

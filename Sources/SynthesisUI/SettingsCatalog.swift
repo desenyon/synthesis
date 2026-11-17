@@ -29,7 +29,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 
 /// One searchable inventory. The same entries label and render the actual controls.
 enum SettingsItem: CaseIterable, Identifiable {
-  case appearance, darkPalette, density, sidebar, counts, recents, launch, previews
+  case appearance, darkPalette, density, layouts, sidebar, counts, recents, launch, previews
   case textSize, readingWidth, spelling, quotes, dashes, links, words
   case assistance, connection, sendKey
   case identity, cover, category, chatMode
@@ -37,7 +37,8 @@ enum SettingsItem: CaseIterable, Identifiable {
   var id: Self { self }
   var section: SettingsSection {
     switch self {
-    case .appearance, .darkPalette, .density, .sidebar, .counts, .recents, .launch, .previews:
+    case .appearance, .darkPalette, .density, .layouts, .sidebar, .counts, .recents, .launch,
+      .previews:
       .general
     case .textSize, .readingWidth, .spelling, .quotes, .dashes, .links, .words: .writing
     case .assistance, .connection, .sendKey: .assistant
@@ -50,6 +51,7 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .appearance: "Appearance"
     case .darkPalette: "Dark surfaces"
     case .density: "Information density"
+    case .layouts: "Workspace layouts"
     case .sidebar: "Expanded navigation"
     case .counts: "Category counts"
     case .recents: "Recent conversations"
@@ -84,6 +86,7 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .darkPalette:
       "Layered graphite or true-black OLED. Used throughout dark appearance, including Canvas."
     case .density: "Compact, comfortable or immersive rows, cards and content spacing."
+    case .layouts: "Save and restore views and panels for this universe on this Mac."
     case .sidebar: "Show labels alongside workspace icons."
     case .counts: "Show record totals beside world categories."
     case .recents: "How many chats appear in navigation."

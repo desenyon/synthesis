@@ -17,6 +17,12 @@ public final class WorkspaceStore {
       "INSERT INTO preferences(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
       [key, value])
   }
+  /// Commit related presentation choices together, so storage failure cannot save half a layout.
+  public func setPreferences(_ values: [String: String]) throws {
+    try db.transaction {
+      for (key, value) in values { try setPreference(key, value: value) }
+    }
+  }
   public func worlds() throws -> [World] {
     try db.rows("SELECT * FROM worlds WHERE owner_id='local' ORDER BY created_at,rowid").map {
       World(

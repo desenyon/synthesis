@@ -31,6 +31,7 @@ struct StudioSheet: View {
               "\(studio.worldID):\(scope.rawValue):\(studio.creativeParent ?? ""):\(studio.captureNonce)"
             )
         }
+      case .layouts: WorkspaceLayoutsSheet(studio: studio)
       case .world: world
       case .document: document
       case .rename: rename

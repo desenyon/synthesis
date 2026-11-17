@@ -181,6 +181,10 @@ struct SettingsScreen: View {
           title: item.title, value: preference(\.density),
           options: InformationDensity.allCases.map { ($0, $0.rawValue.capitalized) }, t: t)
       }
+    case .layouts:
+      row(item) {
+        Button("Manage layouts…") { studio.sheet = .layouts }.buttonStyle(QuietButton(t: t))
+      }
     case .sidebar:
       row(item) {
         Toggle(

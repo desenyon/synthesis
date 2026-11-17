@@ -1,0 +1,17 @@
+CAPTURE layouts 1440x900, bitmap 1440x900, 174ms
+CAPTURE light-layouts 1440x900, bitmap 1440x900, 176ms
+CAPTURE manual-layouts 1440x900, bitmap 1440x900, 89ms
+CAPTURE layouts-empty 1440x900, bitmap 1440x900, 151ms
+CAPTURE layouts-many 1440x900, bitmap 1440x900, 180ms
+CAPTURE layouts-archived 1440x900, bitmap 1440x900, 164ms
+CAPTURE layouts-applied 1440x900, bitmap 1440x900, 126ms
+CAPTURE light-layouts-applied 1440x900, bitmap 1440x900, 123ms
+CAPTURE layouts 1024x768, bitmap 1024x768, 126ms
+CAPTURE light-layouts 1024x768, bitmap 1024x768, 133ms
+CAPTURE manual-layouts 1024x768, bitmap 1024x768, 62ms
+CAPTURE layouts-empty 1024x768, bitmap 1024x768, 118ms
+CAPTURE layouts-many 1024x768, bitmap 1024x768, 129ms
+CAPTURE layouts-archived 1024x768, bitmap 1024x768, 126ms
+CAPTURE layouts-applied 1024x768, bitmap 1024x768, 97ms
+CAPTURE light-layouts-applied 1024x768, bitmap 1024x768, 89ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-012
