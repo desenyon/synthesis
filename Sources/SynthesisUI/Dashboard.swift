@@ -21,53 +21,56 @@ extension Studio {
     }
   }
   func openProposalReview(_ id: String) {
-    guard flushEditor() else { return }
-    perform {
-      _ = try store.proposal(worldID: worldID, id: id)
-      navigate(.review)
-      reviewFocusID = id
+    withNavigation {
+      guard flushEditor() else { return }
+      perform {
+        _ = try store.proposal(worldID: worldID, id: id)
+        navigate(.review)
+        reviewSection = .proposals
+        reviewFocusID = id
+      }
     }
   }
   func openActivity(_ item: WorldActivity) {
-    guard item.worldID == worldID, flushEditor() else { return }
-    perform {
-      let target: InspectionTarget
-      switch item.kind {
-      case .world:
-        navigate(.settings)
-        settingsSection = .world
-        settingsQuery = ""
-        return
-      case .conversation:
-        guard
-          let chat = try store.conversations(worldID: worldID).first(where: {
-            $0.id == item.objectID
-          })
-        else { throw SynthesisError.notFound }
-        openChat(chat)
-        return
-      case .record:
-        let record = try store.record(worldID: worldID, id: item.objectID)
-        guard try !store.isArchived(worldID: worldID, recordID: record.id) else {
-          throw SynthesisError.notFound
+    withNavigation {
+      guard item.worldID == worldID, flushEditor() else { return }
+      perform {
+        let target: InspectionTarget
+        switch item.kind {
+        case .world:
+          openSettings(.world)
+          return
+        case .conversation:
+          guard
+            let chat = try store.conversations(worldID: worldID).first(where: {
+              $0.id == item.objectID
+            })
+          else { throw SynthesisError.notFound }
+          openChat(chat)
+          return
+        case .record:
+          let record = try store.record(worldID: worldID, id: item.objectID)
+          guard try !store.isArchived(worldID: worldID, recordID: record.id) else {
+            throw SynthesisError.notFound
+          }
+          openRecord(record)
+          return
+        case .board:
+          openBoard(item.objectID, kind: item.boardKind ?? "canvas")
+          return
+        case .event: target = .event(item.objectID)
+        case .relationship: target = .relationship(item.objectID)
+        case .proposal:
+          openProposalReview(item.objectID)
+          inspect(.proposal(item.objectID))
+          return
+        case .lane: target = .lane(item.objectID)
         }
-        openRecord(record)
-        return
-      case .board:
-        openBoard(item.objectID, kind: item.boardKind ?? "canvas")
-        return
-      case .event: target = .event(item.objectID)
-      case .relationship: target = .relationship(item.objectID)
-      case .proposal:
-        openProposalReview(item.objectID)
-        inspect(.proposal(item.objectID))
-        return
-      case .lane: target = .lane(item.objectID)
+        _ = try inspectionData(for: target)
+        navigate(item.kind == .relationship ? .knowledge : .timeline)
+        if item.kind == .lane { timelineLaneID = item.objectID }
+        inspect(target)
       }
-      _ = try inspectionData(for: target)
-      navigate(item.kind == .relationship ? .knowledge : .timeline)
-      if item.kind == .lane { timelineLaneID = item.objectID }
-      inspect(target)
     }
   }
 }

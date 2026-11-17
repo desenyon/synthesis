@@ -18,7 +18,9 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#28 verified; #29 global Back/Forward navigation is next.** Latest check: 262 tests / 64 suites, strict lint and optimized build. #28 has 27 inspected native states and 54 mounted-view audit assertions across three sizes. Earlier #27 Canvas evidence remains 17 tests and 49 engine checks.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#29 verified; #30 keyboard-first creation is next.** Latest check: 267 tests / 65 suites, strict lint and optimized build. #29 has 33 inspected frames and 66 native-menu assertions across three sizes. Earlier #27 Canvas evidence remains 17 tests and 49 engine checks.
+
+`NavigationContext` holds tool subpages and optional inspected sources; `ToolNavigation.swift` coalesces their transitions into the same visit/save boundary. Do not clear a still-mounted editor's save callback when replaying tabs. Library filter/sort is Studio state so it survives remount/history. Search collation folds case/diacritics before ordering: locale comparison equated case variants but ordered them inconsistently and broke multi-alias IN queries. Keep the regression.
 
 `AtlasViewSession.swift` retains image-relative framing, marker/region visibility and selection separately from lore. Local preferences are keyed by world/map; history/layouts hold optional visit snapshots. Atlas must reinstall its save callback when loading a map: switching maps keeps the view mounted. Keep unchanged corrupt preferences and recovered copies intact. The capture runner resets ordinary Atlas fixtures before setting custom context states.
 
@@ -51,7 +53,7 @@ Use background captures while the owner works. Foreground self-tests and live-wi
 
 ## Open work
 
-- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#27 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
+- The owner requires the entire expansion, in numerical order. Continue the first unverified item in EXPANSION; implement shared prerequisites when necessary and verify each numbered requirement separately. #1–#29 are verified. Do not count existing partial behavior as completion. Preserve sidebar composition, canon approval and subscription isolation.
 - The new composer still needs foreground popover/keyboard, VoiceOver and animation-feel verification. Request context is previewed at Send; historical answers retain source references, not a full immutable workspace-index snapshot.
 - A live Codex image generation has never been run; it needs the owner's approval because it spends subscription allowance.
 - VoiceOver walkthrough, trackpad feel and animation pacing are unverified.

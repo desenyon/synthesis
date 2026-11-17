@@ -313,7 +313,7 @@ struct EditorScreen: View {
     ContentHeader {
       FilterChip(title: "Overview", selected: !sectionsVisible && !mechanicsVisible, t: studio.t) {
         if save() {
-          tab = .overview
+          studio.openRecordTab(.overview, recordID: record.id)
         }
       }
       FilterChip(
@@ -321,11 +321,11 @@ struct EditorScreen: View {
         t: studio.t
       ) {
         if save() {
-          tab = .sections
+          studio.openRecordTab(.sections, recordID: record.id)
         }
       }
       FilterChip(title: "Mechanics", selected: mechanicsVisible, t: studio.t) {
-        if save() { tab = .mechanics }
+        if save() { studio.openRecordTab(.mechanics, recordID: record.id) }
       }
       Spacer()
     }

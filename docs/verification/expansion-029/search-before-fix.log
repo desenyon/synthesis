@@ -1,0 +1,65 @@
+[0/1] Planning build
+Building for debugging...
+[0/5] Write sources
+[1/5] Write swift-version--1AB21518FC5DEDBE.txt
+[3/5] Compiling SynthesisCoreTests LoreSearchTests.swift
+[4/5] Emitting module SynthesisCoreTests
+[4/6] Write Objects.LinkFileList
+[5/6] Linking SynthesisPackageTests
+Build complete! (1.27s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite LoreSearchTests started.
+◇ Test placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() started.
+UNSCOPED ["The Glass Sea", "The Drowned City"]
+FILTER []
+COMPARE [["category": "Places", "equal": "1", "member": "0"], ["category": "Places", "equal": "1", "member": "0"]]
+ORDER Places Places 0
+ORDER Places place 1
+ORDER Places places 0
+ORDER Places location -1
+ORDER Places locations -1
+ORDER place Places -1
+ORDER place place 0
+ORDER place places -1
+ORDER place location 1
+ORDER place locations 1
+ORDER places Places 0
+ORDER places place 1
+ORDER places places 0
+ORDER places location 1
+ORDER places locations 1
+ORDER location Places 1
+ORDER location place -1
+ORDER location places -1
+ORDER location location 0
+ORDER location locations -1
+ORDER locations Places 1
+ORDER locations place -1
+ORDER locations places -1
+ORDER locations location 1
+ORDER locations locations 0
+INS [["two": "1", "three": "1", "four": "0"]]
+✘ Test placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() recorded an issue at LoreSearchTests.swift:25:7: Expectation failed: Set(try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(\.id))
+          == [sea.id, city.id]
+↳ Set(try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(\.id))
+            == [sea.id, city.id] → <not evaluated>
+✘ Test placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() recorded an issue at LoreSearchTests.swift:25:7: Expectation failed: Set(try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(\.id))
+          == [sea.id, city.id]
+↳ Set(try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(\.id))
+            == [sea.id, city.id] → <not evaluated>
+✘ Test placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() recorded an issue at LoreSearchTests.swift:25:7: Expectation failed: Set(try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(\.id))
+          == [sea.id, city.id]
+↳ Set(try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(\.id))
+            == [sea.id, city.id] → <not evaluated>
+✘ Test placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() recorded an issue at LoreSearchTests.swift:25:7: Expectation failed: Set(try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(\.id))
+          == [sea.id, city.id]
+↳ Set(try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(\.id))
+            == [sea.id, city.id] → <not evaluated>
+✘ Test placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() failed after 0.016 seconds with 4 issues.
+✘ Suite LoreSearchTests failed after 0.016 seconds with 4 issues.
+✘ Test run with 1 test in 1 suite failed after 0.016 seconds with 4 issues.
+Note: Some test targets reported failures:
+  - SynthesisPackageTests (Swift Testing)

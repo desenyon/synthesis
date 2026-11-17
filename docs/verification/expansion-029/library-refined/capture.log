@@ -1,0 +1,10 @@
+NAVIGATION_AUDIT 1440x900 PASS global-history-library: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-library: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-library 1440x900, bitmap 1440x900, 112ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-library: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-library: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-library 1024x768, bitmap 1024x768, 83ms
+NAVIGATION_AUDIT 720x800 PASS global-history-library: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-library: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-library 720x800, bitmap 720x800, 68ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-029/library-refined

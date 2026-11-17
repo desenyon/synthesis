@@ -20,15 +20,16 @@ final class Database {
       sqlite3_create_collation_v2(
         handle, "synthesis_search", SQLITE_UTF8, nil,
         { _, aCount, a, bCount, b in
+          let locale = Locale(identifier: "en_US_POSIX")
           let left = String(
-            decoding: UnsafeRawBufferPointer(start: a, count: Int(aCount)), as: UTF8.self)
+            decoding: UnsafeRawBufferPointer(start: a, count: Int(aCount)), as: UTF8.self
+          ).folding(options: [.caseInsensitive, .diacriticInsensitive], locale: locale)
           let right = String(
-            decoding: UnsafeRawBufferPointer(start: b, count: Int(bCount)), as: UTF8.self)
-          return Int32(
-            left.compare(
-              right, options: [.caseInsensitive, .diacriticInsensitive],
-              locale: Locale(identifier: "en_US_POSIX")
-            ).rawValue)
+            decoding: UnsafeRawBufferPointer(start: b, count: Int(bCount)), as: UTF8.self
+          ).folding(options: [.caseInsensitive, .diacriticInsensitive], locale: locale)
+          // Normalize before ordering: locale-aware compare can equate case variants while
+          // ordering them differently against a third value, breaking SQLite's IN lookup.
+          return left == right ? 0 : (left < right ? -1 : 1)
         }, nil) == SQLITE_OK
     else { throw failure() }
     // Durable activity triggers need portable UUIDs; generated once for each committed change.

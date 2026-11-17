@@ -3,18 +3,20 @@ import SynthesisCore
 
 /// Everything waiting on the creator's judgement in one place: staged AI proposals, drafts that
 /// have moved past accepted canon, and a local consistency check that needs no model.
+enum ReviewSection: String, Codable, CaseIterable {
+  case proposals = "Proposals"
+  case canon = "Canon"
+  case checks = "Checks"
+}
 struct ReviewScreen: View {
-  enum Tab: String, CaseIterable {
-    case proposals = "Proposals"
-    case canon = "Canon"
-    case checks = "Checks"
-  }
   @ObservedObject var studio: Studio
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
-  @State private var tab = Tab.proposals
+  private var tab: ReviewSection {
+    get { studio.reviewSection ?? .proposals }
+    nonmutating set { studio.reviewSection = newValue }
+  }
   @State private var findings: [WorldFinding] = []
   @State private var dismissed = 0
-  @State private var chosen = false
   @State private var query = ""
   @State private var oldestFirst = false
   private var filteredProposals: [Proposal] {
@@ -46,15 +48,15 @@ struct ReviewScreen: View {
         FilterChip(
           title: "Proposals", count: studio.pendingProposals.count, selected: tab == .proposals,
           t: studio.t
-        ) { tab = .proposals }
+        ) { studio.openReviewSection(.proposals) }
         FilterChip(title: "Canon", count: queue.count, selected: tab == .canon, t: studio.t) {
-          tab = .canon
+          studio.openReviewSection(.canon)
         }
         FilterChip(
           title: "Checks", count: findings.count, mutedCount: true, selected: tab == .checks,
           t: studio.t
         ) {
-          tab = .checks
+          studio.openReviewSection(.checks)
         }
         Spacer()
       }
@@ -97,14 +99,13 @@ struct ReviewScreen: View {
         tab = .canon
       } else if studio.captureHint == "review-checks" {
         tab = .checks
-      } else if !chosen {
+      } else if studio.reviewSection == nil {
         // Open on the first tab that has something in it.
         tab =
           !studio.pendingProposals.isEmpty
           ? .proposals
           : (!studio.canonQueue.isEmpty ? .canon : (findings.isEmpty ? .proposals : .checks))
       }
-      chosen = true
     }
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
   }

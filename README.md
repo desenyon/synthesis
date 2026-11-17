@@ -40,7 +40,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 | **Atlas**: named maps linked to places, with markers and drawn regions you can reshape. Return to the same zoom, layers and selected region. | **Review**: proposals, canon decisions and local consistency checks in one place, including changes sent back from what-if worlds. |
 | ![Atlas map with a selected region](docs/screenshots/atlas.png) | ![Review with consistency checks](docs/screenshots/review-checks.png) |
 
-**Also:** searchable [world activity history](docs/ACTIVITY.md) · customizable navigation with per-universe section order, category visibility and favorite records/collections · a world dashboard with project outlines · saved workspace layouts (⌥⌘L) · reversible navigation history · resizable navigation, inspectors and conversation panels · consistent entity selection across workspaces · adjustable information density · portable entity artwork · what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a [universal ⌘K palette](docs/SEARCH.md) for lore, maps, tools, settings and recent changes · shared structured search (`type:character faction:Tidekeepers`, `status:canon updated:7d`) · Finder integration for `.synthesis` files.
+**Also:** searchable [world activity history](docs/ACTIVITY.md) · customizable navigation with per-universe section order, category visibility and favorite records/collections · a world dashboard with project outlines · saved workspace layouts (⌥⌘L) · [global Back/Forward history](docs/NAVIGATION.md) across document and tool subpages · resizable navigation, inspectors and conversation panels · consistent entity selection across workspaces · adjustable information density · portable entity artwork · what-if worlds that merge back through review · entity sections and creative components (notes, facts, checklists, progression) · reversible archive with Undo everywhere · crash recovery for unsaved text · searchable Settings · a [universal ⌘K palette](docs/SEARCH.md) for lore, maps, tools, settings and recent changes · shared structured search (`type:character faction:Tidekeepers`, `status:canon updated:7d`) · Finder integration for `.synthesis` files.
 
 <details>
 <summary>More screenshots</summary>
@@ -92,6 +92,12 @@ Drag from Search, Favorites or Library; Canvas places a linked card at the point
 ![Atlas restored to the same framing and selected Glass Sea region after opening its source](docs/screenshots/atlas-context.png)
 
 [Map navigation](docs/ATLAS_NAVIGATION.md) preserves the view independently from lore.
+
+**Return to your search**
+
+![Library restored with the Places category and matching sea results](docs/screenshots/library-history.png)
+
+Back/Forward retains filters and tool subpages while resolving current lore.
 
 **Saved workspace layouts**
 

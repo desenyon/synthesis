@@ -16,6 +16,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 
 ### Added
+- Expansion #29: shared Back/Forward retains entity tabs, Settings sections/search, Library search/filter/sort, Timeline branches, Review tabs/proposals and inspected objects. Same-mounted editors keep save guards; invalid optional sources clear safely.
 - Expansion #28: Atlas restores per-map zoom, image-relative center, layers and selection across navigation and normal restarts. History/layouts retain visit framing; map-switch save registration, unreadable preferences and removed selections are handled safely.
 - Expansion #27: drag real records from Search, Favorites or Library into either editor pane or onto Canvas. Local-only addresses, fresh-source/save guards, transient targets, exact pan/zoom placement, grouped moves, Undo and confirmed persistence.
 - Expansion #26: real split workspace with a second native editor beside Atlas, Timeline, Graph, Canvas or another record. Independent caret/undo, dual-save guards, layouts/history, a shared contextual composer and adaptive compact controls. Canvas fit now uses precise zoom in short panes.
@@ -39,6 +40,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 - Explore enforced in the core: model proposal blocks are discarded with a notice. Propose still stages draft changes for explicit review; neither mode changes canon.
 
 ### Fixed
+- Category searches normalize case/accents before ordering so multi-alias filters find Places reliably. Compact Library search/categories use native controls and filter rows scroll within the viewport.
 - Expansion #17: background regression audit verifies independent sidebar, document and inspector scrolling while toolbar and composer frames stay fixed.
 - Expansion #14: light Canvas and Graph have a distinct spatial base, white entity/tool surfaces and clearer shared text and boundaries. Native and bundled Canvas palettes agree; dark/OLED styling stays intact.
 - Expansion #9: Atlas drawing and marker tools cannot conflict; marker placement supports Undo. New relationships clear prior reverse settings. Canvas styles target editable drawings only and adapt to selection.

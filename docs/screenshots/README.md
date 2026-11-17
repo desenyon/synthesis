@@ -1,6 +1,6 @@
 # Screenshots
 
-README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png`, `document-tabs.png`, `palette.png`, `navigation.png`, `favorites.png`, `activity.png` `split-workspace.png`, `drag-records.png` and `atlas-context.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
+README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png`, `document-tabs.png`, `palette.png`, `navigation.png`, `favorites.png`, `activity.png` `split-workspace.png`, `drag-records.png` `atlas-context.png` and `library-history.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
 
 | File | Capture state |
 | --- | --- |
@@ -55,3 +55,5 @@ Split workspace: `split-workspace.png` is `split-atlas` at 1440×900 from expans
 Record drag: `drag-records.png` is `drag-targets` at 1440×900 from [expansion #27](../verification/expansion-027/README.md). The isolated sample has an actual favorite record and the native drag-target state; it does not claim a physical mouse gesture was captured.
 
 `atlas-context.png`: expansion #28, `atlas-context-return` at 1440×900, captured after opening the linked source and returning through Back. All three nine-state contact sheets were inspected.
+
+`library-history.png`: expansion #29, `global-history-library`, 1440×900 from the final compact-control refinement. [Evidence](../verification/expansion-029/README.md).

@@ -4,29 +4,30 @@ import SynthesisCore
 
 /// Every document, entity and loose idea in the selected world, with an archive that can be
 /// restored. Search uses the world-scoped full-text index, so tags and aliases match too.
+enum LibraryFilter: String, Codable, CaseIterable {
+  case all = "All"
+  case documents = "Documents"
+  case entities = "Entities"
+  case ideas = "Ideas"
+  case canon = "Canon"
+  case sections = "Sections"
+  case archived = "Archived"
+}
+enum LibraryOrder: String, Codable, CaseIterable {
+  case recent = "Recently updated"
+  case title = "Title"
+}
+
 struct LibraryScreen: View {
-  enum Filter: String, CaseIterable {
-    case all = "All"
-    case documents = "Documents"
-    case entities = "Entities"
-    case ideas = "Ideas"
-    case canon = "Canon"
-    case sections = "Sections"
-    case archived = "Archived"
-  }
-  enum Order: String, CaseIterable {
-    case recent = "Recently updated"
-    case title = "Title"
-  }
   @ObservedObject var studio: Studio
   private var query: String { studio.libraryQuery }
   @State private var indexed = Set<String>()
   @State private var searchFailure: String?
-  @State private var filter = Filter.all
-  @State private var order = Order.recent
+  private var filter: LibraryFilter { studio.libraryFilter }
+  private var order: LibraryOrder { studio.libraryOrder }
   @State private var archived: [LoreRecord] = []
 
-  private func belongs(_ record: LoreRecord, to filter: Filter) -> Bool {
+  private func belongs(_ record: LoreRecord, to filter: LibraryFilter) -> Bool {
     switch filter {
     case .all, .archived: return true
     case .sections: return studio.sectionParents[record.id] != nil
@@ -68,43 +69,41 @@ struct LibraryScreen: View {
           title: studio.libraryCategory ?? "Library",
           detail: "\(rows.count) \(rows.count == 1 ? "item" : "items")", t: studio.t)
         if studio.libraryCategory != nil {
-          Button("Show all") { studio.openLens(nil) }.buttonStyle(.plain)
-            .font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.accent)
-            .padding(.leading, 4)
+          LibraryCategoryBack(studio: studio)
         }
       } trailing: {
         DocumentHistoryMenu(studio: studio)
-        SearchField(
-          text: $studio.libraryQuery, placeholder: "Search lore or type:character", t: studio.t
-        )
-        .frame(minWidth: 140, idealWidth: 240, maxWidth: 240)
-        SearchSyntaxMenu(query: $studio.libraryQuery, t: studio.t)
+        LibrarySearchControl(studio: studio)
         BarAction(title: "New", icon: "plus", t: studio.t, primary: true, help: "New record · ⌘N") {
           studio.newRecordKind = studio.libraryCategory == nil ? "lore" : "entity"
           studio.sheet = .document
         }
       }
       ContentHeader {
-        ForEach(Filter.allCases, id: \.self) { item in
-          if item != .archived || !archived.isEmpty || filter == .archived {
-            FilterChip(
-              title: item.rawValue,
-              count: item == .archived
-                ? archived.count
-                : (item == .all
-                  ? nil
-                  : (item == .sections ? studio.records : studio.topLevelRecords).filter {
-                    belongs($0, to: item)
-                  }.count),
-              selected: filter == item, t: studio.t
-            ) { filter = item }
+        ScrollView(.horizontal) {
+          HStack(spacing: Space.sm) {
+            ForEach(LibraryFilter.allCases, id: \.self) { item in
+              if item != .archived || !archived.isEmpty || filter == .archived {
+                FilterChip(
+                  title: item.rawValue,
+                  count: item == .archived
+                    ? archived.count
+                    : (item == .all
+                      ? nil
+                      : (item == .sections ? studio.records : studio.topLevelRecords).filter {
+                        belongs($0, to: item)
+                      }.count),
+                  selected: filter == item, t: studio.t
+                ) { studio.libraryFilter = item }
+              }
+            }
           }
-        }
+        }.scrollIndicators(.never)
         Spacer(minLength: 8)
         PlainMenu {
-          ForEach(Order.allCases, id: \.self) { item in
+          ForEach(LibraryOrder.allCases, id: \.self) { item in
             Button {
-              order = item
+              studio.libraryOrder = item
             } label: {
               if order == item {
                 StudioLabel(item.rawValue, icon: "checkmark")
@@ -185,6 +184,7 @@ struct LibraryScreen: View {
             hasCanon: filter == .canon, sectionsOnly: filter == .sections)
         ).map(\.id))
       searchFailure = nil
+
     } catch {
       indexed = []
       searchFailure = error.localizedDescription
@@ -192,7 +192,7 @@ struct LibraryScreen: View {
   }
   private func refreshArchive() {
     archived = (try? studio.store.archivedRecords(worldID: studio.worldID)) ?? []
-    if archived.isEmpty && filter == .archived { filter = .all }
+    if archived.isEmpty && filter == .archived { studio.libraryFilter = .all }
   }
   @ViewBuilder private var emptyState: some View {
     if !query.isEmpty || filter != .all {
@@ -204,7 +204,7 @@ struct LibraryScreen: View {
       ) {
         Button("Clear filters") {
           studio.libraryQuery = ""
-          filter = .all
+          studio.libraryFilter = .all
         }.buttonStyle(QuietButton(t: studio.t))
       }
     } else if let category = studio.libraryCategory {

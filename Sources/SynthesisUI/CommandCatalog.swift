@@ -179,10 +179,7 @@ extension CommandPalette {
             id: "setting-\(setting)", section: "Settings", icon: setting.section.icon,
             title: setting.title, detail: setting.section.rawValue
           ) {
-            guard studio.flushEditor() else { return }
-            studio.navigate(.settings)
-            studio.settingsSection = setting.section
-            studio.settingsQuery = setting.title
+            studio.openSettings(setting.section, query: setting.title)
             if setting == .connection { studio.assistantSettingsExpanded = true }
           })
       }

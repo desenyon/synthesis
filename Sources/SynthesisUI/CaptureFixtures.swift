@@ -5,6 +5,10 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "global-history-settings", "light-global-history-settings", "global-history-timeline",
+    "global-history-record", "manual-global-history-record", "global-history-review",
+    "global-history-map", "global-history-canvas", "global-history-graph",
+    "global-history-library",
     "atlas-context-before", "atlas-context-return", "light-atlas-context-return",
     "manual-atlas-context-return", "atlas-context-map-switch", "atlas-context-tools",
     "atlas-context-layers", "atlas-context-split", "atlas-context-fit",
@@ -303,6 +307,10 @@ extension Studio {
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
     endRecordDrag()
+    if state.contains("global-history-") {
+      configureGlobalNavigationCapture(state, board: board, conversation: conversation)
+      return
+    }
     if state.contains("atlas-context-") {
       configureAtlasContextCapture(state, board: board, conversation: conversation)
       return
@@ -868,6 +876,8 @@ extension Studio {
     sheet = nil
     toast = nil
     reviewProgress = nil
+    reviewSection = nil
+    reviewFocusID = nil
     reviewingProposal = false
     stop()
     setMode(state.hasPrefix("manual") ? .manual : .assisted)
@@ -886,6 +896,8 @@ extension Studio {
     navigationForward = []
     libraryCategory = nil
     libraryQuery = ""
+    libraryFilter = .all
+    libraryOrder = .recent
     restoreSidebarDefaults()
     canvasBoardID = board.isEmpty ? nil : board
     companionExpanded = state.hasSuffix("-companion") || state == "companion"

@@ -164,7 +164,7 @@ Migration 0014 adds world-scoped `record_artwork` revisions with an active-image
 
 ### Navigation history
 
-`NavigationLocation` stores only world-scoped addresses; `NavigationEntry` supplies display labels. `withNavigation` coalesces nested operations into one bounded visit, while failed editor saves and repeated addresses leave history intact. Replay validates targets and resolves current records; archived targets are skipped, database failures are surfaced. The common WorkspaceBar supplies Back/Forward; native menu shortcuts and context menus expose history. Editor breadcrumbs show the immediate connected-record trail. The stack is session-local; complete restart restoration is separately tracked at #33.
+`NavigationLocation` stores only world-scoped addresses; `NavigationEntry` supplies display labels. `withNavigation` coalesces nested operations into one bounded visit, while failed editor saves and repeated addresses leave history intact. Replay validates targets and resolves current records; archived targets are skipped, database failures are surfaced. The common WorkspaceBar supplies Back/Forward; native menu shortcuts and context menus expose history. Editor breadcrumbs show the immediate connected-record trail. The stack is session-local; complete restart restoration is separately tracked at #33. Optional `NavigationContext` snapshots entity tabs, Settings/search, Library query/filter/order, Review tab/focus and inspected source. Subpage helpers use the same history/save boundary. Same-mounted-editor replay retains its save callback; optional missing/foreign inspected sources clear without reviving them.
 
 ## Saved workspace layouts
 

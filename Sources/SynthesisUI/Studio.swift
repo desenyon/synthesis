@@ -68,6 +68,7 @@ public struct Toast: Identifiable {
   @Published public var reviewingProposal = false
   @Published var reviewProgress: ReviewProgress?
   @Published var reviewFocusID: String?
+  @Published var reviewSection: ReviewSection?
   @Published public var records: [LoreRecord] = []
   @Published public var recordTabs: [String: RecordPageTab] = [:]
   @Published var layoutRevision = 0
@@ -210,6 +211,8 @@ public struct Toast: Identifiable {
   @Published var inspectorWidth = 300.0
   @Published public var libraryCategory: String?
   @Published var libraryQuery = ""
+  @Published var libraryFilter = LibraryFilter.all
+  @Published var libraryOrder = LibraryOrder.recent
   @Published var sidebarConfiguration = SidebarConfiguration()
   @Published var sidebarConfigurationError: String?
   @Published public var newRecordKind = "lore"
@@ -622,6 +625,7 @@ public struct Toast: Identifiable {
   public func navigate(_ value: Destination) {
     withNavigation {
       guard flushEditor() else { return }
+      guard value != destination || selectedRecord != nil || libraryCategory != nil else { return }
       selectedRecord = nil
       editorSave = nil
       destination = value
@@ -632,7 +636,7 @@ public struct Toast: Identifiable {
         canvasUndo = nil
         canvasFit = nil
       }
-      if value != .library { libraryCategory = nil }
+      libraryCategory = nil
       mobileNavigation = false
       try? store.setPreference("destination", value: value.rawValue)
 
@@ -667,6 +671,7 @@ public struct Toast: Identifiable {
       editorSave = nil
       libraryCategory = category
       libraryQuery = ""
+      libraryFilter = .all
       destination = .library
       canvasUndo = nil
       canvasFit = nil
@@ -694,12 +699,15 @@ public struct Toast: Identifiable {
         companionExpanded = false
         libraryCategory = nil
         libraryQuery = ""
+        libraryFilter = .all
+        libraryOrder = .recent
         let nextDefaults = try store.worldPreferences(worldID: id)
         worldID = id
         worldDefaults = nextDefaults
         preset = nextDefaults.chatMode
         worldCover = Self.cover(store: store, worldID: id)
         reviewFocusID = nil
+        reviewSection = nil
         conversationID = nil
         selectedRecord = nil
         editorSave = nil

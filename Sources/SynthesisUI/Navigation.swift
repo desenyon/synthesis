@@ -13,6 +13,21 @@ struct NavigationLocation: Codable, Equatable {
   var laneID: String?
   var splitRecordID: String?
   var atlasView: AtlasViewState?
+  var context: NavigationContext?
+}
+/// Tool subpages belong to a visit. Text, canon and assistance permissions never do.
+struct NavigationContext: Codable, Equatable {
+  var recordTab: RecordPageTab?
+  var splitTab: RecordPageTab?
+  var settingsSection: SettingsSection?
+  var settingsQuery: String?
+  var libraryQuery: String?
+  var libraryFilter: LibraryFilter?
+  var libraryOrder: LibraryOrder?
+  var reviewSection: ReviewSection?
+  var reviewFocusID: String?
+  var inspection: InspectionTarget?
+  var inspectorShown: Bool?
 }
 struct NavigationEntry: Identifiable, Equatable {
   let id = UUID()
@@ -36,11 +51,32 @@ extension Studio {
         : (destination == .atlas ? atlasSelectedID : nil),
       laneID: destination == .timeline ? timelineLaneID : nil, splitRecordID: splitRecord?.id,
       atlasView: destination == .atlas && atlasView.matches(worldID: worldID, boardID: mapBoardID)
-        ? atlasView.value : nil)
+        ? atlasView.value : nil,
+      context: NavigationContext(
+        recordTab: selectedRecord.map { recordTabs[$0.id] ?? .overview },
+        splitTab: splitRecord.map { recordTabs[$0.id] ?? .overview },
+        settingsSection: destination == .settings ? settingsSection : nil,
+        settingsQuery: destination == .settings ? settingsQuery : nil,
+        libraryQuery: destination == .library ? libraryQuery : nil,
+        libraryFilter: destination == .library ? libraryFilter : nil,
+        libraryOrder: destination == .library ? libraryOrder : nil,
+        reviewSection: destination == .review ? reviewSection : nil,
+        reviewFocusID: destination == .review ? reviewFocusID : nil,
+        inspection: inspectionTarget, inspectorShown: workspaceInspector))
   }
   var navigationEntry: NavigationEntry {
     var title = selectedRecord?.title ?? libraryCategory ?? destination.rawValue
+    if let record = selectedRecord, let tab = recordTabs[record.id], tab != .overview {
+      title += " · \(tab.rawValue.capitalized)"
+    }
     if selectedRecord == nil {
+      if destination == .settings { title += " · \(settingsSection.rawValue)" }
+      if destination == .review, let reviewSection { title += " · \(reviewSection.rawValue)" }
+      if destination == .timeline, let laneID = timelineLaneID,
+        let lane = try? store.chronologyLanes(worldID: worldID).first(where: { $0.id == laneID })
+      {
+        title += " · \(lane.name)"
+      }
       if destination == .chat { title = conversationTitle }
       if let id = navigationLocation.boardID,
         let board = try? store.boards(
@@ -153,6 +189,13 @@ extension Studio {
     do {
       try validateNavigation(address)
       let fresh = try address.recordID.map { try store.record(worldID: address.worldID, id: $0) }
+      let inspected = try currentNavigationInspection(
+        address.context?.inspection, in: address.worldID)
+      let reviewFocus = try currentNavigationInspection(
+        address.context?.reviewFocusID.map(InspectionTarget.proposal), in: address.worldID)
+      let sameEditor =
+        worldID == address.worldID && selectedRecord?.id == address.recordID
+        && destination == address.destination
       replayingNavigation = true
       defer { replayingNavigation = false }
       if address.worldID != worldID {
@@ -160,12 +203,30 @@ extension Studio {
         guard worldID == address.worldID else { return false }
       }
       if address.destination == .chat && conversationID != address.conversationID { stop() }
-      editorSave = nil
+      // A subpage visit can keep the same native editor/map mounted; retain its save guard.
+      if !sameEditor { editorSave = nil }
       try setSplitRecord(
         try address.splitRecordID.map { try store.record(worldID: worldID, id: $0) })
       selectedRecord = fresh
       destination = address.destination
       libraryCategory = address.category
+      if let id = fresh?.id, let tab = address.context?.recordTab { recordTabs[id] = tab }
+      if let id = splitRecord?.id, let tab = address.context?.splitTab { recordTabs[id] = tab }
+      if address.destination == .library {
+        libraryQuery = address.context?.libraryQuery ?? ""
+        libraryFilter = address.context?.libraryFilter ?? .all
+        libraryOrder = address.context?.libraryOrder ?? .recent
+      }
+      if address.destination == .settings {
+        settingsSection = address.context?.settingsSection ?? .general
+        settingsQuery = address.context?.settingsQuery ?? ""
+      }
+      if address.destination == .review {
+        reviewSection = address.context?.reviewSection
+        if case .proposal(let id) = reviewFocus { reviewFocusID = id } else { reviewFocusID = nil }
+      } else {
+        reviewFocusID = nil
+      }
       if address.destination == .chat {
         conversationID = address.conversationID
         try reloadMessages()
@@ -188,7 +249,8 @@ extension Studio {
         canvasFit = nil
       }
       pendingEventSourceID = nil
-      inspectionTarget = nil
+      inspectionTarget = inspected
+      if let shown = address.context?.inspectorShown { workspaceInspector = shown }
       mobileNavigation = false
       try store.setPreference("destination", value: destination.rawValue)
       return true

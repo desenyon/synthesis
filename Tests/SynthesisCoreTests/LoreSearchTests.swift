@@ -4,6 +4,23 @@ import Testing
 @testable import SynthesisCore
 
 struct LoreSearchTests {
+  @Test func placeCategorySearchMatchesTitlesAndBodiesWithEveryAlias() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Aster")
+    let sea = try store.createRecord(
+      worldID: world.id, title: "The Glass Sea", kind: "entity", category: "Places")
+    let city = try store.createRecord(
+      worldID: world.id, title: "The Drowned City", body: "A capital beneath the sea.",
+      kind: "entity", category: "Places")
+    for category in ["Places", "place", "location", "locations"] {
+      #expect(
+        Set(
+          try store.search(worldID: world.id, query: "sea", scope: .init(category: category)).map(
+            \.id))
+          == [sea.id, city.id])
+    }
+  }
+
   @Test func libraryScopeIsAppliedBeforeTheResultLimit() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Aster")

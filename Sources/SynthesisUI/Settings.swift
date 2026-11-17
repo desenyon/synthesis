@@ -109,9 +109,8 @@ struct SettingsScreen: View {
     Binding(
       get: { studio.settingsSection },
       set: { section in
-        studio.settingsQuery = ""
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) {
-          studio.settingsSection = section
+          studio.openSettings(section)
         }
       })
   }

@@ -39,3 +39,5 @@ A record can remain open beside Atlas, Timeline, Graph, Canvas or another docume
 Records can be dragged from world Search, Favorites and Library into either editor pane or onto a curated Canvas. A drop opens or positions the same underlying lore; it never creates a second canon claim. See [record drag](DRAG_RECORDS.md).
 
 Atlas remembers map framing, layer visibility and selection independently of lore, across documents, tools, maps and normal restarts. History and saved layouts restore the same geographic context. See [Atlas navigation](ATLAS_NAVIGATION.md).
+
+Global [Back/Forward](NAVIGATION.md) restores document tabs, maps, conversations and tool subpages, including Library filters, Settings sections, chronology branches and Review focus. Current saved sources and both editor save guards remain authoritative.

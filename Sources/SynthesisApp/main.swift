@@ -593,6 +593,12 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
               print("ATLAS_CONTEXT_AUDIT \(width)x\(height) \(line)")
             }
           }
+          if state.contains("global-history-") {
+            for line in try await studio.auditGlobalNavigationCapture(
+              state, back: { try self.dispatchHistoryMenu(backward: true) },
+              forward: { try self.dispatchHistoryMenu(backward: false) })
+            { print("NAVIGATION_AUDIT \(width)x\(height) \(line)") }
+          }
           let start = CFAbsoluteTimeGetCurrent()
           let pixels = try await shot(
             frameView, to: folder.appendingPathComponent("\(state)-\(width)x\(height).png"),
@@ -656,6 +662,19 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       }
       print("SIDEBAR_AUDIT PASS shortcut registration and native action: \(entry.0)")
     }
+  }
+
+  private func dispatchHistoryMenu(backward: Bool) throws {
+    func entries(_ menu: NSMenu) -> [NSMenuItem] {
+      menu.items.flatMap { [$0] + ($0.submenu.map(entries) ?? []) }
+    }
+    guard let menu = NSApp.mainMenu,
+      let item = entries(menu).first(where: { $0.title == (backward ? "Back" : "Forward") }),
+      item.keyEquivalent == (backward ? "[" : "]"),
+      item.keyEquivalentModifierMask == .command, validateMenuItem(item),
+      let action = item.action, NSApp.sendAction(action, to: item.target, from: item),
+      !NSApp.isActive, !window.isKeyWindow
+    else { throw SynthesisError.invalid("Native history action or background isolation failed.") }
   }
 
 }

@@ -4,13 +4,13 @@ Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/S
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#28 verified; #29 global Back/Forward navigation is next.** The full expansion is unfinished.
+The owner requires all 394 items, individually and in numerical order. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **#1–#29 verified; #30 keyboard-first creation is next.** The full expansion is unfinished.
 
-Latest: [Atlas navigation](ATLAS_NAVIGATION.md) restores each map's zoom, image-relative center, marker/region visibility and selection across documents, tools, maps and normal restarts. Saved layouts and history carry visit framing. Native captures exposed a map-switch save-callback bug; it is fixed and covered by a mounted-view regression. Corrupt view preferences and removed selections cannot overwrite lore or resurrect archived maps.
+Latest: [global Back/Forward](NAVIGATION.md) restores entity tabs, both editor panes, map/board/chat addresses, Settings sections/search, Library query/filter/sort, chronology branches, Review focus and inspected sources. Same-mounted editors retain their save callback. Native captures exposed and verified fixes for category-search collation, compact Library overflow and two icon aliases.
 
-Latest checks: `./scripts/check.sh` passed **262 tests / 64 suites**, strict lint and optimized ad-hoc build. **27 final native states** were inspected at 1440×900, 1024×768 and 720×800, with **54 mounted-view audit assertions**. [Exact evidence](verification/expansion-028/README.md). README now includes the returned Atlas view. No foreground input, live model call, release or owner-app restart; AGENTS.md unchanged.
+`./scripts/check.sh` passed **267 tests / 65 suites**, strict lint and optimized ad-hoc build. **33 final native frames inspected** across 1440×900, 1024×768 and 720×800; **66 native-menu assertions** verify Back/Forward/Back, restored addresses, unchanged lore/mode and inactive-window execution. [Exact evidence](verification/expansion-029/README.md). README includes the returned Library. No live request, foreground input, owner-app restart or release; AGENTS.md unchanged.
 
-Earlier slices include real split editors and native record drag to panes/Canvas; #27 passed 17 Canvas tests and 49 engine checks. The Atlas slice changes no Canvas code, migrations or dependencies. Physical pointer/trackpad feel, animation pacing and VoiceOver remain unverified by background checks. Complete application-session restoration remains #33.
+Earlier slices include split editing, record drag and per-map Atlas context; #27 retains 17 Canvas tests and 49 engine checks. Physical keyboard/trackpad feel, popovers, animation pacing and VoiceOver remain unverified by background checks. Full session restoration remains #33.
 
 ## Latest — chatbox refinement (unreleased)
 

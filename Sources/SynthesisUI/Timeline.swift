@@ -75,10 +75,10 @@ struct TimelineScreen: View {
       }
       ContentHeader {
         PlainMenu {
-          Button("All history") { selectedLane = "" }
+          Button("All history") { studio.openTimelineLane(nil) }
           ForEach(lanes) { lane in
             Button("\(lane.kind == "branch" ? "Branch" : "Period") · \(lane.name)") {
-              selectedLane = lane.id
+              studio.openTimelineLane(lane.id)
             }
           }
         } label: {
@@ -208,7 +208,7 @@ struct TimelineScreen: View {
             }
             Button {
               withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
-                selectedLane = selectedLane == entry.lane.id ? "" : entry.lane.id
+                studio.openTimelineLane(selectedLane == entry.lane.id ? nil : entry.lane.id)
               }
             } label: {
               HStack(spacing: 8) {

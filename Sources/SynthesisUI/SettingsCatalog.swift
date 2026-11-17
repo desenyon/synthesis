@@ -1,6 +1,6 @@
 import Foundation
 
-enum SettingsSection: String, CaseIterable, Identifiable {
+enum SettingsSection: String, Codable, CaseIterable, Identifiable {
   case general = "General"
   case writing = "Writing"
   case assistant = "Assistant"

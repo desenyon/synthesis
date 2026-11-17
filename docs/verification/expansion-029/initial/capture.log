@@ -1,0 +1,91 @@
+NAVIGATION_AUDIT 1440x900 PASS global-history-settings: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-settings: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-settings 1440x900, bitmap 1440x900, 71ms
+NAVIGATION_AUDIT 1440x900 PASS light-global-history-settings: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS light-global-history-settings: current source data and assistance mode unchanged; no generation active
+CAPTURE light-global-history-settings 1440x900, bitmap 1440x900, 64ms
+NAVIGATION_AUDIT 1440x900 PASS global-history-timeline: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-timeline: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-timeline 1440x900, bitmap 1440x900, 119ms
+NAVIGATION_AUDIT 1440x900 PASS global-history-record: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-record: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-record 1440x900, bitmap 1440x900, 123ms
+NAVIGATION_AUDIT 1440x900 PASS manual-global-history-record: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS manual-global-history-record: current source data and assistance mode unchanged; no generation active
+CAPTURE manual-global-history-record 1440x900, bitmap 1440x900, 32ms
+NAVIGATION_AUDIT 1440x900 PASS global-history-review: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-review: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-review 1440x900, bitmap 1440x900, 119ms
+NAVIGATION_AUDIT 1440x900 PASS global-history-map: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-map: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-map 1440x900, bitmap 1440x900, 233ms
+NAVIGATION_AUDIT 1440x900 PASS global-history-canvas: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-canvas: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-canvas 1440x900, bitmap 1440x900, 172ms
+NAVIGATION_AUDIT 1440x900 PASS global-history-graph: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-graph: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-graph 1440x900, bitmap 1440x900, 371ms
+NAVIGATION_AUDIT 1440x900 PASS global-history-library: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1440x900 PASS global-history-library: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-library 1440x900, bitmap 1440x900, 122ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-settings: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-settings: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-settings 1024x768, bitmap 1024x768, 52ms
+NAVIGATION_AUDIT 1024x768 PASS light-global-history-settings: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS light-global-history-settings: current source data and assistance mode unchanged; no generation active
+CAPTURE light-global-history-settings 1024x768, bitmap 1024x768, 50ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-timeline: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-timeline: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-timeline 1024x768, bitmap 1024x768, 105ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-record: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-record: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-record 1024x768, bitmap 1024x768, 77ms
+NAVIGATION_AUDIT 1024x768 PASS manual-global-history-record: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS manual-global-history-record: current source data and assistance mode unchanged; no generation active
+CAPTURE manual-global-history-record 1024x768, bitmap 1024x768, 28ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-review: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-review: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-review 1024x768, bitmap 1024x768, 88ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-map: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-map: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-map 1024x768, bitmap 1024x768, 143ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-canvas: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-canvas: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-canvas 1024x768, bitmap 1024x768, 98ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-graph: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-graph: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-graph 1024x768, bitmap 1024x768, 136ms
+NAVIGATION_AUDIT 1024x768 PASS global-history-library: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 1024x768 PASS global-history-library: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-library 1024x768, bitmap 1024x768, 95ms
+NAVIGATION_AUDIT 720x800 PASS global-history-settings: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-settings: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-settings 720x800, bitmap 720x800, 39ms
+NAVIGATION_AUDIT 720x800 PASS light-global-history-settings: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS light-global-history-settings: current source data and assistance mode unchanged; no generation active
+CAPTURE light-global-history-settings 720x800, bitmap 720x800, 36ms
+NAVIGATION_AUDIT 720x800 PASS global-history-timeline: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-timeline: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-timeline 720x800, bitmap 720x800, 74ms
+NAVIGATION_AUDIT 720x800 PASS global-history-record: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-record: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-record 720x800, bitmap 720x800, 76ms
+NAVIGATION_AUDIT 720x800 PASS manual-global-history-record: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS manual-global-history-record: current source data and assistance mode unchanged; no generation active
+CAPTURE manual-global-history-record 720x800, bitmap 720x800, 19ms
+NAVIGATION_AUDIT 720x800 PASS global-history-review: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-review: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-review 720x800, bitmap 720x800, 68ms
+NAVIGATION_AUDIT 720x800 PASS global-history-map: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-map: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-map 720x800, bitmap 720x800, 134ms
+NAVIGATION_AUDIT 720x800 PASS global-history-canvas: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-canvas: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-canvas 720x800, bitmap 720x800, 103ms
+NAVIGATION_AUDIT 720x800 PASS global-history-graph: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-graph: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-graph 720x800, bitmap 720x800, 135ms
+NAVIGATION_AUDIT 720x800 PASS global-history-library: native Back/Forward/Back actions restore exact document/map/tool address
+NAVIGATION_AUDIT 720x800 PASS global-history-library: current source data and assistance mode unchanged; no generation active
+CAPTURE global-history-library 720x800, bitmap 720x800, 66ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-029/final

@@ -173,3 +173,7 @@ Observed: short-pane captures collapsed the editor title and left a Canvas board
 ### 2026-11-17 — record drops across native and Canvas surfaces
 
 Background engine checks for expansion #27 confirmed that native drop points must be converted through the engine's live pan/zoom and guarded by its current load token, including after save acknowledgment. Native provider tests use process-local addresses rather than copying lore into the pasteboard. The first contact sheets showed a target/composer overlap in narrow layouts; retaining geometry while hiding the composer during the gesture fixed it in the 33-state final matrix. No AGENTS.md change; the shared drag helper and evidence document carry this bounded implementation detail.
+
+## 2026-11-17 — collation ordering and category lookup
+
+A native #29 capture showed zero Places results for “sea”. An isolated regression reproduced it: the locale comparison equated `Places` and `places` but ordered them differently against `location`, so SQLite IN membership failed with four aliases. Search now folds case/diacritics first, then uses a consistent string order. All four place aliases, title/body matches and the existing structured-search suite pass. No persistent index uses this collation, so no reindex/migration is required. Evidence: `verification/expansion-029/search-before-fix.log`. AGENTS.md unchanged; rollback would restore the broken comparison and fail the new regression.
