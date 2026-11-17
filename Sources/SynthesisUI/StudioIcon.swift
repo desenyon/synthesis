@@ -84,6 +84,7 @@ enum StudioIcons {
     "lock.shield": "\u{e40c}",
     "magnifyingglass": "\u{e30c}",
     "map": "\u{e31a}",
+    "pin": "\u{e65c}",
     "mappin.and.ellipse": "\u{e316}",
     "mappin.circle.fill": "\u{ee3a}",
     "messages-square": "\u{e17e}",

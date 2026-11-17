@@ -74,6 +74,7 @@ struct LibraryScreen: View {
             .padding(.leading, 4)
         }
       } trailing: {
+        DocumentHistoryMenu(studio: studio)
         SearchField(text: $query, placeholder: "Search titles, text, tags", t: studio.t)
           .frame(minWidth: 140, idealWidth: 240, maxWidth: 240)
         BarAction(title: "New", icon: "plus", t: studio.t, primary: true, help: "New record · ⌘N") {

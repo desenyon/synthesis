@@ -366,3 +366,9 @@ Checks: Canvas typecheck, 15 tests and bundle build; `./scripts/check.sh` strict
 Graph titles become compact at overview scale, summaries appear closer in, and real artwork plus relationship labels appear in detail. Node positions stay fixed; routing uses visible card bounds. Visible-only bounded thumbnail decoding and a revision cache avoid full-image work during pan/zoom. Artwork indexes respect world, revision and archive state.
 
 `./scripts/check.sh`: strict lint, 200 tests / 51 suites, optimized build. Inspected all 16 refined captures at both sizes plus two corrected selection captures. Visual iterations removed inactive-window hover and overlapping distant relationship labels; selection still exposes the full relation list. README detailed graph added. [Evidence](verification/expansion-015/README.md). No foreground events, model call, release or user-app restart. Next #16.
+
+### 2026-11-17 — Expansion #16, document tabs (verified)
+
+Connected tabs, pins, recent reopening, close-other-unpinned, native menu shortcuts and world-scoped local persistence. Native text views retain caret, scroll, rich text and per-document undo through tab/workspace switching. Fresh reviewed content invalidates old undo; failed saves block switching/closing. Corrupt tab metadata is preserved and cannot prevent opening lore. Closing is not archive.
+
+`./scripts/check.sh`: strict lint, 204 tests / 52 suites, optimized build. Added real native editor retention tests plus disk/world/archive/failure regressions. Corrected reopening order to follow closure. All 16 background captures inspected at both sizes, covering pinned, overflow/long titles, reopened, Sections, recovery, Manual and light states. [Evidence](verification/expansion-016/README.md), [usage](DOCUMENTS.md). No foreground test, live model call or release; owner's app untouched. Next #17.

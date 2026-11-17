@@ -6,7 +6,7 @@ Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bun
 
 `SynthesisApp` hosts `ConnectedRoot` (Shell.swift) in `StudioWindow`, a titled window with full-size content and a transparent title bar. The window keeps native controls, resizing, full screen and frame autosave; `layoutTrafficLights()` centres the buttons in the 56-point header and is reapplied from `update()`.
 
-`ConnectedRoot` lays out the navigation (`Sidebar.swift`), the active workspace and global overlays: the command palette, toasts and the error alert. Navigation, assistance mode and the open record are independent pieces of `Studio` state. A record opens over the current workspace (`selectedRecord`), so closing it returns to where the creator was.
+`ConnectedRoot` lays out the navigation (`Sidebar.swift`), the active workspace and global overlays: the command palette, toasts and the error alert. Navigation, assistance mode and the open record are independent pieces of `Studio` state. A record opens over the current workspace (`selectedRecord`); its breadcrumb returns there. `DocumentTabs.swift` keeps per-world device-local open/pinned/recent record addresses. Closing the active tab selects a remaining tab, or returns to the workspace. `EditorHandle` retains each open native text view and independent undo manager; navigation flushes autosave first. External content reloads clear obsolete native undo. Tab addresses are resolved against current world records and filtered for archive/ownership, never exported as lore.
 
 ## Design system
 

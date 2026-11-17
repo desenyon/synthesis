@@ -120,7 +120,12 @@ public struct Toast: Identifiable {
   /// Records shared with the model for each answer, keyed by assistant message.
   @Published public var contexts: [String: [ContextSource]] = [:]
   @Published public var conversationID: String?
-  @Published public var selectedRecord: LoreRecord?
+  @Published public var selectedRecord: LoreRecord? {
+    didSet { if let record = selectedRecord, oldValue?.id != record.id { retainDocument(record) } }
+  }
+  @Published var documentSession = OpenDocuments()
+  var documentWorldID = ""
+  var documentEditors: [String: EditorHandle] = [:]
   @Published public var destination: Destination = .chat {
     didSet { if oldValue != destination { inspectionTarget = nil } }
   }
@@ -382,6 +387,7 @@ public struct Toast: Identifiable {
     branch = try store.branchInfo(worldID: worldID)
     branchParents = try store.branchParents()
     records = try store.records(worldID: worldID)
+    try syncDocumentSession()
     contextBoards = try store.assistantBoards(worldID: worldID)
     contextLanes = try store.chronologyLanes(worldID: worldID)
     contextOptions = try store.assistantContextOptions(worldID: worldID)

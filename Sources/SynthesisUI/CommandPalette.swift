@@ -134,6 +134,13 @@ struct CommandPalette: View {
           title: destination.rawValue, detail: offset < 9 ? "⌘\(offset + 1)" : ""
         ) { studio.navigate(destination) })
     }
+    if studio.canReopenDocument && matches("Reopen closed document") {
+      items.append(
+        Item(
+          id: "reopen-document", section: "Documents", icon: "clock.arrow.circlepath",
+          title: "Reopen closed document", detail: "⇧⌘T"
+        ) { studio.reopenDocument() })
+    }
     let create: [(String, String, String, String, () -> Void)] = [
       (
         "New document", "doc.badge.plus", "⌘N", "lore",

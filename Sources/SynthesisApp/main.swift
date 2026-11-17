@@ -255,7 +255,8 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     item(file, "Export World as JSON…", #selector(exportJSON))
     item(file, "Export World Images…", #selector(exportImages))
     file.addItem(.separator())
-    item(file, "Close Window", #selector(closeWindow), "w")
+    item(file, "Reopen Closed Document", #selector(reopenDocument), "t", [.command, .shift])
+    item(file, "Close Document or Window", #selector(closeWindow), "w")
     let edit = submenu(main, "Edit")
     item(edit, "Undo", #selector(undoAction), "z")
     item(edit, "Redo", #selector(redoAction), "z", [.command, .shift])
@@ -265,6 +266,9 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     ] { edit.addItem(withTitle: title, action: Selector(selector), keyEquivalent: key) }
     item(edit, "Select All", #selector(selectAllAction), "a")
     let view = submenu(main, "View")
+    item(view, "Next Document", #selector(nextDocument), "\t", [.control])
+    item(view, "Previous Document", #selector(previousDocument), "\t", [.control, .shift])
+    view.addItem(.separator())
     item(view, "Back", #selector(goBack), "[")
     item(view, "Forward", #selector(goForward), "]")
     view.addItem(.separator())
@@ -325,7 +329,16 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
   @objc func saveWorldFile() { studio.savePortableWorld() }
   @objc func exportImages() { studio.exportWorldImages() }
   @objc func search() { studio.palette.toggle() }
-  @objc func closeWindow() { window.performClose(nil) }
+  @objc func reopenDocument() { studio.reopenDocument() }
+  @objc func nextDocument() { studio.cycleDocument() }
+  @objc func previousDocument() { studio.cycleDocument(backward: true) }
+  @objc func closeWindow() {
+    if studio.selectedRecord != nil {
+      studio.closeActiveDocument()
+    } else {
+      window.performClose(nil)
+    }
+  }
   @objc func newItem() {
     studio.newRecordKind = "lore"
     studio.sheet = .document

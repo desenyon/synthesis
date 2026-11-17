@@ -33,7 +33,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 | --- | --- |
 | **Conversation**: attach lore, boards, maps and history; inspect context before sending. Explore ideas or propose reviewable changes, with `@` references and control over what the assistant reads. | **Canvas**: an offline [Excalidraw](https://github.com/excalidraw/excalidraw) board where record cards stay linked to your library and relationships draw themselves. |
 | ![Conversation with a proposal card](docs/screenshots/conversation.png) | ![Canvas in light mode](docs/screenshots/canvas-light.png) |
-| **Graph**: the relationship network, laid out automatically from stored data. Zoom from compact titles to summaries and stored artwork. Copy any neighbourhood onto a board. | **Library and editor**: rich text, tags, aliases, links, sections and a details inspector, with canon review as a line diff. |
+| **Graph**: the relationship network, laid out automatically from stored data. Zoom from compact titles to summaries and stored artwork. Copy any neighbourhood onto a board. | **Library and editor**: pinned document tabs, recent reopening and native undo/caret retention; rich text, tags, aliases, links, sections and a details inspector, with canon review as a line diff. |
 | ![Graph of entities and relationships](docs/screenshots/graph.png) | ![Record editor with inspector](docs/screenshots/editor.png) |
 | **Mechanics**: rules, costs, limits and scenarios for power systems, plus a technique tree built from what each technique requires. | **Timeline**: sourced events with free-form dates, nested branches and periods, and Detailed, Compact or By-era views. |
 | ![Technique tree in Mechanics](docs/screenshots/technique-tree.png) | ![Timeline grouped by era](docs/screenshots/timeline.png) |
@@ -57,6 +57,10 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 ![Graph with profile artwork, summaries and typed relationships](docs/screenshots/graph-detail.png)
 
+**Keep related documents open**
+
+![Pinned and open world documents above the native editor](docs/screenshots/document-tabs.png)
+
 **Saved workspace layouts**
 
 ![Named Research, Writing, Cartography and Simulation arrangements in the native layout manager](docs/screenshots/layouts.png)
@@ -75,7 +79,7 @@ Most worldbuilding tools are either a pile of notes or a rigid wiki. Synthesis t
 
 </details>
 
-Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, Dashboard and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
+Screenshots are the real app with the bundled **Aster** sample world at 1440×900. Composer, context, Conversation, light Canvas, detailed Graph, document tabs, Dashboard and workspace-layout images were refreshed on November 17 for **unreleased main** after 0.0.3; other screens show the 0.0.3 capture set. [Capture details](docs/screenshots/README.md).
 
 The complete 394-item expansion is tracked individually in [the implementation ledger](docs/EXPANSION.md). It is **not yet complete**. Dark surfaces now default to graphite; **Settings → General → Dark surfaces** retains true-black OLED as an option.
 

@@ -80,6 +80,7 @@ struct EditorScreen: View {
   init(studio: Studio, record: LoreRecord) {
     self.studio = studio
     _record = State(initialValue: record)
+    _handle = State(initialValue: studio.editorHandle(for: record))
     _writingStarted = State(
       initialValue: !record.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
     _title = State(initialValue: record.title)
@@ -91,6 +92,7 @@ struct EditorScreen: View {
     GeometryReader { geo in
       VStack(spacing: 0) {
         bar
+        DocumentTabBar(studio: studio)
         if record.kind == "entity" { entityTabs }
         HStack(spacing: 0) {
           if record.kind == "entity" && mechanicsVisible {

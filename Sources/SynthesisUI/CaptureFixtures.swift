@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "document-tabs", "light-document-tabs", "manual-document-tabs", "document-tabs-many",
+    "document-tabs-reopened", "document-tabs-sections",
     "graph-zoom-overview", "graph-zoom-summary", "graph-zoom-detail",
     "light-graph-zoom-overview", "light-graph-zoom-detail", "manual-graph-zoom-detail",
     "dashboard-activity", "light-dashboard-activity", "dashboard", "light-dashboard",
@@ -263,6 +265,40 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("document-tabs") {
+      configureConnectedCapture("library", board: board, conversation: conversation)
+      for id in documentSession.open { closeDocument(id) }
+      for title in ["Mira Vale", "Tidekeepers", "The Glass Sea"] {
+        if let record = records.first(where: { $0.title == title }) { openRecord(record) }
+      }
+      if let mira = records.first(where: { $0.title == "Mira Vale" }) {
+        toggleDocumentPin(mira.id)
+        if state == "document-tabs-many" {
+          for record in topLevelRecords { openRecord(record) }
+          perform {
+            let long = try store.createRecord(
+              worldID: worldID,
+              title: "The annotated accounts of every crossing before the final remembering tide",
+              body: "Comparing the maps and crossing accounts.")
+            try reload()
+            openRecord(long)
+          }
+        } else {
+          openRecord(mira)
+        }
+        if state == "document-tabs-sections" { recordTabs[mira.id] = .sections }
+      }
+      if state == "document-tabs-reopened" {
+        closeActiveDocument()
+        reopenDocument()
+      }
+      inspector = false
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      toast = nil
+      captureHint = state
+      return
+    }
     if state.contains("graph-zoom-") {
       configureConnectedCapture("graph", board: board, conversation: conversation)
       perform {

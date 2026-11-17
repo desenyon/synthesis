@@ -1,6 +1,6 @@
 # Screenshots
 
-README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png` `canvas-light.png` and `graph-detail.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
+README images come from the real app with the bundled Aster sample world, at 1440×900 and scaled to at most 1600 px wide. `composer.png`, `composer-context.png`, `conversation.png`, `layouts.png`, `dashboard.png`, `canvas-light.png`, `graph-detail.png` and `document-tabs.png` were refreshed on 2026-11-17 from unreleased main after 0.0.3; the other images retain the inspected 0.0.3 capture set. No live model request produced these authored fixtures.
 
 | File | Capture state |
 | --- | --- |
@@ -39,3 +39,5 @@ Dashboard: [expansion-013](../verification/expansion-013/README.md). Project and
 Light Canvas: expansion #14, `verification/expansion-014/after`, inspected before PNG pruning.
 
 Detailed Graph: expansion #15, `verification/expansion-015/refined`, using actual record artwork in an isolated fixture.
+
+Document tabs: expansion #16, `verification/expansion-016`, with pinned and real opened records.

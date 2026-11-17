@@ -367,6 +367,10 @@ struct ComposerInput: NSViewRepresentable {
 /// Lets toolbar controls act on the document text view without owning it.
 @MainActor final class EditorHandle {
   weak var view: NSTextView?
+  var scrollView: NSScrollView?
+  let undoManager = UndoManager()
+  var body: String?
+  var rtf: String?
   func send(_ selector: String) {
     guard let view else { return }
     view.window?.makeFirstResponder(view)
@@ -401,18 +405,22 @@ struct RichDocumentEditor: NSViewRepresentable {
   var changed: (String, String?) -> Void
   func makeCoordinator() -> Coordinator { Coordinator(self) }
   func makeNSView(context: Context) -> NSScrollView {
-    let scroll = NSScrollView()
-    let view = NSTextView()
+    makeEditor(coordinator: context.coordinator)
+  }
+  /// Reattach the actual text view so selection, viewport and its undo stack survive tabs.
+  func makeEditor(coordinator: Coordinator) -> NSScrollView {
+    let scroll = handle?.scrollView ?? NSScrollView()
+    let retained = scroll.documentView as? NSTextView
+    let view = retained ?? NSTextView()
     scroll.drawsBackground = false
     scroll.hasVerticalScroller = true
     scroll.autohidesScrollers = true
     scroll.scrollerStyle = .overlay
-    scroll.documentView = view
+    if retained == nil { scroll.documentView = view }
     view.isRichText = true
     view.importsGraphics = false
     view.allowsUndo = true
     view.drawsBackground = false
-    view.font = StudioTypography.native(size: CGFloat(preferences.bodySize))
     view.textColor = NSColor(t.text)
     view.insertionPointColor = NSColor(t.accent)
     view.textContainerInset = NSSize(width: 0, height: 10)
@@ -420,12 +428,20 @@ struct RichDocumentEditor: NSViewRepresentable {
     view.isHorizontallyResizable = false
     view.autoresizingMask = [.width]
     view.textContainer?.widthTracksTextView = true
-    view.delegate = context.coordinator
+    view.delegate = coordinator
     configureWriting(view)
     view.setAccessibilityLabel("Document body")
-    install(view)
+    if retained == nil || handle?.body != body || handle?.rtf != rtf {
+      coordinator.updating = true
+      install(view)
+      view.undoManager?.removeAllActions()
+      coordinator.updating = false
+    }
     handle?.view = view
-    context.coordinator.token = reloadToken
+    handle?.scrollView = scroll
+    handle?.body = body
+    handle?.rtf = rtf
+    coordinator.token = reloadToken
     return scroll
   }
   private var paragraph: NSParagraphStyle {
@@ -463,6 +479,8 @@ struct RichDocumentEditor: NSViewRepresentable {
     if context.coordinator.token != reloadToken {
       context.coordinator.updating = true
       install(view)
+      handle?.body = body
+      handle?.rtf = rtf
       view.undoManager?.removeAllActions()
       context.coordinator.token = reloadToken
       context.coordinator.updating = false
@@ -483,11 +501,14 @@ struct RichDocumentEditor: NSViewRepresentable {
     var token = 0
     var updating = false
     init(_ parent: RichDocumentEditor) { self.parent = parent }
+    func undoManager(for view: NSTextView) -> UndoManager? { parent.handle?.undoManager }
     func textDidChange(_ notification: Notification) {
       guard !updating, let view = notification.object as? NSTextView else { return }
       let data = try? view.attributedString().data(
         from: NSRange(location: 0, length: view.attributedString().length),
         documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf])
+      parent.handle?.body = view.string
+      parent.handle?.rtf = data?.base64EncodedString()
       parent.changed(view.string, data?.base64EncodedString())
     }
   }
