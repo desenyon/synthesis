@@ -1,0 +1,40 @@
+[0/1] Planning build
+Building for production...
+[0/3] Copying Assets
+[1/4] Copying CanvasBundle
+[2/4] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.15s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.b9yVmY/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.b9yVmY/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.b9yVmY/Synthesis-Verification.app: 1 (Operation not permitted)
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT FAIL first-fit acknowledgement contains the committed viewport
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS unacknowledged canvas save blocks shutdown
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+Capture failed: invalid("Canvas engine audit failed; see checks above.")

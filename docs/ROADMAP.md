@@ -11,7 +11,7 @@
 
 ## Active — connected studio audit and UI overhaul
 
-- 0.0.2: reviewed existing workspace edits, current selection/branch context, conversation recovery, floating companions, collapsible chronology and stable Canvas reload. 139 native/11 Canvas tests, 27 engine checks and 48 captures; one approved isolated Codex request passed. Physical gesture/animation/VoiceOver verification remains open. See INTERACTION_COMPLETION.md.
+- 0.0.2: reviewed existing workspace edits, current selection/branch context, conversation recovery, floating companions, collapsible chronology and stable Canvas reload. 140 native/11 Canvas tests, 28 engine checks and 48 source/16 packaged-app captures; one approved isolated Codex request passed. Physical gesture/animation/VoiceOver verification remains open. See INTERACTION_COMPLETION.md.
 
 - 0.0.1 prerelease: narrower sidebar, stable graph zoom, record-owned Canvas links, nested chronology approval, Atlas selection refresh and world/workspace-scoped harness context. Acceptance evidence and remaining limits are in STATE. Next: an isolated foreground gesture/animation walkthrough, opted-in live subscription checks, and signed/notarized distribution before broader release.
 

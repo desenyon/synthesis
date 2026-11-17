@@ -335,9 +335,11 @@ export function App() {
         s.loaded = true;
         synchronise();
         if (fit && api.getSceneElements().length) {
-          api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.94, canvasOffsets: s.fitInsets, animate: false });
+          flushSync(() => api.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.94, canvasOffsets: s.fitInsets, animate: false }));
         }
-        post({ type: "loaded", migrated: Boolean(payload.legacy && !payload.scene), ...serialise(true) });
+        const snapshot = serialise(true);
+        post({ type: "loaded", migrated: Boolean(payload.legacy && !payload.scene), ...snapshot });
+        return snapshot;
       },
       setAssistance(enabled: boolean) { setAssisted(enabled); },
       setTheme(next: Theme) {
@@ -626,6 +628,13 @@ export function App() {
         const restoredViewport = api.getAppState();
         const originalViewport = original.scene!.appState as { scrollX: number; scrollY: number; zoom: number };
         check("board reload preserves saved viewport", Math.abs(restoredViewport.scrollX-originalViewport.scrollX)<0.01 && Math.abs(restoredViewport.scrollY-originalViewport.scrollY)<0.01 && Math.abs(restoredViewport.zoom.value-originalViewport.zoom)<0.001);
+        const firstOpen = structuredClone(original);
+        firstOpen.scene!.appState = {};
+        const acknowledgement = await bridge.load(firstOpen); await wait();
+        const acknowledgedViewport = (acknowledgement?.scene as any)?.appState;
+        const fittedViewport = api.getAppState();
+        check("first-fit acknowledgement contains the committed viewport", !!acknowledgedViewport && Math.abs(acknowledgedViewport.scrollX-fittedViewport.scrollX)<0.01 && Math.abs(acknowledgedViewport.scrollY-fittedViewport.scrollY)<0.01 && Math.abs(acknowledgedViewport.zoom-fittedViewport.zoom.value)<0.001);
+        await bridge.load(original); await wait();
         const selectedCard=api.getSceneElements().find(isCard);
         api.updateScene({appState:{selectedElementIds:{[selectedCard.id]:true}}}); await wait();
         bridge.setAssistance(false); await wait();

@@ -6,17 +6,17 @@
 > synthesis-canvas@0.1.0 test
 > node --test tests/*.test.ts
 
-✔ a relationship and its label detour around an intervening card (1.526625ms)
-✔ close parallel connections keep their labels on separate outside curves (0.503959ms)
-✔ overlay stays attached through pan, zoom and a nonzero webview offset (0.348625ms)
-✔ offscreen cards are culled but partially visible cards survive (0.049542ms)
-✔ archived and retargeted relationships cannot remain as false lore (0.076292ms)
-✔ delayed messages must not write into a newly opened board (0.043333ms)
-✔ nested board groups keep each record group separate (0.052417ms)
-✔ rotated record hit testing follows the visible card instead of its old bounds (0.116291ms)
-✔ connection routes leave the correct card face and separate parallel relationships (0.228459ms)
-✔ overlapping cards route above the content rather than folding into it (0.184166ms)
-✔ Dagre arrangement separates real cards and respects relationship direction (5.272291ms)
+✔ a relationship and its label detour around an intervening card (1.082875ms)
+✔ close parallel connections keep their labels on separate outside curves (1.2355ms)
+✔ overlay stays attached through pan, zoom and a nonzero webview offset (0.380708ms)
+✔ offscreen cards are culled but partially visible cards survive (0.060459ms)
+✔ archived and retargeted relationships cannot remain as false lore (0.077958ms)
+✔ delayed messages must not write into a newly opened board (0.045333ms)
+✔ nested board groups keep each record group separate (0.054ms)
+✔ rotated record hit testing follows the visible card instead of its old bounds (0.078792ms)
+✔ connection routes leave the correct card face and separate parallel relationships (0.199084ms)
+✔ overlapping cards route above the content rather than folding into it (0.1635ms)
+✔ Dagre arrangement separates real cards and respects relationship direction (4.988ms)
 ℹ tests 11
 ℹ suites 0
 ℹ pass 11
@@ -24,7 +24,7 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 80.5245
+ℹ duration_ms 79.743792
 
 > synthesis-canvas@0.1.0 build
 > vite build
@@ -201,6 +201,6 @@ computing gzip size...
 ../Sources/SynthesisUI/CanvasBundle/assets/cytoscape.esm.js                       450.32 kB │ gzip: 144.03 kB
 ../Sources/SynthesisUI/CanvasBundle/assets/cynefin-OW5HDTMX.js                    687.73 kB │ gzip: 151.77 kB
 ../Sources/SynthesisUI/CanvasBundle/assets/index2.js                              716.45 kB │ gzip: 179.15 kB
-../Sources/SynthesisUI/CanvasBundle/assets/index.js                             1,508.62 kB │ gzip: 486.84 kB
+../Sources/SynthesisUI/CanvasBundle/assets/index.js                             1,509.00 kB │ gzip: 487.05 kB
 ../Sources/SynthesisUI/CanvasBundle/assets/subset-shared.chunk.js               1,820.49 kB │ gzip: 735.69 kB
-✓ built in 4.59s
+✓ built in 5.04s

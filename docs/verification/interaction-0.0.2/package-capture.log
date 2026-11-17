@@ -1,0 +1,46 @@
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-verified-0.0.2.3rIWpR/Synthesis.app: 1 (Operation not permitted)
+CAPTURE atlas-linked 1440x900, bitmap 2880x1800, 1561ms
+CAPTURE conversation-home 1440x900, bitmap 2880x1800, 1072ms
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT PASS first-fit acknowledgement contains the committed viewport
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS unacknowledged canvas save blocks shutdown
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+CAPTURE canvas 1440x900, bitmap 2880x1800, 1084ms
+CAPTURE companion 1440x900, bitmap 2880x1800, 630ms
+CAPTURE light 1440x900, bitmap 2880x1800, 1101ms
+CAPTURE graph 1440x900, bitmap 2880x1800, 2615ms
+CAPTURE timeline 1440x900, bitmap 2880x1800, 957ms
+CAPTURE review-edits 1440x900, bitmap 2880x1800, 951ms
+CAPTURE atlas-linked 1024x768, bitmap 2048x1536, 989ms
+CAPTURE conversation-home 1024x768, bitmap 2048x1536, 645ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 748ms
+CAPTURE companion 1024x768, bitmap 2048x1536, 685ms
+CAPTURE light 1024x768, bitmap 2048x1536, 668ms
+CAPTURE graph 1024x768, bitmap 2048x1536, 1058ms
+CAPTURE timeline 1024x768, bitmap 2048x1536, 625ms
+CAPTURE review-edits 1024x768, bitmap 2048x1536, 634ms
+Native captures complete: /tmp/synthesis-verified-0.0.2.3rIWpR/captures

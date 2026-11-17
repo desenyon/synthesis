@@ -132,6 +132,7 @@ public struct Toast: Identifiable {
   @Published var atlasSelectedID: String?
   @Published var timelineLaneID: String?
   private var pendingSubmission: (world: String, conversation: String, text: String)?
+  let harnessSelection: HarnessSelection
   var contextualRecordIDs: [String] {
     if let selectedRecord { return [selectedRecord.id] }
     let selection: [String]
@@ -186,16 +187,18 @@ public struct Toast: Identifiable {
   }
   public init(store: WorkspaceStore, transport: (any ModelTransport)? = nil) throws {
     self.store = store
-    // Requests go to whichever provider is selected when they are sent. The transports read
-    // the choice from defaults so they stay independent of this observable object.
+    // The cache belongs to this database/window. Background verification cannot change
+    // the provider or model of an already-running creator's workspace.
+    let selection = HarnessSelection()
+    harnessSelection = selection
     let setting: @Sendable (String) -> String = {
-      UserDefaults.standard.string(forKey: $0) ?? ""
+      selection.string(forKey: $0)
     }
     self.engine = AgentEngine(
       store: store,
       transport: transport
         ?? ProviderRouter(
-          kind: { ProviderKind(rawValue: setting("Synthesis.provider")) ?? .claudeCode },
+          kind: { ProviderKind(rawValue: setting("Synthesis.provider")) ?? .codex },
           claude: ClaudeCodeTransport(model: { setting("Synthesis.model.claude-code") }),
           codex: CodexTransport(model: { setting("Synthesis.model.codex") })))
     // Migrate obsolete API selection to an installed subscription harness.
@@ -203,11 +206,11 @@ public struct Toast: Identifiable {
       try store.preference("provider").flatMap(ProviderKind.init(rawValue:))
       ?? .codex
     try store.setPreference("provider", value: provider.rawValue)
-    UserDefaults.standard.set(provider.rawValue, forKey: "Synthesis.provider")
+    harnessSelection.set(provider.rawValue, forKey: "Synthesis.provider")
     for kind in [ProviderKind.claudeCode, .codex] {
       let value = try store.preference("model:\(kind.rawValue)") ?? ""
       harnessModels[kind] = value
-      UserDefaults.standard.set(value, forKey: "Synthesis.model.\(kind.rawValue)")
+      harnessSelection.set(value, forKey: "Synthesis.model.\(kind.rawValue)")
     }
     worlds = try store.worlds()
     let firstLaunch = worlds.isEmpty
@@ -261,7 +264,7 @@ public struct Toast: Identifiable {
     perform {
       try store.setPreference("provider", value: kind.rawValue)
       provider = kind
-      UserDefaults.standard.set(kind.rawValue, forKey: "Synthesis.provider")
+      harnessSelection.set(kind.rawValue, forKey: "Synthesis.provider")
       providerStatus = nil
       checkingProvider = false
       refreshProviderAvailability()
@@ -281,7 +284,7 @@ public struct Toast: Identifiable {
     perform {
       try store.setPreference("model:\(kind.rawValue)", value: model)
       harnessModels[kind] = model
-      UserDefaults.standard.set(model, forKey: "Synthesis.model.\(kind.rawValue)")
+      harnessSelection.set(model, forKey: "Synthesis.model.\(kind.rawValue)")
     }
   }
   /// Asks the harness for its own sign-in status. No model request is made.

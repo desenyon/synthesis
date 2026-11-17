@@ -17,6 +17,22 @@ actor RecordingResponse: ModelTransport {
 }
 
 @MainActor struct ConversationFlowTests {
+  @Test func verificationProviderSettingsCannotChangeAnotherStudioOrHostDefaults() throws {
+    let keys = ["Synthesis.provider", "Synthesis.model.codex", "Synthesis.model.claude-code"]
+    let before = keys.map { UserDefaults.standard.string(forKey: $0) }
+    let first = try Studio(store: WorkspaceStore(path: ":memory:"), transport: RecordingResponse())
+    first.setProvider(.claudeCode)
+    first.setHarnessModel("first-instance-model", for: .claudeCode)
+    let second = try Studio(store: WorkspaceStore(path: ":memory:"), transport: RecordingResponse())
+    second.setProvider(.codex)
+    second.setHarnessModel("second-instance-model", for: .codex)
+    #expect(first.harnessSelection.string(forKey: "Synthesis.provider") == "claude-code")
+    #expect(
+      first.harnessSelection.string(forKey: "Synthesis.model.claude-code") == "first-instance-model"
+    )
+    #expect(second.harnessSelection.string(forKey: "Synthesis.provider") == "codex")
+    #expect(keys.map { UserDefaults.standard.string(forKey: $0) } == before)
+  }
   @Test func continueIncludesTheSavedInterruptedResponse() async throws {
     let store = try WorkspaceStore(path: ":memory:")
     let transport = RecordingResponse()

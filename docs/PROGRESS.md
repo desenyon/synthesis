@@ -191,3 +191,10 @@ Fixed close/parallel curves and route labels, added basic obstacle detours, and 
 Final checks: strict lint, **139 native tests/30 suites**, optimized build; Canvas typecheck/**11 tests**/bundle build; **27 native/WebKit checks** and **48 background captures**, both contact sheets inspected. One explicitly approved isolated Codex request passed (9.312s), cited real fixture lore and staged two changes without applying them. No additional subscription calls. Regression failures were repaired, including interrupted response loss, coincident parallel curves, absent workspace editing and final test-macro/tuple typing errors. Evidence: verification/interaction-0.0.2.
 
 Updated README/screenshots, state, architecture, decisions, roadmap and completion ledger. AGENTS adds one evidence-backed viewport-readiness rule; no protected change. Owner brief and live worlds untouched. No foreground automation, physical gesture/VoiceOver result or animation-frame-rate claim. Distribution remains Apple Silicon/ad-hoc signed, not notarized. Preparing a separate 0.0.2 prerelease, preserving 0.0.1.
+
+
+### 0.0.2 final artifact pass
+
+The first implementation checkpoint was committed/pushed as `2bbff4b`. A new failing engine assertion then exposed first-fit acknowledgement preceding its viewport commit; repaired and rebuilt the bundled engine. Final isolation audit removed shared macOS provider/model defaults in favor of per-Studio state; added a two-instance regression. Owner preferences already matched the saved database settings and were not changed.
+
+Final `./scripts/check.sh`: **140 native tests / 30 suites**, strict lint and optimized build passed. Canvas typecheck, **11 Node tests**, bundle build passed. Packaged and extracted the final Apple Silicon ZIP; strict code signature verification and executable comparison passed. Its real native run passed **28 engine checks** and produced **16 captures** at 1440×900 and 1024×768; inspected both package contact sheets. This supplements the earlier 48 source captures. Exactly one approved live Codex request remains the total. Release publication follows the checked source commit; 0.0.1 stays immutable.
