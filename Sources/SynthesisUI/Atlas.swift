@@ -61,18 +61,16 @@ struct AtlasScreen: View {
               .lineLimit(1)
             StudioIcon("chevron.down", size: 10)
           }.foregroundStyle(studio.t.text)
-        }
+        }.frame(minWidth: 120, alignment: .leading)
         if let parent = maps.first(where: { $0.id == map.parentMapID }) {
           Button("In \(parent.name)") { switchMap(parent.id) }
             .buttonStyle(QuietButton(t: studio.t, role: .ghost)).lineLimit(1)
         }
       } trailing: {
         if map.image != nil {
-          Button {
+          BarAction(title: "Place marker", icon: "mappin.and.ellipse", t: studio.t, primary: true) {
             markerPicker = true
-          } label: {
-            StudioLabel("Place marker", icon: "mappin.and.ellipse")
-          }.buttonStyle(QuietButton(t: studio.t, primary: true)).disabled(unmarkedRecords.isEmpty)
+          }.disabled(unmarkedRecords.isEmpty)
             .help(
               unmarkedRecords.isEmpty
                 ? "Every record already has a marker on this map"
@@ -88,11 +86,9 @@ struct AtlasScreen: View {
             }
         }
         if map.image != nil {
-          Button {
+          BarAction(title: "Draw region", icon: "hexagon", t: studio.t) {
             regionPicker = true
-          } label: {
-            StudioLabel("Draw region", icon: "hexagon")
-          }.buttonStyle(QuietButton(t: studio.t)).disabled(studio.records.isEmpty)
+          }.disabled(studio.records.isEmpty)
             .help("Choose a record, then click around its area on the map")
             .popover(isPresented: $regionPicker) {
               SearchableRecordPicker(records: studio.records, t: studio.t) { record in
@@ -220,7 +216,7 @@ struct AtlasScreen: View {
   }
   private func switchMap(_ id: String) {
     guard persist() else { return }
-    studio.mapBoardID = id
+    studio.openBoard(id, kind: "atlas")
     loadMap()
   }
   private func loadMap() {
@@ -242,7 +238,11 @@ struct AtlasScreen: View {
       if changed {
         zoom = 1
         pan = .zero
-        selected = nil
+        if let selected, !map.markers.contains(where: { $0.recordID == selected }),
+          !map.regions.contains(where: { $0.recordID == selected })
+        {
+          self.selected = nil
+        }
         selectedRegion = nil
         authoring.choose(.browse)
       }

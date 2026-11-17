@@ -65,7 +65,10 @@ final class StudioWindow: NSWindow {
     layoutTrafficLights()
   }
 }
-@MainActor final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+@MainActor
+final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
+  NSMenuItemValidation
+{
   var window: StudioWindow!
   var studio: Studio!
   private var previousApplication: NSRunningApplication?
@@ -262,6 +265,9 @@ final class StudioWindow: NSWindow {
     ] { edit.addItem(withTitle: title, action: Selector(selector), keyEquivalent: key) }
     item(edit, "Select All", #selector(selectAllAction), "a")
     let view = submenu(main, "View")
+    item(view, "Back", #selector(goBack), "[")
+    item(view, "Forward", #selector(goForward), "]")
+    view.addItem(.separator())
     for (index, destination) in Destination.allCases.enumerated() {
       item(view, destination.rawValue, #selector(go(_:)), "\(index + 1)", tag: index)
     }
@@ -330,6 +336,13 @@ final class StudioWindow: NSWindow {
     let all = Destination.allCases
     if all.indices.contains(sender.tag) { studio.navigate(all[sender.tag]) }
   }
+  func validateMenuItem(_ item: NSMenuItem) -> Bool {
+    if item.action == #selector(goBack) { return studio?.canNavigateBack ?? false }
+    if item.action == #selector(goForward) { return studio?.canNavigateForward ?? false }
+    return true
+  }
+  @objc func goBack() { studio.goBack() }
+  @objc func goForward() { studio.goForward() }
   @objc func toggleSidebar() { studio.toggleSidebar() }
   @objc func toggleInspector() {
     if studio.selectedRecord == nil {

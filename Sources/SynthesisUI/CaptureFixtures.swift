@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "history-trail", "history-back", "history-map", "manual-history-trail",
+    "light-history-trail", "collapsed-history-trail",
     "inspector-library", "light-inspector-library", "manual-inspector-library",
     "inspector-graph", "inspector-canvas", "inspector-atlas", "light-inspector-atlas",
     "inspector-event", "inspector-lane", "inspector-conversation", "inspector-review",
@@ -254,6 +256,27 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("history-trail") || state.contains("history-back")
+      || state.contains("history-map")
+    {
+      configureConnectedCapture("library", board: board, conversation: conversation)
+      navigationBack = []
+      navigationForward = []
+      inspector = false
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      if state.hasPrefix("collapsed-") { collapsed = true }
+      for title in ["Mira Vale", "Tidekeepers", "The Glass Sea"] {
+        if let record = records.first(where: { $0.title == title }) { openRecord(record) }
+      }
+      if state.contains("history-back") { goBack() }
+      if state.contains("history-map"), let map = contextBoards.first(where: { $0.kind == "atlas" })
+      {
+        openBoard(map.id, kind: "atlas")
+      }
+      captureHint = state
+      return
+    }
     let inspectorStates = [
       "inspector-library": "library", "light-inspector-library": "light-library",
       "manual-inspector-library": "library", "inspector-graph": "graph",
@@ -349,6 +372,8 @@ extension Studio {
     inspector = true
     workspaceInspector = false
     inspectionTarget = nil
+    navigationBack = []
+    navigationForward = []
     libraryCategory = nil
     canvasBoardID = board.isEmpty ? nil : board
     companionExpanded = state.hasSuffix("-companion") || state == "companion"

@@ -544,8 +544,7 @@ struct RelationshipGraph: View {
       let board = try studio.store.saveBoard(
         worldID: studio.worldID, name: title, kind: "canvas",
         content: String(decoding: data, as: UTF8.self))
-      studio.canvasBoardID = board.id
-      studio.navigate(.canvas)
+      studio.openBoard(board.id, kind: "canvas")
       studio.show("Copied to a new board. Moving cards there never changes the graph.")
     }
   }

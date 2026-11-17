@@ -238,8 +238,7 @@ struct CuratedCanvas: View {
     let boards = (try? studio.store.boards(worldID: studio.worldID, kind: "canvas")) ?? []
     ForEach(boards) { item in
       Button {
-        studio.canvasBoardID = item.id
-        session.switchBoard(item.id)
+        studio.openBoard(item.id, kind: "canvas")
       } label: {
         if item.id == session.boardID {
           StudioLabel(item.name, icon: "checkmark")
@@ -272,8 +271,7 @@ struct CuratedCanvas: View {
             studio.perform {
               try studio.store.setBoardArchived(
                 worldID: studio.worldID, id: item.id, archived: false)
-              studio.canvasBoardID = item.id
-              session.switchBoard(item.id)
+              studio.openBoard(item.id, kind: "canvas")
             }
           }
         }
@@ -287,8 +285,7 @@ struct CuratedCanvas: View {
         worldID: studio.worldID, name: "Untitled board \(existing + 1)", kind: "canvas",
         content: CanvasBoardContent.empty
       ).id
-      studio.canvasBoardID = id
-      session.switchBoard(id)
+      studio.openBoard(id, kind: "canvas")
     }
   }
   private func archiveBoard() {

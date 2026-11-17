@@ -1,0 +1,5 @@
+CAPTURE history-back 1440x900, bitmap 1440x900, 127ms
+CAPTURE history-map 1440x900, bitmap 1440x900, 213ms
+CAPTURE history-back 1024x768, bitmap 1024x768, 99ms
+CAPTURE history-map 1024x768, bitmap 1024x768, 152ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-011/refined

@@ -1,0 +1,21 @@
+CAPTURE history-trail 1440x900, bitmap 1440x900, 138ms
+CAPTURE history-back 1440x900, bitmap 1440x900, 121ms
+CAPTURE history-map 1440x900, bitmap 1440x900, 220ms
+CAPTURE manual-history-trail 1440x900, bitmap 1440x900, 50ms
+CAPTURE light-history-trail 1440x900, bitmap 1440x900, 135ms
+CAPTURE collapsed-history-trail 1440x900, bitmap 1440x900, 117ms
+CAPTURE conversation-home 1440x900, bitmap 1440x900, 149ms
+CAPTURE canvas 1440x900, bitmap 1440x900, 169ms
+CAPTURE graph 1440x900, bitmap 1440x900, 396ms
+CAPTURE timeline 1440x900, bitmap 1440x900, 129ms
+CAPTURE history-trail 1024x768, bitmap 1024x768, 104ms
+CAPTURE history-back 1024x768, bitmap 1024x768, 98ms
+CAPTURE history-map 1024x768, bitmap 1024x768, 151ms
+CAPTURE manual-history-trail 1024x768, bitmap 1024x768, 36ms
+CAPTURE light-history-trail 1024x768, bitmap 1024x768, 104ms
+CAPTURE collapsed-history-trail 1024x768, bitmap 1024x768, 93ms
+CAPTURE conversation-home 1024x768, bitmap 1024x768, 116ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 120ms
+CAPTURE graph 1024x768, bitmap 1024x768, 171ms
+CAPTURE timeline 1024x768, bitmap 1024x768, 99ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-011

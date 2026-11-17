@@ -9,12 +9,14 @@ import Testing
     @Published var hovered = false
     @Published var scope = "Library"
     @Published var enabled = true
+    @Published var active = ControlActiveState.key
   }
   private struct Probe: View {
     @ObservedObject var state: State
     var body: some View {
       Text("Control").trackedHover($state.hovered)
         .environment(\.interactionScope, state.scope)
+        .environment(\.controlActiveState, state.active)
         .disabled(!state.enabled)
     }
   }
@@ -45,6 +47,11 @@ import Testing
     state.hovered = true
     await settle()
     state.enabled = false
+    await settle()
+    #expect(!state.hovered)
+    state.hovered = true
+    await settle()
+    state.active = .inactive
     await settle()
     #expect(!state.hovered)
     // This host never creates, orders or activates a window.

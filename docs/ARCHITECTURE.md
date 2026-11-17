@@ -161,3 +161,7 @@ Migration 0014 adds world-scoped `record_artwork` revisions with an active-image
 ### Contextual inspection
 
 `ObjectInspection.swift` builds read-only, active-world projections for records, events, chronology lanes, maps, canvas boards, relationships, conversations, proposals and world identity. `ObjectInspector` follows current selection or an explicitly inspected reference without navigating the main view. Visibility persists; a 300pt dock becomes a dismissible overlay below the toolbar in narrow windows. Native frosted backing prevents the persistent WKWebView from drawing through the floating inspector. The editor retains its existing editable inspector, also available in Mechanics. Inspection never submits a model request or accepts a proposal.
+
+### Navigation history
+
+`NavigationLocation` stores only world-scoped addresses; `NavigationEntry` supplies display labels. `withNavigation` coalesces nested operations into one bounded visit, while failed editor saves and repeated addresses leave history intact. Replay validates targets and resolves current records; archived targets are skipped, database failures are surfaced. The common WorkspaceBar supplies Back/Forward; native menu shortcuts and context menus expose history. Editor breadcrumbs show the immediate connected-record trail. The stack is session-local; complete restart restoration is separately tracked at #33.

@@ -251,8 +251,7 @@ struct ProposalCard: View {
           .foregroundStyle(t.positive).fixedSize()
         if ["create_board", "place_record"].contains(change.action), let id = change.resultID {
           Button("Open canvas") {
-            studio.canvasBoardID = id
-            studio.navigate(.canvas)
+            studio.openBoard(id, kind: "canvas")
           }.buttonStyle(QuietButton(t: t, role: .ghost))
         }
         if ["create_branch", "create_period", "add_event", "revise_event", "revise_lane"].contains(
@@ -265,8 +264,7 @@ struct ProposalCard: View {
           let id = change.resultID
         {
           Button("Open atlas") {
-            studio.mapBoardID = id
-            studio.navigate(.atlas)
+            studio.openBoard(id, kind: "atlas")
           }.buttonStyle(QuietButton(t: t, role: .ghost))
         }
         let ruleSource =

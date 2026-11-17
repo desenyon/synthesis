@@ -18,16 +18,18 @@ private struct TrackedHover: ViewModifier {
   @Binding var hovered: Bool
   @Environment(\.isEnabled) private var enabled
   @Environment(\.interactionScope) private var scope
+  @Environment(\.controlActiveState) private var activeState
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   func body(content: Content) -> some View {
     content
       .onContinuousHover { phase in
         switch phase {
-        case .active: hovered = enabled
+        case .active: hovered = enabled && activeState == .key
         case .ended: hovered = false
         }
       }
       .onChange(of: enabled) { _, value in if !value { hovered = false } }
+      .onChange(of: activeState) { _, value in if value != .key { hovered = false } }
       .onChange(of: scope) { _, _ in hovered = false }
       .onDisappear { hovered = false }
       .onReceive(

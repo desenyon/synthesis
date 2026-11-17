@@ -578,6 +578,7 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
   }
   private func row(compact: Bool) -> some View {
     HStack(spacing: Space.sm) {
+      if global { NavigationButtons(studio: studio) }
       leading()
       Spacer(minLength: 8)
       trailing()
@@ -607,23 +608,15 @@ struct WorkspaceBar<Leading: View, Trailing: View>: View {
 
 /// Reads the bar's compact environment inside its row, after layout chooses a variant.
 struct RecordBreadcrumb: View {
+  @ObservedObject var studio: Studio
   let origin: String
   let title: String
   let status: String
   let t: Theme
-  var back: () -> Void
   @Environment(\.barCompact) private var compact
   var body: some View {
     HStack(spacing: Space.sm) {
-      Button(action: back) {
-        HStack(spacing: 5) {
-          StudioIcon("chevron.left", size: 11)
-          if !compact { Text(origin).font(.studio(size: 13.5, weight: .medium)) }
-        }.foregroundStyle(t.secondary).padding(.horizontal, 7).frame(height: 28)
-          .hoverFill(t)
-      }.buttonStyle(.plain).padding(.leading, -6).help("Back to \(origin)")
-        .accessibilityLabel("Back to \(origin)").keyboardShortcut("[", modifiers: .command)
-      if !compact { Text("/").foregroundStyle(t.muted.opacity(0.6)) }
+      RecordTrail(studio: studio, origin: origin)
       Text(title.isEmpty ? "Untitled" : title).font(.studio(size: 13.5, weight: .medium))
         .lineLimit(1).layoutPriority(1)
       if compact {

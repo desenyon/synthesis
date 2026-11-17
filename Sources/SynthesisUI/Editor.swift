@@ -168,9 +168,8 @@ struct EditorScreen: View {
   private var origin: String { studio.libraryCategory ?? studio.destination.rawValue }
   private var bar: some View {
     WorkspaceBar(studio: studio) {
-      RecordBreadcrumb(origin: origin, title: title, status: status, t: studio.t) {
-        studio.closeRecord()
-      }.layoutPriority(1)
+      RecordBreadcrumb(studio: studio, origin: origin, title: title, status: status, t: studio.t)
+        .layoutPriority(1)
     } trailing: {
       if record.state == "canon" {
         StateBadge(state: "canon", t: studio.t).padding(.horizontal, 6)
@@ -210,8 +209,7 @@ struct EditorScreen: View {
             ForEach(maps) { map in
               Button("Open \(map.name)") {
                 if save() {
-                  studio.mapBoardID = map.id
-                  studio.navigate(.atlas)
+                  studio.openBoard(map.id, kind: "atlas")
                 }
               }
             }

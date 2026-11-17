@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import SynthesisCore
 
-public enum Destination: String, CaseIterable, Identifiable {
+public enum Destination: String, CaseIterable, Identifiable, Codable {
   case chat = "Conversation"
   case canvas = "Canvas"
   case library = "Library"
@@ -55,6 +55,10 @@ public struct Toast: Identifiable {
   public let engine: AgentEngine
   @Published public var worlds: [World] = []
   @Published public var worldID = ""
+  @Published var navigationBack: [NavigationEntry] = []
+  @Published var navigationForward: [NavigationEntry] = []
+  var navigationDepth = 0
+  var replayingNavigation = false
   @Published public var worldRevision = 0
   @Published public var reviewingProposal = false
   @Published public var records: [LoreRecord] = []
@@ -91,9 +95,12 @@ public struct Toast: Identifiable {
   public var canvasLoaded: Bool { canvasSession?.loaded ?? false }
   /// Opens Canvas with this record's card selected, adding the card if the board lacks it.
   public func showOnCanvas(_ record: LoreRecord) {
-    guard flushEditor() else { return }
-    navigate(.canvas)
-    canvas().reveal(record)
+    withNavigation {
+      guard flushEditor() else { return }
+      navigate(.canvas)
+      canvas().reveal(record)
+
+    }
   }
   /// Puts references to the selected canvas cards into the message being written.
   public func referenceCanvasSelection() {
@@ -375,6 +382,9 @@ public struct Toast: Identifiable {
     contextOptions = try store.assistantContextOptions(worldID: worldID)
     conversations = try store.conversations(worldID: worldID)
     pendingProposals = try store.proposals(worldID: worldID).filter { $0.pending > 0 }
+    try reloadMessages()
+  }
+  func reloadMessages() throws {
     if let conversationID {
       messages = try store.messages(worldID: worldID, conversationID: conversationID)
       proposals = Dictionary(
@@ -548,110 +558,152 @@ public struct Toast: Identifiable {
   }
   public func flushEditor() -> Bool { editorSave?() ?? true }
   public func navigate(_ value: Destination) {
-    guard flushEditor() else { return }
-    selectedRecord = nil
-    editorSave = nil
-    destination = value
-    if value != .timeline { pendingEventSourceID = nil }
-    if value != .canvas {
-      canvasUndo = nil
-      canvasFit = nil
+    withNavigation {
+      guard flushEditor() else { return }
+      selectedRecord = nil
+      editorSave = nil
+      destination = value
+      if value != .timeline { pendingEventSourceID = nil }
+      if value != .canvas {
+        canvasUndo = nil
+        canvasFit = nil
+      }
+      if value != .library { libraryCategory = nil }
+      mobileNavigation = false
+      try? store.setPreference("destination", value: value.rawValue)
+
     }
-    if value != .library { libraryCategory = nil }
-    mobileNavigation = false
-    try? store.setPreference("destination", value: value.rawValue)
   }
   /// Profile entry points keep unsaved editor content and world isolation intact.
   public func showRelationships(for record: LoreRecord) {
-    guard record.worldID == worldID, records.contains(where: { $0.id == record.id }), flushEditor()
-    else { return }
-    navigate(.knowledge)
-    graphSelectedID = record.id
+    withNavigation {
+      guard record.worldID == worldID, records.contains(where: { $0.id == record.id }),
+        flushEditor()
+      else { return }
+      navigate(.knowledge)
+      graphSelectedID = record.id
+
+    }
   }
   public func beginEvent(for record: LoreRecord) {
-    guard record.worldID == worldID, records.contains(where: { $0.id == record.id }), flushEditor()
-    else { return }
-    navigate(.timeline)
-    timelineLaneID = nil
-    pendingEventSourceID = record.id
+    withNavigation {
+      guard record.worldID == worldID, records.contains(where: { $0.id == record.id }),
+        flushEditor()
+      else { return }
+      navigate(.timeline)
+      timelineLaneID = nil
+      pendingEventSourceID = record.id
+
+    }
   }
   public func openLens(_ category: String?) {
-    guard flushEditor() else { return }
-    selectedRecord = nil
-    editorSave = nil
-    libraryCategory = category
-    destination = .library
-    canvasUndo = nil
-    canvasFit = nil
-    mobileNavigation = false
-    try? store.setPreference("destination", value: Destination.library.rawValue)
-  }
-  public func switchWorld(_ id: String) {
-    guard id != worldID else { return }
-    guard flushEditor() else { return }
-    stop()
-    perform {
-      persistPendingComposer()
-      canvasBoardID = nil
-      mapBoardID = nil
-      graphSelectedID = nil
-      atlasSelectedID = nil
-      timelineLaneID = nil
-      pendingEventSourceID = nil
-      inspectionTarget = nil
-      companionExpanded = false
-      libraryCategory = nil
-      let nextDefaults = try store.worldPreferences(worldID: id)
-      worldID = id
-      worldDefaults = nextDefaults
-      preset = nextDefaults.chatMode
-      worldCover = Self.cover(store: store, worldID: id)
-      conversationID = nil
+    withNavigation {
+      guard flushEditor() else { return }
       selectedRecord = nil
       editorSave = nil
-      try store.setPreference("world", value: id)
-      draft = try store.preference("composer:\(id)") ?? ""
-      try reload()
+      libraryCategory = category
+      destination = .library
+      canvasUndo = nil
+      canvasFit = nil
+      mobileNavigation = false
+      try? store.setPreference("destination", value: Destination.library.rawValue)
+
+    }
+  }
+  public func switchWorld(_ id: String) {
+    withNavigation {
+      guard id != worldID, (try? store.worlds().contains(where: { $0.id == id })) == true else {
+        return
+      }
+      guard flushEditor() else { return }
+      stop()
+      perform {
+        persistPendingComposer()
+        canvasBoardID = nil
+        mapBoardID = nil
+        graphSelectedID = nil
+        atlasSelectedID = nil
+        timelineLaneID = nil
+        pendingEventSourceID = nil
+        inspectionTarget = nil
+        companionExpanded = false
+        libraryCategory = nil
+        let nextDefaults = try store.worldPreferences(worldID: id)
+        worldID = id
+        worldDefaults = nextDefaults
+        preset = nextDefaults.chatMode
+        worldCover = Self.cover(store: store, worldID: id)
+        conversationID = nil
+        selectedRecord = nil
+        editorSave = nil
+        try store.setPreference("world", value: id)
+        draft = try store.preference("composer:\(id)") ?? ""
+        try reload()
+      }
+
     }
   }
   public func newChat(keepWorkspace: Bool = false) {
-    guard flushEditor() else { return }
-    stop()
-    preset = worldDefaults.chatMode
-    if !keepWorkspace {
-      selectedRecord = nil
-      editorSave = nil
-      destination = .chat
-    }
-    conversationID = nil
-    messages = []
-    mobileNavigation = false
-  }
-  public func openChat(_ chat: Conversation, keepWorkspace: Bool = false) {
-    guard flushEditor() else { return }
-    stop()
-    perform {
-      conversationID = chat.id
+    withNavigation {
+      guard flushEditor() else { return }
+      stop()
+      preset = worldDefaults.chatMode
       if !keepWorkspace {
         selectedRecord = nil
         editorSave = nil
         destination = .chat
       }
-      try reload()
+      conversationID = nil
+      messages = []
       mobileNavigation = false
+
+    }
+  }
+  public func openChat(_ chat: Conversation, keepWorkspace: Bool = false) {
+    withNavigation {
+      guard chat.worldID == worldID,
+        (try? store.conversations(worldID: worldID).contains(where: { $0.id == chat.id })) == true,
+        flushEditor()
+      else { return }
+      stop()
+      perform {
+        conversationID = chat.id
+        if !keepWorkspace {
+          selectedRecord = nil
+          editorSave = nil
+          destination = .chat
+        }
+        try reload()
+        mobileNavigation = false
+      }
+
     }
   }
   /// Opens a record over the current workspace; closing returns to where the creator was.
   public func openRecord(_ record: LoreRecord) {
-    guard flushEditor() else { return }
-    selectedRecord = record
-    editorSave = nil
-    mobileNavigation = false
+    withNavigation {
+      guard record.worldID == worldID, record.id != selectedRecord?.id, flushEditor() else {
+        return
+      }
+      guard let fresh = try? store.record(worldID: worldID, id: record.id),
+        (try? store.isArchived(worldID: worldID, recordID: record.id)) == false
+      else {
+        error = "This record is no longer available in this universe."
+        return
+      }
+      selectedRecord = fresh
+      editorSave = nil
+      mobileNavigation = false
+
+    }
   }
   public func closeRecord() {
-    guard flushEditor() else { return }
-    selectedRecord = nil
-    editorSave = nil
+    withNavigation {
+      guard flushEditor() else { return }
+      selectedRecord = nil
+      editorSave = nil
+
+    }
   }
   public func createRecord(
     title: String, kind: String = "lore", body: String = "", category: String = ""

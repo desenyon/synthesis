@@ -4,6 +4,8 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
+- Reversible entity breadcrumbs and shared Back/Forward history (⌘[ / ⌘]) across records, maps, boards, conversations and worlds. Stale sources resolve current lore; archived and foreign targets cannot be reopened accidentally. Compact Atlas actions preserve the map title; inactive-window hover highlights clear.
+
 - Optional contextual inspectors across workspaces, with real linked object properties, world isolation, independent scrolling and compact-window presentation. Toggle with ⌥⌘I; record editing keeps its existing inspector.
 
 - Empty entity profiles now offer optional writing prompts, portraits, relationship navigation and sourced history. Artwork revisions persist with guarded Undo and portable v8 / JSON11 exports; accepted prose stays unchanged.
