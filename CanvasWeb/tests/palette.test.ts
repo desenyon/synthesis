@@ -5,7 +5,7 @@ import { displayPalette, palette, displayColor, engineTheme, categoryColor } fro
 test('graphite, OLED and light share a display/export palette without changing engine mode', () => {
   assert.equal(displayPalette('dark').background, '#111315');
   assert.equal(displayPalette('oled').background, '#000000');
-  assert.equal(displayPalette('light').background, '#f8f9fb');
+  assert.equal(displayPalette('light').background, '#e7ecf2');
   assert.equal(engineTheme('oled'), 'dark');
   for (const theme of ['dark', 'oled', 'light'] as const) {
     const actual = displayColor(palette(theme).surface, theme);

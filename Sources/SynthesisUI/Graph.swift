@@ -247,6 +247,7 @@ struct RelationshipGraph: View {
           }
         }.padding(14).animation(reduceMotion ? nil : Motion.panelAnimation, value: selected)
       }
+      .background(studio.t.spatialBackground)
       .coordinateSpace(name: "graph").clipped()
       .onAppear {
         area = geo.size

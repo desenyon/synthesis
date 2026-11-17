@@ -22,7 +22,7 @@ import {
   type RecordInfo,
   type RelationInfo,
 } from "./cards";
-import { palette, engineTheme, type Theme } from "./palette";
+import { palette, displayPalette, engineTheme, type Theme } from "./palette";
 import { acceptsSession, containsCardPoint } from "./sceneRules";
 import { arrangeCards } from "./layout";
 import { exportBoard } from "./exportBoard";
@@ -769,7 +769,7 @@ export function App() {
   }, [api, apply, analyse, onChange, openSpot, reportSelection, serialise, synchronise, save]);
 
   return (
-    <div className={`synthesis-board ${theme}`}>
+    <div className={`synthesis-board ${theme}`} style={{backgroundColor: displayPalette(theme).background}}>
     <Excalidraw
       excalidrawAPI={setApi}
       theme={engineTheme(theme)}

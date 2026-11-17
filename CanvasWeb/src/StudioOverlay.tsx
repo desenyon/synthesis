@@ -102,7 +102,13 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
         post({ type: 'connect', arrowID: `ports:${crypto.randomUUID()}`, source: connecting, target: id, label: '' });
         setConnecting(null);
     };
-    return <div className={`studio-overlay ${theme}`}>
+    const material = displayPalette(theme);
+    const lightMaterial = theme === 'light' ? {
+        '--glass': material.surface, '--line': material.border, '--quiet': material.secondary,
+        '--ink': material.text, '--muted': material.muted, '--positive': material.positive,
+        '--focus': material.accent,
+    } as CSSProperties : undefined;
+    return <div className={`studio-overlay ${theme}`} style={lightMaterial}>
    <div className="studio-relationship-layer">
      {elements.filter((e:any) => e.customData?.synthesis === 'relation' && !e.isDeleted).map((edge:any) => {
        const labelID = edge.boundElements?.find((b:any) => b.type === 'text')?.id;

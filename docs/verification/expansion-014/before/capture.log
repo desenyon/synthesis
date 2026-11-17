@@ -1,0 +1,4 @@
+CAPTURE light 1440x900, bitmap 1440x900, 172ms
+CAPTURE light-graph 1440x900, bitmap 1440x900, 389ms
+CAPTURE light-editor 1440x900, bitmap 1440x900, 143ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-014/before

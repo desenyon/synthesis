@@ -8,14 +8,16 @@ public struct Theme {
   public var oled = false
   public var canvasTheme: String { dark ? (oled ? "oled" : "dark") : "light" }
   public var background: Color { Color(hex: dark ? (oled ? 0x000000 : 0x111315) : 0xF8F9FB) }
+  /// Spatial boards sit below white entity surfaces and floating tools in light mode.
+  public var spatialBackground: Color { dark ? background : Color(hex: 0xE7ECF2) }
   public var sidebar: Color { navigation.background }
   var navigation: SidebarPalette { SidebarPalette(dark: dark) }
   public var surface: Color { Color(hex: dark ? (oled ? 0x111111 : 0x1A1D21) : 0xFFFFFF) }
   public var secondarySurface: Color { Color(hex: dark ? (oled ? 0x1B1B1B : 0x24282E) : 0xECEFF3) }
   public var text: Color { Color(hex: dark ? 0xE6E9EF : 0x20232B) }
   public var secondary: Color { Color(hex: dark ? 0xB6BBC5 : 0x5C6573) }
-  public var muted: Color { Color(hex: dark ? 0x8F96A3 : 0x7D8593) }
-  public var border: Color { Color(hex: dark ? (oled ? 0x2A2A2A : 0x353B43) : 0xDCE1E8) }
+  public var muted: Color { Color(hex: dark ? 0x8F96A3 : 0x697586) }
+  public var border: Color { Color(hex: dark ? (oled ? 0x2A2A2A : 0x353B43) : 0xC6D0DD) }
   public var accent: Color { Color(hex: dark ? 0xA9C7FF : 0x456B9D) }
   public var accentSoft: Color { Color(hex: dark ? 0x252D3B : 0xE3ECF3) }
   /// Text or icon colour placed on a filled accent control.

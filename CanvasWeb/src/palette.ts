@@ -50,12 +50,12 @@ const dark = {
   } as Record<string, string>,
 };
 const light = {
-  background: "#f8f9fb",
+  background: "#e7ecf2",
   surface: "#ffffff",
   text: "#20232b",
   secondary: "#5c6573",
-  muted: "#7d8593",
-  border: "#dce1e8",
+  muted: "#697586",
+  border: "#c6d0dd",
   accent: "#456b9d",
   positive: "#2f7653",
   categories: {

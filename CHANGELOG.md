@@ -23,6 +23,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 - Explore enforced in the core: model proposal blocks are discarded with a notice. Propose still stages draft changes for explicit review; neither mode changes canon.
 
 ### Fixed
+- Expansion #14: light Canvas and Graph have a distinct spatial base, white entity/tool surfaces and clearer shared text and boundaries. Native and bundled Canvas palettes agree; dark/OLED styling stays intact.
 - Expansion #9: Atlas drawing and marker tools cannot conflict; marker placement supports Undo. New relationships clear prior reverse settings. Canvas styles target editable drawings only and adapt to selection.
 - Expansion #8: transient hover feedback clears after navigation, disabling and focus loss. Shared restrained transitions honor Reduce Motion; confirmation toasts stay above compact composers.
 - Expansion #5: Canvas category accents now match native views, including readable light colors; Graph and Canvas use consistent Phosphor category glyphs. Historical events share a calendar identity across Library and Timeline.
