@@ -5,6 +5,34 @@ import Testing
 @testable import SynthesisUI
 
 @MainActor struct InspectionTests {
+  @Test func selectingAnEventIsReadOnlyAndClearsWhenTheWorkspaceChanges() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    let record = try store.createRecord(worldID: studio.worldID, title: "First map")
+    let event = try store.addEvent(
+      worldID: studio.worldID, title: "Charting the coast", date: "Year 12", source: record.id)
+    let other = try store.createWorld(name: "Other world")
+    let foreignRecord = try store.createRecord(worldID: other.id, title: "Private source")
+    let foreign = try store.addEvent(
+      worldID: other.id, title: "Private event", date: "Unknown", source: foreignRecord.id)
+    try studio.reload()
+    studio.navigate(.timeline)
+    studio.setMode(.manual)
+    studio.workspaceInspector = false
+    for _ in 0..<2 { studio.selectForInspection(.event(event.id)) }
+    #expect(studio.effectiveInspection == .event(event.id))
+    #expect(!studio.workspaceInspector && studio.selectedRecord == nil)
+    #expect(try store.record(worldID: studio.worldID, id: record.id) == record)
+    #expect(try store.events(worldID: studio.worldID).count == 1)
+    studio.selectForInspection(.event(foreign.id))
+    #expect(studio.effectiveInspection == .event(event.id) && studio.error != nil)
+    studio.timelineLaneID = "another-filter"
+    #expect(studio.inspectionTarget == nil)
+    studio.selectForInspection(.event(event.id))
+    studio.navigate(.atlas)
+    #expect(studio.inspectionTarget == nil && studio.mode == .manual)
+  }
+
   @Test func dockedInspectorKeepsCanvasHiddenBehindCompanionTakeover() throws {
     let studio = try Studio(store: WorkspaceStore(path: ":memory:"))
     studio.destination = .canvas

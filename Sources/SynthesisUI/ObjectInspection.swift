@@ -61,6 +61,12 @@ extension Studio {
       try store.setPreference("workspace-inspector", value: "shown")
     }
   }
+  func selectForInspection(_ target: InspectionTarget) {
+    perform {
+      _ = try inspectionData(for: target)
+      inspectionTarget = target
+    }
+  }
   public func toggleWorkspaceInspector() {
     perform {
       try store.setPreference("workspace-inspector", value: workspaceInspector ? "hidden" : "shown")

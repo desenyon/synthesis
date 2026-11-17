@@ -8,7 +8,7 @@ import {
   restore,
   viewportCoordsToSceneCoords,
 } from "@excalidraw/excalidraw";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
 import {
   arrowLabel,
@@ -638,6 +638,32 @@ export function App() {
         await bridge.load(original); await wait();
         const selectedCard=api.getSceneElements().find(isCard);
         api.updateScene({appState:{selectedElementIds:{[selectedCard.id]:true}}}); await wait();
+        const recordSurface = () => document.querySelector<HTMLElement>(`[data-record-id="${selectedCard.customData.recordID}"]`)!;
+        const originalSize = recordSurface().getBoundingClientRect();
+        for (const appearance of ['dark', 'light', 'oled'] as const) {
+          bridge.setTheme(appearance); await wait();
+          // The 180 ms border transition is intentional; inspect its settled colour,
+          // rather than comparing an intermediate frame against the theme token.
+          await Promise.all(recordSurface().getAnimations().map(animation => animation.finished.catch(() => undefined)));
+          const surface = recordSurface(), rect = surface.getBoundingClientRect();
+          const hex = displayPalette(appearance).accent;
+          const rgb = `rgb(${[1,3,5].map(i => parseInt(hex.slice(i,i+2),16)).join(', ')})`;
+          check(`${appearance} entity selection uses the shared accent without changing dimensions`,
+            surface.classList.contains('is-selected') && getComputedStyle(surface).borderColor === rgb &&
+            Math.abs(rect.width-originalSize.width)<.1 && Math.abs(rect.height-originalSize.height)<.1);
+          if (results.at(-1)?.startsWith('FAIL')) results.push(`DETAIL ${appearance}: selected=${surface.classList.contains('is-selected')}, border=${getComputedStyle(surface).borderColor}, expected=${rgb}, size=${rect.width},${rect.height}, original=${originalSize.width},${originalSize.height}`);
+          check(`${appearance} engine selection handles use the same accent`,
+            getComputedStyle(document.querySelector('.excalidraw')!).getPropertyValue('--color-selection').trim() === palette(appearance).accent);
+        }
+        bridge.setTheme(original.theme); await wait();
+        const keyOnCard = (key: string) => recordSurface().dispatchEvent(new KeyboardEvent('keydown', {key, bubbles:true, cancelable:true}));
+        keyOnCard('Escape'); await wait();
+        check('entity keyboard Escape clears selection', !Object.values(api.getAppState().selectedElementIds).some(Boolean));
+        keyOnCard(' '); await wait(); keyOnCard(' '); await wait();
+        check('entity keyboard selection is repeatable and selects its grouped content',
+          !!api.getAppState().selectedElementIds[selectedCard.id] && api.getSceneElements().filter((e:El)=>e.groupIds?.[0]===selectedCard.groupIds?.[0]).every((e:El)=>api.getAppState().selectedElementIds[e.id]));
+        window.dispatchEvent(new Event('blur')); await wait();
+        check('losing focus clears transient entity hover', !document.querySelector('.studio-record.is-hovered'));
         bridge.setAssistance(false); await wait();
         check("manual mode removes canvas AI action",!document.querySelector('[aria-label="Reference in conversation"]'));
         bridge.setAssistance(true); await wait();
@@ -769,7 +795,8 @@ export function App() {
   }, [api, apply, analyse, onChange, openSpot, reportSelection, serialise, synchronise, save]);
 
   return (
-    <div className={`synthesis-board ${theme}`} style={{backgroundColor: displayPalette(theme).background}}>
+    <div className={`synthesis-board ${theme}`} style={{backgroundColor: displayPalette(theme).background,
+      '--engine-selection': palette(theme).accent} as CSSProperties}>
     <Excalidraw
       excalidrawAPI={setApi}
       theme={engineTheme(theme)}

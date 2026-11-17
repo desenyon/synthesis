@@ -5,6 +5,9 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "selection-graph", "light-selection-graph", "manual-selection-graph",
+    "selection-canvas", "light-selection-canvas", "selection-atlas", "light-selection-atlas",
+    "selection-regions", "selection-library", "selection-timeline",
     "panels-default", "panels-narrow", "panels-wide", "light-panels-wide", "manual-panels-wide",
     "panels-collapsed", "panels-inspector-wide", "panels-companion-wide", "panels-canvas-companion",
     "panels-settings",
@@ -274,6 +277,20 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("selection-") {
+      let bases = [
+        "graph": "graph-selected", "canvas": "canvas", "atlas": "atlas",
+        "regions": "atlas-regions", "library": "inspector-library", "timeline": "inspector-event",
+      ]
+      let kind = state.components(separatedBy: "-").last ?? ""
+      if let base = bases[kind] {
+        configureConnectedCapture(base, board: board, conversation: conversation)
+        dark = !state.hasPrefix("light-")
+        if state.hasPrefix("manual-") { setMode(.manual) }
+        if kind == "atlas" { atlasSelectedID = records.first { $0.title == "The Glass Sea" }?.id }
+      }
+      return
+    }
     if state.contains("panels-") {
       let base =
         state == "panels-inspector-wide"
@@ -1152,5 +1169,12 @@ extension Studio {
     if state == "composer-unavailable" { providerConfigured = false }
     captureHint = state
     captureNonce += 1
+  }
+
+  public func captureCanvasSelection() {
+    guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil,
+      let record = records.first(where: { $0.title == "Mira Vale" })
+    else { return }
+    canvas().reveal(record)
   }
 }

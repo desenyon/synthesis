@@ -254,7 +254,10 @@ struct RecordRow: View {
       }.padding(.horizontal, 10).frame(
         height: density.libraryRow - (studio.preferences.libraryPreviews ? 0 : 10)
       )
-      .hoverFill(studio.t, radius: 9)
+      .entitySurface(
+        studio.t,
+        selected: !archived && studio.workspaceInspector
+          && studio.effectiveInspection == .record(record.id), radius: 9)
     }.buttonStyle(.plain)
       .contextMenu {
         if archived {

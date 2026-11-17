@@ -179,3 +179,7 @@ Project outlines are ordinary entity records with category `Projects`: draft/can
 ## Resizable panels — expansion #19
 
 `PanelSizing.swift` centralizes panel bounds and preference updates. `PanelDividerView` supplies AppKit pointer tracking, keyboard actions and an accessibility splitter inside a fixed nine-point hit region. Dragging changes published dimensions; release/focus loss commits once. Window constraints affect presentation only. The editor docks only when at least 480pt remains for writing. Saved layouts add optional sidebar/inspector dimensions for backward compatibility; companion width retains its existing key. `PanelSizingAudit` verifies rendered frames and native accessibility actions without activating the test window.
+
+## Shared entity selection — expansion #20
+
+`EntitySurface` in Interaction.swift applies Theme selection/hover tokens to graph cards, timeline events, inspected Library rows and Atlas shapes/labels without affecting layout. Native hover uses the existing focus/context lifecycle. Canvas articles mirror actual Excalidraw selection; pointer-transparent bodies retain engine drag/history, while keyboard events update the grouped engine elements. CSS uses the display palette for cards and inverse-filter palette for engine handles. Selection alone never writes lore or approves proposals.

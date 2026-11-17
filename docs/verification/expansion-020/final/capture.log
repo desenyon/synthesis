@@ -1,0 +1,57 @@
+CAPTURE selection-graph 1440x900, bitmap 1440x900, 538ms
+CAPTURE light-selection-graph 1440x900, bitmap 1440x900, 540ms
+CAPTURE manual-selection-graph 1440x900, bitmap 1440x900, 514ms
+CAPTURE selection-canvas 1440x900, bitmap 1440x900, 161ms
+CAPTURE light-selection-canvas 1440x900, bitmap 1440x900, 164ms
+CAPTURE selection-atlas 1440x900, bitmap 1440x900, 263ms
+CAPTURE light-selection-atlas 1440x900, bitmap 1440x900, 262ms
+CAPTURE selection-regions 1440x900, bitmap 1440x900, 249ms
+CAPTURE selection-library 1440x900, bitmap 1440x900, 135ms
+CAPTURE selection-timeline 1440x900, bitmap 1440x900, 143ms
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT PASS first-fit acknowledgement contains the committed viewport
+CANVAS_AUDIT PASS dark entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS light entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS oled entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS entity keyboard Escape clears selection
+CANVAS_AUDIT PASS entity keyboard selection is repeatable and selects its grouped content
+CANVAS_AUDIT PASS losing focus clears transient entity hover
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS unacknowledged canvas save blocks shutdown
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+CAPTURE canvas 1440x900, bitmap 1440x900, 163ms
+CAPTURE selection-graph 1024x768, bitmap 1024x768, 255ms
+CAPTURE light-selection-graph 1024x768, bitmap 1024x768, 244ms
+CAPTURE manual-selection-graph 1024x768, bitmap 1024x768, 209ms
+CAPTURE selection-canvas 1024x768, bitmap 1024x768, 101ms
+CAPTURE light-selection-canvas 1024x768, bitmap 1024x768, 101ms
+CAPTURE selection-atlas 1024x768, bitmap 1024x768, 167ms
+CAPTURE light-selection-atlas 1024x768, bitmap 1024x768, 172ms
+CAPTURE selection-regions 1024x768, bitmap 1024x768, 171ms
+CAPTURE selection-library 1024x768, bitmap 1024x768, 114ms
+CAPTURE selection-timeline 1024x768, bitmap 1024x768, 103ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 97ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-020/final

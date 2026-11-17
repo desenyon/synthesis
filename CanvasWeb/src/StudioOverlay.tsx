@@ -1,8 +1,8 @@
 import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound, Note as StickyNote, Image as ImageIcon, GitBranch, BoundingBox as Frame, Pencil, Square, Minus, CornersOut as Scan, ArrowCounterClockwise as Undo2, ArrowClockwise as Redo2, ArrowUpRight, At as AtSign, X, SlidersHorizontal, Books as Library, FilePlus as FilePlus2, FileText, Graph, User, Flag, MapPin, Lightning, Sparkle, CalendarBlank, Lightbulb, type Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { CaptureUpdateAction, newElementWith } from '@excalidraw/excalidraw';
+import { CaptureUpdateAction, newElementWith, viewportCoordsToSceneCoords } from '@excalidraw/excalidraw';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { isCard, kindLabel, stateName, type RecordInfo, type RelationInfo } from './cards';
-import { cardFrame, visibleFrame, drawingStyleContext } from './sceneRules';
+import { cardFrame, visibleFrame, drawingStyleContext, containsCardPoint } from './sceneRules';
 import { palette, displayPalette, categoryColor, categoryKey, type Theme } from './palette';
 type Props = {
     api: any;
@@ -37,6 +37,8 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
     const [view, setView] = useState<any>(null);
     const [connecting, setConnecting] = useState<string | null>(null);
     const [styles, setStyles] = useState(false);
+    const [hovered, setHovered] = useState<string | null>(null);
+    const host = useRef<HTMLDivElement>(null);
     const frame = useRef(0);
     useEffect(() => {
         const refresh = () => { cancelAnimationFrame(frame.current); frame.current = requestAnimationFrame(() => setView({ state: api.getAppState(), elements: api.getSceneElements(), files: api.getFiles(), records: new Map(records()) })); };
@@ -44,6 +46,44 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
         refresh();
         return () => { unsubscribe(); cancelAnimationFrame(frame.current); };
     }, [api, records]);
+    useEffect(() => {
+        let pending = 0;
+        let signature = '';
+        const clear = () => { cancelAnimationFrame(pending); setHovered(null); };
+        const move = (event: PointerEvent) => {
+            cancelAnimationFrame(pending);
+            if (!document.hasFocus() || event.buttons ||
+                (event.target as HTMLElement)?.closest?.('button, input, textarea, .glass')) { clear(); return; }
+            pending = requestAnimationFrame(() => {
+                const state = api.getAppState();
+                if (state.activeTool?.type !== 'selection') return;
+                const point = viewportCoordsToSceneCoords(event, state);
+                const hit = [...api.getSceneElements()].reverse().find((e: any) => isCard(e) && containsCardPoint(e, point));
+                setHovered(hit?.id ?? null);
+            });
+        };
+        const surface = host.current?.parentElement;
+        surface?.addEventListener('pointermove', move);
+        surface?.addEventListener('pointerleave', clear);
+        surface?.addEventListener('pointerdown', clear);
+        window.addEventListener('blur', clear);
+        document.addEventListener('visibilitychange', clear);
+        const unsubscribe = api.onChange(() => {
+            const state = api.getAppState();
+            const next = [state.scrollX, state.scrollY, state.zoom.value, state.width, state.height,
+                state.activeTool?.type, Object.keys(state.selectedElementIds).sort().join(','),
+                api.getSceneElements().filter(isCard).map((e: any) => e.id).join(',')].join(':');
+            if (next !== signature) { signature = next; clear(); }
+        });
+        return () => {
+            cancelAnimationFrame(pending); unsubscribe();
+            surface?.removeEventListener('pointermove', move);
+            surface?.removeEventListener('pointerleave', clear);
+            surface?.removeEventListener('pointerdown', clear);
+            window.removeEventListener('blur', clear);
+            document.removeEventListener('visibilitychange', clear);
+        };
+    }, [api, !!view]);
     useEffect(() => { const cancel = (e: KeyboardEvent) => { if (e.key === 'Escape') {
         setConnecting(null);
         setStyles(false);
@@ -103,12 +143,19 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
         setConnecting(null);
     };
     const material = displayPalette(theme);
-    const lightMaterial = theme === 'light' ? {
+    const materialStyle = {
         '--glass': material.surface, '--line': material.border, '--quiet': material.secondary,
         '--ink': material.text, '--muted': material.muted, '--positive': material.positive,
         '--focus': material.accent,
-    } as CSSProperties : undefined;
-    return <div className={`studio-overlay ${theme}`} style={lightMaterial}>
+        '--selection-fill': `color-mix(in srgb, ${material.accent} ${theme === 'light' ? 7 : 8}%, transparent)`,
+        '--hover-edge': `color-mix(in srgb, ${material.secondary} 55%, transparent)`,
+    } as CSSProperties;
+    const selectCard = (card: any) => {
+        const group = card.groupIds?.[0];
+        const ids = elements.filter((e: any) => e.id === card.id || (group && e.groupIds?.[0] === group)).map((e: any) => [e.id, true]);
+        api.updateScene({appState: {selectedElementIds: Object.fromEntries(ids), selectedGroupIds: {}}, captureUpdate: CaptureUpdateAction.NEVER});
+    };
+    return <div ref={host} className={`studio-overlay ${theme}`} style={materialStyle}>
    <div className="studio-relationship-layer">
      {elements.filter((e:any) => e.customData?.synthesis === 'relation' && !e.isDeleted).map((edge:any) => {
        const labelID = edge.boundElements?.find((b:any) => b.type === 'text')?.id;
@@ -136,7 +183,18 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
             const color = categoryColor(displayPalette(theme), record?.category ?? '');
             const CategoryIcon = categoryIcons[categoryKey(record?.category ?? '')] ?? FileText;
             const connections = relations().filter(r => r.sourceID === record?.id || r.targetID === record?.id).length;
-            return <article key={card.id} className={`studio-record ${selected ? 'is-selected' : ''} ${related ? '' : 'is-unrelated'} ${artURL ? 'has-art' : ''}`} style={{ '--record-accent': color, left: bounds.x + (bounds.width - card.width) / 2, top: bounds.y + (bounds.height - card.height) / 2, width: card.width, height: card.height, transform: `scale(${bounds.zoom}) rotate(${card.angle ?? 0}rad)` } as CSSProperties}>
+            return <article key={card.id} data-record-id={card.customData.recordID} role="group" tabIndex={0}
+              aria-label={`${record?.title ?? 'Archived record'}${selected ? ', selected' : ''}`} aria-keyshortcuts="Space Enter Escape"
+              onKeyDown={event => {
+                if (event.target !== event.currentTarget) return;
+                if (event.key === ' ' || event.key === 'Enter' || event.key === 'Escape') {
+                    event.preventDefault(); event.stopPropagation();
+                    if (event.key === ' ') selectCard(card);
+                    else if (event.key === 'Enter') post({type: 'openRecord', id: card.customData.recordID});
+                    else api.updateScene({appState: {selectedElementIds: {}, selectedGroupIds: {}}, captureUpdate: CaptureUpdateAction.NEVER});
+                }
+              }}
+              className={`studio-record ${selected ? 'is-selected' : ''} ${hovered === card.id ? 'is-hovered' : ''} ${related ? '' : 'is-unrelated'} ${artURL ? 'has-art' : ''}`} style={{ '--record-accent': color, left: bounds.x + (bounds.width - card.width) / 2, top: bounds.y + (bounds.height - card.height) / 2, width: card.width, height: card.height, transform: `scale(${bounds.zoom}) rotate(${card.angle ?? 0}rad)` } as CSSProperties}>
          <div className="record-kicker"><CategoryIcon size={13} weight="regular" aria-hidden="true"/>{record ? kindLabel(record) : 'Archived record'}</div>
          {artURL && <img className="record-art" src={artURL} alt="" style={{ height: Math.min(art.height, card.height - 90) }} draggable={false}/>}
          <div className="record-copy"><h2>{record?.title ?? 'Archived record'}</h2><p>{record?.body || 'Open this record to begin writing.'}</p></div>

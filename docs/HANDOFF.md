@@ -18,7 +18,7 @@ Start here when picking up Synthesis.
 
 ## Active expansion
 
-All 394 requirements remain individually tracked in EXPANSION. **#1–#19 verified; #20 hover/selection consistency is next.** Latest check: 215 tests / 54 suites, strict lint and optimized build. #19 has 24 final inspected captures and 14 rendered resize/scroll assertions; the latest Canvas check (#14) passed 15 tests and 28 engine checks; no foreground events or subscription requests.
+All 394 requirements remain individually tracked in EXPANSION. **#1–#20 verified; #21 universal command palette is next.** Latest check: 216 tests / 54 suites, strict lint and optimized build. #20 has 22 final inspected states, 15 Canvas tests and 37 embedded-engine checks. Selection and hover use common native/Canvas tokens; engine handles use the inverse-filter palette. No foreground events, owner-app restart or subscription requests.
 
 ## Current shape
 

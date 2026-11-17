@@ -628,7 +628,6 @@ private struct EventCard: View {
   var remove: () -> Void
   var moveEarlier: (() -> Void)?
   var moveLater: (() -> Void)?
-  @State private var hover = false
   var body: some View {
     let t = studio.t
     HStack(alignment: .top, spacing: 10) {
@@ -666,11 +665,19 @@ private struct EventCard: View {
         Button("Remove", action: remove)
       }
     }.padding(14).frame(maxWidth: .infinity, alignment: .leading)
-      .background(
-        t.surface.opacity(hover ? 1 : 0.7), in: RoundedRectangle(cornerRadius: Metric.cardRadius)
+      .entitySurface(
+        t, selected: studio.inspectionTarget == .event(event.id), base: t.surface, bordered: true
       )
-      .overlay(RoundedRectangle(cornerRadius: Metric.cardRadius).stroke(t.hairline, lineWidth: 1))
-      .trackedHover($hover)
+      .contentShape(RoundedRectangle(cornerRadius: Metric.cardRadius))
+      .onTapGesture {
+        if NSApp.currentEvent?.clickCount == 2 {
+          edit()
+        } else {
+          studio.selectForInspection(.event(event.id))
+        }
+      }
+      .accessibilityAction { studio.selectForInspection(.event(event.id)) }
+      .accessibilityAction(named: "Edit event", edit)
       .contextMenu {
         Button("Edit…", action: edit)
         Button("Inspect") { studio.inspect(.event(event.id)) }

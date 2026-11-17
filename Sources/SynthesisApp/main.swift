@@ -544,6 +544,10 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
             try await Task.sleep(for: .milliseconds(500))
             studio.canvasFit?()
             try await Task.sleep(for: .milliseconds(900))
+            if state.contains("selection-canvas") {
+              studio.captureCanvasSelection()
+              try await Task.sleep(for: .milliseconds(400))
+            }
           }
           if state == "canvas", width == 1440,
             ProcessInfo.processInfo.environment["SYNTHESIS_CANVAS_AUDIT"] == "1"
@@ -553,6 +557,10 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
             if checks.contains(where: { $0.hasPrefix("FAIL") }) {
               throw SynthesisError.invalid("Canvas engine audit failed; see checks above.")
             }
+            // The audit deliberately pans to verify viewport persistence. Frame the board
+            // again for the appearance capture instead of photographing that test offset.
+            studio.canvasFit?()
+            try await Task.sleep(for: .milliseconds(900))
           }
           try await Task.sleep(for: .milliseconds(200))
           if state != "toast" { studio.toast = nil }

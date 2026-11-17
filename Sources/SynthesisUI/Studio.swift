@@ -161,7 +161,9 @@ public struct Toast: Identifiable {
   @Published var atlasSelectedID: String? {
     didSet { if oldValue != atlasSelectedID { inspectionTarget = nil } }
   }
-  @Published var timelineLaneID: String?
+  @Published var timelineLaneID: String? {
+    didSet { if oldValue != timelineLaneID { inspectionTarget = nil } }
+  }
   @Published var pendingEventSourceID: String?
   private var pendingSubmission: (world: String, conversation: String, text: String)?
   let harnessSelection: HarnessSelection

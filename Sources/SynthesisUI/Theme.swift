@@ -24,6 +24,10 @@ public struct Theme {
   public var onAccent: Color { dark ? Color(hex: 0x14181C) : .white }
   public var hover: Color { text.opacity(dark ? 0.06 : 0.05) }
   public var pressed: Color { text.opacity(dark ? 0.1 : 0.08) }
+  /// Selection is an interaction state, independent of a record's category or canon status.
+  var selectionBorder: Color { accent }
+  var selectionFill: Color { accent.opacity(dark ? 0.08 : 0.07) }
+  var hoverBorder: Color { secondary.opacity(0.55) }
   public var hairline: Color { border.opacity(dark ? 0.6 : 0.8) }
   public var positive: Color { Color(hex: dark ? 0x8FC3A6 : 0x2F7653) }
   public var warning: Color { Color(hex: dark ? 0xDDB878 : 0x8F6312) }

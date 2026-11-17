@@ -465,14 +465,13 @@ struct AtlasScreen: View {
         region.points.map { $0.last ?? 0.5 }.reduce(0, +) / count,
       ], origin, width, height)
     return ZStack {
-      path.fill(tint.opacity(active ? 0.3 : 0.16))
       // A pale under-stroke keeps the outline legible on dark or busy map imagery.
       path.stroke(
-        Color.white.opacity(0.55), style: StrokeStyle(lineWidth: active ? 4 : 3, lineJoin: .round))
+        Color.white.opacity(0.55), style: StrokeStyle(lineWidth: 3, lineJoin: .round))
       path.stroke(
-        tint.opacity(0.95),
+        active ? studio.t.selectionBorder : tint.opacity(0.95),
         style: StrokeStyle(
-          lineWidth: active ? 2 : 1.2, lineJoin: .round, dash: active ? [] : [6, 4]))
+          lineWidth: active ? 1.5 : 1, lineJoin: .round, dash: active ? [] : [6, 4]))
       // A marker for the same record already carries its name.
       if !(showMarkers && map.markers.contains { $0.recordID == region.recordID }) {
         Text(record?.title ?? "Archived record").font(.studio(.sectionLabel))
@@ -482,35 +481,49 @@ struct AtlasScreen: View {
       }
       if active && drawingRecord == nil {
         ForEach(Array(region.points.enumerated()), id: \.offset) { index, value in
-          Circle().fill(studio.t.surface).overlay(Circle().stroke(tint, lineWidth: 2))
-            .frame(width: 11, height: 11).contentShape(Circle().inset(by: -6))
-            .position(point(value, origin, width, height))
-            .gesture(
-              DragGesture(minimumDistance: 1, coordinateSpace: .named("atlas-map"))
-                .onChanged { drag in
-                  guard let i = map.regions.firstIndex(where: { $0.id == region.id }),
-                    map.regions[i].points.indices.contains(index)
-                  else { return }
-                  if reshapeBefore == nil { reshapeBefore = currentBoard }
-                  map.regions[i].points[index] = [
-                    min(1, max(0, (drag.location.x - (origin.x - width / 2)) / width)),
-                    min(1, max(0, (drag.location.y - (origin.y - height / 2)) / height)),
-                  ]
-                }
-                .onEnded { _ in
-                  let before = reshapeBefore
-                  reshapeBefore = nil
-                  if persist() { offerUndo(before, title: "Region reshaped") }
-                }
-            )
-            .help("Drag to reshape").accessibilityLabel("Region point \(index + 1)")
+          Circle().fill(studio.t.surface).overlay(
+            Circle().stroke(studio.t.selectionBorder, lineWidth: 1.5)
+          )
+          .frame(width: 11, height: 11).contentShape(Circle().inset(by: -6))
+          .position(point(value, origin, width, height))
+          .gesture(
+            DragGesture(minimumDistance: 1, coordinateSpace: .named("atlas-map"))
+              .onChanged { drag in
+                guard let i = map.regions.firstIndex(where: { $0.id == region.id }),
+                  map.regions[i].points.indices.contains(index)
+                else { return }
+                if reshapeBefore == nil { reshapeBefore = currentBoard }
+                map.regions[i].points[index] = [
+                  min(1, max(0, (drag.location.x - (origin.x - width / 2)) / width)),
+                  min(1, max(0, (drag.location.y - (origin.y - height / 2)) / height)),
+                ]
+              }
+              .onEnded { _ in
+                let before = reshapeBefore
+                reshapeBefore = nil
+                if persist() { offerUndo(before, title: "Region reshaped") }
+              }
+          )
+          .help("Drag to reshape").accessibilityLabel("Region point \(index + 1)")
         }
       }
     }
+    .entitySurface(studio.t, selected: active, shape: path, base: tint.opacity(0.16))
     .contentShape(path)
     .onTapGesture {
-      selectedRegion = active ? nil : region.id
-      selected = active ? nil : region.recordID
+      if NSApp.currentEvent?.clickCount == 2, let record {
+        studio.openRecord(record)
+      } else {
+        selectedRegion = region.id
+        selected = region.recordID
+      }
+    }
+    .accessibilityElement(children: .contain)
+    .accessibilityLabel("Region: \(record?.title ?? "archived record")")
+    .accessibilityAddTraits(.isButton)
+    .accessibilityAction {
+      selectedRegion = region.id
+      selected = region.recordID
     }
     .contextMenu {
       if let record { Button("Open record") { studio.openRecord(record) } }
@@ -590,20 +603,24 @@ struct AtlasScreen: View {
     let active = selected == marker.recordID
     let tint = record.map { studio.t.category($0.category) } ?? studio.t.muted
     return VStack(spacing: 3) {
-      StudioIcon("mappin.circle.fill", size: active ? 28 : 24)
-        .symbolRenderingMode(.palette).foregroundStyle(Color.white, tint)
+      StudioIcon("mappin.circle.fill", size: 24)
+        .foregroundStyle(active ? studio.t.selectionBorder : tint)
+        .background(studio.t.surface.opacity(0.96), in: Circle())
         .shadow(color: .black.opacity(0.35), radius: 3, y: 1)
       Text(record?.title ?? "Archived record").font(.studio(size: 11.5, weight: .medium))
         .lineLimit(1).padding(.horizontal, 6).frame(height: 18)
-        .background(studio.t.surface.opacity(0.92), in: Capsule())
-        .overlay(Capsule().stroke(active ? tint : studio.t.hairline, lineWidth: 1))
+        .entitySurface(
+          studio.t, selected: active, shape: Capsule(), base: studio.t.surface.opacity(0.92),
+          bordered: true
+        )
         .foregroundStyle(studio.t.text)
     }
     .onTapGesture {
       if NSApp.currentEvent?.clickCount == 2, let record {
         studio.openRecord(record)
       } else {
-        selected = active ? nil : marker.recordID
+        selectedRegion = nil
+        selected = marker.recordID
       }
     }
     .contextMenu {
@@ -620,7 +637,11 @@ struct AtlasScreen: View {
     }
     .help(record?.title ?? "Archived record")
     .accessibilityLabel("Marker: \(record?.title ?? "archived record")")
-    .accessibilityAddTraits(.isButton)
+    .accessibilityAddTraits(active ? [.isButton, .isSelected] : .isButton)
+    .accessibilityAction {
+      selectedRegion = nil
+      selected = marker.recordID
+    }
   }
   private func upload() {
     studio.perform {

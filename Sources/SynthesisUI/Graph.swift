@@ -358,10 +358,9 @@ struct RelationshipGraph: View {
           .overlay(alignment: .top) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
       }
     }.frame(width: detailLevel.cardSize.width, height: detailLevel.cardSize.height)
-      .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.panelRadius))
-      .overlay(
-        RoundedRectangle(cornerRadius: Metric.panelRadius).stroke(
-          isSelected ? tint : studio.t.border, lineWidth: isSelected ? 1.5 : 1)
+      .entitySurface(
+        studio.t, selected: isSelected, radius: Metric.cardRadius,
+        base: studio.t.surface, bordered: true
       )
       .elevation(.card, t: studio.t)
       .overlay(alignment: .leading) { port(entity, tint: tint).offset(x: -6) }
@@ -377,7 +376,7 @@ struct RelationshipGraph: View {
         if NSApp.currentEvent?.clickCount == 2 {
           studio.openRecord(entity)
         } else {
-          selected = isSelected ? nil : entity.id
+          selected = entity.id
         }
       }
       .gesture(
@@ -406,6 +405,8 @@ struct RelationshipGraph: View {
         "\(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category)): \(entity.title)"
       )
       .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+      .accessibilityAction { selected = entity.id }
+      .accessibilityAction(named: "Open record") { studio.openRecord(entity) }
   }
   private func beginRelationship(from id: String, to other: String? = nil) {
     source = id
