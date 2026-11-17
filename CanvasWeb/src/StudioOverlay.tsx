@@ -1,9 +1,9 @@
-import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound, Note as StickyNote, Image as ImageIcon, GitBranch, BoundingBox as Frame, Pencil, Square, Minus, CornersOut as Scan, ArrowCounterClockwise as Undo2, ArrowClockwise as Redo2, ArrowUpRight, At as AtSign, X, SlidersHorizontal, Books as Library, FilePlus as FilePlus2, FileText, Graph, type Icon as PhosphorIcon } from '@phosphor-icons/react';
+import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound, Note as StickyNote, Image as ImageIcon, GitBranch, BoundingBox as Frame, Pencil, Square, Minus, CornersOut as Scan, ArrowCounterClockwise as Undo2, ArrowClockwise as Redo2, ArrowUpRight, At as AtSign, X, SlidersHorizontal, Books as Library, FilePlus as FilePlus2, FileText, Graph, User, Flag, MapPin, Lightning, Sparkle, CalendarBlank, Lightbulb, type Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { CaptureUpdateAction, newElementWith } from '@excalidraw/excalidraw';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { isCard, kindLabel, stateName, type RecordInfo, type RelationInfo } from './cards';
 import { cardFrame, visibleFrame } from './sceneRules';
-import { palette, type Theme } from './palette';
+import { palette, displayPalette, categoryColor, categoryKey, type Theme } from './palette';
 type Props = {
     api: any;
     theme: Theme;
@@ -29,7 +29,7 @@ function Tool({ label, icon, active = false, disabled = false, action }: {
 }) {
     return <button type="button" className={`studio-tool ${active ? 'is-active' : ''}`} title={label} aria-label={label} aria-pressed={active} disabled={disabled} onClick={action}><Icon name={icon}/><span className="studio-tooltip">{label}</span></button>;
 }
-const tones: Record<string, string> = { characters: '#e2b993', factions: '#b5a2e7', systems: '#b5a2e7', places: '#8bd9b7', 'power systems': '#e7d17d', cosmology: '#d6a8dc' };
+const categoryIcons: Record<string, PhosphorIcon> = { characters: User, factions: Flag, places: MapPin, 'power systems': Lightning, cosmology: Sparkle, events: CalendarBlank, ideas: Lightbulb };
 /** Rich cards are a presentation of engine elements, never a second board model.
  * Pointer-transparent bodies preserve Excalidraw drag, selection, resize and undo.
  * Only explicit record actions and connection ports intercept the pointer. */
@@ -126,10 +126,11 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
             const art = artByGroup.get(group);
             const artURL = art && files[art.fileId]?.dataURL;
             const related = chosen.length === 0 || neighbours.has(card.customData.recordID);
-            const color = tones[record?.category.toLowerCase() ?? ''] ?? '#9bbfdd';
+            const color = categoryColor(displayPalette(theme), record?.category ?? '');
+            const CategoryIcon = categoryIcons[categoryKey(record?.category ?? '')] ?? FileText;
             const connections = relations().filter(r => r.sourceID === record?.id || r.targetID === record?.id).length;
             return <article key={card.id} className={`studio-record ${selected ? 'is-selected' : ''} ${related ? '' : 'is-unrelated'} ${artURL ? 'has-art' : ''}`} style={{ '--record-accent': color, left: bounds.x + (bounds.width - card.width) / 2, top: bounds.y + (bounds.height - card.height) / 2, width: card.width, height: card.height, transform: `scale(${bounds.zoom}) rotate(${card.angle ?? 0}rad)` } as CSSProperties}>
-         <div className="record-kicker"><i />{record ? kindLabel(record) : 'Archived record'}</div>
+         <div className="record-kicker"><CategoryIcon size={13} weight="regular" aria-hidden="true"/>{record ? kindLabel(record) : 'Archived record'}</div>
          {artURL && <img className="record-art" src={artURL} alt="" style={{ height: Math.min(art.height, card.height - 90) }} draggable={false}/>}
          <div className="record-copy"><h2>{record?.title ?? 'Archived record'}</h2><p>{record?.body || 'Open this record to begin writing.'}</p></div>
          <footer><span>{connections} {connections === 1 ? 'connection' : 'connections'}</span><span className={`record-state ${record?.state === 'canon' ? 'is-canon' : ''}`}><i />{record ? stateName(record) : 'Archived'}</span></footer>

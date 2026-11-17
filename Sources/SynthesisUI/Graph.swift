@@ -279,7 +279,7 @@ struct RelationshipGraph: View {
     return VStack(alignment: .leading, spacing: 0) {
       if zoom >= 0.55 {
         HStack(spacing: 7) {
-          Circle().fill(tint).frame(width: 5, height: 5)
+          StudioIcon(recordIcon(entity), size: 13).foregroundStyle(tint)
           Text(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category))
             .font(.studio(.captionStrong)).foregroundStyle(
               studio.t.secondary

@@ -46,6 +46,7 @@ const dark = {
     places: "#9cc7b5",
     "power systems": "#d4c48f",
     cosmology: "#c9a9d6",
+    events: "#9bbccd",
   } as Record<string, string>,
 };
 const light = {
@@ -55,7 +56,7 @@ const light = {
   secondary: "#5c6573",
   muted: "#7d8593",
   border: "#dce1e8",
-  accent: "#3b637f",
+  accent: "#456b9d",
   positive: "#2f7653",
   categories: {
     characters: "#866042",
@@ -63,6 +64,7 @@ const light = {
     places: "#3b7461",
     "power systems": "#7a6a2e",
     cosmology: "#7b5391",
+    events: "#46677a",
   } as Record<string, string>,
 };
 
@@ -80,7 +82,22 @@ export function palette(theme: Theme): Palette {
   return convert(displayPalette(theme));
 }
 export function categoryColor(p: Palette, category: string): string {
-  return p.categories[category.toLowerCase() === "systems" ? "factions" : category.toLowerCase()] ?? p.accent;
+  return p.categories[categoryKey(category)] ?? p.accent;
+}
+
+/** Visual aliases; never rewrite stored creator categories. Mirrors native Vocabulary. */
+export function categoryKey(category: string): string {
+  const value = category.trim().toLowerCase();
+  const aliases: Record<string, string> = {
+    character: 'characters', characters: 'characters',
+    faction: 'factions', factions: 'factions', system: 'factions', systems: 'factions',
+    place: 'places', places: 'places', location: 'places', locations: 'places',
+    'power system': 'power systems', 'power systems': 'power systems',
+    'magic system': 'power systems', 'magic systems': 'power systems',
+    event: 'events', events: 'events', 'historical events': 'events', history: 'events',
+    idea: 'ideas', ideas: 'ideas',
+  };
+  return aliases[value] ?? value;
 }
 
 /** The exact CSS dark filter, applied to stored hex colours for WebKit PNG export.

@@ -31,12 +31,13 @@ public struct Theme {
 
   /// Muted semantic accent for a worldbuilding category.
   public func category(_ name: String) -> Color {
-    switch name.lowercased() {
+    switch Vocabulary.categoryKey(name) {
     case "characters": return Color(hex: dark ? 0xD7B899 : 0x866042)
     case "factions", "systems": return Color(hex: dark ? 0xB7B6E0 : 0x655A96)
     case "places": return Color(hex: dark ? 0x9CC7B5 : 0x3B7461)
     case "power systems": return Color(hex: dark ? 0xD4C48F : 0x7A6A2E)
     case "cosmology": return Color(hex: dark ? 0xC9A9D6 : 0x7B5391)
+    case "events": return Color(hex: dark ? 0x9BBCCD : 0x46677A)
     default: return accent
     }
   }
@@ -158,6 +159,18 @@ enum Vocabulary {
   static func displayCategory(_ value: String) -> String {
     value == "Factions" ? "Systems" : value
   }
+  /// Visual aliases only. Original creator/imported category names remain untouched.
+  static func categoryKey(_ value: String) -> String {
+    switch value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+    case "character", "characters": "characters"
+    case "faction", "factions", "system", "systems": "systems"
+    case "place", "places", "location", "locations": "places"
+    case "power system", "power systems", "magic system", "magic systems": "power systems"
+    case "event", "events", "historical events", "history": "events"
+    case "idea", "ideas": "ideas"
+    default: value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+  }
   static func matchesCategory(_ value: String, _ category: String) -> Bool {
     value == category || (category == "Systems" && value == "Factions")
   }
@@ -187,12 +200,13 @@ enum Vocabulary {
 }
 
 func categoryIcon(_ category: String) -> String {
-  switch category.lowercased() {
+  switch Vocabulary.categoryKey(category) {
   case "characters": return "person"
   case "factions", "systems": return "flag"
   case "places": return "mappin.and.ellipse"
   case "power systems": return "bolt"
   case "cosmology": return "sparkles"
+  case "events": return "calendar"
   case "ideas": return "lightbulb"
   default: return "doc.text"
   }

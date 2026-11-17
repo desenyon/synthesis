@@ -334,9 +334,10 @@ struct TimelineScreen: View {
     let lane = lanes.first { $0.id == placements[event.id] }
     return HStack(spacing: 12) {
       Text(unknown ? "Date unknown" : event.dateLabel).font(.studio(.captionStrong))
-        .foregroundStyle(unknown ? studio.t.muted : studio.t.accent).lineLimit(1)
+        .foregroundStyle(unknown ? studio.t.muted : studio.t.category("events")).lineLimit(1)
         .frame(width: 132, alignment: .trailing)
-      Circle().fill(unknown ? studio.t.muted : studio.t.accent).frame(width: 6, height: 6)
+      Circle().fill(unknown ? studio.t.muted : studio.t.category("events")).frame(
+        width: 6, height: 6)
       Text(event.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
         .layoutPriority(1)
       if density == .compact, let lane {
@@ -375,13 +376,14 @@ struct TimelineScreen: View {
     return HStack(alignment: .top, spacing: 16) {
       Text(unknown ? "Date unknown" : event.dateLabel)
         .font(.studio(size: 12.5, weight: .medium))
-        .foregroundStyle(unknown ? studio.t.muted : studio.t.accent)
+        .foregroundStyle(unknown ? studio.t.muted : studio.t.category("events"))
         .multilineTextAlignment(.trailing).frame(width: 132, alignment: .trailing)
         .padding(.top, 15)
       VStack(spacing: 0) {
         Rectangle().fill(first ? .clear : studio.t.border).frame(width: 1.5, height: 18)
         Circle().fill(studio.t.background).frame(width: 11, height: 11)
-          .overlay(Circle().stroke(unknown ? studio.t.muted : studio.t.accent, lineWidth: 2))
+          .overlay(
+            Circle().stroke(unknown ? studio.t.muted : studio.t.category("events"), lineWidth: 2))
         Rectangle().fill(last ? .clear : studio.t.border).frame(width: 1.5)
           .frame(maxHeight: .infinity)
       }.frame(width: 12)
@@ -616,8 +618,11 @@ private struct EventCard: View {
     let t = studio.t
     HStack(alignment: .top, spacing: 10) {
       VStack(alignment: .leading, spacing: 8) {
-        Text(event.title).font(.studio(.cardTitle))
-          .fixedSize(horizontal: false, vertical: true)
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+          StudioIcon("calendar", size: 14).foregroundStyle(t.category("events"))
+          Text(event.title).font(.studio(.cardTitle))
+            .fixedSize(horizontal: false, vertical: true)
+        }
         HStack(spacing: 10) {
           if let source {
             Button {

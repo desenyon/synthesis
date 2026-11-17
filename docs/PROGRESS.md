@@ -310,3 +310,7 @@ Added semantic typography roles over bundled Inter and shared spacing/elevation 
 ### Expansion #4 — entity typography hierarchy (verified, 2026-11-17)
 
 32pt entity-title role, shared identity heading on Sections and Mechanics, quieter section controls and metadata. The editor retains an editable wrapping title; Settings adopts the shared page-title role. `./scripts/check.sh`: 175 tests / 42 suites, lint and optimized build passed. 16 native captures inspected, including long editable titles at 1024×768 and dark/light Overview, Sections and Mechanics. No data schema or authored rich-text change. [Evidence](verification/expansion-004/README.md).
+
+### Expansion #5 — semantic category identity (verified, 2026-11-17)
+
+Removed the divergent Canvas pastel map. Native and Canvas categories use matching colors and Phosphor glyphs; singular/imported visual aliases preserve original stored names. History receives a calendar and understated blue-gray identity. Light Canvas accent corrected to the native value. `./scripts/check.sh`: 175 tests / 42 suites, lint and optimized build. Canvas typecheck, rebuilt bundle, 14 tests including 4.5:1 category text contrast and alias checks. 14 native captures inspected across Canvas, Graph, Library and Timeline in dark/light at both sizes. [Evidence](verification/expansion-005/README.md).

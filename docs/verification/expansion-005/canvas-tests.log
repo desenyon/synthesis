@@ -1,0 +1,27 @@
+
+> synthesis-canvas@0.1.0 test
+> node --test tests/*.test.ts
+
+✔ graphite, OLED and light share a display/export palette without changing engine mode (0.630375ms)
+✔ category aliases retain one readable identity in every appearance (0.188958ms)
+Canvas routing benchmark: 600 connections, 300 cards: 8.3 ms
+✔ routing 600 connections across a 300-card board stays interactive (9.336625ms)
+✔ a relationship and its label detour around an intervening card (0.725375ms)
+✔ close parallel connections keep their labels on separate outside curves (0.539792ms)
+✔ overlay stays attached through pan, zoom and a nonzero webview offset (0.326ms)
+✔ offscreen cards are culled but partially visible cards survive (0.051208ms)
+✔ archived and retargeted relationships cannot remain as false lore (0.067958ms)
+✔ delayed messages must not write into a newly opened board (0.039708ms)
+✔ nested board groups keep each record group separate (0.051333ms)
+✔ rotated record hit testing follows the visible card instead of its old bounds (0.070583ms)
+✔ connection routes leave the correct card face and separate parallel relationships (0.187666ms)
+✔ overlapping cards route above the content rather than folding into it (0.15575ms)
+✔ Dagre arrangement separates real cards and respects relationship direction (5.534042ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 79.991333
