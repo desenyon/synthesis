@@ -2,6 +2,8 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. 0.0.x versions are published as full GitHub releases (owner instruction); v0.0.3 is the latest. Licensed GPL-3.0. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits.
 
+Implementation checkpoint `dd9fd840b204226b46fb6618a1f95c524db1399f` is pushed to `origin/main`, with matching remote SHA confirmed. Later documentation commits do not change the tested implementation. No release/tag was created.
+
 ## Active — complete expansion brief
 
 The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger; [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **32 Verified, 11 In progress, 351 Open.** The full expansion is unfinished. Parallel work is now frozen at the owner's request for a fresh chat with the configured 50-agent limit. All workers stopped; the checkpoint includes code, tests, errors, preliminary screenshots and a prepared final capture manifest.

@@ -2,6 +2,8 @@
 
 Start here when picking up Synthesis.
 
+Implementation checkpoint [`dd9fd84`](https://github.com/desenyon/synthesis/commit/dd9fd840b204226b46fb6618a1f95c524db1399f) was pushed to `origin/main`; the remote SHA was checked. This follow-up only records that push. Resume from the latest main, keeping the checkpoint's incomplete statuses.
+
 ## Where things are
 
 - Canonical checkout: `/Users/desenyon/Developer/synthesis`, branch `main` (also the GitHub default). Build and open `dist/Synthesis.app` here; no other worktrees are current.
