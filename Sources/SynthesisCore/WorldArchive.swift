@@ -44,6 +44,10 @@ extension WorkspaceStore {
   /// Imports an independent copy, even if this snapshot was exported from this installation.
   /// Fresh IDs prevent cross-world links. Everything rolls back if validation or a write fails.
   public func importWorldArchive(_ data: Data) throws -> World {
+    try importWorldArchiveMapping(data).world
+  }
+  /// The import, also returning old → new identifiers so a what-if branch can trace its copies.
+  func importWorldArchiveMapping(_ data: Data) throws -> (world: World, ids: [String: String]) {
     guard data.count <= 200_000_000 else {
       throw SynthesisError.invalid("This world file exceeds 200 MB.")
     }
@@ -149,7 +153,7 @@ extension WorkspaceStore {
             "\(key):\(newWorld)", value: key == "world-cover" ? value : remap(value))
         }
       }
-      return try world(newWorld)
+      return (try world(newWorld), ids)
     }
   }
 }

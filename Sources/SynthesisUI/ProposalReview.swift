@@ -12,9 +12,12 @@ struct ProposalCard: View {
     let t = studio.t
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .firstTextBaseline, spacing: 9) {
-        StudioIcon("square.stack.3d.up", size: 13).foregroundStyle(t.accent)
+        StudioIcon(
+          proposal.isBranchMerge ? "arrow.triangle.merge" : "square.stack.3d.up", size: 13
+        ).foregroundStyle(t.accent)
         VStack(alignment: .leading, spacing: 2) {
-          Text("Proposed changes").font(.studio(size: 13.5, weight: .semibold))
+          Text(proposal.isBranchMerge ? "Changes from a what-if" : "Proposed changes")
+            .font(.studio(size: 13.5, weight: .semibold))
           Text(proposal.summary).font(.studio(size: 13)).foregroundStyle(t.secondary)
             .fixedSize(horizontal: false, vertical: true)
         }

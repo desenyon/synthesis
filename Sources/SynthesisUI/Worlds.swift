@@ -114,7 +114,22 @@ struct WorldsScreen: View {
                     if world.demo {
                       Text("Sample").font(.studio(size: 12)).foregroundStyle(studio.t.muted)
                     }
+                    if studio.branchParents[world.id] != nil {
+                      StudioLabel("What-if", icon: "tuningfork").font(.studio(size: 12))
+                        .foregroundStyle(studio.t.warning)
+                    }
                     PlainMenu {
+                      Button("New what-if from \(world.name)…") {
+                        studio.switchWorld(world.id)
+                        studio.sheet = .whatIf
+                      }
+                      if studio.branchParents[world.id] != nil {
+                        Button("Send changes back…") {
+                          studio.switchWorld(world.id)
+                          studio.sheet = .sendWhatIf
+                        }
+                      }
+                      Divider()
                       Button("Save world file…") {
                         studio.switchWorld(world.id)
                         studio.savePortableWorld()

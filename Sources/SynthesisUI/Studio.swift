@@ -60,6 +60,10 @@ public struct Toast: Identifiable {
   @Published public var records: [LoreRecord] = []
   @Published public var recordSectionTabs: [String: Bool] = [:]
   @Published public var sectionParents: [String: String] = [:]
+  /// Set when the open world is a what-if branch of another world.
+  @Published public var branch: WorldBranch?
+  /// What-if world ID → the world it was made from.
+  @Published public var branchParents: [String: String] = [:]
   public var topLevelRecords: [LoreRecord] { records.filter { sectionParents[$0.id] == nil } }
 
   @Published public var conversations: [Conversation] = []
@@ -172,7 +176,7 @@ public struct Toast: Identifiable {
   private var requestID = UUID()
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
-    case world, document, rename, onboarding, components
+    case world, document, rename, onboarding, components, whatIf, sendWhatIf
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
@@ -307,6 +311,8 @@ public struct Toast: Identifiable {
     defer { worldRevision += 1 }
     worlds = try store.worlds()
     sectionParents = try store.sectionMemberships(worldID: worldID)
+    branch = try store.branchInfo(worldID: worldID)
+    branchParents = try store.branchParents()
     records = try store.records(worldID: worldID)
     conversations = try store.conversations(worldID: worldID)
     pendingProposals = try store.proposals(worldID: worldID).filter { $0.pending > 0 }
@@ -580,6 +586,35 @@ public struct Toast: Identifiable {
       try reload()
       switchWorld(world.id)
       sheet = nil
+    }
+  }
+  /// Copies the open world into a new what-if and opens it. The original stays as it is.
+  public func createWhatIf(_ name: String) {
+    guard flushEditor() else { return }
+    perform {
+      let parent = world?.name ?? "this world"
+      let copy = try store.createWhatIfBranch(parentID: worldID, name: name)
+      try reload()
+      switchWorld(copy.id)
+      sheet = nil
+      show("Opened the what-if “\(copy.name)”. \(parent) is unchanged.", icon: "tuningfork")
+    }
+  }
+  /// Stages the what-if's changes for review in the original world.
+  public func sendWhatIf() {
+    guard flushEditor(), let branch else { return }
+    perform {
+      let proposal = try store.proposeBranchMerge(worldID: worldID)
+      sheet = nil
+      try reload()
+      show(
+        "Sent \(proposal.changes.count) \(proposal.changes.count == 1 ? "change" : "changes") to \(branch.parentName) for review",
+        icon: "arrow.triangle.merge", actionTitle: "Open"
+      ) { [weak self] in
+        guard let self else { return }
+        self.switchWorld(branch.parentID)
+        self.navigate(.review)
+      }
     }
   }
   public func renameWorld(_ name: String) {

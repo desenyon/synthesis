@@ -116,6 +116,9 @@ public struct Proposal: Identifiable, Codable, Equatable, Sendable {
   public var changes: [ProposedChange]
   public var state: String
   public var createdAt: String
+  /// `ai-proposed`, or `branch-merge` for changes sent back from a creator's what-if branch.
+  public var origin: String?
+  public var isBranchMerge: Bool { origin == "branch-merge" }
   public var pending: Int { changes.filter { $0.status == "pending" }.count }
 }
 public enum SynthesisError: LocalizedError {

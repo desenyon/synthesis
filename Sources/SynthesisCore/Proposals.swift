@@ -44,7 +44,7 @@ extension WorkspaceStore {
     return Proposal(
       id: row["id"]!, worldID: row["world_id"]!, conversationID: row["conversation_id"],
       messageID: row["message_id"], summary: row["reason"] ?? "", changes: changes,
-      state: row["state"]!, createdAt: row["created_at"]!)
+      state: row["state"]!, createdAt: row["created_at"]!, origin: row["origin"])
   }
   public func proposals(worldID: String, conversationID: String? = nil) throws -> [Proposal] {
     _ = try world(worldID)
@@ -68,6 +68,16 @@ extension WorkspaceStore {
   @discardableResult public func stageProposal(
     worldID: String, conversationID: String?, messageID: String?, payload: [String: Any]
   ) throws -> Proposal? {
+    try stageProposal(
+      worldID: worldID, conversationID: conversationID, messageID: messageID, payload: payload,
+      limit: 12, origin: "ai-proposed")
+  }
+  /// `limit` caps model output at 12 changes; a creator's own what-if merge may carry more.
+  /// `origin` is `ai-proposed` or `branch-merge`, and is shown on the proposal in Review.
+  func stageProposal(
+    worldID: String, conversationID: String?, messageID: String?, payload: [String: Any],
+    limit: Int, origin: String
+  ) throws -> Proposal? {
     let known = Dictionary(
       uniqueKeysWithValues: try records(worldID: worldID).map { ($0.id, $0) })
     func text(_ value: Any?, limit: Int) -> String? {
@@ -75,7 +85,7 @@ extension WorkspaceStore {
       let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
       return trimmed.isEmpty ? nil : String(trimmed.prefix(limit))
     }
-    let raw = (payload["changes"] as? [[String: Any]] ?? []).prefix(12)
+    let raw = (payload["changes"] as? [[String: Any]] ?? []).prefix(limit)
     let boards =
       try boards(worldID: worldID, kind: "canvas") + boards(worldID: worldID, kind: "atlas")
     var createdBoards: [String: String] = [:]
@@ -308,10 +318,10 @@ extension WorkspaceStore {
       summary += " · \(requested - changes.count) unsupported or invalid changes were not staged."
     }
     try db.execute(
-      "INSERT INTO proposals(id,world_id,payload,base_version,before,evidence,reason,origin,state,created_at,updated_at,message_id,conversation_id) VALUES(?,?,?,NULL,NULL,'[]',?,'ai-proposed','pending',?,?,?,?)",
+      "INSERT INTO proposals(id,world_id,payload,base_version,before,evidence,reason,origin,state,created_at,updated_at,message_id,conversation_id) VALUES(?,?,?,NULL,NULL,'[]',?,?,'pending',?,?,?,?)",
       [
         id, worldID, String(decoding: try JSONEncoder().encode(changes), as: UTF8.self), summary,
-        now, now, messageID, conversationID,
+        origin, now, now, messageID, conversationID,
       ])
     return try proposal(worldID: worldID, id: id)
   }
@@ -362,7 +372,8 @@ extension WorkspaceStore {
         case "create_record":
           change.resultID = try createRecord(
             worldID: worldID, title: change.title ?? "Untitled", body: change.body ?? "",
-            kind: change.kind ?? "lore", category: change.category ?? "", origin: "ai-proposed"
+            kind: change.kind ?? "lore", category: change.category ?? "",
+            origin: proposal.isBranchMerge ? "imported" : "ai-proposed"
           ).id
         case "revise_record":
           let current = try record(worldID: worldID, id: try resolved(change.recordID))
@@ -375,7 +386,7 @@ extension WorkspaceStore {
           change.resultID = try addRelation(
             worldID: worldID, source: try resolved(change.source),
             target: try resolved(change.target), label: change.label ?? "related to",
-            origin: "ai-proposed"
+            origin: proposal.isBranchMerge ? "imported" : "ai-proposed"
           ).id
         case "create_branch", "create_period":
           change.resultID = try createChronologyLane(
@@ -390,7 +401,7 @@ extension WorkspaceStore {
             date: change.date ?? "",
             source: try change.source.map { try resolved($0) }, order: nil,
             laneID: try change.laneID.map { try resolved($0) },
-            origin: "ai-proposed"
+            origin: proposal.isBranchMerge ? "imported" : "ai-proposed"
           ).id
         case "create_map":
           change.resultID = try createAtlasMap(

@@ -113,7 +113,7 @@ struct ReviewScreen: View {
       }.frame(maxWidth: .infinity).padding(.top, 40)
     } else {
       intro(
-        "Changes the assistant has suggested. Accepting saves a draft; canon is decided separately."
+        "Changes suggested by the assistant or sent back from a what-if. Accepting saves a draft; canon is decided separately."
       )
       ForEach(filteredProposals) { proposal in
         VStack(alignment: .leading, spacing: 8) {

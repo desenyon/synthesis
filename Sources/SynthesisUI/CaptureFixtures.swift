@@ -32,6 +32,8 @@ extension Studio {
     "preferences-library",
     "conversation-interrupted", "review-edits", "timeline-edit", "timeline-companion",
     "graph-companion", "atlas-companion", "light-atlas-companion", "editor-recovered",
+    "what-if-new", "what-if-send",
+    "review-what-if", "worlds-what-if",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -180,6 +182,51 @@ extension Studio {
       try reload()
     }
     return (board.id, chat.id)
+  }
+  /// A what-if of the sample world with a rewrite, a new entity, a relationship, an event and
+  /// one edit made in both worlds, so the send preview shows every kind of row.
+  private func captureWhatIf() -> String? {
+    let name = "What if the sea never froze?"
+    if let existing = worlds.first(where: { $0.name == name }) { return existing.id }
+    var result: String?
+    perform {
+      let parentID = worldID
+      let branch = try store.createWhatIfBranch(parentID: parentID, name: name)
+      let copies = Dictionary(
+        try store.records(worldID: branch.id).map { ($0.title, $0) },
+        uniquingKeysWith: { a, _ in a })
+      if let sea = copies["The Glass Sea"] {
+        _ = try store.saveRecord(
+          worldID: branch.id, id: sea.id, version: sea.version, title: sea.title,
+          body:
+            "The sea never hardens. Crossings are made by boat, and the drowned city stays hidden.",
+          rtf: nil)
+      }
+      let ferry = try store.createRecord(
+        worldID: branch.id, title: "The Ferrymen's Guild",
+        body: "Rowers who replaced the Tidekeepers once the glass stopped forming.", kind: "entity",
+        category: "Factions")
+      if let order = copies["Tidekeepers"] {
+        _ = try store.addRelation(
+          worldID: branch.id, source: ferry.id, target: order.id, label: "replaces")
+        if let parentOrder = try store.records(worldID: parentID).first(where: {
+          $0.title == "Tidekeepers"
+        }) {
+          _ = try store.saveRecord(
+            worldID: parentID, id: parentOrder.id, version: parentOrder.version,
+            title: parentOrder.title, body: parentOrder.body + " They never sail.", rtf: nil)
+          _ = try store.saveRecord(
+            worldID: branch.id, id: order.id, version: order.version, title: order.title,
+            body: order.body + " They lost their purpose.", rtf: nil)
+        }
+      }
+      _ = try store.addEvent(
+        worldID: branch.id, title: "The last frozen dawn", date: "Year 1 of open water",
+        source: ferry.id)
+      try reload()
+      result = branch.id
+    }
+    return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
     _ = flushEditor()
@@ -512,6 +559,30 @@ extension Studio {
       inspector = false
       selectedRecord = records.first { $0.title == "Oren Ashe" }
       if let id = selectedRecord?.id { recordSectionTabs[id] = true }
+    case "what-if-new":
+      destination = .library
+      sheet = .whatIf
+    case "what-if-send", "review-what-if", "worlds-what-if":
+      if let branchID = captureWhatIf() {
+        if state == "what-if-send" {
+          switchWorld(branchID)
+          perform { try reload() }
+          destination = .library
+          sheet = .sendWhatIf
+        } else if state == "worlds-what-if" {
+          destination = .worlds
+        } else {
+          perform {
+            if try !store.proposals(worldID: worldID).contains(where: {
+              $0.isBranchMerge && $0.pending > 0
+            }) {
+              try store.proposeBranchMerge(worldID: branchID)
+            }
+            try reload()
+          }
+          destination = .review
+        }
+      }
     case "editor-recovered":
       destination = .library
       if let record = records.first(where: { $0.title == "The Glass Sea" }) {

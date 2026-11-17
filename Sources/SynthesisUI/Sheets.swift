@@ -35,6 +35,8 @@ struct StudioSheet: View {
       case .document: document
       case .rename: rename
       case .onboarding: onboarding
+      case .whatIf: WhatIfSheet(studio: studio)
+      case .sendWhatIf: SendWhatIfSheet(studio: studio)
       }
     }
   }

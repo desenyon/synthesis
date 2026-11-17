@@ -240,6 +240,10 @@ struct Sidebar: View {
       Button("Open world file…") { studio.openPortableWorld() }
       Button("Save world file…") { studio.savePortableWorld() }
       Button("New world…") { studio.sheet = .world }
+      Button("New what-if from \(studio.world?.name ?? "this world")…") { studio.sheet = .whatIf }
+      if let branch = studio.branch {
+        Button("Send changes to \(branch.parentName)…") { studio.sheet = .sendWhatIf }
+      }
       if !studio.worlds.contains(where: { $0.demo }) {
         Button("Open sample world") { studio.loadSample() }
       }
@@ -250,8 +254,11 @@ struct Sidebar: View {
           VStack(alignment: .leading, spacing: 4) {
             Text(studio.world?.name ?? "World").font(.studio(size: 14, weight: .semibold))
               .foregroundStyle(palette.text).lineLimit(1).truncationMode(.tail)
-            Text(studio.world?.demo == true ? "Sample universe" : "World workspace")
-              .font(.studio(size: 11)).foregroundStyle(palette.muted).lineLimit(1)
+            Text(
+              studio.branch.map { "What-if of \($0.parentName)" }
+                ?? (studio.world?.demo == true ? "Sample universe" : "World workspace")
+            )
+            .font(.studio(size: 11)).foregroundStyle(palette.muted).lineLimit(1)
           }.frame(maxWidth: .infinity, alignment: .leading)
           StudioIcon("chevron.down", size: 12).foregroundStyle(palette.muted)
         }
