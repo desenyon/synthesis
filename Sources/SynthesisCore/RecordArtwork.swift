@@ -30,6 +30,16 @@ extension WorkspaceStore {
     ).map(artworkRow)
   }
 
+  /// Lightweight index for spatial views. Image bytes are loaded only for visible cards.
+  public func recordArtworkIDs(worldID: String) throws -> [String: String] {
+    _ = try world(worldID)
+    return Dictionary(
+      uniqueKeysWithValues: try db.rows(
+        "SELECT a.id,a.record_id FROM record_artwork a JOIN records r ON r.id=a.record_id AND r.world_id=a.world_id WHERE a.world_id=? AND a.archived=0 AND r.archived=0",
+        [worldID]
+      ).map { ($0["record_id"]!, $0["id"]!) })
+  }
+
   @discardableResult public func saveRecordArtwork(
     worldID: String, recordID: String, data: Data, origin: String = "imported",
     expectedID: String?

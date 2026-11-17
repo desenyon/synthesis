@@ -9,6 +9,27 @@ struct RecordArtworkTests {
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aAfkAAAAASUVORK5CYII="
   )!
 
+  @Test func spatialArtworkIndexTracksCurrentRevisionsAndArchives() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Aster")
+    let other = try store.createWorld(name: "Other")
+    let record = try store.createRecord(worldID: world.id, title: "Mira", kind: "entity")
+    let first = try store.saveRecordArtwork(
+      worldID: world.id, recordID: record.id, data: Self.png, expectedID: nil)
+    #expect(try store.recordArtworkIDs(worldID: world.id) == [record.id: first.id])
+    let second = try store.saveRecordArtwork(
+      worldID: world.id, recordID: record.id, data: Self.png, expectedID: first.id)
+    #expect(try store.recordArtworkIDs(worldID: world.id) == [record.id: second.id])
+    #expect(try store.recordArtworkIDs(worldID: other.id).isEmpty)
+    try store.restoreRecordArtwork(
+      worldID: world.id, recordID: record.id, id: nil, expectedID: second.id)
+    #expect(try store.recordArtworkIDs(worldID: world.id).isEmpty)
+    try store.restoreRecordArtwork(
+      worldID: world.id, recordID: record.id, id: first.id, expectedID: nil)
+    try store.archiveRecord(worldID: world.id, id: record.id)
+    #expect(try store.recordArtworkIDs(worldID: world.id).isEmpty)
+  }
+
   @Test func artworkPersistsAndUndoRejectsStaleOrForeignImages() throws {
     let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     defer { try? FileManager.default.removeItem(at: folder) }

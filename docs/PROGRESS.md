@@ -360,3 +360,9 @@ Added an optional Dashboard with recent entities, unfinished writing, pending pr
 Canvas and Graph now use a cool spatial base beneath white entities and floating controls. Shared light secondary/border tokens are stronger; Canvas overlay colors come from the same palette as export and native surfaces. Removed stale green-tinted overlay text. Dark/OLED behavior and data are unchanged.
 
 Checks: Canvas typecheck, 15 tests and bundle build; `./scripts/check.sh` strict lint, 196 tests / 50 suites and optimized build; 28 embedded-engine checks. Compared three before states with same-size after captures. Inspected all 18 final captures at 1440×900 and 1024×768 in six contact-sheet rows: Canvas, Graph, editor, inspector, composer, Library, Dashboard and dark regressions. README light Canvas refreshed. Background verification only; no physical-input/animation claim or live model request. [Evidence](verification/expansion-014/README.md). Next #15.
+
+### 2026-11-17 — Expansion #15, semantic graph zoom (verified)
+
+Graph titles become compact at overview scale, summaries appear closer in, and real artwork plus relationship labels appear in detail. Node positions stay fixed; routing uses visible card bounds. Visible-only bounded thumbnail decoding and a revision cache avoid full-image work during pan/zoom. Artwork indexes respect world, revision and archive state.
+
+`./scripts/check.sh`: strict lint, 200 tests / 51 suites, optimized build. Inspected all 16 refined captures at both sizes plus two corrected selection captures. Visual iterations removed inactive-window hover and overlapping distant relationship labels; selection still exposes the full relation list. README detailed graph added. [Evidence](verification/expansion-015/README.md). No foreground events, model call, release or user-app restart. Next #16.

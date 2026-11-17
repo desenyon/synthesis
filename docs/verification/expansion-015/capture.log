@@ -1,0 +1,17 @@
+CAPTURE graph-zoom-overview 1440x900, bitmap 1440x900, 245ms
+CAPTURE graph-zoom-summary 1440x900, bitmap 1440x900, 398ms
+CAPTURE graph-zoom-detail 1440x900, bitmap 1440x900, 464ms
+CAPTURE light-graph-zoom-overview 1440x900, bitmap 1440x900, 241ms
+CAPTURE light-graph-zoom-detail 1440x900, bitmap 1440x900, 477ms
+CAPTURE manual-graph-zoom-detail 1440x900, bitmap 1440x900, 432ms
+CAPTURE graph 1440x900, bitmap 1440x900, 384ms
+CAPTURE graph-selected 1440x900, bitmap 1440x900, 539ms
+CAPTURE graph-zoom-overview 1024x768, bitmap 1024x768, 155ms
+CAPTURE graph-zoom-summary 1024x768, bitmap 1024x768, 237ms
+CAPTURE graph-zoom-detail 1024x768, bitmap 1024x768, 215ms
+CAPTURE light-graph-zoom-overview 1024x768, bitmap 1024x768, 168ms
+CAPTURE light-graph-zoom-detail 1024x768, bitmap 1024x768, 208ms
+CAPTURE manual-graph-zoom-detail 1024x768, bitmap 1024x768, 175ms
+CAPTURE graph 1024x768, bitmap 1024x768, 163ms
+CAPTURE graph-selected 1024x768, bitmap 1024x768, 242ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-015

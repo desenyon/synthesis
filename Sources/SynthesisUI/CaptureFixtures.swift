@@ -5,6 +5,8 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates = [
+    "graph-zoom-overview", "graph-zoom-summary", "graph-zoom-detail",
+    "light-graph-zoom-overview", "light-graph-zoom-detail", "manual-graph-zoom-detail",
     "dashboard-activity", "light-dashboard-activity", "dashboard", "light-dashboard",
     "manual-dashboard", "dashboard-empty",
     "dashboard-project", "dashboard-new-project", "dashboard-review", "dashboard-long",
@@ -261,6 +263,24 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if state.contains("graph-zoom-") {
+      configureConnectedCapture("graph", board: board, conversation: conversation)
+      perform {
+        if let mira = records.first(where: { $0.title == "Mira Vale" }),
+          try store.recordArtwork(worldID: worldID, recordID: mira.id) == nil,
+          let image = StudioArtwork.cartographer.data
+        {
+          _ = try store.saveRecordArtwork(
+            worldID: worldID, recordID: mira.id, data: image,
+            origin: "ai-generated", expectedID: nil)
+        }
+        try reload()
+      }
+      dark = !state.hasPrefix("light-")
+      if state.hasPrefix("manual-") { setMode(.manual) }
+      captureHint = state
+      return
+    }
     if state.contains("dashboard") {
       configureConnectedCapture(
         state == "dashboard-empty" ? "empty-library" : "library", board: board,

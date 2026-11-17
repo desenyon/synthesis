@@ -4,7 +4,7 @@ import SwiftUI
 /// Dagre handles directed layout; SwiftUI owns rendering, selection and world-record actions.
 /// The bundled, fixed script receives IDs and dimensions only. No network, shell, or model code.
 enum GraphLayout {
-  static let cardSize = CGSize(width: 270, height: 176)
+  static let cardSize = CGSize(width: 270, height: 208)
   private static let script: String? = {
     for bundle in [Bundle.main, Bundle.module] {
       if let url = bundle.resourceURL?.appendingPathComponent("Assets/Graph/dagre.min.js"),
@@ -98,9 +98,11 @@ struct GraphRoute {
         * end.y)
   }
   static func between(
-    _ a: CGPoint, _ b: CGPoint, scale: Double, lane: Double, obstacles: [CGRect] = []
+    _ a: CGPoint, _ b: CGPoint, scale: Double, lane: Double,
+    cardSize: CGSize = GraphLayout.cardSize,
+    obstacles: [CGRect] = []
   ) -> GraphRoute {
-    let direct = direct(a, b, scale: scale, lane: lane)
+    let direct = direct(a, b, scale: scale, lane: lane, cardSize: cardSize)
     let xs = [direct.start.x, direct.first.x, direct.second.x, direct.end.x]
     let ys = [direct.start.y, direct.first.y, direct.second.y, direct.end.y]
     let extent = CGRect(
@@ -113,8 +115,8 @@ struct GraphRoute {
     }
     guard blocked else { return direct }
     let half = CGSize(
-      width: GraphLayout.cardSize.width / 2 * scale + 7,
-      height: GraphLayout.cardSize.height / 2 * scale + 7)
+      width: cardSize.width / 2 * scale + 7,
+      height: cardSize.height / 2 * scale + 7)
     let horizontal = abs(a.x - b.x) >= abs(a.y - b.y)
     let rects =
       obstacles
@@ -137,11 +139,12 @@ struct GraphRoute {
       first: CGPoint(x: horizontal ? start.x : outer, y: horizontal ? outer : start.y),
       second: CGPoint(x: horizontal ? end.x : outer, y: horizontal ? outer : end.y), end: end)
   }
-  private static func direct(_ a: CGPoint, _ b: CGPoint, scale: Double, lane: Double) -> GraphRoute
-  {
+  private static func direct(
+    _ a: CGPoint, _ b: CGPoint, scale: Double, lane: Double, cardSize: CGSize
+  ) -> GraphRoute {
     let half = CGSize(
-      width: GraphLayout.cardSize.width / 2 * scale + 7,
-      height: GraphLayout.cardSize.height / 2 * scale + 7)
+      width: cardSize.width / 2 * scale + 7,
+      height: cardSize.height / 2 * scale + 7)
     let horizontal = abs(b.x - a.x) / half.width >= abs(b.y - a.y) / half.height
     let direction: Double = (horizontal ? b.x - a.x : b.y - a.y) >= 0 ? 1 : -1
     let start = CGPoint(

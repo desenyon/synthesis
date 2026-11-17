@@ -16,6 +16,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 
 ### Added
+- Expansion #15: graph semantic zoom from compact titles through summaries to stored artwork and relationship labels. Ports follow visible cards; offscreen culling and bounded thumbnails avoid repeated image decoding.
 - Expansion #6: persisted Compact, Comfortable and Immersive density in Settings. Navigation and history rows, Library previews, Worlds/Mechanics cards and entity-section spacing adapt together.
 - Shared World assistant composer with expandable writing space, removable context chips and matching full, companion and compact layouts.
 - Real record, Canvas, Atlas and history attachments; a local context inspector showing source reasons, excerpts and structured workspace data before Send.

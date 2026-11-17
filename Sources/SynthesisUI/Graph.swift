@@ -8,7 +8,10 @@ struct RelationshipGraph: View {
   }
   @ObservedObject var studio: Studio
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @Environment(\.controlActiveState) private var controlActiveState
   @State private var relationships: [Relation] = []
+  @State private var artworkIDs: [String: String] = [:]
+  private var detailLevel: GraphDetail { GraphDetail(scale: zoom) }
   @State private var layout: [String: CGPoint] = [:]
   @State private var signature = ""
   @State private var layoutTask: Task<Void, Never>?
@@ -89,6 +92,7 @@ struct RelationshipGraph: View {
       }
     }
     .onChange(of: selected) { _, _ in hoveredEdge = nil }
+    .onChange(of: controlActiveState) { _, _ in hoveredEdge = nil }
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .onDisappear {
       layoutTask?.cancel()
@@ -120,13 +124,13 @@ struct RelationshipGraph: View {
     guard layout[edge.sourceID] != nil, layout[edge.targetID] != nil else { return nil }
     return GraphRoute.between(
       point(edge.sourceID, size), point(edge.targetID, size),
-      scale: zoom, lane: (lanes[edge.id] ?? 0) * zoom,
+      scale: zoom, lane: (lanes[edge.id] ?? 0) * zoom, cardSize: detailLevel.cardSize,
       obstacles: layout.keys.filter { $0 != edge.sourceID && $0 != edge.targetID }.map {
         let centre = point($0, size)
         return CGRect(
-          x: centre.x - GraphLayout.cardSize.width * zoom / 2,
-          y: centre.y - GraphLayout.cardSize.height * zoom / 2,
-          width: GraphLayout.cardSize.width * zoom, height: GraphLayout.cardSize.height * zoom)
+          x: centre.x - detailLevel.cardSize.width * zoom / 2,
+          y: centre.y - detailLevel.cardSize.height * zoom / 2,
+          width: detailLevel.cardSize.width * zoom, height: detailLevel.cardSize.height * zoom)
       })
   }
   private func graph(_ nodes: [LoreRecord]) -> some View {
@@ -191,36 +195,11 @@ struct RelationshipGraph: View {
             return true
           })
         ForEach(relationships) { edge in
-          if let c = routes[edge.id],
-            hypot(c.end.x - c.start.x, c.end.y - c.start.y) > 54 || hoveredEdge == edge.id
-          {
-            let strong = emphasized(edge)
-            Button {
-              editing = edge
-              label = edge.label
-              panel = .edit
-            } label: {
-              Text(edge.label).font(.studio(.captionStrong)).lineLimit(1)
-                .foregroundStyle(strong ? studio.t.accent : studio.t.muted)
-                .padding(.horizontal, 8).frame(height: 22)
-                .background(studio.t.background, in: Capsule())
-                .overlay(
-                  Capsule().stroke(
-                    hoveredEdge == edge.id ? studio.t.accent.opacity(0.8) : studio.t.border,
-                    lineWidth: 1))
-            }.buttonStyle(.plain).opacity(strong ? 1 : 0.45)
-              .help("\(name(edge.sourceID)) \(edge.label) \(name(edge.targetID)). Click to edit.")
-              .onContinuousHover { phase in
-                switch phase {
-                case .active: hoveredEdge = edge.id
-                case .ended: if hoveredEdge == edge.id { hoveredEdge = nil }
-                }
-              }
-              .position(
-                x: c.middle.x, y: c.middle.y)
-          }
+          if let route = routes[edge.id] { edgeControl(edge, route: route) }
         }
-        ForEach(nodes) { entity in node(entity, size: geo.size) }
+        ForEach(nodes.filter { visible($0.id, in: geo.size) }) { entity in
+          node(entity, size: geo.size)
+        }
         if relationships.isEmpty || connecting != nil {
           Text(
             connecting == nil
@@ -265,6 +244,63 @@ struct RelationshipGraph: View {
       }
     }
   }
+  private func visible(_ id: String, in size: CGSize) -> Bool {
+    let centre = point(id, size)
+    let bounds = CGRect(
+      x: centre.x - detailLevel.cardSize.width * zoom / 2,
+      y: centre.y - detailLevel.cardSize.height * zoom / 2,
+      width: detailLevel.cardSize.width * zoom, height: detailLevel.cardSize.height * zoom)
+    return CGRect(origin: .zero, size: size).insetBy(dx: -32, dy: -32).intersects(bounds)
+  }
+
+  private func edgeControl(_ edge: Relation, route: GraphRoute) -> some View {
+    let strong = emphasized(edge)
+    let showLabel = detailLevel.showsRelationship(hovered: hoveredEdge == edge.id)
+    let labelWidth = min(200.0, max(60, Double(edge.label.count) * 7 + 16))
+    var path = Path()
+    path.move(to: route.start)
+    path.addCurve(to: route.end, control1: route.first, control2: route.second)
+    var hit = path.strokedPath(StrokeStyle(lineWidth: 14))
+    // One combined hit region prevents hover flicker when the revealed label covers its edge.
+    if showLabel {
+      hit.addRoundedRect(
+        in: CGRect(
+          x: route.middle.x - labelWidth / 2, y: route.middle.y - 11,
+          width: labelWidth, height: 22), cornerSize: CGSize(width: 11, height: 11))
+    }
+    return Button {
+      editing = edge
+      label = edge.label
+      panel = .edit
+    } label: {
+      ZStack {
+        path.stroke(Color.clear, lineWidth: 14)
+        if showLabel {
+          Text(edge.label).font(.studio(.captionStrong)).lineLimit(1)
+            .foregroundStyle(strong ? studio.t.accent : studio.t.muted)
+            .padding(.horizontal, 8).frame(height: 22).frame(width: labelWidth)
+            .background(studio.t.surface, in: Capsule())
+            .overlay(
+              Capsule().stroke(
+                hoveredEdge == edge.id ? studio.t.accent.opacity(0.8) : studio.t.border,
+                lineWidth: 1)
+            )
+            .opacity(strong ? 1 : 0.45).position(route.middle)
+        }
+      }.contentShape(hit)
+    }.buttonStyle(.plain)
+      .accessibilityLabel(
+        "\(name(edge.sourceID)) \(edge.label) \(name(edge.targetID)). Edit relationship."
+      )
+      .help("\(name(edge.sourceID)) \(edge.label) \(name(edge.targetID))")
+      .onContinuousHover { phase in
+        switch phase {
+        case .active: if controlActiveState == .key { hoveredEdge = edge.id }
+        case .ended: if hoveredEdge == edge.id { hoveredEdge = nil }
+        }
+      }
+  }
+
   private func node(_ entity: LoreRecord, size: CGSize) -> some View {
     let tint = studio.t.category(entity.category)
     let isSelected = selected == entity.id
@@ -277,45 +313,51 @@ struct RelationshipGraph: View {
     let dim = !neighbour || !matches(entity)
     let count = relationships.filter { $0.sourceID == entity.id || $0.targetID == entity.id }.count
     return VStack(alignment: .leading, spacing: 0) {
-      if zoom >= 0.55 {
+      if detailLevel == .overview {
+        HStack(spacing: 9) {
+          StudioIcon(recordIcon(entity), size: max(16, 10 / zoom)).foregroundStyle(tint)
+          Text(entity.title).font(.studio(size: max(17, 12 / zoom), weight: .semibold))
+            .lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
+          Circle().fill(studio.t.state(entity.state)).frame(width: 6, height: 6)
+        }.padding(.horizontal, 14).frame(maxHeight: .infinity)
+      } else {
         HStack(spacing: 7) {
           StudioIcon(recordIcon(entity), size: 13).foregroundStyle(tint)
           Text(entity.category.isEmpty ? "Entity" : Vocabulary.displayCategory(entity.category))
-            .font(.studio(.captionStrong)).foregroundStyle(
-              studio.t.secondary
-            ).lineLimit(1)
+            .font(.studio(.captionStrong)).foregroundStyle(studio.t.secondary).lineLimit(1)
           Spacer(minLength: 4)
           IconButton(icon: "arrow.up.forward", label: "Open \(entity.title)", t: studio.t, size: 22)
           {
             studio.openRecord(entity)
           }
-        }.padding(.horizontal, 13).frame(height: 35)
+        }.padding(.horizontal, 13).frame(height: 30)
         Rectangle().fill(studio.t.hairline).frame(height: 1).padding(.horizontal, 13)
+        VStack(alignment: .leading, spacing: 8) {
+          Text(entity.title).font(.studio(size: max(17, 12 / zoom), weight: .semibold))
+            .tracking(-0.3).lineLimit(detailLevel == .detail ? 2 : 1)
+          HStack(alignment: .top, spacing: 10) {
+            if detailLevel == .detail, let revision = artworkIDs[entity.id] {
+              GraphArtwork(
+                store: studio.store, worldID: studio.worldID, recordID: entity.id,
+                revision: revision)
+            }
+            Text(entity.body.isEmpty ? "Open this record to begin writing." : entity.body)
+              .font(.studio(size: max(14, 11 / zoom))).foregroundStyle(studio.t.secondary)
+              .lineSpacing(3).lineLimit(detailLevel == .detail ? 4 : 1)
+              .frame(maxWidth: .infinity, alignment: .leading)
+          }
+        }.padding(.horizontal, 14).padding(.vertical, 11)
+          .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        HStack {
+          Text("\(count) \(count == 1 ? "connection" : "connections")").lineLimit(1)
+          Spacer(minLength: 4)
+          Circle().fill(studio.t.state(entity.state)).frame(width: 4, height: 4)
+          Text(entity.state.capitalized)
+        }.font(.studio(size: max(11.5, 9 / zoom))).foregroundStyle(studio.t.secondary)
+          .padding(.horizontal, 13).frame(height: 28)
+          .overlay(alignment: .top) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
       }
-      VStack(alignment: .leading, spacing: 7) {
-        Text(entity.title).font(.studio(size: max(16.5, 12 / zoom), weight: .semibold)).tracking(
-          -0.3
-        ).lineLimit(zoom < 0.55 ? 2 : (zoom < 0.8 ? 1 : 2))
-        if zoom >= 0.55 {
-          Text(entity.body.isEmpty ? "Open this record to begin writing." : entity.body)
-            .font(.studio(size: max(13.5, 11 / zoom))).foregroundStyle(studio.t.secondary)
-            .lineSpacing(
-              3
-            ).lineLimit(zoom < 0.8 ? 1 : 2)
-        }
-      }.padding(.horizontal, 14).padding(.vertical, 12).frame(
-        maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-      HStack {
-        Text(
-          zoom < 0.55 ? "\(count) links" : "\(count) \(count == 1 ? "connection" : "connections")"
-        ).lineLimit(1)
-        Spacer()
-        Circle().fill(studio.t.state(entity.state)).frame(width: 4, height: 4)
-        Text(entity.state.capitalized)
-      }.font(.studio(size: max(11.5, 9 / zoom))).foregroundStyle(studio.t.secondary)
-        .padding(.horizontal, 13).frame(height: 29)
-        .overlay(alignment: .top) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
-    }.frame(width: GraphLayout.cardSize.width, height: GraphLayout.cardSize.height)
+    }.frame(width: detailLevel.cardSize.width, height: detailLevel.cardSize.height)
       .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.panelRadius))
       .overlay(
         RoundedRectangle(cornerRadius: Metric.panelRadius).stroke(
@@ -325,7 +367,7 @@ struct RelationshipGraph: View {
       .overlay(alignment: .leading) { port(entity, tint: tint).offset(x: -6) }
       .overlay(alignment: .trailing) { port(entity, tint: tint).offset(x: 6) }
       .scaleEffect(zoom).frame(
-        width: GraphLayout.cardSize.width * zoom, height: GraphLayout.cardSize.height * zoom
+        width: detailLevel.cardSize.width * zoom, height: detailLevel.cardSize.height * zoom
       )
       .opacity(dim ? 0.35 : 1)
       .animation(reduceMotion ? nil : Motion.feedbackAnimation, value: dim)
@@ -456,6 +498,7 @@ struct RelationshipGraph: View {
   private func refresh() {
     studio.perform {
       relationships = try studio.store.relations(worldID: studio.worldID)
+      artworkIDs = try studio.store.recordArtworkIDs(worldID: studio.worldID)
       let nodes = entities.map(\.id).sorted()
       let landscape = area.width >= area.height
       let next =
@@ -504,14 +547,23 @@ struct RelationshipGraph: View {
     let ys = layout.values.map(\.y)
     let width = (xs.max()! - xs.min()!) + GraphLayout.cardSize.width + 96
     let height = (ys.max()! - ys.min()!) + GraphLayout.cardSize.height + 96
-    // Fit must not crop cards. At overview scales cards retain their title and state;
-    // selection opens full details and zoom restores the description.
+    // Fit uses maximum card bounds. Semantic detail never rearranges node centres.
     let scale = min(1, max(0.1, min(size.width / width, (size.height - 40) / height)))
     let apply = {
-      zoom = scale
+      let capturedScale: Double? =
+        studio.captureHint.contains("graph-zoom-")
+        ? (studio.captureHint.hasSuffix("overview")
+          ? 0.42
+          : studio.captureHint.hasSuffix("summary") ? 0.75 : 1.1) : nil
+      zoom = capturedScale ?? scale
       pan = CGSize(
         width: -(xs.max()! + xs.min()!) / 2 * scale,
         height: -(ys.max()! + ys.min()!) / 2 * scale - 10)
+      if capturedScale != nil, let focus = entities.first(where: { $0.title == "Mira Vale" }),
+        let centre = layout[focus.id]
+      {
+        pan = CGSize(width: -centre.x * zoom - size.width * 0.22, height: -centre.y * zoom)
+      }
     }
     if animated {
       withAnimation(reduceMotion ? nil : Motion.panelAnimation) { apply() }
