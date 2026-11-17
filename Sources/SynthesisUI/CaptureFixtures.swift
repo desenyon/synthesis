@@ -10,6 +10,7 @@ extension Studio {
     "composer-companion", "light-composer-companion", "composer-command-return",
     "composer-unavailable", "oled-conversation", "oled-canvas", "oled-settings",
     "opaque-conversation", "opaque-graph", "light-opaque-graph",
+    "editor-long", "light-editor-long",
     "sidebar-long", "light-sidebar-long", "sidebar-history", "sidebar-folded",
     "sidebar-opaque", "light-sidebar-opaque", "empty-sidebar", "light-collapsed",
     "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
@@ -684,6 +685,18 @@ extension Studio {
             + "\n\nWhen the glass holds, the drowned lamps can be counted. Mira never counts the same number twice.",
           rtf: nil, category: record.category, baseVersion: record.version)
         selectedRecord = record
+      }
+    case "editor-long", "light-editor-long":
+      destination = .library
+      let title = "Mira Vale, Keeper of the Unfinished Charts of the Western Glass Sea"
+      if let existing = records.first(where: { $0.title == title }) {
+        selectedRecord = existing
+      } else {
+        selectedRecord = try? store.createRecord(
+          worldID: worldID, title: title,
+          body: "A cartographer tracing places that do not stay still.",
+          kind: "entity", category: "Characters")
+        try? reload()
       }
     case "editor", "light-editor", "sheet-rule", "preferences-editor":
       destination = .library

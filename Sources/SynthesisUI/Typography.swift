@@ -5,9 +5,11 @@ import SwiftUI
 /// Semantic type roles, shared by native pages and controls. Rich document text retains
 /// the creator's saved font size; these roles describe application chrome and hierarchy.
 enum TextRole {
-  case title, section, cardTitle, body, control, label, caption, captionStrong, sectionLabel
+  case entityTitle, title, section, cardTitle, body, control, label, caption, captionStrong,
+    sectionLabel
   var size: CGFloat {
     switch self {
+    case .entityTitle: 32
     case .title: 30
     case .section: 20
     case .cardTitle, .body: 16
@@ -19,7 +21,7 @@ enum TextRole {
   }
   var weight: Font.Weight {
     switch self {
-    case .title, .section, .cardTitle, .sectionLabel: .semibold
+    case .entityTitle, .title, .section, .cardTitle, .sectionLabel: .semibold
     case .control, .label, .captionStrong: .medium
     case .body, .caption: .regular
     }

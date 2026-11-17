@@ -19,6 +19,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 - Narrow composers measure attachment wrapping instead of hiding a third chip. Multiline input remeasures after native layout and clears a stale scroll offset when the whole draft fits, preserving the caret and longer drafts' scroll positions.
 
 ### Changed
+- Expansion #4: entity identity stays prominent across Overview, Sections and Mechanics; a shared 32pt title, quieter metadata and long-name wrapping preserve page hierarchy.
 - Expansion #3: semantic typography and shared spacing, radii and elevation tokens replace repeated control/card/page constants. Existing sidebar geometry and rich document formatting are preserved.
 - Expansion #2: shared native frosted materials for floating toolbars, inspectors, menus and composers, with opaque Reduce Transparency and Increase Contrast fallbacks.
 - Expansion #1: graphite dark surfaces by default with a persistent true-black OLED option shared by native workspaces, Canvas and board image export.

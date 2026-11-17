@@ -138,7 +138,7 @@ struct SettingsScreen: View {
   }
   private func heading(_ title: String, _ subtitle: String) -> some View {
     VStack(alignment: .leading, spacing: 8) {
-      Text(title).font(.studio(size: 28, weight: .semibold))
+      Text(title).font(.studio(.title)).accessibilityAddTraits(.isHeader)
       Text(subtitle).font(.studio(size: 14)).foregroundStyle(t.secondary)
         .fixedSize(horizontal: false, vertical: true)
     }

@@ -16,8 +16,9 @@ struct RecordSectionsPage: View {
     ScrollView {
       ContentColumn {
         VStack(alignment: .leading, spacing: 24) {
+          EntityPageHeading(record: parent, t: studio.t)
           HStack {
-            Text("Sections").font(.studio(.cardTitle))
+            Text("Sections").font(.studio(.label)).foregroundStyle(studio.t.secondary)
             Text("\(sections.count + components.count)").font(.studio(.caption)).foregroundStyle(
               studio.t.secondary)
             Spacer()

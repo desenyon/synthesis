@@ -22,11 +22,9 @@ struct RulesLab: View {
       ContentColumn {
         VStack(alignment: .leading, spacing: 24) {
           HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 7) {
-              Text("How this world works").font(.studio(size: 28, weight: .semibold)).tracking(-0.5)
-              Text("Define the mechanics. Explore their limits. Keep the exceptions deliberate.")
-                .font(.studio(size: 14)).foregroundStyle(studio.t.secondary)
-            }
+            EntityPageHeading(
+              record: record, t: studio.t,
+              subtitle: "Mechanics · define the limits, costs and exceptions.")
             Spacer()
             Button("Add rule") {
               editing = nil

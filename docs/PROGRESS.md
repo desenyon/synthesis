@@ -306,3 +306,7 @@ Shared native in-window vibrancy for floating toolbars, inspectors, popovers and
 ### Expansion #3 — design tokens (verified, 2026-11-17)
 
 Added semantic typography roles over bundled Inter and shared spacing/elevation roles; common page geometry, radii, controls, captions and card headings now resolve through the same definitions. Updated stale UI_DIRECTION values to the actual source. `./scripts/check.sh`: 175 tests / 42 suites, strict lint and optimized build passed. 16 captures inspected across two sizes: editor, Library, Settings, Worlds, Graph, Canvas, and light editor/Library. This is a presentation refactor; saved rich text and layout behavior remain intact. [Evidence](verification/expansion-003/README.md).
+
+### Expansion #4 — entity typography hierarchy (verified, 2026-11-17)
+
+32pt entity-title role, shared identity heading on Sections and Mechanics, quieter section controls and metadata. The editor retains an editable wrapping title; Settings adopts the shared page-title role. `./scripts/check.sh`: 175 tests / 42 suites, lint and optimized build passed. 16 native captures inspected, including long editable titles at 1024×768 and dark/light Overview, Sections and Mechanics. No data schema or authored rich-text change. [Evidence](verification/expansion-004/README.md).

@@ -273,7 +273,8 @@ struct EditorScreen: View {
         }
       }.padding(.bottom, 10)
       TextField("Untitled", text: $title, axis: .vertical)
-        .font(.studio(.title)).tracking(-0.4).textFieldStyle(.plain)
+        .font(.studio(.entityTitle)).tracking(-0.4).textFieldStyle(.plain)
+        .accessibilityLabel("Record title")
         .onChange(of: title) { _, _ in changed() }.accessibilityLabel("Title")
       HStack(spacing: 2) {
         IconButton(icon: "bold", label: "Bold · ⌘B", t: studio.t) { handle.send("toggleBoldface:") }

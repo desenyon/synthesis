@@ -22,6 +22,26 @@ struct ContentHeader<Content: View>: View {
   }
 }
 
+/// Entity identity remains the primary heading when changing its writing/sections/mechanics tab.
+struct EntityPageHeading: View {
+  let record: LoreRecord
+  let t: Theme
+  var subtitle = ""
+  var body: some View {
+    VStack(alignment: .leading, spacing: Space.sm) {
+      Text(record.category.isEmpty ? "Entity" : Vocabulary.displayCategory(record.category))
+        .font(.studio(.captionStrong)).foregroundStyle(t.secondary)
+      Text(record.title).font(.studio(.entityTitle)).tracking(-0.4)
+        .foregroundStyle(t.text).fixedSize(horizontal: false, vertical: true)
+        .accessibilityAddTraits(.isHeader)
+      if !subtitle.isEmpty {
+        Text(subtitle).font(.studio(size: 14)).foregroundStyle(t.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+    }.frame(maxWidth: .infinity, alignment: .leading)
+  }
+}
+
 /// A scroll cue that disappears once the remaining content is visible.
 struct BottomOverflowFade: ViewModifier {
   let active: Bool
