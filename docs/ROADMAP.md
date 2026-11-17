@@ -11,6 +11,8 @@
 
 ## Active — connected studio audit and UI overhaul
 
+- 0.0.2: reviewed existing workspace edits, current selection/branch context, conversation recovery, floating companions, collapsible chronology and stable Canvas reload. 139 native/11 Canvas tests, 27 engine checks and 48 captures; one approved isolated Codex request passed. Physical gesture/animation/VoiceOver verification remains open. See INTERACTION_COMPLETION.md.
+
 - 0.0.1 prerelease: narrower sidebar, stable graph zoom, record-owned Canvas links, nested chronology approval, Atlas selection refresh and world/workspace-scoped harness context. Acceptance evidence and remaining limits are in STATE. Next: an isolated foreground gesture/animation walkthrough, opted-in live subscription checks, and signed/notarized distribution before broader release.
 
 - 2026-11-16: shared composers, real activity rows, themed app menus, Dagre entity-card Graph and undoable Canvas arrangement implemented. Canvas PNG now exports styled cards and local artwork. Evidence and remaining interaction limits: [STATE](STATE.md).
@@ -20,8 +22,8 @@
 
 - Implemented: custom live canvas presentation, session isolation, image reload/import repair, relation synchronization, nested-group ownership, optional GPT illustrations and uncapped record pickers. Regression checks and background visual evidence: [REFINEMENT_AUDIT](verification/REFINEMENT_AUDIT.md).
 - Implemented 2026-11-15: subscription-only authentication, stale-revision rejection, structured world context, reviewed spatial/link/rule actions, source-aware Canvas capture/relationship controls, Phosphor icons and grouped navigation. Current evidence/limits: [INTEGRATION_OVERHAUL](INTEGRATION_OVERHAUL.md).
-- Next: persist the full world-index trace and test a live subscription run with the updated flags; expand interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Measure large boards and derived graphs; live/export card content now shares the Synthesis presentation.
-- Then: streamed-response/Stop behavior with controlled transport, editor crash recovery, accessibility/trackpad walkthrough, deeper Timeline and Atlas operations.
+- Next: persist the full world-index trace; the isolated Codex run with updated flags now passes; expand interaction coverage for connection ports, relationship edits, drawing style, keyboard/context menus and export. Measure large boards and derived graphs; live/export card content now shares the Synthesis presentation.
+- Controlled-transport Stop/recovery is covered. Next: editor crash recovery, accessibility/trackpad walkthrough, deeper Timeline and Atlas operations.
 - Mechanics is available on every entity: kind-filtered rules, scenarios, explicit canon review and restorable snapshots. Agent rule revisions are stale-checked; proposed scenarios leave conclusions to the creator. Spatial technique trees and automatic simulations remain incomplete.
 - Reference parity and complete product acceptance remain open; screenshots alone do not certify all interactions.
 

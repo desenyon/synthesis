@@ -9,6 +9,7 @@ struct ConversationStudio: View {
   var companion = false
   /// False when the companion replaces the canvas in a narrow window.
   var docked = true
+  @State private var followLatest = true
   var body: some View {
     GeometryReader { geo in
       let narrow = geo.size.width < 620
@@ -198,6 +199,7 @@ struct ConversationStudio: View {
               if !studio.streamed.isEmpty {
                 // A change set arrives as JSON at the end; show prose, not the raw block.
                 MarkdownContent(text: ProposalParser.visible(studio.streamed), t: studio.t)
+                  .environment(\.openURL, recordLinkAction(studio))
                 if studio.streamed.contains(ProposalParser.fence) {
                   StudioLabel("Preparing changes for your review…", icon: "square.stack.3d.up")
                     .font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
@@ -206,15 +208,35 @@ struct ConversationStudio: View {
             }
           }
           Color.clear.frame(height: 1).id("latest")
+            .background(TranscriptScrollObserver { followLatest = $0 })
         }.frame(maxWidth: 720, alignment: .leading).padding(.horizontal, narrow ? 18 : 40)
           .padding(.top, 12).padding(.bottom, 20).frame(maxWidth: .infinity)
       }
+      .overlay(alignment: .bottomTrailing) {
+        if !followLatest {
+          Button {
+            followLatest = true
+            withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("latest", anchor: .bottom) }
+          } label: {
+            StudioLabel("Latest", icon: "arrow.down").font(.studio(size: 12.5, weight: .medium))
+              .padding(.horizontal, 12).padding(.vertical, 8).floatingPanel(studio.t)
+          }.buttonStyle(.plain).padding(16).transition(
+            .opacity.combined(with: .move(edge: .bottom)))
+        }
+      }
       .onAppear { proxy.scrollTo("latest", anchor: .bottom) }
       .onChange(of: studio.messages.count) { _, _ in
-        withAnimation(.easeOut(duration: 0.18)) { proxy.scrollTo("latest", anchor: .bottom) }
+        if followLatest {
+          withAnimation(.easeOut(duration: 0.18)) { proxy.scrollTo("latest", anchor: .bottom) }
+        }
       }
-      .onChange(of: studio.streamed) { _, _ in proxy.scrollTo("latest", anchor: .bottom) }
-      .onChange(of: studio.conversationID) { _, _ in proxy.scrollTo("latest", anchor: .bottom) }
+      .onChange(of: studio.streamed) { _, _ in
+        if followLatest { proxy.scrollTo("latest", anchor: .bottom) }
+      }
+      .onChange(of: studio.conversationID) { _, _ in
+        followLatest = true
+        proxy.scrollTo("latest", anchor: .bottom)
+      }
     }
   }
 }
@@ -268,6 +290,9 @@ struct ChatRow: View {
       Text(message.body).font(.studio(size: 13)).foregroundStyle(studio.t.secondary)
         .fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
+      Button("Edit & retry") {
+        studio.prepareRetry(after: message.id)
+      }.buttonStyle(QuietButton(t: studio.t, role: .ghost)).disabled(studio.busy)
       Button("Model settings") { studio.openAssistantSettings() }.buttonStyle(.plain)
         .font(.studio(size: 13, weight: .medium)).foregroundStyle(studio.t.accent)
     }.padding(.horizontal, 14).padding(.vertical, 11)
@@ -280,8 +305,13 @@ struct ChatRow: View {
       HStack(spacing: 8) {
         StudioIcon("sparkles", size: 15).foregroundStyle(studio.t.accent)
         Text(sample ? "Imported example" : "Synthesis").font(.studio(size: 13, weight: .semibold))
-        Text(sample ? "Authored sample · not a model response" : "Suggestion · not canon")
-          .font(.studio(size: 12)).foregroundStyle(studio.t.muted)
+        Text(
+          sample
+            ? "Authored sample · not a model response"
+            : (message.state == "interrupted"
+              ? "Incomplete response" : "Suggestion · not canon")
+        )
+        .font(.studio(size: 12)).foregroundStyle(studio.t.muted)
       }
       MarkdownContent(text: message.body, t: studio.t)
         .environment(\.openURL, recordLinkAction(studio))
@@ -334,6 +364,7 @@ struct UnifiedComposer: View {
   @State private var loadedWorld = ""
   @State private var saveTask: Task<Void, Never>?
   @State private var inputHeight: CGFloat = 26
+  @State private var referencePicker = false
   @State private var mentionQuery: String?
   @State private var mentionIndex = 0
   @State private var handle = ComposerHandle()
@@ -355,9 +386,7 @@ struct UnifiedComposer: View {
         if collapsed { compactField } else { fullField }
       }
       .background(
-        LinearGradient(
-          colors: [studio.t.surface, studio.t.surface],
-          startPoint: .topLeading, endPoint: .bottomTrailing),
+        studio.t.surface,
         in: RoundedRectangle(cornerRadius: collapsed ? 18 : 22)
       )
       .overlay(
@@ -398,6 +427,15 @@ struct UnifiedComposer: View {
   }
   private var fullField: some View {
     VStack(spacing: 14) {
+      if companion || studio.selectedRecord != nil {
+        HStack(spacing: 7) {
+          StudioIcon(studio.destination.icon, size: 12)
+          Text(studio.contextLabel).lineLimit(1)
+          Spacer(minLength: 0)
+          Text("World context").foregroundStyle(studio.t.muted)
+        }.font(.studio(size: 12, weight: .medium)).foregroundStyle(studio.t.secondary)
+          .padding(.horizontal, 20).padding(.top, 14)
+      }
       ComposerInput(
         text: $text,
         placeholder: companion
@@ -437,8 +475,7 @@ struct UnifiedComposer: View {
       references.padding(.bottom, 1)
       ComposerInput(
         text: $text,
-        placeholder: studio.selectedRecord.map { "Ask about \($0.title)…" }
-          ?? "Ask about this \(studio.destination.rawValue.lowercased())…", color: studio.t.text,
+        placeholder: "Ask about \(studio.contextLabel)…", color: studio.t.text,
         placeholderColor: studio.t.muted, accent: studio.t.accent,
         accentSoft: studio.t.accentSoft, sendShortcut: studio.preferences.sendShortcut,
         handle: handle, onFocus: { focused = $0 }, onHeight: { inputHeight = $0 },
@@ -475,25 +512,21 @@ struct UnifiedComposer: View {
     }
   }
   private var references: some View {
-    PlainMenu {
-      if studio.topLevelRecords.isEmpty {
-        Text("Create a record in Library first")
-      } else {
-        ForEach(referenceGroups, id: \.0) { group in
-          MenuSection(group.0) {
-            ForEach(group.1) { record in
-              Button(record.title) { handle.insertReference(title: record.title, id: record.id) }
-            }
-          }
-        }
-      }
+    Button {
+      referencePicker = true
     } label: {
       HStack(spacing: 4) {
         StudioIcon("at", size: 13)
         if !collapsed { Text("Lore").font(.studio(size: 13, weight: .medium)) }
       }.foregroundStyle(studio.t.secondary).padding(.horizontal, 7).frame(height: 28)
         .hoverFill(studio.t)
-    }.help("Reference a record from this world — or type @ in your message")
+    }.buttonStyle(.plain).help("Reference lore from this world, or type @")
+      .popover(isPresented: $referencePicker) {
+        SearchableRecordPicker(records: studio.records, t: studio.t) { record in
+          handle.insertReference(title: record.title, id: record.id)
+          referencePicker = false
+        }
+      }
   }
   private var mentionList: some View {
     VStack(alignment: .leading, spacing: 1) {
@@ -548,12 +581,6 @@ struct UnifiedComposer: View {
     case .cancel: mentionQuery = nil
     }
     return true
-  }
-  private var referenceGroups: [(String, [LoreRecord])] {
-    let grouped = Dictionary(grouping: studio.records.prefix(60)) {
-      $0.category.isEmpty ? "Uncategorised" : Vocabulary.displayCategory($0.category)
-    }
-    return grouped.keys.sorted().map { ($0, grouped[$0] ?? []) }
   }
   private var modeMenu: some View {
     PlainMenu {

@@ -30,6 +30,8 @@ extension Studio {
     "settings-assistant-details",
     "manual-settings", "settings-collapsed", "settings-model-search", "preferences-editor",
     "preferences-library",
+    "conversation-interrupted", "review-edits", "timeline-edit", "timeline-companion",
+    "graph-companion", "atlas-companion", "light-atlas-companion",
   ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -213,6 +215,9 @@ extension Studio {
     assistantSettingsExpanded = state == "settings-assistant-details"
     recordSectionTabs = [:]
     selectedRecord = nil
+    graphSelectedID = nil
+    atlasSelectedID = nil
+    timelineLaneID = nil
     palette = false
     sheet = nil
     toast = nil
@@ -223,13 +228,61 @@ extension Studio {
     inspector = true
     libraryCategory = nil
     canvasBoardID = board.isEmpty ? nil : board
-    companionExpanded = ["companion", "library-companion", "sections-companion"].contains(state)
+    companionExpanded = state.hasSuffix("-companion") || state == "companion"
     companionWidth = 400
     draft = ""
     preset = "Create"
     conversationID = state.hasSuffix("conversation-home") ? nil : conversation
     perform { try reload() }
     switch state {
+    case "conversation-interrupted":
+      destination = .chat
+      perform {
+        let chat = try store.createConversation(worldID: worldID, title: "An interrupted crossing")
+        conversationID = chat.id
+        _ = try store.appendMessage(
+          worldID: worldID, conversationID: chat.id, role: "user",
+          body: "Explore a different route across the Glass Sea.", state: "complete")
+        _ = try store.appendMessage(
+          worldID: worldID, conversationID: chat.id, role: "assistant",
+          body:
+            "A northern passage could let Mira avoid the tide ledgers. The cost of that route is still an open question.",
+          state: "interrupted")
+        _ = try store.appendMessage(
+          worldID: worldID, conversationID: chat.id, role: "system",
+          body:
+            "The connection ended before the reply was complete. Your conversation has been saved.",
+          state: "error")
+        try reload()
+      }
+    case "review-edits":
+      destination = .review
+      perform {
+        let lane = try store.createChronologyLane(
+          worldID: worldID, name: "Early crossings", kind: "period")
+        let event = try store.saveChronologyEvent(
+          worldID: worldID, id: nil,
+          title: "The first crossing", date: "Before the ledgers", source: nil, order: nil,
+          laneID: nil)
+        guard let map = try store.boards(worldID: worldID, kind: "atlas").first else { return }
+        _ = try store.stageProposal(
+          worldID: worldID, conversationID: nil, messageID: nil,
+          payload: [
+            "summary": "Refine the crossing history and its map · authored capture example",
+            "changes": [
+              [
+                "action": "revise_event", "id": event.id, "title": "The first remembered crossing",
+                "lane": lane.id,
+              ],
+              [
+                "action": "revise_lane", "id": lane.id, "title": "The Age of Glass",
+                "date": "Year 12", "body": "The tide ledgers begin here.",
+              ],
+              ["action": "revise_map", "id": map.id, "title": "Crossings of the Glass Sea"],
+            ],
+          ])
+        try reload()
+      }
     case "sidebar-long", "light-sidebar-long", "sidebar-history", "empty-sidebar":
       destination = .chat
       conversationID = nil
@@ -390,12 +443,13 @@ extension Studio {
     case "sheet-canon", "sheet-history":
       destination = .library
       selectedRecord = records.first { $0.title == "Tidekeepers" }
-    case "graph", "graph-selected", "light-graph", "sheet-relation", "empty-graph":
+    case "graph", "graph-selected", "light-graph", "sheet-relation", "empty-graph",
+      "graph-companion":
       destination = .knowledge
     case "review", "review-canon", "review-checks": destination = .review
-    case "timeline", "empty-timeline":
+    case "timeline", "empty-timeline", "timeline-edit", "timeline-companion":
       destination = .timeline
-      if state == "timeline" {
+      if state != "empty-timeline" {
         perform {
           if try store.chronologyLanes(worldID: worldID).isEmpty {
             let branch = try store.createChronologyLane(
@@ -410,7 +464,7 @@ extension Studio {
         }
       }
     case "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
-      "atlas-local":
+      "atlas-local", "atlas-companion", "light-atlas-companion":
       destination = .atlas
       perform {
         guard let original = try store.boards(worldID: worldID, kind: "atlas").first,

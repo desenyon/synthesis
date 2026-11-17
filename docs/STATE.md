@@ -2,6 +2,18 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. Development prerelease 0.0.1 is owner-authorized; the 1.0 public product launch remains later. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits. AGENTS.md changes only the former no-releases sentence to reflect that explicit authorization.
 
+## Current checkpoint — 0.0.2 interaction completion pass
+
+Expanded the audit beyond the prior Atlas-only fix. Shared composers now expose current selection context and searchable lore; stopped/interrupted responses and unsent/retry drafts survive. Reading older messages suspends automatic scrolling. Context follows the selected Graph/Atlas entity, Timeline branch, Canvas selection and open editor at submission. One owner-approved isolated Codex request returned cited prose and a staged proposal; no personal lore or second request was used.
+
+Added before/after reviewed edits to existing events, history branches/periods, map metadata and relationship labels, with stale-state rejection and archive portability coverage. Timeline has manual editing, collapsible nested history and descendant counts; accepted chronology changes reset filtering to All history. Atlas acceptance selects/refreshes its target map. Relation-only changes now refresh Review checks. Contextual companions float above secondary workspaces and retain width without resizing their viewport. Canvas retains its dock/takeover.
+
+Fixed close parallel relationships, label placement and basic intervening-card detours. Fixed a real Canvas viewport-loss bug during repeated approval/reload: readiness now waits for committed React app state. Added explicit viewport checks beyond element coordinates. Hidden Canvas no longer participates in compact companion hit testing/capture. Accepted 284pt sidebar appearance remains intact.
+
+Verified **139 native tests / 30 suites**, strict lint and optimized build; **11 Canvas tests**, typecheck and bundle build; **27 engine/native checks**; **48 native captures inspected in both contact sheets**; **one live Codex test passed**. [Full evidence](verification/interaction-0.0.2/README.md). Eight README screenshots refreshed. AGENTS adds one operational requirement for Canvas viewport readiness/reload verification; the learning ledger records evidence and rollback. Owner brief untouched. v0.0.1 remains intact; v0.0.2 packaging/publication is tracked in PROGRESS.
+
+Physical trackpad feel, animation frame pacing, VoiceOver, dense-board routing/performance and live-CLI Stop remain unverified. Runtime image generation, advanced spatial techniques/cosmology simulation, editable lore-coherent map layers and canon branch merging remain incomplete. Next: isolated physical interaction/accessibility verification and the deeper tools listed in NEXT_PASS. No claim of complete 1.0 product acceptance.
+
 ## Follow-up on main — Atlas interaction audit
 
 After the published release, corrected Atlas button zoom drift after panning. Graph and Atlas now share `SpatialViewport`, with separate zoom limits and guards against invalid gesture coordinates. Atlas retains its decoded image between loads/replacements so pan/zoom renders no longer decode the base64 payload repeatedly. The accepted sidebar composition is unchanged.

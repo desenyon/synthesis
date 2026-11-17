@@ -22,7 +22,10 @@ struct AtlasScreen: View {
   @State private var pan = CGSize.zero
   @State private var panAnchor: CGPoint?
   @State private var placing: String?
-  @State private var selected: String?
+  private var selected: String? {
+    get { studio.atlasSelectedID }
+    nonmutating set { studio.atlasSelectedID = newValue }
+  }
   var body: some View {
     VStack(spacing: 0) {
       WorkspaceBar(studio: studio) {

@@ -85,7 +85,7 @@ struct ReviewScreen: View {
       }
       chosen = true
     }
-    .onChange(of: studio.records) { _, _ in refresh() }
+    .onChange(of: studio.worldRevision) { _, _ in refresh() }
   }
   private func refresh() {
     findings = (try? studio.store.worldChecks(worldID: studio.worldID)) ?? []

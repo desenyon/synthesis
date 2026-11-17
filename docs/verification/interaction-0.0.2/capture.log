@@ -1,0 +1,87 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.13s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.gMtY8U/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.gMtY8U/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.gMtY8U/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE atlas-linked 1440x900, bitmap 1440x900, 285ms
+CAPTURE mechanics 1440x900, bitmap 1440x900, 172ms
+CAPTURE conversation-home 1440x900, bitmap 1440x900, 179ms
+CAPTURE conversation-loading 1440x900, bitmap 1440x900, 189ms
+CAPTURE conversation 1440x900, bitmap 1440x900, 196ms
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS unacknowledged canvas save blocks shutdown
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+CAPTURE canvas 1440x900, bitmap 1440x900, 205ms
+CAPTURE companion 1440x900, bitmap 1440x900, 138ms
+CAPTURE manual 1440x900, bitmap 1440x900, 98ms
+CAPTURE collapsed 1440x900, bitmap 1440x900, 203ms
+CAPTURE light 1440x900, bitmap 1440x900, 203ms
+CAPTURE graph 1440x900, bitmap 1440x900, 417ms
+CAPTURE graph-selected 1440x900, bitmap 1440x900, 596ms
+CAPTURE editor 1440x900, bitmap 1440x900, 168ms
+CAPTURE timeline 1440x900, bitmap 1440x900, 165ms
+CAPTURE light-conversation 1440x900, bitmap 1440x900, 190ms
+CAPTURE settings 1440x900, bitmap 1440x900, 69ms
+CAPTURE library-companion 1440x900, bitmap 1440x900, 137ms
+CAPTURE conversation-interrupted 1440x900, bitmap 1440x900, 187ms
+CAPTURE review-edits 1440x900, bitmap 1440x900, 163ms
+CAPTURE timeline-edit 1440x900, bitmap 1440x900, 185ms
+CAPTURE timeline-companion 1440x900, bitmap 1440x900, 137ms
+CAPTURE graph-companion 1440x900, bitmap 1440x900, 383ms
+CAPTURE atlas-companion 1440x900, bitmap 1440x900, 224ms
+CAPTURE light-atlas-companion 1440x900, bitmap 1440x900, 240ms
+CAPTURE atlas-linked 1024x768, bitmap 1024x768, 165ms
+CAPTURE mechanics 1024x768, bitmap 1024x768, 122ms
+CAPTURE conversation-home 1024x768, bitmap 1024x768, 124ms
+CAPTURE conversation-loading 1024x768, bitmap 1024x768, 137ms
+CAPTURE conversation 1024x768, bitmap 1024x768, 134ms
+CAPTURE canvas 1024x768, bitmap 1024x768, 145ms
+CAPTURE companion 1024x768, bitmap 1024x768, 132ms
+CAPTURE manual 1024x768, bitmap 1024x768, 70ms
+CAPTURE collapsed 1024x768, bitmap 1024x768, 153ms
+CAPTURE light 1024x768, bitmap 1024x768, 135ms
+CAPTURE graph 1024x768, bitmap 1024x768, 203ms
+CAPTURE graph-selected 1024x768, bitmap 1024x768, 280ms
+CAPTURE editor 1024x768, bitmap 1024x768, 124ms
+CAPTURE timeline 1024x768, bitmap 1024x768, 114ms
+CAPTURE light-conversation 1024x768, bitmap 1024x768, 138ms
+CAPTURE settings 1024x768, bitmap 1024x768, 54ms
+CAPTURE library-companion 1024x768, bitmap 1024x768, 115ms
+CAPTURE conversation-interrupted 1024x768, bitmap 1024x768, 131ms
+CAPTURE review-edits 1024x768, bitmap 1024x768, 128ms
+CAPTURE timeline-edit 1024x768, bitmap 1024x768, 142ms
+CAPTURE timeline-companion 1024x768, bitmap 1024x768, 119ms
+CAPTURE graph-companion 1024x768, bitmap 1024x768, 181ms
+CAPTURE atlas-companion 1024x768, bitmap 1024x768, 176ms
+CAPTURE light-atlas-companion 1024x768, bitmap 1024x768, 168ms
+Native captures complete: /private/tmp/synthesis-interaction-final
+Native captures: /tmp/synthesis-interaction-final
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py '/tmp/synthesis-interaction-final' [--prune]

@@ -11,11 +11,7 @@ public struct ConnectedRoot: View {
   public var body: some View {
     GeometryReader { geo in
       let compact = geo.size.width < 760
-      let rail =
-        studio.collapsed
-        || (geo.size.width < 1180 && studio.companionExpanded
-          && ![.chat, .worlds, .settings].contains(studio.destination)
-          && studio.selectedRecord == nil)
+      let rail = studio.collapsed
       let column: CGFloat = compact ? 0 : (rail ? Metric.rail : Metric.sidebar)
       ZStack(alignment: .topLeading) {
         studio.t.sidebar.ignoresSafeArea()
@@ -24,11 +20,12 @@ public struct ConnectedRoot: View {
         // every other screen the web view stays in place but hidden.
         if let session = studio.canvasSession {
           let frame = canvasFrame ?? lastCanvasFrame
-          CanvasWebView(session: session)
+          let visible = canvasFrame != nil && studio.canvasVisible(windowWidth: geo.size.width)
+          CanvasWebView(session: session, visible: visible)
             .frame(width: max(1, frame.width), height: max(1, frame.height))
             .position(x: frame.midX, y: frame.midY)
-            .opacity(canvasFrame == nil ? 0 : 1).allowsHitTesting(canvasFrame != nil)
-            .accessibilityHidden(canvasFrame == nil)
+            .opacity(visible ? 1 : 0).allowsHitTesting(visible)
+            .accessibilityHidden(!visible)
         }
         HStack(spacing: 0) {
           if !compact {
@@ -52,6 +49,7 @@ public struct ConnectedRoot: View {
             }
             .environment(\.barInset, max(0, Metric.chrome - column - 12))
             .animation(.easeInOut(duration: 0.22), value: studio.destination)
+            .animation(.easeInOut(duration: 0.2), value: studio.selectedRecord?.id)
             .animation(.easeInOut(duration: 0.22), value: studio.companionExpanded)
         }
         HStack(spacing: 0) {
@@ -121,29 +119,25 @@ public struct ConnectedRoot: View {
       content.transition(.opacity)
     } else {
       GeometryReader { geometry in
-        HStack(spacing: 0) {
-          if geometry.size.width < 760 && studio.mode == .assisted && studio.companionExpanded {
-            ConversationStudio(studio: studio, companion: true, docked: false)
-          } else {
-            content.transition(.opacity).frame(
-              minWidth: 0, maxWidth: .infinity, maxHeight: .infinity
-            )
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-              if studio.mode == .assisted && !studio.companionExpanded {
-                UnifiedComposer(studio: studio, companion: true, collapsed: true)
-                  .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
-                  .frame(maxWidth: .infinity).background(studio.t.background)
-                  .transition(.move(edge: .bottom).combined(with: .opacity))
-              }
+        content.transition(.opacity).frame(maxWidth: .infinity, maxHeight: .infinity)
+          .safeAreaInset(edge: .bottom, spacing: 0) {
+            if studio.mode == .assisted {
+              UnifiedComposer(studio: studio, companion: true, collapsed: true)
+                .frame(maxWidth: 620).padding(.horizontal, 20).padding(.vertical, 12)
+                .frame(maxWidth: .infinity).background(studio.t.background)
+                .opacity(studio.companionExpanded ? 0 : 1)
+                .allowsHitTesting(!studio.companionExpanded)
+                .accessibilityHidden(studio.companionExpanded)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
+          }
+          .overlay(alignment: .bottomTrailing) {
             if studio.mode == .assisted && studio.companionExpanded {
-              Rectangle().fill(studio.t.hairline).frame(width: 1)
-              ConversationStudio(studio: studio, companion: true)
-                .frame(width: min(420, max(300, geometry.size.width * 0.4)))
+              FloatingCompanion(studio: studio, available: geometry.size)
+                .padding(14)
                 .transition(.move(edge: .trailing).combined(with: .opacity))
             }
           }
-        }
       }
     }
   }

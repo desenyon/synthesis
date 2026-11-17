@@ -9,6 +9,7 @@ import {
   viewportCoordsToSceneCoords,
 } from "@excalidraw/excalidraw";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import {
   arrowLabel,
   buildArrow,
@@ -290,7 +291,6 @@ export function App() {
           ]);
         } catch {}
         if (epoch !== loadEpoch || !acceptsSession(activeSession, payload.sessionID)) return;
-        api.resetScene();
         let elements: El[] = [];
         let appState: Record<string, unknown> = {};
         let fit = false;
@@ -320,10 +320,15 @@ export function App() {
         }
         if (epoch !== loadEpoch || !acceptsSession(activeSession, payload.sessionID)) return;
         s.applying = true;
-        api.updateScene({
-          elements,
-          appState: { ...appState, selectedElementIds: {}, selectedGroupIds: {}, editingGroupId: null, theme: payload.theme, viewBackgroundColor: "transparent" },
-          captureUpdate: CaptureUpdateAction.NEVER,
+        // Native may flush as soon as it receives `loaded`. Commit React's viewport first;
+        // otherwise serialise() can acknowledge the reset (0,0) viewport as the saved one.
+        flushSync(() => {
+          api.resetScene();
+          api.updateScene({
+            elements,
+            appState: { ...appState, selectedElementIds: {}, selectedGroupIds: {}, editingGroupId: null, theme: payload.theme, viewBackgroundColor: "transparent" },
+            captureUpdate: CaptureUpdateAction.NEVER,
+          });
         });
         api.history.clear();
         s.applying = false;
@@ -618,6 +623,9 @@ export function App() {
         const files=Object.keys(original.scene!.files??{});
         await bridge.load(original); await wait();
         check("image files survive board reload",files.length>0 && files.every(id=>api.getFiles()[id]?.dataURL));
+        const restoredViewport = api.getAppState();
+        const originalViewport = original.scene!.appState as { scrollX: number; scrollY: number; zoom: number };
+        check("board reload preserves saved viewport", Math.abs(restoredViewport.scrollX-originalViewport.scrollX)<0.01 && Math.abs(restoredViewport.scrollY-originalViewport.scrollY)<0.01 && Math.abs(restoredViewport.zoom.value-originalViewport.zoom)<0.001);
         const selectedCard=api.getSceneElements().find(isCard);
         api.updateScene({appState:{selectedElementIds:{[selectedCard.id]:true}}}); await wait();
         bridge.setAssistance(false); await wait();
@@ -660,6 +668,7 @@ export function App() {
         return JSON.stringify({
           cards,
           zoom: state.zoom.value,
+          scrollX: state.scrollX, scrollY: state.scrollY,
           relations: api.getSceneElements().filter(isRelation).length,
           pointer: s.pointerLog.slice(-8),
         });

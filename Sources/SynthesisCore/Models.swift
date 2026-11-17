@@ -104,6 +104,8 @@ public struct ProposedChange: Identifiable, Codable, Equatable, Sendable {
   public var boardID: String? = nil
   public var x: Double? = nil
   public var y: Double? = nil
+  /// Reviewable domain metadata captured before a workspace edit. Never includes image bytes.
+  public var workspaceBefore: [String: String]? = nil
 }
 public struct Proposal: Identifiable, Codable, Equatable, Sendable {
   public var id: String

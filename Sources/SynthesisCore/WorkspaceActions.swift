@@ -108,7 +108,9 @@ extension WorkspaceStore {
   }
 
   /// Bounded structured context, without image bytes, credentials or foreign-world content.
-  public func workspaceContext(worldID: String, boardID: String? = nil) throws -> String {
+  public func workspaceContext(
+    worldID: String, boardID: String? = nil, chronologyLaneID: String? = nil
+  ) throws -> String {
     let records = try records(worldID: worldID)
     let known = Set(records.map(\.id))
     let allBoards =
@@ -145,8 +147,12 @@ extension WorkspaceStore {
     let relations = try relations(worldID: worldID)
     let events = try events(worldID: worldID)
     let lanes = try chronologyLanes(worldID: worldID)
+    if let chronologyLaneID, !lanes.contains(where: { $0.id == chronologyLaneID }) {
+      throw SynthesisError.notFound
+    }
     let placements = try chronologyPlacements(worldID: worldID)
     let object: [String: Any] = [
+      "activeChronologyLane": chronologyLaneID ?? "",
       "records": records.prefix(100).map {
         ["id": $0.id, "title": $0.title, "kind": $0.kind, "state": $0.state]
       },

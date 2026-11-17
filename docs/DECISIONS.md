@@ -108,3 +108,8 @@ Use an explicitly themed `NSVisualEffectView` with an 88% opaque tint, never ada
 ## 2026-11-16 — narrower sidebar and development releases (owner protected)
 
 The owner's follow-up requested horizontal compaction without another redesign and explicitly authorized the first development release. The accepted sidebar composition is retained at 284pt; 0.0.1 is published as a prerelease. This supersedes the earlier width target and no-release restriction. The public product launch remains 1.0. Subsequent fixes on main do not silently replace the published tag or binary.
+
+
+## 2026-11-16 — follow-up development checkpoint
+
+Keep v0.0.1 and its binary intact. Package the verified interaction follow-up as v0.0.2 under the owner's authorization for development prereleases. Native contextual chat floats above secondary workspaces while the Canvas companion remains docked (or takes over a compact workspace). Edits to existing chronology/map/relationship structures go through typed proposals and captured metadata, not executable model UI or unrestricted tools. No new canon permissions, provider credentials or automatic model calls are introduced.

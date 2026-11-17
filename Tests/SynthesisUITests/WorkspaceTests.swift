@@ -53,6 +53,9 @@ import Testing
     let store = try WorkspaceStore(path: ":memory:")
     let studio = try Studio(store: store)
     let initial = studio.worldRevision
+    studio.timelineLaneID = try store.createChronologyLane(
+      worldID: studio.worldID, name: "Previously filtered history", kind: "branch"
+    ).id
     let proposal = try #require(
       try store.stageProposal(
         worldID: studio.worldID, conversationID: nil, messageID: nil,
@@ -69,6 +72,7 @@ import Testing
     #expect(!studio.reviewingProposal)
     #expect(studio.error == nil, "\(studio.error ?? "")")
     #expect(studio.worldRevision > initial)
+    #expect(studio.timelineLaneID == nil, "Accepted history must be visible in All history")
     #expect(try store.events(worldID: studio.worldID).count == 1)
     let map = try #require(try store.boards(worldID: studio.worldID, kind: "atlas").first)
     #expect(studio.mapBoardID == map.id)

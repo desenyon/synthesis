@@ -1,5 +1,24 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+test('a relationship and its label detour around an intervening card', async () => {
+    const { connectionRoute } = await import('../src/sceneRules.ts');
+    const a={x:0,y:0,width:300,height:180}, b={...a,x:800}, obstacle={...a,x:400};
+    const route=connectionRoute(a,b,0,[obstacle]);
+    const inside=(x:number,y:number)=>x>obstacle.x&&x<obstacle.x+obstacle.width&&y>obstacle.y&&y<obstacle.y+obstacle.height;
+    assert.ok(route.points.every(p=>!inside(route.start.x+p[0],route.start.y+p[1])));
+    assert.ok(!inside(route.middle.x,route.middle.y));
+});
+test('close parallel connections keep their labels on separate outside curves', async () => {
+    const { connectionRoute } = await import('../src/sceneRules.ts');
+    const a = {x:0,y:0,width:300,height:180};
+    for (const x of [0,12,120,270]) {
+        const b = {...a,x};
+        const first = connectionRoute(a,b,-30), second = connectionRoute(a,b,30);
+        assert.ok(Math.abs(first.middle.y-second.middle.y)>=20);
+        assert.ok(first.middle.y<0 && second.middle.y<0);
+        assert.equal(first.middle.x,(first.start.x+first.end.x)/2);
+    }
+});
 import { cardFrame, visibleFrame, relationDisposition, acceptsSession, cardGroup, containsCardPoint } from '../src/sceneRules.ts';
 test('overlay stays attached through pan, zoom and a nonzero webview offset', () => {
     assert.deepEqual(cardFrame({ x: 100, y: 80, width: 300, height: 180 }, { scrollX: -20, scrollY: 10, zoom: { value: 1.5 } }), { x: 120, y: 135, width: 450, height: 270, zoom: 1.5 });

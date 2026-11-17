@@ -1,6 +1,6 @@
 # Studio refinement — owner request, 2026-11-15
 
-This is an implementation ledger, not an acceptance claim. Preserve real lore and explicit canon approval. Native SwiftUI/AppKit remains the application; Canvas embeds the offline Excalidraw engine. No release or unattended model usage.
+This is an implementation ledger, not an acceptance claim. Preserve real lore and explicit canon approval. Native SwiftUI/AppKit remains the application; Canvas embeds the offline Excalidraw engine. Development prereleases are owner-authorized; model usage requires an explicit request. One isolated Codex verification request was approved and used on 2026-11-16.
 
 ## Implemented checkpoint (verification in STATE.md)
 
@@ -21,8 +21,8 @@ This is an implementation ledger, not an acceptance claim. Preserve real lore an
 ## Remaining owner scope
 
 1. First-install-only onboarding and full-page application/world settings implemented. Expand useful, wired preferences in subsequent slices.
-2. Close-node routing and independently labelled reverse relationships implemented. Dense obstacle routing and large-board performance remain.
-3. Saved nested branches/periods and reviewed agent creation implemented. Zoom, era navigation refinements and true canon branches remain.
+2. Close-node routing and independently labelled reverse relationships implemented. Basic intervening-card detours now work; dense obstacle routing and large-board performance remain.
+3. Saved nested branches/periods, collapsible history trees, manual editing and reviewed agent creation/revision implemented. Zoom, era navigation refinements and true canon branches remain.
 4. Entity sections and native Notes/Facts/Checklist/Progression components are implemented across workspaces. Mechanics adds rules, scenarios and canon/history UI to every entity category. Richer spatial technique/cosmology tools remain; no arbitrary model code is executed.
 5. Image-only export and portable world snapshots implemented. File association and continuous save synchronization remain.
 6. Explicit-click subscription image generation, with usage disclosure. Text chat must not invoke image generation implicitly. Verify Codex's actual output contract before claiming support.

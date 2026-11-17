@@ -478,7 +478,8 @@ final class StudioWindow: NSWindow {
           window.backgroundColor = NSColor(studio.t.background)
           window.layoutTrafficLights()
           try await Task.sleep(for: .milliseconds(700))
-          let canvas = studio.destination == .canvas && studio.selectedRecord == nil
+          // A compact companion replaces Canvas. Never composite a hidden engine into chat.
+          let canvas = studio.canvasVisible(windowWidth: Double(width))
           if canvas {
             // The engine loads asynchronously; wait for the board, then frame it.
             for _ in 0..<40 where !studio.canvasLoaded {

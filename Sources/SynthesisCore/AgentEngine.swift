@@ -29,7 +29,7 @@ public protocol ModelTransport: Sendable {
   public func submit(
     worldID: String, conversationID: String, prompt: String, preset: String,
     boardID: String? = nil, selectedRecordIDs: [String] = [],
-    workspaceName: String = "Conversation",
+    workspaceName: String = "Conversation", chronologyLaneID: String? = nil,
     onActivity: @escaping @MainActor (AgentActivity) -> Void = { _ in },
     onDelta: @escaping @Sendable (String) async -> Void
   ) async throws {
@@ -53,7 +53,8 @@ public protocol ModelTransport: Sendable {
     let retrievalPrompt =
       text + selected.map { " [\($0.title)](synthesis://record/\($0.id))" }.joined()
     let sources = try store.contextRecords(worldID: worldID, prompt: retrievalPrompt)
-    let workspace = try store.workspaceContext(worldID: worldID, boardID: boardID)
+    let workspace = try store.workspaceContext(
+      worldID: worldID, boardID: boardID, chronologyLaneID: chronologyLaneID)
     onActivity(
       .init(
         id: "lore", title: "World context ready",
@@ -90,6 +91,10 @@ public protocol ModelTransport: Sendable {
         {"action":"create_branch","title":"…","lane":"optional existing chronology parent ID","body":"…"},
         {"action":"create_period","title":"…","date":"beginning, if known","endDate":"end, if known","lane":"optional existing chronology parent ID"},
         {"action":"create_board","title":"new board name"},
+        {"action":"revise_event","id":"event ID","title":"optional new title","date":"optional date","source":"optional source record ID","lane":"optional branch/period ID, or empty string for All history"},
+        {"action":"revise_lane","id":"branch/period ID","title":"optional new title","date":"optional start","endDate":"optional end","body":"optional notes","lane":"optional parent ID, or empty string for root"},
+        {"action":"revise_map","id":"map ID","title":"optional new name","source":"optional place entity ID, or empty string to unlink","parentMap":"optional parent ID, or empty string for root"},
+        {"action":"revise_relationship","id":"relationship ID","label":"new relationship verb phrase"},
         {"action":"create_map","title":"map name","source":"optional entity ID","parentMap":"optional existing atlas ID"},
         {"action":"place_record","board":"supplied board ID or new board name","source":"record ID or new title","x":0,"y":0},
         {"action":"place_marker","board":"atlas board ID","source":"record ID","x":0.5,"y":0.5},
@@ -103,6 +108,7 @@ public protocol ModelTransport: Sendable {
       ```
       Use only supplied record IDs. At most 12 changes. Every change is a draft the creator may accept or reject one by one; nothing in the block is applied by you, and none of it is canon.
       add_event, create_branch and create_period may include lane with an existing chronology ID or the exact title of an earlier branch/period in this proposal. Put parents before children, then events; accepting each dependency resolves its stable ID. An event without an existing source may omit source; accepting it creates a draft source document atomically.
+      For revisions, omit unchanged fields rather than sending placeholder words. Workspace revisions capture before-state and reject stale approval. They preserve map artwork/markers and event source lore. revise_relationship changes the label, not endpoints. Never claim an edit happened before approval.
       create_map creates a named empty Atlas map after review. Omit unknown source/parentMap fields. The creator supplies its image separately; never claim generated geography or place markers before an image exists. Existing maps expose their place, parentMap and hasImage in context.
       add_scenario creates a hypothetical creative test for a system, only after review. The creator writes the verdict; no automatic simulation or canon is implied.
       create_component proposes an editable native component backed by a draft lore record. Use notes for prose, facts for Label: value lines, checklist for - [ ] tasks, progression for ordered stages (one line per stage). Never output executable UI, HTML, scripts or unlisted component kinds. All creation needs user review. Revise existing component content with revise_record and its record ID. The creator retains all manual controls.
@@ -115,8 +121,13 @@ public protocol ModelTransport: Sendable {
       \(context)
       """
     let input =
-      history.filter { $0.role != "system" && $0.state == "complete" }.suffix(20).map {
-        ["role": $0.role, "content": String($0.body.prefix(16000))]
+      history.filter { $0.role != "system" && ["complete", "interrupted"].contains($0.state) }
+      .suffix(20).map {
+        [
+          "role": $0.role,
+          "content": ($0.state == "interrupted" ? "[This response ended before completion.]\n" : "")
+            + String($0.body.prefix(16000)),
+        ]
       } + [["role": "user", "content": text]]
     try store.appendMessage(
       worldID: worldID, conversationID: conversationID, role: "user", body: text, state: "complete")
@@ -128,14 +139,20 @@ public protocol ModelTransport: Sendable {
     generation = token
     let responseStart = Date()
     onActivity(.init(id: "response", title: "Waiting for your assistant", state: .running))
+    let partial = PartialResponse()
     let task = Task {
       try Task.checkCancellation()
       return try await transport.generate(
-        ModelRequest(instructions: instructions, messages: input), onDelta: onDelta)
+        ModelRequest(instructions: instructions, messages: input)
+      ) { text in
+        await partial.update(text)
+        await onDelta(text)
+      }
     }
     active = task
     var operation = "response"
     var operationStart = responseStart
+    var responseSaved = false
     defer { if generation == token { active = nil } }
     do {
       let answer = try await withTaskCancellationHandler {
@@ -157,6 +174,11 @@ public protocol ModelTransport: Sendable {
           id: "response", title: "Response received", state: .complete,
           startedAt: responseStart, endedAt: Date()))
       let parsed = ProposalParser.split(answer)
+      if answer.contains(ProposalParser.fence), parsed.payload == nil {
+        throw SynthesisError.invalid(
+          "The assistant returned an unreadable change set. Nothing was applied; ask it to retry the proposed changes."
+        )
+      }
       let staged = parsed.payload != nil
       let prose =
         parsed.prose.isEmpty && staged
@@ -165,6 +187,7 @@ public protocol ModelTransport: Sendable {
       let message = try store.appendMessage(
         worldID: worldID, conversationID: conversationID, role: "assistant", body: prose,
         state: "complete")
+      responseSaved = true
       try store.saveMessageContext(worldID: worldID, messageID: message.id, sources: sources)
       if let payload = parsed.payload {
         let reviewStart = Date()
@@ -188,6 +211,18 @@ public protocol ModelTransport: Sendable {
         }
       }
     } catch {
+      let visible = ProposalParser.visible(await partial.text)
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+      if !responseSaved && !visible.isEmpty {
+        // Stopping never stages a partial proposal. Keep useful prose labelled incomplete,
+        // scoped to the original conversation even if navigation has since changed.
+        if let message = try? store.appendMessage(
+          worldID: worldID, conversationID: conversationID, role: "assistant",
+          body: visible, state: "interrupted")
+        {
+          try? store.saveMessageContext(worldID: worldID, messageID: message.id, sources: sources)
+        }
+      }
       onActivity(
         .init(
           id: operation,
@@ -206,4 +241,9 @@ public protocol ModelTransport: Sendable {
       throw error
     }
   }
+}
+
+private actor PartialResponse {
+  private(set) var text = ""
+  func update(_ value: String) { text = value }
 }

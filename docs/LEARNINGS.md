@@ -128,3 +128,10 @@ The stress fixture also exposed an invalid sample conversation ID being assigned
 Observed: Graph Fit allowed 10% while zoom buttons clamped to 40%, causing inward jumps on Zoom Out. The shared anchor transform has numeric regressions. Chronology staging rejected references to new proposal lanes; nested approval tests now cover stable parent IDs. Studio acceptance regression caught and fixed the missing-source event path before packaging. Installed Codex feature listing showed memories enabled by default; the transport now disables them and tests flags and environment isolation.
 
 Instruction change: AGENTS section 5 replaces only “Development only: no releases.” with the owner's explicit 0.0.1 development-prerelease authorization, retaining 1.0 as public product launch and all canon/privacy rules. Evidence is the current owner request. No autonomous product-goal change. Rollback: restore that sentence only if the owner withdraws release authorization. Validation is the full check/capture record in STATE; the instruction does not alter runtime permissions.
+
+
+## 2026-11-16 — Canvas readiness must include the viewport
+
+Observation: the engine audit passed element-position checks, but the 1440×900 capture clipped most cards after repeated reviewed placement/reload. React had not committed `updateScene` app state when `loaded` serialized it, so a native save could persist reset scroll coordinates. Committing reset/update with `flushSync` before acknowledging readiness repaired the real screenshot. Added saved-viewport, approval-viewport and repeated-reload engine checks. Also excluded the hidden Canvas from compact companion captures and native hit testing.
+
+AGENTS.md operational patch: “A Canvas load must commit its viewport before acknowledging readiness; verify repeated load/flush cycles, not only element positions.” Validation: before/after captures in the interaction completion evidence, passing viewport checks and Canvas typecheck/tests/build. No protected rule changed. Rollback: revert that added sentence independently; reverting the implementation requires rerunning the three viewport checks.

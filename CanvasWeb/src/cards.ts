@@ -241,9 +241,9 @@ export function syncCards(elements: readonly El[], records: Map<string, RecordIn
 }
 
 /** A labelled arrow bound to two card rectangles. Returns the arrow, its label and the rects. */
-export function buildArrow(a: El, b: El, label: string, theme: Theme, customData: Record<string, unknown>, lane = 0): El[] {
+export function buildArrow(a: El, b: El, label: string, theme: Theme, customData: Record<string, unknown>, lane = 0, obstacles: El[] = []): El[] {
   const p = palette(theme);
-  const { start, end, points } = connectionRoute(a, b, lane);
+  const { start, end, points, middle } = connectionRoute(a, b, lane, obstacles);
   const id = `arrow:${Math.random().toString(36).slice(2, 12)}`;
   const made = convertToExcalidrawElements(
     [
@@ -273,7 +273,7 @@ export function buildArrow(a: El, b: El, label: string, theme: Theme, customData
   } as any);
   const bind = (rect: El) =>
     newElementWith(rect, { boundElements: [...(rect.boundElements ?? []), { type: "arrow", id: arrow.id }] });
-  return [bind(a), bind(b), arrow, ...made.slice(1).map(e => newElementWith(e as any, {locked: customData.synthesis === "relation"}))];
+  return [bind(a), bind(b), arrow, ...made.slice(1).map(e => newElementWith(e as any, {locked: customData.synthesis === "relation", x:middle.x-e.width/2, y:middle.y-e.height/2}))];
 }
 
 /** The text bound to an arrow, if any. */
@@ -301,6 +301,8 @@ export function syncRelations(
   }
   for (const group of pairs.values()) group.sort((a,b) => a.id.localeCompare(b.id)).forEach((r,i) => lanes.set(r.id, (i - (group.length - 1) / 2) * 36));
   const byID = new Map(elements.map(e => [e.id,e]));
+  const cardBounds = elements.filter(isCard);
+  const obstaclesKey = cardBounds.map(e=>[e.id,e.x,e.y,e.width,e.height]);
   for (const arrow of elements.filter(e => isRelation(e) && !e.isDeleted)) {
     const source = byID.get(arrow.startBinding?.elementId)?.customData?.recordID;
     const target = byID.get(arrow.endBinding?.elementId)?.customData?.recordID;
@@ -318,13 +320,13 @@ export function syncRelations(
     const a = byID.get(arrow.startBinding?.elementId), b = byID.get(arrow.endBinding?.elementId);
     if (!a || !b || a.angle || b.angle) continue;
     const lane = lanes.get(arrow.customData.relationID) ?? 0;
-    const routeKey = JSON.stringify([4,a.x,a.y,a.width,a.height,b.x,b.y,b.width,b.height,lane]);
+    const routeKey = JSON.stringify([6,a.x,a.y,a.width,a.height,b.x,b.y,b.width,b.height,lane,obstaclesKey]);
     if (arrow.customData.routeKey === routeKey && arrow.locked) continue;
-    const route = connectionRoute(a,b,lane);
+    const route = connectionRoute(a,b,lane,cardBounds.filter(e=>e.id!==a.id&&e.id!==b.id));
     const label = arrowLabel(arrow, next ?? elements);
     next = (next ?? [...elements]).map(e => e.id === arrow.id
       ? newElementWith(e, {locked:true,x:route.start.x,y:route.start.y,width:Math.abs(route.end.x-route.start.x),height:Math.abs(route.end.y-route.start.y),points:route.points,roughness:0,roundness:{type:2},endArrowhead:"triangle",strokeWidth:1.5,customData:{...e.customData,routeKey}})
-      : e.id === label?.id ? newElementWith(e,{locked:true,x:(route.start.x+route.end.x-e.width)/2,y:(route.start.y+route.end.y-e.height)/2+lane}) : e);
+      : e.id === label?.id ? newElementWith(e,{locked:true,x:route.middle.x-e.width/2,y:route.middle.y-e.height/2}) : e);
   }
   const current = () => next ?? elements;
   const cardFor = (recordID: string) => current().find((e) => isCard(e) && e.customData.recordID === recordID);
@@ -334,7 +336,7 @@ export function syncRelations(
     const a = cardFor(relation.sourceID);
     const b = cardFor(relation.targetID);
     if (!a || !b) continue;
-    const added = buildArrow(a, b, relation.label, theme, { synthesis: "relation", relationID: relation.id }, lanes.get(relation.id) ?? 0);
+    const added = buildArrow(a, b, relation.label, theme, { synthesis: "relation", relationID: relation.id }, lanes.get(relation.id) ?? 0, cardBounds.filter(e=>e.id!==a.id&&e.id!==b.id));
     const list = [...current()];
     for (const el of added) {
       const index = list.findIndex((e) => e.id === el.id);

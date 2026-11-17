@@ -62,6 +62,12 @@ struct ProposalCard: View {
   }
   private func describe(_ change: ProposedChange) -> (icon: String, kind: String, title: String) {
     switch change.action {
+    case "revise_event", "revise_lane", "revise_map", "revise_relationship":
+      let kind = [
+        "revise_event": "Edit event", "revise_lane": "Edit history branch or period",
+        "revise_map": "Edit map details", "revise_relationship": "Edit relationship",
+      ][change.action]!
+      return ("pencil.line", kind, change.title ?? change.label ?? "Workspace change")
     case "create_record":
       return (
         categoryIcon(change.category ?? (change.kind == "capture" ? "ideas" : "")),
@@ -155,7 +161,7 @@ struct ProposalCard: View {
           Text(info.kind).font(.studio(size: 11.5, weight: .medium)).foregroundStyle(t.muted)
           Text(info.title).font(.studio(size: 14, weight: .medium))
             .fixedSize(horizontal: false, vertical: true)
-          if let lane = change.laneID {
+          if let lane = change.laneID, !lane.isEmpty {
             Text("Inside \(laneName(lane))").font(.studio(size: 12.5)).foregroundStyle(t.secondary)
           }
           if change.action == "add_event", change.source == nil {
@@ -196,6 +202,9 @@ struct ProposalCard: View {
         if !narrow { status(change) }
       }
       if narrow { status(change).padding(.leading, 28) }
+      if let before = change.workspaceBefore {
+        workspaceChanges(change, before: before).padding(.leading, 28)
+      }
       if open, let text = change.body {
         preview(
           text,
@@ -239,11 +248,15 @@ struct ProposalCard: View {
             studio.navigate(.canvas)
           }.buttonStyle(QuietButton(t: t, role: .ghost))
         }
-        if ["create_branch", "create_period", "add_event"].contains(change.action) {
+        if ["create_branch", "create_period", "add_event", "revise_event", "revise_lane"].contains(
+          change.action)
+        {
           Button("Open timeline") { studio.navigate(.timeline) }.buttonStyle(
             QuietButton(t: t, role: .ghost))
         }
-        if ["place_marker", "create_map"].contains(change.action), let id = change.resultID {
+        if ["place_marker", "create_map", "revise_map"].contains(change.action),
+          let id = change.resultID
+        {
           Button("Open atlas") {
             studio.mapBoardID = id
             studio.navigate(.atlas)
@@ -284,6 +297,47 @@ struct ProposalCard: View {
           )
       }
     }
+  }
+  private func workspaceChanges(_ change: ProposedChange, before: [String: String]) -> some View {
+    let after = [
+      "title": change.title, "date": change.date, "endDate": change.endDate,
+      "body": change.body, "source": change.source ?? "", "lane": change.laneID,
+      "parentMap": change.parentMapID, "label": change.label,
+    ].compactMapValues { $0 }
+    let labels = [
+      "title": "Name", "date": "Date / start", "endDate": "End", "body": "Notes",
+      "source": "Linked record", "lane": "History parent", "parentMap": "Parent map",
+      "label": "Relationship",
+    ]
+    return VStack(alignment: .leading, spacing: 6) {
+      ForEach(
+        before.keys.sorted().filter { key in after[key] != nil && after[key] != before[key]
+        }, id: \.self
+      ) { key in
+        VStack(alignment: .leading, spacing: 2) {
+          Text(labels[key] ?? key).font(.studio(size: 11.5, weight: .medium)).foregroundStyle(
+            studio.t.muted)
+          Text(displayValue(before[key] ?? "", key: key)).strikethrough().foregroundStyle(
+            studio.t.secondary)
+          Text(displayValue(after[key] ?? "", key: key)).foregroundStyle(studio.t.text)
+        }.font(.studio(size: 12.5)).fixedSize(horizontal: false, vertical: true)
+      }
+    }
+  }
+  private func displayValue(_ value: String, key: String) -> String {
+    if value.isEmpty {
+      if key == "lane" { return "All history" }
+      if key == "parentMap" { return "World map" }
+      return "Not set"
+    }
+    if key == "source" { return studio.name(for: value, in: proposal) }
+    if key == "lane" { return laneName(value) }
+    if key == "parentMap" {
+      return (try? studio.store.boards(worldID: studio.worldID, kind: "atlas"))?.first {
+        $0.id == value
+      }?.name ?? "Unavailable map"
+    }
+    return value
   }
   /// Full proposed text, or a line diff against the record as it is now.
   private func preview(_ text: String, against old: String?) -> some View {

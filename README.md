@@ -1,6 +1,6 @@
 # Synthesis
 
-A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Conversation, Canvas, Library, Graph, Timeline, Atlas, Review and Worlds** are views of one saved world, sharing one design system.
+A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. Development prerelease [0.0.2](docs/releases/0.0.2.md). **Conversation, Canvas, Library, Graph, Timeline, Atlas, Review and Worlds** are views of one saved world, sharing one design system.
 
 ![Synthesis Canvas with linked character, system and place cards in the Aster sample world](docs/screenshots/canvas.png)
 
@@ -21,7 +21,7 @@ A native macOS worldbuilding studio built with SwiftUI, AppKit and SQLite. **Con
 
 ![Knowledge Graph showing seven entities connected by labeled relationships](docs/screenshots/graph.png)
 
-**Timeline** — organize sourced events into history branches and periods.
+**Timeline** — organize sourced events into editable, collapsible history branches and periods.
 
 ![Timeline with a nested history branch, period and sourced events](docs/screenshots/timeline.png)
 
@@ -103,7 +103,7 @@ On Canvas, double-click a card to open its record. Draw an arrow from one entity
 uv run --with pillow python scripts/contact-sheets.py docs/verification/latest --prune
 ```
 
-The native suite (includes the rules backend) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Nine additional Node tests cover canvas geometry, relationship state, nested groups and session isolation (`cd CanvasWeb && npm test`). Visual checks use the real native window and bundled WebKit engine, never HTML previews. The background runner builds a temporary app, requires a fresh isolated database and refuses model requests. It does not overwrite the running bundle. Background sheets render their real content inline to avoid modal activation; native modal interaction requires the explicit foreground test. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the current audit and limits are in [INTEGRATION_OVERHAUL](docs/INTEGRATION_OVERHAUL.md). Full strict lint, the native suite and optimized build pass on the consolidated checkout. Mechanics provides rule and scenario editing, review and history on every entity. Spatial technique trees and automatic simulations remain future work.
+The native suite (includes the rules backend) covers persistence, world isolation, canon approval, cancellation, reversible archive, audited relationships, retrieval, the proposal approval boundary, import and export, board layout and undo, mention tokens, Markdown parsing, canon diffing and graph layout. Eleven additional Node tests cover canvas geometry, relationship state, nested groups and session isolation (`cd CanvasWeb && npm test`). Visual checks use the real native window and bundled WebKit engine, never HTML previews. The background runner builds a temporary app, requires a fresh isolated database and refuses model requests. It does not overwrite the running bundle. Background sheets render their real content inline to avoid modal activation; native modal interaction requires the explicit foreground test. The self-test needs its window to be key for a few seconds and reports skipped checks if focus is taken. Current status is in [STATE](docs/STATE.md); the current audit and limits are in [INTEGRATION_OVERHAUL](docs/INTEGRATION_OVERHAUL.md). Full strict lint, the native suite and optimized build pass on the consolidated checkout. Mechanics provides rule and scenario editing, review and history on every entity. Spatial technique trees and automatic simulations remain future work.
 
 The assistant uses only Claude Code or Codex with your subscription. Direct API settings and transport have been removed; see [AI setup](docs/AI_SETUP.md).
 
@@ -111,7 +111,7 @@ Data: `~/Library/Application Support/Synthesis/synthesis.sqlite`, overridable wi
 
 Typing in ⌘K also offers to capture the text as an idea. Worlds export as a folder of Markdown files or as complete JSON; Markdown and text files import as drafts.
 
-Current limits: Claude’s earlier handoff records one live request per subscription harness; this audit makes no model-provider calls. Live streaming/Stop UI, large boards/graphs, trackpad and VoiceOver remain unverified. PNG export includes actual card typography, state and artwork; editor controls and ports are not part of the exported illustration. Bundled AI-generated sample artwork is optional; on-demand image generation is not implemented. Earlier evidence under `docs/verification` is historical.
+Current limits: one owner-approved isolated Codex request passed in the 0.0.2 audit, returning cited prose and a staged proposal without applying changes. Codex currently emits completed updates, not token-by-token text. Live streaming/Stop UI, large boards/graphs, trackpad and VoiceOver remain unverified. PNG export includes actual card typography, state and artwork; editor controls and ports are not part of the exported illustration. Bundled AI-generated sample artwork is optional; on-demand image generation is not implemented. Earlier evidence under `docs/verification` is historical.
 
 To build a separate review bundle without replacing a running app: `./scripts/build.sh release dist/Synthesis-review.app`. Use the primary checkout above; historical worktree paths in old verification logs are not current launch targets.
 
@@ -120,3 +120,5 @@ Audit repairs are tracked in [AUDIT.md](docs/AUDIT.md) and [PROGRESS.md](docs/PR
 The current audit has completed 19 items; A2 still needs its live Canvas theme check, and C2 remains excluded pending owner approval. The latest composer directive authorizes the shared composer rebuild; the old C3-specific pill proposal was not adopted. Worlds now shows saved covers and activity with editable descriptions. Timeline can create an event in an empty world with its source draft. Markdown export preserves supported rich formatting and entity sections. Settings now uses searchable sections and individually explained import/export actions; provider details stay behind a disclosure. See [STATE](docs/STATE.md) for exact verification limits, including the unrun foreground modal test.
 
 Creative components let you add notes, facts, checklists and progression tracks to workspaces and entity pages. They are ordinary versioned lore, usable in Manual mode and available to reviewed assistant proposals. [Usage and data contract](docs/CREATIVE_COMPONENTS.md).
+
+The 0.0.2 interaction pass adds safe conversation recovery, workspace/selection-aware requests, reviewed edits to existing chronology/maps/relationships and stable Canvas reloads. See the [completion ledger](docs/INTERACTION_COMPLETION.md) and [verification evidence](docs/verification/interaction-0.0.2/README.md) for exact coverage and remaining limits.

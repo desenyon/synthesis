@@ -55,9 +55,6 @@ struct CuratedCanvas: View {
       studio.editorSave = nil
       studio.canvasUndo = { session.command($0 ? "undo" : "redo") }
       studio.canvasFit = { session.command("fit") }
-      if let width = try? studio.store.preference("companion-width"), let value = Double(width) {
-        studio.companionWidth = min(460, max(320, value))
-      }
     }
     .onChange(of: studio.captureNonce) { _, _ in
       if studio.captureHint == "sheet-artwork" { panel = .artwork }

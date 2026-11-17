@@ -48,6 +48,16 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
         setConnecting(null);
         setStyles(false);
     } }; window.addEventListener('keydown', cancel); return () => window.removeEventListener('keydown', cancel); }, []);
+    useEffect(() => {
+        if (connecting && view && !view.elements.some((element:any) => isCard(element) && element.customData.recordID === connecting)) setConnecting(null);
+    }, [connecting, view]);
+    useEffect(() => {
+        const dismiss = (event:PointerEvent) => {
+            if (!(event.target as HTMLElement)?.closest('.record-port, .studio-connect-hint')) setConnecting(null);
+        };
+        window.addEventListener('pointerdown',dismiss);
+        return () => window.removeEventListener('pointerdown',dismiss);
+    }, []);
 
     if (!view)
         return null;

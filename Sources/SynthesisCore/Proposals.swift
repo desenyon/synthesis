@@ -7,8 +7,18 @@ public enum ProposalParser {
   public static let fence = "```synthesis-proposal"
   /// Text safe to show while an answer is still streaming: everything before the change set.
   public static func visible(_ partial: String) -> String {
-    guard let range = partial.range(of: fence) else { return partial }
-    return String(partial[..<range.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+    if let range = partial.range(of: fence) {
+      return String(partial[..<range.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    // A provider can split the fence across chunks. Hold only its trailing prefix,
+    // so machine-readable proposal text cannot flash into the visible response.
+    for length in stride(from: min(fence.count - 1, partial.count), through: 1, by: -1) {
+      let suffix = String(partial.suffix(length))
+      if fence.hasPrefix(suffix) {
+        return String(partial.dropLast(length)).trimmingCharacters(in: .whitespacesAndNewlines)
+      }
+    }
+    return partial
   }
   public static func split(_ answer: String) -> (prose: String, payload: [String: Any]?) {
     guard let start = answer.range(of: fence) else { return (answer, nil) }
@@ -104,6 +114,10 @@ extension WorkspaceStore {
         date: nil, reason: text(item["reason"], limit: 400), evidence: Array(evidence),
         status: "pending", resultID: nil)
       switch change.action {
+      case "revise_event", "revise_lane", "revise_map", "revise_relationship":
+        guard prepareWorkspaceRevision(worldID: worldID, item: item, change: &change) else {
+          continue
+        }
       case "create_record":
         let kind = item["kind"] as? String ?? "lore"
         guard ["lore", "entity", "capture"].contains(kind),
@@ -288,7 +302,11 @@ extension WorkspaceStore {
     guard !changes.isEmpty else { return nil }
     let id = UUID().uuidString
     let now = timestamp()
-    let summary = text(payload["summary"], limit: 300) ?? "Proposed changes"
+    var summary = text(payload["summary"], limit: 300) ?? "Proposed changes"
+    let requested = (payload["changes"] as? [Any])?.count ?? 0
+    if requested > changes.count {
+      summary += " · \(requested - changes.count) unsupported or invalid changes were not staged."
+    }
     try db.execute(
       "INSERT INTO proposals(id,world_id,payload,base_version,before,evidence,reason,origin,state,created_at,updated_at,message_id,conversation_id) VALUES(?,?,?,NULL,NULL,'[]',?,'ai-proposed','pending',?,?,?,?)",
       [
@@ -327,7 +345,8 @@ extension WorkspaceStore {
         // Rule revisions identify a rule, not a lore record. Its owner is checked here;
         // the exact active rule and captured revision are checked in the rule branch below.
         let recordReferences =
-          change.action == "revise_rule"
+          ["revise_rule", "revise_event", "revise_lane", "revise_map", "revise_relationship"]
+            .contains(change.action)
           ? [change.source, change.target] : [change.recordID, change.source, change.target]
         for reference in recordReferences.compactMap({ $0 }) {
           let id = try resolved(reference)
@@ -338,6 +357,8 @@ extension WorkspaceStore {
           }
         }
         switch change.action {
+        case "revise_event", "revise_lane", "revise_map", "revise_relationship":
+          change.resultID = try applyWorkspaceRevision(worldID: worldID, change: change)
         case "create_record":
           change.resultID = try createRecord(
             worldID: worldID, title: change.title ?? "Untitled", body: change.body ?? "",

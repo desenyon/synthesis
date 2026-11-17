@@ -11,6 +11,35 @@ public struct ChronologyLane: Identifiable, Codable, Equatable, Sendable {
 }
 
 extension WorkspaceStore {
+  @discardableResult public func updateChronologyLane(
+    worldID: String, expected: ChronologyLane, name: String, parentID: String?,
+    start: String, end: String, notes: String
+  ) throws -> ChronologyLane {
+    try db.transaction {
+      let lanes = try chronologyLanes(worldID: worldID)
+      guard lanes.first(where: { $0.id == expected.id }) == expected else {
+        throw SynthesisError.stale
+      }
+      let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
+      guard !title.isEmpty, title.count <= 160, start.count <= 160, end.count <= 160,
+        notes.count <= 30_000
+      else { throw SynthesisError.invalid("Use a short name and date labels for this history.") }
+      var ancestor = parentID
+      var visited: Set<String> = [expected.id]
+      while let id = ancestor {
+        guard visited.insert(id).inserted, let lane = lanes.first(where: { $0.id == id }) else {
+          throw SynthesisError.invalid("A history branch cannot contain itself or form a cycle.")
+        }
+        ancestor = lane.parentID
+      }
+      try db.execute(
+        "UPDATE chronology_lanes SET name=?,start_label=?,end_label=?,notes=?,parent_id=?,updated_at=? WHERE world_id=? AND id=? AND archived=0",
+        [title, start, end, notes, parentID, timestamp(), worldID, expected.id])
+      return ChronologyLane(
+        id: expected.id, parentID: parentID, name: title, kind: expected.kind,
+        start: start, end: end, notes: notes)
+    }
+  }
   public func chronologyLanes(worldID: String) throws -> [ChronologyLane] {
     _ = try world(worldID)
     return try db.rows(

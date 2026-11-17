@@ -12,7 +12,10 @@ struct RelationshipGraph: View {
   @State private var signature = ""
   @State private var layoutTask: Task<Void, Never>?
   @State private var query = ""
-  @State private var selected: String?
+  private var selected: String? {
+    get { studio.graphSelectedID }
+    nonmutating set { studio.graphSelectedID = newValue }
+  }
   @State private var connecting: String?
   @State private var hoveredEdge: String?
   @State private var zoom = 1.0
@@ -91,6 +94,8 @@ struct RelationshipGraph: View {
     .onDisappear {
       layoutTask?.cancel()
       signature = ""
+      hoveredEdge = nil
+      connecting = nil
     }
     .studioSheet(item: $panel) { item in
       switch item {
@@ -116,7 +121,14 @@ struct RelationshipGraph: View {
     guard layout[edge.sourceID] != nil, layout[edge.targetID] != nil else { return nil }
     return GraphRoute.between(
       point(edge.sourceID, size), point(edge.targetID, size),
-      scale: zoom, lane: (lanes[edge.id] ?? 0) * zoom)
+      scale: zoom, lane: (lanes[edge.id] ?? 0) * zoom,
+      obstacles: layout.keys.filter { $0 != edge.sourceID && $0 != edge.targetID }.map {
+        let centre = point($0, size)
+        return CGRect(
+          x: centre.x - GraphLayout.cardSize.width * zoom / 2,
+          y: centre.y - GraphLayout.cardSize.height * zoom / 2,
+          width: GraphLayout.cardSize.width * zoom, height: GraphLayout.cardSize.height * zoom)
+      })
   }
   private func graph(_ nodes: [LoreRecord]) -> some View {
     GeometryReader { geo in
@@ -124,10 +136,14 @@ struct RelationshipGraph: View {
         relationships.map {
           DisplayEdge(id: $0.id, source: $0.sourceID, target: $0.targetID, label: $0.label)
         }, spacing: 30)
+      let routes = Dictionary(
+        uniqueKeysWithValues: relationships.compactMap { edge in
+          curve(edge, geo.size, lanes: lanes).map { (edge.id, $0) }
+        })
       ZStack {
         Canvas { context, size in
           for edge in relationships {
-            guard let c = curve(edge, size, lanes: lanes) else { continue }
+            guard let c = routes[edge.id] else { continue }
             let strong = emphasized(edge)
             let color = studio.t.accent.opacity(strong ? (hoveredEdge == edge.id ? 1 : 0.7) : 0.16)
             var path = Path()
@@ -158,7 +174,11 @@ struct RelationshipGraph: View {
               anchor: CGPoint(
                 x: location.x - geo.size.width / 2, y: location.y - geo.size.height / 2))
           },
-          onClick: { selected = nil },
+          onClick: {
+            selected = nil
+            connecting = nil
+            hoveredEdge = nil
+          },
           onDrag: { start, current, phase in
             let last = panAnchor ?? start
             pan.width += current.x - last.x
@@ -172,7 +192,7 @@ struct RelationshipGraph: View {
             return true
           })
         ForEach(relationships) { edge in
-          if let c = curve(edge, geo.size, lanes: lanes),
+          if let c = routes[edge.id],
             hypot(c.end.x - c.start.x, c.end.y - c.start.y) > 54 || hoveredEdge == edge.id
           {
             let strong = emphasized(edge)
@@ -191,7 +211,12 @@ struct RelationshipGraph: View {
                     lineWidth: 1))
             }.buttonStyle(.plain).opacity(strong ? 1 : 0.45)
               .help("\(name(edge.sourceID)) \(edge.label) \(name(edge.targetID)). Click to edit.")
-              .onHover { hoveredEdge = $0 ? edge.id : (hoveredEdge == edge.id ? nil : hoveredEdge) }
+              .onContinuousHover { phase in
+                switch phase {
+                case .active: hoveredEdge = edge.id
+                case .ended: if hoveredEdge == edge.id { hoveredEdge = nil }
+                }
+              }
               .position(
                 x: c.middle.x, y: c.middle.y)
           }
@@ -209,8 +234,10 @@ struct RelationshipGraph: View {
         }
         VStack {
           if let entity = nodes.first(where: { $0.id == selected }) {
-            detail(entity).frame(maxWidth: .infinity, alignment: .trailing)
-              .transition(.move(edge: .trailing).combined(with: .opacity))
+            detail(entity).frame(
+              maxWidth: .infinity, alignment: studio.companionExpanded ? .leading : .trailing
+            )
+            .transition(.move(edge: .trailing).combined(with: .opacity))
           }
           Spacer(minLength: 0)
           HStack {
@@ -313,6 +340,7 @@ struct RelationshipGraph: View {
         DragGesture(minimumDistance: 4, coordinateSpace: .named("graph"))
           .onChanged { value in
             if dragNode?.id != entity.id { dragNode = (entity.id, layout[entity.id] ?? .zero) }
+            hoveredEdge = nil
             guard let origin = dragNode?.origin else { return }
             layout[entity.id] = CGPoint(
               x: origin.x + value.translation.width / zoom,
@@ -429,12 +457,13 @@ struct RelationshipGraph: View {
         nodes.joined(separator: ",") + "|\(landscape)|"
         + relationships.map { "\($0.sourceID)>\($0.targetID)" }.sorted().joined(separator: ",")
       if next != signature {
+        let initiallyEmpty = layout.isEmpty
         signature = next
         layoutTask?.cancel()
         let edges = relationships.map { ($0.sourceID, $0.targetID) }
         if nodes.count <= 80 {
           layout = GraphLayout.positions(nodes: nodes, edges: edges, landscape: landscape)
-          if framed { frame(area, animated: false) }
+          if framed && initiallyEmpty { frame(area, animated: false) }
         } else {
           let worker = Task.detached(priority: .userInitiated) {
             GraphLayout.positions(nodes: nodes, edges: edges, landscape: landscape)
@@ -447,7 +476,7 @@ struct RelationshipGraph: View {
             }
             guard !Task.isCancelled, signature == next else { return }
             layout = result
-            if framed { frame(area, animated: false) }
+            if framed && initiallyEmpty { frame(area, animated: false) }
           }
         }
       }

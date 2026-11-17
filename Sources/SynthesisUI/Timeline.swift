@@ -7,9 +7,16 @@ struct TimelineScreen: View {
   @ObservedObject var studio: Studio
   @State private var lanes: [ChronologyLane] = []
   @State private var placements: [String: String] = [:]
-  @State private var selectedLane = ""
+  @State private var foldedLanes: Set<String> = []
+  private var selectedLane: String {
+    get { studio.timelineLaneID ?? "" }
+    nonmutating set { studio.timelineLaneID = newValue.isEmpty ? nil : newValue }
+  }
   @State private var eventLane = ""
   @State private var creatingLane = false
+  @State private var editingLane: ChronologyLane?
+  @State private var laneParent = ""
+  @State private var laneNotes = ""
   @State private var laneName = ""
   @State private var laneKind = "period"
   @State private var laneStart = ""
@@ -34,13 +41,7 @@ struct TimelineScreen: View {
   }
   private var descendants: Set<String> {
     guard !selectedLane.isEmpty else { return [] }
-    var ids: Set<String> = [selectedLane]
-    for _ in 0..<lanes.count {
-      let next = Set(lanes.filter { $0.parentID.map(ids.contains) ?? false }.map(\.id))
-      if next.isSubset(of: ids) { break }
-      ids.formUnion(next)
-    }
-    return ids
+    return laneFamily(selectedLane)
   }
   var body: some View {
     let rows = filtered
@@ -58,7 +59,7 @@ struct TimelineScreen: View {
         ) { begin(nil) }
       }
       ContentHeader {
-        Menu {
+        PlainMenu {
           Button("All history") { selectedLane = "" }
           ForEach(lanes) { lane in
             Button("\(lane.kind == "branch" ? "Branch" : "Period") · \(lane.name)") {
@@ -73,6 +74,9 @@ struct TimelineScreen: View {
           Text([lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — ")).font(
             .studio(size: 12)
           ).foregroundStyle(studio.t.secondary)
+          IconButton(icon: "pencil.line", label: "Edit history", t: studio.t) {
+            edit(lane)
+          }
           IconButton(icon: "archivebox", label: "Archive branch or period", t: studio.t) {
             studio.perform {
               try studio.store.setChronologyLaneArchived(
@@ -91,6 +95,9 @@ struct TimelineScreen: View {
         }
         Spacer()
         Button("New branch") {
+          editingLane = nil
+          laneParent = selectedLane
+          laneNotes = ""
           laneKind = "branch"
           laneName = ""
           laneStart = ""
@@ -98,6 +105,9 @@ struct TimelineScreen: View {
           creatingLane = true
         }.buttonStyle(QuietButton(t: studio.t))
         Button("New period") {
+          editingLane = nil
+          laneParent = selectedLane
+          laneNotes = ""
           laneKind = "period"
           laneName = ""
           laneStart = ""
@@ -120,7 +130,13 @@ struct TimelineScreen: View {
         }
       }
     }
-    .onAppear { refresh() }
+    .onAppear {
+      refresh()
+      if studio.captureHint == "timeline-edit", let lane = lanes.first {
+        selectedLane = lane.id
+        edit(lane)
+      }
+    }
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .studioSheet(isPresented: $composing) { form }
     .studioSheet(isPresented: $creatingLane) { laneForm }
@@ -130,28 +146,46 @@ struct TimelineScreen: View {
     ScrollView {
       VStack(alignment: .leading, spacing: 2) {
         ForEach(treeRows, id: \.lane.id) { entry in
-          Button {
-            withAnimation(.easeOut(duration: 0.18)) {
-              selectedLane = selectedLane == entry.lane.id ? "" : entry.lane.id
+          let family = laneFamily(entry.lane.id)
+          HStack(spacing: 4) {
+            if lanes.contains(where: { $0.parentID == entry.lane.id }) {
+              Button {
+                withAnimation(.easeOut(duration: 0.16)) {
+                  if !foldedLanes.insert(entry.lane.id).inserted {
+                    foldedLanes.remove(entry.lane.id)
+                  }
+                }
+              } label: {
+                StudioIcon("chevron.right", size: 10)
+                  .rotationEffect(.degrees(foldedLanes.contains(entry.lane.id) ? 0 : 90))
+                  .frame(width: 20, height: 28).contentShape(Rectangle())
+              }.buttonStyle(.plain).accessibilityLabel(
+                "\(foldedLanes.contains(entry.lane.id) ? "Expand" : "Collapse") \(entry.lane.name)")
+            } else {
+              Color.clear.frame(width: 20, height: 28)
             }
-          } label: {
-            HStack(spacing: 8) {
-              StudioIcon(
-                entry.lane.kind == "branch" ? "arrow.triangle.branch" : "calendar", size: 13)
-              Text(entry.lane.name).lineLimit(1)
-              Text(entry.lane.kind == "branch" ? "Branch" : "Period")
-                .font(.studio(size: 11)).foregroundStyle(studio.t.muted)
-              Spacer(minLength: 8)
-              Text("\(events.filter { placements[$0.id] == entry.lane.id }.count)")
-                .monospacedDigit().foregroundStyle(studio.t.secondary)
-            }.font(.studio(size: 13, weight: .medium))
-              .padding(.leading, 10 + CGFloat(entry.depth) * 20).padding(.trailing, 10)
-              .frame(height: 30).background(
-                selectedLane == entry.lane.id ? studio.t.hover : .clear,
-                in: RoundedRectangle(cornerRadius: 6)
-              )
-              .contentShape(Rectangle())
-          }.buttonStyle(.plain).help("Show \(entry.lane.name) and its nested history")
+            Button {
+              withAnimation(.easeOut(duration: 0.18)) {
+                selectedLane = selectedLane == entry.lane.id ? "" : entry.lane.id
+              }
+            } label: {
+              HStack(spacing: 8) {
+                StudioIcon(
+                  entry.lane.kind == "branch" ? "arrow.triangle.branch" : "calendar", size: 13)
+                Text(entry.lane.name).lineLimit(1)
+                Text(entry.lane.kind == "branch" ? "Branch" : "Period")
+                  .font(.studio(size: 11)).foregroundStyle(studio.t.muted)
+                Spacer(minLength: 8)
+                Text("\(events.filter { family.contains(placements[$0.id] ?? "") }.count)")
+                  .monospacedDigit().foregroundStyle(studio.t.secondary)
+              }.font(.studio(size: 13, weight: .medium))
+                .padding(.trailing, 10).frame(height: 30)
+                .contentShape(Rectangle())
+            }.buttonStyle(.plain).help("Show \(entry.lane.name) and its nested history")
+          }.padding(.leading, 6 + CGFloat(entry.depth) * 20)
+            .background(
+              selectedLane == entry.lane.id ? studio.t.hover : .clear,
+              in: RoundedRectangle(cornerRadius: 6))
         }
       }.padding(.horizontal, 24).padding(.vertical, 8)
     }.frame(maxHeight: min(170, CGFloat(lanes.count * 32 + 16)))
@@ -159,15 +193,28 @@ struct TimelineScreen: View {
   private var treeRows: [(lane: ChronologyLane, depth: Int)] {
     var result: [(lane: ChronologyLane, depth: Int)] = []
     var seen = Set<String>()
-    func visit(_ parent: String?, depth: Int) {
+    func visit(_ parent: String?, depth: Int, visible: Bool = true) {
       for lane in lanes where lane.parentID == parent && seen.insert(lane.id).inserted {
-        result.append((lane, depth))
-        visit(lane.id, depth: depth + 1)
+        if visible { result.append((lane, depth)) }
+        visit(lane.id, depth: depth + 1, visible: visible && !foldedLanes.contains(lane.id))
       }
     }
     visit(nil, depth: 0)
     // An archived parent must not hide a surviving child from All history.
-    for lane in lanes where !seen.contains(lane.id) { result.append((lane, 0)) }
+    for lane in lanes where !seen.contains(lane.id) {
+      seen.insert(lane.id)
+      result.append((lane, 0))
+      visit(lane.id, depth: 1, visible: !foldedLanes.contains(lane.id))
+    }
+    return result
+  }
+  private func laneFamily(_ id: String) -> Set<String> {
+    var result: Set<String> = [id]
+    for _ in 0..<lanes.count {
+      let children = Set(lanes.filter { $0.parentID.map(result.contains) ?? false }.map(\.id))
+      if children.isSubset(of: result) { break }
+      result.formUnion(children)
+    }
     return result
   }
   private func row(_ event: WorldEvent, first: Bool, last: Bool) -> some View {
@@ -309,9 +356,20 @@ struct TimelineScreen: View {
     }
   }
   private func closeLane() { creatingLane = false }
+  private func edit(_ lane: ChronologyLane) {
+    editingLane = lane
+    laneName = lane.name
+    laneKind = lane.kind
+    laneStart = lane.start
+    laneEnd = lane.end
+    laneParent = lane.parentID ?? ""
+    laneNotes = lane.notes
+    creatingLane = true
+  }
   private var laneForm: some View {
     SheetScaffold(
-      title: laneKind == "branch" ? "New history branch" : "New period",
+      title: editingLane != nil
+        ? "Edit history" : (laneKind == "branch" ? "New history branch" : "New period"),
       subtitle: "Keep your world's own chronology. Dates can stay uncertain.", t: studio.t,
       close: closeLane
     ) {
@@ -319,26 +377,39 @@ struct TimelineScreen: View {
         label: "Name",
         placeholder: laneKind == "branch" ? "An alternate history" : "Age of the first kingdoms",
         text: $laneName, t: studio.t)
-      if laneKind == "period" {
+      HStack(spacing: 12) {
         FormField(
           label: "Beginning", placeholder: "Optional date or era", text: $laneStart, t: studio.t)
         FormField(
           label: "End", placeholder: "Optional; may still be ongoing", text: $laneEnd, t: studio.t)
       }
-      Text(
-        selectedLane.isEmpty
-          ? "Created at the root of your history." : "Created inside the selected branch or period."
-      )
-      .font(.studio(size: 12)).foregroundStyle(studio.t.secondary)
+      ChoiceField(
+        title: "Inside", selection: $laneParent,
+        choices: [("", "All history")]
+          + lanes.filter { !laneFamily(editingLane?.id ?? "").contains($0.id) }.map {
+            ($0.id, $0.name)
+          }, t: studio.t)
+      FormField(
+        label: "Notes", placeholder: "What defines this history?", text: $laneNotes, t: studio.t)
     } footer: {
       Spacer()
-      Button("Create") {
+      Button(editingLane == nil ? "Create" : "Save changes") {
         studio.perform {
-          let lane = try studio.store.createChronologyLane(
-            worldID: studio.worldID, name: laneName, kind: laneKind,
-            parentID: selectedLane.isEmpty ? nil : selectedLane, start: laneStart, end: laneEnd)
+          let lane: ChronologyLane
+          if let editingLane {
+            lane = try studio.store.updateChronologyLane(
+              worldID: studio.worldID, expected: editingLane,
+              name: laneName, parentID: laneParent.isEmpty ? nil : laneParent, start: laneStart,
+              end: laneEnd, notes: laneNotes)
+          } else {
+            lane = try studio.store.createChronologyLane(
+              worldID: studio.worldID, name: laneName, kind: laneKind,
+              parentID: laneParent.isEmpty ? nil : laneParent, start: laneStart, end: laneEnd,
+              notes: laneNotes)
+          }
           selectedLane = lane.id
           creatingLane = false
+          try studio.reload()
           refresh()
         }
       }.buttonStyle(QuietButton(t: studio.t, primary: true)).disabled(

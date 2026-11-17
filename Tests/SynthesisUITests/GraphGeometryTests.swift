@@ -4,6 +4,21 @@ import Testing
 @testable import SynthesisUI
 
 struct GraphGeometryTests {
+  @Test func relationshipsDetourAroundAnInterveningCard() {
+    let obstacle = CGRect(x: 350, y: -100, width: 300, height: 200)
+    let route = GraphRoute.between(
+      .zero, CGPoint(x: 1000, y: 0), scale: 1, lane: 0, obstacles: [obstacle])
+    for i in 0...100 { #expect(!obstacle.contains(route.point(at: Double(i) / 100))) }
+    #expect(!obstacle.contains(route.middle))
+  }
+  @Test func nearbyParallelRelationshipsDoNotCollapseOntoOneCurve() {
+    for x in [0.0, 12, 120, 270] {
+      let a = GraphRoute.between(.zero, CGPoint(x: x, y: 0), scale: 1, lane: -30)
+      let b = GraphRoute.between(.zero, CGPoint(x: x, y: 0), scale: 1, lane: 30)
+      #expect(abs(a.middle.y - b.middle.y) >= 20)
+    }
+  }
+
   @Test func atlasButtonZoomKeepsAPannedLandmarkAtTheViewportCentre() {
     let inward = SpatialViewport.zoom(
       scale: 1, pan: CGSize(width: 200, height: -80), factor: 1.25, anchor: .zero,

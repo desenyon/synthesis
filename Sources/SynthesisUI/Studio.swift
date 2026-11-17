@@ -128,6 +128,29 @@ public struct Toast: Identifiable {
   @Published public var editorSave: (() -> Bool)?
   @Published public var canvasBoardID: String?
   @Published public var mapBoardID: String?
+  @Published var graphSelectedID: String?
+  @Published var atlasSelectedID: String?
+  @Published var timelineLaneID: String?
+  private var pendingSubmission: (world: String, conversation: String, text: String)?
+  var contextualRecordIDs: [String] {
+    if let selectedRecord { return [selectedRecord.id] }
+    let selection: [String]
+    switch destination {
+    case .canvas: selection = canvasSession?.selection ?? []
+    case .knowledge: selection = graphSelectedID.map { [$0] } ?? []
+    case .atlas: selection = atlasSelectedID.map { [$0] } ?? []
+    default: selection = []
+    }
+    let active = Set(records.map(\.id))
+    return selection.filter(active.contains)
+  }
+  var contextLabel: String {
+    if let selectedRecord { return selectedRecord.title }
+    if let id = contextualRecordIDs.first, let record = records.first(where: { $0.id == id }) {
+      return record.title
+    }
+    return libraryCategory ?? destination.rawValue
+  }
   @Published public var companionExpanded = false
   @Published public var companionWidth = 400.0
   @Published public var libraryCategory: String?
@@ -152,6 +175,11 @@ public struct Toast: Identifiable {
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
+  public func canvasVisible(windowWidth: Double) -> Bool {
+    let sidebar = windowWidth < 760 ? 0 : (collapsed ? Metric.rail : Metric.sidebar)
+    let takeover = mode == .assisted && companionExpanded && windowWidth - sidebar < 860
+    return destination == .canvas && selectedRecord == nil && !takeover
+  }
   public var t: Theme { Theme(dark: dark) }
   public var conversationTitle: String {
     conversations.first { $0.id == conversationID }?.title ?? "New conversation"
@@ -193,6 +221,9 @@ public struct Toast: Identifiable {
     mode = WorkspaceMode(rawValue: try store.preference("mode") ?? "assisted") ?? .assisted
     dark = try store.preference("theme") != "light"
     collapsed = try store.preference("sidebar") == "collapsed"
+    if let saved = try store.preference("companion-width").flatMap(Double.init), saved.isFinite {
+      companionWidth = min(460, max(320, saved))
+    }
     inspector = try store.preference("inspector") != "hidden"
     let savedDestination = try store.preference("destination").flatMap(Destination.init(rawValue:))
     destination =
@@ -318,8 +349,15 @@ public struct Toast: Identifiable {
             worldID: world, proposalID: proposal.id, changeID: change.id,
             accept: accept, confirmation: proposal.id)
           if accept, let applied = resolved.changes.first(where: { $0.id == change.id }) {
-            if applied.action == "create_map" { mapBoardID = applied.resultID }
+            if ["create_map", "revise_map"].contains(applied.action) {
+              mapBoardID = applied.resultID
+            }
             if applied.action == "place_marker" { mapBoardID = applied.resultID }
+            if ["create_branch", "create_period", "add_event", "revise_event", "revise_lane"]
+              .contains(applied.action)
+            {
+              timelineLaneID = nil
+            }
             if applied.action == "create_board" { canvasBoardID = applied.resultID }
           }
         }
@@ -449,6 +487,9 @@ public struct Toast: Identifiable {
       persistPendingComposer()
       canvasBoardID = nil
       mapBoardID = nil
+      graphSelectedID = nil
+      atlasSelectedID = nil
+      timelineLaneID = nil
       companionExpanded = false
       libraryCategory = nil
       let nextDefaults = try store.worldPreferences(worldID: id)
@@ -577,7 +618,36 @@ public struct Toast: Identifiable {
 
   // MARK: Conversation
 
+  /// Retry is an editing action, never an implicit provider request. Keep any newer thought.
+  func prepareRetry(after messageID: String) {
+    guard !busy, let index = messages.firstIndex(where: { $0.id == messageID }),
+      let prompt = messages[..<index].last(where: { $0.role == "user" })?.body
+    else { return }
+    if draft.isEmpty {
+      draft = prompt
+    } else if draft != prompt && !draft.hasPrefix(prompt + "\n\n") {
+      draft = prompt + "\n\n" + draft
+    }
+    persistComposer()
+  }
+
+  private func restorePendingSubmission() {
+    guard let pending = pendingSubmission else { return }
+    pendingSubmission = nil
+    guard pending.world == worldID else { return }
+    persistPendingComposer()
+    if draft.isEmpty {
+      draft = pending.text
+    } else if draft != pending.text {
+      draft = pending.text + "\n\n" + draft
+    }
+    persistComposer()
+  }
   public func stop() {
+    let stopped = running
+    let world = worldID
+    let conversation = conversationID
+    restorePendingSubmission()
     requestID = UUID()
     engine.cancel()
     running?.cancel()
@@ -585,6 +655,13 @@ public struct Toast: Identifiable {
     busy = false
     streamed = ""
     activity = []
+    if let stopped {
+      Task { [weak self] in
+        await stopped.value
+        guard let self, self.worldID == world, self.conversationID == conversation else { return }
+        self.perform { try self.reload() }
+      }
+    }
   }
   public func send(keepWorkspace: Bool = false) {
     guard mode == .assisted, !busy, !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -596,10 +673,12 @@ public struct Toast: Identifiable {
     guard flushEditor() else { return }
     let activeBoard =
       destination == .canvas ? canvasSession?.boardID : (destination == .atlas ? mapBoardID : nil)
-    let selectedIDs =
-      selectedRecord.map { [$0.id] }
-      ?? (destination == .canvas ? (canvasSession?.selection ?? []) : [])
-    let workspaceName = destination.rawValue
+    let selectedIDs = contextualRecordIDs
+    let laneID = destination == .timeline ? timelineLaneID : nil
+    let workspaceName =
+      selectedRecord == nil
+      ? (libraryCategory ?? destination.rawValue)
+      : "Editor in \(destination.rawValue)"
     let prompt = draft
     let wid = worldID
     perform {
@@ -613,6 +692,7 @@ public struct Toast: Identifiable {
       busy = true
       activity = []
       streamed = ""
+      pendingSubmission = (wid, cid, prompt)
       draft = ""
       persistComposer()
       if !keepWorkspace {
@@ -628,10 +708,15 @@ public struct Toast: Identifiable {
           try await self.engine.submit(
             worldID: wid, conversationID: cid, prompt: prompt, preset: chosenPreset,
             boardID: activeBoard, selectedRecordIDs: selectedIDs, workspaceName: workspaceName,
+            chronologyLaneID: laneID,
             onActivity: { [weak self] step in
               guard let self, self.requestID == request, self.worldID == wid,
                 self.conversationID == cid, self.mode == .assisted
               else { return }
+              if step.id == "response", step.state == .running {
+                self.pendingSubmission = nil
+                self.perform { try self.reload() }
+              }
               if let index = self.activity.firstIndex(where: { $0.id == step.id }) {
                 self.activity[index] = step
               } else {
@@ -647,12 +732,7 @@ public struct Toast: Identifiable {
           {
             if case SynthesisError.unavailable = error {
             } else {
-              if (try? self.store.messages(worldID: wid, conversationID: cid).last(where: {
-                $0.role == "user"
-              })?.body) != prompt {
-                self.draft = prompt
-                self.persistComposer()
-              }
+              self.restorePendingSubmission()
               self.error = error.localizedDescription
             }
           }
@@ -662,11 +742,6 @@ public struct Toast: Identifiable {
           self.streamed = ""
           self.perform { try self.reload() }
         }
-      }
-      // The user message is committed by the core before the transport awaits.
-      Task {
-        await Task.yield()
-        self.perform { try self.reload() }
       }
     }
   }

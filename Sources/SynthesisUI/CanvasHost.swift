@@ -407,7 +407,19 @@ struct CanvasBoardContent {
       while studio.reviewingProposal || !loaded, Date() < deadline {
         try await Task.sleep(for: .milliseconds(50))
       }
+      try await Task.sleep(for: .milliseconds(250))
       let after = await probe()
+      let viewportKeys = ["zoom", "scrollX", "scrollY"]
+      let viewportDetail = viewportKeys.map {
+        "\($0): \(before[$0] ?? "missing") -> \(after[$0] ?? "missing")"
+      }.joined(separator: ", ")
+      checks.append(
+        viewportKeys.allSatisfy { key in
+          guard let a = before[key] as? Double, let b = after[key] as? Double else { return false }
+          return abs(a - b) < 0.01
+        }
+          ? "PASS reviewed placement preserves the viewport"
+          : "FAIL reviewed placement changed the viewport: \(viewportDetail)")
       let moved = (after["cards"] as? [[String: Any]])?.first {
         $0["recordID"] as? String == recordID
       }
@@ -421,6 +433,17 @@ struct CanvasBoardContent {
       reloadStoredBoard()
       let restoreDeadline = Date().addingTimeInterval(5)
       while !loaded, Date() < restoreDeadline { try await Task.sleep(for: .milliseconds(50)) }
+      try await Task.sleep(for: .milliseconds(250))
+      let restored = await probe()
+      checks.append(
+        viewportKeys.allSatisfy { key in
+          guard let a = before[key] as? Double, let b = restored[key] as? Double else {
+            return false
+          }
+          return abs(a - b) < 0.01
+        }
+          ? "PASS repeated board reload retains the viewport"
+          : "FAIL repeated board reload lost the viewport")
       studio.toast = nil
     } else {
       checks.append("FAIL missing linked card for reviewed placement audit")
@@ -693,6 +716,7 @@ struct CanvasFrameKey: PreferenceKey {
 /// Places the session's long-lived web view in the SwiftUI hierarchy. The shell mounts it once.
 struct CanvasWebView: NSViewRepresentable {
   let session: CanvasSession
+  var visible = true
   func makeNSView(context: Context) -> NSView {
     let container = NSView()
     attach(to: container)
@@ -701,6 +725,7 @@ struct CanvasWebView: NSViewRepresentable {
   func updateNSView(_ container: NSView, context: Context) { attach(to: container) }
   private func attach(to container: NSView) {
     let web = session.webView
+    web.isHidden = !visible
     guard web.superview !== container else { return }
     web.removeFromSuperview()
     web.frame = container.bounds
