@@ -2,7 +2,7 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. 0.0.x versions are published as full GitHub releases (owner instruction); v0.0.3 is the latest. Licensed GPL-3.0. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits.
 
-Implementation checkpoint `dd9fd840b204226b46fb6618a1f95c524db1399f` is pushed to `origin/main`, with matching remote SHA confirmed. Later documentation commits do not change the tested implementation. No release/tag was created.
+The latest Linux source checkpoint is `45a4a0c`. The historical macOS implementation checkpoint is `dd9fd84`. Use the current [Mac handoff](HANDOFF.md) and [continuation prompt](RUN_PROMPT.md) for the full verification sweep. No release or tag was created.
 
 ## Active — complete expansion brief
 

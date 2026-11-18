@@ -2,11 +2,13 @@
 
 Start here when picking up Synthesis.
 
-Implementation checkpoint [`dd9fd84`](https://github.com/desenyon/synthesis/commit/dd9fd840b204226b46fb6618a1f95c524db1399f) was pushed to `origin/main`; the remote SHA was checked. This follow-up only records that push. Resume from the latest main, keeping the checkpoint's incomplete statuses.
+Use the [copyable Mac continuation prompt](RUN_PROMPT.md) with a coding agent in the canonical checkout. Review local changes before integrating the latest source from `origin/main`. The Linux source checkpoint is `45a4a0c`. Its source changes cover #35, #36, #47–48, #67–70, and #347. The delivery details and any fallback transfer are recorded in the handoff that accompanies these docs.
 
-## Linux continuation — 2026-11-17
+## Current continuation — 2026-11-17
 
-Source work for #35, #36, #47–48, #67–70 and #347 resumed with owner approval after the runtime exposed only the Linux checkout. Start with [the run record](PROGRESS.md), [the reference guide](DRAG_RECORDS.md) and [the relationship guide](RELATIONSHIPS.md). The original checkpoint below preserves the Mac evidence and error history. The acceptance ledger now has 32 Verified, 19 In progress, 342 Open and 1 Decision needed.
+The ledger has **32 Verified, 19 In progress, 342 Open, and 1 Decision needed**. [Progress](PROGRESS.md) records 155 scoped Linux core tests, 20 Canvas tests, typecheck, the offline Canvas build, Swift format lint, and Swift parsing. The Linux checks excluded macOS-only paths. Native build, tests and captures after this source checkpoint remain pending.
+
+Run `./scripts/check.sh` and `./scripts/verify-session.sh` from `/Users/desenyon/Developer/synthesis` on `main`. Follow the quiet capture command below. Fix regressions before marking each requirement Verified. Preserve the #375 decision about API credentials and the owner-protected subscription-only boundary. Continue independent work where possible. The release gate requires all 394 items and explicit publication approval.
 
 Run the full Mac check and Canvas audit, then inspect the 69-state capture sweep at all three sizes. Confirm physical #35 drop routing in an authorized isolated session.
 
@@ -31,22 +33,15 @@ uv run --with pillow python scripts/contact-sheets.py docs/verification/expansio
 2. [STATE](STATE.md): what is verified, with exact checks.
 3. [EXPANSION](EXPANSION.md) and [EXPANSION_SOURCE](EXPANSION_SOURCE.md): all 394 requirements, individual acceptance and exact source. Then [ROADMAP](ROADMAP.md) and [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md).
 4. [PARALLEL_WORK](PARALLEL_WORK.md) and the [checkpoint/error record](verification/expansion-parallel-checkpoint/README.md): ownership, stopped workers, exact failed/passing runs, missing wiring and the final capture manifest.
-5. [ARCHITECTURE](ARCHITECTURE.md): modules and persistence. This checkpoint adds migrations 0016–0017, portable format v10 and JSON schema 13.
+5. [ARCHITECTURE](ARCHITECTURE.md): modules and persistence. The current source includes migrations through 0019, portable format v12 and JSON schema 15.
 
-## Active expansion
+## Historical macOS checkpoint
 
-**Checkpoint frozen by owner request; resume in the new chat.** All 394 requirements remain individually tracked: 32 Verified, 11 In progress, 351 Open. #1–#32 remain verified; no new boxes were ticked in this parallel checkpoint. Final `./scripts/check.sh` passed 334 tests / 81 suites, strict lint and the optimized build. Canvas 18 tests/typecheck passed. The final binary passed the two-process session audit. Failed check11 and all open defects are preserved in the checkpoint record. Final three-size native captures have **not** run.
+The original implementation checkpoint [`dd9fd84`](https://github.com/desenyon/synthesis/commit/dd9fd840b204226b46fb6618a1f95c524db1399f) was pushed and verified. The figures and source gaps below describe that earlier checkpoint. All 394 requirements remain individually tracked: 32 Verified, 11 In progress, 351 Open. #1–#32 remain verified; no new boxes were ticked in this parallel checkpoint. Final `./scripts/check.sh` passed 334 tests / 81 suites, strict lint and the optimized build. Canvas 18 tests/typecheck passed. The final binary passed the two-process session audit. Failed check11 and all open defects are preserved in the checkpoint record. Final three-size native captures have **not** run.
 
 **Do not publish a release or tag.** The owner requires every expansion item finished before another release, and publication still requires explicit owner authorization. Current v0.0.3 remains unchanged. Do not relaunch the owner's working app or run foreground tests while they work.
 
 All three workers stopped after their narrow fixes. Saved configuration already sets50 agent threads and passes strict validation; the old runtime still rejected a fifth total agent. Recheck the new runtime's capacity and launch the requested parallel team only as supported. Do not silently use other providers or separate CLI processes to evade a limit. Root owns integration/builds/commits; assign distinct source ownership, read-only coordination and independent checker/reviewer roles before mutations.
-
-### Resume here
-
-1. Confirm main/current status and leave `docs/DESIGN_AGENT_BRIEF.md` untouched. Read the checkpoint errors before claiming anything fixed.
-2. Assign independent ownership for the remaining #35 reference wiring and for final native inspection of #33/#34/#43/#44/#61–66. The capture manifest has 56 states; the exact quiet three-size command is saved in the checkpoint record. Current-source final images are required before accepting those items.
-3. #35 must consolidate direct-source budget counting, implement editor insertion/modern mention rendering, add persistent/undoable Canvas reference cards and image/board drag sources, register its UTI, and test drop precedence/world isolation. Its current core/composer paths compile and pass tests, but this is not full cross-workspace drag-and-drop.
-4. After final checks and inspected screenshots, update evidence for each requirement separately, log progress, commit and push. Continue the other 351 Open entries in independent groups; no partial capability counts as complete.
 
 ### Saved implementation map
 
