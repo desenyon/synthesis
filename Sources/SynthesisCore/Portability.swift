@@ -100,10 +100,41 @@ extension WorkspaceStore {
       return
         "- \(period.kind.title) · \(MarkdownText.escape(period.name)) · From \(start) · Until \(end)"
     }.joined(separator: "\n")
+    let facts =
+      record.kind == "entity"
+      ? try structuredFactMarkdown(worldID: worldID, subjectID: record.id) : ""
     return metadata + heading + illustration + MarkdownText.body(record) + "\n"
       + (properties.isEmpty ? "" : "\n## Structured properties\n\n" + properties + "\n")
       + (nameHistory.isEmpty ? "" : "\n## Names through time\n\n" + nameHistory + "\n")
+      + (facts.isEmpty ? "" : "\n## Structured facts\n\n" + facts + "\n")
       + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n")
+  }
+
+  private func structuredFactMarkdown(worldID: String, subjectID: String) throws -> String {
+    var entries: [String] = []
+    for fact in try structuredFacts(worldID: worldID, subjectID: subjectID) {
+      var revisions = [fact.working]
+      if let accepted = fact.accepted, accepted.id != fact.working.id { revisions.append(accepted) }
+      for revision in revisions {
+        let value: String
+        switch revision.value {
+        case .text(let text): value = MarkdownText.escape(text)
+        case .entity(let id):
+          let entity = try record(worldID: worldID, id: id)
+          value = "\(MarkdownText.escape(entity.title)) (\(id))"
+        }
+        var line =
+          "- **\(MarkdownText.escape(fact.predicate))** · \(revision.status.title) · \(value)"
+        line += " · \(MarkdownText.escape(revision.author)) · \(revision.recordedAt)"
+        if let evidence = revision.evidence {
+          let source = try structuredFactSource(worldID: worldID, evidence: evidence)
+          line +=
+            " · Evidence: \(MarkdownText.escape(source.title)) (\(source.id), revision \(source.version))"
+        }
+        entries.append(line)
+      }
+    }
+    return entries.joined(separator: "\n")
   }
 
   /// One Markdown file per record with front matter, plus relationship and timeline indexes.
@@ -186,8 +217,21 @@ extension WorkspaceStore {
         "# Relationships\n\nRelationships between entities in \(world.name).\n\n"
           + (related.isEmpty ? "None yet.\n" : related.joined(separator: "\n") + "\n")
       ))
-    let history = try events(worldID: worldID).map {
-      "- **\($0.dateLabel == "unknown" ? "Date unknown" : $0.dateLabel)** — \($0.title) (source: \(titles[$0.sourceID] ?? "archived record"))"
+    let timelineDates = try timelineEventDates(worldID: worldID)
+    let calendarName = try timelineCalendar(worldID: worldID)?.name
+    let history = try events(worldID: worldID).map { event in
+      let originalLabel = event.dateLabel == "unknown" ? "Date unknown" : event.dateLabel
+      let source = titles[event.sourceID] ?? "archived record"
+      var line = "- **\(originalLabel)** — \(event.title) (source: \(source))"
+      if let date = timelineDates[event.id] {
+        switch date {
+        case .calendarDay:
+          line += "\n  - \(date.label) (\(calendarName ?? "Calendar"))"
+        case .unknown:
+          if event.dateLabel != "unknown" { line += "\n  - Calendar date unknown" }
+        }
+      }
+      return line
     }
     files.append(
       (

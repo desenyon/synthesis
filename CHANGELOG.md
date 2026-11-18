@@ -4,6 +4,8 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
+- Timeline adds a scalable horizontal date axis and configurable fixed calendars. Entity profiles can record independent facts with document revision evidence and an explicit approval step.
+- Review applies an explicitly accepted proposal batch as drafts in one transaction. Reviewed what-if relationships carry their metadata and evidence into the parent world.
 - Graph can isolate a selected entity’s neighborhood and expand it by degrees. The relationship inspector opens recorded revisions. Atlas places open linked child maps, and empty parent maps retain child navigation.
 - Canvas can browse and place events, proposals and Atlas images from the current world. Its compact header keeps the board title and drawing controls in view. Archiving the last board and creating its replacement run in one transaction.
 - Entity profiles distinguish portraits, location artwork and banners. Request pins prioritize their eligible history within the context limits, and a composer that changes worlds loads the new world’s draft before Send.

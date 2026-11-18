@@ -9,7 +9,6 @@ struct ObjectInspector: View {
   @State private var data: ObjectInspection?
   @State private var failure: String?
   @State private var recordPicker = false
-  @State private var relationshipHistory: RelationshipHistoryTarget?
   private struct Refresh: Hashable {
     var world: String
     var revision: Int
@@ -65,7 +64,7 @@ struct ObjectInspector: View {
             }
             if case .relationship(let id) = target {
               Button("Show history") {
-                showRelationshipHistory(id: id, title: data.title)
+                studio.showRelationshipHistory(id: id, title: data.title)
               }.buttonStyle(QuietButton(t: studio.t))
             }
             VStack(alignment: .leading, spacing: 12) {
@@ -134,21 +133,8 @@ struct ObjectInspector: View {
       .animation(reduceMotion ? nil : Motion.panelAnimation, value: target)
       .task(id: Refresh(world: studio.worldID, revision: studio.worldRevision, target: target)) {
         load()
-        if ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil,
-          studio.captureHint == "relationship-history", case .relationship(let id) = target,
-          let data
-        {
-          showRelationshipHistory(id: id, title: data.title)
-        }
-      }
-      .studioSheet(item: $relationshipHistory) { target in
-        RelationshipHistorySheet(studio: studio, target: target) { relationshipHistory = nil }
       }
       .accessibilityElement(children: .contain).accessibilityLabel("Contextual inspector")
-  }
-  private func showRelationshipHistory(id: String, title: String) {
-    relationshipHistory = RelationshipHistoryTarget(
-      worldID: studio.worldID, relationshipID: id, title: title)
   }
   private func load() {
     do {

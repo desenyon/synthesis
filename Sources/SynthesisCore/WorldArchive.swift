@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 12
+  var version = 14
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -19,7 +19,8 @@ extension WorkspaceStore {
     "record_artwork", "world_activity", "entity_types", "entity_profiles", "entity_profile_history",
     "entity_type_history", "entity_templates", "entity_template_history", "conversation_branches",
     "conversation_message_origins", "prompt_recipes", "entity_name_periods",
-    "entity_name_period_history",
+    "entity_name_period_history", "timeline_calendars", "timeline_event_dates",
+    "structured_facts", "structured_fact_revisions",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
     _ = try world(worldID)
@@ -79,7 +80,16 @@ extension WorkspaceStore {
         archive.tables[table] = archive.tables[table] ?? []
       }
     }
-    guard archive.format == "dev.synthesis.world", (1...12).contains(archive.version),
+    if (1...12).contains(archive.version) {
+      archive.tables["timeline_calendars"] = archive.tables["timeline_calendars"] ?? []
+      archive.tables["timeline_event_dates"] = archive.tables["timeline_event_dates"] ?? []
+    }
+    if (1...13).contains(archive.version) {
+      for table in ["structured_facts", "structured_fact_revisions"] {
+        archive.tables[table] = archive.tables[table] ?? []
+      }
+    }
+    guard archive.format == "dev.synthesis.world", (1...14).contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -162,6 +172,8 @@ extension WorkspaceStore {
       for table in Self.archiveTables {
         for source in archive.tables[table] ?? [] {
           var row = source.mapValues(remap)
+          if table == "timeline_calendars" { row["name"] = source["name"] }
+          if table == "events" { row["date_label"] = source["date_label"] }
           if table == "record_artwork" {
             guard let image = source["image"], let data = Data(base64Encoded: image),
               try Self.validateArtwork(data) == source["mime_type"],
@@ -187,6 +199,21 @@ extension WorkspaceStore {
             // Names and date labels are fictional wording, never addresses.
             try validateEntityNameArchiveLabels(source)
             for key in ["name", "start_label", "end_label"] { row[key] = source[key] }
+          }
+          if table == "structured_facts" { row["predicate"] = source["predicate"] }
+          if table == "structured_fact_revisions" {
+            for key in ["text_value", "author"] { row[key] = source[key] }
+          }
+          if table == "proposals", let raw = source["payload"], let mapped = row["payload"],
+            raw.contains("\"relationshipAttributes\"")
+          {
+            // Evidence addresses follow the copied world. Authored date labels stay literal.
+            let original = try schemaDecode([ProposedChange].self, raw)
+            var changes = try schemaDecode([ProposedChange].self, mapped)
+            for index in changes.indices {
+              changes[index].relationshipAttributes = original[index].relationshipAttributes
+            }
+            row["payload"] = try schemaJSON(changes)
           }
           // Reject external references even on tables whose historical schema lacks FKs.
           for (key, value) in source where key.hasSuffix("_id") && key != "owner_id" {
@@ -217,6 +244,8 @@ extension WorkspaceStore {
       try validateActivitySources(worldID: newWorld)
       try validateRelationshipArchive(worldID: newWorld)
       try validateEntityNameArchive(worldID: newWorld)
+      try validateTimelineArchive(worldID: newWorld)
+      try validateStructuredFactArchive(worldID: newWorld)
       try validateEntitySchemas(worldID: newWorld)
       try refreshEntityPropertySearch(worldID: newWorld)
       try validateConversationTools(worldID: newWorld)

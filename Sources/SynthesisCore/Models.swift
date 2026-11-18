@@ -70,7 +70,7 @@ extension Relation {
     revision = try values.decodeIfPresent(Int.self, forKey: .revision) ?? 1
   }
 }
-public struct WorldEvent: Identifiable, Codable, Sendable {
+public struct WorldEvent: Identifiable, Codable, Equatable, Sendable {
   public var id: String
   public var title: String
   public var dateLabel: String
@@ -129,6 +129,8 @@ public struct ProposedChange: Identifiable, Codable, Equatable, Sendable {
   public var y: Double? = nil
   /// Reviewable domain metadata captured before a workspace edit. Never includes image bytes.
   public var workspaceBefore: [String: String]? = nil
+  /// What-if relationship details. Supporting records are proposed separately in `evidence`.
+  public var relationshipAttributes: RelationshipAttributes? = nil
 }
 public struct Proposal: Identifiable, Codable, Equatable, Sendable {
   public var id: String

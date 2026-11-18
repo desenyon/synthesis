@@ -5,14 +5,19 @@ import SynthesisCore
 /// optional position and never invents calendar precision.
 /// How much of each event Timeline shows. Remembered on this device only.
 enum TimelineDensity: String, CaseIterable, Codable {
-  case detailed, compact, overview
+  case detailed, compact, overview, axis
   var title: String {
     switch self {
     case .detailed: return "Detailed"
     case .compact: return "Compact"
     case .overview: return "By era"
+    case .axis: return "Calendar axis"
     }
   }
+}
+
+private enum TimelineDateInput: Hashable {
+  case wording, calendarDay, unknown
 }
 
 struct TimelineScreen: View {
@@ -58,11 +63,41 @@ struct TimelineScreen: View {
   @State private var order = ""
   @State private var source = ""
   @State private var sourcePicker = false
+  @State private var calendar: TimelineCalendar?
+  @State private var timelineDates: [String: TimelineEventDate] = [:]
+  @State private var calendarSheetWorld: String?
+  @State private var creatingCalendar = false
+  @State private var editingWorld: String?
+  @State private var expectedEvent: TimelineEventExpectation?
+  @State private var dateInput: TimelineDateInput = .wording
+  @State private var year = ""
+  @State private var month = ""
+  @State private var day = ""
+
+  private var calendarDay: CalendarDay? {
+    guard let calendar, let year = Int(year), let month = Int(month), let day = Int(day)
+    else { return nil }
+    let value = CalendarDay(year: year, month: month, day: day)
+    guard (try? calendar.startHour(of: value)) != nil else { return nil }
+    return value
+  }
+
+  private func displayDate(_ event: WorldEvent) -> String {
+    if let typed = timelineDates[event.id] {
+      if case .unknown = typed, event.dateLabel != "unknown", !event.dateLabel.isEmpty {
+        return event.dateLabel
+      }
+      return typed.label
+    }
+    return event.dateLabel == "unknown" || event.dateLabel.isEmpty
+      ? "Date unknown" : event.dateLabel
+  }
   private var filtered: [WorldEvent] {
     events.filter {
       (selectedLane.isEmpty || placements[$0.id] == selectedLane
         || descendants.contains(placements[$0.id] ?? ""))
         && (query.isEmpty || $0.dateLabel.localizedCaseInsensitiveContains(query)
+          || displayDate($0).localizedCaseInsensitiveContains(query)
           || $0.title.localizedCaseInsensitiveContains(query))
     }
   }
@@ -87,73 +122,11 @@ struct TimelineScreen: View {
           help: "Add an event, using existing lore or a new draft document"
         ) { begin(nil) }
       }
-      ContentHeader {
-        PlainMenu {
-          Button("All history") { studio.openTimelineLane(nil) }
-          ForEach(lanes) { lane in
-            Button("\(lane.kind == "branch" ? "Branch" : "Period") · \(lane.name)") {
-              studio.openTimelineLane(lane.id)
-            }
-          }
-        } label: {
-          Text(lanes.first { $0.id == selectedLane }?.name ?? "All history").font(
-            .studio(.label))
-        }.frame(maxWidth: 260, alignment: .leading)
-        if let lane = lanes.first(where: { $0.id == selectedLane }) {
-          Text([lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — ")).font(
-            .studio(.caption)
-          ).foregroundStyle(studio.t.secondary)
-          IconButton(icon: "pencil.line", label: "Edit history", t: studio.t) {
-            edit(lane)
-          }
-          IconButton(icon: "archivebox", label: "Archive branch or period", t: studio.t) {
-            studio.perform {
-              try studio.store.setChronologyLaneArchived(
-                worldID: studio.worldID, id: lane.id, archived: true)
-              selectedLane = ""
-              refresh()
-              studio.show("Archived \(lane.name)", actionTitle: "Undo") {
-                studio.perform {
-                  try studio.store.setChronologyLaneArchived(
-                    worldID: studio.worldID, id: lane.id, archived: false)
-                  refresh()
-                }
-              }
-            }
-          }
-        }
-        Spacer()
-        SegmentedSwitch(
-          choices: TimelineDensity.allCases.map {
-            .init(value: $0, title: $0.title, help: "Show \($0.title.lowercased())")
-          }, selected: density, label: "Timeline zoom", t: studio.t
-        ) { value in
-          withAnimation(reduceMotion ? nil : Motion.panelAnimation) { density = value }
-          try? studio.store.setPreference("timeline-density", value: value.rawValue)
-        }
-        Button("New branch") {
-          editingLane = nil
-          laneParent = selectedLane
-          laneNotes = ""
-          laneKind = "branch"
-          laneName = ""
-          laneStart = ""
-          laneEnd = ""
-          creatingLane = true
-        }.buttonStyle(QuietButton(t: studio.t))
-        Button("New period") {
-          editingLane = nil
-          laneParent = selectedLane
-          laneNotes = ""
-          laneKind = "period"
-          laneName = ""
-          laneStart = ""
-          laneEnd = ""
-          creatingLane = true
-        }.buttonStyle(QuietButton(t: studio.t))
-      }
+      historyHeader
       if !lanes.isEmpty { historyTree }
-      if rows.isEmpty {
+      if density == .axis {
+        axis(rows)
+      } else if rows.isEmpty {
         empty.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
         ScrollViewReader { proxy in
@@ -172,6 +145,8 @@ struct TimelineScreen: View {
                 }.padding(.vertical, 16)
               case .overview:
                 overview(rows, proxy: proxy)
+              case .axis:
+                EmptyView()
               }
             }
           }
@@ -183,6 +158,18 @@ struct TimelineScreen: View {
       if studio.captureHint == "timeline-overview" { density = .overview }
       refresh()
       consumePendingEvent()
+      if studio.captureHint.hasPrefix("timeline-axis") {
+        density = .axis
+        if studio.captureHint == "timeline-axis-new-calendar" {
+          calendarSheetWorld = studio.worldID
+          creatingCalendar = true
+        }
+        if studio.captureHint == "timeline-axis-date",
+          let dated = events.first(where: { timelineDates[$0.id] != nil })
+        {
+          begin(dated)
+        }
+      }
       if studio.captureHint == "timeline-edit", let lane = lanes.first {
         selectedLane = lane.id
         edit(lane)
@@ -192,7 +179,164 @@ struct TimelineScreen: View {
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .studioSheet(isPresented: $composing) { form }
     .studioSheet(isPresented: $creatingLane) { laneForm }
+    .studioSheet(isPresented: $creatingCalendar) {
+      if let worldID = calendarSheetWorld {
+        FixedTimelineCalendarSheet(studio: studio, worldID: worldID) {
+          creatingCalendar = false
+          refresh()
+        }
+      }
+    }
   }
+
+  private func axis(_ rows: [WorldEvent]) -> some View {
+    let unplaced = rows.filter { event in
+      if case .calendarDay? = timelineDates[event.id] { return false }
+      return true
+    }
+    return ScrollView {
+      ContentColumn {
+        VStack(alignment: .leading, spacing: 18) {
+          if let calendar {
+            FixedTimelineAxis(
+              calendar: calendar, events: rows, dates: timelineDates, t: studio.t,
+              inspect: { studio.inspect(.event($0.id)) }, edit: { begin($0) }
+            ).id(calendar.id)
+          } else {
+            EmptyState(
+              icon: "calendar", title: "Set up a calendar",
+              message:
+                "Define this world’s calendar to position events on the axis.",
+              t: studio.t
+            ) {
+              Button("Create calendar") {
+                calendarSheetWorld = studio.worldID
+                creatingCalendar = true
+              }.buttonStyle(QuietButton(t: studio.t, primary: true))
+            }
+          }
+          if !unplaced.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+              Text("Without a calendar date").font(.studio(.cardTitle))
+              ForEach(unplaced) { compactRow($0) }
+            }
+          } else if rows.isEmpty, !query.isEmpty {
+            empty
+          }
+        }.padding(.vertical, 16)
+      }
+    }
+  }
+
+  private var historyHeader: some View {
+    let lane = lanes.first { $0.id == selectedLane }
+    return ContentHeader {
+      ViewThatFits(in: .horizontal) {
+        HStack(spacing: Space.sm) {
+          historyScope(lane)
+          Spacer(minLength: Space.sm)
+          timelineDisplayMenu
+          Button("New branch") { beginHistory("branch") }.buttonStyle(QuietButton(t: studio.t))
+          Button("New period") { beginHistory("period") }.buttonStyle(QuietButton(t: studio.t))
+        }
+        VStack(alignment: .leading, spacing: Space.sm) {
+          historyScope(lane)
+          HStack(spacing: Space.sm) {
+            timelineDisplayMenu
+            Spacer(minLength: Space.sm)
+            PlainMenu {
+              Button("New branch") { beginHistory("branch") }
+              Button("New period") { beginHistory("period") }
+            } label: {
+              Label("New history", systemImage: "plus").font(.studio(.label))
+            }
+          }
+        }
+      }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+  }
+
+  private func historyScope(_ lane: ChronologyLane?) -> some View {
+    HStack(spacing: Space.sm) {
+      PlainMenu(flexible: true) {
+        Button("All history") { studio.openTimelineLane(nil) }
+        ForEach(lanes) { lane in
+          Button("\(lane.kind == "branch" ? "Branch" : "Period") · \(lane.name)") {
+            studio.openTimelineLane(lane.id)
+          }
+        }
+      } label: {
+        HStack(spacing: 5) {
+          Text(lane?.name ?? "All history").font(.studio(.label)).lineLimit(1)
+          StudioIcon("chevron.down", size: 9).foregroundStyle(studio.t.secondary)
+        }.contentShape(Rectangle())
+      }.frame(maxWidth: 260, alignment: .leading)
+        .layoutPriority(1)
+      if let lane {
+        let dates = [lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — ")
+        if !dates.isEmpty {
+          Text(dates).font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+            .lineLimit(1).help(dates)
+        }
+        IconButton(icon: "pencil.line", label: "Edit history", t: studio.t) { edit(lane) }
+        IconButton(icon: "archivebox", label: "Archive branch or period", t: studio.t) {
+          studio.perform {
+            try studio.store.setChronologyLaneArchived(
+              worldID: studio.worldID, id: lane.id, archived: true)
+            selectedLane = ""
+            refresh()
+            studio.show("Archived \(lane.name)", actionTitle: "Undo") {
+              studio.perform {
+                try studio.store.setChronologyLaneArchived(
+                  worldID: studio.worldID, id: lane.id, archived: false)
+                refresh()
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private var timelineDisplayMenu: some View {
+    PlainMenu {
+      ForEach(TimelineDensity.allCases, id: \.self) { value in
+        Button {
+          changeDensity(value)
+        } label: {
+          HStack {
+            Text(value.title)
+            Spacer()
+            if density == value { StudioIcon("check", size: 11) }
+          }
+        }.accessibilityAddTraits(density == value ? .isSelected : [])
+      }
+    } label: {
+      HStack(spacing: 5) {
+        Text(density.title).font(.studio(.label))
+        StudioIcon("chevron.down", size: 9).foregroundStyle(studio.t.secondary)
+      }.contentShape(Rectangle())
+    }.accessibilityLabel("Timeline display, \(density.title)")
+  }
+
+  private func changeDensity(_ value: TimelineDensity) {
+    withAnimation(reduceMotion ? nil : Motion.panelAnimation) { density = value }
+    if value != .axis {
+      try? studio.store.setPreference("timeline-density", value: value.rawValue)
+    }
+  }
+
+  private func beginHistory(_ kind: String) {
+    editingLane = nil
+    laneParent = selectedLane
+    laneNotes = ""
+    laneKind = kind
+    laneName = ""
+    laneStart = ""
+    laneEnd = ""
+    creatingLane = true
+  }
+
   /// The hierarchy stays visible even when a newly accepted branch has no events yet.
   private var historyTree: some View {
     ScrollView {
@@ -345,10 +489,11 @@ struct TimelineScreen: View {
   }
   private func compactRow(_ event: WorldEvent) -> some View {
     let source = studio.records.first { $0.id == event.sourceID }
-    let unknown = event.dateLabel == "unknown" || event.dateLabel.isEmpty
+    let date = displayDate(event)
+    let unknown = date == "Date unknown"
     let lane = lanes.first { $0.id == placements[event.id] }
     return HStack(spacing: 12) {
-      Text(unknown ? "Date unknown" : event.dateLabel).font(.studio(.captionStrong))
+      Text(date).font(.studio(.captionStrong))
         .foregroundStyle(unknown ? studio.t.muted : studio.t.category("events")).lineLimit(1)
         .frame(width: 132, alignment: .trailing)
       Circle().fill(unknown ? studio.t.muted : studio.t.category("events")).frame(
@@ -389,9 +534,10 @@ struct TimelineScreen: View {
   }
   private func row(_ event: WorldEvent, first: Bool, last: Bool) -> some View {
     let sourceRecord = studio.records.first { $0.id == event.sourceID }
-    let unknown = event.dateLabel == "unknown"
+    let date = displayDate(event)
+    let unknown = date == "Date unknown"
     return HStack(alignment: .top, spacing: 16) {
-      Text(unknown ? "Date unknown" : event.dateLabel)
+      Text(date)
         .font(.studio(size: 12.5, weight: .medium))
         .foregroundStyle(unknown ? studio.t.muted : studio.t.category("events"))
         .multilineTextAlignment(.trailing).frame(width: 132, alignment: .trailing)
@@ -438,14 +584,37 @@ struct TimelineScreen: View {
     newSource = false
   }
   private func begin(_ event: WorldEvent?) {
-    eventLane = event.flatMap { placements[$0.id] } ?? selectedLane
-    editing = event
-    title = event?.title ?? ""
-    date = event.map { $0.dateLabel == "unknown" ? "" : $0.dateLabel } ?? ""
-    order = event?.order.map(String.init) ?? ""
-    source = event?.sourceID ?? studio.records.first?.id ?? ""
-    newSource = event == nil && studio.records.isEmpty
-    composing = true
+    studio.perform {
+      let worldID = studio.worldID
+      let fresh = try event.map {
+        try studio.store.timelineEventExpectation(worldID: worldID, event: $0)
+      }
+      let existingDate = fresh?.date
+      editingWorld = worldID
+      expectedEvent = fresh
+      eventLane = event == nil ? selectedLane : fresh?.laneID ?? ""
+      editing = event
+      title = event?.title ?? ""
+      date = event.map { $0.dateLabel == "unknown" ? "" : $0.dateLabel } ?? ""
+      order = event?.order.map(String.init) ?? ""
+      source = event?.sourceID ?? studio.records.first?.id ?? ""
+      newSource = event == nil && studio.records.isEmpty
+      year = ""
+      month = ""
+      day = ""
+      switch existingDate {
+      case .calendarDay(let value)?:
+        dateInput = .calendarDay
+        year = String(value.year)
+        month = String(value.month)
+        day = String(value.day)
+      case .unknown?:
+        dateInput = .unknown
+      case nil:
+        dateInput = .wording
+      }
+      composing = true
+    }
   }
   private func move(_ event: WorldEvent, by offset: Int) {
     studio.perform {
@@ -482,16 +651,26 @@ struct TimelineScreen: View {
   }
   private func closeForm() { composing = false }
   private var form: some View {
+    let existingDate = expectedEvent?.date
+    let dateChoices: [(TimelineDateInput, String)] =
+      (existingDate == nil ? [(.wording, "Wording only")] : [])
+      + (calendar == nil ? [] : [(.calendarDay, "Calendar day")]) + [(.unknown, "Unknown")]
     let valid =
       !title.trimmingCharacters(in: .whitespaces).isEmpty && (newSource || !source.isEmpty)
-      && (order.isEmpty || Int(order) != nil)
+      && (order.isEmpty || Int(order) != nil) && (dateInput != .calendarDay || calendarDay != nil)
     let save = {
       studio.perform {
+        guard let editingWorld, editingWorld == studio.worldID else { throw SynthesisError.stale }
+        let proposedDate: TimelineEventDate? =
+          dateInput == .unknown
+          ? .unknown
+          : dateInput == .calendarDay ? calendarDay.map(TimelineEventDate.calendarDay) : nil
         let name = title.trimmingCharacters(in: .whitespacesAndNewlines)
         _ = try studio.store.saveChronologyEvent(
           worldID: studio.worldID, id: editing?.id, title: name, date: date,
           source: newSource ? nil : source,
-          order: Int(order), laneID: eventLane.isEmpty ? nil : eventLane)
+          order: Int(order), laneID: eventLane.isEmpty ? nil : eventLane,
+          timelineDate: proposedDate == existingDate ? nil : proposedDate, expected: expectedEvent)
         try studio.reload()
         composing = false
         refresh()
@@ -507,6 +686,20 @@ struct TimelineScreen: View {
           label: "When", placeholder: "Leave empty if unknown", text: $date, t: studio.t)
         FormField(label: "Position", placeholder: "Optional", text: $order, t: studio.t)
           .frame(width: 110)
+      }
+      ChoiceField(
+        title: "Calendar placement", selection: $dateInput, choices: dateChoices, t: studio.t)
+      if dateInput == .calendarDay, let calendar {
+        HStack(spacing: 10) {
+          FormField(label: "Year", placeholder: "Year", text: $year, t: studio.t)
+          FormField(label: "Month", placeholder: "Month", text: $month, t: studio.t)
+          FormField(label: "Day", placeholder: "Day", text: $day, t: studio.t)
+        }
+        Text(calendarDay == nil ? "Enter a valid date in \(calendar.name)." : calendar.name)
+          .font(.studio(.caption)).foregroundStyle(
+            calendarDay == nil ? studio.t.danger : studio.t.secondary
+          )
+          .lineLimit(2)
       }
       ChoiceField(
         title: "Branch or period", selection: $eventLane,
@@ -623,6 +816,8 @@ struct TimelineScreen: View {
       events = try studio.store.events(worldID: studio.worldID)
       lanes = try studio.store.chronologyLanes(worldID: studio.worldID)
       placements = try studio.store.chronologyPlacements(worldID: studio.worldID)
+      calendar = try studio.store.timelineCalendar(worldID: studio.worldID)
+      timelineDates = try studio.store.timelineEventDates(worldID: studio.worldID)
       if !selectedLane.isEmpty && !lanes.contains(where: { $0.id == selectedLane }) {
         selectedLane = ""
       }

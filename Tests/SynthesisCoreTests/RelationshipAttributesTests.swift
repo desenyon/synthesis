@@ -138,7 +138,7 @@ struct RelationshipAttributesTests {
 
     let archive = try store.exportWorldArchive(worldID: world.id)
     let portable = try JSONDecoder().decode(WorldArchive.self, from: archive)
-    #expect(portable.version == 12)
+    #expect(portable.version == 14)
     let copy = try store.importWorldArchiveMapping(archive)
     let copiedEdge = try #require(try store.relations(worldID: copy.world.id).first)
     var expected = attributes
@@ -183,7 +183,7 @@ struct RelationshipAttributesTests {
     let json = try #require(
       JSONSerialization.jsonObject(with: store.exportWorld(world.id)) as? [String: Any])
     let hidden = try #require((json["hiddenRelationships"] as? [[String: String]])?.first)
-    #expect(json["schemaVersion"] as? Int == 15)
+    #expect(json["schemaVersion"] as? Int == 17)
     #expect(hidden["id"] == edge.id)
     #expect(
       try RelationshipAttributes.decodeStored(try #require(hidden["attributes"])) == attributes)

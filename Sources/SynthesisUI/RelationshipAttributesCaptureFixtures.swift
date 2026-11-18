@@ -45,6 +45,9 @@ extension Studio {
         inspectionTarget = .relationship(edge.id)
         workspaceInspector = true
       }
+      if state == "relationship-history" {
+        showRelationshipHistory(id: edge.id, title: edge.label)
+      }
       captureHint = state
     }
   }

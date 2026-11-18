@@ -619,6 +619,9 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
           if state.hasSuffix("session-writing") {
             try studio.auditRestoredWritingSession()
           }
+          if let error = studio.error {
+            throw SynthesisError.invalid("Capture state \(state) after layout: \(error)")
+          }
           if state != "toast" { studio.toast = nil }
           window.layoutTrafficLights()
           guard !NSApp.isActive, !window.isKeyWindow else {

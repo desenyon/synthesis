@@ -98,9 +98,17 @@ extension WorkspaceStore {
   /// never an inferred calendar. Branch membership does not promote an event into canon.
   public func saveChronologyEvent(
     worldID: String, id: String?, title: String, date: String, source: String?, order: Int?,
-    laneID: String?, origin: String = "user-authored"
+    laneID: String?, origin: String = "user-authored", timelineDate: TimelineEventDate? = nil,
+    expected: TimelineEventExpectation? = nil
   ) throws -> WorldEvent {
     try db.transaction {
+      if let expected {
+        guard id == expected.event.id, worldID == expected.worldID,
+          try timelineEventExpectation(worldID: worldID, event: expected.event) == expected
+        else { throw SynthesisError.stale }
+      } else if timelineDate != nil && id != nil {
+        throw SynthesisError.stale
+      }
       if let laneID {
         guard try chronologyLanes(worldID: worldID).contains(where: { $0.id == laneID }) else {
           throw SynthesisError.notFound
@@ -119,6 +127,9 @@ extension WorkspaceStore {
       } else {
         event = try addEvent(
           worldID: worldID, title: title, date: date, source: source, order: order, origin: origin)
+      }
+      if let timelineDate {
+        try storeTimelineEventDate(worldID: worldID, eventID: event.id, date: timelineDate)
       }
       if let laneID {
         let now = timestamp()

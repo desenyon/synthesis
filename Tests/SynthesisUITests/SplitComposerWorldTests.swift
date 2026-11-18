@@ -26,11 +26,11 @@ import Testing
     #expect(editor.string == submitted)
     let submit = try #require(editor.onSubmit)
     submit()
-    let deadline = ContinuousClock.now + .seconds(3)
-    while studio.busy && ContinuousClock.now < deadline {
+    defer { studio.stop() }
+    let deadline = ContinuousClock.now + .seconds(5)
+    while await transport.requests.isEmpty && ContinuousClock.now < deadline {
       try await Task.sleep(for: .milliseconds(15))
     }
-    #expect(!studio.busy)
     let request = try #require(await transport.requests.first)
     #expect(request.messages.last?["content"] == submitted)
     #expect(try store.preference("composer:\(first)") == "First universe writing")

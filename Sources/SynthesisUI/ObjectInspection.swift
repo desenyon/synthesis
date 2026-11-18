@@ -151,12 +151,17 @@ extension Studio {
       }
       let placements = try store.chronologyPlacements(worldID: worldID)
       let lane = try store.chronologyLanes(worldID: worldID).first { $0.id == placements[id] }
+      let originalDate = event.dateLabel == "unknown" ? "Unknown" : event.dateLabel
+      let typedDate = try store.timelineEventDates(worldID: worldID)[id]
       var result = ObjectInspection(
         title: event.title, kind: "Historical event", icon: "calendar",
         properties: [
-          property("Date", event.dateLabel == "unknown" ? "Unknown" : event.dateLabel),
+          property("Date", typedDate?.label ?? originalDate),
           property("Order", event.order.map(String.init) ?? "Unspecified"),
         ], references: reference(event.sourceID, "Source").map { [$0] } ?? [])
+      if typedDate != nil, event.dateLabel != "unknown" {
+        result.properties.append(property("Date wording", originalDate))
+      }
       if let lane {
         result.references.append(
           InspectionReference(

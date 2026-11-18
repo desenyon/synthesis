@@ -38,7 +38,8 @@ public enum ProposalParser {
 extension Proposal {
   public func prerequisites(for change: ProposedChange) -> [ProposedChange] {
     let references = Set(
-      [change.source, change.target, change.laneID, change.boardID].compactMap { $0 })
+      change.evidence
+        + [change.source, change.target, change.laneID, change.boardID].compactMap { $0 })
     return changes.filter { references.contains("change:\($0.id)") }
   }
 }
@@ -180,6 +181,22 @@ extension WorkspaceStore {
         change.source = source
         change.target = target
         change.label = label
+        if origin == "branch-merge", let rawAttributes = item["relationshipAttributes"] {
+          guard let attributes = rawAttributes as? RelationshipAttributes,
+            attributes.evidenceRecordIDs.isEmpty,
+            let requested = item["relationshipEvidence"] as? [String],
+            requested.count <= RelationshipAttributes.evidenceLimit
+          else { continue }
+          let evidence = requested.compactMap { reference in
+            if reference.hasPrefix("$") { return createdByKey[String(reference.dropFirst())] }
+            return known[reference]?.id
+          }
+          guard evidence.count == requested.count, Set(evidence).count == evidence.count else {
+            continue
+          }
+          change.relationshipAttributes = try attributes.validated()
+          change.evidence = evidence
+        }
       case "create_branch", "create_period":
         guard let title = text(item["title"], limit: 160) else { continue }
         change.title = title
@@ -343,6 +360,49 @@ extension WorkspaceStore {
       ])
     return try proposal(worldID: worldID, id: id)
   }
+  /// Applies or dismisses exactly the reviewed rows in one transaction. Existing per-row
+  /// writes run as savepoints, so failure also rolls back derived search, history and activity.
+  public func resolveChanges(
+    worldID: String, proposalID: String, changes: [ProposedChange], accept: Bool,
+    confirmation: String
+  ) throws -> Proposal {
+    guard confirmation == proposalID else {
+      throw SynthesisError.invalid("Explicit approval of this exact proposal is required.")
+    }
+    let selected = Set(changes.map(\.id))
+    guard !selected.isEmpty, selected.count == changes.count else {
+      throw SynthesisError.invalid("Choose a nonempty set of distinct changes to review.")
+    }
+    let displayed = Dictionary(uniqueKeysWithValues: changes.map { ($0.id, $0) })
+    return try db.transaction {
+      var result = try proposal(worldID: worldID, id: proposalID)
+      var remaining = result.changes.filter { selected.contains($0.id) }
+      guard remaining.count == changes.count, Set(remaining.map(\.id)) == selected,
+        remaining.allSatisfy({ $0.status == "pending" && $0 == displayed[$0.id] })
+      else {
+        throw SynthesisError.invalid("These proposal decisions changed. Review the latest version.")
+      }
+      while !remaining.isEmpty {
+        let index =
+          accept
+          ? remaining.firstIndex { candidate in
+            result.prerequisites(for: candidate).allSatisfy {
+              $0.status == "accepted" && $0.resultID != nil
+            }
+          } : remaining.startIndex
+        guard let index else {
+          throw SynthesisError.invalid(
+            "Accept the required changes with this review, or leave their dependents pending.")
+        }
+        let change = remaining.remove(at: index)
+        result = try resolveChange(
+          worldID: worldID, proposalID: proposalID, changeID: change.id,
+          accept: accept, confirmation: confirmation)
+      }
+      return result
+    }
+  }
+
   /// Applies or dismisses one staged change. Requires the proposal's own ID as confirmation so
   /// only an explicit, scoped creator action can reach it; the agent engine never calls this.
   /// Accepted changes become drafts. Canon is untouched and still needs its own review.
@@ -401,10 +461,16 @@ extension WorkspaceStore {
             title: change.title ?? current.title, body: change.body ?? current.body, rtf: nil
           ).id
         case "relate":
+          var attributes = RelationshipAttributes()
+          if proposal.isBranchMerge, let reviewed = change.relationshipAttributes {
+            attributes = reviewed
+            attributes.evidenceRecordIDs = try change.evidence.map { try resolved($0) }
+            change.evidence = attributes.evidenceRecordIDs
+          }
           change.resultID = try addRelation(
             worldID: worldID, source: try resolved(change.source),
             target: try resolved(change.target), label: change.label ?? "related to",
-            origin: proposal.isBranchMerge ? "imported" : "ai-proposed"
+            origin: proposal.isBranchMerge ? "imported" : "ai-proposed", attributes: attributes
           ).id
         case "create_branch", "create_period":
           change.resultID = try createChronologyLane(

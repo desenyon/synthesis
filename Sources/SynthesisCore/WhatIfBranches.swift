@@ -120,12 +120,13 @@ extension WorkspaceStore {
       uniqueKeysWithValues: try records(worldID: branch.parentID).map { ($0.id, $0) })
     var preview: [BranchChange] = []
     var payload: [[String: Any]] = []
-    // Branch record ID → how the merge refers to it in the original (an ID or a new title).
+    // Branch record ID → original ID or a batch-local key for a record being sent.
     var reference: [String: String] = [:]
     let records = try records(worldID: worldID)
     for record in records {
       guard let origin = origins[record.id] else {
-        reference[record.id] = record.title
+        let key = "r\(record.id)"
+        reference[record.id] = "$\(key)"
         preview.append(
           BranchChange(
             id: "create:\(record.id)", kind: .create, title: record.title,
@@ -133,7 +134,7 @@ extension WorkspaceStore {
               "New \(record.kind == "entity" ? "entity" : record.kind == "capture" ? "idea" : "document") in the what-if."
           ))
         payload.append([
-          "action": "create_record", "kind": record.kind, "title": record.title,
+          "action": "create_record", "kind": record.kind, "title": record.title, "ref": key,
           "category": record.category, "body": record.body,
           "reason": "Written in the what-if “\(try world(worldID).name)”.",
         ])
@@ -187,21 +188,47 @@ extension WorkspaceStore {
         $0["item_id"]!
       })
     let titles = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0.title) })
+    func relationshipReference(_ id: String) -> String? {
+      if let origin = origins[id] { return parentActive[origin.id]?.id }
+      return reference[id]
+    }
     for relation in try relations(worldID: worldID) where !existing.contains(relation.id) {
-      guard let source = reference[relation.sourceID], let target = reference[relation.targetID]
-      else { continue }
+      let title =
+        "\(titles[relation.sourceID] ?? "?") — \(relation.label) → \(titles[relation.targetID] ?? "?")"
+      let id = "relate:\(relation.id)"
+      var attributes = relation.attributes
+      let evidence = attributes.evidenceRecordIDs.compactMap(relationshipReference)
+      guard let source = relationshipReference(relation.sourceID),
+        let target = relationshipReference(relation.targetID),
+        evidence.count == attributes.evidenceRecordIDs.count
+      else {
+        preview.append(
+          BranchChange(
+            id: id, kind: .unsupported, title: title,
+            detail:
+              "A relationship endpoint or evidence record is unavailable for merge. Restore it before sending."
+          ))
+        continue
+      }
+      attributes.evidenceRecordIDs = []
       preview.append(
         BranchChange(
-          id: "relate:\(relation.id)", kind: .relate,
-          title:
-            "\(titles[relation.sourceID] ?? "?") — \(relation.label) → \(titles[relation.targetID] ?? "?")",
-          detail: "New relationship in the what-if."))
+          id: id, kind: .relate, title: title, detail: "New relationship in the what-if."))
       payload.append([
         "action": "relate", "source": source, "target": target, "label": relation.label,
-        "reason": "Connected in the what-if.",
+        "reason": "Connected in the what-if.", "relationshipAttributes": attributes,
+        "relationshipEvidence": evidence,
       ])
     }
+    let timelineDates = try timelineEventDates(worldID: worldID)
     for event in try events(worldID: worldID) where !existing.contains(event.id) {
+      if timelineDates[event.id] != nil {
+        preview.append(
+          BranchChange(
+            id: "unsupported:\(event.id)", kind: .unsupported, title: event.title,
+            detail: "This event has a structured date. Copy it manually to keep its date."))
+        continue
+      }
       var item: [String: Any] = [
         "action": "add_event", "title": event.title, "date": event.dateLabel,
         "reason": "Recorded in the what-if.",
@@ -220,12 +247,12 @@ extension WorkspaceStore {
   /// in the original changes until the creator accepts individual changes in Review; canon still
   /// needs its own review after that.
   @discardableResult public func proposeBranchMerge(worldID: String) throws -> Proposal {
-    let plan = try branchPlan(worldID: worldID)
-    guard !plan.payload.isEmpty else {
-      throw SynthesisError.invalid("Nothing in this what-if can be sent yet.")
-    }
-    let name = try world(worldID).name
-    return try db.transaction {
+    try db.transaction {
+      let plan = try branchPlan(worldID: worldID)
+      guard !plan.payload.isEmpty else {
+        throw SynthesisError.invalid("Nothing in this what-if can be sent yet.")
+      }
+      let name = try world(worldID).name
       guard
         let proposal = try stageProposal(
           worldID: plan.parentID, conversationID: nil, messageID: nil,

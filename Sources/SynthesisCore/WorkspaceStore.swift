@@ -674,7 +674,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 15
+      var schemaVersion = 17
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -700,6 +700,8 @@ public final class WorkspaceStore {
       var rulePrerequisites: [[String: String]]
       var chronology: [[String: String]]
       var chronologyPlacements: [[String: String]]
+      var timelineCalendars: [[String: String]]
+      var timelineEventDates: [[String: String]]
       var recordSections: [[String: String]]
       var creativeComponents: [[String: String]]
       var recordArtwork: [[String: String]]
@@ -712,6 +714,8 @@ public final class WorkspaceStore {
       var entityTemplateHistory: [[String: String]]
       var entityNamePeriods: [[String: String]]
       var entityNamePeriodHistory: [[String: String]]
+      var structuredFacts: [[String: String]]
+      var structuredFactRevisions: [[String: String]]
       var conversationBranches: [[String: String]]
       var conversationMessageOrigins: [[String: String]]
       var promptRecipes: [[String: String]]
@@ -752,6 +756,8 @@ public final class WorkspaceStore {
       rulePrerequisites: db.rows("SELECT * FROM rule_prerequisites WHERE world_id=?", [id]),
       chronology: db.rows("SELECT * FROM chronology_lanes WHERE world_id=?", [id]),
       chronologyPlacements: db.rows("SELECT * FROM chronology_placements WHERE world_id=?", [id]),
+      timelineCalendars: db.rows("SELECT * FROM timeline_calendars WHERE world_id=?", [id]),
+      timelineEventDates: db.rows("SELECT * FROM timeline_event_dates WHERE world_id=?", [id]),
       recordSections: db.rows(
         "SELECT * FROM record_sections WHERE world_id=? ORDER BY parent_id,position", [id]),
       creativeComponents: db.rows("SELECT * FROM creative_components WHERE world_id=?", [id]),
@@ -769,6 +775,10 @@ public final class WorkspaceStore {
         "SELECT * FROM entity_name_periods WHERE world_id=? ORDER BY rowid", [id]),
       entityNamePeriodHistory: db.rows(
         "SELECT * FROM entity_name_period_history WHERE world_id=? ORDER BY rowid", [id]),
+      structuredFacts: db.rows(
+        "SELECT * FROM structured_facts WHERE world_id=? ORDER BY rowid", [id]),
+      structuredFactRevisions: db.rows(
+        "SELECT * FROM structured_fact_revisions WHERE world_id=? ORDER BY rowid", [id]),
       conversationBranches: db.rows("SELECT * FROM conversation_branches WHERE world_id=?", [id]),
       conversationMessageOrigins: db.rows(
         "SELECT * FROM conversation_message_origins WHERE world_id=?", [id]),

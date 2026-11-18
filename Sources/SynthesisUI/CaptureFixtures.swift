@@ -7,7 +7,7 @@ extension Studio {
   public static let captureStates =
     QuickCaptureController.captureStates + conversationToolsCaptureStates
     + entitySchemaCaptureStates + bidirectionalRelationshipCaptureStates
-    + relationshipMetadataCaptureStates + entityNamesCaptureStates
+    + relationshipMetadataCaptureStates + entityNamesCaptureStates + structuredFactCaptureStates
     + chronologyHierarchyCaptureStates + CanvasReferencePicker.captureStates + [
       "session-writing", "light-session-writing", "manual-session-writing", "session-sections",
       "session-split", "session-graph", "session-timeline", "session-atlas", "session-canvas",
@@ -128,7 +128,8 @@ extension Studio {
       "what-if-new", "what-if-send",
       "review-what-if", "worlds-what-if", "mechanics-tree", "mechanics-requires", "atlas-regions",
       "atlas-drawing", "atlas-placing", "light-atlas-drawing", "timeline-compact",
-      "timeline-overview", "sheet-generate",
+      "timeline-overview", "timeline-axis", "timeline-axis-date", "timeline-axis-new-calendar",
+      "sheet-generate",
     ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else {
@@ -334,6 +335,10 @@ extension Studio {
     endRecordDrag()
     clearRequestPins()
     submittedAssistantContext = nil
+    if state.hasPrefix("timeline-axis") {
+      configureFixedTimelineCapture(state, board: board, conversation: conversation)
+      return
+    }
     if Self.conversationToolsCaptureStates.contains(state) {
       configureConversationToolsCapture(state, board: board, conversation: conversation)
       return
@@ -399,6 +404,10 @@ extension Studio {
     }
     if Self.chronologyHierarchyCaptureStates.contains(state) {
       configureChronologyHierarchyCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if Self.structuredFactCaptureStates.contains(state) {
+      configureStructuredFactCapture(state, board: board, conversation: conversation)
       return
     }
     if Self.entityNamesCaptureStates.contains(state) {
@@ -624,28 +633,23 @@ extension Studio {
         var progress = ReviewProgress(
           worldID: worldID, proposalID: proposal.id, accept: true,
           total: proposal.changes.count, summary: proposal.summary)
-        _ = try store.resolveChange(
-          worldID: worldID, proposalID: proposal.id,
-          changeID: proposal.changes[0].id, accept: true, confirmation: proposal.id)
-        progress.completed = 1
         progress.phase = .running
-        progress.detail = "Canon is unchanged."
+        progress.detail = "Applying this review in one transaction."
         if state.hasSuffix("complete") {
-          for change in proposal.changes.dropFirst() {
-            _ = try store.resolveChange(
-              worldID: worldID, proposalID: proposal.id, changeID: change.id,
-              accept: true, confirmation: proposal.id)
-            progress.completed += 1
-          }
+          _ = try store.resolveChanges(
+            worldID: worldID, proposalID: proposal.id, changes: proposal.changes,
+            accept: true, confirmation: proposal.id)
+          progress.completed = proposal.changes.count
           progress.phase = .complete
+          progress.detail = "Canon is unchanged."
         } else if state.hasSuffix("failed") {
           _ = try store.saveRecord(
             worldID: worldID, id: source.id, version: source.version,
             title: source.title, body: "A newly discovered route", rtf: nil)
           do {
-            _ = try store.resolveChange(
-              worldID: worldID, proposalID: proposal.id,
-              changeID: proposal.changes[1].id, accept: true, confirmation: proposal.id)
+            _ = try store.resolveChanges(
+              worldID: worldID, proposalID: proposal.id, changes: proposal.changes,
+              accept: true, confirmation: proposal.id)
           } catch {
             progress.phase = .failed
             progress.detail = error.localizedDescription
@@ -1347,6 +1351,9 @@ extension Studio {
     case "atlas", "empty-atlas", "atlas-regions", "atlas-drawing", "atlas-placing",
       "light-atlas-drawing", "sheet-generate":
       destination = .atlas
+      if viewState != "empty-atlas" {
+        mapBoardID = try? store.boards(worldID: worldID, kind: "atlas").first?.id
+      }
     case "sections", "light-sections", "manual-sections", "sections-companion", "sheet-section",
       "section-editor":
       destination = .library

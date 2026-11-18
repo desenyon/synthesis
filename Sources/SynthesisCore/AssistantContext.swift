@@ -304,23 +304,63 @@ extension WorkspaceStore {
         decoding: try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys]),
         as: UTF8.self)
     }
-    let lore = sources.map { source -> String in
+    // Embedded links in an excerpt do not opt additional sources into the request.
+    let embeddedExclusions = exclusionIDs.subtracting(allowed)
+    let embeddedApproved = approvedRecords?.filter { allowed.contains($0.key) }
+    var embeddedLinkPermissions: [WorldReference: Bool] = [:]
+    func bodyExcerpt(_ body: String, limit: Int) throws -> String {
+      guard options.restricted, body.contains("synthesis://") else {
+        return String(body.prefix(limit))
+      }
+      guard let references = try? Self.requestWorldReferences(in: body) else {
+        return "[Excerpt omitted: too many embedded source references.]"
+      }
+      let hidden = Set(
+        references.filter { reference in
+          if let permitted = embeddedLinkPermissions[reference] { return !permitted }
+          let permitted: Bool
+          switch reference.kind {
+          case .record:
+            permitted = reference.worldID == worldID && allowed.contains(reference.id)
+          case .board, .atlasImage, .canvasImage:
+            permitted =
+              embeddedApproved == nil && reference.worldID == worldID
+              && boardIDs.contains(reference.containerID ?? reference.id)
+          case .event, .artwork, .proposal:
+            permitted =
+              (try? assistantReference(
+                reference, worldID: worldID, excludedRecords: embeddedExclusions,
+                excludedHistory: excludedHistory, approvedRecords: embeddedApproved)) != nil
+          }
+          embeddedLinkPermissions[reference] = permitted
+          return !permitted
+        })
+      let filtered = try assistantPrompt(
+        body, worldID: worldID, excluding: hidden, excludingRecordIDs: embeddedExclusions,
+        approvedRecords: embeddedApproved,
+        embeddedScope: (recordIDs: allowed, references: Set(references).subtracting(hidden)))
+      // Clip only after filtering, so a link cut in half cannot expose its excluded label.
+      return String(filtered.prefix(limit))
+    }
+    let lore = try sources.map { source -> String in
       let r = source.record
       if options.canonOnly {
+        let excerpt = try bodyExcerpt(r.body, limit: 6000)
         return
-          "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category). Accepted canon: \(String(r.body.prefix(6000)))"
+          "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category). Accepted canon: \(excerpt)"
       }
       let canon = r.canonical.flatMap { $0.data(using: .utf8) }.flatMap {
         try? JSONSerialization.jsonObject(with: $0) as? [String: Any]
       }
-      let accepted = canon?["body"] as? String ?? "none"
+      let accepted = try bodyExcerpt(canon?["body"] as? String ?? "none", limit: 6000)
+      let working = try bodyExcerpt(r.body, limit: 3000)
       let rules = (try? rulesText(worldID: worldID, systemID: r.id)) ?? ""
       let properties =
         (try? entityPropertyText(worldID: worldID, recordID: r.id, allowedIDs: allowed, limit: 4000))
         ?? ""
       return (rules.isEmpty ? "" : "Rules of \(r.title) —\n\(rules)\n")
         + (properties.isEmpty ? "" : properties + "\n")
-        + "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category), state: \(r.state), version: \(r.version). Working draft: \(String(r.body.prefix(3000))). Accepted canon snapshot: \(String(accepted.prefix(6000)))"
+        + "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category), state: \(r.state), version: \(r.version). Working draft: \(working). Accepted canon snapshot: \(accepted)"
     }.joined(separator: "\n\n")
     return AssistantContext(
       sources: sources, workspace: workspace, lore: lore,
@@ -336,45 +376,46 @@ extension WorkspaceStore {
     var sources: [WorldReferenceSource] = []
     var excluded: Set<WorldReference> = []
     for reference in try Self.requestWorldReferences(in: prompt) {
-      let hiddenHistory = try isChronologyReferenceExcluded(
-        reference, worldID: worldID, exclusions: excludedHistory)
-      let hiddenRecord = reference.kind == .record && excludedRecords.contains(reference.id)
-      if hiddenHistory || hiddenRecord {
-        excluded.insert(reference)
-        continue
-      }
-      if let approvedRecords {
-        guard reference.kind == .record, let record = approvedRecords[reference.id] else {
-          excluded.insert(reference)
-          continue
-        }
-        sources.append(
-          WorldReferenceSource(
-            reference: reference, title: record.title,
-            detail: record.kind == "entity" ? record.category : "Source",
-            excerpt: "", state: "canon", recordIDs: [record.id], boardKind: nil,
-            originRecordIDs: []))
-        continue
-      }
-      if reference.kind == .proposal,
-        !excludedRecords.isEmpty || !excludedHistory.laneIDs.isEmpty
+      if let source = try assistantReference(
+        reference, worldID: worldID, excludedRecords: excludedRecords,
+        excludedHistory: excludedHistory, approvedRecords: approvedRecords)
       {
-        let prior = try proposal(worldID: worldID, id: reference.id)
-        // Earlier answers may use index entries and conversation text without excerpt IDs.
-        // Do not re-share their generated proposal text when any explicit exclusion is set.
-        if prior.messageID != nil && !prior.isBranchMerge {
-          excluded.insert(reference)
-          continue
-        }
-      }
-      let source = try resolveReference(reference, worldID: worldID)
-      if excludedRecords.isDisjoint(with: source.exclusionRecordIDs) {
         sources.append(source)
       } else {
         excluded.insert(reference)
       }
     }
     return (sources, excluded)
+  }
+
+  private func assistantReference(
+    _ reference: WorldReference, worldID: String, excludedRecords: Set<String>,
+    excludedHistory: AssistantChronologyExclusions, approvedRecords: [String: LoreRecord]?
+  ) throws -> WorldReferenceSource? {
+    let hiddenHistory = try isChronologyReferenceExcluded(
+      reference, worldID: worldID, exclusions: excludedHistory)
+    let hiddenRecord = reference.kind == .record && excludedRecords.contains(reference.id)
+    if hiddenHistory || hiddenRecord { return nil }
+    if let approvedRecords {
+      guard reference.kind == .record, let record = approvedRecords[reference.id] else {
+        return nil
+      }
+      return WorldReferenceSource(
+        reference: reference, title: record.title,
+        detail: record.kind == "entity" ? record.category : "Source",
+        excerpt: "", state: "canon", recordIDs: [record.id], boardKind: nil,
+        originRecordIDs: [])
+    }
+    if reference.kind == .proposal,
+      !excludedRecords.isEmpty || !excludedHistory.laneIDs.isEmpty
+    {
+      let prior = try proposal(worldID: worldID, id: reference.id)
+      // Earlier answers may use index entries and conversation text without excerpt IDs.
+      // Do not re-share their generated proposal text when any explicit exclusion is set.
+      if prior.messageID != nil && !prior.isBranchMerge { return nil }
+    }
+    let source = try resolveReference(reference, worldID: worldID)
+    return excludedRecords.isDisjoint(with: source.exclusionRecordIDs) ? source : nil
   }
 
   private func scopedWorkspaceContext(

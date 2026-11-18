@@ -1,5 +1,9 @@
 # Decisions
 
+## 2026-11-17 — Subscription credentials for #375 (owner-protected)
+
+The owner confirmed that signing in through Claude Code or Codex satisfies the credentials portion of #375. The subscription-only provider boundary remains binding. Keep #375 in progress until provider and model settings, context limits, data-sharing controls and cost controls meet their acceptance criteria.
+
 ## 2026-11-17 — checkpoint and release gate (owner-protected)
 
 The owner requested saving all current parallel work, including errors, committing and pushing main, and stopping so a new chat can use the configured 50-agent limit. All 394 expansion requirements remain individually accountable. No new release or tag is authorized; the owner requires every item finished before another release. Explicit publication approval is still required afterward. Existing v0.0.1–v0.0.3 releases remain untouched. This supersedes earlier release authorization for the current development pass.

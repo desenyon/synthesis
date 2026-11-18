@@ -231,6 +231,9 @@ struct ProposalCard: View {
       if let before = change.workspaceBefore {
         workspaceChanges(change, before: before).padding(.leading, 28)
       }
+      if let attributes = change.relationshipAttributes, attributes != .init() {
+        relationshipDetails(attributes).padding(.leading, 28)
+      }
       if open, let text = change.body {
         preview(
           text,
@@ -254,6 +257,10 @@ struct ProposalCard: View {
                   .background(t.background.opacity(0.6), in: Capsule())
                   .overlay(Capsule().stroke(t.hairline, lineWidth: 1))
               }.buttonStyle(.plain).help("Open \(record.title)")
+            } else if change.relationshipAttributes != nil {
+              let name = studio.name(for: id, in: proposal)
+              Text(id.hasPrefix("change:") ? "New record · \(name)" : name)
+                .font(.studio(.caption)).foregroundStyle(t.secondary).lineLimit(2)
             }
           }
         }.padding(.leading, 28)
@@ -323,6 +330,23 @@ struct ProposalCard: View {
       }
     }
   }
+  private func relationshipDetails(_ attributes: RelationshipAttributes) -> some View {
+    let details = [
+      "Meaning · \(attributes.kind.title)",
+      "Start · \(attributes.startLabel.isEmpty ? "Unknown" : attributes.startLabel)",
+      "End · \(attributes.endLabel.isEmpty ? "Unknown" : attributes.endLabel)",
+      "Strength · \(attributes.strength.title)",
+      "Secrecy · \(attributes.secrecy.title)",
+      "Mutuality · \(attributes.mutuality.title)",
+      "Status · \(attributes.status.title)",
+    ]
+    return VStack(alignment: .leading, spacing: 2) {
+      ForEach(details, id: \.self) { detail in
+        Text(detail).fixedSize(horizontal: false, vertical: true)
+      }
+    }.font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+  }
+
   private func workspaceChanges(_ change: ProposedChange, before: [String: String]) -> some View {
     let after = [
       "title": change.title, "date": change.date, "endDate": change.endDate,

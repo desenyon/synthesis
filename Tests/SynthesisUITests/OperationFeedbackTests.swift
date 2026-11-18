@@ -28,7 +28,7 @@ import Testing
     #expect(studio.mode == .manual)
   }
 
-  @Test func partiallyFailedBatchReportsActualCountAndLeavesLaterDecisionsPending() async throws {
+  @Test func failedBatchReportsZeroAndLeavesEveryDecisionPending() async throws {
     let store = try WorkspaceStore(path: ":memory:")
     let studio = try Studio(store: store)
     let record = try store.createRecord(worldID: studio.worldID, title: "Source", body: "Old")
@@ -46,11 +46,12 @@ import Testing
       title: record.title, body: "Newer human writing", rtf: nil)
     studio.resolveAll(proposal, accept: true)
     while studio.reviewingProposal { await Task.yield() }
-    #expect(studio.reviewProgress?.completed == 1 && studio.reviewProgress?.phase == .failed)
-    #expect(studio.reviewProgress?.feedback.fraction == 0.5 && studio.error != nil)
-    #expect(studio.pendingProposals.first?.pending == 1)
+    #expect(studio.reviewProgress?.completed == 0 && studio.reviewProgress?.phase == .failed)
+    #expect(studio.reviewProgress?.feedback.fraction == 0 && studio.error != nil)
+    #expect(studio.pendingProposals.first?.pending == 2)
     #expect(try store.record(worldID: studio.worldID, id: record.id).body == "Newer human writing")
-    #expect(studio.records.contains { $0.title == "First" && $0.state == "draft" })
+    #expect(!studio.records.contains { $0.title == "First" })
+    #expect(try store.search(worldID: studio.worldID, query: "First").isEmpty)
   }
 
   @Test func changingWorldBeforeReviewCannotApplyDecisionsIntoEitherWorld() async throws {

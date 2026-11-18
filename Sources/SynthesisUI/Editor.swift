@@ -45,7 +45,7 @@ enum TextDiff {
 
 struct EditorScreen: View {
   enum Panel: String, Identifiable {
-    case history, canon, names
+    case history, canon, names, facts
     var id: String { rawValue }
   }
   @ObservedObject var studio: Studio
@@ -175,6 +175,11 @@ struct EditorScreen: View {
       {
         panel = .names
       }
+      if placement == .main && record.kind == "entity"
+        && Studio.structuredFactCaptureStates.contains(studio.captureHint)
+      {
+        panel = .facts
+      }
     }
     .onDisappear {
       saving?.cancel()
@@ -206,6 +211,9 @@ struct EditorScreen: View {
         EntityNamePeriodsSheet(
           studio: studio, entity: record, placement: placement,
           editForCapture: studio.captureHint == "entity-name-edit", close: closePanel)
+      case .facts:
+        StructuredFactsSheet(
+          studio: studio, subject: record, placement: placement, close: closePanel)
       }
     }
   }
@@ -318,6 +326,9 @@ struct EditorScreen: View {
             }
           }
         }
+      }
+      if record.kind == "entity" {
+        Button("Structured facts…") { if save() { panel = .facts } }
       }
       Button("Show on canvas") { if save() { studio.showOnCanvas(record) } }
       Button("Export as Markdown…") { export() }
@@ -1029,13 +1040,14 @@ struct RecordInspector: View {
     }
   }
   private func load() {
+    let worldID = record.worldID
+    guard worldID == studio.worldID else { return }
     studio.perform {
-      rules = try studio.store.rules(worldID: studio.worldID, systemID: record.id)
-      outgoing = try studio.store.linkedRecords(worldID: studio.worldID, id: record.id)
-      incoming = try studio.store.linkedRecords(
-        worldID: studio.worldID, id: record.id, incoming: true)
+      rules = try studio.store.rules(worldID: worldID, systemID: record.id)
+      outgoing = try studio.store.linkedRecords(worldID: worldID, id: record.id)
+      incoming = try studio.store.linkedRecords(worldID: worldID, id: record.id, incoming: true)
       relations = try studio.recordRelationships(for: record)
-      events = try studio.store.events(worldID: studio.worldID).filter {
+      events = try studio.store.events(worldID: worldID).filter {
         $0.sourceID == record.id
       }
     }

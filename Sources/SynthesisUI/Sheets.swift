@@ -39,6 +39,10 @@ struct StudioSheet: View {
       case .layouts: WorkspaceLayoutsSheet(studio: studio)
       case .navigation: SidebarCustomizationSheet(studio: studio)
       case .activity: WorldActivitySheet(studio: studio)
+      case .relationshipHistory:
+        if let target = studio.relationshipHistoryTarget {
+          RelationshipHistorySheet(studio: studio, target: target, close: close)
+        }
       case .linkRecords:
         if let draft = studio.recordLinkDraft { RecordLinkSheet(studio: studio, draft: draft) }
       case .splitRecord: SplitRecordPicker(studio: studio)

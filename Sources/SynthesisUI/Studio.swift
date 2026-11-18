@@ -248,6 +248,11 @@ public struct Toast: Identifiable {
   @Published public var captureNonce = 0
   /// Conversation the rename sheet edits; defaults to the open conversation.
   public var renameTarget: String?
+  var relationshipHistoryTarget: RelationshipHistoryTarget?
+  func showRelationshipHistory(id: String, title: String) {
+    relationshipHistoryTarget = .init(worldID: worldID, relationshipID: id, title: title)
+    sheet = .relationshipHistory
+  }
   var pendingComposer: (world: String, text: String, base: String)?
   public var canvasUndo: ((Bool) -> Void)?
   public var canvasFit: (() -> Void)?
@@ -256,7 +261,7 @@ public struct Toast: Identifiable {
   private var toastTask: Task<Void, Never>?
   public enum Sheet: String, Identifiable {
     case world, document, rename, onboarding, components, whatIf, sendWhatIf, layouts, project,
-      navigation, activity, splitRecord, linkRecords
+      navigation, activity, splitRecord, linkRecords, relationshipHistory
     public var id: String { rawValue }
   }
   public var world: World? { worlds.first { $0.id == worldID } }
@@ -476,8 +481,9 @@ public struct Toast: Identifiable {
     resolve(proposal, changes: proposal.changes.filter { $0.status == "pending" }, accept: accept)
   }
   private func resolve(_ proposal: Proposal, changes: [ProposedChange], accept: Bool) {
-    guard !reviewingProposal, !changes.isEmpty, flushEditor() else { return }
-    let world = worldID
+    guard proposal.worldID == worldID, !reviewingProposal, !changes.isEmpty, flushEditor()
+    else { return }
+    let world = proposal.worldID
     reviewingProposal = true
     reviewProgress = ReviewProgress(
       worldID: world, proposalID: proposal.id, accept: accept, total: changes.count,
@@ -488,17 +494,18 @@ public struct Toast: Identifiable {
         guard await flushCanvas() else {
           throw SynthesisError.invalid("Canvas is not saved yet. No review decisions were applied.")
         }
-        for change in changes {
-          guard world == worldID else { throw CancellationError() }
-          reviewProgress?.phase = .running
-          reviewProgress?.detail = "Canon is unchanged."
-          await Task.yield()
-          guard world == worldID else { throw CancellationError() }
-          let resolved = try store.resolveChange(
-            worldID: world, proposalID: proposal.id, changeID: change.id,
-            accept: accept, confirmation: proposal.id)
-          reviewProgress?.completed += 1
-          if accept, let applied = resolved.changes.first(where: { $0.id == change.id }) {
+        guard world == worldID else { throw CancellationError() }
+        reviewProgress?.phase = .running
+        reviewProgress?.detail = "Applying this review in one transaction."
+        await Task.yield()
+        guard world == worldID else { throw CancellationError() }
+        let resolved = try store.resolveChanges(
+          worldID: world, proposalID: proposal.id, changes: changes,
+          accept: accept, confirmation: proposal.id)
+        reviewProgress?.completed = changes.count
+        if accept {
+          let ids = Set(changes.map(\.id))
+          for applied in resolved.changes where ids.contains(applied.id) {
             if ["create_map", "revise_map", "place_marker"].contains(applied.action) {
               mapBoardID = applied.resultID
             }
@@ -515,7 +522,7 @@ public struct Toast: Identifiable {
         show(accept ? "Saved reviewed changes. Canon is unchanged." : "Changes dismissed.")
       } catch is CancellationError {
         reviewProgress?.phase = .cancelled
-        reviewProgress?.detail = "Remaining changes still await your review."
+        reviewProgress?.detail = "These changes still await your review."
       } catch {
         reviewProgress?.phase = .failed
         reviewProgress?.detail = error.localizedDescription
@@ -523,7 +530,9 @@ public struct Toast: Identifiable {
       }
       if world == worldID {
         perform { try reload() }
-        if accept && changes.contains(where: { $0.action == "place_record" }) {
+        if accept && reviewProgress?.phase == .complete
+          && changes.contains(where: { $0.action == "place_record" })
+        {
           canvasSession?.reloadStoredBoard()
         }
       }

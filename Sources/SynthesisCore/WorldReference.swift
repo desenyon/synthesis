@@ -243,9 +243,13 @@ extension WorkspaceStore {
   /// source is excluded, retaining the surrounding prose and original local message.
   func assistantPrompt(
     _ text: String, worldID: String, excluding references: Set<WorldReference>,
-    excludingRecordIDs: Set<String>, approvedRecords: [String: LoreRecord]? = nil
+    excludingRecordIDs: Set<String>, approvedRecords: [String: LoreRecord]? = nil,
+    embeddedScope: (recordIDs: Set<String>, references: Set<WorldReference>)? = nil
   ) throws -> String {
-    guard !references.isEmpty || !excludingRecordIDs.isEmpty || approvedRecords != nil else {
+    guard
+      !references.isEmpty || !excludingRecordIDs.isEmpty || approvedRecords != nil
+        || embeddedScope != nil
+    else {
       return text
     }
     let hidden = "[Excluded source]"
@@ -254,15 +258,20 @@ extension WorkspaceStore {
     let replacements = try Self.referenceLinks(in: text).compactMap { link -> (NSRange, String)? in
       let recordID: String
       if let reference = try? WorldReference(url: link.url) {
-        if references.contains(reference) { return (link.range, hidden) }
+        if references.contains(reference) || embeddedScope?.references.contains(reference) == false
+        {
+          return (link.range, hidden)
+        }
         guard reference.kind == .record else { return nil }
         recordID = reference.id
       } else if link.url.host == "record" {
         recordID = link.url.lastPathComponent
       } else {
-        return approvedRecords == nil ? nil : (link.range, hidden)
+        return approvedRecords == nil && embeddedScope == nil ? nil : (link.range, hidden)
       }
-      let isExcluded = excludingRecordIDs.contains(recordID)
+      let isExcluded =
+        excludingRecordIDs.contains(recordID)
+        || embeddedScope?.recordIDs.contains(recordID) == false
       guard isExcluded || approvedRecords != nil else { return nil }
       var range = link.range
       if link.url.host == "record" {

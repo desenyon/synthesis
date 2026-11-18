@@ -262,7 +262,7 @@ struct RelationshipGraph: View {
           .frame(maxHeight: .infinity, alignment: .top).padding(.top, 14)
         }
         VStack {
-          if !studio.focusMode && !studio.workspaceInspector,
+          if projection == nil, !studio.focusMode, !studio.workspaceInspector,
             let entity = nodes.first(where: { $0.id == selected })
           {
             detail(entity, edges: edges).frame(
@@ -575,6 +575,11 @@ struct RelationshipGraph: View {
       IconButton(icon: "plus", label: "Expand one degree", t: studio.t) {
         showNeighborhood(GraphNeighborhood(rootID: scope.rootID, depth: scope.depth + 1))
       }.disabled(!projection.canExpand)
+      if let selected, projection.nodeIDs.contains(selected) {
+        IconButton(icon: "sidebar.right", label: "Inspect selected entity", t: studio.t) {
+          studio.inspect(.record(selected))
+        }
+      }
       IconButton(icon: "xmark", label: "Show the full graph", t: studio.t) {
         showNeighborhood(nil)
       }

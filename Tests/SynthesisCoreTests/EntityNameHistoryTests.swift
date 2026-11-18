@@ -145,7 +145,7 @@ struct EntityNameHistoryTests {
     _ = try store.archiveEntityNamePeriod(worldID: world.id, expected: second)
     let archive = try store.exportWorldArchive(worldID: world.id)
     let portable = try JSONDecoder().decode(WorldArchive.self, from: archive)
-    #expect(portable.version == 12)
+    #expect(portable.version == 14)
     let copy = try store.importWorldArchiveMapping(archive)
     let copyRecordID = try #require(copy.ids[entity.id])
     let names = try store.entityNamePeriods(worldID: copy.world.id, recordID: copyRecordID)
@@ -165,7 +165,7 @@ struct EntityNameHistoryTests {
 
     let json = try #require(
       JSONSerialization.jsonObject(with: store.exportWorld(world.id)) as? [String: Any])
-    #expect(json["schemaVersion"] as? Int == 15)
+    #expect(json["schemaVersion"] as? Int == 17)
     #expect((json["entityNamePeriods"] as? [[String: String]])?.count == 2)
     #expect((json["entityNamePeriodHistory"] as? [[String: String]])?.count == 2)
     let markdown = try store.exportRecordMarkdown(worldID: world.id, recordID: entity.id).content

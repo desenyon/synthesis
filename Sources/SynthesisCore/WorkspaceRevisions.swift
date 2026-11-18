@@ -7,11 +7,15 @@ extension WorkspaceStore {
       guard let event = try events(worldID: worldID).first(where: { $0.id == id }) else {
         throw SynthesisError.notFound
       }
-      return [
+      var snapshot = [
         "title": event.title, "date": event.dateLabel, "source": event.sourceID,
         "order": event.order.map(String.init) ?? "",
         "lane": try chronologyPlacements(worldID: worldID)[id] ?? "",
       ]
+      if let date = try timelineEventDates(worldID: worldID)[id] {
+        snapshot["calendarDate"] = date.label
+      }
+      return snapshot
     case "revise_lane":
       guard let lane = try chronologyLanes(worldID: worldID).first(where: { $0.id == id }) else {
         throw SynthesisError.notFound

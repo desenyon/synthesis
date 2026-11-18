@@ -4,11 +4,17 @@ Start here when picking up Synthesis.
 
 Use the [copyable Mac continuation prompt](RUN_PROMPT.md) with a coding agent in the canonical checkout. Review local changes before integrating the latest source from `origin/main`. The Linux source checkpoint on GitHub is [`df71af3`](https://github.com/desenyon/synthesis/commit/df71af3db260cfc188958979d291a90659b92ba4). The GitHub connector preserved all seven implementation trees and commit messages. Local Git on Spark preserves the original hashes on `spark-original-b3602d7`. The source changes cover #35, #36, #47–48, #67–70, and #347.
 
-## Current continuation — 2026-11-17
+## Mac continuation — 2026-11-17
+
+The [Mac acceptance record](verification/expansion-parallel-final/README.md) covers the full 69-state sweep, all three sizes, the native/WebKit audit and the follow-up capture work. The [ledger](EXPANSION.md) is authoritative for individual statuses. [STATE](STATE.md) records current checks and [the dependency map](EXPANSION_DEPENDENCIES.md) records outstanding owners and prerequisites.
+
+The owner confirmed that subscription sign-in fulfills #375’s credential requirement. Other provider configuration and usage controls remain in progress. Foreground testing, model calls and release publication have separate authorization.
+
+## Original Mac acceptance handoff — 2026-11-17
 
 The ledger has **32 Verified, 19 In progress, 342 Open, and 1 Decision needed**. [Progress](PROGRESS.md) records 155 scoped Linux core tests, 20 Canvas tests, typecheck, the offline Canvas build, Swift format lint, and Swift parsing. The Linux checks excluded macOS-only paths. Native build, tests and captures after this source checkpoint remain pending.
 
-Run `./scripts/check.sh` and `./scripts/verify-session.sh` from `/Users/desenyon/Developer/synthesis` on `main`. Follow the quiet capture command below. Fix regressions before marking each requirement Verified. Preserve the #375 decision about API credentials and the owner-protected subscription-only boundary. Continue independent work where possible. The release gate requires all 394 items and explicit publication approval.
+Run `./scripts/check.sh` and `./scripts/verify-session.sh` from `/Users/desenyon/Developer/synthesis` on `main`. Use the quiet capture command below to reproduce the baseline sweep. Fix regressions before marking each requirement Verified. Preserve the owner-protected subscription-only boundary. Continue independent work where possible. The release gate requires all 394 items and explicit publication approval.
 
 Run the full Mac check and Canvas audit, then inspect the 69-state capture sweep at all three sizes. Confirm physical #35 drop routing in an authorized isolated session.
 
@@ -33,7 +39,7 @@ uv run --with pillow python scripts/contact-sheets.py docs/verification/expansio
 2. [STATE](STATE.md): what is verified, with exact checks.
 3. [EXPANSION](EXPANSION.md) and [EXPANSION_SOURCE](EXPANSION_SOURCE.md): all 394 requirements, individual acceptance and exact source. Then [ROADMAP](ROADMAP.md) and [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md).
 4. [PARALLEL_WORK](PARALLEL_WORK.md) and the [checkpoint/error record](verification/expansion-parallel-checkpoint/README.md): ownership, stopped workers, exact failed/passing runs, missing wiring and the final capture manifest.
-5. [ARCHITECTURE](ARCHITECTURE.md): modules and persistence. The current source includes migrations through 0019, portable format v12 and JSON schema 15.
+5. [ARCHITECTURE](ARCHITECTURE.md): modules and persistence. The current source includes migrations through 0021, portable format v14 and JSON schema 17.
 
 ## Historical macOS checkpoint
 
