@@ -133,6 +133,9 @@ import Testing
       })
     #expect(try store.proposal(worldID: world, id: proposal.id).pending == 1)
     try store.archiveRecord(worldID: world, id: a.id)
+    // A historical answer can still have a cached source when it is archived elsewhere.
+    #expect(studio.records.contains { $0.id == a.id })
+    #expect(throws: SynthesisError.self) { try studio.inspectionData(for: .record(a.id)) }
     try studio.reload()
     #expect(throws: SynthesisError.self) { try studio.inspectionData(for: .record(a.id)) }
     let foreign = try store.createWorld(name: "Other")

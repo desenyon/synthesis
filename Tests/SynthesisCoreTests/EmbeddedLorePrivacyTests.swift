@@ -58,7 +58,8 @@ import Testing
   @Test func canonOnlySubstitutesTheAcceptedTitleInAnEmbeddedLink() async throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Frozen sources")
-    let publicRecord = try store.createRecord(worldID: world.id, title: "Accepted harbor")
+    let publicRecord = try store.createRecord(
+      worldID: world.id, title: "Accepted harbor", body: "The harbor is closed after dark.")
     let accepted = try store.promote(
       worldID: world.id, id: publicRecord.id, version: publicRecord.version,
       confirmation: publicRecord.id)
@@ -86,6 +87,10 @@ import Testing
       preset: "Develop", contextOptions: options
     ) { _ in }
 
+    let context = try store.assistantContext(
+      worldID: world.id, prompt: "Read the accepted overview.", options: options)
+    #expect(context.citationAddresses.allSatisfy { $0.recordID != owner.id })
+    #expect(context.citationAddresses.contains { $0.recordID == publicRecord.id })
     let request = try #require(await transport.lastRequest)
     let payload = request.instructions + request.messages.compactMap { $0["content"] }.joined()
     let acceptedLink = WorldReferenceSource.markdown(title: publicRecord.title, url: target.url)

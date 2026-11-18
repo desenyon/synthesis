@@ -424,13 +424,14 @@ struct ProposalCard: View {
 /// Collapsed list of the records that were shared with the model for one answer.
 struct ContextDisclosure: View {
   @ObservedObject var studio: Studio
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   let sources: [ContextSource]
   @State private var open = false
   var body: some View {
     let t = studio.t
     VStack(alignment: .leading, spacing: 8) {
       Button {
-        withAnimation(.easeOut(duration: 0.14)) { open.toggle() }
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.14)) { open.toggle() }
       } label: {
         HStack(spacing: 5) {
           HStack(spacing: -5) {
@@ -451,20 +452,25 @@ struct ContextDisclosure: View {
       if open {
         VStack(alignment: .leading, spacing: 1) {
           ForEach(sources) { source in
-            Button {
-              studio.openRecord(source.record)
-            } label: {
-              HStack(spacing: 8) {
-                StudioIcon(recordIcon(source.record), size: 11.5)
-                  .foregroundStyle(t.category(source.record.category)).frame(width: 16)
-                Text(source.record.title).font(.studio(.label)).lineLimit(1)
-                Text(source.reason).font(.studio(.caption)).foregroundStyle(t.muted)
-                  .lineLimit(1)
-                Spacer(minLength: 0)
-                StateBadge(state: source.record.state, t: t)
-              }.padding(.horizontal, 8).frame(height: 28).hoverFill(t, radius: 6)
-            }.buttonStyle(.plain)
-              .contextMenu { Button("Inspect source") { studio.inspect(.record(source.id)) } }
+            HStack(spacing: 2) {
+              Button {
+                studio.openRecord(source.record)
+              } label: {
+                HStack(spacing: 8) {
+                  StudioIcon(recordIcon(source.record), size: 11.5)
+                    .foregroundStyle(t.category(source.record.category)).frame(width: 16)
+                  Text(source.record.title).font(.studio(.label)).lineLimit(1)
+                  Text(source.reason).font(.studio(.caption)).foregroundStyle(t.muted)
+                    .lineLimit(1)
+                  Spacer(minLength: 0)
+                  StateBadge(state: source.record.state, t: t)
+                }.padding(.horizontal, 8).frame(height: 28).hoverFill(t, radius: 6)
+              }.buttonStyle(.plain)
+                .contextMenu { Button("Inspect source") { studio.inspect(.record(source.id)) } }
+              if source.record.kind == "entity" {
+                ResponseEntityInspectionButton(studio: studio, record: source.record)
+              }
+            }
           }
         }.padding(6)
           .background(
@@ -473,6 +479,23 @@ struct ContextDisclosure: View {
           .overlay(
             RoundedRectangle(cornerRadius: Metric.floatingRadius).stroke(t.hairline, lineWidth: 1))
       }
+    }
+  }
+}
+
+private struct ResponseEntityInspectionButton: View {
+  @ObservedObject var studio: Studio
+  let record: LoreRecord
+  @State private var presented = false
+
+  var body: some View {
+    IconButton(icon: "info.circle", label: "Inspect \(record.title)", t: studio.t) {
+      presented = true
+    }.popover(isPresented: $presented) {
+      ObjectInspector(
+        studio: studio,
+        source: WorldReference(worldID: record.worldID, kind: .record, id: record.id)
+      ).frame(width: 320, height: 440)
     }
   }
 }

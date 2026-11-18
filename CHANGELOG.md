@@ -4,6 +4,8 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
+- Canvas adds a minimap and named viewport bookmarks with Undo. Graph copies the selected neighborhood to a Canvas with live references.
+- Assistant replies can open exact accepted passages and retain provider-reported token counts on this Mac. Settings exposes per-world sharing and context choices. The writer separates explicit backlinks from textual mentions and suggests missing profile fields.
 - Simulation calculates and saves a fictional resource reserve with exact inputs, seeded replay, a step-by-step trace and paused interventions. Runs stay hypothetical and support archive with Undo.
 - Custom entity types open dedicated Library collections. Data Settings can check or rebuild the selected world's search indexes. Assistant Settings exposes a local daily chat limit and recent responses display provider-reported token counts when supplied.
 - Timeline adds a scalable horizontal date axis and configurable fixed calendars. Entity profiles can record independent facts with document revision evidence and an explicit approval step.

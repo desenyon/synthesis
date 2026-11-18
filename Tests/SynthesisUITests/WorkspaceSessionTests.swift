@@ -34,7 +34,7 @@ import Testing
       query: "sea", framed: true)
     studio.timelineLaneID = lane.id
     studio.timelineView = TimelineViewState(
-      density: .overview, foldedLanes: [lane.id], query: "tide")
+      density: .overview, eraDateFilter: .undated, foldedLanes: [lane.id], query: "tide")
     studio.draft = "Earlier idea"
     studio.pendingComposer = (studio.worldID, "Latest unsent idea", studio.draft)
     studio.focusMode = true
@@ -95,15 +95,20 @@ import Testing
     try studio.reload()
     studio.openRecord(record)
     studio.draft = "First-world draft"
+    studio.timelineView.eraDateFilter = .dated
     studio.switchWorld(second.id)
+    #expect(studio.timelineView.eraDateFilter == nil)
     studio.navigate(.atlas)
+    studio.timelineView.eraDateFilter = .undated
     studio.draft = "Second-world draft"
     studio.switchWorld(world)
     #expect(studio.selectedRecord?.id == record.id && studio.draft == "First-world draft")
+    #expect(studio.timelineView.eraDateFilter == .dated)
     studio.switchWorld(second.id)
     #expect(
       studio.destination == .atlas && studio.selectedRecord == nil
         && studio.draft == "Second-world draft")
+    #expect(studio.timelineView.eraDateFilter == .undated)
     studio.switchWorld(world)
     studio.updatePreferences { $0.launchWorkspace = "Atlas" }
     #expect(studio.saveSessionForClose())

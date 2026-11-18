@@ -34,6 +34,10 @@ import { exportBoard } from "./exportBoard";
 import { StudioOverlay } from "./StudioOverlay";
 import { fitOptions, type FitInsets } from "./viewport";
 import { restoredCardSelection } from "./sessionSelection";
+import {
+  captureViewport, maximumViewportZoom, minimumViewportZoom, readViewportBookmarks,
+  restoreViewport, type Viewpoint, type ViewportBookmark,
+} from "./viewportNavigation";
 
 type El = any;
 type Api = any;
@@ -57,7 +61,7 @@ type LoadPayload = {
   assisted: boolean;
   name: string;
   theme: Theme;
-  scene: { elements: El[]; appState?: Record<string, unknown>; files?: Record<string, El> } | null;
+  scene: { elements: El[]; appState?: Record<string, unknown>; files?: Record<string, El>; viewportBookmarks?: unknown } | null;
   legacy: { cards: LegacyCard[]; edges: LegacyEdge[] } | null;
   hiddenRelations: string[];
   records: RecordInfo[];
@@ -65,6 +69,10 @@ type LoadPayload = {
 };
 
 const randomId = () => Math.random().toString(36).slice(2, 12);
+
+function allowsViewportAnimation() {
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 function isWorldReferenceLink(value: unknown): value is string {
   return typeof value === "string" && value.length <= 2048 && value.startsWith("synthesis://reference/");
@@ -94,6 +102,8 @@ export function App() {
   const [assisted, setAssisted] = useState(true);
   const [theme, setTheme] = useState<Theme>(initialTheme);
   const [name, setName] = useState("Board");
+  const [navigationBottom, setNavigationBottom] = useState(176);
+  const [navigation, setNavigation] = useState({ sessionID: "", bookmarks: [] as ViewportBookmark[] });
   const live = useRef({
     api: null as Api,
     theme: initialTheme,
@@ -109,6 +119,7 @@ export function App() {
     saveTimer: 0,
     analyzeTimer: 0,
     filesKey: "",
+    bookmarks: [] as ViewportBookmark[],
   });
 
   /** Applies element changes without adding them to the undo history. */
@@ -163,6 +174,7 @@ export function App() {
     const filesKey = Object.keys(files).sort().join(",");
     const scene: Record<string, unknown> = {
       elements,
+      ...(s.bookmarks.length ? { viewportBookmarks: s.bookmarks } : {}),
       appState: {
         scrollX: state.scrollX,
         scrollY: state.scrollY,
@@ -181,6 +193,31 @@ export function App() {
     if (!s.api || !s.loaded) return;
     post({ type: "change", ...serialise(false) });
   }, [serialise]);
+
+  const setBookmarks = (sessionID: string, proposed: ViewportBookmark[]) => {
+    const s = live.current;
+    if (!s.loaded || !acceptsSession(activeSession, sessionID)) return false;
+    const bookmarks = readViewportBookmarks(proposed);
+    if (bookmarks.length !== proposed.length) return false;
+    s.bookmarks = bookmarks;
+    setNavigation({ sessionID, bookmarks: s.bookmarks });
+    save();
+    return true;
+  };
+
+  const moveTo = (sessionID: string, point: Viewpoint) => {
+    const s = live.current;
+    if (!s.loaded || !acceptsSession(activeSession, sessionID)) return;
+    const appState = restoreViewport(point, s.api.getAppState());
+    if (!Number.isFinite(appState.scrollX) || !Number.isFinite(appState.scrollY)) return;
+    // A running Fit/reveal can still publish frames. Cancel it and commit the replacement
+    // together so a native flush only sees the exact recalled viewport.
+    flushSync(() => {
+      s.api.scrollToContent([], { animate: false });
+      s.api.updateScene({ appState, captureUpdate: CaptureUpdateAction.NEVER });
+    });
+    save();
+  };
 
   /** Looks for things only the creator's edits can cause, once the scene has settled. */
   const analyse = useCallback(() => {
@@ -310,8 +347,13 @@ export function App() {
         window.clearTimeout(s.analyzeTimer);
         s.selectionKey = "";
         s.loaded = false;
+        setNavigation({ sessionID: "", bookmarks: [] });
+        s.bookmarks = [];
         s.theme = payload.theme;
-        if (payload.fitInsets) s.fitInsets = payload.fitInsets;
+        if (payload.fitInsets) {
+          s.fitInsets = payload.fitInsets;
+          setNavigationBottom(payload.fitInsets.bottom);
+        }
         s.records = new Map(payload.records.map((r) => [r.id, r]));
         s.relations = payload.relations;
         s.hidden = new Set(payload.hiddenRelations);
@@ -341,7 +383,7 @@ export function App() {
             appState = {
               scrollX: saved.scrollX,
               scrollY: saved.scrollY,
-              zoom: { value: Math.min(4, Math.max(0.1, Number(saved.zoom) || 1)) },
+              zoom: { value: Math.min(maximumViewportZoom, Math.max(minimumViewportZoom, Number(saved.zoom) || 1)) },
               gridModeEnabled: Boolean(saved.gridModeEnabled),
             };
           } else {
@@ -358,6 +400,7 @@ export function App() {
         // Native may flush as soon as it receives `loaded`. Commit React's viewport first;
         // otherwise serialise() can acknowledge the reset (0,0) viewport as the saved one.
         flushSync(() => {
+          api.scrollToContent([], { animate: false });
           api.resetScene();
           api.updateScene({
             elements,
@@ -368,6 +411,8 @@ export function App() {
         api.history.clear();
         s.applying = false;
         s.loaded = true;
+        s.bookmarks = readViewportBookmarks(payload.scene?.viewportBookmarks);
+        setNavigation({ sessionID: payload.sessionID, bookmarks: s.bookmarks });
         synchronise();
         if (fit && api.getSceneElements().length) {
           const state = api.getAppState();
@@ -420,8 +465,9 @@ export function App() {
         synchronise();
         const targets = api.getSceneElements().filter((e: El) => selected[e.id]);
         if (targets.length) {
-          const reveal = () => api.scrollToContent(targets, { fitToContent: false, animate: animateReveal });
-          if (animateReveal) reveal();
+          const animate = animateReveal && allowsViewportAnimation();
+          const reveal = () => api.scrollToContent(targets, { fitToContent: false, animate });
+          if (animate) reveal();
           else flushSync(reveal);
         }
         onChange();
@@ -619,7 +665,10 @@ export function App() {
         synchronise();
         onChange();
       },
-      setFitInsets(insets: FitInsets) { s.fitInsets = insets; },
+      setFitInsets(insets: FitInsets) {
+        s.fitInsets = insets;
+        setNavigationBottom(insets.bottom);
+      },
       command(name: string, insets?: FitInsets | null, flushID?: string) {
         if (name === "arrange") {
           const all: El[] = api.getSceneElementsIncludingDeleted();
@@ -635,7 +684,7 @@ export function App() {
           synchronise(); save(); bridge.command("fit");
           return;
         }
-        if (insets) s.fitInsets = insets;
+        if (insets) bridge.setFitInsets(insets);
         const key = (k: string, extra: Record<string, unknown> = {}) =>
           document.querySelector(".excalidraw")?.dispatchEvent(new KeyboardEvent("keydown", { key: k, code: `Key${k.toUpperCase()}`, metaKey: true, bubbles: true, ...extra }));
         if (name === "undo") key("z");
@@ -644,13 +693,14 @@ export function App() {
         else if (["zoomIn", "zoomOut", "resetZoom"].includes(name)) {
           const state = api.getAppState();
           const old = state.zoom.value;
-          const zoom = name === "resetZoom" ? 1 : Math.min(4, Math.max(0.1, old * (name === "zoomIn" ? 1.2 : 1/1.2)));
+          const zoom = name === "resetZoom" ? 1 : Math.min(maximumViewportZoom,
+            Math.max(minimumViewportZoom, old * (name === "zoomIn" ? 1.2 : 1/1.2)));
           api.updateScene({appState: {zoom: {value: zoom}, scrollX: state.scrollX + state.width / 2 * (1/zoom - 1/old), scrollY: state.scrollY + state.height / 2 * (1/zoom - 1/old)}, captureUpdate: CaptureUpdateAction.NEVER});
         }
         else if (name === "fit" && api.getSceneElements().length) {
           const state = api.getAppState();
           const options = fitOptions(getCommonBounds(api.getSceneElements()), state.width, state.height, s.fitInsets);
-          api.scrollToContent(undefined, { ...options, animate: true, duration: 180 });
+          api.scrollToContent(undefined, { ...options, animate: allowsViewportAnimation(), duration: 180 });
         } else if (name === "flush") {
           window.clearTimeout(s.saveTimer);
           window.clearTimeout(s.analyzeTimer);
@@ -678,6 +728,21 @@ export function App() {
           if (activeSession === exportingSession) post({ type: "exportFailed", message: error instanceof Error ? error.message : "This board could not be exported." });
         }
       },
+      /** Called by the isolated screenshot runner after the board is fully mounted. */
+      async captureNavigation() {
+        const button = document.querySelector<HTMLButtonElement>('.studio-add-bar button[aria-label="Board navigation"]');
+        if (!s.loaded || !button) return false;
+        const viewpoint = captureViewport(api.getAppState());
+        if (!setBookmarks(activeSession, [
+          { id: "crossing", name: "Crossing overview", ...viewpoint },
+          { id: "charts", name: "The long tides beyond the western charts of the Glass Sea", ...viewpoint,
+            x: viewpoint.x + 160, y: viewpoint.y - 80 },
+        ])) return false;
+        if (button.getAttribute("aria-pressed") !== "true") button.click();
+        await new Promise(resolve => setTimeout(resolve, 120));
+        return document.querySelectorAll('.studio-navigation li').length === 2
+          && !!document.querySelector('.studio-minimap canvas');
+      },
       /** Deterministic, isolated WebKit integration checks. Never calls a model. */
       async audit() {
         const results: string[] = [];
@@ -696,6 +761,20 @@ export function App() {
           (fitBounds[2]+fitState.scrollX)*fitState.zoom.value,
           (fitBounds[3]+fitState.scrollY)*fitState.zoom.value ];
         check("fit clears native composer and toolbars", screen[0] >= s.fitInsets.left - 1 && screen[1] >= s.fitInsets.top - 1 && screen[2] <= fitState.width - s.fitInsets.right + 1 && screen[3] <= fitState.height - s.fitInsets.bottom + 1);
+        const matchMedia = window.matchMedia;
+        try {
+          window.matchMedia = query => query === "(prefers-reduced-motion: reduce)"
+            ? { matches: true } as MediaQueryList : matchMedia.call(window, query);
+          flushSync(() => api.updateScene({ appState: { scrollX: fitState.scrollX + 10000 } }));
+          flushSync(() => bridge.command("fit"));
+          const immediateFit = api.getAppState();
+          check("reduced-motion fit commits the viewport immediately",
+            Math.abs(immediateFit.scrollX - fitState.scrollX) < 0.01
+            && Math.abs(immediateFit.scrollY - fitState.scrollY) < 0.01
+            && Math.abs(immediateFit.zoom.value - fitState.zoom.value) < 0.001);
+        } finally {
+          window.matchMedia = matchMedia;
+        }
         const stockToolbar = document.querySelector(".App-menu_top");
         check("custom toolbar replaces stock controls", !stockToolbar || getComputedStyle(stockToolbar).display === "none");
         check("custom cards paint above engine", Number(getComputedStyle(document.querySelector(".studio-overlay")!).zIndex) > 2 && document.querySelectorAll(".studio-record").length > 0);
@@ -848,7 +927,106 @@ export function App() {
           Boolean(image && !bridge.revealImage(image.id, "stale")
             && bridge.revealImage(image.id, activeSession)
             && api.getAppState().selectedElementIds[image.id]));
-        await bridge.load(original); await wait();
+        await bridge.load(original);
+        // A background WebKit frame can be throttled. Observe each mounted/control state
+        // before driving it so missing UI cannot silently cascade into bookmark failures.
+        const waitFor = async <T,>(read: () => T | null | undefined): Promise<T | null> => {
+          const deadline = performance.now() + 2500;
+          do {
+            const value = read();
+            if (value != null) return value;
+            await new Promise(resolve => setTimeout(resolve, 30));
+          } while (performance.now() < deadline);
+          return null;
+        };
+        const navigationButton = () => document.querySelector<HTMLButtonElement>(
+          '.studio-add-bar button[aria-label="Board navigation"]');
+        const minimapButton = () => document.querySelector<HTMLButtonElement>('.studio-minimap');
+        const openNavigation = async () => {
+          const toggle = await waitFor(navigationButton);
+          if (!toggle) return false;
+          if (toggle.getAttribute("aria-pressed") === "false") {
+            flushSync(() => toggle.click());
+          }
+          const map = await waitFor(() => {
+            const button = minimapButton();
+            return button?.disabled === false ? button : null;
+          });
+          return !!map;
+        };
+        const saveName = "Audit viewpoint";
+        const bookmarkButton = () => document.querySelector<HTMLButtonElement>(
+          '.studio-navigation button[title="Audit viewpoint"]');
+        const storedBookmark = () => s.bookmarks.find(bookmark => bookmark.name === saveName);
+        const opened = await openNavigation();
+        const bookmarkInput = document.querySelector<HTMLInputElement>('.studio-navigation input');
+        const snapshotView = captureViewport(api.getAppState());
+        check("bookmarks reject stale board sessions",
+          !setBookmarks("stale", [{ id: randomId(), name: saveName, ...snapshotView }]));
+        const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+        if (bookmarkInput && valueSetter) {
+          flushSync(() => {
+            valueSetter.call(bookmarkInput, saveName);
+            bookmarkInput.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText" }));
+          });
+        }
+        const submit = () => document.querySelector<HTMLButtonElement>('.studio-navigation button[type="submit"]');
+        const saveButton = opened && bookmarkInput ? await waitFor(() => {
+          const button = submit();
+          return button?.disabled === false ? button : null;
+        }) : null;
+        const enteredName = bookmarkInput?.value === saveName;
+        if (saveButton) flushSync(() => saveButton.click());
+        const markedView = saveButton ? await waitFor(storedBookmark) : null;
+        const bookmarked = serialise(true).scene as LoadPayload["scene"];
+        const sameView = (actual: Viewpoint, expected: Viewpoint) =>
+          Math.abs(actual.x - expected.x) < 0.01 && Math.abs(actual.y - expected.y) < 0.01
+          && Math.abs(actual.zoom - expected.zoom) < 0.01;
+        const savedOriginalView = !!markedView && sameView(markedView, snapshotView)
+          && sameView(captureViewport(api.getAppState()), snapshotView)
+          && readViewportBookmarks(bookmarked?.viewportBookmarks).some(mark => mark.id === markedView.id);
+        check(savedOriginalView ? "saving through the bookmark form serializes the current view"
+          : "saving through the bookmark form serializes the current view " + JSON.stringify({
+            opened, toggle: navigationButton()?.getAttribute("aria-pressed"),
+            input: !!bookmarkInput?.isConnected, enteredName, enabledSave: !!saveButton,
+            mapDisabled: minimapButton()?.disabled, sameSession: activeSession === original.sessionID,
+            loaded: s.loaded, snapshotView, liveView: captureViewport(api.getAppState()),
+            validView: readViewportBookmarks([{ id: "audit-probe", name: saveName, ...snapshotView }]).length === 1,
+            storedCount: s.bookmarks.length, savedView: markedView ? { x: markedView.x, y: markedView.y, zoom: markedView.zoom } : null,
+          }), savedOriginalView);
+        const removeButton = document.querySelector<HTMLButtonElement>(
+          '.studio-navigation button[aria-label="Remove bookmark Audit viewpoint"]');
+        if (removeButton) flushSync(() => removeButton.click());
+        const removed = !!markedView && !bookmarkButton() && !storedBookmark();
+        const toggle = navigationButton();
+        if (toggle?.getAttribute("aria-pressed") === "true") flushSync(() => toggle.click());
+        const reopened = await openNavigation();
+        const undoButton = document.querySelector<HTMLButtonElement>('.studio-bookmark-undo button');
+        if (undoButton) flushSync(() => undoButton.click());
+        check("removing a bookmark offers Undo after closing and reopening navigation",
+          removed && reopened && !!bookmarkButton() && !!markedView && storedBookmark()?.id === markedView.id);
+
+        await bridge.load({ ...original, sessionID: "audit-unrelated-board", scene: {
+          elements: [], appState: { scrollX: 0, scrollY: 0, zoom: 1 },
+        }});
+        const otherOpened = await openNavigation();
+        check("opening a different board does not carry any bookmarks into it",
+          otherOpened && !bookmarkButton() && readViewportBookmarks(serialise(true).scene.viewportBookmarks).length === 0);
+        await bridge.load({ ...original, scene: bookmarked });
+        const restoredNavigation = await openNavigation();
+        flushSync(() => api.updateScene({appState: {scrollX: api.getAppState().scrollX + 91, zoom: {value: 1.45}}}));
+        const loadedBookmark = bookmarkButton();
+        api.scrollToContent(undefined, { animate: true, duration: 180 });
+        loadedBookmark?.click();
+        const recalledView = captureViewport(api.getAppState());
+        check("navigation draws the minimap and immediately recalls the saved center and zoom",
+          restoredNavigation && !!loadedBookmark && !!markedView && sameView(recalledView, markedView));
+        await new Promise(resolve => setTimeout(resolve, 250));
+        check("bookmark recall cancels any prior animated viewport movement",
+          !!markedView && sameView(captureViewport(api.getAppState()), markedView));
+        await bridge.load(original);
+        const restoredToggle = await waitFor(navigationButton);
+        if (restoredToggle?.getAttribute("aria-pressed") === "true") flushSync(() => restoredToggle.click());
         try {
           const blob = await exportBoard(api.getSceneElements(), api.getAppState(), api.getFiles(), s.records, s.relations, s.theme);
           (window as any).__synthesisAuditPNG = await new Promise<string>((resolve, reject) => {
@@ -1019,7 +1197,7 @@ export function App() {
         <MainMenu.DefaultItems.ClearCanvas />
       </MainMenu>
     </Excalidraw>
-    {api && <StudioOverlay api={api} theme={theme} assisted={assisted} records={getRecords} relations={getRelations} post={post}/>}
+    {api && <StudioOverlay key={navigation.sessionID} navigation={{ ...navigation, bottom: navigationBottom, setBookmarks, moveTo }} api={api} theme={theme} assisted={assisted} records={getRecords} relations={getRelations} post={post}/>}
     </div>
   );
 }

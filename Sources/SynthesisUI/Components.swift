@@ -94,6 +94,8 @@ struct PreferenceMenu<Value: Hashable>: View {
   @Binding var value: Value
   let options: [(Value, String)]
   let t: Theme
+  var width: CGFloat = 176
+  private var selectedTitle: String { options.first { $0.0 == value }?.1 ?? title }
   var body: some View {
     PlainMenu {
       ForEach(options.indices, id: \.self) { i in
@@ -113,14 +115,14 @@ struct PreferenceMenu<Value: Hashable>: View {
       }
     } label: {
       HStack(spacing: Space.sm) {
-        Text(options.first { $0.0 == value }?.1 ?? title).lineLimit(1)
+        Text(selectedTitle).lineLimit(1)
         Spacer(minLength: 4)
         StudioIcon("chevron.up.chevron.down", size: 12).foregroundStyle(t.secondary)
       }.font(.studio(.label)).foregroundStyle(t.text)
-        .padding(.horizontal, Space.md).frame(width: 176, height: 34)
+        .padding(.horizontal, Space.md).frame(width: width, height: 34)
         .background(t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
         .overlay(RoundedRectangle(cornerRadius: Metric.radius).stroke(t.hairline, lineWidth: 1))
-    }.accessibilityLabel(title)
+    }.accessibilityLabel(title).accessibilityValue(selectedTitle)
   }
 }
 

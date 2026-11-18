@@ -96,6 +96,7 @@ public struct Toast: Identifiable {
 
   @Published public var conversations: [Conversation] = []
   @Published public var messages: [ChatMessage] = []
+  @Published private(set) var assistantResponseUsage: [String: ModelTokenUsage] = [:]
   /// Staged AI change sets for the open conversation, keyed by the message that proposed them.
   @Published public var proposals: [String: Proposal] = [:]
   /// Every staged change set in this world that still has something to decide.
@@ -478,8 +479,11 @@ public struct Toast: Identifiable {
           proposal in proposal.messageID.map { ($0, proposal) }
         }, uniquingKeysWith: { _, latest in latest })
       contexts = try store.messageContext(worldID: worldID, conversationID: conversationID)
+      assistantResponseUsage = try store.assistantResponseUsage(
+        worldID: worldID, conversationID: conversationID)
     } else {
       messages = []
+      assistantResponseUsage = [:]
       proposals = [:]
       contexts = [:]
     }
@@ -594,7 +598,7 @@ public struct Toast: Identifiable {
     toastTask = Task { @MainActor [weak self] in
       try? await Task.sleep(for: .seconds(action == nil ? 3.5 : 7))
       guard !Task.isCancelled, self?.toast?.id == value.id else { return }
-      withAnimation(.easeOut(duration: 0.18)) { self?.toast = nil }
+      self?.toast = nil
     }
   }
   public func persistPendingComposer() {
@@ -1171,12 +1175,17 @@ public struct Toast: Identifiable {
   /// Saves a model answer as an AI-origin draft. It never becomes canon without separate review.
   public func saveResponse(_ message: ChatMessage, entity: Bool = false) {
     perform {
-      let heading = message.body.split(separator: "\n").first.map(String.init) ?? ""
+      guard message.worldID == worldID, message.role == "assistant",
+        let original = try store.messages(worldID: worldID, conversationID: message.conversationID)
+          .first(where: { $0.id == message.id && $0.role == "assistant" })
+      else { throw SynthesisError.notFound }
+      let body = AssistantCitation.markdown(original.body, forDraft: true)
+      let heading = body.split(separator: "\n").first.map(String.init) ?? ""
       let title = heading.trimmingCharacters(in: CharacterSet(charactersIn: "# *_")).prefix(80)
       let record = try store.createRecord(
         worldID: worldID,
         title: title.isEmpty ? (entity ? "New entity" : "Conversation draft") : String(title),
-        body: message.body, kind: entity ? "entity" : "lore", origin: "ai-proposed")
+        body: body, kind: entity ? "entity" : "lore", origin: "ai-proposed")
       try reload()
       openRecord(record)
     }

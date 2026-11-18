@@ -10,7 +10,7 @@ extension Studio {
     + entitySchemaCaptureStates + bidirectionalRelationshipCaptureStates
     + relationshipMetadataCaptureStates + entityNamesCaptureStates + structuredFactCaptureStates
     + chronologyHierarchyCaptureStates + CanvasReferencePicker.captureStates
-    + simulationCaptureStates + [
+    + simulationCaptureStates + assistantCitationCaptureStates + recordBacklinkCaptureStates + [
       "session-writing", "light-session-writing", "manual-session-writing", "session-sections",
       "session-split", "session-graph", "session-timeline", "session-atlas", "session-canvas",
       "session-conversation", "session-library",
@@ -83,9 +83,11 @@ extension Studio {
       "entity-components",
       "component-new",
       "conversation-home", "light-conversation-home", "conversation-loading", "conversation",
-      "sheet-artwork", "canvas", "companion", "manual",
+      "sheet-artwork", "canvas", "canvas-navigation", "manual-canvas-navigation",
+      "companion", "manual",
       "collapsed", "light",
       "graph", "graph-selected", "graph-neighbourhood-one", "graph-neighbourhood-two",
+      "graph-copy-neighbourhood",
       "library", "editor", "timeline", "atlas",
       "palette", "palette-body", "palette-search", "palette-maps", "palette-scenes",
       "palette-settings",
@@ -121,10 +123,12 @@ extension Studio {
       "sections", "light-sections", "manual-sections", "sections-companion", "sections-empty",
       "sheet-section", "section-editor",
       "settings-writing", "settings-assistant", "settings-world", "settings-data",
+      "settings-assistant-context", "manual-settings-assistant-context",
       "settings-index-current", "settings-index-stale",
-      "settings-search", "settings-no-results", "light-settings", "light-settings-writing",
+      "settings-search", "settings-scope-search", "settings-no-results", "light-settings",
+      "light-settings-writing",
       "settings-assistant-details", "assistant-usage-settings", "assistant-usage-report",
-      "assistant-usage-unavailable",
+      "assistant-usage-unavailable", "assistant-usage-history", "manual-assistant-usage-history",
       "manual-settings", "settings-collapsed", "settings-model-search", "preferences-editor",
       "preferences-library",
       "conversation-interrupted", "review-edits", "timeline-edit", "timeline-companion",
@@ -133,6 +137,7 @@ extension Studio {
       "review-what-if", "worlds-what-if", "mechanics-tree", "mechanics-requires", "atlas-regions",
       "atlas-drawing", "atlas-placing", "light-atlas-drawing", "timeline-compact",
       "timeline-overview", "timeline-axis", "timeline-axis-date", "timeline-axis-new-calendar",
+      "timeline-activity", "timeline-activity-filtered", "timeline-activity-empty",
       "sheet-generate",
     ]
   public func prepareConnectedCapture() throws -> (board: String, conversation: String) {
@@ -342,6 +347,19 @@ extension Studio {
     endRecordDrag()
     clearRequestPins()
     submittedAssistantContext = nil
+    if ["assistant-usage-history", "manual-assistant-usage-history"].contains(state) {
+      configureConnectedCapture("conversation", board: board, conversation: conversation)
+      perform {
+        let chat = try store.assistantUsageCaptureConversation(worldID: worldID)
+        openChat(chat)
+        if state.hasPrefix("manual-") { setMode(.manual) }
+        guard conversationID == chat.id, assistantResponseUsage.count == 1 else {
+          throw SynthesisError.invalid("The saved usage fixture could not be opened.")
+        }
+      }
+      captureHint = state
+      return
+    }
     if state == "assistant-usage-settings" {
       configureConnectedCapture("settings-assistant", board: board, conversation: conversation)
       perform { try store.setAssistantChatLimit(5) }
@@ -369,12 +387,24 @@ extension Studio {
       configureEntityTypeLibraryCapture(state, board: board, conversation: conversation)
       return
     }
+    if state.hasPrefix("timeline-activity") {
+      configureTimelineActivityCapture(state, board: board, conversation: conversation)
+      return
+    }
     if state.hasPrefix("timeline-axis") {
       configureFixedTimelineCapture(state, board: board, conversation: conversation)
       return
     }
+    if Self.isCanvasNavigationCapture(state) {
+      configureCanvasNavigationCapture(state, board: board, conversation: conversation)
+      return
+    }
     if Self.conversationToolsCaptureStates.contains(state) {
       configureConversationToolsCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if Self.assistantCitationCaptureStates.contains(state) {
+      configureAssistantCitationCapture(state, board: board, conversation: conversation)
       return
     }
     if Self.entitySchemaCaptureStates.contains(state) {
@@ -442,6 +472,10 @@ extension Studio {
     }
     if Self.structuredFactCaptureStates.contains(state) {
       configureStructuredFactCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if Self.recordBacklinkCaptureStates.contains(state) {
+      configureRecordBacklinkCapture(state, board: board, conversation: conversation)
       return
     }
     if Self.entityNamesCaptureStates.contains(state) {
@@ -1287,6 +1321,18 @@ extension Studio {
     case "settings-world":
       destination = .settings
       settingsSection = .world
+    case "settings-assistant-context", "manual-settings-assistant-context":
+      destination = .settings
+      settingsSection = .world
+      settingsQuery = "Assistant context"
+      updateContext {
+        $0.budget = .focused
+        if state.hasPrefix("manual") {
+          $0.scope = .attachments
+          $0.canonOnly = true
+          $0.includeSelection = false
+        }
+      }
     case "settings-data":
       destination = .settings
       settingsSection = .data
@@ -1295,6 +1341,9 @@ extension Studio {
     case "settings-search":
       destination = .settings
       settingsQuery = "export"
+    case "settings-scope-search":
+      destination = .settings
+      settingsQuery = "navigation"
     case "settings-no-results":
       destination = .settings
       settingsQuery = "unicorn"
@@ -1322,6 +1371,27 @@ extension Studio {
         graphSelectedID = root.id
         graphView.neighborhood = GraphNeighborhood(
           rootID: root.id, depth: state.hasSuffix("one") ? 1 : 2)
+      }
+    case "graph-copy-neighbourhood":
+      destination = .knowledge
+      perform {
+        let entities = records.filter { $0.kind == "entity" }
+        guard let root = entities.first(where: { $0.title == "Mira Vale" }) else {
+          throw SynthesisError.invalid("The graph copy fixture needs its root entity.")
+        }
+        let allIDs = Set(entities.map(\.id))
+        let edges = try store.relations(worldID: worldID).map { ($0.sourceID, $0.targetID) }
+        let scope = GraphNeighborhood(rootID: root.id, depth: 2)
+        guard let projection = scope.project(nodeIDs: allIDs, edges: edges),
+          projection.nodeIDs.count > 1
+        else { throw SynthesisError.invalid("The graph copy fixture needs a linked neighborhood.") }
+        graphSelectedID = root.id
+        graphView.neighborhood = scope
+        guard
+          try copyGraphToCanvas(
+            worldID: worldID, neighborhood: scope, shownIDs: projection.nodeIDs,
+            positions: GraphLayout.positions(nodes: allIDs.sorted(), edges: edges)) != nil
+        else { throw SynthesisError.invalid("The graph copy fixture did not create a canvas.") }
       }
     case "review", "review-canon", "review-checks": destination = .review
     case "timeline", "empty-timeline", "timeline-edit", "timeline-companion", "timeline-compact",

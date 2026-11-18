@@ -92,8 +92,8 @@ struct RelationshipGraph: View {
         BarAction(
           title: selected == nil && neighborhood == nil ? "Copy to canvas" : "Copy neighbourhood",
           icon: "rectangle.on.rectangle", t: studio.t,
-          help: "Create an editable board from what is shown. The graph itself is not changed."
-        ) { transferToCanvas() }.disabled(nodes.isEmpty)
+          help: "Create a new board of live entity references."
+        ) { transferToCanvas() }.disabled(!canTransferToCanvas)
         BarAction(
           title: "Relationship", icon: "plus", t: studio.t, primary: true,
           help: allNodes.count < 2 ? "Create two entities first" : "Connect two entities"
@@ -559,6 +559,7 @@ struct RelationshipGraph: View {
         Button("Inspect") { studio.inspect(.record(entity.id)) }
           .buttonStyle(QuietButton(t: studio.t, primary: true))
         Button("Copy neighbourhood") { transferToCanvas() }.buttonStyle(QuietButton(t: studio.t))
+          .disabled(!canTransferToCanvas)
       }
     }
   }
@@ -718,37 +719,30 @@ struct RelationshipGraph: View {
       apply()
     }
   }
+  private var canTransferToCanvas: Bool {
+    guard layoutWorldID == studio.worldID, pendingSignature == nil, !layout.isEmpty else {
+      return false
+    }
+    return neighborhood != nil || selected != nil || entities.contains(where: matches)
+  }
+
   private func transferToCanvas() {
+    guard canTransferToCanvas, let layoutWorldID else { return }
+    let nodes = entities
+    let scope = neighborhood ?? selected.map { GraphNeighborhood(rootID: $0, depth: 1) }
+    let shownIDs: Set<String>
+    if let scope {
+      guard
+        let projection = scope.project(
+          nodeIDs: Set(nodes.map(\.id)), edges: relationships.map { ($0.sourceID, $0.targetID) })
+      else { return }
+      shownIDs = projection.nodeIDs
+    } else {
+      shownIDs = Set(nodes.filter(matches).map(\.id))
+    }
     studio.perform {
-      var ids = Set(entities.filter(matches).map(\.id))
-      var title = "Graph copy"
-      if let neighborhood, let projection = neighborhoodProjection(entities) {
-        ids = projection.nodeIDs
-        title = "Around \(name(neighborhood.rootID))"
-      } else if let selected {
-        ids = [selected]
-        for relation in relationships
-        where relation.sourceID == selected || relation.targetID == selected {
-          ids.insert(relation.sourceID)
-          ids.insert(relation.targetID)
-        }
-        title = "Around \(name(selected))"
-      }
-      var document = CanvasDocument()
-      // Keep the graph's arrangement so the board opens looking like what was copied.
-      document.cards = entities.filter { ids.contains($0.id) }.map { record in
-        var card = CanvasCard(text: record.title, recordID: record.id)
-        card.width = 300
-        card.x = (layout[record.id]?.x ?? 0) * 1.2
-        card.y = (layout[record.id]?.y ?? 0) * 1.3
-        return card
-      }
-      let data = try JSONEncoder().encode(document)
-      let board = try studio.store.saveBoard(
-        worldID: studio.worldID, name: title, kind: "canvas",
-        content: String(decoding: data, as: UTF8.self))
-      studio.openBoard(board.id, kind: "canvas")
-      studio.show("Copied to a new board. Moving cards there never changes the graph.")
+      try studio.copyGraphToCanvas(
+        worldID: layoutWorldID, neighborhood: scope, shownIDs: shownIDs, positions: layout)
     }
   }
 

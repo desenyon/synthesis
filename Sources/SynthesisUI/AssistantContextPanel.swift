@@ -235,9 +235,9 @@ struct AssistantContextPanel: View {
   private var draftContext: some View {
     VStack(alignment: .leading, spacing: 14) {
       ChoiceField(
-        title: "Read from", selection: option(\.scope),
+        title: "Read from", selection: studio.assistantContextBinding(\.scope),
         choices: AssistantContextScope.allCases.map { ($0, $0.title) }, t: studio.t)
-      Toggle("Accepted lore only", isOn: option(\.canonOnly))
+      Toggle("Accepted lore only", isOn: studio.assistantContextBinding(\.canonOnly))
         .font(.studio(size: 13))
         .help("Use saved versions that you accepted as canon")
       if studio.contextOptions.canonOnly {
@@ -248,7 +248,7 @@ struct AssistantContextPanel: View {
       }
       exclusionSettings
       ChoiceField(
-        title: "Context size", selection: option(\.budget),
+        title: "Context size", selection: studio.assistantContextBinding(\.budget),
         choices: AssistantContextBudget.allCases.map { ($0, $0.title) }, t: studio.t
       )
       .help("Limits direct references and the number of full record excerpts.")
@@ -257,16 +257,15 @@ struct AssistantContextPanel: View {
         StudioLabel("\(count) pinned for the next message", icon: "pin")
           .font(.studio(.caption)).foregroundStyle(studio.t.accent)
       }
-      Toggle("Include workspace selection", isOn: option(\.includeSelection)).font(
+      Toggle(
+        "Include workspace selection", isOn: studio.assistantContextBinding(\.includeSelection)
+      ).font(
         .studio(size: 13)
       )
       .help("Includes selected lore and the active canvas, map or history branch.")
       Toggle(
         "Include recent conversation",
-        isOn: Binding(
-          get: { studio.contextOptions.includeHistory && !studio.contextOptions.restricted },
-          set: { value in studio.updateContext { $0.includeHistory = value } }
-        )
+        isOn: studio.assistantContextHistoryBinding
       )
       .font(.studio(size: 13)).disabled(studio.contextOptions.restricted)
       Text(
@@ -510,13 +509,6 @@ struct AssistantContextPanel: View {
   private func toggle(_ id: String, in values: inout [String]) {
     if values.contains(id) { values.removeAll { $0 == id } } else { values.append(id) }
   }
-  private func option<Value>(_ path: WritableKeyPath<AssistantContextOptions, Value>) -> Binding<
-    Value
-  > {
-    Binding(
-      get: { studio.contextOptions[keyPath: path] },
-      set: { value in studio.updateContext { $0[keyPath: path] = value } })
-  }
   private func refresh() {
     if attachments {
       acceptedRecordIDs =
@@ -531,5 +523,33 @@ struct AssistantContextPanel: View {
       preview = nil
       failure = error.localizedDescription
     }
+  }
+}
+
+extension Studio {
+  func assistantContextBinding<Value>(
+    _ path: WritableKeyPath<AssistantContextOptions, Value>
+  ) -> Binding<Value> {
+    let world = worldID
+    let original = contextOptions[keyPath: path]
+    return Binding(
+      get: { self.worldID == world ? self.contextOptions[keyPath: path] : original },
+      set: { value in
+        guard self.worldID == world else { return }
+        self.updateContext { $0[keyPath: path] = value }
+      })
+  }
+
+  var assistantContextHistoryBinding: Binding<Bool> {
+    let world = worldID
+    return Binding(
+      get: {
+        self.worldID == world && self.contextOptions.includeHistory
+          && !self.contextOptions.restricted
+      },
+      set: { value in
+        guard self.worldID == world, !self.contextOptions.restricted else { return }
+        self.updateContext { $0.includeHistory = value }
+      })
   }
 }

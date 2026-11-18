@@ -206,6 +206,20 @@ import Testing
     #expect(saved.title == "The Tide Ledger" && saved.origin == "ai-proposed")
     #expect(saved.state == "draft" && saved.canonical == nil)
   }
+  @Test func savingAnOldAssistantResponseCannotCrossWorlds() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    let originalWorld = studio.worldID
+    let conversation = try store.createConversation(worldID: originalWorld)
+    let message = try store.appendMessage(
+      worldID: originalWorld, conversationID: conversation.id, role: "assistant",
+      body: "Keep this local.", state: "complete")
+    let other = try store.createWorld(name: "Other world")
+    studio.switchWorld(other.id)
+    studio.saveResponse(message)
+    #expect(try store.records(worldID: other.id).isEmpty)
+    #expect(studio.error != nil)
+  }
   @Test func sampleWorldIsIdempotentAndLeavesOtherWorldsAlone() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let studio = try Studio(store: store)

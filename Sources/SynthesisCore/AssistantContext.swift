@@ -65,6 +65,11 @@ public struct AssistantContext: Sendable {
   public var eligibleCount: Int
   public var selectedIDs: [String]
   var providerPrompt: String
+  var citationAddresses: [AssistantCitation] = []
+
+  public func linkAcceptedCitations(in text: String) -> String {
+    AssistantCitation.response(text, addresses: citationAddresses)
+  }
 }
 
 extension WorkspaceStore {
@@ -135,7 +140,9 @@ extension WorkspaceStore {
     _ = try world(worldID)
     let all = try records(worldID: worldID)
     let activeIDs = Set(all.map(\.id))
-    let available = options.canonOnly ? Self.assistantAcceptedRecords(all) : all
+    let available =
+      options.canonOnly
+      ? Self.assistantAcceptedRecords(all, preservingRichText: true) : all
     let byID = Dictionary(uniqueKeysWithValues: available.map { ($0.id, $0) })
     let boards = try assistantBoards(worldID: worldID)
     let lanes = try chronologyLanes(worldID: worldID)
@@ -308,52 +315,95 @@ extension WorkspaceStore {
     let embeddedExclusions = exclusionIDs.subtracting(allowed)
     let embeddedApproved = approvedRecords?.filter { allowed.contains($0.key) }
     var embeddedLinkPermissions: [WorldReference: Bool] = [:]
-    func bodyExcerpt(_ body: String, limit: Int) throws -> String {
-      guard options.restricted, body.contains("synthesis://") else {
-        return String(body.prefix(limit))
+    func allowsEmbeddedLink(_ reference: WorldReference) -> Bool {
+      if let permitted = embeddedLinkPermissions[reference] { return permitted }
+      let permitted: Bool
+      switch reference.kind {
+      case .record:
+        permitted = reference.worldID == worldID && allowed.contains(reference.id)
+      case .board, .atlasImage, .canvasImage:
+        permitted =
+          embeddedApproved == nil && reference.worldID == worldID
+          && boardIDs.contains(reference.containerID ?? reference.id)
+      case .event, .artwork, .proposal:
+        permitted =
+          (try? assistantReference(
+            reference, worldID: worldID, excludedRecords: embeddedExclusions,
+            excludedHistory: excludedHistory, approvedRecords: embeddedApproved)) != nil
       }
+      embeddedLinkPermissions[reference] = permitted
+      return permitted
+    }
+    func bodyExcerpt(_ text: String, rtf: String? = nil, limit: Int) throws -> String {
+      guard options.restricted else { return String(text.prefix(limit)) }
+      let body: String
+      if let rtf {
+        let hidden = "[Excluded source]"
+        guard
+          let filtered = MarkdownText.assistantBody(
+            text, rtf: rtf,
+            replacement: { url in
+              guard let url else { return hidden }
+              let recordID: String
+              if let reference = try? WorldReference(url: url) {
+                guard allowsEmbeddedLink(reference) else { return hidden }
+                guard reference.kind == .record else { return nil }
+                recordID = reference.id
+              } else {
+                // An ordinary record link has one path component and no authority fields.
+                guard url.absoluteString == "synthesis://record/\(url.lastPathComponent)",
+                  allowed.contains(url.lastPathComponent)
+                else { return hidden }
+                recordID = url.lastPathComponent
+              }
+              guard let approved = embeddedApproved?[recordID] else { return nil }
+              return String(approved.title.map { $0.isNewline ? " " : $0 })
+            })
+        else { return "[Excerpt unavailable: rich-text links could not be checked.]" }
+        body = filtered
+      } else {
+        body = text
+      }
+      guard body.contains("synthesis://") else { return String(body.prefix(limit)) }
       guard let references = try? Self.requestWorldReferences(in: body) else {
         return "[Excerpt omitted: too many embedded source references.]"
       }
-      let hidden = Set(
-        references.filter { reference in
-          if let permitted = embeddedLinkPermissions[reference] { return !permitted }
-          let permitted: Bool
-          switch reference.kind {
-          case .record:
-            permitted = reference.worldID == worldID && allowed.contains(reference.id)
-          case .board, .atlasImage, .canvasImage:
-            permitted =
-              embeddedApproved == nil && reference.worldID == worldID
-              && boardIDs.contains(reference.containerID ?? reference.id)
-          case .event, .artwork, .proposal:
-            permitted =
-              (try? assistantReference(
-                reference, worldID: worldID, excludedRecords: embeddedExclusions,
-                excludedHistory: excludedHistory, approvedRecords: embeddedApproved)) != nil
-          }
-          embeddedLinkPermissions[reference] = permitted
-          return !permitted
-        })
+      let permitted = Set(references.filter(allowsEmbeddedLink))
       let filtered = try assistantPrompt(
-        body, worldID: worldID, excluding: hidden, excludingRecordIDs: embeddedExclusions,
+        body, worldID: worldID, excluding: [], excludingRecordIDs: embeddedExclusions,
         approvedRecords: embeddedApproved,
-        embeddedScope: (recordIDs: allowed, references: Set(references).subtracting(hidden)))
+        embeddedScope: (recordIDs: allowed, references: permitted))
       // Clip only after filtering, so a link cut in half cannot expose its excluded label.
       return String(filtered.prefix(limit))
+    }
+    var citationAddresses: [AssistantCitation] = []
+    func acceptedExcerpt(_ record: LoreRecord) throws -> String {
+      let limit = AssistantCitation.excerptLimit
+      let rendered = try bodyExcerpt(record.body, rtf: record.rtf, limit: limit)
+      // An address opens the original approval revision. Do not issue one for an
+      // excerpt whose links or labels changed under this request's scope.
+      guard rendered.utf8.elementsEqual(record.body.prefix(limit).utf8) else { return rendered }
+      return acceptedCitationExcerpt(record, addresses: &citationAddresses)
     }
     let lore = try sources.map { source -> String in
       let r = source.record
       if options.canonOnly {
-        let excerpt = try bodyExcerpt(r.body, limit: 6000)
+        let excerpt = try acceptedExcerpt(r)
         return
           "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category). Accepted canon: \(excerpt)"
       }
-      let canon = r.canonical.flatMap { $0.data(using: .utf8) }.flatMap {
-        try? JSONSerialization.jsonObject(with: $0) as? [String: Any]
+      let accepted: String
+      if let record = Self.assistantAcceptedRecords([r], preservingRichText: true).first {
+        accepted = try acceptedExcerpt(record)
+      } else {
+        let canon = r.canonical.flatMap { $0.data(using: .utf8) }.flatMap {
+          try? JSONSerialization.jsonObject(with: $0) as? [String: Any]
+        }
+        accepted = try bodyExcerpt(
+          canon?["body"] as? String ?? "none", rtf: canon?["rtf"] as? String,
+          limit: AssistantCitation.excerptLimit)
       }
-      let accepted = try bodyExcerpt(canon?["body"] as? String ?? "none", limit: 6000)
-      let working = try bodyExcerpt(r.body, limit: 3000)
+      let working = try bodyExcerpt(r.body, rtf: r.rtf, limit: 3000)
       let rules = (try? rulesText(worldID: worldID, systemID: r.id)) ?? ""
       let properties =
         (try? entityPropertyText(worldID: worldID, recordID: r.id, allowedIDs: allowed, limit: 4000))
@@ -363,10 +413,15 @@ extension WorkspaceStore {
         + "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category), state: \(r.state), version: \(r.version). Working draft: \(working). Accepted canon snapshot: \(accepted)"
     }.joined(separator: "\n\n")
     return AssistantContext(
-      sources: sources, workspace: workspace, lore: lore,
+      sources: options.canonOnly
+        ? sources.map { source in
+          var projection = source
+          projection.record.rtf = nil
+          return projection
+        } : sources, workspace: workspace, lore: lore,
       includesHistory: options.includeHistory && !options.restricted,
       eligibleCount: allowed.count, selectedIDs: selected.filter(allowed.contains),
-      providerPrompt: providerPrompt)
+      providerPrompt: providerPrompt, citationAddresses: citationAddresses)
   }
 
   private func assistantReferences(

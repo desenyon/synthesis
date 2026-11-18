@@ -3,6 +3,12 @@ import Foundation
 extension WorkspaceStore {
   /// Uses the full accepted snapshot and omits records with missing or inconsistent canon data.
   public static func assistantAcceptedRecords(_ records: [LoreRecord]) -> [LoreRecord] {
+    assistantAcceptedRecords(records, preservingRichText: false)
+  }
+
+  static func assistantAcceptedRecords(_ records: [LoreRecord], preservingRichText: Bool)
+    -> [LoreRecord]
+  {
     let decoder = JSONDecoder()
     let accepted: [LoreRecord] = records.compactMap { record in
       guard let json = record.canonical,
@@ -15,7 +21,7 @@ extension WorkspaceStore {
       // A snapshot captures the revision before the approval, including its previous state.
       snapshot.state = "canon"
       snapshot.canonical = nil
-      snapshot.rtf = nil
+      if !preservingRichText { snapshot.rtf = nil }
       return snapshot
     }
     return accepted.sorted {

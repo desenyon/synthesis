@@ -15,6 +15,7 @@ struct ConversationStudio: View {
   @State private var branches: [ConversationBranch] = []
   @State private var recipesPresented = false
   @State private var recipesWorldID = ""
+  @State private var citationPassage: AssistantCitationPassage?
   @State private var transcriptSpace = UUID()
   @State private var displayedConversationID: String?
   @State private var restoringScroll = false
@@ -53,12 +54,25 @@ struct ConversationStudio: View {
     }.background(studio.t.background)
       .onAppear {
         reloadLineage()
+        presentCapturedCitation()
         if studio.captureHint.contains("recipe-") && !studio.captureHint.hasSuffix("applied") {
           recipesWorldID = studio.worldID
           recipesPresented = true
         }
       }
-      .onChange(of: studio.conversationID) { _, _ in reloadLineage() }
+      .onChange(of: studio.conversationID) { _, _ in
+        citationPassage = nil
+        reloadLineage()
+        presentCapturedCitation()
+      }
+      .onChange(of: studio.worldID) { _, _ in citationPassage = nil }
+      .onChange(of: studio.captureHint) { previous, _ in
+        if previous == "assistant-citation-passage" { citationPassage = nil }
+        presentCapturedCitation()
+      }
+      .studioSheet(item: $citationPassage) { passage in
+        AssistantCitationSheet(source: passage, studio: studio, close: { citationPassage = nil })
+      }
       .onChange(of: studio.worldRevision) { _, _ in reloadLineage() }
       .studioSheet(isPresented: $recipesPresented) {
         PromptRecipesSheet(
@@ -278,15 +292,18 @@ struct ConversationStudio: View {
             ConversationLineage(studio: studio, branch: lineage, companion: companion)
           }
           ForEach(studio.messages) { message in
-            ChatRow(studio: studio, message: message, narrow: narrow, companion: companion)
-              .id(message.id)
-              .background {
-                GeometryReader { geometry in
-                  Color.clear.preference(
-                    key: TranscriptFramePreference.self,
-                    value: [message.id: geometry.frame(in: .named(transcriptSpace))])
-                }
+            ChatRow(
+              studio: studio, message: message, narrow: narrow, companion: companion,
+              inspectCitation: inspectCitation
+            )
+            .id(message.id)
+            .background {
+              GeometryReader { geometry in
+                Color.clear.preference(
+                  key: TranscriptFramePreference.self,
+                  value: [message.id: geometry.frame(in: .named(transcriptSpace))])
               }
+            }
           }
           if studio.busy
             || studio.activity.contains(where: { $0.state == .failed || $0.state == .cancelled })
@@ -380,6 +397,23 @@ struct ConversationStudio: View {
     }
   }
 
+  private func inspectCitation(_ address: AssistantCitation) {
+    guard let passage = try? studio.store.resolveAssistantCitation(address, worldID: studio.worldID)
+    else {
+      studio.show("That accepted passage is unavailable.", icon: "questionmark.circle")
+      return
+    }
+    citationPassage = passage
+  }
+
+  private func presentCapturedCitation() {
+    guard studio.captureHint == "assistant-citation-passage",
+      let message = studio.messages.last(where: { $0.role == "assistant" }),
+      let address = AssistantCitation.addresses(in: message.body).first
+    else { return }
+    inspectCitation(address)
+  }
+
   private func reloadLineage() {
     lineage = nil
     branches = []
@@ -422,18 +456,22 @@ private struct TranscriptFramePreference: PreferenceKey {
 /// Opens `synthesis://record/<id>` links against the selected world only.
 @MainActor func recordLinkAction(_ studio: Studio) -> OpenURLAction {
   OpenURLAction { url in
-    if studio.openWorkspaceReference(url) { return .handled }
-    if url.scheme == "synthesis", url.host == "record",
-      let record = studio.records.first(where: { $0.id == url.lastPathComponent })
-    {
-      studio.openRecord(record)
-      return .handled
-    }
-    if url.scheme == "synthesis" {
-      studio.show("That record is not available in this world.", icon: "questionmark.circle")
-    }
-    return .discarded
+    recordLinkResult(url, studio: studio)
   }
+}
+
+@MainActor private func recordLinkResult(_ url: URL, studio: Studio) -> OpenURLAction.Result {
+  if studio.openWorkspaceReference(url) { return .handled }
+  if url.scheme == "synthesis", url.host == "record",
+    let record = studio.records.first(where: { $0.id == url.lastPathComponent })
+  {
+    studio.openRecord(record)
+    return .handled
+  }
+  if url.scheme == "synthesis" {
+    studio.show("That record is not available in this world.", icon: "questionmark.circle")
+  }
+  return .discarded
 }
 
 struct ChatRow: View {
@@ -441,6 +479,7 @@ struct ChatRow: View {
   let message: ChatMessage
   var narrow = false
   var companion = false
+  let inspectCitation: (AssistantCitation) -> Void
   @State private var copied = false
   var body: some View {
     switch message.role {
@@ -500,18 +539,24 @@ struct ChatRow: View {
         )
         .font(.studio(.caption)).foregroundStyle(studio.t.muted)
       }
-      MarkdownContent(text: message.body, t: studio.t)
-        .environment(\.openURL, recordLinkAction(studio))
+      MarkdownContent(text: AssistantCitation.markdown(message.body), t: studio.t)
+        .environment(\.openURL, assistantLinkAction)
       if let proposal = studio.proposals[message.id] {
         ProposalCard(studio: studio, proposal: proposal, narrow: narrow)
       }
       if let sources = studio.contexts[message.id], !sources.isEmpty {
         ContextDisclosure(studio: studio, sources: sources)
       }
+      if let usage = studio.assistantResponseUsage[message.id] {
+        Text("\(usage.provider.title) · \(usage.detail) · Subscription cost unavailable")
+          .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
       HStack(spacing: 2) {
         action(copied ? "Copied" : "Copy", copied ? "checkmark" : "doc.on.doc") {
           NSPasteboard.general.clearContents()
-          NSPasteboard.general.setString(message.body, forType: .string)
+          NSPasteboard.general.setString(
+            AssistantCitation.markdown(message.body, forDraft: true), forType: .string)
           copied = true
           Task { @MainActor in
             try? await Task.sleep(for: .seconds(1.6))
@@ -526,6 +571,20 @@ struct ChatRow: View {
       }.padding(.leading, -8)
     }
   }
+  private var assistantLinkAction: OpenURLAction {
+    let allowed = Set(AssistantCitation.addresses(in: message.body))
+    return OpenURLAction { url in
+      guard url.scheme == "synthesis", url.host == "citation" else {
+        return recordLinkResult(url, studio: studio)
+      }
+      guard message.worldID == studio.worldID, message.conversationID == studio.conversationID,
+        let address = AssistantCitation(url: url), allowed.contains(address)
+      else { return .discarded }
+      inspectCitation(address)
+      return .handled
+    }
+  }
+
   private var branchAction: some View {
     action("Branch from here", "arrow.triangle.branch") {
       studio.branchConversation(at: message.id, keepWorkspace: companion)

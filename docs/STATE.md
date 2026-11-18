@@ -6,7 +6,7 @@ Use the current [Mac handoff](HANDOFF.md) and [continuation prompt](RUN_PROMPT.m
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **64 Verified, 12 In progress, 318 Open.** The Mac continuation uses separate coordinators, owners and independent reviewers with a single build queue. [Ownership and dependencies](EXPANSION_DEPENDENCIES.md)
+The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **70 Verified, 16 In progress, 308 Open.** The Mac continuation uses separate coordinators, owners and independent reviewers with a single build queue. [Ownership and dependencies](EXPANSION_DEPENDENCIES.md)
 
 Mac baseline `3b0693a` passed 390 native tests, both session processes, 20 Canvas tests and 59 WebKit/native Canvas checks. The 69-state sweep produced 207 main frames and 18 utility panels. Independent reviewers inspected all three sizes. Follow-up work covers compact Canvas clipping, Quick Capture window controls, editor selection evidence, property glyphs and the next feature slices. [Mac sweep](verification/expansion-parallel-final/README.md)
 
@@ -15,6 +15,8 @@ The follow-up passed 404 tests in 102 suites, the isolated optimized build and b
 The Timeline, Facts and atomic Review checkpoint passed 422 tests in 106 suites, strict format lint, optimized signing and both session processes. Reviewers inspected 48 main frames across all three sizes and confirmed the corrected Graph neighborhood fit, relationship history sheet, linked Atlas region and compact selected-period controls. Migrations 0020–0021 add named fixed calendars and independent facts. Typed relationship metadata now survives reviewed branch merge and portability, and a late batch failure rolls back the whole draft operation. [Exact evidence](verification/expansion-parallel-final/README.md#timeline-facts-and-atomic-review)
 
 The Simulation and Settings checkpoint passed 447 tests in 114 suites and both session processes. Inspectors reviewed 48 final frames across all three sizes. Typed Library collections show an assigned membership lens, local Simulation saves reproducible hypothetical resource traces, Data Settings checks and rebuilds world indexes, and the Assistant exposes a finite chat limit and the latest provider-reported usage. Cost figures and image-usage metrics remain unavailable. [Exact evidence](verification/expansion-parallel-final/README.md#simulation-typed-library-and-settings)
+
+The connected workspace checkpoint passed 467 tests in 123 suites, strict lint, both session processes, 23 Canvas tests and TypeScript. The expanded sweep covered all 69 handoff states plus 21 new ones. It produced 270 main frames and 18 panels across three sizes and passed all 66 Canvas assertions. Exact citations and automatic backlinks respect scoped source addresses. Canvas bookmarks and Graph transfer preserve the selected live view. Settings exposes world sharing choices and replies retain their reported text token counts locally. [Exact evidence](verification/expansion-parallel-final/README.md#connected-workspace-audit)
 
 **No new release or tag is authorized. The owner requires all 394 requirements completed before another release; completing them does not itself authorize publication.** The current 0.0.3 release is unchanged.
 

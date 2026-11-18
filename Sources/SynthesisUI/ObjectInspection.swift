@@ -108,9 +108,9 @@ extension Studio {
           property("Conversations", "\(conversations.count)"),
         ])
     case .record(let id):
-      guard records.contains(where: { $0.id == id && $0.worldID == worldID }) else {
-        throw SynthesisError.notFound
-      }
+      guard records.contains(where: { $0.id == id && $0.worldID == worldID }),
+        try !store.isArchived(worldID: worldID, recordID: id)
+      else { throw SynthesisError.notFound }
       let record = try store.record(worldID: worldID, id: id)
       var result = ObjectInspection(
         title: record.title, kind: Vocabulary.displayCategory(record.category),

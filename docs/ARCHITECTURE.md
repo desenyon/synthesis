@@ -24,6 +24,10 @@ Migration 0022 stores immutable world-scoped Simulation snapshots with exact tra
 
 Data Settings checks three derived FTS tables against saved records, typed properties and names. A file-backed maintenance queue uses a separate SQLite connection and rebuilds only the selected world in one transaction. The device-local chat cap counts admitted submissions and commits the UTC tally alongside the saved prompt. The latest successful activity displays provider-reported counts when available.
 
+Migration 0024 stores provider-reported text usage against the actual assistant reply on this Mac. Completed replies and their counts commit together. Portable archives and conversation branches omit this device metadata. Assistant citations mint scoped addresses only for an immutable accepted passage that matches the permitted excerpt byte for byte. Restricted requests examine native rich-text links before clipping. The record inspector reads native and portable links separately from lexical mentions using a scoped snapshot.
+
+Canvas serializes named viewport bookmarks inside the existing board scene. Views recall scene-space centers and zoom, cancel prior engine animations, and validate the saved board generation. The minimap projects existing engine geometry. Graph transfer saves a bounded neighborhood with live record references and its scoped relationships. [Mac evidence](verification/expansion-parallel-final/README.md#connected-workspace-audit)
+
 Explicit bulk proposal acceptance runs under one transaction and validates the exact reviewed rows and prerequisite results before committing drafts. What-if proposals carry approved-for-review relationship metadata and map evidence through the branch's stable identities.
 
 Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bundle: `dist/Synthesis.app`. The former `swift-falcon` worktree is retired.

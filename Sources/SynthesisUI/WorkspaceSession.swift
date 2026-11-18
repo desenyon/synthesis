@@ -78,6 +78,7 @@ struct TimelineViewState: Codable, Equatable {
   static let unplacedEraID = "unplaced"
 
   var density = TimelineDensity.detailed
+  var eraDateFilter: TimelineDateFilter?
   var foldedLanes: Set<String> = []
   var foldedEras: Set<String> = []
   var query = ""

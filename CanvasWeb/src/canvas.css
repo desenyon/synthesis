@@ -111,7 +111,11 @@ body,
 /* A split workspace can be wide and short: keep every drawing tool reachable. */
 @media(max-height:440px) and (min-width:620px){.studio-drawing-bar{top:12px;right:12px;transform:none;flex-direction:row}.studio-drawing-bar .tool-separator{width:1px;height:19px;margin:0 3px}.studio-drawing-bar .studio-tooltip{top:calc(100% + 10px);right:0}.studio-selection{top:62px}}
 @media(max-height:440px) and (max-width:619px){.studio-drawing-bar{max-height:calc(100% - 120px);overflow-y:auto;scrollbar-width:thin}}
-@media(prefers-reduced-motion:reduce){.studio-overlay *{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion: reduce) {
+  .studio-overlay * { animation: none !important; transition: none !important; }
+  .studio-overlay .studio-tool:active,
+  .studio-overlay .record-port:is(:hover, :focus-visible, .connecting) { transform: none; }
+}
 /* Establish one stacking context above both engine canvas layers. */
 .studio-overlay{z-index:5}
 /* Excalidraw has a separate mobile chrome path when the companion narrows the board. */
@@ -140,3 +144,20 @@ body,
 .studio-relationship-hit { position:absolute; pointer-events:auto; background:transparent; border:0; border-radius:6px; cursor:pointer; }
 .studio-relationship-hit:hover { background:rgba(169,199,255,.08); }
 .studio-relationship-hit:focus-visible { outline:2px solid var(--focus,#a9c7ff); outline-offset:2px; }
+
+.studio-navigation{--studio-navigation-top:74px;position:absolute;top:var(--studio-navigation-top);left:18px;width:min(246px,calc(100% - 86px));max-height:calc(100% - var(--studio-navigation-top) - var(--studio-navigation-bottom,76px));box-sizing:border-box;padding:9px;overflow:auto;color:var(--quiet);font-size:12px}
+.studio-navigation button,.studio-navigation input{background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:inherit}
+.studio-navigation button{cursor:pointer}
+.studio-navigation button:disabled{opacity:.5;cursor:default}
+.studio-navigation button:focus-visible,.studio-navigation input:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.studio-navigation .studio-minimap{display:block;width:100%;padding:0}
+.studio-minimap canvas{display:block;width:100%;height:auto}
+.studio-navigation form,.studio-navigation li,.studio-bookmark-undo{display:flex;gap:4px;margin-top:5px}
+.studio-navigation input,.studio-navigation li button:first-child,.studio-bookmark-undo span{min-width:0;flex:1}
+.studio-navigation li button:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.studio-navigation ul{margin:0;padding:0;list-style:none}
+.studio-bookmark-undo{align-items:center}
+@media(max-width:800px){
+  .studio-navigation{--studio-navigation-top:66px;left:12px}
+  .studio-navigation.below-selection{--studio-navigation-top:124px}
+}

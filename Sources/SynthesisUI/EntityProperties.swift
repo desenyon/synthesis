@@ -22,6 +22,7 @@ struct EntityPropertiesPage: View {
   @State private var template = false
   @State private var history = false
   @State private var showHidden = false
+  @State private var showSuggestions = false
   @State private var failure: String?
 
   var body: some View {
@@ -47,6 +48,9 @@ struct EntityPropertiesPage: View {
           }
           if let resolved, let review {
             profileHeader(resolved, review: review)
+            if !review.suggestedFields.isEmpty {
+              suggestions(review, resolved: resolved)
+            }
             VStack(spacing: 0) {
               ForEach(
                 resolved.fields.filter {
@@ -113,6 +117,14 @@ struct EntityPropertiesPage: View {
       }
       if studio.captureHint.contains("properties-history") { history = true }
       if studio.captureHint == "properties-template" { template = true }
+      if ["properties-suggestions", "properties-suggestion-edit"].contains(studio.captureHint) {
+        showSuggestions = true
+        if studio.captureHint == "properties-suggestion-edit", let review, let resolved,
+          let firstField = review.suggestedFields.first
+        {
+          edit(firstField, review: review, resolved: resolved)
+        }
+      }
       if let review, let resolved, studio.captureHint.hasPrefix("properties-edit-"),
         let field = resolved.fields.first(where: {
           "properties-edit-" + $0.kind.rawValue == studio.captureHint
@@ -128,10 +140,15 @@ struct EntityPropertiesPage: View {
       EntityValueSheet(
         studio: studio, field: item.field, value: item.value, inherited: item.inherited
       ) { value in
+        guard item.profile.worldID == studio.worldID, item.profile.recordID == record.id else {
+          throw SynthesisError.stale
+        }
         var values = item.profile.values
         values[item.field.key] = value
         _ = try studio.store.saveEntityProfile(
-          worldID: studio.worldID, recordID: record.id, typeID: item.profile.typeID, values: values,
+          worldID: item.profile.worldID, recordID: item.profile.recordID,
+          typeID: item.profile.typeID,
+          values: values,
           expectedVersion: item.profile.version)
         try studio.reload()
       } close: {
@@ -173,6 +190,31 @@ struct EntityPropertiesPage: View {
         .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
     }
   }
+  private func suggestions(_ review: EntityProfileReview, resolved: EntityResolvedType)
+    -> some View
+  {
+    DisclosureGroup("Optional field suggestions", isExpanded: $showSuggestions) {
+      FlowLayout(spacing: Space.sm) {
+        ForEach(review.suggestedFields) { field in
+          Button {
+            edit(field, review: review, resolved: resolved)
+          } label: {
+            StudioLabel(field.label, icon: "pencil.line").lineLimit(1)
+          }.buttonStyle(QuietButton(t: studio.t))
+            .accessibilityLabel("Edit suggested field, \(field.label)")
+        }
+      }.padding(.top, Space.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }.font(.studio(.label))
+  }
+
+  private func edit(_ field: EntityField, review: EntityProfileReview, resolved: EntityResolvedType)
+  {
+    editing = EntityPropertyEdit(
+      field: field, value: review.snapshot.values[field.key], profile: review.profile,
+      inherited: resolved.defaults[field.key] != nil)
+  }
+
   private func propertyRow(
     _ field: EntityField, review: EntityProfileReview, resolved: EntityResolvedType
   ) -> some View {
@@ -233,9 +275,7 @@ struct EntityPropertiesPage: View {
       }.frame(maxWidth: .infinity, alignment: .leading)
       if field.kind != .formula {
         IconButton(icon: "pencil.line", label: "Edit \(field.label)", t: studio.t, size: 28) {
-          editing = EntityPropertyEdit(
-            field: field, value: value, profile: review.profile,
-            inherited: resolved.defaults[field.key] != nil)
+          edit(field, review: review, resolved: resolved)
         }
       }
     }.padding(16).opacity(hidden ? 0.7 : 1)
@@ -246,11 +286,12 @@ struct EntityPropertiesPage: View {
       }
   }
   private func load() {
+    guard record.worldID == studio.worldID else { return }
     do {
-      types = try studio.store.entityTypes(worldID: studio.worldID)
-      review = try studio.store.entityProfileReview(worldID: studio.worldID, recordID: record.id)
+      types = try studio.store.entityTypes(worldID: record.worldID)
+      review = try studio.store.entityProfileReview(worldID: record.worldID, recordID: record.id)
       resolved = try review.map {
-        try studio.store.resolvedEntityType(worldID: studio.worldID, id: $0.profile.typeID)
+        try studio.store.resolvedEntityType(worldID: record.worldID, id: $0.profile.typeID)
       }
       failure = nil
     } catch { failure = error.localizedDescription }

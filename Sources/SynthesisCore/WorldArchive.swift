@@ -177,6 +177,25 @@ extension WorkspaceStore {
           var row = source.mapValues(remap)
           if table == "timeline_calendars" { row["name"] = source["name"] }
           if table == "events" { row["date_label"] = source["date_label"] }
+          if table == "boards", source["kind"] == "canvas",
+            let original = source["content"], original.contains("viewportBookmarks"),
+            let mapped = row["content"], mapped != original,
+            let originalObject = try? JSONSerialization.jsonObject(with: Data(original.utf8))
+              as? [String: Any],
+            originalObject["format"] as? String == "excalidraw",
+            let originalScene = originalObject["scene"] as? [String: Any],
+            let bookmarks = originalScene["viewportBookmarks"],
+            var mappedObject = try? JSONSerialization.jsonObject(with: Data(mapped.utf8))
+              as? [String: Any],
+            var mappedScene = mappedObject["scene"] as? [String: Any]
+          {
+            // Bookmarks hold literal labels and scene positions. Other saved references remap.
+            mappedScene["viewportBookmarks"] = bookmarks
+            mappedObject["scene"] = mappedScene
+            row["content"] = String(
+              decoding: try JSONSerialization.data(
+                withJSONObject: mappedObject, options: [.sortedKeys]), as: UTF8.self)
+          }
           if table == "record_artwork" {
             guard let image = source["image"], let data = Data(base64Encoded: image),
               try Self.validateArtwork(data) == source["mime_type"],

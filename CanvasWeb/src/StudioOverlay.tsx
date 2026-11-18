@@ -1,11 +1,13 @@
-import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound, Note as StickyNote, Image as ImageIcon, GitBranch, BoundingBox as Frame, Pencil, Square, Minus, CornersOut as Scan, ArrowCounterClockwise as Undo2, ArrowClockwise as Redo2, ArrowUpRight, At as AtSign, X, SlidersHorizontal, Books as Library, FilePlus as FilePlus2, FileText, Graph, User, Flag, MapPin, Lightning, Sparkle, CalendarBlank, Lightbulb, type Icon as PhosphorIcon } from '@phosphor-icons/react';
+import { Cursor as MousePointer2, Hand, Plus, IdentificationCard as ContactRound, Note as StickyNote, Image as ImageIcon, GitBranch, BoundingBox as Frame, Pencil, Square, Minus, CornersOut as Scan, ArrowCounterClockwise as Undo2, ArrowClockwise as Redo2, ArrowUpRight, At as AtSign, X, SlidersHorizontal, Books as Library, FilePlus as FilePlus2, FileText, Graph, User, Flag, MapPin, Lightning, Sparkle, CalendarBlank, Lightbulb, MapTrifold, type Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { CaptureUpdateAction, newElementWith, viewportCoordsToSceneCoords } from '@excalidraw/excalidraw';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { isCard, kindLabel, stateName, type RecordInfo, type RelationInfo } from './cards';
 import { cardFrame, visibleFrame, drawingStyleContext, containsCardPoint } from './sceneRules';
+import { BoardNavigation, type BoardNavigationControls } from './BoardNavigation';
 import { palette, displayPalette, categoryColor, categoryKey, type Theme } from './palette';
 type Props = {
     api: any;
+    navigation: BoardNavigationControls;
     theme: Theme;
     assisted: boolean;
     records: () => Map<string, RecordInfo>;
@@ -15,7 +17,7 @@ type Props = {
 const icons: Record<string, PhosphorIcon> = { select: MousePointer2, hand: Hand, plus: Plus, entity: ContactRound,
     note: StickyNote, image: ImageIcon, connect: GitBranch, frame: Frame, draw: Pencil, shape: Square,
     minus: Minus, fit: Scan, arrange: Graph, undo: Undo2, redo: Redo2, open: ArrowUpRight, reference: AtSign,
-    close: X, settings: SlidersHorizontal, library: Library, capture: FilePlus2 };
+    close: X, navigation: MapTrifold, settings: SlidersHorizontal, library: Library, capture: FilePlus2 };
 function Icon({ name }: { name: string }) {
     const Glyph = icons[name] ?? FileText;
     return <Glyph size={17} weight="regular" aria-hidden="true"/>;
@@ -33,10 +35,11 @@ const categoryIcons: Record<string, PhosphorIcon> = { characters: User, factions
 /** Rich cards are a presentation of engine elements, never a second board model.
  * Pointer-transparent bodies preserve Excalidraw drag, selection, resize and undo.
  * Only explicit record actions and connection ports intercept the pointer. */
-export function StudioOverlay({ api, theme, assisted, records, relations, post }: Props) {
+export function StudioOverlay({ api, navigation, theme, assisted, records, relations, post }: Props) {
     const [view, setView] = useState<any>(null);
     const [connecting, setConnecting] = useState<string | null>(null);
     const [styles, setStyles] = useState(false);
+    const [showNavigation, setShowNavigation] = useState(false);
     const [hovered, setHovered] = useState<string | null>(null);
     const host = useRef<HTMLDivElement>(null);
     const frame = useRef(0);
@@ -87,6 +90,7 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
     useEffect(() => { const cancel = (e: KeyboardEvent) => { if (e.key === 'Escape') {
         setConnecting(null);
         setStyles(false);
+        setShowNavigation(false);
     } }; window.addEventListener('keydown', cancel); return () => window.removeEventListener('keydown', cancel); }, []);
     useEffect(() => {
         if (connecting && view && !view.elements.some((element:any) => isCard(element) && element.customData.recordID === connecting)) setConnecting(null);
@@ -210,7 +214,9 @@ export function StudioOverlay({ api, theme, assisted, records, relations, post }
      <span className="tool-separator"/>
      <Tool label="Capture an idea in Library" icon="note" action={() => post({type:'request',action:'note'})}/>
      <Tool label="Add image" icon="image" action={() => post({ type: 'request', action: 'image' })}/>
+     {navigation.sessionID && <Tool label="Board navigation" icon="navigation" active={showNavigation} action={() => setShowNavigation(value => !value)}/>}
    </div>
+   {navigation.sessionID && <BoardNavigation controls={navigation} elements={elements} viewport={state} visible={showNavigation} selected={chosen.length > 0} />}
    <div className="studio-drawing-bar glass" role="toolbar" aria-label="Canvas tools">
      <Tool label="Select · V" icon="select" active={active === 'selection'} action={() => chooseTool('selection')}/>
      <Tool label="Pan · H" icon="hand" active={active === 'hand'} action={() => chooseTool('hand')}/>

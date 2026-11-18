@@ -13,7 +13,7 @@ extension Studio {
     "properties-edit-entity",
     "properties-edit-coordinates", "properties-edit-media", "properties-edit-selections",
     "properties-edit-entities", "properties-template",
-    "properties-new-entity",
+    "properties-new-entity", "properties-suggestions", "properties-suggestion-edit",
   ]
   /// Uses the same store methods as creator controls, only against the isolated capture database.
   func configureEntitySchemaCapture(_ state: String, board: String, conversation: String) {
@@ -24,6 +24,11 @@ extension Studio {
     inspector = false
     workspaceInspector = false
     companionExpanded = false
+    if ["properties-suggestions", "properties-suggestion-edit"].contains(state) {
+      configurePropertySuggestionsCapture()
+      captureHint = state
+      return
+    }
     perform {
       let sea =
         try records.first { $0.title == "The Glass Sea" }
@@ -135,5 +140,33 @@ extension Studio {
       }
     }
     captureHint = state
+  }
+
+  private func configurePropertySuggestionsCapture() {
+    perform {
+      let type =
+        try store.entityTypes(worldID: worldID).first { $0.name == "Character biography" }
+        ?? store.saveEntityType(
+          worldID: worldID, name: "Character biography",
+          fields: [
+            EntityField(key: "birthplace", label: "Birthplace", kind: .entity),
+            EntityField(key: "calling", label: "Calling"),
+            EntityField(key: "ancestry", label: "Ancestry"),
+          ])
+      let entity =
+        try records.first { $0.title == "Iona Crest" }
+        ?? store.createRecord(
+          worldID: worldID, title: "Iona Crest",
+          body: "A wheelwright who mends the search boats.", kind: "entity",
+          category: "Characters")
+      if try store.entityProfile(worldID: worldID, recordID: entity.id) == nil {
+        _ = try store.saveEntityProfile(
+          worldID: worldID, recordID: entity.id, typeID: type.id,
+          values: ["ancestry": .unknown], expectedVersion: nil)
+      }
+      try reload()
+      openRecord(entity)
+      recordTabs[entity.id] = .properties
+    }
   }
 }

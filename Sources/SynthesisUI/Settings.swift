@@ -67,26 +67,19 @@ struct SettingsScreen: View {
                       if !items.isEmpty {
                         VStack(alignment: .leading, spacing: 0) {
                           Text(section.rawValue).font(.studio(.cardTitle))
-                            .padding(.bottom, 8)
-                          ForEach(items) { item in setting(item) }
+                            .accessibilityAddTraits(.isHeader).padding(.bottom, 8)
+                          settingsRows(items)
                         }
                       }
                     }
                   } else {
                     heading(studio.settingsSection.rawValue, studio.settingsSection.detail)
                     if studio.settingsSection == .writing { writingPreview }
-                    VStack(alignment: .leading, spacing: 0) {
-                      ForEach(matches) { item in setting(item) }
+                    settingsRows(matches)
+                    if studio.settingsSection == .data {
+                      Text("Exports never include device preferences or provider credentials.")
+                        .font(.studio(.caption)).foregroundStyle(t.muted)
                     }
-                    Text(
-                      studio.settingsSection == .world
-                        ? "Defaults apply to new work. Existing lore stays as you wrote it."
-                        : studio.settingsSection == .data
-                          ? "Exports never include device preferences or provider credentials."
-                          : studio.settingsSection == .assistant
-                            ? "Provider preferences apply on this Mac. Nothing is generated automatically."
-                            : "Preferences are saved on this Mac as you change them."
-                    ).font(.studio(.caption)).foregroundStyle(t.muted)
                   }
                 }.id("top").frame(maxWidth: 720, alignment: .leading)
                   .padding(.horizontal, wide ? 32 : 24).padding(.bottom, 40)
@@ -132,10 +125,24 @@ struct SettingsScreen: View {
           .accessibilityAddTraits(
             studio.settingsSection == section && !searching ? .isSelected : [])
       }
-      Text("This Mac · current world").font(.studio(size: 11.5)).foregroundStyle(t.muted)
-        .padding(.horizontal, 12).padding(.top, 20)
     }
   }
+  private func settingsRows(_ items: [SettingsItem]) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+      ForEach(SettingsScope.allCases, id: \.self) { scope in
+        let group = items.filter { $0.scope == scope }
+        if !group.isEmpty {
+          VStack(alignment: .leading, spacing: 0) {
+            Text(scope.title).font(.studio(.caption)).foregroundStyle(t.secondary)
+              .accessibilityAddTraits(.isHeader).padding(.top, 10).padding(.bottom, 4)
+            ForEach(group) { item in setting(item) }
+          }
+        }
+      }
+      ForEach(items.filter { $0.scope == nil }) { item in setting(item) }
+    }
+  }
+
   private func heading(_ title: String, _ subtitle: String) -> some View {
     VStack(alignment: .leading, spacing: 8) {
       Text(title).font(.studio(.title)).accessibilityAddTraits(.isHeader)
@@ -165,6 +172,10 @@ struct SettingsScreen: View {
     -> some View
   {
     PreferenceRow(title: item.title, detail: item.detail, t: t, control: control)
+  }
+  private func contextToggle(_ title: String, isOn: Binding<Bool>) -> some View {
+    Toggle(title, isOn: isOn).labelsHidden().toggleStyle(.switch)
+      .controlSize(.small).tint(t.accent)
   }
   @ViewBuilder private func setting(_ item: SettingsItem) -> some View {
     switch item {
@@ -276,6 +287,37 @@ struct SettingsScreen: View {
             set: { value in
               studio.updateWorldDefaults { $0.chatMode = value }
             }), options: Vocabulary.modes.map { ($0.name, $0.name) }, t: t)
+      }
+    case .assistantScope:
+      row(item) {
+        PreferenceMenu(
+          title: item.title, value: studio.assistantContextBinding(\.scope),
+          options: AssistantContextScope.allCases.map { ($0, $0.title) }, t: t)
+      }
+    case .assistantBudget:
+      row(item) {
+        PreferenceMenu(
+          title: item.title, value: studio.assistantContextBinding(\.budget),
+          options: AssistantContextBudget.allCases.map { ($0, $0.title) }, t: t, width: 232)
+      }
+    case .assistantAcceptedOnly:
+      row(item) {
+        contextToggle(item.title, isOn: studio.assistantContextBinding(\.canonOnly))
+      }
+    case .assistantSelection:
+      row(item) {
+        contextToggle(item.title, isOn: studio.assistantContextBinding(\.includeSelection))
+      }
+    case .assistantHistory:
+      PreferenceRow(
+        title: item.title,
+        detail: studio.contextOptions.restricted
+          ? "The current restrictions withhold earlier messages. Your new message is still shared."
+          : item.detail,
+        t: t
+      ) {
+        contextToggle(item.title, isOn: studio.assistantContextHistoryBinding)
+          .disabled(studio.contextOptions.restricted)
       }
     case .searchIndex:
       SearchIndexSettings(item: item, store: studio.store, worldID: studio.worldID, t: t)
@@ -402,6 +444,9 @@ private struct AssistantAdvancedSettings: View {
         Text(
           "Sending a message shares selected world context with your chosen provider. The subscription harness runs in an empty folder without project access or tools. Manual mode blocks generation."
         )
+        Button("World context settings") {
+          studio.openSettings(.world, query: "Assistant context")
+        }.buttonStyle(QuietButton(t: studio.t))
         Text(
           "When you choose Generate image, Codex receives the image description and uses your ChatGPT subscription allowance. The daily chat limit applies to text conversations."
         )

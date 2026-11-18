@@ -599,6 +599,11 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
               try await Task.sleep(for: .milliseconds(400))
             }
           }
+          if Studio.isCanvasNavigationCapture(state) {
+            try await studio.openCanvasNavigationForCapture()
+            print(
+              "CANVAS_NAVIGATION_AUDIT PASS \(width)x\(height) minimap and two stored bookmarks")
+          }
           if state == "canvas", width == 1440,
             ProcessInfo.processInfo.environment["SYNTHESIS_CANVAS_AUDIT"] == "1"
           {

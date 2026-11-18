@@ -83,19 +83,17 @@ struct TimelineScreen: View {
   }
 
   private func displayDate(_ event: WorldEvent) -> String {
-    if let typed = timelineDates[event.id] {
-      if case .unknown = typed, event.dateLabel != "unknown", !event.dateLabel.isEmpty {
-        return event.dateLabel
-      }
-      return typed.label
-    }
-    return event.dateLabel == "unknown" || event.dateLabel.isEmpty
-      ? "Date unknown" : event.dateLabel
+    if case .calendarDay(let day)? = timelineDates[event.id] { return day.label }
+    return TimelineDateFilter.wording(of: event) ?? "Date unknown"
   }
+
   private var filtered: [WorldEvent] {
-    events.filter {
-      (selectedLane.isEmpty || placements[$0.id] == selectedLane
-        || descendants.contains(placements[$0.id] ?? ""))
+    let descendants = descendants
+    let dateFilter = density == .overview ? studio.timelineView.eraDateFilter ?? .all : .all
+    return events.filter {
+      dateFilter.includes($0, date: timelineDates[$0.id])
+        && (selectedLane.isEmpty || placements[$0.id] == selectedLane
+          || descendants.contains(placements[$0.id] ?? ""))
         && (query.isEmpty || $0.dateLabel.localizedCaseInsensitiveContains(query)
           || displayDate($0).localizedCaseInsensitiveContains(query)
           || $0.title.localizedCaseInsensitiveContains(query))
@@ -126,7 +124,7 @@ struct TimelineScreen: View {
       if !lanes.isEmpty { historyTree }
       if density == .axis {
         axis(rows)
-      } else if rows.isEmpty {
+      } else if rows.isEmpty && density != .overview {
         empty.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
         ScrollViewReader { proxy in
@@ -413,43 +411,17 @@ struct TimelineScreen: View {
     }
     return result
   }
-  /// The top-level period or branch an event's placement belongs to, if any.
-  private func era(of event: WorldEvent) -> ChronologyLane? {
-    guard var lane = lanes.first(where: { $0.id == placements[event.id] }) else { return nil }
-    var seen: Set<String> = [lane.id]
-    while let parent = lanes.first(where: { $0.id == lane.parentID }),
-      seen.insert(parent.id).inserted
-    {
-      lane = parent
-    }
-    return lane
-  }
   private func overview(_ rows: [WorldEvent], proxy: ScrollViewProxy) -> some View {
-    let eras = lanes.filter { lane in
-      lane.parentID == nil || !lanes.contains { $0.id == lane.parentID }
-    }
-    var groups: [(id: String, lane: ChronologyLane?, events: [WorldEvent])] = eras.map { lane in
-      (lane.id, lane, rows.filter { era(of: $0)?.id == lane.id })
-    }.filter { !$0.events.isEmpty }
-    let unplaced = rows.filter { era(of: $0) == nil }
-    if !unplaced.isEmpty { groups.append((TimelineViewState.unplacedEraID, nil, unplaced)) }
+    let groups = TimelineEraGroup.group(rows, lanes: lanes, placements: placements)
+    let dateFilter = Binding(
+      get: { studio.timelineView.eraDateFilter ?? .all },
+      set: { studio.timelineView.eraDateFilter = $0 })
     return VStack(alignment: .leading, spacing: 18) {
-      if groups.count > 1 {
-        ScrollView(.horizontal) {
-          HStack(spacing: 6) {
-            ForEach(groups, id: \.id) { group in
-              FilterChip(
-                title: group.lane?.name ?? "Not in a period", count: group.events.count,
-                selected: false, t: studio.t
-              ) {
-                withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
-                  proxy.scrollTo(group.id, anchor: .top)
-                }
-              }
-              .help("Jump to \(group.lane?.name ?? "events outside any period")")
-            }
-          }
-        }.scrollIndicators(.never)
+      TimelineActivitySummary(groups: groups, dateFilter: dateFilter, t: studio.t) { id in
+        withAnimation(reduceMotion ? nil : Motion.panelAnimation) {
+          foldedEras.remove(id)
+          proxy.scrollTo(id, anchor: .top)
+        }
       }
       ForEach(groups, id: \.id) { group in
         VStack(alignment: .leading, spacing: 8) {
@@ -464,15 +436,16 @@ struct TimelineScreen: View {
               StudioIcon(
                 group.lane?.kind == "branch" ? "arrow.triangle.branch" : "calendar", size: 13
               ).foregroundStyle(studio.t.accent)
-              Text(group.lane?.name ?? "Not in a period").font(.studio(.cardTitle))
-                .lineLimit(1)
+              Text(group.name).font(.studio(.cardTitle))
+                .lineLimit(1).layoutPriority(1).help(group.name)
               if let lane = group.lane, !(lane.start + lane.end).isEmpty {
                 Text([lane.start, lane.end].filter { !$0.isEmpty }.joined(separator: " — "))
                   .font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary).lineLimit(1)
               }
               Spacer(minLength: 8)
-              Text("\(group.events.count) \(group.events.count == 1 ? "event" : "events")")
+              Text(group.countLabel)
                 .font(.studio(.caption)).monospacedDigit().foregroundStyle(studio.t.muted)
+                .fixedSize()
             }.contentShape(Rectangle())
           }.buttonStyle(.plain)
             .accessibilityLabel(
@@ -494,8 +467,10 @@ struct TimelineScreen: View {
     let lane = lanes.first { $0.id == placements[event.id] }
     return HStack(spacing: 12) {
       Text(date).font(.studio(.captionStrong))
-        .foregroundStyle(unknown ? studio.t.muted : studio.t.category("events")).lineLimit(1)
-        .frame(width: 132, alignment: .trailing)
+        .foregroundStyle(unknown ? studio.t.muted : studio.t.category("events"))
+        .lineLimit(2).multilineTextAlignment(.trailing)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(width: 132, alignment: .trailing).help(date)
       Circle().fill(unknown ? studio.t.muted : studio.t.category("events")).frame(
         width: 6, height: 6)
       Text(event.title).font(.studio(size: 13.5, weight: .medium)).lineLimit(1)
@@ -522,7 +497,8 @@ struct TimelineScreen: View {
         moveActions(event)
         Button("Remove") { remove(event) }
       }
-    }.padding(.horizontal, 8).frame(height: 34).hoverFill(studio.t, radius: 7)
+    }.padding(.horizontal, 8).padding(.vertical, 3).frame(minHeight: 34)
+      .hoverFill(studio.t, radius: 7)
       .contextMenu {
         Button("Edit…") { begin(event) }
         Button("Inspect") { studio.inspect(.event(event.id)) }

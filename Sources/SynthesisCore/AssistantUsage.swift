@@ -3,6 +3,7 @@ import Foundation
 
 /// Counts reported by a completed harness operation. They are not subscription usage units.
 public struct ModelTokenUsage: Equatable, Sendable {
+  public let provider: ProviderKind
   public let inputTokens: Int
   public let outputTokens: Int
   public let cacheReadInputTokens: Int?
@@ -28,7 +29,7 @@ public struct ModelTokenUsage: Equatable, Sendable {
     }
     guard let input = count("input_tokens"), let output = count("output_tokens") else { return nil }
     return ModelTokenUsage(
-      inputTokens: input, outputTokens: output,
+      provider: provider, inputTokens: input, outputTokens: output,
       cacheReadInputTokens: count(
         provider == .codex ? "cached_input_tokens" : "cache_read_input_tokens"),
       cacheWriteInputTokens: count(

@@ -68,6 +68,9 @@ import Testing
     let saved = try store.saveRecord(
       worldID: worldID, id: record.id, version: record.version, title: record.title,
       body: body, rtf: encoded)
+    let backlinks = try store.recordBacklinks(worldID: worldID, recordID: sourceRecord.id)
+    #expect(backlinks.linked.map(\.id) == [saved.id])
+    #expect(backlinks.mentioned.isEmpty)
     let markdown = try store.exportRecordMarkdown(worldID: worldID, recordID: saved.id).content
     #expect(markdown.contains(#"[Figure \[A\]](\#(address.url.absoluteString))"#))
     #expect(saved.canonical == nil)

@@ -61,10 +61,10 @@ extension WorkspaceStore {
     let targets = records.filter { $0.kind == "entity" && $0.title.count >= 4 }
     var mentions = 0
     for record in records where !record.body.isEmpty && mentions < 40 {
-      let body = record.body.lowercased()
-      for target in targets where target.id != record.id {
+      let text = RecordTextReferences(record.body, rtf: record.rtf, worldID: worldID)
+      for target in targets where target.id != record.id && mentions < 40 {
         guard !connected.contains("\(record.id)|\(target.id)"),
-          containsWord(body, target.title.lowercased())
+          !text.recordIDs.contains(target.id), text.mentions([target.title.lowercased()])
         else { continue }
         findings.append(
           WorldFinding(
@@ -319,21 +319,5 @@ extension WorkspaceStore {
     record.category.isEmpty
       ? (record.kind == "entity" ? "entity" : record.kind == "capture" ? "idea" : "document")
       : record.category
-  }
-  /// Whole-word, case-insensitive containment; both arguments are already lowercased.
-  private func containsWord(_ text: String, _ word: String) -> Bool {
-    var search = text.startIndex..<text.endIndex
-    while let range = text.range(of: word, range: search) {
-      let before =
-        range.lowerBound == text.startIndex ? nil : text[text.index(before: range.lowerBound)]
-      let after = range.upperBound == text.endIndex ? nil : text[range.upperBound]
-      if !(before.map { $0.isLetter || $0.isNumber } ?? false),
-        !(after.map { $0.isLetter || $0.isNumber } ?? false)
-      {
-        return true
-      }
-      search = range.upperBound..<text.endIndex
-    }
-    return false
   }
 }

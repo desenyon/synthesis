@@ -315,7 +315,7 @@ extension WorkspaceStore {
     pattern: #"\[(?:\\[\s\S]|[^\[\]\\])*\]\((\#(referenceAddressPattern))\)"#
       + #"|(\#(referenceAddressPattern))"#)
 
-  private static func referenceLinks(in text: String)
+  static func referenceLinks(in text: String)
     -> [(url: URL, range: NSRange, addressRange: NSRange)]
   {
     let source = text as NSString

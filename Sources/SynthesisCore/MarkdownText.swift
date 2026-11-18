@@ -10,11 +10,37 @@ enum MarkdownText {
       result.append(character)
     }
   }
+  static func richBody(_ body: String, rtf: String?) -> NSAttributedString? {
+    guard let rtf, let data = Data(base64Encoded: rtf),
+      let rich = NSAttributedString(rtf: data, documentAttributes: nil), rich.string == body
+    else { return nil }
+    return rich
+  }
+
+  /// Inspect native link ranges without exporting rich text or unrelated URLs.
+  static func assistantBody(
+    _ body: String, rtf: String, replacement: (URL?) -> String?
+  ) -> String? {
+    guard let rich = richBody(body, rtf: rtf), rich.string.utf8.elementsEqual(body.utf8) else {
+      return nil
+    }
+    var replacements: [(NSRange, String)] = []
+    rich.enumerateAttribute(.link, in: NSRange(location: 0, length: rich.length)) {
+      value, range, _ in
+      guard let value else { return }
+      let raw = (value as? URL)?.absoluteString ?? (value as? String)
+      if let raw, !raw.lowercased().hasPrefix("synthesis:") { return }
+      if let safe = replacement(raw.flatMap { URL(string: $0) }) {
+        replacements.append((range, safe))
+      }
+    }
+    let result = NSMutableString(string: body)
+    for (range, text) in replacements.reversed() { result.replaceCharacters(in: range, with: text) }
+    return result as String
+  }
+
   static func body(_ record: LoreRecord) -> String {
-    guard let encoded = record.rtf, let data = Data(base64Encoded: encoded),
-      let rich = NSAttributedString(rtf: data, documentAttributes: nil),
-      rich.string == record.body
-    else { return record.body }
+    guard let rich = richBody(record.body, rtf: record.rtf) else { return record.body }
     let text = rich.string as NSString
     var paragraphs: [String] = []
     var offset = 0

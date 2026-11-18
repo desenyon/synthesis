@@ -806,7 +806,8 @@ struct RecordInspector: View {
   var history: () -> Void
   var editRule: (WorldRule?) -> Void
   @State private var outgoing: [LoreRecord] = []
-  @State private var incoming: [LoreRecord] = []
+  @State private var backlinks: RecordBacklinks?
+  @State private var backlinksFailed = false
   @State private var relations: [RecordRelationship] = []
   @State private var events: [WorldEvent] = []
   @State private var rules: [WorldRule] = []
@@ -900,10 +901,19 @@ struct RecordInspector: View {
               }
             }
         }
-        if !incoming.isEmpty {
-          section("Referenced by") {
-            ForEach(incoming) { linkRow($0, prefix: nil, removable: false) }
+        if let backlinks {
+          if !backlinks.linked.isEmpty {
+            section("Linked from") {
+              ForEach(backlinks.linked) { linkRow($0, prefix: nil, removable: false) }
+            }
           }
+          if !backlinks.mentioned.isEmpty {
+            section("Text mentions") {
+              ForEach(backlinks.mentioned) { linkRow($0, prefix: nil, removable: false) }
+            }
+          }
+        } else if backlinksFailed {
+          section("Backlinks") { hint("Backlinks could not be read.") }
         }
         if !events.isEmpty {
           section("On the timeline") {
@@ -930,6 +940,7 @@ struct RecordInspector: View {
     }
     .onChange(of: record.version) { _, _ in load() }
     .onChange(of: studio.worldRevision) { _, _ in load() }
+    .task(id: studio.worldRevision) { await loadBacklinks() }
     .accessibilityElement(children: .contain).accessibilityLabel("Record details")
   }
   private var statusNote: String {
@@ -1045,11 +1056,29 @@ struct RecordInspector: View {
     studio.perform {
       rules = try studio.store.rules(worldID: worldID, systemID: record.id)
       outgoing = try studio.store.linkedRecords(worldID: worldID, id: record.id)
-      incoming = try studio.store.linkedRecords(worldID: worldID, id: record.id, incoming: true)
       relations = try studio.recordRelationships(for: record)
       events = try studio.store.events(worldID: worldID).filter {
         $0.sourceID == record.id
       }
+    }
+  }
+  private func loadBacklinks() async {
+    let worldID = record.worldID
+    let revision = studio.worldRevision
+    guard worldID == studio.worldID else { return }
+    do {
+      let result = try await studio.store.loadRecordBacklinks(worldID: worldID, recordID: record.id)
+      guard !Task.isCancelled, worldID == studio.worldID, revision == studio.worldRevision else {
+        return
+      }
+      backlinks = result
+      backlinksFailed = false
+    } catch {
+      guard !Task.isCancelled, worldID == studio.worldID, revision == studio.worldRevision else {
+        return
+      }
+      backlinks = nil
+      backlinksFailed = true
     }
   }
 }

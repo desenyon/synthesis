@@ -5,7 +5,11 @@ import SynthesisCore
 /// changes this panel only; opening/editing remains an explicit action.
 struct ObjectInspector: View {
   @ObservedObject var studio: Studio
+  /// A response presents its own inspector without changing the workspace selection.
+  var source: WorldReference? = nil
+  @Environment(\.dismiss) private var dismiss
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var sourceSelection: InspectionTarget?
   @State private var data: ObjectInspection?
   @State private var failure: String?
   @State private var recordPicker = false
@@ -14,37 +18,45 @@ struct ObjectInspector: View {
     var revision: Int
     var target: InspectionTarget
   }
+  private var target: InspectionTarget {
+    sourceSelection ?? source.map { .record($0.id) } ?? studio.effectiveInspection
+  }
+
   var body: some View {
-    let target = studio.effectiveInspection
+    let sourceAvailable = source.map { $0.worldID == studio.worldID } ?? true
     VStack(spacing: 0) {
       HStack(spacing: 8) {
         Text("Inspector").font(.studio(.control))
         Spacer(minLength: 0)
-        if case .record(let id) = target,
+        if source == nil, case .record(let id) = target,
           let record = studio.records.first(where: { $0.id == id })
         {
           RecordFavoriteButton(studio: studio, record: record)
         }
-        IconButton(icon: "books.vertical", label: "Inspect a record", t: studio.t) {
-          recordPicker = true
-        }.disabled(studio.records.isEmpty).popover(isPresented: $recordPicker) {
-          SearchableRecordPicker(records: studio.records, t: studio.t) { record in
-            studio.inspect(.record(record.id))
-            recordPicker = false
+        if source == nil {
+          IconButton(icon: "books.vertical", label: "Inspect a record", t: studio.t) {
+            recordPicker = true
+          }.disabled(studio.records.isEmpty).popover(isPresented: $recordPicker) {
+            SearchableRecordPicker(records: studio.records, t: studio.t) { record in
+              studio.inspect(.record(record.id))
+              recordPicker = false
+            }
           }
         }
         IconButton(icon: "xmark", label: "Close inspector", t: studio.t) {
-          studio.toggleWorkspaceInspector()
+          if source == nil { studio.toggleWorkspaceInspector() } else { dismiss() }
         }
       }.padding(.horizontal, 16).frame(height: Metric.bar)
       Rectangle().fill(studio.t.hairline).frame(height: 1)
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
-          if studio.inspectionTarget != nil {
+          if source == nil && studio.inspectionTarget != nil {
             Button("Follow workspace selection") { studio.followInspectionSelection() }
               .buttonStyle(QuietButton(t: studio.t, role: .ghost))
           }
-          if let failure {
+          if !sourceAvailable {
+            Text("Source unavailable in this universe").font(.studio(.cardTitle))
+          } else if let failure {
             Text("Object unavailable").font(.studio(.cardTitle))
             Text(failure).font(.studio(.label)).foregroundStyle(studio.t.secondary)
               .fixedSize(horizontal: false, vertical: true)
@@ -92,7 +104,11 @@ struct ObjectInspector: View {
                 SectionLabel(title: "Connected", t: studio.t)
                 ForEach(Array(data.references.enumerated()), id: \.offset) { _, link in
                   Button {
-                    studio.inspect(link.target)
+                    if source == nil {
+                      studio.inspect(link.target)
+                    } else {
+                      sourceSelection = link.target
+                    }
                   } label: {
                     HStack(spacing: 8) {
                       StudioIcon(link.icon, size: 14).foregroundStyle(studio.t.secondary)
@@ -113,11 +129,14 @@ struct ObjectInspector: View {
               let record = studio.records.first(where: { $0.id == id })
             {
               HStack(spacing: 8) {
-                Button("Open record") { studio.openRecord(record) }
-                  .buttonStyle(QuietButton(t: studio.t))
+                Button("Open record") {
+                  studio.openRecord(record)
+                  if source != nil && studio.selectedRecord?.id == id { dismiss() }
+                }.buttonStyle(QuietButton(t: studio.t))
                 IconButton(icon: "square.stack.3d.up", label: "Open beside workspace", t: studio.t)
                 {
                   studio.openBeside(record)
+                  if source != nil && studio.splitRecord?.id == id { dismiss() }
                 }
                 if studio.mode == .assisted {
                   IconButton(icon: "at", label: "Reference in conversation", t: studio.t) {
@@ -138,7 +157,8 @@ struct ObjectInspector: View {
   }
   private func load() {
     do {
-      data = try studio.inspectionData(for: studio.effectiveInspection)
+      if let source, source.worldID != studio.worldID { throw SynthesisError.notFound }
+      data = try studio.inspectionData(for: target)
       failure = nil
     } catch {
       data = nil

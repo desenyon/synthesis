@@ -27,6 +27,18 @@ enum SettingsSection: String, Codable, CaseIterable, Identifiable {
   }
 }
 
+enum SettingsScope: CaseIterable, Hashable {
+  case application, worldOnDevice, portableWorld
+
+  var title: String {
+    switch self {
+    case .application: "All worlds on this Mac"
+    case .worldOnDevice: "This world on this Mac"
+    case .portableWorld: "Included in this world’s portable file"
+    }
+  }
+}
+
 /// One searchable inventory. The same entries label and render the actual controls.
 enum SettingsItem: CaseIterable, Identifiable {
   case appearance, darkPalette, density, layouts, sidebar, navigationContent, navigationWidth,
@@ -35,8 +47,25 @@ enum SettingsItem: CaseIterable, Identifiable {
   case textSize, readingWidth, spelling, quotes, dashes, links, words
   case assistance, connection, dailyChatLimit, sendKey
   case identity, cover, category, chatMode
+  case assistantScope, assistantBudget, assistantAcceptedOnly, assistantSelection, assistantHistory
   case searchIndex, importLore, importWorld, portable, markdown, json, images, sample
   var id: Self { self }
+
+  var scope: SettingsScope? {
+    switch self {
+    case .appearance, .darkPalette, .density, .sidebar, .navigationWidth, .inspectorWidth,
+      .companionWidth, .counts, .recents, .launch, .previews, .textSize, .readingWidth, .spelling,
+      .quotes, .dashes, .links, .words, .assistance, .connection, .dailyChatLimit, .sendKey:
+      .application
+    case .layouts, .navigationContent, .searchIndex, .assistantScope, .assistantBudget,
+      .assistantAcceptedOnly, .assistantSelection, .assistantHistory:
+      .worldOnDevice
+    case .identity, .cover, .category, .chatMode:
+      .portableWorld
+    case .importLore, .importWorld, .portable, .markdown, .json, .images, .sample:
+      nil
+    }
+  }
   var section: SettingsSection {
     switch self {
     case .appearance, .darkPalette, .density, .layouts, .sidebar, .navigationContent,
@@ -46,7 +75,9 @@ enum SettingsItem: CaseIterable, Identifiable {
       .general
     case .textSize, .readingWidth, .spelling, .quotes, .dashes, .links, .words: .writing
     case .assistance, .connection, .dailyChatLimit, .sendKey: .assistant
-    case .identity, .cover, .category, .chatMode: .world
+    case .identity, .cover, .category, .chatMode, .assistantScope, .assistantBudget,
+      .assistantAcceptedOnly, .assistantSelection, .assistantHistory:
+      .world
     default: .data
     }
   }
@@ -80,6 +111,11 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .cover: "World cover"
     case .category: "New entity type"
     case .chatMode: "New conversation mode"
+    case .assistantScope: "Read from"
+    case .assistantBudget: "Context size"
+    case .assistantAcceptedOnly: "Accepted lore only"
+    case .assistantSelection: "Include workspace selection"
+    case .assistantHistory: "Include recent conversation"
     case .searchIndex: "Search indexes"
     case .importLore: "Import writing"
     case .importWorld: "Open a world file"
@@ -124,6 +160,15 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .cover: "Saved with this world and included in its portable file."
     case .category: "A starting category, including your own clans, sects or orders."
     case .chatMode: "The starting approach for a new chat in this world."
+    case .assistantScope:
+      "Allow world search or limit context to attachments, pins and enabled selections."
+    case .assistantBudget:
+      "Limits direct references and full lore excerpts per message. This is a source count."
+    case .assistantAcceptedOnly:
+      "Share the saved versions you approved as canon. Working drafts and live workspace details stay local."
+    case .assistantSelection:
+      "Include the selected lore and the active canvas, map or history group."
+    case .assistantHistory: "Share up to 20 earlier messages when context is unrestricted."
     case .searchIndex:
       "Rebuild regenerates local search data for this world and preserves lore, canon and history."
     case .importLore: "Markdown and text become draft documents in the current world."
@@ -144,6 +189,9 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .readingWidth: "margins layout"
     case .sendKey: "keyboard shortcut enter return"
     case .connection: "gpt claude codex model subscription login authentication privacy"
+    case .assistantScope, .assistantBudget, .assistantAcceptedOnly, .assistantSelection,
+      .assistantHistory:
+      "assistant context privacy data sharing"
     case .searchIndex: "fts search repair refresh rebuild maintenance integrity"
     case .portable: "export backup snapshot"
     case .markdown, .json, .images: "export save"

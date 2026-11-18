@@ -12,6 +12,7 @@ struct CuratedCanvas: View {
   }
   @ObservedObject var studio: Studio
   @ObservedObject private var session: CanvasSession
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var panel: Panel?
   @State private var formTitle = ""
   @State private var formKind = "entity"
@@ -219,7 +220,11 @@ struct CuratedCanvas: View {
           icon: "at", t: studio.t,
           help:
             "Mention the selected \(session.selection.count == 1 ? "card" : "cards") in the conversation"
-        ) { withAnimation(.easeOut(duration: 0.18)) { studio.referenceCanvasSelection() } }
+        ) {
+          withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
+            studio.referenceCanvasSelection()
+          }
+        }
       }
       PlainMenu {
         Button("Entity…") { prepareCreate() }
@@ -266,7 +271,11 @@ struct CuratedCanvas: View {
           icon: "sidebar.right",
           label: studio.companionExpanded ? "Hide companion" : "Open companion conversation",
           t: studio.t, active: studio.companionExpanded
-        ) { withAnimation(.easeOut(duration: 0.18)) { studio.companionExpanded.toggle() } }
+        ) {
+          withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
+            studio.companionExpanded.toggle()
+          }
+        }
       }
     }.background(studio.t.background)
   }

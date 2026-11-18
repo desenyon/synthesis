@@ -119,6 +119,20 @@ import Testing
     }
   }
 
+  @Test func settingsSearchRetainsDeviceAndWorldScopes() {
+    let navigation = SettingsItem.matching("navigation", section: .general)
+    #expect(navigation.contains(.sidebar) && SettingsItem.sidebar.scope == .application)
+    #expect(navigation.contains(.navigationContent))
+    #expect(SettingsItem.navigationContent.scope == .worldOnDevice)
+    #expect(SettingsItem.layouts.scope == .worldOnDevice)
+    #expect(SettingsItem.connection.scope == .application)
+    #expect(SettingsItem.dailyChatLimit.scope == .application)
+    #expect(SettingsItem.searchIndex.scope == .worldOnDevice)
+    #expect(SettingsItem.category.scope == .portableWorld)
+    #expect(SettingsItem.identity.scope == .portableWorld)
+    #expect(SettingsItem.portable.scope == nil)
+  }
+
   @Test func providerSelectionAndSettingsNavigationDoNotStartChecksOrGeneration() throws {
     let studio = try Studio(store: WorkspaceStore(path: ":memory:"))
     studio.setMode(.manual)
