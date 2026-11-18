@@ -1,5 +1,11 @@
 # Development progress
 
+## 2026-11-17 — #347 submitted context inspection
+
+World context can show the immutable prepared lore excerpts and workspace index for the latest admitted request in the current conversation. The view keeps the submitted pins and exclusions after the live composer changes. Draft preview remains available for the next message. A scoped callback receives the prepared context immediately before generation. It never creates a provider request on its own.
+
+The expanded Linux probe passed 150 tests in 38 suites, including parity between the prepared callback and the actual stand-in transport request. It omits platform-specific AppKit, ImageIO, Quick Capture and harness paths and their dependent test fixtures. Strict format and parse checks passed for the changed files. The native snapshot test and `context-submitted` capture remain pending. The secure GitHub credential request timed out, so the source checkpoints remain local.
+
 ## 2026-11-17 — #48 context exclusions and accepted-only snapshots
 
 History exclusions apply to descendants through archived parents, their events and backing records. Excluded sources are withheld before pins, board membership, retrieval, proposal references and index selection. The inspector can clear an explicit exclusion after archive. Accepted lore only projects valid frozen record snapshots and omits live workspace metadata, draft overlays and earlier messages. Provider-facing links use accepted titles and the local transcript retains original text.

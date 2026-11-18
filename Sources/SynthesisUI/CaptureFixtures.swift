@@ -101,7 +101,7 @@ extension Studio {
       "drag-search", "light-drag-search", "drag-favorites", "drag-targets", "light-drag-targets",
       "manual-drag-targets", "drag-second-pane", "drag-opened", "light-drag-opened", "drag-canvas",
       "reference-editor", "reference-composer", "proposal-faction-batch",
-      "request-pins", "request-pins-browser", "context-exclusions",
+      "request-pins", "request-pins-browser", "context-exclusions", "context-submitted",
       "changes-history", "light-changes-history", "manual-changes-history", "changes-approvals",
       "changes-relations", "changes-search", "changes-empty", "changes-archived",
       "changes-dashboard", "changes-reconstructed",
@@ -329,6 +329,7 @@ extension Studio {
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
     endRecordDrag()
     clearRequestPins()
+    submittedAssistantContext = nil
     if Self.conversationToolsCaptureStates.contains(state) {
       configureConversationToolsCapture(state, board: board, conversation: conversation)
       return
@@ -378,6 +379,10 @@ extension Studio {
     }
     if state == "context-exclusions" {
       configureContextExclusionCapture(board: board, conversation: conversation)
+      return
+    }
+    if state == "context-submitted" {
+      configureSubmittedContextCapture(board: board, conversation: conversation)
       return
     }
     if Self.bidirectionalRelationshipCaptureStates.contains(state) {

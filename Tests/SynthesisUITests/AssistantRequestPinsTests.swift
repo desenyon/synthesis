@@ -67,6 +67,8 @@ private struct PausedPinResponse: ModelTransport {
     #expect(studio.busy)
     #expect(request.instructions.contains(preview.lore))
     #expect(request.instructions.contains(preview.workspace))
+    let submitted = try #require(studio.submittedAssistantContext)
+    #expect(submitted.lore == preview.lore && submitted.workspace == preview.workspace)
     #expect(studio.activeRequestPins.isEmpty)
     #expect(studio.contextOptions == saved)
     #expect(try store.assistantContextOptions(worldID: world) == saved)
@@ -76,6 +78,10 @@ private struct PausedPinResponse: ModelTransport {
     let next = try studio.previewContext(prompt: "What else should I know?")
     #expect(next.sources.map(\.id) == [attached.id])
     #expect(!next.workspace.contains(period.id))
+    #expect(studio.submittedAssistantContext?.workspace == submitted.workspace)
+    let otherConversation = try store.createConversation(worldID: world)
+    studio.openChat(otherConversation)
+    #expect(studio.submittedAssistantContext == nil)
   }
 
   @Test func blockedAndImmediatelyCancelledSubmissionsPreserveTheDraftAndPins() async throws {

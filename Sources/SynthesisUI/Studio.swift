@@ -134,7 +134,9 @@ public struct Toast: Identifiable {
   public var reviewCanon: String?
   /// Records shared with the model for each answer, keyed by assistant message.
   @Published public var contexts: [String: [ContextSource]] = [:]
-  @Published public var conversationID: String?
+  @Published public var conversationID: String? {
+    didSet { if oldValue != conversationID { submittedAssistantContext = nil } }
+  }
   @Published var conversationRevealMessageID: String?
   @Published var conversationScrollAnchors: [String: String] = [:]
   @Published public var selectedRecord: LoreRecord? {
@@ -167,6 +169,7 @@ public struct Toast: Identifiable {
   @Published public var contextLanes: [ChronologyLane] = []
   @Published public var busy = false
   @Published public var activity: [AgentActivity] = []
+  @Published var submittedAssistantContext: AssistantContext?
   @Published public var streamed = ""
   @Published public var error: String?
   @Published public var toast: Toast?
@@ -953,6 +956,7 @@ public struct Toast: Identifiable {
     running?.cancel()
     running = nil
     busy = false
+    submittedAssistantContext = nil
     streamed = ""
     activity = []
     if let stopped {
@@ -1041,6 +1045,7 @@ public struct Toast: Identifiable {
       let chosenPins = activeRequestPins
       let request = UUID()
       requestID = request
+      submittedAssistantContext = nil
       busy = true
       activity = []
       streamed = ""
@@ -1062,6 +1067,12 @@ public struct Toast: Identifiable {
             worldID: wid, conversationID: cid, prompt: prompt, preset: chosenPreset,
             boardID: activeBoard, selectedRecordIDs: selectedIDs, workspaceName: workspaceName,
             chronologyLaneID: laneID, contextOptions: chosenContext, requestPins: chosenPins,
+            onContextPrepared: { [weak self] prepared in
+              guard let self, self.requestID == request, self.worldID == wid,
+                self.conversationID == cid, self.mode == .assisted
+              else { return }
+              self.submittedAssistantContext = prepared
+            },
             onActivity: { [weak self] step in
               guard let self, self.requestID == request, self.worldID == wid,
                 self.conversationID == cid, self.mode == .assisted

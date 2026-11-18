@@ -21,4 +21,23 @@ extension Studio {
       captureHint = "context-exclusions"
     }
   }
+
+  func configureSubmittedContextCapture(board: String, conversation: String) {
+    configureConnectedCapture("conversation", board: board, conversation: conversation)
+    perform {
+      guard let mira = records.first(where: { $0.title == "Mira Vale" }) else {
+        throw SynthesisError.notFound
+      }
+      updateRequestPins { $0.recordIDs = [mira.id] }
+      let snapshot = try previewContext(prompt: "Describe Mira's crossing.")
+      guard snapshot.sources.first?.id == mira.id else {
+        throw SynthesisError.invalid("The submitted context did not include the pinned source.")
+      }
+      clearRequestPins()
+      submittedAssistantContext = snapshot
+      busy = true
+      draft = "What did the council decide afterward?"
+      captureHint = "context-submitted"
+    }
+  }
 }

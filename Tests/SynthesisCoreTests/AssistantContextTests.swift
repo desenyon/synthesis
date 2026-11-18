@@ -34,13 +34,17 @@ import Testing
     let chat = try store.createConversation(worldID: world.id)
     let transport = CountingTransport()
     let engine = AgentEngine(store: store, transport: transport)
+    var submitted: AssistantContext?
     try await engine.submit(
       worldID: world.id, conversationID: chat.id, prompt: "Compare their roles", preset: "Develop",
-      contextOptions: saved, requestPins: pins
-    ) { _ in }
+      contextOptions: saved, requestPins: pins, onContextPrepared: { submitted = $0 },
+      onDelta: { _ in })
     let request = try #require(await transport.lastRequest)
-    #expect(request.instructions.contains(preview.workspace))
-    #expect(request.instructions.contains(preview.lore))
+    let snapshot = try #require(submitted)
+    #expect(snapshot.workspace == preview.workspace && snapshot.lore == preview.lore)
+    #expect(snapshot.sources.map(\.id) == preview.sources.map(\.id))
+    #expect(request.instructions.contains(snapshot.workspace))
+    #expect(request.instructions.contains(snapshot.lore))
     #expect(try store.assistantContextOptions(worldID: world.id) == saved)
 
     saved.excludedRecordIDs = [mira.id]

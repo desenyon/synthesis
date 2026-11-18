@@ -363,7 +363,7 @@ Source: [complete supplied brief](EXPANSION_SOURCE.md), SHA-256 `248e5cf11387658
 | 344 | **AI-generated test cases.** Create hypothetical situations to test whether world rules produce the intended behavior. | Open | Full requirement not yet verified. |
 | 345 | **Model routing.** Use different AI models for writing, structured extraction, classification, planning and intensive reasoning. | Open | Full requirement not yet verified. |
 | 346 | **Provider-agnostic AI.** Allow compatible local and hosted models when feasible. | Open | Full requirement not yet verified. |
-| 347 | **Transparent context inspection.** Show what lore the assistant read before generating an answer. | Open | Full requirement not yet verified. |
+| 347 | **Transparent context inspection.** Show what lore the assistant read before generating an answer. | In progress | World context retains the exact prepared excerpts and workspace index for the latest request in this conversation and distinguishes them from the draft preview. Linux payload parity passed. Native capture remains pending. |
 | 348 | **Generation reproducibility.** Record the model, prompt configuration, relevant context and output for important operations. | Open | Full requirement not yet verified. |
 | 349 | **Automated world summaries.** Generate summaries of entities, civilizations, historical periods and changes using traceable references. | Open | Full requirement not yet verified. |
 | 350 | **Specialized collaborative agents.** Optional agents for cartography, chronology, economy, narrative and consistency, each with restricted responsibilities. | Open | Full requirement not yet verified. |

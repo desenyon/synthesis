@@ -102,19 +102,21 @@ struct AssistantContextPanel: View {
   @State private var acceptedRecordIDs: Set<String> = []
   @State private var preview: AssistantContext?
   @State private var failure: String?
+  @State private var viewingSubmitted = false
 
   init(studio: Studio, prompt: String, attachments: Bool = false, nextMessageOnly: Bool = false) {
     self.studio = studio
     self.prompt = prompt
     self.attachments = attachments
     _nextMessageOnly = State(initialValue: nextMessageOnly)
+    _viewingSubmitted = State(initialValue: studio.busy && studio.submittedAssistantContext != nil)
   }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 14) {
       HStack(spacing: 8) {
         StudioIcon(attachments ? "paperclip" : "eye", size: 16)
-        Text(attachments ? "Attach world context" : "Context for this message")
+        Text(attachments ? "Attach world context" : "World context")
           .font(.studio(size: 15, weight: .semibold))
         Spacer(minLength: 0)
       }
@@ -129,6 +131,10 @@ struct AssistantContextPanel: View {
       .onChange(of: studio.contextOptions) { _, _ in refresh() }
       .onChange(of: studio.activeRequestPins) { _, _ in refresh() }
       .onChange(of: studio.worldRevision) { _, _ in refresh() }
+      .onReceive(studio.$submittedAssistantContext) { submitted in
+        if submitted == nil { viewingSubmitted = false }
+        if submitted != nil && studio.busy { viewingSubmitted = true }
+      }
   }
 
   private var attachmentBrowser: some View {
@@ -207,99 +213,128 @@ struct AssistantContextPanel: View {
   private var contextInspector: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 14) {
-        ChoiceField(
-          title: "Read from", selection: option(\.scope),
-          choices: AssistantContextScope.allCases.map { ($0, $0.title) }, t: studio.t)
-        Toggle("Accepted lore only", isOn: option(\.canonOnly))
-          .font(.studio(size: 13))
-          .help("Use saved versions that you accepted as canon")
-        if studio.contextOptions.canonOnly {
+        if studio.submittedAssistantContext != nil {
+          ChoiceField(
+            title: "Inspect", selection: $viewingSubmitted,
+            choices: [(false, "Draft preview"), (true, "Submitted request")], t: studio.t)
+        }
+        if viewingSubmitted, let submitted = studio.submittedAssistantContext {
           Text(
-            "Context uses saved accepted versions. Attachments and pins select eligible records. Working drafts, earlier messages and live workspace details are omitted."
-          )
-          .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+            submitted.includesHistory
+              ? "Snapshot prepared for the last request, with recent conversation enabled."
+              : "Snapshot prepared for the last request. Earlier messages were withheld."
+          ).font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+          contextSources(submitted, submitted: true)
+        } else {
+          draftContext
         }
-        exclusionSettings
-        ChoiceField(
-          title: "Context size", selection: option(\.budget),
-          choices: AssistantContextBudget.allCases.map { ($0, $0.title) }, t: studio.t
-        )
-        .help("Limits direct references and the number of full record excerpts.")
-        let count = studio.composerAttachments.filter(\.pinned).count
-        if count > 0 {
-          StudioLabel("\(count) pinned for the next message", icon: "pin")
-            .font(.studio(.caption)).foregroundStyle(studio.t.accent)
-        }
-        Toggle("Include workspace selection", isOn: option(\.includeSelection)).font(
-          .studio(size: 13)
-        )
-        .help("Includes selected lore and the active canvas, map or history branch.")
-        Toggle(
-          "Include recent conversation",
-          isOn: Binding(
-            get: { studio.contextOptions.includeHistory && !studio.contextOptions.restricted },
-            set: { value in studio.updateContext { $0.includeHistory = value } }
-          )
-        )
-        .font(.studio(size: 13)).disabled(studio.contextOptions.restricted)
-        Text(
-          studio.contextOptions.restricted
-            ? "Earlier messages are withheld for restricted context, so they cannot reintroduce excluded lore. Your new message is still sent."
-            : "Up to 20 earlier messages accompany this request. Excerpts and the world index are bounded; this is not a token or cost estimate."
-        )
-        .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
-        if let failure {
-          Text(failure).font(.studio(size: 13)).foregroundStyle(studio.t.warning)
-        } else if let preview {
-          HStack {
-            Text("\(preview.sources.count) records to read").font(
-              .studio(size: 13, weight: .semibold))
-            Spacer()
-            Text("of \(preview.eligibleCount) eligible").font(.studio(size: 11.5)).foregroundStyle(
-              studio.t.muted)
-          }
-          if preview.sources.isEmpty {
-            Text(
-              studio.contextOptions.canonOnly
-                ? "No accepted record versions match this context."
-                : "No lore excerpts. Attach records or broaden the scope to give the assistant more context."
-            )
-            .font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
-          }
-          ForEach(preview.sources) { source in
-            DisclosureGroup {
-              Text(String(source.record.body.prefix(3000))).font(.studio(size: 12.5))
-                .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
-              Button("Exclude from context") {
-                studio.updateContext {
-                  if !$0.excludedRecordIDs.contains(source.id) {
-                    $0.excludedRecordIDs.append(source.id)
-                  }
-                }
-              }.buttonStyle(QuietButton(t: studio.t))
-            } label: {
-              VStack(alignment: .leading, spacing: 3) {
-                Text(source.record.title).font(.studio(.label)).lineLimit(1)
-                Text(source.reason).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
-              }
-            }.tint(studio.t.secondary)
-          }
-          DisclosureGroup("Exact lore excerpts") {
-            Text(preview.lore.isEmpty ? "No excerpts." : preview.lore)
-              .font(.studio(.caption)).textSelection(.enabled)
-              .frame(maxWidth: .infinity, alignment: .leading)
-          }.font(.studio(size: 12.5)).tint(studio.t.secondary)
-          DisclosureGroup("Structured workspace index") {
-            Text(preview.workspace).font(.system(size: 11, design: .monospaced))
-              .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
-          }.font(.studio(size: 12.5)).tint(studio.t.secondary)
-        }
-        Text(
-          "Preview refreshes on Send. Exclusions apply to context sources and their indexed data. Creator-written text is included. Images stay local."
-        )
-        .font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
       }
     }
+  }
+
+  private var draftContext: some View {
+    VStack(alignment: .leading, spacing: 14) {
+      ChoiceField(
+        title: "Read from", selection: option(\.scope),
+        choices: AssistantContextScope.allCases.map { ($0, $0.title) }, t: studio.t)
+      Toggle("Accepted lore only", isOn: option(\.canonOnly))
+        .font(.studio(size: 13))
+        .help("Use saved versions that you accepted as canon")
+      if studio.contextOptions.canonOnly {
+        Text(
+          "Context uses saved accepted versions. Attachments and pins select eligible records. Working drafts, earlier messages and live workspace details are omitted."
+        )
+        .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+      }
+      exclusionSettings
+      ChoiceField(
+        title: "Context size", selection: option(\.budget),
+        choices: AssistantContextBudget.allCases.map { ($0, $0.title) }, t: studio.t
+      )
+      .help("Limits direct references and the number of full record excerpts.")
+      let count = studio.composerAttachments.filter(\.pinned).count
+      if count > 0 {
+        StudioLabel("\(count) pinned for the next message", icon: "pin")
+          .font(.studio(.caption)).foregroundStyle(studio.t.accent)
+      }
+      Toggle("Include workspace selection", isOn: option(\.includeSelection)).font(
+        .studio(size: 13)
+      )
+      .help("Includes selected lore and the active canvas, map or history branch.")
+      Toggle(
+        "Include recent conversation",
+        isOn: Binding(
+          get: { studio.contextOptions.includeHistory && !studio.contextOptions.restricted },
+          set: { value in studio.updateContext { $0.includeHistory = value } }
+        )
+      )
+      .font(.studio(size: 13)).disabled(studio.contextOptions.restricted)
+      Text(
+        studio.contextOptions.restricted
+          ? "Earlier messages are withheld for restricted context, so they cannot reintroduce excluded lore. Your new message is still sent."
+          : "Up to 20 earlier messages accompany this request. Excerpts and the world index are bounded; this is not a token or cost estimate."
+      )
+      .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+      if let failure {
+        Text(failure).font(.studio(size: 13)).foregroundStyle(studio.t.warning)
+      } else if let preview {
+        contextSources(preview, submitted: false)
+      }
+      Text(
+        "Preview refreshes on Send. Exclusions apply to context sources and their indexed data. Creator-written text is included. Images stay local."
+      )
+      .font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
+    }
+  }
+
+  @ViewBuilder private func contextSources(_ context: AssistantContext, submitted: Bool)
+    -> some View
+  {
+    HStack {
+      Text("\(context.sources.count) \(submitted ? "submitted records" : "records to read")")
+        .font(.studio(size: 13, weight: .semibold))
+      Spacer()
+      Text("of \(context.eligibleCount) eligible").font(.studio(size: 11.5)).foregroundStyle(
+        studio.t.muted)
+    }
+    if context.sources.isEmpty {
+      let message =
+        submitted
+        ? "No lore excerpts were included."
+        : (studio.contextOptions.canonOnly
+          ? "No accepted record versions match this context."
+          : "No lore excerpts. Attach records or broaden the scope.")
+      Text(message).font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
+    }
+    ForEach(context.sources) { source in
+      DisclosureGroup {
+        Text(String(source.record.body.prefix(3000))).font(.studio(size: 12.5))
+          .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
+        if !submitted {
+          Button("Exclude from context") {
+            studio.updateContext {
+              if !$0.excludedRecordIDs.contains(source.id) {
+                $0.excludedRecordIDs.append(source.id)
+              }
+            }
+          }.buttonStyle(QuietButton(t: studio.t))
+        }
+      } label: {
+        VStack(alignment: .leading, spacing: 3) {
+          Text(source.record.title).font(.studio(.label)).lineLimit(1)
+          Text(source.reason).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
+        }
+      }.tint(studio.t.secondary)
+    }
+    DisclosureGroup("Exact lore excerpts") {
+      Text(context.lore.isEmpty ? "No excerpts." : context.lore)
+        .font(.studio(.caption)).textSelection(.enabled)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }.font(.studio(size: 12.5)).tint(studio.t.secondary)
+    DisclosureGroup("Structured workspace index") {
+      Text(context.workspace).font(.system(size: 11, design: .monospaced))
+        .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
+    }.font(.studio(size: 12.5)).tint(studio.t.secondary)
   }
 
   @ViewBuilder private var exclusionSettings: some View {

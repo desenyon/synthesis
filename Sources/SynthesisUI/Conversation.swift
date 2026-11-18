@@ -72,7 +72,7 @@ struct ConversationStudio: View {
         // Background verification renders the same popover contents without activating macOS.
         if [
           "composer-context", "light-composer-context", "composer-browser", "request-pins-browser",
-          "context-exclusions",
+          "context-exclusions", "context-submitted",
         ]
         .contains(
           studio.captureHint)

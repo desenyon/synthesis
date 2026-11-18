@@ -32,6 +32,7 @@ public protocol ModelTransport: Sendable {
     workspaceName: String = "Conversation", chronologyLaneID: String? = nil,
     contextOptions: AssistantContextOptions = .init(),
     requestPins: AssistantRequestPins = .init(),
+    onContextPrepared: @escaping @MainActor (AssistantContext) -> Void = { _ in },
     onActivity: @escaping @MainActor (AgentActivity) -> Void = { _ in },
     onDelta: @escaping @Sendable (String) async -> Void
   ) async throws {
@@ -141,6 +142,7 @@ public protocol ModelTransport: Sendable {
     }
     let token = UUID()
     generation = token
+    onContextPrepared(prepared)
     let responseStart = Date()
     onActivity(
       .init(
