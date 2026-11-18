@@ -1,0 +1,96 @@
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-writing 1440x900, bitmap 2880x1800, 690ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 1440x900, bitmap 2880x1800, 841ms
+FOCUS_AUDIT 1440x900 PASS focus-from-properties: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-from-properties: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-from-properties 1440x900, bitmap 2880x1800, 39ms
+FOCUS_AUDIT 1440x900 PASS focus-from-properties-restored: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1440x900 PASS focus-from-properties-restored: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-from-properties-restored 1440x900, bitmap 2880x1800, 717ms
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT PASS first-fit acknowledgement contains the committed viewport
+CANVAS_AUDIT PASS dark entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS dark engine selection handles use the same accent
+CANVAS_AUDIT PASS light entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS light engine selection handles use the same accent
+CANVAS_AUDIT PASS oled entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS oled engine selection handles use the same accent
+CANVAS_AUDIT PASS entity keyboard Escape clears selection
+CANVAS_AUDIT PASS entity keyboard selection is repeatable and selects its grouped content
+CANVAS_AUDIT PASS losing focus clears transient entity hover
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS record drop rejects foreign sessions and unknown records
+CANVAS_AUDIT PASS record drop rejects invalid viewport coordinates
+CANVAS_AUDIT PASS record drop reaches the live engine
+CANVAS_AUDIT PASS record drop uses current pan and zoom
+CANVAS_AUDIT PASS record drop preserves viewport and avoids duplicate cards
+CANVAS_AUDIT PASS record drop selects the complete card group
+CANVAS_AUDIT PASS record drop move is undoable
+CANVAS_AUDIT PASS new record drop creates a linked card
+CANVAS_AUDIT PASS new record drop can be undone
+CANVAS_AUDIT PASS reference drops reject stale sessions, invalid points and external URLs
+CANVAS_AUDIT PASS a source reference reaches the live engine
+CANVAS_AUDIT PASS reference cards use current pan and zoom without becoming record cards
+CANVAS_AUDIT PASS dropping the reference again moves its card without duplicate links
+CANVAS_AUDIT PASS reference movement is undoable
+CANVAS_AUDIT PASS reference links and placement survive save/load
+CANVAS_AUDIT PASS opening an image reference selects its exact element
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS an unrelated autosave does not acknowledge a pending flush
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+CANVAS_AUDIT PASS the outgoing canvas stops accepting drops during a board switch
+CANVAS_AUDIT PASS native record drop is acknowledged and saved
+CANVAS_AUDIT PASS native record drop survives a board reload without duplicates
+CANVAS_AUDIT PASS native record drop preserves source lore and canon state
+CANVAS_AUDIT PASS a stale reference drop cannot enter the reloaded board
+CANVAS_AUDIT PASS native event drop confirms a saved reference with board coordinates
+CAPTURE canvas 1440x900, bitmap 2880x1800, 855ms
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-writing 1024x768, bitmap 2048x1536, 459ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 1024x768, bitmap 2048x1536, 534ms
+FOCUS_AUDIT 1024x768 PASS focus-from-properties: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-from-properties: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-from-properties 1024x768, bitmap 2048x1536, 49ms
+FOCUS_AUDIT 1024x768 PASS focus-from-properties-restored: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 1024x768 PASS focus-from-properties-restored: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-from-properties-restored 1024x768, bitmap 2048x1536, 607ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 539ms
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-writing 720x800, bitmap 1440x1600, 345ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 720x800, bitmap 1440x1600, 434ms
+FOCUS_AUDIT 720x800 PASS focus-from-properties: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-from-properties: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-from-properties 720x800, bitmap 1440x1600, 34ms
+FOCUS_AUDIT 720x800 PASS focus-from-properties-restored: native focus shortcut hides/restores presentation without replacing the editor
+FOCUS_AUDIT 720x800 PASS focus-from-properties-restored: addresses, panel choices, original lore and assistance mode preserved
+CAPTURE focus-from-properties-restored 720x800, bitmap 1440x1600, 457ms
+CAPTURE canvas 720x800, bitmap 1440x1600, 486ms
+Native captures complete: /private/tmp/synthesis-expansion-434a7cc/focused-capture

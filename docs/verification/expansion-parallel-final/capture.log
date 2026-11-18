@@ -1,0 +1,371 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--1AB21518FC5DEDBE.txt
+Build complete! (0.17s)
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+warning: '--build-system native' has been deprecated and will be removed in a future release; please report an issue at https://github.com/swiftlang/swift-package-manager/issues if you are unable to adopt the default build system.
+/tmp/synthesis-ui.1IM6Xw/Synthesis-Verification.app: replacing existing signature
+Built /tmp/synthesis-ui.1IM6Xw/Synthesis-Verification.app (ad-hoc signed development build).
+sandbox_extension_issue_file_to_process failed for /tmp/synthesis-ui.1IM6Xw/Synthesis-Verification.app: 1 (Operation not permitted)
+CAPTURE quick-capture-empty 1440x900, bitmap 2880x1800, 1127ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-empty: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-writing 1440x900, bitmap 2880x1800, 1084ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-writing: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-other-world 1440x900, bitmap 2880x1800, 1331ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-other-world: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-error 1440x900, bitmap 2880x1800, 1057ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-error: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-saved 1440x900, bitmap 2880x1800, 963ms
+QUICK_CAPTURE_AUDIT PASS one idea saved, scratch cleared, repeat ignored, canon untouched
+QUICK_CAPTURE_AUDIT PASS quick-capture-saved: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE light-quick-capture-writing 1440x900, bitmap 2880x1800, 982ms
+QUICK_CAPTURE_AUDIT PASS light-quick-capture-writing: native nonactivating panel, 560pt, world-scoped draft
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch 1440x900, bitmap 2880x1800, 899ms
+CONVERSATION_TOOLS_AUDIT PASS light-conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE light-conversation-branch 1440x900, bitmap 2880x1800, 1047ms
+CONVERSATION_TOOLS_AUDIT PASS manual-conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE manual-conversation-branch 1440x900, bitmap 2880x1800, 108ms
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch-source: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch-source 1440x900, bitmap 2880x1800, 920ms
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch-companion: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch-companion 1440x900, bitmap 2880x1800, 566ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-library 1440x900, bitmap 2880x1800, 1053ms
+CONVERSATION_TOOLS_AUDIT PASS light-recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE light-recipe-library 1440x900, bitmap 2880x1800, 1080ms
+CONVERSATION_TOOLS_AUDIT PASS manual-recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE manual-recipe-library 1440x900, bitmap 2880x1800, 323ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-editor: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-editor 1440x900, bitmap 2880x1800, 1138ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-empty: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-empty 1440x900, bitmap 2880x1800, 1019ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-applied: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-applied 1440x900, bitmap 2880x1800, 867ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-archived: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-archived 1440x900, bitmap 2880x1800, 1052ms
+CAPTURE properties-empty 1440x900, bitmap 2880x1800, 684ms
+CAPTURE properties-fields 1440x900, bitmap 2880x1800, 708ms
+CAPTURE light-properties-fields 1440x900, bitmap 2880x1800, 721ms
+CAPTURE manual-properties-fields 1440x900, bitmap 2880x1800, 132ms
+CAPTURE properties-inherited 1440x900, bitmap 2880x1800, 702ms
+CAPTURE properties-conditional 1440x900, bitmap 2880x1800, 699ms
+CAPTURE properties-review 1440x900, bitmap 2880x1800, 919ms
+CAPTURE light-properties-review 1440x900, bitmap 2880x1800, 946ms
+CAPTURE properties-history 1440x900, bitmap 2880x1800, 909ms
+CAPTURE entity-types 1440x900, bitmap 2880x1800, 903ms
+CAPTURE light-entity-types 1440x900, bitmap 2880x1800, 932ms
+CAPTURE entity-types-edit 1440x900, bitmap 2880x1800, 1001ms
+CAPTURE properties-edit-text 1440x900, bitmap 2880x1800, 902ms
+CAPTURE properties-edit-number 1440x900, bitmap 2880x1800, 901ms
+CAPTURE properties-edit-boolean 1440x900, bitmap 2880x1800, 889ms
+CAPTURE properties-edit-date 1440x900, bitmap 2880x1800, 913ms
+CAPTURE properties-edit-range 1440x900, bitmap 2880x1800, 906ms
+CAPTURE properties-edit-duration 1440x900, bitmap 2880x1800, 919ms
+CAPTURE properties-edit-selection 1440x900, bitmap 2880x1800, 911ms
+CAPTURE properties-edit-entity 1440x900, bitmap 2880x1800, 910ms
+CAPTURE properties-edit-coordinates 1440x900, bitmap 2880x1800, 886ms
+CAPTURE properties-edit-media 1440x900, bitmap 2880x1800, 895ms
+CAPTURE properties-edit-selections 1440x900, bitmap 2880x1800, 884ms
+CAPTURE properties-edit-entities 1440x900, bitmap 2880x1800, 877ms
+CAPTURE properties-template 1440x900, bitmap 2880x1800, 920ms
+CAPTURE properties-new-entity 1440x900, bitmap 2880x1800, 917ms
+CAPTURE relationship-outgoing 1440x900, bitmap 2880x1800, 697ms
+CAPTURE relationship-incoming 1440x900, bitmap 2880x1800, 690ms
+CAPTURE relationship-metadata-editor 1440x900, bitmap 2880x1800, 2763ms
+CAPTURE relationship-metadata-inspector 1440x900, bitmap 2880x1800, 1280ms
+CAPTURE entity-names 1440x900, bitmap 2880x1800, 881ms
+CAPTURE entity-name-edit 1440x900, bitmap 2880x1800, 887ms
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-writing 1440x900, bitmap 2880x1800, 704ms
+SESSION_AUDIT PASS light-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE light-session-writing 1440x900, bitmap 2880x1800, 716ms
+SESSION_AUDIT PASS manual-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE manual-session-writing 1440x900, bitmap 2880x1800, 127ms
+SESSION_AUDIT PASS session-sections: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-sections 1440x900, bitmap 2880x1800, 692ms
+SESSION_AUDIT PASS session-split: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-split 1440x900, bitmap 2880x1800, 678ms
+SESSION_AUDIT PASS session-graph: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-graph 1440x900, bitmap 2880x1800, 3552ms
+SESSION_AUDIT PASS session-timeline: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-timeline 1440x900, bitmap 2880x1800, 696ms
+SESSION_AUDIT PASS session-atlas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-atlas 1440x900, bitmap 2880x1800, 1644ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 1440x900, bitmap 2880x1800, 842ms
+SESSION_AUDIT PASS session-conversation: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-conversation 1440x900, bitmap 2880x1800, 929ms
+SESSION_AUDIT PASS session-library: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-library 1440x900, bitmap 2880x1800, 698ms
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT PASS first-fit acknowledgement contains the committed viewport
+CANVAS_AUDIT PASS dark entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS dark engine selection handles use the same accent
+CANVAS_AUDIT PASS light entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS light engine selection handles use the same accent
+CANVAS_AUDIT PASS oled entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS oled engine selection handles use the same accent
+CANVAS_AUDIT PASS entity keyboard Escape clears selection
+CANVAS_AUDIT PASS entity keyboard selection is repeatable and selects its grouped content
+CANVAS_AUDIT PASS losing focus clears transient entity hover
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS record drop rejects foreign sessions and unknown records
+CANVAS_AUDIT PASS record drop rejects invalid viewport coordinates
+CANVAS_AUDIT PASS record drop reaches the live engine
+CANVAS_AUDIT PASS record drop uses current pan and zoom
+CANVAS_AUDIT PASS record drop preserves viewport and avoids duplicate cards
+CANVAS_AUDIT PASS record drop selects the complete card group
+CANVAS_AUDIT PASS record drop move is undoable
+CANVAS_AUDIT PASS new record drop creates a linked card
+CANVAS_AUDIT PASS new record drop can be undone
+CANVAS_AUDIT PASS reference drops reject stale sessions, invalid points and external URLs
+CANVAS_AUDIT PASS a source reference reaches the live engine
+CANVAS_AUDIT PASS reference cards use current pan and zoom without becoming record cards
+CANVAS_AUDIT PASS dropping the reference again moves its card without duplicate links
+CANVAS_AUDIT PASS reference movement is undoable
+CANVAS_AUDIT PASS reference links and placement survive save/load
+CANVAS_AUDIT PASS opening an image reference selects its exact element
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS an unrelated autosave does not acknowledge a pending flush
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+CANVAS_AUDIT PASS the outgoing canvas stops accepting drops during a board switch
+CANVAS_AUDIT PASS native record drop is acknowledged and saved
+CANVAS_AUDIT PASS native record drop survives a board reload without duplicates
+CANVAS_AUDIT PASS native record drop preserves source lore and canon state
+CANVAS_AUDIT PASS a stale reference drop cannot enter the reloaded board
+CANVAS_AUDIT PASS native event drop confirms a saved reference with board coordinates
+CAPTURE canvas 1440x900, bitmap 2880x1800, 840ms
+CAPTURE reference-editor 1440x900, bitmap 2880x1800, 694ms
+CAPTURE reference-composer 1440x900, bitmap 2880x1800, 919ms
+CAPTURE proposal-faction-batch 1440x900, bitmap 2880x1800, 759ms
+CAPTURE request-pins 1440x900, bitmap 2880x1800, 947ms
+CAPTURE request-pins-browser 1440x900, bitmap 2880x1800, 2189ms
+CAPTURE context-exclusions 1440x900, bitmap 2880x1800, 1187ms
+CAPTURE context-submitted 1440x900, bitmap 2880x1800, 1248ms
+CAPTURE quick-capture-empty 1024x768, bitmap 2048x1536, 578ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-empty: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-writing 1024x768, bitmap 2048x1536, 573ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-writing: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-other-world 1024x768, bitmap 2048x1536, 577ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-other-world: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-error 1024x768, bitmap 2048x1536, 580ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-error: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-saved 1024x768, bitmap 2048x1536, 559ms
+QUICK_CAPTURE_AUDIT PASS one idea saved, scratch cleared, repeat ignored, canon untouched
+QUICK_CAPTURE_AUDIT PASS quick-capture-saved: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE light-quick-capture-writing 1024x768, bitmap 2048x1536, 571ms
+QUICK_CAPTURE_AUDIT PASS light-quick-capture-writing: native nonactivating panel, 560pt, world-scoped draft
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch 1024x768, bitmap 2048x1536, 547ms
+CONVERSATION_TOOLS_AUDIT PASS light-conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE light-conversation-branch 1024x768, bitmap 2048x1536, 557ms
+CONVERSATION_TOOLS_AUDIT PASS manual-conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE manual-conversation-branch 1024x768, bitmap 2048x1536, 86ms
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch-source: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch-source 1024x768, bitmap 2048x1536, 535ms
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch-companion: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch-companion 1024x768, bitmap 2048x1536, 515ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-library 1024x768, bitmap 2048x1536, 661ms
+CONVERSATION_TOOLS_AUDIT PASS light-recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE light-recipe-library 1024x768, bitmap 2048x1536, 670ms
+CONVERSATION_TOOLS_AUDIT PASS manual-recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE manual-recipe-library 1024x768, bitmap 2048x1536, 229ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-editor: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-editor 1024x768, bitmap 2048x1536, 694ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-empty: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-empty 1024x768, bitmap 2048x1536, 660ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-applied: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-applied 1024x768, bitmap 2048x1536, 505ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-archived: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-archived 1024x768, bitmap 2048x1536, 660ms
+CAPTURE properties-empty 1024x768, bitmap 2048x1536, 456ms
+CAPTURE properties-fields 1024x768, bitmap 2048x1536, 478ms
+CAPTURE light-properties-fields 1024x768, bitmap 2048x1536, 447ms
+CAPTURE manual-properties-fields 1024x768, bitmap 2048x1536, 107ms
+CAPTURE properties-inherited 1024x768, bitmap 2048x1536, 476ms
+CAPTURE properties-conditional 1024x768, bitmap 2048x1536, 473ms
+CAPTURE properties-review 1024x768, bitmap 2048x1536, 617ms
+CAPTURE light-properties-review 1024x768, bitmap 2048x1536, 603ms
+CAPTURE properties-history 1024x768, bitmap 2048x1536, 603ms
+CAPTURE entity-types 1024x768, bitmap 2048x1536, 612ms
+CAPTURE light-entity-types 1024x768, bitmap 2048x1536, 615ms
+CAPTURE entity-types-edit 1024x768, bitmap 2048x1536, 694ms
+CAPTURE properties-edit-text 1024x768, bitmap 2048x1536, 606ms
+CAPTURE properties-edit-number 1024x768, bitmap 2048x1536, 595ms
+CAPTURE properties-edit-boolean 1024x768, bitmap 2048x1536, 597ms
+CAPTURE properties-edit-date 1024x768, bitmap 2048x1536, 612ms
+CAPTURE properties-edit-range 1024x768, bitmap 2048x1536, 581ms
+CAPTURE properties-edit-duration 1024x768, bitmap 2048x1536, 618ms
+CAPTURE properties-edit-selection 1024x768, bitmap 2048x1536, 583ms
+CAPTURE properties-edit-entity 1024x768, bitmap 2048x1536, 604ms
+CAPTURE properties-edit-coordinates 1024x768, bitmap 2048x1536, 606ms
+CAPTURE properties-edit-media 1024x768, bitmap 2048x1536, 613ms
+CAPTURE properties-edit-selections 1024x768, bitmap 2048x1536, 606ms
+CAPTURE properties-edit-entities 1024x768, bitmap 2048x1536, 577ms
+CAPTURE properties-template 1024x768, bitmap 2048x1536, 613ms
+CAPTURE properties-new-entity 1024x768, bitmap 2048x1536, 590ms
+CAPTURE relationship-outgoing 1024x768, bitmap 2048x1536, 580ms
+CAPTURE relationship-incoming 1024x768, bitmap 2048x1536, 594ms
+CAPTURE relationship-metadata-editor 1024x768, bitmap 2048x1536, 982ms
+CAPTURE relationship-metadata-inspector 1024x768, bitmap 2048x1536, 935ms
+CAPTURE entity-names 1024x768, bitmap 2048x1536, 577ms
+CAPTURE entity-name-edit 1024x768, bitmap 2048x1536, 565ms
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-writing 1024x768, bitmap 2048x1536, 468ms
+SESSION_AUDIT PASS light-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE light-session-writing 1024x768, bitmap 2048x1536, 475ms
+SESSION_AUDIT PASS manual-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE manual-session-writing 1024x768, bitmap 2048x1536, 101ms
+SESSION_AUDIT PASS session-sections: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-sections 1024x768, bitmap 2048x1536, 462ms
+SESSION_AUDIT PASS session-split: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-split 1024x768, bitmap 2048x1536, 468ms
+SESSION_AUDIT PASS session-graph: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-graph 1024x768, bitmap 2048x1536, 2091ms
+SESSION_AUDIT PASS session-timeline: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-timeline 1024x768, bitmap 2048x1536, 450ms
+SESSION_AUDIT PASS session-atlas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-atlas 1024x768, bitmap 2048x1536, 1009ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 1024x768, bitmap 2048x1536, 544ms
+SESSION_AUDIT PASS session-conversation: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-conversation 1024x768, bitmap 2048x1536, 569ms
+SESSION_AUDIT PASS session-library: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-library 1024x768, bitmap 2048x1536, 464ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 545ms
+CAPTURE reference-editor 1024x768, bitmap 2048x1536, 573ms
+CAPTURE reference-composer 1024x768, bitmap 2048x1536, 573ms
+CAPTURE proposal-faction-batch 1024x768, bitmap 2048x1536, 514ms
+CAPTURE request-pins 1024x768, bitmap 2048x1536, 585ms
+CAPTURE request-pins-browser 1024x768, bitmap 2048x1536, 1406ms
+CAPTURE context-exclusions 1024x768, bitmap 2048x1536, 749ms
+CAPTURE context-submitted 1024x768, bitmap 2048x1536, 790ms
+CAPTURE quick-capture-empty 720x800, bitmap 1440x1600, 533ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-empty: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE quick-capture-writing 720x800, bitmap 1440x1600, 531ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-writing: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE quick-capture-other-world 720x800, bitmap 1440x1600, 550ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-other-world: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE quick-capture-error 720x800, bitmap 1440x1600, 552ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-error: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE quick-capture-saved 720x800, bitmap 1440x1600, 550ms
+QUICK_CAPTURE_AUDIT PASS one idea saved, scratch cleared, repeat ignored, canon untouched
+QUICK_CAPTURE_AUDIT PASS quick-capture-saved: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE light-quick-capture-writing 720x800, bitmap 1440x1600, 552ms
+QUICK_CAPTURE_AUDIT PASS light-quick-capture-writing: native nonactivating panel, 420pt, world-scoped draft
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch 720x800, bitmap 1440x1600, 532ms
+CONVERSATION_TOOLS_AUDIT PASS light-conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE light-conversation-branch 720x800, bitmap 1440x1600, 531ms
+CONVERSATION_TOOLS_AUDIT PASS manual-conversation-branch: persisted branch/recipe data, source lineage and no active model request
+CAPTURE manual-conversation-branch 720x800, bitmap 1440x1600, 59ms
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch-source: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch-source 720x800, bitmap 1440x1600, 515ms
+CONVERSATION_TOOLS_AUDIT PASS conversation-branch-companion: persisted branch/recipe data, source lineage and no active model request
+CAPTURE conversation-branch-companion 720x800, bitmap 1440x1600, 547ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-library 720x800, bitmap 1440x1600, 617ms
+CONVERSATION_TOOLS_AUDIT PASS light-recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE light-recipe-library 720x800, bitmap 1440x1600, 611ms
+CONVERSATION_TOOLS_AUDIT PASS manual-recipe-library: persisted branch/recipe data, source lineage and no active model request
+CAPTURE manual-recipe-library 720x800, bitmap 1440x1600, 146ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-editor: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-editor 720x800, bitmap 1440x1600, 637ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-empty: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-empty 720x800, bitmap 1440x1600, 625ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-applied: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-applied 720x800, bitmap 1440x1600, 485ms
+CONVERSATION_TOOLS_AUDIT PASS recipe-archived: persisted branch/recipe data, source lineage and no active model request
+CAPTURE recipe-archived 720x800, bitmap 1440x1600, 621ms
+CAPTURE properties-empty 720x800, bitmap 1440x1600, 334ms
+CAPTURE properties-fields 720x800, bitmap 1440x1600, 343ms
+CAPTURE light-properties-fields 720x800, bitmap 1440x1600, 360ms
+CAPTURE manual-properties-fields 720x800, bitmap 1440x1600, 73ms
+CAPTURE properties-inherited 720x800, bitmap 1440x1600, 359ms
+CAPTURE properties-conditional 720x800, bitmap 1440x1600, 356ms
+CAPTURE properties-review 720x800, bitmap 1440x1600, 473ms
+CAPTURE light-properties-review 720x800, bitmap 1440x1600, 454ms
+CAPTURE properties-history 720x800, bitmap 1440x1600, 499ms
+CAPTURE entity-types 720x800, bitmap 1440x1600, 495ms
+CAPTURE light-entity-types 720x800, bitmap 1440x1600, 499ms
+CAPTURE entity-types-edit 720x800, bitmap 1440x1600, 689ms
+CAPTURE properties-edit-text 720x800, bitmap 1440x1600, 447ms
+CAPTURE properties-edit-number 720x800, bitmap 1440x1600, 477ms
+CAPTURE properties-edit-boolean 720x800, bitmap 1440x1600, 477ms
+CAPTURE properties-edit-date 720x800, bitmap 1440x1600, 498ms
+CAPTURE properties-edit-range 720x800, bitmap 1440x1600, 462ms
+CAPTURE properties-edit-duration 720x800, bitmap 1440x1600, 466ms
+CAPTURE properties-edit-selection 720x800, bitmap 1440x1600, 466ms
+CAPTURE properties-edit-entity 720x800, bitmap 1440x1600, 466ms
+CAPTURE properties-edit-coordinates 720x800, bitmap 1440x1600, 467ms
+CAPTURE properties-edit-media 720x800, bitmap 1440x1600, 480ms
+CAPTURE properties-edit-selections 720x800, bitmap 1440x1600, 465ms
+CAPTURE properties-edit-entities 720x800, bitmap 1440x1600, 462ms
+CAPTURE properties-template 720x800, bitmap 1440x1600, 458ms
+CAPTURE properties-new-entity 720x800, bitmap 1440x1600, 473ms
+CAPTURE relationship-outgoing 720x800, bitmap 1440x1600, 467ms
+CAPTURE relationship-incoming 720x800, bitmap 1440x1600, 456ms
+CAPTURE relationship-metadata-editor 720x800, bitmap 1440x1600, 870ms
+CAPTURE relationship-metadata-inspector 720x800, bitmap 1440x1600, 797ms
+CAPTURE entity-names 720x800, bitmap 1440x1600, 460ms
+CAPTURE entity-name-edit 720x800, bitmap 1440x1600, 457ms
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-writing 720x800, bitmap 1440x1600, 349ms
+SESSION_AUDIT PASS light-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE light-session-writing 720x800, bitmap 1440x1600, 342ms
+SESSION_AUDIT PASS manual-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE manual-session-writing 720x800, bitmap 1440x1600, 69ms
+SESSION_AUDIT PASS session-sections: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-sections 720x800, bitmap 1440x1600, 360ms
+SESSION_AUDIT PASS session-split: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-split 720x800, bitmap 1440x1600, 351ms
+SESSION_AUDIT PASS session-graph: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-graph 720x800, bitmap 1440x1600, 2048ms
+SESSION_AUDIT PASS session-timeline: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-timeline 720x800, bitmap 1440x1600, 373ms
+SESSION_AUDIT PASS session-atlas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-atlas 720x800, bitmap 1440x1600, 896ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 720x800, bitmap 1440x1600, 429ms
+SESSION_AUDIT PASS session-conversation: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-conversation 720x800, bitmap 1440x1600, 549ms
+SESSION_AUDIT PASS session-library: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-library 720x800, bitmap 1440x1600, 356ms
+CAPTURE canvas 720x800, bitmap 1440x1600, 431ms
+CAPTURE reference-editor 720x800, bitmap 1440x1600, 468ms
+CAPTURE reference-composer 720x800, bitmap 1440x1600, 563ms
+CAPTURE proposal-faction-batch 720x800, bitmap 1440x1600, 398ms
+CAPTURE request-pins 720x800, bitmap 1440x1600, 577ms
+CAPTURE request-pins-browser 720x800, bitmap 1440x1600, 1205ms
+CAPTURE context-exclusions 720x800, bitmap 1440x1600, 684ms
+CAPTURE context-submitted 720x800, bitmap 1440x1600, 710ms
+Native captures complete: /Users/desenyon/Developer/synthesis/docs/verification/expansion-parallel-final
+Native captures: docs/verification/expansion-parallel-final
+Contact sheets: uv run --with pillow python scripts/contact-sheets.py 'docs/verification/expansion-parallel-final' [--prune]
