@@ -227,6 +227,61 @@ struct EntitySchemaArchiveTests {
     }
   }
 
+  @Test func inheritedMediaCannotMakeAnUnportableAcceptedSnapshot() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Aster")
+    let map = EntityField(key: "map", label: "Map", kind: .media)
+    let parent = try store.saveEntityType(worldID: world.id, name: "Person", fields: [map])
+    let child = try store.saveEntityType(
+      worldID: world.id, name: "Navigator", parentTypeID: parent.id,
+      fields: [
+        EntityField(key: "portrait", label: "Portrait", kind: .media),
+        EntityField(key: "study", label: "Study", kind: .media),
+      ])
+    let record = try store.createTypedEntity(worldID: world.id, typeID: child.id, title: "Mira")
+    let firstReview = try #require(
+      try store.entityProfileReview(worldID: world.id, recordID: record.id))
+    let accepted = try store.acceptEntityProperties(
+      worldID: world.id, recordID: record.id, confirmedProfileID: firstReview.profile.id,
+      expectedRevision: firstReview.revision)
+
+    // Each 6 MB PNG fits the per-image limit and takes 8 MB before JSON metadata.
+    // Two overrides and one inherited value each fit their separate drafts.
+    let image = Self.maximumSizePropertyImage()
+    let working = try store.saveEntityProfile(
+      worldID: world.id, recordID: record.id, typeID: child.id,
+      values: ["portrait": image, "study": image], expectedVersion: accepted.version)
+    try store.saveEntityType(
+      worldID: world.id, id: parent.id, expectedVersion: parent.version, name: parent.name,
+      fields: [map], defaults: ["map": image])
+
+    let oversized = try #require(
+      try store.entityProfileReview(worldID: world.id, recordID: record.id))
+    #expect(oversized.snapshot.values.count == 3)
+    #expect(throws: SynthesisError.self) {
+      try store.acceptEntityProperties(
+        worldID: world.id, recordID: record.id, confirmedProfileID: oversized.profile.id,
+        expectedRevision: oversized.revision)
+    }
+    let unchanged = try store.entityProfile(worldID: world.id, recordID: record.id)
+    #expect(unchanged?.version == working.version && unchanged?.canonical == firstReview.snapshot)
+    let history = try store.entityProfileHistory(worldID: world.id, recordID: record.id)
+    #expect(history.map { $0.profile.version } == [working.version, accepted.version, 1])
+  }
+
+  private static func maximumSizePropertyImage() -> EntityValue {
+    let original = RecordArtworkTests.png
+    var data = Data(original.dropLast(12))
+    // Insert a valid tEXt chunk before IEND. The pixels stay 1×1, and the fixed chunk
+    // length and CRC-32 below cover Comment, its NUL separator, and 5,999,912 "x" bytes.
+    data.append(contentsOf: [0x00, 0x5b, 0x8d, 0x30])
+    data.append(contentsOf: "tEXtComment\0".utf8)
+    data.append(Data(repeating: 0x78, count: 5_999_912))
+    data.append(contentsOf: [0xc4, 0xac, 0xc7, 0xd2])
+    data.append(contentsOf: original.suffix(12))
+    return .media(name: "reference.png", mime: "image/png", base64: data.base64EncodedString())
+  }
+
   @Test func schemaImageExportIncludesInheritedTemplateAndAcceptedMediaWithinOneWorld() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Aster")

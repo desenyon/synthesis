@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import SynthesisCore
 
@@ -21,6 +22,9 @@ extension Studio {
       base = "editor"
     }
     configureConnectedCapture(base, board: board, conversation: conversation)
+    if state.hasPrefix("focus-from-properties"), let record = selectedRecord {
+      recordTabs[record.id] = .properties
+    }
     dark = !state.hasPrefix("light-")
     if state.hasPrefix("manual-") { setMode(.manual) }
     if state.hasSuffix("collapsed") { collapsed = true }
@@ -40,6 +44,12 @@ extension Studio {
     let layout = (collapsed, inspector, workspaceInspector, companionExpanded, sidebarWidth)
     let handle = selectedRecord.map { editorHandle(for: $0) }
     let textView = handle?.view
+    let startsFromProperties = state.hasPrefix("focus-from-properties")
+    if startsFromProperties {
+      guard location.context?.recordTab == .properties, textView?.window == nil else {
+        throw SynthesisError.invalid("The focus fixture must begin on Properties.")
+      }
+    }
     try toggle()
     try await Task.sleep(for: .milliseconds(450))
     guard focusMode, visibleSidebarWidth(windowWidth: 1440) == 0,
@@ -47,6 +57,9 @@ extension Studio {
       textView == nil || handle?.view === textView
     else {
       throw SynthesisError.invalid("Focus did not hide panels or replaced the native editor.")
+    }
+    if startsFromProperties && handle?.view?.window == nil {
+      throw SynthesisError.invalid("Focus from Properties did not reveal the document editor.")
     }
     if state.hasSuffix("restored") || state.hasSuffix("collapsed") {
       try toggle()

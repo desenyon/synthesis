@@ -4,6 +4,23 @@ import Testing
 @testable import SynthesisCore
 
 struct ConversationToolsTests {
+  @Test func branchExcerptPreservesBlockBoundariesAndTrimsRenderedText() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Excerpt study")
+    let original = try store.createConversation(worldID: world.id)
+    let passage = String(repeating: "north ", count: 28)
+    let reply = try store.appendMessage(
+      worldID: world.id, conversationID: original.id, role: "assistant",
+      body: "### Crossing\n\nFirst passage.\n\n**\(passage)wind**", state: "complete")
+    let branch = try store.branchConversation(
+      worldID: world.id, conversationID: original.id, at: reply.id)
+    let lineage = try #require(
+      try store.conversationBranch(worldID: world.id, conversationID: branch.id))
+    #expect(lineage.forkExcerpt.hasPrefix("Crossing First passage. north"))
+    #expect(!lineage.forkExcerpt.contains("**"))
+    #expect(lineage.forkExcerpt.count <= 180)
+  }
+
   @Test func branchCopiesOnlyTheSelectedPrefixAndKeepsSourceReferences() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Branch study")

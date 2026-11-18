@@ -1,5 +1,13 @@
 # Development progress
 
+## 2026-11-17 — Mac regression checkpoint
+
+Fast-forwarded `main` to `434a7cc` and preserved the untracked design brief. The first native check found a Swift Testing compile error in the pin-chip assertion. After correcting it, 375 native tests passed and both session process phases passed. The first isolated capture stopped after 58 main frames and six panels at 1440×900. Its Canvas session check compared a viewport sampled during animation with a later saved viewport. The fixture now selects without animation and compares the live, saved, and reopened viewports. The session fixture also independently checks the full newest draft.
+
+Repairs include scoped assistant reference labels, withholding prior generated proposals under explicit exclusions, sanitized provider errors, fail-closed Claude authentication, archived-record canon approval rejection, matching Quick Capture receipt cleanup, unplaced Timeline session restoration, technique prerequisite archive/Undo, and portable overlapping chronology. Branch lineage formats whole Markdown blocks before clipping. Property review names referenced entities, marks inactive fields, and rejects oversized frozen snapshots atomically. Focus reveals the native document from structured tabs and restores the chosen tab on exit.
+
+`./scripts/check.sh` passed strict lint, **390 tests in 96 suites**, and an optimized isolated build. `./scripts/verify-session.sh` passed both processes. Canvas 20 tests, TypeScript, and the offline bundle build passed. A focused three-size rerun produced 15 main frames, 12 Focus assertions, three fresh Canvas session checks, and 59 real WebKit/native Canvas assertions. The full 69-state rerun is underway. This source checkpoint precedes requirement status changes. Foreground input and live subscriptions remain separate authorization gates.
+
 ## Mac continuation handoff
 
 GitHub `main` received all seven Linux implementation commits and the Mac continuation prompt. The connector generated new commit hashes. Each GitHub tree matched the corresponding Spark tree. A fresh fetch confirmed the updated remote ref, and the original history remains on the local `spark-original-b3602d7` branch. This was a source push. Native acceptance and the release gate remain pending. [Current handoff](HANDOFF.md)

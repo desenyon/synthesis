@@ -21,7 +21,7 @@ import Testing
 
     let chips = studio.composerAttachments
     #expect(chips.count == 3)
-    #expect(chips.allSatisfy(\.pinned))
+    #expect(chips.allSatisfy { $0.pinned })
     let miraPin = try #require(chips.first { $0.key == mira.id })
     studio.removeAttachment(miraPin)
     #expect(studio.contextOptions.recordIDs == [mira.id])

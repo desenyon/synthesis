@@ -12,6 +12,7 @@ extension Studio {
       "session-split", "session-graph", "session-timeline", "session-atlas", "session-canvas",
       "session-conversation", "session-library",
       "focus-writing", "light-focus-writing", "manual-focus-writing", "focus-restored",
+      "focus-from-properties", "focus-from-properties-restored",
       "focus-collapsed", "focus-split", "focus-blank", "focus-atlas", "focus-graph",
       "focus-canvas", "focus-conversation",
       "startup-settings", "light-startup-settings", "startup-atlas", "light-startup-atlas",
@@ -1455,10 +1456,10 @@ extension Studio {
     captureNonce += 1
   }
 
-  public func captureCanvasSelection() {
+  public func captureCanvasSelection(animate: Bool = true) {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil,
       let record = records.first(where: { $0.title == "Mira Vale" })
     else { return }
-    canvas().reveal(record)
+    canvas().reveal(record, animate: animate)
   }
 }

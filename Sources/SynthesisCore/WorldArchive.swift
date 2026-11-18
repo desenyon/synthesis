@@ -154,6 +154,8 @@ extension WorkspaceStore {
         decoding: try JSONSerialization.data(withJSONObject: snapshot, options: [.sortedKeys]),
         as: UTF8.self)
     }
+    archive.tables["chronology_lanes"] = try chronologyLanesInImportOrder(
+      archive.tables["chronology_lanes"] ?? [])
     return try db.transaction {
       let newWorld = ids[oldWorld]!
       try db.execute("INSERT INTO activity_imports(world_id) VALUES(?)", [newWorld])

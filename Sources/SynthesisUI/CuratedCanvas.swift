@@ -308,26 +308,35 @@ struct CuratedCanvas: View {
     }
   }
   private func archiveBoard() {
-    guard let id = session.boardID else { return }
+    guard let board = session.boardReference, let generation = session.dropSessionID,
+      studio.canvasBoardID == nil || studio.canvasBoardID == board.id
+    else { return }
     let name = session.name
     Task {
-      await session.flush()
+      guard await session.flush(), studio.destination == .canvas,
+        session.boardReference == board, session.dropSessionID == generation,
+        studio.canvasBoardID == nil || studio.canvasBoardID == board.id
+      else { return }
       studio.perform {
-        try studio.store.setBoardArchived(worldID: studio.worldID, id: id, archived: true)
-        let remaining = try studio.store.boards(worldID: studio.worldID, kind: "canvas")
+        try studio.store.setBoardArchived(worldID: board.worldID, id: board.id, archived: true)
+        let remaining = try studio.store.boards(worldID: board.worldID, kind: "canvas")
         let next =
           try remaining.first?.id
           ?? studio.store.saveBoard(
-            worldID: studio.worldID, name: "Untitled board", kind: "canvas",
+            worldID: board.worldID, name: "Untitled board", kind: "canvas",
             content: CanvasBoardContent.empty
           ).id
         studio.canvasBoardID = next
         session.switchBoard(next)
         studio.show("Archived board “\(name)”", icon: "archivebox", actionTitle: "Undo") {
           studio.perform {
-            try studio.store.setBoardArchived(worldID: studio.worldID, id: id, archived: false)
-            studio.canvasBoardID = id
-            session.switchBoard(id)
+            try studio.store.setBoardArchived(worldID: board.worldID, id: board.id, archived: false)
+            if studio.worldID == board.worldID, studio.destination == .canvas,
+              studio.canvasBoardID == next
+            {
+              studio.canvasBoardID = board.id
+              session.switchBoard(board.id)
+            }
           }
         }
       }

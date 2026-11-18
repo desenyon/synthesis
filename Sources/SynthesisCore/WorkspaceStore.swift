@@ -215,6 +215,9 @@ public final class WorkspaceStore {
     return try db.transaction {
       let r = try record(worldID: worldID, id: id)
       guard r.version == version else { throw SynthesisError.stale }
+      guard try !isArchived(worldID: worldID, recordID: id) else {
+        throw SynthesisError.invalid("Restore this record before reviewing it for canon.")
+      }
       guard r.kind != "capture" else {
         throw SynthesisError.invalid("Convert this idea into a document before canon review.")
       }

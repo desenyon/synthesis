@@ -65,19 +65,24 @@ enum MentionCodec {
     ) { value, range, _ in
       let text = attributed.attributedSubstring(from: range).string
       if let address = value as? String {
-        if address.hasPrefix(referencePrefix) {
-          let escaped = text.replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "[", with: "\\[")
-            .replacingOccurrences(of: "]", with: "\\]")
-          output += "[\(escaped)](\(address))"
-        } else {
-          output += "[\(text)](\(legacyPrefix)\(address))"
-        }
+        output += markdown(title: text, address: address)
       } else {
         output += text
       }
     }
     return output
+  }
+  static func address(for record: LoreRecord) -> String {
+    guard record.title.contains(where: { $0.isNewline || #"\[]"#.contains($0) }) else {
+      return record.id
+    }
+    return WorldReference(worldID: record.worldID, kind: .record, id: record.id).url.absoluteString
+  }
+  static func markdown(title: String, address: String) -> String {
+    if address.hasPrefix(referencePrefix), let url = URL(string: address) {
+      return WorldReferenceSource.markdown(title: title, url: url)
+    }
+    return "[\(title)](\(legacyPrefix)\(address))"
   }
   /// The `@query` being typed immediately before `caret`, if any, and its range.
   static func query(in text: NSString, caret: Int) -> (text: String, range: NSRange)? {
@@ -162,10 +167,10 @@ final class ComposerTextView: NSTextView {
 /// Lets the composer's buttons and mention list insert a reference at the caret.
 @MainActor final class ComposerHandle {
   weak var view: ComposerTextView?
-  var insert: ((_ title: String, _ id: String, _ replacing: NSRange?) -> Void)?
+  var insert: ((_ title: String, _ address: String, _ replacing: NSRange?) -> Void)?
   var mentionRange: NSRange?
-  func insertReference(title: String, id: String, replacingQuery: Bool = false) {
-    insert?(title, id, replacingQuery ? mentionRange : nil)
+  func insertReference(_ record: LoreRecord, replacingQuery: Bool = false) {
+    insert?(record.title, MentionCodec.address(for: record), replacingQuery ? mentionRange : nil)
   }
 }
 
@@ -244,8 +249,8 @@ struct ComposerInput: NSViewRepresentable {
     let coordinator = context.coordinator
     coordinator.parent = self
     handle?.view = editor
-    handle?.insert = { [weak coordinator] title, id, range in
-      coordinator?.insertToken(title: title, id: id, replacing: range)
+    handle?.insert = { [weak coordinator] title, address, range in
+      coordinator?.insertToken(title: title, address: address, replacing: range)
     }
     if MentionCodec.markdown(editor.attributedString()) != text {
       coordinator.updating = true
@@ -322,7 +327,7 @@ struct ComposerInput: NSViewRepresentable {
       textDidChange(Notification(name: NSText.didChangeNotification, object: textView))
       return false
     }
-    func insertToken(title: String, id: String, replacing: NSRange?) {
+    func insertToken(title: String, address: String, replacing: NSRange?) {
       guard let editor = view, let storage = editor.textStorage else { return }
       let target = replacing ?? editor.selectedRange()
       guard NSMaxRange(target) <= storage.length else { return }
@@ -335,7 +340,8 @@ struct ComposerInput: NSViewRepresentable {
       }
       piece.append(
         MentionCodec.token(
-          title: title, address: id, base: parent.baseAttributes, accent: NSColor(parent.accent),
+          title: title, address: address, base: parent.baseAttributes,
+          accent: NSColor(parent.accent),
           soft: NSColor(parent.accentSoft)))
       piece.append(NSAttributedString(string: " ", attributes: parent.baseAttributes))
       updating = true

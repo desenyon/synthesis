@@ -118,19 +118,13 @@ struct ConversationLineage: View {
   @ObservedObject var studio: Studio
   let branch: ConversationBranch
   var companion = false
-  private var excerpt: String {
-    let plain =
-      (try? AttributedString(markdown: branch.forkExcerpt)).map { String($0.characters) }
-      ?? branch.forkExcerpt
-    return plain.replacingOccurrences(of: "\n", with: " ")
-  }
   var body: some View {
     HStack(alignment: .top, spacing: 10) {
       StudioIcon("arrow.triangle.branch", size: 15).foregroundStyle(studio.t.secondary)
         .padding(.top, 2)
       VStack(alignment: .leading, spacing: 5) {
         Text("Branched from \(branch.parentTitle)").font(.studio(.label)).lineLimit(1)
-        Text(excerpt)
+        Text(branch.forkExcerpt)
           .font(.studio(.caption)).foregroundStyle(studio.t.secondary).lineLimit(2)
         Button(
           branch.parentArchived

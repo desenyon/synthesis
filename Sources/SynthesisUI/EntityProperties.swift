@@ -288,23 +288,23 @@ struct EntityPropertyCanonSheet: View {
               if let old = review.profile.canonical?.values[field.key],
                 old != review.snapshot.values[field.key]
               {
-                Text("Previously: " + old.summary).font(.studio(.caption)).foregroundStyle(
+                Text("Previously: " + displayValue(old)).font(.studio(.caption)).foregroundStyle(
                   studio.t.secondary)
               }
               Text(field.kind.label + (field.kind == .formula ? " · " + field.formula : ""))
                 .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+              if !review.snapshot.visibleKeys.contains(field.key) {
+                Text("Inactive under the current condition")
+                  .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+              }
               if case .media(let name, _, let raw) = review.snapshot.values[field.key],
                 let data = Data(base64Encoded: raw), let image = NSImage(data: data)
               {
                 Image(nsImage: image).resizable().scaledToFit().frame(maxHeight: 140)
                   .clipShape(RoundedRectangle(cornerRadius: Metric.radius)).accessibilityLabel(name)
               }
-              Text(
-                (try? studio.store.entityValueText(
-                  worldID: studio.worldID, value: review.snapshot.values[field.key] ?? .unknown))
-                  ?? "Unknown"
-              )
-              .font(.studio(size: 14)).fixedSize(horizontal: false, vertical: true)
+              Text(displayValue(review.snapshot.values[field.key] ?? .unknown))
+                .font(.studio(size: 14)).fixedSize(horizontal: false, vertical: true)
             }
           }
           if let old = review.profile.canonical {
@@ -331,6 +331,18 @@ struct EntityPropertyCanonSheet: View {
           close()
         } catch { failure = error.localizedDescription }
       }.buttonStyle(QuietButton(t: studio.t, primary: true))
+    }
+  }
+
+  private func displayValue(_ value: EntityValue) -> String {
+    switch value {
+    case .entity(let id):
+      return (try? studio.store.record(worldID: record.worldID, id: id).title)
+        ?? "Unavailable entity"
+    case .entities(let ids):
+      return ids.isEmpty ? "None" : ids.map { displayValue(.entity($0)) }.joined(separator: "; ")
+    default:
+      return value.summary
     }
   }
 }

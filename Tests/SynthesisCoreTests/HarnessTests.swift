@@ -139,6 +139,48 @@ struct HarnessTests {
       _ = try await CodexTransport(executable: { nil }).generate(request()) { _ in }
     }
   }
+  @Test @MainActor func providerErrorsKeepPrivateOutputOutOfTheConversationAndArchive() async throws
+  {
+    let fake = try script(
+      """
+      cat > /dev/null
+      if [ "$1" = exec ]; then
+        echo 'usage limit PRIVATE_DIAGNOSTIC_SENTINEL' >&2
+      else
+        echo '{"type":"result","is_error":true,"result":"PRIVATE_DIAGNOSTIC_SENTINEL"}'
+      fi
+      exit 1
+      """)
+    defer { try? FileManager.default.removeItem(at: fake.folder) }
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Isolated")
+    let transports: [any ModelTransport] = [
+      CodexTransport(executable: { fake.path }), ClaudeCodeTransport(executable: { fake.path }),
+    ]
+    for transport in transports {
+      let chat = try store.createConversation(worldID: world.id)
+      let engine = AgentEngine(store: store, transport: transport)
+      var activity: [AgentActivity] = []
+      do {
+        try await engine.submit(
+          worldID: world.id, conversationID: chat.id, prompt: "Write a short answer.",
+          preset: "Develop", onActivity: { activity.append($0) }, onDelta: { _ in })
+        Issue.record("The failed harness must throw")
+      } catch {
+        #expect(!error.localizedDescription.contains("PRIVATE_DIAGNOSTIC_SENTINEL"))
+      }
+      let message = try #require(
+        try store.messages(worldID: world.id, conversationID: chat.id).last)
+      #expect(message.role == "system" && message.state == "error")
+      #expect(!message.body.contains("PRIVATE_DIAGNOSTIC_SENTINEL"))
+      #expect(!activity.contains { $0.detail.contains("PRIVATE_DIAGNOSTIC_SENTINEL") })
+    }
+    let archive = String(decoding: try store.exportWorldArchive(worldID: world.id), as: UTF8.self)
+    #expect(!archive.contains("PRIVATE_DIAGNOSTIC_SENTINEL"))
+    let json = String(decoding: try store.exportWorld(world.id), as: UTF8.self)
+    #expect(!json.contains("PRIVATE_DIAGNOSTIC_SENTINEL"))
+  }
+
   @Test func cancellingARequestTerminatesTheHarness() async throws {
     let fake = try script(
       """
@@ -272,8 +314,17 @@ struct HarnessTests {
     )
     #expect(
       claude.signedIn && claude.detail == "Signed in with your Claude subscription · Pro plan")
+    let unrecognizedPlan = ProviderStatus.interpret(
+      .claudeCode,
+      output:
+        #"{"loggedIn":true,"authMethod":"claude.ai","subscriptionType":"PRIVATE_DIAGNOSTIC_SENTINEL"}"#,
+      path: "")
+    #expect(unrecognizedPlan.signedIn)
+    #expect(unrecognizedPlan.detail == "Signed in with your Claude subscription")
     #expect(
       !ProviderStatus.interpret(.claudeCode, output: #"{"loggedIn": false}"#, path: "").signedIn)
+    #expect(
+      !ProviderStatus.interpret(.claudeCode, output: "Logged in using ChatGPT", path: "").signedIn)
     #expect(
       ProviderStatus.interpret(.codex, output: "Logged in using ChatGPT", path: "").detail
         == "Signed in with your ChatGPT subscription")

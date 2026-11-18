@@ -1137,7 +1137,8 @@ public struct Toast: Identifiable {
   }
   /// Appends a lore reference to the composer draft.
   public func reference(_ record: LoreRecord) {
-    let link = "[\(record.title)](synthesis://record/\(record.id))"
+    let link = MentionCodec.markdown(
+      title: record.title, address: MentionCodec.address(for: record))
     persistPendingComposer()
     let base = draft
     draft =

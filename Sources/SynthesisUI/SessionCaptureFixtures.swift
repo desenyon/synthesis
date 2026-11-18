@@ -72,8 +72,9 @@ extension Studio {
       libraryFilter = .entities
       libraryOrder = .title
     }
-    draft = "Explore what Mira remembers about the Glass Sea. Keep it as a draft."
-    pendingComposer = (worldID, draft + " Include the Tidekeepers.", draft)
+    let initialDraft = "Explore what Mira remembers about the Glass Sea. Keep it as a draft."
+    let expectedDraft = initialDraft + " Include the Tidekeepers."
+    draft = initialDraft
     try await Task.sleep(for: .milliseconds(250))
     if state.hasSuffix("canvas") {
       let deadline = Date().addingTimeInterval(10)
@@ -81,26 +82,40 @@ extension Studio {
         try await Task.sleep(for: .milliseconds(50))
       }
       guard canvasLoaded else { throw SynthesisError.invalid("Session Canvas did not load.") }
-      captureCanvasSelection()
-      try await Task.sleep(for: .milliseconds(450))
+      captureCanvasSelection(animate: false)
+      guard await flushCanvas() else {
+        throw SynthesisError.invalid("The original Canvas did not confirm its save.")
+      }
       let snapshot = await canvas().probe()
       let keys: Set<String> = ["selectedRecordIDs", "zoom", "scrollX", "scrollY", "cards"]
       let expected = snapshot.filter { keys.contains($0.key) }
       guard let selected = expected["selectedRecordIDs"] as? [String], !selected.isEmpty else {
         throw SynthesisError.invalid("The original Canvas selection was not committed.")
       }
+      let saved = try store.boards(worldID: worldID, kind: "canvas").first {
+        $0.id == canvas().boardID
+      }
+      let scene = try saved.flatMap { try CanvasBoardContent.decode($0.content).scene }
+      let viewport = scene?["appState"] as? [String: Any] ?? [:]
+      try compareCanvasViewport(expected: expected, actual: viewport, step: "Canvas save")
       try store.setPreference(
         "capture-session-canvas",
         value: String(decoding: JSONSerialization.data(withJSONObject: expected), as: UTF8.self))
     }
-    guard flushEditor(), await flushCanvas(), saveSessionForClose() else {
+    guard flushEditor() else {
+      throw SynthesisError.invalid("Session capture could not save its original workspace.")
+    }
+    if !state.hasSuffix("canvas"), !(await flushCanvas()) {
+      throw SynthesisError.invalid("Session capture could not save its original Canvas.")
+    }
+    pendingComposer = (worldID, expectedDraft, draft)
+    guard saveSessionForClose() else {
       throw SynthesisError.invalid("Session capture could not save its original workspace.")
     }
     let location = navigationLocation
     let graph = graphView
     let timeline = timelineView
     let sources = try store.records(worldID: worldID)
-    let expectedDraft = pendingComposer?.text ?? draft
     sessionSaveTask?.cancel()
     sessionObservation = nil
     let reopened = try Studio(store: store, transport: transport)
@@ -126,11 +141,7 @@ extension Studio {
       let expected = try JSONSerialization.jsonObject(with: Data(raw.utf8)) as? [String: Any]
     else { throw SynthesisError.invalid("Missing Canvas session expectation.") }
     let actual = await canvas().probe()
-    for key in ["zoom", "scrollX", "scrollY"] {
-      guard let before = expected[key] as? Double, let after = actual[key] as? Double,
-        abs(before - after) < 0.01
-      else { throw SynthesisError.invalid("Canvas session changed \(key).") }
-    }
+    try compareCanvasViewport(expected: expected, actual: actual, step: "Canvas restore")
     guard expected["selectedRecordIDs"] as? [String] == actual["selectedRecordIDs"] as? [String],
       let cards = actual["cards"] as? [[String: Any]],
       let oldCards = expected["cards"] as? [[String: Any]], cards.count == oldCards.count
@@ -143,5 +154,19 @@ extension Studio {
       else { throw SynthesisError.invalid("Canvas session moved a stored card.") }
     }
     print("SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards")
+  }
+
+  private func compareCanvasViewport(
+    expected: [String: Any], actual: [String: Any], step: String
+  ) throws {
+    for key in ["zoom", "scrollX", "scrollY"] {
+      let before = expected[key] as? Double
+      let after = actual[key] as? Double
+      guard let before, let after, abs(before - after) < 0.01 else {
+        throw SynthesisError.invalid(
+          "\(step) changed \(key) from \(before.map(String.init(describing:)) ?? "missing") to \(after.map(String.init(describing:)) ?? "missing")."
+        )
+      }
+    }
   }
 }

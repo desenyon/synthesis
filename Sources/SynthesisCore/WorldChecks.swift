@@ -109,7 +109,9 @@ extension WorkspaceStore {
           detail: "A title without a description.", recordIDs: [record.id]))
     }
     findings += relationshipFindings(relations, records: records)
-    findings += timelineFindings(try events(worldID: worldID))
+    findings += timelineFindings(
+      try events(worldID: worldID), placements: try chronologyPlacements(worldID: worldID),
+      lanes: try chronologyLanes(worldID: worldID, includingArchived: true))
     findings += tagFindings(records)
     let order: [WorldFinding.Kind] = [
       .duplicateName, .conflictingRelationship, .timelineOrder, .orphanedEvent, .tagVariant,
@@ -193,13 +195,28 @@ extension WorkspaceStore {
     .joined(separator: " ")
     return (value, era)
   }
-  func timelineFindings(_ events: [WorldEvent]) -> [WorldFinding] {
+  func timelineFindings(
+    _ events: [WorldEvent], placements: [String: String], lanes: [ChronologyLane]
+  ) -> [WorldFinding] {
+    // A period inherits its nearest branch. Keep archived ancestors in the lookup because
+    // archive preserves their placements and children.
+    let children = Dictionary(grouping: lanes, by: \.parentID)
+    var branchByLane: [String: String] = [:]
+    var pending = lanes.filter { $0.kind == "branch" }.map { (laneID: $0.id, branchID: $0.id) }
+    while let entry = pending.popLast() {
+      guard branchByLane[entry.laneID] == nil else { continue }
+      branchByLane[entry.laneID] = entry.branchID
+      for child in children[entry.laneID, default: []] where child.kind != "branch" {
+        pending.append((laneID: child.id, branchID: entry.branchID))
+      }
+    }
     let ordered = events.filter { $0.order != nil }.sorted { $0.order! < $1.order! }
     var findings: [WorldFinding] = []
-    var previous: (event: WorldEvent, date: (value: Double, era: String))?
+    var previous: [String?: (event: WorldEvent, date: (value: Double, era: String))] = [:]
     for event in ordered {
       guard let date = Self.comparableDate(event.dateLabel) else { continue }
-      if let last = previous, last.date.era == date.era, last.date.value > date.value {
+      let branch = placements[event.id].flatMap { branchByLane[$0] }
+      if let last = previous[branch], last.date.era == date.era, last.date.value > date.value {
         findings.append(
           WorldFinding(
             id: "timeline-order:\(last.event.id):\(event.id)", kind: .timelineOrder,
@@ -208,7 +225,7 @@ extension WorkspaceStore {
               "“\(last.event.title)” (\(last.event.dateLabel)) comes before “\(event.title)” (\(event.dateLabel)) in your Timeline order.",
             recordIDs: [last.event.sourceID, event.sourceID].filter { !$0.isEmpty }))
       }
-      previous = (event, date)
+      previous[branch] = (event, date)
     }
     return findings
   }

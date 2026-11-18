@@ -43,19 +43,21 @@ extension WorkspaceStore {
       // the content so only an identical submission counts as a retry.
       let digest = SHA256.hash(data: Data(body.utf8)).map { String(format: "%02x", $0) }.joined()
       let receiptKey = "quick-capture-receipt:\(worldID):\(draft.id):\(digest)"
+      let captured: LoreRecord
       if let recordID = try preference(receiptKey) {
-        return try record(worldID: worldID, id: recordID)
+        captured = try record(worldID: worldID, id: recordID)
+      } else {
+        let firstLine = body.split(whereSeparator: \.isNewline).first.map(String.init) ?? body
+        let title = String(firstLine.prefix(70))
+        captured = try createRecord(
+          worldID: worldID, title: title, body: body, kind: "capture", category: "Ideas")
+        try setPreference(receiptKey, value: captured.id)
       }
-      let firstLine = body.split(whereSeparator: \.isNewline).first.map(String.init) ?? body
-      let title = String(firstLine.prefix(70))
-      let record = try createRecord(
-        worldID: worldID, title: title, body: body, kind: "capture", category: "Ideas")
-      try setPreference(receiptKey, value: record.id)
       // Do not erase a newer scratch draft if this is a delayed retry.
       if try quickCaptureDraft(worldID: worldID) == draft {
         try setPreference("quick-capture:\(worldID)", value: "")
       }
-      return record
+      return captured
     }
   }
 }

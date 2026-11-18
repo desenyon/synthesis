@@ -70,6 +70,7 @@ import Testing
     session.canvasID = "gone-board"
     session.conversationID = "gone-chat"
     session.timelineLane = "gone-lane"
+    session.timeline.foldedEras = ["gone-lane", "unplaced"]
     session.editorPositions = [foreign.id: EditorPosition(location: 5, length: 10, scrollY: 0)]
     try studio.store.archiveRecord(worldID: studio.worldID, id: gone.id)
     try studio.store.setPreference(
@@ -81,6 +82,7 @@ import Testing
     #expect(restored.graphSelectedID == nil && restored.canvasBoardID == nil)
     #expect(restored.conversationID == nil && restored.timelineLaneID == nil)
     #expect(restored.graphView.positions.count == 1 && restored.graphView.zoom == 2.2)
+    #expect(restored.timelineView.foldedEras == ["unplaced"])
     #expect(restored.editorPositions.isEmpty && restored.error == nil)
   }
 

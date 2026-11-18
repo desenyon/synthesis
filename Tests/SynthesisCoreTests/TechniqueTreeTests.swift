@@ -44,6 +44,45 @@ struct TechniqueTreeTests {
     #expect(try store.prerequisites(worldID: world.id, systemID: system.id).count == 1)
   }
 
+  @Test func dormantPrerequisitesPreventLoopsAndSurviveEdits() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Tree")
+    let system = try store.createRecord(
+      worldID: world.id, title: "Remembrance", kind: "entity", category: "Power systems")
+    func step(_ title: String) throws -> WorldRule {
+      try store.addRule(
+        worldID: world.id, systemID: system.id, kind: .technique, title: title, body: "Original")
+    }
+    let a = try step("Recall")
+    let b = try step("Tide sight")
+    let c = try step("Drowned chart")
+    try store.setPrerequisites(worldID: world.id, ruleID: a.id, requires: [b.id])
+    try store.setPrerequisites(worldID: world.id, ruleID: b.id, requires: [c.id])
+    try store.setRuleArchived(worldID: world.id, id: b.id, archived: true)
+    #expect(try store.prerequisites(worldID: world.id, systemID: system.id).isEmpty)
+
+    #expect(throws: SynthesisError.self) {
+      try store.setPrerequisites(worldID: world.id, ruleID: c.id, requires: [a.id])
+    }
+    #expect(throws: SynthesisError.self) {
+      try store.setPrerequisites(worldID: world.id, ruleID: b.id, requires: [])
+    }
+    #expect(throws: SynthesisError.self) {
+      try store.setPrerequisites(worldID: world.id, ruleID: c.id, requires: [b.id])
+    }
+    // The editor submits only visible prerequisites. Text edits must retain dormant edges.
+    _ = try store.saveRule(
+      worldID: world.id, systemID: system.id, existing: a, kind: .technique,
+      title: a.title, body: "Edited", requires: [])
+    try store.setRuleArchived(worldID: world.id, id: b.id, archived: false)
+    let edges = Set(try store.prerequisites(worldID: world.id, systemID: system.id))
+    #expect(
+      edges == [
+        RulePrerequisite(ruleID: a.id, requiresID: b.id),
+        RulePrerequisite(ruleID: b.id, requiresID: c.id),
+      ])
+  }
+
   @Test func saveRuleIsAtomicAndTreeSurvivesPortableCopy() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Tree")

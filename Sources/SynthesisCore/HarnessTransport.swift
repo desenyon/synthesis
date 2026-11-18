@@ -201,10 +201,10 @@ public struct ClaudeCodeTransport: ModelTransport {
         "Claude Code is not signed in. Open Terminal, run `claude`, sign in with your subscription, then send again. Your message is saved."
     }
     if lower.contains("limit") {
-      return "Claude Code reports a usage limit: \(message.prefix(200)). Your message is saved."
+      return "Claude Code reports a usage limit. Check your subscription allowance and send again."
     }
-    return
-      "Claude Code could not finish this response: \(message.prefix(240)). Your message is saved."
+    // Error events and stderr can echo a prompt, credentials, or private paths.
+    return "Claude Code could not finish this response. Your message is saved. Try again."
   }
   public func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
@@ -291,7 +291,10 @@ public struct CodexTransport: ModelTransport {
       return
         "Codex is not signed in. Open Terminal, run `codex login`, sign in with your subscription, then send again. Your message is saved."
     }
-    return "Codex could not finish this response: \(message.prefix(240)). Your message is saved."
+    if lower.contains("usage limit") || lower.contains("quota") {
+      return "Codex reports a usage limit. Check your subscription allowance and send again."
+    }
+    return "Codex could not finish this response. Your message is saved. Try again."
   }
   public func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
@@ -415,18 +418,24 @@ public struct ProviderStatus: Equatable, Sendable {
   public static func interpret(_ kind: ProviderKind, output: String, path: String)
     -> ProviderStatus
   {
-    if kind == .claudeCode,
+    if kind == .claudeCode {
       let object = (try? JSONSerialization.jsonObject(with: Data(output.utf8))) as? [String: Any]
-    {
-      let signedIn =
-        object["loggedIn"] as? Bool == true && object["authMethod"] as? String == "claude.ai"
-      let plan = (object["subscriptionType"] as? String).map { " · \($0.capitalized) plan" } ?? ""
-      let method = object["authMethod"] as? String ?? ""
+      guard object?["loggedIn"] as? Bool == true, object?["authMethod"] as? String == "claude.ai"
+      else {
+        return ProviderStatus(
+          installed: true, signedIn: false, detail: "Not signed in — run `claude` in Terminal")
+      }
+      let plan: String
+      switch (object?["subscriptionType"] as? String)?.lowercased() {
+      case "pro": plan = " · Pro plan"
+      case "max": plan = " · Max plan"
+      case "team": plan = " · Team plan"
+      case "enterprise": plan = " · Enterprise plan"
+      default: plan = ""
+      }
       return ProviderStatus(
-        installed: true, signedIn: signedIn,
-        detail: signedIn
-          ? "Signed in\(method == "claude.ai" ? " with your Claude subscription" : "")\(plan)"
-          : "Not signed in — run `claude` in Terminal")
+        installed: true, signedIn: true,
+        detail: "Signed in with your Claude subscription\(plan)")
     }
     let lower = output.lowercased()
     let signedIn =
@@ -435,8 +444,8 @@ public struct ProviderStatus: Equatable, Sendable {
     return ProviderStatus(
       installed: true, signedIn: signedIn,
       detail: signedIn
-        ? (lower.contains("chatgpt") ? "Signed in with your ChatGPT subscription" : "Signed in")
-        : "Not signed in — run `\(kind == .codex ? "codex login" : "claude")` in Terminal")
+        ? "Signed in with your ChatGPT subscription"
+        : "Not signed in — run `codex login` in Terminal")
   }
 }
 private actor OutputBuffer {

@@ -70,8 +70,8 @@ struct EditorScreen: View {
   @State private var writingPrompt: String?
   @State private var editingRule: WorldRule?
   @State private var ruleSheet = false
-  private var tab: RecordPageTab {
-    get { studio.recordTabs[record.id] ?? .overview }
+  var tab: RecordPageTab {
+    get { studio.focusMode ? .overview : (studio.recordTabs[record.id] ?? .overview) }
     nonmutating set { studio.recordTabs[record.id] = newValue }
   }
   private var mechanicsVisible: Bool { tab == .mechanics }

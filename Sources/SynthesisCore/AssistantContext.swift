@@ -152,8 +152,8 @@ extension WorkspaceStore {
     let (referenceSources, excludedAddresses) = try assistantReferences(
       in: prompt, worldID: worldID, excludedRecords: excluded, excludedHistory: excludedHistory,
       approvedRecords: approvedRecords)
-    let providerPrompt = Self.assistantPrompt(
-      prompt, excluding: excludedAddresses, excludingRecordIDs: excluded,
+    let providerPrompt = try assistantPrompt(
+      prompt, worldID: worldID, excluding: excludedAddresses, excludingRecordIDs: excluded,
       approvedRecords: approvedRecords)
     let referenceRecordIDs = referenceSources.flatMap(\.recordIDs).filter { byID[$0] != nil }
     let referenceBoardIDs = referenceSources.filter { $0.reference.kind == .board }.map {
@@ -347,6 +347,17 @@ extension WorkspaceStore {
             excerpt: "", state: "canon", recordIDs: [record.id], boardKind: nil,
             originRecordIDs: []))
         continue
+      }
+      if reference.kind == .proposal,
+        !excludedRecords.isEmpty || !excludedHistory.laneIDs.isEmpty
+      {
+        let prior = try proposal(worldID: worldID, id: reference.id)
+        // Earlier answers may use index entries and conversation text without excerpt IDs.
+        // Do not re-share their generated proposal text when any explicit exclusion is set.
+        if prior.messageID != nil && !prior.isBranchMerge {
+          excluded.insert(reference)
+          continue
+        }
       }
       let source = try resolveReference(reference, worldID: worldID)
       if excludedRecords.isDisjoint(with: source.exclusionRecordIDs) {

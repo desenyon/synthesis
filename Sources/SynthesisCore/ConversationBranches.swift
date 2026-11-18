@@ -100,9 +100,31 @@ extension WorkspaceStore {
         conversationID: $0["conversation_id"]!, worldID: worldID, title: $0["title"]!,
         parentConversationID: $0["parent_conversation_id"]!, parentTitle: $0["parent_title"]!,
         forkMessageID: $0["fork_message_id"]!,
-        forkExcerpt: String(($0["fork_body"] ?? "").prefix(180)),
+        forkExcerpt: branchExcerpt($0["fork_body"] ?? ""),
         parentArchived: $0["parent_archived"] == "1", archived: $0["archived"] == "1",
         createdAt: $0["created_at"]!)
     }
+  }
+
+  private func branchExcerpt(_ body: String) -> String {
+    let plain: String
+    if let markdown = try? AttributedString(markdown: body) {
+      var blocks: [String] = []
+      var current = ""
+      var intent: PresentationIntent?
+      for run in markdown.runs {
+        if run.presentationIntent != intent {
+          if !current.isEmpty { blocks.append(current) }
+          current = ""
+          intent = run.presentationIntent
+        }
+        current += String(markdown[run.range].characters)
+      }
+      blocks.append(current)
+      plain = blocks.joined(separator: " ")
+    } else {
+      plain = body
+    }
+    return String(plain.split(whereSeparator: \.isWhitespace).joined(separator: " ").prefix(180))
   }
 }

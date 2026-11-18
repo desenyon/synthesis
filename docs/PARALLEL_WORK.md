@@ -1,5 +1,9 @@
 # Parallel expansion work — 2026-11-17
 
+## Mac continuation
+
+The current runtime accepted more than four agents with the existing configuration. Two coordinators mapped dependencies and acceptance, specialist owners audited the remaining items and drafted scoped patches, and independent checkers covered data, assistant boundaries, Canvas, and native appearance at each size. Workers used waves of disjoint assignments. The root serialized compilation, packaging, capture and source integration. The [dependency map](EXPANSION_DEPENDENCIES.md) records ownership and gates for #71–394 and the additional acceptance items.
+
 The owner authorized parallel workers, coordinators, and independent checkers. This supersedes the earlier requirement to implement in numerical sequence; all 394 acceptance entries still require individual evidence.
 
 ## Saved ownership — all workers stopped for the requested handoff

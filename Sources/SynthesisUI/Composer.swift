@@ -85,7 +85,7 @@ struct UnifiedComposer: View {
     }
     .popover(isPresented: $referencePicker) {
       SearchableRecordPicker(records: studio.records, t: studio.t) { record in
-        handle.insertReference(title: record.title, id: record.id)
+        handle.insertReference(record)
         referencePicker = false
       }
     }
@@ -435,7 +435,7 @@ struct UnifiedComposer: View {
     guard matches.indices.contains(mentionIndex) else { return }
     let record = matches[mentionIndex]
     mentionQuery = nil
-    handle.insertReference(title: record.title, id: record.id, replacingQuery: true)
+    handle.insertReference(record, replacingQuery: true)
   }
   private func mentionKey(_ key: ComposerTextView.MentionKey) -> Bool {
     let count = mentionMatches.count

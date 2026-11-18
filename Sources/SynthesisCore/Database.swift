@@ -58,20 +58,31 @@ final class Database {
             BoardActivity.changed(String(cString: old), String(cString: new)) ? 1 : 0)
         }, nil, nil, nil) == SQLITE_OK
     else { throw failure() }
+    let appFolder = Bundle.main.resourceURL?.appendingPathComponent("Migrations")
+    let folder =
+      appFolder.flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil } ?? Bundle
+      .module.url(forResource: "Migrations", withExtension: nil)!
+    let migrations = try FileManager.default.contentsOfDirectory(
+      at: folder, includingPropertiesForKeys: nil
+    ).filter { $0.pathExtension == "sql" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+    let knownMigrations = Set(migrations.map(\.lastPathComponent))
+    if try !rows(
+      "SELECT 1 FROM sqlite_master WHERE type='table' AND name='schema_migrations'"
+    ).isEmpty {
+      let appliedMigrations = try rows("SELECT name FROM schema_migrations")
+      guard appliedMigrations.allSatisfy({ $0["name"].map(knownMigrations.contains) == true })
+      else {
+        throw SynthesisError.invalid(
+          "This workspace requires a newer Synthesis version. Open it with the version that last saved it or a later version."
+        )
+      }
+    }
     try execute("PRAGMA foreign_keys=ON")
     try execute("PRAGMA journal_mode=WAL")
     try execute(
       "CREATE TABLE IF NOT EXISTS schema_migrations(name TEXT PRIMARY KEY,applied_at TEXT NOT NULL)"
     )
-    let appFolder = Bundle.main.resourceURL?.appendingPathComponent("Migrations")
-    let folder =
-      appFolder.flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil } ?? Bundle
-      .module.url(forResource: "Migrations", withExtension: nil)!
-    for file in try FileManager.default.contentsOfDirectory(
-      at: folder, includingPropertiesForKeys: nil
-    ).filter({ $0.pathExtension == "sql" }).sorted(by: {
-      $0.lastPathComponent < $1.lastPathComponent
-    }) {
+    for file in migrations {
       if try rows("SELECT name FROM schema_migrations WHERE name=?", [file.lastPathComponent])
         .isEmpty
       {

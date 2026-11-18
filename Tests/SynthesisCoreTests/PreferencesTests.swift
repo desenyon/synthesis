@@ -62,6 +62,31 @@ struct PreferencesTests {
     #expect(try store.worldPreferences(worldID: legacyWorld.id) == WorldPreferences())
   }
 
+  @Test func aNewerDatabaseIsRejectedWhileItsWorldDataRemainsIntact() throws {
+    let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let path = folder.appendingPathComponent("workspace.sqlite").path
+    let store = try WorkspaceStore(path: path)
+    let world = try store.createWorld(name: "Preserve this world")
+    let record = try store.createRecord(worldID: world.id, title: "Preserve this record")
+    let future = "9999_future_settings.sql"
+    try store.db.execute(
+      "INSERT INTO schema_migrations VALUES(?,?)", [future, "2026-11-17"])
+    let applied = try store.db.rows("SELECT * FROM schema_migrations ORDER BY name")
+
+    do {
+      _ = try WorkspaceStore(path: path)
+      Issue.record("Opened a workspace with an unsupported migration.")
+    } catch SynthesisError.invalid(let message) {
+      #expect(message.contains("newer Synthesis version"))
+    }
+    #expect(try store.db.rows("SELECT * FROM schema_migrations ORDER BY name") == applied)
+    #expect(try store.record(worldID: world.id, id: record.id) == record)
+
+    try store.db.execute("DELETE FROM schema_migrations WHERE name=?", [future])
+    #expect(try WorkspaceStore(path: path).record(worldID: world.id, id: record.id) == record)
+  }
+
   @Test func invalidWorldDefaultsRollBackImport() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Aster")

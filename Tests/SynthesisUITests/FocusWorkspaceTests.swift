@@ -81,6 +81,58 @@ import Testing
     #expect(!studio.focusMode)
   }
 
+  @Test(arguments: ["properties", "mechanics", "sections"])
+  func focusShowsWritingFromStructuredTabsAndRestoresTheOriginalTab(_ tabName: String)
+    async throws
+  {
+    let tab = try #require(RecordPageTab(rawValue: tabName))
+    _ = NSApplication.shared
+    let studio = try Studio(store: WorkspaceStore(path: ":memory:"))
+    studio.sheet = nil
+    studio.setMode(.manual)
+    let record = try studio.store.createRecord(
+      worldID: studio.worldID, title: "Mira Vale", body: "The sea remembers.", kind: "entity",
+      category: "Characters")
+    try studio.reload()
+    studio.openRecord(record)
+    studio.openRecordTab(tab, recordID: record.id)
+    let location = studio.navigationLocation
+    let editor = EditorScreen(studio: studio, record: record)
+    let host = NSHostingView(rootView: editor)
+    host.frame = CGRect(x: 0, y: 0, width: 900, height: 700)
+    host.layoutSubtreeIfNeeded()
+    let handle = studio.editorHandle(for: record)
+    #expect(handle.view == nil)
+
+    studio.toggleFocusMode()
+    try await waitForLayout(host) { handle.scrollView?.isDescendant(of: host) == true }
+    let view = try #require(handle.view)
+    #expect(studio.focusMode && view.string == record.body)
+    #expect(studio.recordTabs[record.id] == tab && studio.navigationLocation == location)
+    view.setSelectedRange(NSRange(location: 0, length: 3))
+
+    studio.toggleFocusMode()
+    #expect(editor.tab == tab)
+    #expect(!studio.focusMode && studio.recordTabs[record.id] == tab)
+    #expect(studio.navigationLocation == location && studio.mode == .manual)
+
+    studio.toggleFocusMode()
+    try await waitForLayout(host) { handle.scrollView?.isDescendant(of: host) == true }
+    #expect(handle.view === view && view.selectedRange() == NSRange(location: 0, length: 3))
+    #expect(try studio.store.record(worldID: studio.worldID, id: record.id) == record)
+  }
+
+  private func waitForLayout(_ host: NSView, until condition: () -> Bool) async throws {
+    let clock = ContinuousClock()
+    let deadline = clock.now.advanced(by: .seconds(2))
+    repeat {
+      host.layoutSubtreeIfNeeded()
+      if condition() { return }
+      try await Task.sleep(for: .milliseconds(10))
+    } while clock.now < deadline
+    #expect(condition())
+  }
+
   @Test func nativeWritingKeepsItsEditorCaretUndoAndSaveCallbackThroughFocus() async throws {
     _ = NSApplication.shared
     let studio = try Studio(store: WorkspaceStore(path: ":memory:"))

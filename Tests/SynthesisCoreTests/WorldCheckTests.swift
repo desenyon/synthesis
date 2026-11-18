@@ -41,6 +41,40 @@ struct WorldCheckTests {
     #expect(WorkspaceStore.comparableDate("unknown") == nil)
   }
 
+  @Test func timelineOrderFindingsStayWithinEachHistoryIncludingArchivedAncestors() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Alternate histories")
+    let source = try store.createRecord(worldID: world.id, title: "Annals")
+    let first = try store.createChronologyLane(
+      worldID: world.id, name: "First path", kind: "branch")
+    let second = try store.createChronologyLane(
+      worldID: world.id, name: "Second path", kind: "branch")
+    let period = try store.createChronologyLane(
+      worldID: world.id, name: "Period", kind: "period", parentID: first.id)
+
+    func add(_ title: String, year: Int, order: Int, laneID: String? = nil) throws -> WorldEvent {
+      try store.saveChronologyEvent(
+        worldID: world.id, id: nil, title: title, date: "Year \(year) AE", source: source.id,
+        order: order, laneID: laneID)
+    }
+
+    _ = try add("Opening", year: 1, order: 1)
+    let later = try add("Founding", year: 120, order: 2, laneID: first.id)
+    _ = try add("Second path's opening", year: 40, order: 3, laneID: second.id)
+    let earlier = try add("Drowning", year: 30, order: 4, laneID: period.id)
+    _ = try add("Second path's end", year: 90, order: 5, laneID: second.id)
+    _ = try add("Closing", year: 2, order: 6)
+
+    func findingIDs() throws -> [String] {
+      try store.worldChecks(worldID: world.id).filter { $0.kind == .timelineOrder }.map(\.id)
+    }
+
+    let expected = ["timeline-order:\(later.id):\(earlier.id)"]
+    #expect(try findingIDs() == expected)
+    try store.setChronologyLaneArchived(worldID: world.id, id: first.id, archived: true)
+    #expect(try findingIDs() == expected)
+  }
+
   @Test func tagVariantsMergeAsRevisionsAndUndoRestoresThem() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Tags")

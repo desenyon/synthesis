@@ -69,6 +69,8 @@ struct GraphViewState: Codable, Equatable {
 }
 
 struct TimelineViewState: Codable, Equatable {
+  static let unplacedEraID = "unplaced"
+
   var density = TimelineDensity.detailed
   var foldedLanes: Set<String> = []
   var foldedEras: Set<String> = []
@@ -191,7 +193,7 @@ extension Studio {
     timelineView = session.timeline
     let lanes = Set(contextLanes.map(\.id))
     timelineView.foldedLanes.formIntersection(lanes)
-    timelineView.foldedEras.formIntersection(lanes.union([""]))
+    timelineView.foldedEras.formIntersection(lanes.union([TimelineViewState.unplacedEraID]))
     timelineView.query = String(timelineView.query.prefix(2000))
     conversationID = session.conversationID.flatMap { id in
       conversations.contains { $0.id == id } ? id : nil

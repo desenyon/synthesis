@@ -394,7 +394,7 @@ export function App() {
         s.relations = relations;
         synchronise();
       },
-      addCards(ids: string[]) {
+      addCards(ids: string[], animateReveal = true) {
         const added: El[] = [];
         const existing: El[] = api.getSceneElements();
         const selected: Record<string, true> = {};
@@ -419,7 +419,11 @@ export function App() {
         });
         synchronise();
         const targets = api.getSceneElements().filter((e: El) => selected[e.id]);
-        if (targets.length) api.scrollToContent(targets, { fitToContent: false, animate: true });
+        if (targets.length) {
+          const reveal = () => api.scrollToContent(targets, { fitToContent: false, animate: animateReveal });
+          if (animateReveal) reveal();
+          else flushSync(reveal);
+        }
         onChange();
       },
       /** Place a real record at a native drop point without panning or cloning its lore. */

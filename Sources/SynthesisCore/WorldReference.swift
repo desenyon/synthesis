@@ -85,12 +85,11 @@ public struct WorldReferenceSource: Equatable, Sendable {
 
   public var markdown: String { Self.markdown(title: title, url: reference.url) }
 
-  static func markdown(title: String, url: URL) -> String {
-    let label = title.replacingOccurrences(of: "\\", with: "\\\\")
+  public static func markdown(title: String, url: URL) -> String {
+    let label = String(title.map { $0.isNewline ? " " : $0 })
+      .replacingOccurrences(of: "\\", with: "\\\\")
       .replacingOccurrences(of: "[", with: "\\[")
       .replacingOccurrences(of: "]", with: "\\]")
-      .replacingOccurrences(of: "\n", with: " ")
-      .replacingOccurrences(of: "\r", with: " ")
     return "[\(label)](\(url.absoluteString))"
   }
 }
@@ -242,15 +241,17 @@ extension WorkspaceStore {
 
   /// App-created inline references include a source label. Filter the entire link when its
   /// source is excluded, retaining the surrounding prose and original local message.
-  static func assistantPrompt(
-    _ text: String, excluding references: Set<WorldReference>, excludingRecordIDs: Set<String>,
-    approvedRecords: [String: LoreRecord]? = nil
-  ) -> String {
+  func assistantPrompt(
+    _ text: String, worldID: String, excluding references: Set<WorldReference>,
+    excludingRecordIDs: Set<String>, approvedRecords: [String: LoreRecord]? = nil
+  ) throws -> String {
     guard !references.isEmpty || !excludingRecordIDs.isEmpty || approvedRecords != nil else {
       return text
     }
     let hidden = "[Excluded source]"
-    let replacements = referenceLinks(in: text).compactMap { link -> (NSRange, String)? in
+    let source = text as NSString
+    var knownTitles: [String: [String]] = [:]
+    let replacements = try Self.referenceLinks(in: text).compactMap { link -> (NSRange, String)? in
       let recordID: String
       if let reference = try? WorldReference(url: link.url) {
         if references.contains(reference) { return (link.range, hidden) }
@@ -261,14 +262,39 @@ extension WorkspaceStore {
       } else {
         return approvedRecords == nil ? nil : (link.range, hidden)
       }
-      if excludingRecordIDs.contains(recordID) { return (link.range, hidden) }
-      guard let approvedRecords else { return nil }
-      guard let record = approvedRecords[recordID] else { return (link.range, hidden) }
-      return (link.range, WorldReferenceSource.markdown(title: record.title, url: link.url))
+      let isExcluded = excludingRecordIDs.contains(recordID)
+      guard isExcluded || approvedRecords != nil else { return nil }
+      var range = link.range
+      if link.url.host == "record" {
+        if knownTitles[recordID] == nil {
+          knownTitles[recordID] = try db.rows(
+            """
+            SELECT title FROM records WHERE world_id=? AND id=?
+            UNION
+            SELECT CASE WHEN json_valid(snapshot) THEN json_extract(snapshot,'$.title') END AS title
+            FROM native_revisions WHERE world_id=? AND record_id=?
+            """, [worldID, recordID, worldID, recordID]
+          ).compactMap { $0["title"] }
+        }
+        // Older composer actions inserted the raw title. Match saved or historical titles
+        // exactly so nested brackets do not leave a partial label outside the redaction.
+        let end = NSMaxRange(link.addressRange) + 1
+        for title in knownTitles[recordID, default: []] {
+          let candidate = "[\(title)](\(link.url.absoluteString))"
+          let length = candidate.utf16.count
+          guard length > range.length, length <= end, end <= source.length else { continue }
+          let full = NSRange(location: end - length, length: length)
+          if source.substring(with: full) == candidate { range = full }
+        }
+      }
+      guard !isExcluded, let record = approvedRecords?[recordID] else { return (range, hidden) }
+      return (range, WorldReferenceSource.markdown(title: record.title, url: link.url))
     }
     let result = NSMutableString(string: text)
-    for (range, replacement) in replacements.reversed() {
+    var remainingEnd = source.length
+    for (range, replacement) in replacements.reversed() where NSMaxRange(range) <= remainingEnd {
       result.replaceCharacters(in: range, with: replacement)
+      remainingEnd = range.location
     }
     return result as String
   }
@@ -280,21 +306,24 @@ extension WorkspaceStore {
     pattern: #"\[(?:\\[\s\S]|[^\[\]\\])*\]\((\#(referenceAddressPattern))\)"#
       + #"|(\#(referenceAddressPattern))"#)
 
-  private static func referenceLinks(in text: String) -> [(url: URL, range: NSRange)] {
+  private static func referenceLinks(in text: String)
+    -> [(url: URL, range: NSRange, addressRange: NSRange)]
+  {
     let source = text as NSString
     let range = NSRange(location: 0, length: source.length)
     return (referenceLinkPattern?.matches(in: text, range: range) ?? []).compactMap { match in
       let inlineAddress = match.range(at: 1)
       let address = inlineAddress.location == NSNotFound ? match.range(at: 2) : inlineAddress
       guard let url = URL(string: source.substring(with: address)) else { return nil }
-      return (url, match.range)
+      return (url, match.range, address)
     }
   }
 
   private static func uniqueWorldReferences(in text: String, limit: Int) -> [WorldReference] {
     var seen = Set<WorldReference>()
     var references: [WorldReference] = []
-    for (url, _) in referenceLinks(in: text) {
+    for link in referenceLinks(in: text) {
+      let url = link.url
       guard let reference = try? WorldReference(url: url), seen.insert(reference).inserted else {
         continue
       }

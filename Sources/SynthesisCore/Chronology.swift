@@ -170,3 +170,21 @@ extension WorkspaceStore {
     }
   }
 }
+
+/// The portable source uses creation order, but edits may assign a later-created parent.
+/// Order the complete forest, including archived ancestors, for SQLite's immediate FKs.
+func chronologyLanesInImportOrder(_ rows: [[String: String]]) throws -> [[String: String]] {
+  var children = Dictionary(grouping: rows) { $0["parent_id"] }
+  var ordered = children.removeValue(forKey: nil) ?? []
+  var index = 0
+  while index < ordered.count {
+    if let id = ordered[index]["id"], let descendants = children.removeValue(forKey: id) {
+      ordered.append(contentsOf: descendants)
+    }
+    index += 1
+  }
+  guard ordered.count == rows.count else {
+    throw SynthesisError.invalid("The world file contains a missing or cyclic history parent.")
+  }
+  return ordered
+}

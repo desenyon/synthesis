@@ -211,6 +211,7 @@ extension WorkspaceStore {
       guard try !isArchived(worldID: worldID, recordID: recordID) else {
         throw SynthesisError.invalid("Restore the entity before accepting its properties.")
       }
+      try validateEntitySnapshot(worldID: worldID, snapshot: review.snapshot)
       try db.execute(
         "UPDATE entity_profiles SET canonical_json=?,version=version+1,updated_at=? WHERE world_id=? AND id=?",
         [try schemaJSON(review.snapshot), timestamp(), worldID, confirmedProfileID])

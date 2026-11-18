@@ -359,7 +359,7 @@ extension WorkspaceStore {
 }
 
 extension WorkspaceStore {
-  private func activeRule(worldID: String, id: String) throws -> WorldRule {
+  func activeRule(worldID: String, id: String) throws -> WorldRule {
     let current = try rule(worldID: worldID, id: id)
     guard try !isArchived(worldID: worldID, recordID: current.systemID),
       try !db.rows("SELECT id FROM rules WHERE world_id=? AND id=? AND archived=0", [worldID, id])

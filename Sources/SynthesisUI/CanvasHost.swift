@@ -298,10 +298,21 @@ struct CanvasBoardContent {
 
   // MARK: Commands
 
-  var dropSessionID: String? { loaded && writable ? loadID : nil }
+  var dropSessionID: String? {
+    // Studio selects the destination before the outgoing engine finishes saving.
+    guard loaded, writable, studio.destination == .canvas, studio.selectedRecord == nil,
+      worldID == studio.worldID, let boardID,
+      studio.canvasBoardID == nil || studio.canvasBoardID == boardID
+    else { return nil }
+    return loadID
+  }
+
+  private func canDrop(on boardID: String, sessionID: String) -> Bool {
+    self.boardID == boardID && dropSessionID == sessionID
+  }
 
   var boardReference: WorldReference? {
-    guard let boardID, loaded, worldID == studio.worldID else { return nil }
+    guard dropSessionID != nil, let boardID else { return nil }
     return WorldReference(worldID: worldID, kind: .board, id: boardID)
   }
 
@@ -316,22 +327,20 @@ struct CanvasBoardContent {
   func drop(_ record: LoreRecord, at point: CGPoint, boardID: String, sessionID: String)
     async throws
   {
-    guard loaded, writable, worldID == studio.worldID, record.worldID == worldID,
-      self.boardID == boardID, loadID == sessionID, point.x.isFinite, point.y.isFinite,
-      webView.bounds.contains(point)
+    guard canDrop(on: boardID, sessionID: sessionID), record.worldID == worldID,
+      point.x.isFinite, point.y.isFinite, webView.bounds.contains(point)
     else { throw SynthesisError.invalid("This canvas changed. Drag the record again.") }
     sync()
     let accepted = try await webView.callAsyncJavaScript(
       "return window.synthesis.dropCard(id, x, y, sessionID)",
       arguments: ["id": record.id, "x": point.x, "y": point.y, "sessionID": sessionID],
       in: nil, contentWorld: .page)
-    guard accepted as? Bool == true, self.boardID == boardID, loadID == sessionID,
-      worldID == studio.worldID
+    guard accepted as? Bool == true, canDrop(on: boardID, sessionID: sessionID)
     else { throw SynthesisError.invalid("The record could not be placed on this canvas.") }
     guard await flush() else {
       throw SynthesisError.invalid(failure ?? "The record placement could not be saved.")
     }
-    guard self.boardID == boardID, loadID == sessionID, worldID == studio.worldID else {
+    guard canDrop(on: boardID, sessionID: sessionID) else {
       throw SynthesisError.invalid("The canvas changed before its save completed.")
     }
   }
@@ -339,9 +348,8 @@ struct CanvasBoardContent {
   func drop(_ source: WorldReferenceSource, at point: CGPoint, boardID: String, sessionID: String)
     async throws
   {
-    guard loaded, writable, worldID == studio.worldID, source.reference.worldID == worldID,
-      self.boardID == boardID, loadID == sessionID, point.x.isFinite, point.y.isFinite,
-      webView.bounds.contains(point)
+    guard canDrop(on: boardID, sessionID: sessionID), source.reference.worldID == worldID,
+      point.x.isFinite, point.y.isFinite, webView.bounds.contains(point)
     else { throw SynthesisError.invalid("This canvas changed. Drag the reference again.") }
     let current = try studio.store.resolveReference(source.reference, worldID: worldID)
     if current.reference.kind == .record {
@@ -358,13 +366,12 @@ struct CanvasBoardContent {
       "return window.synthesis.dropReference(reference, x, y, sessionID)",
       arguments: ["reference": payload, "x": point.x, "y": point.y, "sessionID": sessionID],
       in: nil, contentWorld: .page)
-    guard accepted as? Bool == true, self.boardID == boardID, loadID == sessionID,
-      worldID == studio.worldID
+    guard accepted as? Bool == true, canDrop(on: boardID, sessionID: sessionID)
     else { throw SynthesisError.invalid("The reference could not be placed on this canvas.") }
     guard await flush() else {
       throw SynthesisError.invalid(failure ?? "The reference placement could not be saved.")
     }
-    guard self.boardID == boardID, loadID == sessionID, worldID == studio.worldID else {
+    guard canDrop(on: boardID, sessionID: sessionID) else {
       throw SynthesisError.invalid("The canvas changed before its save completed.")
     }
   }
@@ -400,7 +407,7 @@ struct CanvasBoardContent {
     }
   }
 
-  func add(_ records: [LoreRecord]) {
+  func add(_ records: [LoreRecord], animateReveal: Bool = true) {
     let ids = records.filter { $0.worldID == worldID }.map(\.id)
     guard !ids.isEmpty else { return }
     guard loaded else {
@@ -410,13 +417,13 @@ struct CanvasBoardContent {
     // A newly saved entity may not exist in the engine's last record snapshot yet.
     // WebKit queues these calls in order; sync the shared model before placing its card.
     sync()
-    call("addCards", [ids])
+    call("addCards", [ids, animateReveal])
   }
   /// Places a record on the open board (or selects its card) and brings it into view. If the
   /// board is still loading the request waits for it.
-  func reveal(_ record: LoreRecord) {
+  func reveal(_ record: LoreRecord, animate: Bool = true) {
     if loaded, worldID == studio.worldID {
-      add([record])
+      add([record], animateReveal: animate)
     } else {
       pendingReveal.append(record.id)
     }
@@ -583,6 +590,16 @@ struct CanvasBoardContent {
       studio.toast = nil
     } else {
       checks.append("FAIL missing linked card for reviewed placement audit")
+    }
+    do {
+      let previousSelection = studio.canvasBoardID
+      defer { studio.canvasBoardID = previousSelection }
+      // Navigation selects the next board before WebKit acknowledges the outgoing save.
+      studio.canvasBoardID = UUID().uuidString
+      checks.append(
+        loaded && dropSessionID == nil && boardReference == nil
+          ? "PASS the outgoing canvas stops accepting drops during a board switch"
+          : "FAIL the outgoing canvas remains available after the selected board changes")
     }
     if let boardID, let sessionID = dropSessionID {
       let beforeDrop = try content.encoded()

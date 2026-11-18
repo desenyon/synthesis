@@ -12,56 +12,65 @@ extension WorkspaceStore {
 
   /// Active prerequisite edges between active rules of one system.
   public func prerequisites(worldID: String, systemID: String) throws -> [RulePrerequisite] {
-    _ = try record(worldID: worldID, id: systemID)
-    return try db.rows(
-      "SELECT p.rule_id,p.requires_id FROM rule_prerequisites p JOIN rules a ON a.id=p.rule_id AND a.world_id=p.world_id JOIN rules b ON b.id=p.requires_id AND b.world_id=p.world_id WHERE p.world_id=? AND p.archived=0 AND a.archived=0 AND b.archived=0 AND a.system_id=? ORDER BY p.created_at,p.rowid",
-      [worldID, systemID]
-    ).map { RulePrerequisite(ruleID: $0["rule_id"]!, requiresID: $0["requires_id"]!) }
+    try storedPrerequisites(worldID: worldID, systemID: systemID)
+      .filter { !$0.sourceArchived && !$0.targetArchived }.map { $0.edge }
   }
 
-  /// Replaces what a rule requires. Edges no longer listed are archived, not deleted.
-  /// Rejects rules from another system or world and any loop ("A needs B needs A").
+  private func storedPrerequisites(worldID: String, systemID: String) throws
+    -> [(edge: RulePrerequisite, sourceArchived: Bool, targetArchived: Bool)]
+  {
+    _ = try record(worldID: worldID, id: systemID)
+    return try db.rows(
+      "SELECT p.rule_id,p.requires_id,a.archived AS source_archived,b.archived AS target_archived FROM rule_prerequisites p JOIN rules a ON a.id=p.rule_id AND a.world_id=p.world_id JOIN rules b ON b.id=p.requires_id AND b.world_id=p.world_id AND b.system_id=a.system_id WHERE p.world_id=? AND p.archived=0 AND a.system_id=? ORDER BY p.created_at,p.rowid",
+      [worldID, systemID]
+    ).map {
+      (
+        RulePrerequisite(ruleID: $0["rule_id"]!, requiresID: $0["requires_id"]!),
+        $0["source_archived"] == "1", $0["target_archived"] == "1"
+      )
+    }
+  }
+
+  /// Replaces a rule's visible requirements and preserves dormant edges for archive Undo.
+  /// A dormant edge still participates in loop checks because either endpoint can be restored.
   public func setPrerequisites(worldID: String, ruleID: String, requires: [String]) throws {
     try db.transaction {
-      let rule = try rule(worldID: worldID, id: ruleID)
-      let wanted = Set(requires)
+      let rule = try activeRule(worldID: worldID, id: ruleID)
+      let stored = try storedPrerequisites(worldID: worldID, systemID: rule.systemID)
+      let outgoing = stored.filter { $0.edge.ruleID == ruleID }
+      let current = Set(outgoing.map { $0.edge.requiresID })
+      let dormant = Set(outgoing.filter { $0.targetArchived }.map { $0.edge.requiresID })
+      let supplied = Set(requires)
+      let wanted = Self.treeKinds.contains(rule.kind) ? supplied.union(dormant) : supplied
       guard wanted.count <= 24 else {
         throw SynthesisError.invalid("A technique can require up to 24 others.")
       }
-      for id in wanted {
-        let other = try self.rule(worldID: worldID, id: id)
-        guard other.systemID == rule.systemID, id != ruleID,
-          try db.rows("SELECT archived FROM rules WHERE id=?", [id]).first?["archived"] == "0"
-        else {
+      for id in wanted.subtracting(dormant) {
+        let other = try activeRule(worldID: worldID, id: id)
+        guard other.systemID == rule.systemID, id != ruleID else {
           throw SynthesisError.invalid("A requirement must be another active rule of this system.")
         }
       }
-      // Loop check on the edges as they would be after this change.
       var graph: [String: Set<String>] = [:]
-      for edge in try prerequisites(worldID: worldID, systemID: rule.systemID)
-      where edge.ruleID != ruleID {
+      for (edge, _, _) in stored where edge.ruleID != ruleID {
         graph[edge.ruleID, default: []].insert(edge.requiresID)
       }
-      graph[ruleID] = wanted
-      var visiting = Set<String>()
-      var done = Set<String>()
-      func loops(_ node: String) -> Bool {
-        if done.contains(node) { return false }
-        if !visiting.insert(node).inserted { return true }
-        for next in graph[node] ?? [] where loops(next) { return true }
-        visiting.remove(node)
-        done.insert(node)
-        return false
-      }
-      guard !loops(ruleID) else {
-        throw SynthesisError.invalid(
-          "That would make a loop: a technique cannot, through others, require itself.")
+      var remaining = Array(wanted)
+      var visited = Set<String>()
+      while let node = remaining.popLast() {
+        guard node != ruleID else {
+          throw SynthesisError.invalid(
+            "That would make a loop: a technique cannot, through others, require itself.")
+        }
+        if visited.insert(node).inserted { remaining.append(contentsOf: graph[node] ?? []) }
       }
       let now = timestamp()
-      try db.execute(
-        "UPDATE rule_prerequisites SET archived=1,updated_at=? WHERE world_id=? AND rule_id=? AND archived=0",
-        [now, worldID, ruleID])
-      for id in wanted.sorted() {
+      for id in current.subtracting(wanted).sorted() {
+        try db.execute(
+          "UPDATE rule_prerequisites SET archived=1,updated_at=? WHERE world_id=? AND rule_id=? AND requires_id=?",
+          [now, worldID, ruleID, id])
+      }
+      for id in wanted.subtracting(current).sorted() {
         try db.execute(
           "INSERT INTO rule_prerequisites VALUES(?,?,?,?,0,?,?) ON CONFLICT(rule_id,requires_id) DO UPDATE SET archived=0,updated_at=excluded.updated_at",
           [UUID().uuidString, worldID, ruleID, id, now, now])

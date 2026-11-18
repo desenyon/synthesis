@@ -288,7 +288,7 @@ struct TimelineScreen: View {
       (lane.id, lane, rows.filter { era(of: $0)?.id == lane.id })
     }.filter { !$0.events.isEmpty }
     let unplaced = rows.filter { era(of: $0) == nil }
-    if !unplaced.isEmpty { groups.append(("unplaced", nil, unplaced)) }
+    if !unplaced.isEmpty { groups.append((TimelineViewState.unplacedEraID, nil, unplaced)) }
     return VStack(alignment: .leading, spacing: 18) {
       if groups.count > 1 {
         ScrollView(.horizontal) {

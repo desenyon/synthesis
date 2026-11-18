@@ -4,6 +4,10 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
+- Restored Canvas sessions retain their saved viewport, selection and latest draft. Focus opens writing from Properties, Mechanics or Sections and returns to the chosen page. Branch lineage excerpts retain paragraph breaks as spaces and omit formatting marks.
+- Quick Capture clears an identical retried draft after its original save. Canon review rejects archived records and unportable property snapshots. Technique edits preserve archived prerequisite links for Undo, and portable histories restore nested periods in parent order.
+- Restricted requests redact saved reference labels and withhold prior generated proposals with incomplete provenance. Provider failures display safe explanations, and subscription status checks require the chosen provider’s sign-in format.
+
 - Temporary Focus workspaces (⌥⌘F): hide navigation, inspectors and companion controls while retaining writing, split documents, native Undo and original panel choices.
 
 - Choose Atlas, Conversation, Dashboard, Canvas, Library, Your worlds or the last workspace at startup. Direct chat/board routes remember their workspace; Manual keeps provider calls disabled and opens Library instead of Conversation.

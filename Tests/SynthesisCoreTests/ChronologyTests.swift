@@ -85,6 +85,58 @@ struct ChronologyTests {
     try store.setChronologyLaneArchived(worldID: world.id, id: period.id, archived: false)
     #expect(try store.chronologyLanes(worldID: world.id).count == 2)
   }
+  @Test func reparentedOverlappingPeriodsSurviveArchiveRoundTrip() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Competing histories")
+    let older = try store.createChronologyLane(
+      worldID: world.id, name: "Early tide", kind: "period", start: "Year 20", end: "Year 60")
+    let age = try store.createChronologyLane(
+      worldID: world.id, name: "Age of the crossing", kind: "period", start: "Year 10",
+      end: "Year 80")
+    let corrected = try store.updateChronologyLane(
+      worldID: world.id, expected: older, name: older.name, parentID: age.id, start: older.start,
+      end: older.end, notes: "The eastern account")
+    let sibling = try store.createChronologyLane(
+      worldID: world.id, name: "Harbour rule", kind: "period", parentID: age.id, start: "Year 50",
+      end: "Year 70")
+    let alternate = try store.createChronologyLane(
+      worldID: world.id, name: "Western account", kind: "branch", start: "Year 10", end: "Year 80")
+    let source = try store.createRecord(worldID: world.id, title: "The tide ledger")
+    let event = try store.saveChronologyEvent(
+      worldID: world.id, id: nil, title: "The crossings", date: "Year 52", source: source.id,
+      order: nil, laneID: corrected.id)
+    #expect(try store.chronologyPlacements(worldID: world.id)[event.id] == corrected.id)
+    try store.setChronologyLaneArchived(worldID: world.id, id: age.id, archived: true)
+    let copy = try store.importWorldArchive(store.exportWorldArchive(worldID: world.id))
+    let lanes = try store.chronologyLanes(worldID: copy.id, includingArchived: true)
+    let copyAge = try #require(lanes.first { $0.name == age.name })
+    let copyOlder = try #require(lanes.first { $0.name == older.name })
+    let copySibling = try #require(lanes.first { $0.name == sibling.name })
+    let copyAlternate = try #require(lanes.first { $0.name == alternate.name })
+    let copyEvent = try #require(try store.events(worldID: copy.id).first)
+    #expect(copyAge.id != age.id && copyOlder.id != older.id)
+    #expect(copyOlder.parentID == copyAge.id && copySibling.parentID == copyAge.id)
+    #expect(copyOlder.start == older.start && copySibling.end == sibling.end)
+    #expect(copyAlternate.parentID == nil && copyAlternate.kind == "branch")
+    #expect(try store.chronologyPlacements(worldID: copy.id)[copyEvent.id] == copyOlder.id)
+    #expect(try store.chronologyLanes(worldID: copy.id).count == 3)
+    try store.setChronologyLaneArchived(worldID: copy.id, id: copyAge.id, archived: false)
+    #expect(try store.chronologyLanes(worldID: copy.id).count == 4)
+    #expect(try store.record(worldID: copy.id, id: copyEvent.sourceID).canonical == nil)
+  }
+
+  @Test func archiveRejectsCyclicLaneParentsWithoutImportingAWorld() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "History")
+    let lane = try store.createChronologyLane(worldID: world.id, name: "Age", kind: "period")
+    var archive = try JSONDecoder().decode(
+      WorldArchive.self, from: store.exportWorldArchive(worldID: world.id))
+    archive.tables["chronology_lanes"]?[0]["parent_id"] = lane.id
+    let payload = try JSONEncoder().encode(archive)
+    #expect(throws: SynthesisError.self) { try store.importWorldArchive(payload) }
+    #expect(try store.worlds().map(\.id) == [world.id])
+  }
+
   @Test func foreignBranchCannotCreatePartialEvent() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "One")

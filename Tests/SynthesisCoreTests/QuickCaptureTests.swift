@@ -55,6 +55,19 @@ struct QuickCaptureTests {
     #expect(try store.records(worldID: world.id).count == 1)
   }
 
+  @Test func retryClearsAnIdenticalScratchWithoutCreatingAnotherIdea() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Restored scratch")
+    let draft = QuickCaptureDraft(text: "A fragment in two restored editors")
+    try store.saveQuickCaptureDraft(worldID: world.id, draft: draft)
+    let record = try store.commitQuickCapture(worldID: world.id, draft: draft)
+    // A second editor can persist the same scratch before it receives the existing receipt.
+    try store.saveQuickCaptureDraft(worldID: world.id, draft: draft)
+    #expect(try store.commitQuickCapture(worldID: world.id, draft: draft).id == record.id)
+    #expect(try store.records(worldID: world.id).count == 1)
+    #expect(try store.quickCaptureDraft(worldID: world.id).text.isEmpty)
+  }
+
   @Test func lateRetryDoesNotEraseANewerDraft() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Retry")

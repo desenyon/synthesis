@@ -55,6 +55,18 @@ struct StoreTests {
     }
     #expect(try s.history(worldID: w.id, id: r.id).count == 3)
   }
+  @Test func anOpenCanonReviewCannotPromoteAnArchivedRecord() throws {
+    let store = try fixture()
+    let world = try store.createWorld(name: "Archive review")
+    let record = try store.createRecord(worldID: world.id, title: "Frozen draft")
+    try store.archiveRecord(worldID: world.id, id: record.id)
+    #expect(throws: SynthesisError.self) {
+      try store.promote(
+        worldID: world.id, id: record.id, version: record.version, confirmation: record.id)
+    }
+    #expect(try store.record(worldID: world.id, id: record.id).canonical == nil)
+    #expect(try store.history(worldID: world.id, id: record.id).count == 1)
+  }
   @Test func relationshipIsolationAndUnknownDates() throws {
     let s = try fixture()
     let a = try s.createWorld(name: "A")

@@ -9,7 +9,8 @@ import subprocess
 import tempfile
 import uuid
 
-binary = Path('dist/Synthesis.app/Contents/MacOS/Synthesis').resolve()
+app = Path(os.environ.get('SYNTHESIS_APP_BUNDLE', 'dist/Synthesis.app'))
+binary = (app / 'Contents/MacOS/Synthesis').resolve()
 if not binary.is_file():
     raise SystemExit('Build the app first with ./scripts/check.sh')
 with tempfile.TemporaryDirectory(prefix='synthesis-session.', dir=os.environ.get('TMPDIR')) as fixture:
