@@ -232,7 +232,7 @@ struct EntityPropertiesPage: View {
         }
       }.frame(maxWidth: .infinity, alignment: .leading)
       if field.kind != .formula {
-        IconButton(icon: "pencil", label: "Edit \(field.label)", t: studio.t, size: 28) {
+        IconButton(icon: "pencil.line", label: "Edit \(field.label)", t: studio.t, size: 28) {
           editing = EntityPropertyEdit(
             field: field, value: value, profile: review.profile,
             inherited: resolved.defaults[field.key] != nil)

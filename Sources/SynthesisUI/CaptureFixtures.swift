@@ -7,7 +7,8 @@ extension Studio {
   public static let captureStates =
     QuickCaptureController.captureStates + conversationToolsCaptureStates
     + entitySchemaCaptureStates + bidirectionalRelationshipCaptureStates
-    + relationshipMetadataCaptureStates + entityNamesCaptureStates + [
+    + relationshipMetadataCaptureStates + entityNamesCaptureStates
+    + chronologyHierarchyCaptureStates + CanvasReferencePicker.captureStates + [
       "session-writing", "light-session-writing", "manual-session-writing", "session-sections",
       "session-split", "session-graph", "session-timeline", "session-atlas", "session-canvas",
       "session-conversation", "session-library",
@@ -66,13 +67,14 @@ extension Studio {
       "editor-long", "light-editor-long",
       "profile-empty", "light-profile-empty", "profile-artwork", "light-profile-artwork",
       "profile-connected", "profile-writing", "profile-event", "manual-profile-empty",
+      "profile-artwork-place", "profile-artwork-banner",
       "compact-library", "immersive-library", "light-compact-library", "light-immersive-library",
       "compact-worlds", "immersive-worlds", "compact-mechanics", "immersive-mechanics",
       "compact-sections", "immersive-sections",
       "sidebar-long", "light-sidebar-long", "sidebar-history", "sidebar-folded",
       "sidebar-opaque", "light-sidebar-opaque", "empty-sidebar", "light-collapsed",
       "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
-      "atlas-local",
+      "atlas-local", "atlas-hierarchy-selected", "atlas-hierarchy-empty-parent",
       "mechanics", "light-mechanics", "manual-mechanics", "mechanics-empty", "mechanics-scenario",
       "mechanics-review", "mechanics-history",
       "components", "light-components", "manual-components", "components-empty",
@@ -81,7 +83,8 @@ extension Studio {
       "conversation-home", "light-conversation-home", "conversation-loading", "conversation",
       "sheet-artwork", "canvas", "companion", "manual",
       "collapsed", "light",
-      "graph", "graph-selected", "library", "editor", "timeline", "atlas",
+      "graph", "graph-selected", "graph-neighbourhood-one", "graph-neighbourhood-two",
+      "library", "editor", "timeline", "atlas",
       "palette", "palette-body", "palette-search", "palette-maps", "palette-scenes",
       "palette-settings",
       "palette-tools", "palette-recent", "light-palette-search", "manual-palette-search",
@@ -392,6 +395,10 @@ extension Studio {
     }
     if Self.relationshipMetadataCaptureStates.contains(state) {
       configureRelationshipMetadataCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if Self.chronologyHierarchyCaptureStates.contains(state) {
+      configureChronologyHierarchyCapture(state, board: board, conversation: conversation)
       return
     }
     if Self.entityNamesCaptureStates.contains(state) {
@@ -995,6 +1002,8 @@ extension Studio {
       .replacingOccurrences(of: "compact-", with: "")
       .replacingOccurrences(of: "immersive-", with: "")
     switch viewState {
+    case let state where CanvasReferencePicker.captureStates.contains(state):
+      destination = .canvas
     case "composer-attached", "light-composer-attached", "composer-context",
       "light-composer-context",
       "composer-browser", "composer-overflow", "composer-expanded",
@@ -1267,6 +1276,13 @@ extension Studio {
     case "graph", "graph-selected", "light-graph", "sheet-relation", "empty-graph",
       "graph-companion":
       destination = .knowledge
+    case "graph-neighbourhood-one", "graph-neighbourhood-two":
+      destination = .knowledge
+      if let root = records.first(where: { $0.title == "Mira Vale" }) {
+        graphSelectedID = root.id
+        graphView.neighborhood = GraphNeighborhood(
+          rootID: root.id, depth: state.hasSuffix("one") ? 1 : 2)
+      }
     case "review", "review-canon", "review-checks": destination = .review
     case "timeline", "empty-timeline", "timeline-edit", "timeline-companion", "timeline-compact",
       "timeline-overview":
@@ -1296,7 +1312,8 @@ extension Studio {
         }
       }
     case "atlas-linked", "light-atlas-linked", "manual-atlas-linked", "atlas-details", "atlas-new",
-      "atlas-local", "atlas-companion", "light-atlas-companion":
+      "atlas-local", "atlas-companion", "light-atlas-companion", "atlas-hierarchy-selected",
+      "atlas-hierarchy-empty-parent":
       destination = .atlas
       perform {
         guard let original = try store.boards(worldID: worldID, kind: "atlas").first,
@@ -1317,8 +1334,15 @@ extension Studio {
             worldID: worldID, name: "The drowned harbour", placeID: city.id, parentMapID: root.id)
         }
         let maps = try store.boards(worldID: worldID, kind: "atlas")
-        mapBoardID =
-          state == "atlas-local" ? maps.first { $0.name == "The drowned harbour" }?.id : original.id
+        let harbour = maps.first { $0.name == "The drowned harbour" }
+        if state == "atlas-hierarchy-empty-parent", let harbour,
+          !maps.contains(where: { $0.name == "The old quays" })
+        {
+          _ = try store.createAtlasMap(
+            worldID: worldID, name: "The old quays", parentMapID: harbour.id)
+        }
+        let opensChild = ["atlas-local", "atlas-hierarchy-empty-parent"].contains(state)
+        mapBoardID = opensChild ? harbour?.id : original.id
       }
     case "atlas", "empty-atlas", "atlas-regions", "atlas-drawing", "atlas-placing",
       "light-atlas-drawing", "sheet-generate":
@@ -1374,22 +1398,28 @@ extension Studio {
         selectedRecord = record
       }
     case "profile-empty", "light-profile-empty", "profile-artwork", "light-profile-artwork",
-      "profile-connected", "profile-writing", "profile-event", "manual-profile-empty":
+      "profile-connected", "profile-writing", "profile-event", "manual-profile-empty",
+      "profile-artwork-place", "profile-artwork-banner":
       destination = .library
       inspector = false
       perform {
-        let name =
-          viewState.hasSuffix("empty")
-          ? "Neris Vale" : viewState == "profile-writing" ? "Rowan Vale" : "Elian Sable"
-        var record = records.first { $0.title == name }
+        let example: (name: String, category: String, art: StudioArtwork) =
+          switch viewState {
+          case "profile-artwork-place": ("Glasswatch Harbor", "Places", .atlas)
+          case "profile-artwork-banner": ("Glasswatch Mariners", "Factions", .atlas)
+          case "profile-writing": ("Rowan Vale", "Characters", .cartographer)
+          case _ where viewState.hasSuffix("empty"): ("Neris Vale", "Characters", .cartographer)
+          default: ("Elian Sable", "Characters", .cartographer)
+          }
+        var record = records.first { $0.title == example.name }
         if record == nil {
           record = try store.createRecord(
-            worldID: worldID, title: name, kind: "entity", category: "Characters")
+            worldID: worldID, title: example.name, kind: "entity", category: example.category)
         }
         guard var record else { return }
         if !viewState.hasSuffix("empty"),
           try store.recordArtwork(worldID: worldID, recordID: record.id) == nil,
-          let image = StudioArtwork.cartographer.data
+          let image = example.art.data
         {
           _ = try store.saveRecordArtwork(
             worldID: worldID, recordID: record.id, data: image, origin: "ai-generated",
@@ -1448,7 +1478,10 @@ extension Studio {
       perform {
         let maps = try store.boards(worldID: worldID, kind: "atlas")
         if let id = mapBoardID ?? maps.first?.id {
-          try restoreAtlasView(boardID: id, view: AtlasViewState())
+          let selected =
+            state == "atlas-hierarchy-selected"
+            ? records.first(where: { $0.title == "The Drowned City" })?.id : nil
+          try restoreAtlasView(boardID: id, view: AtlasViewState(selectedRecordID: selected))
         }
       }
     }

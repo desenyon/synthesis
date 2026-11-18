@@ -3,7 +3,7 @@ import SynthesisCore
 
 extension Studio {
   static let relationshipMetadataCaptureStates = [
-    "relationship-metadata-editor", "relationship-metadata-inspector",
+    "relationship-metadata-editor", "relationship-metadata-inspector", "relationship-history",
   ]
 
   func relationshipMetadataCaptureRelation() throws -> Relation {
@@ -41,7 +41,7 @@ extension Studio {
           worldID: worldID, expected: edge, label: edge.label, attributes: attributes)
         try reload()
       }
-      if state == "relationship-metadata-inspector" {
+      if state != "relationship-metadata-editor" {
         inspectionTarget = .relationship(edge.id)
         workspaceInspector = true
       }

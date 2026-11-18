@@ -17,3 +17,14 @@ The first sweep stopped at `session-canvas` after 58 main frames and six panels.
 | #133 | The relationship form accepts qualitative strength and the inspector displays it. The scoped native/core relationship tests verify the metadata round trip. |
 
 The compact review found a clipped Canvas header and toolbar, displaced Quick Capture window controls, and two missing property glyphs. The medium review found that the fixture could overwrite the seeded editor selection with an already-mounted editor handle. Follow-up evidence tracks these corrections. The sweep uses a disposable database and a blocked model transport. Physical drag routing, global hotkey delivery, focus return, VoiceOver and live subscription behavior require separate authorization.
+
+## Follow-up captures
+
+The next isolated build passed strict lint, 404 tests in 102 suites, and both session processes. The recapture rendered 114 main frames and 18 Quick Capture panels across the three window sizes. It passed 59 Canvas assertions and nine exact native editor selection assertions. Independent reviewers inspected all three sizes. [Follow-up log](follow-up.log)
+
+- #33 editor selection, the newest draft and Canvas viewport and selection are confirmed. The compact Drawing, Arrange and zoom controls now fit inside the window, and all six Quick Capture state panels center the title-bar controls.
+- #47 verifies request pins and capped history ordering with the actual stand-in payload in World and Attachments scopes. Exclusions retain priority. Large histories contribute a bounded slice.
+- #62 and #65 show distinct edit and history glyphs, the template editor and the typed creation flow. Tests cover local schema revisions and independent templates. Existing typed profile gaps remain tracked separately under #61, #63, #64 and #66.
+- #86 visibly distinguishes Portrait, Location artwork and Banner at every size. #146 and #147 show real root and child map navigation, including an empty parent with a nested local map.
+- The new Graph scope renders different membership at one and two degrees. The preview overlapped some cards. The edge history is backed by saved revisions but its offscreen sheet was clipped. The compact selected chronology clipped controls, and a dedicated region fixture retained the previous empty child map. #129, #136, #152 and #200 stay in progress pending corrected captures.
+- Canvas Add now opens a local source picker for events, proposals and Atlas images. In all modes, selection re-resolves the source and confirms the board save. Drag routing and Quick Capture hotkey/focus behavior remain pending separately authorized foreground evidence.

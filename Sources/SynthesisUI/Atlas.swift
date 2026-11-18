@@ -12,6 +12,7 @@ struct AtlasScreen: View {
   @State private var boardID: String?
   @State private var currentBoard: Board?
   @State private var maps: [Board] = []
+  @State private var localMaps = AtlasLocalMaps()
   @State private var loadedMap = AtlasDocument()
   @State private var loadedWorld = ""
   @State private var details = false
@@ -155,16 +156,19 @@ struct AtlasScreen: View {
         } else if let image = mapImage {
           mapView(image, size: geo.size)
         } else {
-          EmptyState(
-            icon: Destination.atlas.icon, title: "No map yet",
-            message:
-              "Bring a drawing or a rendered map, then pin the places, people and events of this world to it.",
-            t: studio.t
-          ) {
-            Button("Choose a map image…") { upload() }
-              .buttonStyle(QuietButton(t: studio.t, primary: true))
-            Button("Sample illustrations…") { artworkPicker = true }
-              .buttonStyle(QuietButton(t: studio.t))
+          VStack(spacing: 0) {
+            EmptyState(
+              icon: Destination.atlas.icon, title: "No map yet",
+              message:
+                "Bring a drawing or a rendered map, then pin the places, people and events of this world to it.",
+              t: studio.t
+            ) {
+              Button("Choose a map image…") { upload() }
+                .buttonStyle(QuietButton(t: studio.t, primary: true))
+              Button("Sample illustrations…") { artworkPicker = true }
+                .buttonStyle(QuietButton(t: studio.t))
+            }
+            localMapMenu
           }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
       }
@@ -253,6 +257,7 @@ struct AtlasScreen: View {
         maps.first(where: { $0.id == studio.mapBoardID })
         ?? maps.first(where: { $0.id == remembered }) ?? maps.first
       let changed = loadedWorld != studio.worldID || boardID != board?.id
+      localMaps = AtlasLocalMaps(parentID: board?.id, maps: maps)
       let next =
         try board.map { try JSONDecoder().decode(AtlasDocument.self, from: Data($0.content.utf8)) }
         ?? AtlasDocument()
@@ -398,18 +403,7 @@ struct AtlasScreen: View {
               StudioLabel(place.title, icon: "mappin.and.ellipse").lineLimit(1)
             }.buttonStyle(QuietButton(t: studio.t))
           }
-          let children = maps.filter {
-            (try? AtlasLinks(content: $0.content).parentMapID) == boardID
-          }
-          if !children.isEmpty {
-            PlainMenu {
-              ForEach(children) { child in Button(child.name) { switchMap(child.id) } }
-            } label: {
-              StudioLabel("Local maps · \(children.count)", icon: "chevron.down")
-                .font(.studio(.label)).padding(.horizontal, 12)
-                .frame(height: Metric.control).floatingPanel(studio.t)
-            }
-          }
+          localMapMenu
           Spacer()
           if let board = currentBoard, loadedWorld == studio.worldID {
             SpatialReferenceHandle(
@@ -459,8 +453,9 @@ struct AtlasScreen: View {
                 )
                 .font(.studio(.caption)).foregroundStyle(studio.t.muted).lineLimit(1)
               }.frame(maxWidth: 240, alignment: .leading)
-              Button("Open") { studio.openRecord(record) }
-                .buttonStyle(QuietButton(t: studio.t))
+              Button(localMaps.byPlace[record.id]?.count == 1 ? "Open map" : "Open record") {
+                openMappedPlace(record)
+              }.buttonStyle(QuietButton(t: studio.t))
             }.padding(8).floatingPanel(studio.t)
           }
           Spacer()
@@ -553,7 +548,7 @@ struct AtlasScreen: View {
     .contentShape(path)
     .onTapGesture {
       if NSApp.currentEvent?.clickCount == 2, let record {
-        studio.openRecord(record)
+        openMappedPlace(record)
       } else {
         selectedRegion = region.id
         selected = region.recordID
@@ -567,7 +562,7 @@ struct AtlasScreen: View {
       selected = region.recordID
     }
     .contextMenu {
-      if let record { Button("Open record") { studio.openRecord(record) } }
+      if let record { mappedPlaceOptions(record) }
       Button("Redraw region") { startDrawing(region.recordID, replacing: region.id) }
       Button("Remove region") {
         let before = currentBoard
@@ -654,14 +649,14 @@ struct AtlasScreen: View {
     }
     .onTapGesture {
       if NSApp.currentEvent?.clickCount == 2, let record {
-        studio.openRecord(record)
+        openMappedPlace(record)
       } else {
         selectedRegion = nil
         selected = marker.recordID
       }
     }
     .contextMenu {
-      if let record { Button("Open record") { studio.openRecord(record) } }
+      if let record { mappedPlaceOptions(record) }
       Button("Move marker") {
         startPlacing(marker.recordID)
       }
@@ -679,6 +674,38 @@ struct AtlasScreen: View {
       selectedRegion = nil
       selected = marker.recordID
     }
+  }
+  @ViewBuilder private var localMapMenu: some View {
+    if !localMaps.all.isEmpty {
+      PlainMenu {
+        ForEach(localMaps.all) { child in Button(child.name) { openLocalMap(child.id) } }
+      } label: {
+        StudioLabel("Local maps · \(localMaps.all.count)", icon: "chevron.down")
+          .font(.studio(.label)).padding(.horizontal, 12)
+          .frame(height: Metric.control).floatingPanel(studio.t)
+      }
+    }
+  }
+  private func openMappedPlace(_ record: LoreRecord) {
+    guard let boardID, loadedWorld == studio.worldID, !loadFailed else { return }
+    studio.openAtlasPlace(record, parentID: boardID)
+  }
+  private func openLocalMap(_ childID: String, placeID: String? = nil) {
+    guard let boardID, loadedWorld == studio.worldID, !loadFailed else { return }
+    studio.openAtlasChild(childID, parentID: boardID, placeID: placeID)
+  }
+  @ViewBuilder private func mappedPlaceOptions(_ record: LoreRecord) -> some View {
+    let children = localMaps.byPlace[record.id] ?? []
+    if children.count == 1, let child = children.first {
+      Button("Open map") { openLocalMap(child.id, placeID: record.id) }
+    } else if !children.isEmpty {
+      Menu("Open local map") {
+        ForEach(children) { child in
+          Button(child.name) { openLocalMap(child.id, placeID: record.id) }
+        }
+      }
+    }
+    Button("Open record") { studio.openRecord(record) }
   }
   private func upload() {
     studio.perform {
@@ -725,6 +752,7 @@ struct AtlasScreen: View {
         loadedMap = map
         studio.mapBoardID = saved.id
         maps = try studio.store.boards(worldID: loadedWorld, kind: "atlas")
+        localMaps = AtlasLocalMaps(parentID: saved.id, maps: maps)
         try viewport.activate(
           worldID: loadedWorld, board: saved, map: map, recordIDs: Set(studio.records.map(\.id)))
       }

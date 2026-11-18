@@ -406,12 +406,12 @@ public struct ProviderStatus: Equatable, Sendable {
       executable: path, arguments: kind == .claudeCode ? ["auth", "status"] : ["login", "status"],
       input: "", directory: directory, timeout: .seconds(8)
     ) { line in await output.add(line) }
-    let text = await output.text + (result?.errors ?? "")
     guard result?.status == 0 else {
       return ProviderStatus(
         installed: true, signedIn: false,
         detail: "Sign-in check failed. Open \(kind.title) and sign in with your subscription.")
     }
+    let text = await output.text + (kind == .codex ? result?.errors ?? "" : "")
     return interpret(kind, output: text, path: path)
   }
   /// Reads the harness's own status output.

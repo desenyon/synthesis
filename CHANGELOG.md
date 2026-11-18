@@ -4,6 +4,10 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
+- Graph can isolate a selected entity’s neighborhood and expand it by degrees. The relationship inspector opens recorded revisions. Atlas places open linked child maps, and empty parent maps retain child navigation.
+- Canvas can browse and place events, proposals and Atlas images from the current world. Its compact header keeps the board title and drawing controls in view. Archiving the last board and creating its replacement run in one transaction.
+- Entity profiles distinguish portraits, location artwork and banners. Request pins prioritize their eligible history within the context limits, and a composer that changes worlds loads the new world’s draft before Send.
+
 - Restored Canvas sessions retain their saved viewport, selection and latest draft. Focus opens writing from Properties, Mechanics or Sections and returns to the chosen page. Branch lineage excerpts retain paragraph breaks as spaces and omit formatting marks.
 - Quick Capture clears an identical retried draft after its original save. Canon review rejects archived records and unportable property snapshots. Technique edits preserve archived prerequisite links for Undo, and portable histories restore nested periods in parent order.
 - Restricted requests redact saved reference labels and withhold prior generated proposals with incomplete provenance. Provider failures display safe explanations, and subscription status checks require the chosen provider’s sign-in format.

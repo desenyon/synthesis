@@ -43,6 +43,7 @@ struct GraphViewState: Codable, Equatable {
   var pan = CGSize.zero
   var query = ""
   var framed = false
+  var neighborhood: GraphNeighborhood?
 
   func reconciled(records: [LoreRecord]) -> Self {
     var value = self
@@ -64,6 +65,11 @@ struct GraphViewState: Codable, Equatable {
       value.signature = ""
     }
     value.query = String(query.prefix(2000))
+    if let neighborhood, ids.contains(neighborhood.rootID) {
+      value.neighborhood?.depth = min(max(1, neighborhood.depth), max(1, ids.count - 1))
+    } else {
+      value.neighborhood = nil
+    }
     return value
   }
 }

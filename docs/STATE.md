@@ -6,9 +6,11 @@ The latest Linux source checkpoint on `origin/main` is `df71af3`. The historical
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **39 Verified, 14 In progress, 340 Open, 1 Decision needed.** The Mac continuation uses separate coordinators, owners and independent reviewers with a single build queue. [Ownership and dependencies](EXPANSION_DEPENDENCIES.md)
+The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **46 Verified, 14 In progress, 333 Open, 1 Decision needed.** The Mac continuation uses separate coordinators, owners and independent reviewers with a single build queue. [Ownership and dependencies](EXPANSION_DEPENDENCIES.md)
 
 Mac baseline `3b0693a` passed 390 native tests, both session processes, 20 Canvas tests and 59 WebKit/native Canvas checks. The 69-state sweep produced 207 main frames and 18 utility panels. Independent reviewers inspected all three sizes. Follow-up work covers compact Canvas clipping, Quick Capture window controls, editor selection evidence, property glyphs and the next feature slices. [Mac sweep](verification/expansion-parallel-final/README.md)
+
+The follow-up passed 404 tests in 102 suites, the isolated optimized build and both session processes. Reviewers inspected 114 main frames and 18 panel captures. Canvas clipping, the editor selection fixture, glyphs and Quick Capture header alignment are repaired. Graph neighborhood fit, the relationship history sheet, the region fixture and compact selected-period controls have further visual work. [Follow-up evidence](verification/expansion-parallel-final/README.md#follow-up-captures)
 
 **No new release or tag is authorized. The owner requires all 394 requirements completed before another release; completing them does not itself authorize publication.** The current 0.0.3 release is unchanged.
 

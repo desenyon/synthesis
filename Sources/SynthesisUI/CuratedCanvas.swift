@@ -19,6 +19,8 @@ struct CuratedCanvas: View {
   @State private var formCategory = "Characters"
   @State private var boardName = ""
   @State private var pickerQuery = ""
+  @State private var showReferencePicker = false
+  @State private var placingReference = false
   init(studio: Studio) {
     self.studio = studio
     session = studio.canvas()
@@ -35,28 +37,33 @@ struct CuratedCanvas: View {
     GeometryReader { geo in
       // A narrow window has no room to dock: the companion takes the workspace instead.
       let takeover = assistantDocked && geo.size.width < 860
+      let companionWidth =
+        assistantDocked && !takeover ? studio.companionDisplayWidth(available: geo.size.width) : 0
+      let dividerWidth = companionWidth > 0 ? PanelResizeHandle.width : 0
+      let boardWidth = max(1, geo.size.width - companionWidth - dividerWidth)
       HStack(spacing: 0) {
         if !takeover {
           VStack(spacing: 0) {
-            bar
+            bar(tight: boardWidth < 750)
             board
-          }.frame(maxWidth: .infinity, maxHeight: .infinity)
+          }.frame(width: boardWidth).frame(maxHeight: .infinity)
         }
         if takeover {
           ConversationStudio(studio: studio, companion: true, docked: false)
         } else if assistantDocked {
           PanelResizeHandle(
             studio: studio, panel: .companion,
-            displayedWidth: studio.companionDisplayWidth(available: geo.size.width),
+            displayedWidth: companionWidth,
             maximum: max(320, geo.size.width - 520))
           ConversationStudio(studio: studio, companion: true)
-            .frame(width: studio.companionDisplayWidth(available: geo.size.width))
+            .frame(width: companionWidth)
             .transition(.move(edge: .trailing).combined(with: .opacity))
         }
       }
     }
     .onAppear {
       if studio.captureHint == "sheet-artwork" { panel = .artwork }
+      showReferencePicker = CanvasReferencePicker.captureStates.contains(studio.captureHint)
       session.switchBoard(studio.canvasBoardID)
       studio.editorSave = nil
       studio.canvasUndo = { session.command($0 ? "undo" : "redo") }
@@ -173,7 +180,7 @@ struct CuratedCanvas: View {
 
   // MARK: Bar
 
-  private var bar: some View {
+  private func bar(tight: Bool) -> some View {
     WorkspaceBar(studio: studio) {
       if let reference = session.boardReference {
         SpatialReferenceHandle(
@@ -190,12 +197,12 @@ struct CuratedCanvas: View {
           StudioIcon("chevron.down", size: 9)
             .foregroundStyle(studio.t.muted)
         }.padding(.horizontal, 6).frame(height: 28).hoverFill(studio.t)
-      }.padding(.leading, -4).help("Switch, rename or archive boards")
+      }.padding(.leading, -4).layoutPriority(1).help("Switch, rename or archive boards")
       if let failure = session.failure {
         StudioLabel("Not saved", icon: "exclamationmark.triangle")
           .font(.studio(.captionStrong)).foregroundStyle(studio.t.warning).fixedSize()
           .help(failure)
-      } else {
+      } else if !tight {
         Text("Saved").font(.studio(.caption)).foregroundStyle(studio.t.muted).fixedSize()
           .help("This board is saved on this device")
       }
@@ -220,6 +227,8 @@ struct CuratedCanvas: View {
           pickerQuery = ""
           panel = .library
         }
+        Button("Reference from world…") { showReferencePicker.toggle() }
+          .disabled(session.dropSessionID == nil)
         Button("Image…") { session.addImage() }
         Button("Sample illustrations…") { panel = .artwork }
         if let card = session.selection.first, session.selection.count == 1 {
@@ -235,14 +244,22 @@ struct CuratedCanvas: View {
           }
         }
       } label: {
-        StudioLabel("Add", icon: "plus").font(.studio(.label)).fixedSize()
+        Group {
+          if tight {
+            StudioIcon("plus", size: 14).accessibilityLabel("Add to board")
+          } else {
+            StudioLabel("Add", icon: "plus")
+          }
+        }.font(.studio(.label)).fixedSize()
           .padding(.horizontal, 10).frame(height: Metric.control)
           .background(studio.t.surface, in: RoundedRectangle(cornerRadius: Metric.radius))
           .overlay(
             RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.hairline, lineWidth: 1))
-      }.help("Add records or an image. Draw, write and connect with the tools on the canvas.")
-      IconButton(icon: "viewfinder", label: "Fit everything in view", t: studio.t) {
-        session.command("fit")
+      }.help("Add records, images or world references to the canvas.")
+      if !tight {
+        IconButton(icon: "viewfinder", label: "Fit everything in view", t: studio.t) {
+          session.command("fit")
+        }
       }
       if studio.mode == .assisted {
         IconButton(
@@ -273,6 +290,7 @@ struct CuratedCanvas: View {
       panel = .rename
     }
     Button("Export as PNG…") { session.exportImage() }
+    Button("Fit everything in view") { session.command("fit") }
     if session.hiddenCount > 0 {
       Button(
         "Show \(session.hiddenCount) hidden relationship\(session.hiddenCount == 1 ? "" : "s")"
@@ -318,14 +336,9 @@ struct CuratedCanvas: View {
         studio.canvasBoardID == nil || studio.canvasBoardID == board.id
       else { return }
       studio.perform {
-        try studio.store.setBoardArchived(worldID: board.worldID, id: board.id, archived: true)
-        let remaining = try studio.store.boards(worldID: board.worldID, kind: "canvas")
-        let next =
-          try remaining.first?.id
-          ?? studio.store.saveBoard(
-            worldID: board.worldID, name: "Untitled board", kind: "canvas",
-            content: CanvasBoardContent.empty
-          ).id
+        let next = try studio.store.archiveCanvasBoard(
+          worldID: board.worldID, id: board.id, blankContent: CanvasBoardContent.empty
+        )
         studio.canvasBoardID = next
         session.switchBoard(next)
         studio.show("Archived board “\(name)”", icon: "archivebox", actionTitle: "Undo") {
@@ -398,8 +411,64 @@ struct CuratedCanvas: View {
             .padding(.bottom, 76)
         }
       }
+      .overlay(alignment: .topLeading) {
+        if showReferencePicker {
+          let dragging = studio.recordDrag != nil || studio.workspaceReferenceDrag != nil
+          CanvasReferencePicker(
+            studio: studio,
+            initialCategory: referenceCaptureCategory,
+            initialQuery: studio.captureHint == "canvas-reference-empty" ? "No matching name" : "",
+            place: placeReference,
+            close: { showReferencePicker = false }
+          )
+          .frame(
+            width: min(320, max(0, geo.size.width - 32)),
+            height: min(370, max(0, geo.size.height - 32))
+          )
+          .padding(16)
+          .disabled(placingReference)
+          .opacity(dragging ? 0 : 1)
+          .allowsHitTesting(!dragging)
+          .accessibilityHidden(dragging)
+        }
+      }
     }
   }
+
+  private var referenceCaptureCategory: CanvasReferencePicker.Category {
+    switch studio.captureHint {
+    case "canvas-reference-proposals": .proposals
+    case "manual-canvas-reference-atlas": .atlas
+    default: .events
+    }
+  }
+
+  /// Keyboard activation goes through the same guarded placement as the native drop surface.
+  private func placeReference(_ reference: WorldReference) {
+    guard !placingReference, let board = session.boardReference,
+      let sessionID = session.dropSessionID
+    else { return }
+    let bounds = session.webView.bounds
+    let point = CGPoint(x: bounds.midX, y: bounds.midY)
+    let location = studio.navigationLocation
+    placingReference = true
+    Task {
+      defer { placingReference = false }
+      guard studio.navigationLocation == location, studio.flushEditor() else { return }
+      do {
+        let source = try studio.store.resolveReference(reference, worldID: board.worldID)
+        try await session.drop(source, at: point, boardID: board.id, sessionID: sessionID)
+        guard studio.navigationLocation == location else { return }
+        showReferencePicker = false
+        studio.show("Placed \(source.title) on the canvas")
+      } catch {
+        if studio.navigationLocation == location {
+          studio.show(error.localizedDescription, icon: "exclamationmark.triangle")
+        }
+      }
+    }
+  }
+
   // MARK: Sheets
 
   private func closePanel() { panel = nil }

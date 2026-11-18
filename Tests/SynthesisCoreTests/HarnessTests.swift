@@ -18,15 +18,21 @@ struct HarnessTests {
   }
 
   /// Writes an executable shell script and returns its path plus the folder it logs into.
-  func script(_ body: String) throws -> (path: String, folder: URL) {
+  func script(_ body: String, automaticallySignedIn: Bool = true) throws
+    -> (path: String, folder: URL)
+  {
     let folder = FileManager.default.temporaryDirectory.appendingPathComponent(
       "harness-test-\(UUID().uuidString)")
     try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
     let url = folder.appendingPathComponent("fake")
-    try
-      "#!/bin/sh\nLOG='\(folder.path)'\nif [ \"$1\" = auth ]; then echo '{\"loggedIn\":true,\"authMethod\":\"claude.ai\"}'; exit 0; fi\nif [ \"$1\" = login ]; then echo 'Logged in using ChatGPT'; exit 0; fi\n\(body)\n"
-      .write(
-        to: url, atomically: true, encoding: .utf8)
+    let auth =
+      automaticallySignedIn
+      ? """
+      if [ "$1" = auth ]; then echo '{"loggedIn":true,"authMethod":"claude.ai"}'; exit 0; fi
+      if [ "$1" = login ]; then echo 'Logged in using ChatGPT'; exit 0; fi
+      """ : ""
+    try "#!/bin/sh\nLOG='\(folder.path)'\n\(auth)\n\(body)\n"
+      .write(to: url, atomically: true, encoding: .utf8)
     try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: url.path)
     return (url.path, folder)
   }
@@ -157,7 +163,8 @@ struct HarnessTests {
     let transports: [any ModelTransport] = [
       CodexTransport(executable: { fake.path }), ClaudeCodeTransport(executable: { fake.path }),
     ]
-    for transport in transports {
+    let expectedFailures = ["Codex reports a usage limit", "Claude Code could not finish"]
+    for (transport, expectedFailure) in zip(transports, expectedFailures) {
       let chat = try store.createConversation(worldID: world.id)
       let engine = AgentEngine(store: store, transport: transport)
       var activity: [AgentActivity] = []
@@ -167,6 +174,7 @@ struct HarnessTests {
           preset: "Develop", onActivity: { activity.append($0) }, onDelta: { _ in })
         Issue.record("The failed harness must throw")
       } catch {
+        #expect(error.localizedDescription.contains(expectedFailure))
         #expect(!error.localizedDescription.contains("PRIVATE_DIAGNOSTIC_SENTINEL"))
       }
       let message = try #require(
@@ -339,6 +347,24 @@ struct HarnessTests {
     #expect(try await router.generate(request()) { _ in } == "from codex")
     #expect(ProviderKind.allCases == [.claudeCode, .codex])
     #expect(ProviderKind(rawValue: "openai") == nil)
+  }
+
+  @Test func claudeSignInReadsJSONSeparatelyFromWarnings() async throws {
+    let fake = try script(
+      """
+      printf '%s\\n' '{"loggedIn":true,"authMethod":"claude.ai"}'
+      printf '%s\\n' 'Fixture warning on stderr' >&2
+      """, automaticallySignedIn: false)
+    defer { try? FileManager.default.removeItem(at: fake.folder) }
+    let status = await ProviderStatus.check(.claudeCode, executable: fake.path)
+    #expect(status.signedIn)
+    #expect(status.detail == "Signed in with your Claude subscription")
+    let stderrOnly = try script(
+      "printf '%s\\n' '{\"loggedIn\":true,\"authMethod\":\"claude.ai\"}' >&2",
+      automaticallySignedIn: false)
+    defer { try? FileManager.default.removeItem(at: stderrOnly.folder) }
+    let unconfirmed = await ProviderStatus.check(.claudeCode, executable: stderrOnly.path)
+    #expect(!unconfirmed.signedIn)
   }
 }
 /// Opt-in check against the real harnesses. It uses a little subscription quota, so it only

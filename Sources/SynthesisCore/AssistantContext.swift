@@ -194,6 +194,21 @@ extension WorkspaceStore {
         "The \(options.budget.rawValue) context fits \(options.budget.limit) directly referenced sources. Increase context size or remove an attachment."
       )
     }
+    let children = Dictionary(grouping: lanes) { $0.parentID }
+    func includeDescendants(of roots: Set<String>) -> Set<String> {
+      var included = roots
+      var pending = Array(roots)
+      while let parentID = pending.popLast() {
+        for child in children[parentID, default: []]
+        where !excludedHistory.laneIDs.contains(child.id) && included.insert(child.id).inserted {
+          pending.append(child.id)
+        }
+      }
+      return included
+    }
+    let pinnedLanes = Set(requestPins.laneIDs).intersection(laneIDs)
+    let pinnedHistory = includeDescendants(of: pinnedLanes)
+    let includedLanes = includeDescendants(of: laneIDs)
     var anchors: [ContextSource] = []
     func add(_ id: String, _ reason: String) {
       guard !excluded.contains(id), let record = byID[id], !anchors.contains(where: { $0.id == id })
@@ -203,6 +218,9 @@ extension WorkspaceStore {
     for id in requestPins.recordIDs { add(id, "Pinned for this request") }
     for id in options.recordIDs { add(id, "Attached by you") }
     for id in referenceRecordIDs + typedRecordIDs { add(id, "You referenced it") }
+    for event in events where placements[event.id].map(pinnedHistory.contains) == true {
+      add(event.sourceID, "In pinned history")
+    }
     for id in selected { add(id, "Current selection") }
     for board in boards where boardIDs.contains(board.id) {
       let object =
@@ -219,17 +237,6 @@ extension WorkspaceStore {
       }
       if let place = object["placeID"] as? String {
         add(place, options.canonOnly ? "Place of an attached map" : "Place of \(board.name)")
-      }
-    }
-    var includedLanes = laneIDs
-    var changed = true
-    while changed {
-      changed = false
-      for lane in lanes
-      where lane.parentID.map(includedLanes.contains) == true
-        && !excludedHistory.laneIDs.contains(lane.id)
-      {
-        if includedLanes.insert(lane.id).inserted { changed = true }
       }
     }
     for event in events where placements[event.id].map(includedLanes.contains) == true {
@@ -270,7 +277,8 @@ extension WorkspaceStore {
         try scopedWorkspaceContext(
           worldID: worldID, allowedIDs: allowed, boardIDs: boardIDs, laneIDs: includedLanes,
           boardID: options.includeSelection ? boardID : nil,
-          chronologyLaneID: activeLane, restricted: options.restricted)
+          chronologyLaneID: activeLane, pinnedLaneIDs: pinnedLanes,
+          pinnedHistoryIDs: pinnedHistory, restricted: options.restricted)
       }
     if !referenceSources.isEmpty {
       guard
@@ -371,13 +379,15 @@ extension WorkspaceStore {
 
   private func scopedWorkspaceContext(
     worldID: String, allowedIDs: Set<String>, boardIDs: Set<String>, laneIDs: Set<String>,
-    boardID: String?, chronologyLaneID: String?, restricted: Bool
+    boardID: String?, chronologyLaneID: String?, pinnedLaneIDs: Set<String>,
+    pinnedHistoryIDs: Set<String>, restricted: Bool
   ) throws -> String {
     let raw = try workspaceContext(
       worldID: worldID, boardID: boardID, chronologyLaneID: chronologyLaneID,
       allowedRecordIDs: allowedIDs, includedBoardIDs: restricted ? boardIDs : nil,
       includedLaneIDs: restricted ? laneIDs : nil,
-      preferredBoardIDs: boardIDs, preferredLaneIDs: laneIDs)
+      preferredBoardIDs: boardIDs, preferredLaneIDs: laneIDs,
+      pinnedLaneIDs: pinnedLaneIDs, pinnedHistoryIDs: pinnedHistoryIDs)
     guard var object = try JSONSerialization.jsonObject(with: Data(raw.utf8)) as? [String: Any]
     else { throw SynthesisError.notFound }
     func filter(_ key: String, _ predicate: ([String: Any]) -> Bool) {

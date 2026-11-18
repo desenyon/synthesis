@@ -5,6 +5,30 @@ import Testing
 
 struct StoreTests {
   func fixture() throws -> WorkspaceStore { try WorkspaceStore(path: ":memory:") }
+
+  @Test func lastCanvasArchiveRollsBackIfItsReplacementCannotBeSaved() throws {
+    let store = try fixture()
+    let world = try store.createWorld(name: "Boards")
+    let first = try store.saveBoard(
+      worldID: world.id, name: "First crossing", kind: "canvas", content: "{}")
+    try store.db.execute(
+      """
+      CREATE TRIGGER reject_fallback BEFORE INSERT ON boards BEGIN
+        SELECT RAISE(ABORT, 'cannot save the replacement');
+      END
+      """)
+    #expect(throws: SynthesisError.self) {
+      try store.archiveCanvasBoard(worldID: world.id, id: first.id, blankContent: "{}")
+    }
+    #expect(try store.boards(worldID: world.id, kind: "canvas").map(\.id) == [first.id])
+    #expect(try store.boards(worldID: world.id, kind: "canvas", archived: true).isEmpty)
+    try store.db.execute("DROP TRIGGER reject_fallback")
+    let replacement = try store.archiveCanvasBoard(
+      worldID: world.id, id: first.id, blankContent: "{}")
+    #expect(try store.boards(worldID: world.id, kind: "canvas").map(\.id) == [replacement])
+    try store.setBoardArchived(worldID: world.id, id: first.id, archived: false)
+    #expect(try store.boards(worldID: world.id, kind: "canvas").contains { $0.id == first.id })
+  }
   @Test func persistenceAcrossReopen() throws {
     let path = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).path
     defer {

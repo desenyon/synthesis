@@ -110,4 +110,29 @@ struct TechniqueTreeTests {
     let rules = try store.rules(worldID: copy.id, systemID: copied.id)
     #expect(rules.first { $0.id == edges[0].ruleID }?.title == "Recall")
   }
+
+  @Test func newPrerequisitesCannotAttachToAnExistingLoop() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Legacy tree")
+    let system = try store.createRecord(worldID: world.id, title: "Remembrance", kind: "entity")
+    func rule(_ title: String) throws -> WorldRule {
+      try store.addRule(
+        worldID: world.id, systemID: system.id, kind: .technique, title: title, body: "Example")
+    }
+    let a = try rule("Recall")
+    let b = try rule("Tide sight")
+    let c = try rule("Drowned chart")
+    try store.setPrerequisites(worldID: world.id, ruleID: b.id, requires: [c.id])
+    // Old world archives could contain a loop before this mutation is attempted.
+    let now = timestamp()
+    try store.db.execute(
+      "INSERT INTO rule_prerequisites VALUES(?,?,?,?,0,?,?)",
+      [
+        UUID().uuidString, world.id, c.id, b.id, now, now,
+      ])
+    #expect(throws: SynthesisError.self) {
+      try store.setPrerequisites(worldID: world.id, ruleID: a.id, requires: [b.id])
+    }
+    #expect(try store.prerequisites(worldID: world.id, systemID: system.id).count == 2)
+  }
 }

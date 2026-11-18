@@ -96,11 +96,10 @@ struct UnifiedComposer: View {
         close: { recipesPresented = false })
     }
     .onAppear {
-      loadedWorld = studio.worldID
-      text = studio.draft
-      syncedDraft = studio.draft
+      loadWorldDraft()
       expanded = studio.captureHint == "composer-expanded"
     }
+    .onChange(of: studio.worldID) { _, _ in loadWorldDraft() }
     .onChange(of: studio.draft) { _, value in
       syncedDraft = value
       if value != text { text = value }
@@ -505,10 +504,19 @@ struct UnifiedComposer: View {
       )
       .accessibilityLabel(studio.busy ? "Stop generation" : "Send message")
   }
-  private func commitDraft() {
-    if studio.commitComposer(text: text, worldID: loadedWorld, replacing: syncedDraft) {
-      syncedDraft = text
+  private func loadWorldDraft() {
+    saveTask?.cancel()
+    mentionQuery = nil
+    loadedWorld = studio.worldID
+    syncedDraft = studio.draft
+    text = studio.draft
+  }
+  @discardableResult private func commitDraft() -> Bool {
+    guard studio.commitComposer(text: text, worldID: loadedWorld, replacing: syncedDraft) else {
+      return false
     }
+    syncedDraft = text
+    return true
   }
   private func openRecipes(saveDraft: Bool = false) {
     saveTask?.cancel()
@@ -521,7 +529,7 @@ struct UnifiedComposer: View {
   private func send() {
     guard studio.mode == .assisted, !studio.busy else { return }
     saveTask?.cancel()
-    commitDraft()
+    guard commitDraft() else { return }
     studio.send(keepWorkspace: companion || collapsed)
     text = studio.draft
     if collapsed {

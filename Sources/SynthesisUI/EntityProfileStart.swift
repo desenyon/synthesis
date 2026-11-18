@@ -114,12 +114,19 @@ struct EntityArtworkControl: View {
   var compact = false
   @State private var artwork: RecordArtwork?
   @State private var library = false
-  private var portrait: Bool { Vocabulary.categoryKey(record.category) == "characters" }
+  private var presentation: (title: String, width: CGFloat, height: CGFloat) {
+    switch Vocabulary.categoryKey(record.category) {
+    case "characters": ("Portrait", compact ? 72 : 112, compact ? 72 : 132)
+    case "places": ("Location artwork", compact ? 96 : 144, compact ? 64 : 96)
+    case "systems": ("Banner", compact ? 104 : 168, compact ? 48 : 72)
+    default: ("Artwork", compact ? 72 : 112, compact ? 72 : 112)
+    }
+  }
   var body: some View {
     HStack(alignment: .center, spacing: Space.lg) {
       if let artwork, let image = ImageCache.image(base64: artwork.image) {
         Image(nsImage: image).resizable().scaledToFill()
-          .frame(width: compact ? 72 : 112, height: compact ? 72 : 132).clipped()
+          .frame(width: presentation.width, height: presentation.height).clipped()
           .clipShape(RoundedRectangle(cornerRadius: Metric.cardRadius))
           .accessibilityLabel("Artwork for \(record.title)")
           .workspaceReferenceDraggable(
@@ -128,7 +135,7 @@ struct EntityArtworkControl: View {
       }
       VStack(alignment: .leading, spacing: Space.sm) {
         if !compact || artwork != nil {
-          Text(portrait ? "Portrait" : "Visual reference").font(.studio(.label))
+          Text(presentation.title).font(.studio(.label))
           Text(
             artwork == nil
               ? "Optional. Choose your own image."
@@ -141,7 +148,7 @@ struct EntityArtworkControl: View {
             choose()
           } label: {
             StudioLabel(
-              artwork == nil ? (portrait ? "Add portrait" : "Add artwork") : "Replace",
+              artwork == nil ? "Add \(presentation.title.lowercased())" : "Replace",
               icon: "photo")
           }.buttonStyle(QuietButton(t: studio.t))
           IconMenu(icon: "ellipsis", label: "Artwork options", t: studio.t) {

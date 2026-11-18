@@ -1,0 +1,225 @@
+CAPTURE quick-capture-empty 1440x900, bitmap 2880x1800, 932ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-empty: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-writing 1440x900, bitmap 2880x1800, 920ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-writing: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-other-world 1440x900, bitmap 2880x1800, 894ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-other-world: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-error 1440x900, bitmap 2880x1800, 887ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-error: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-saved 1440x900, bitmap 2880x1800, 928ms
+QUICK_CAPTURE_AUDIT PASS one idea saved, scratch cleared, repeat ignored, canon untouched
+QUICK_CAPTURE_AUDIT PASS quick-capture-saved: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE light-quick-capture-writing 1440x900, bitmap 2880x1800, 943ms
+QUICK_CAPTURE_AUDIT PASS light-quick-capture-writing: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE properties-fields 1440x900, bitmap 2880x1800, 709ms
+CAPTURE light-properties-fields 1440x900, bitmap 2880x1800, 715ms
+CAPTURE entity-types-edit 1440x900, bitmap 2880x1800, 993ms
+CAPTURE properties-template 1440x900, bitmap 2880x1800, 905ms
+CAPTURE relationship-history 1440x900, bitmap 2880x1800, 1436ms
+CAPTURE chronology-hierarchy 1440x900, bitmap 2880x1800, 674ms
+CAPTURE chronology-hierarchy-age 1440x900, bitmap 2880x1800, 689ms
+CAPTURE canvas-reference-events 1440x900, bitmap 2880x1800, 1641ms
+CAPTURE canvas-reference-proposals 1440x900, bitmap 2880x1800, 1618ms
+CAPTURE manual-canvas-reference-atlas 1440x900, bitmap 2880x1800, 1052ms
+CAPTURE canvas-reference-empty 1440x900, bitmap 2880x1800, 1705ms
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE session-writing 1440x900, bitmap 2880x1800, 707ms
+SESSION_AUDIT PASS light-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE light-session-writing 1440x900, bitmap 2880x1800, 715ms
+SESSION_AUDIT PASS manual-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE manual-session-writing 1440x900, bitmap 2880x1800, 121ms
+SESSION_AUDIT PASS session-sections: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-sections 1440x900, bitmap 2880x1800, 685ms
+SESSION_AUDIT PASS session-split: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-split 1440x900, bitmap 2880x1800, 688ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 1440x900, bitmap 2880x1800, 827ms
+CAPTURE profile-artwork 1440x900, bitmap 2880x1800, 703ms
+CAPTURE light-profile-artwork 1440x900, bitmap 2880x1800, 726ms
+CAPTURE profile-artwork-place 1440x900, bitmap 2880x1800, 705ms
+CAPTURE profile-artwork-banner 1440x900, bitmap 2880x1800, 714ms
+CAPTURE atlas-details 1440x900, bitmap 2880x1800, 1600ms
+CAPTURE atlas-new 1440x900, bitmap 2880x1800, 1646ms
+CAPTURE atlas-local 1440x900, bitmap 2880x1800, 692ms
+CAPTURE atlas-hierarchy-selected 1440x900, bitmap 2880x1800, 1701ms
+CAPTURE atlas-hierarchy-empty-parent 1440x900, bitmap 2880x1800, 870ms
+CANVAS_AUDIT PASS fit clears native composer and toolbars
+CANVAS_AUDIT PASS custom toolbar replaces stock controls
+CANVAS_AUDIT PASS custom cards paint above engine
+CANVAS_AUDIT PASS custom pan tool reaches engine
+CANVAS_AUDIT PASS custom zoom control reaches engine
+CANVAS_AUDIT PASS overlay permits real engine card drag (40, 25)
+CANVAS_AUDIT PASS custom undo restores dragged card
+CANVAS_AUDIT PASS custom redo restores move
+CANVAS_AUDIT PASS stored relationship endpoints are locked to their records
+CANVAS_AUDIT PASS stored relationship labels are locked and inspectable
+CANVAS_AUDIT PASS stored relationship rename refreshes label
+CANVAS_AUDIT PASS archived relationship disappears
+CANVAS_AUDIT PASS grouping cards never mixes their record content
+CANVAS_AUDIT PASS image files survive board reload
+CANVAS_AUDIT PASS board reload preserves saved viewport
+CANVAS_AUDIT PASS first-fit acknowledgement contains the committed viewport
+CANVAS_AUDIT PASS dark entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS dark engine selection handles use the same accent
+CANVAS_AUDIT PASS light entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS light engine selection handles use the same accent
+CANVAS_AUDIT PASS oled entity selection uses the shared accent without changing dimensions
+CANVAS_AUDIT PASS oled engine selection handles use the same accent
+CANVAS_AUDIT PASS entity keyboard Escape clears selection
+CANVAS_AUDIT PASS entity keyboard selection is repeatable and selects its grouped content
+CANVAS_AUDIT PASS losing focus clears transient entity hover
+CANVAS_AUDIT PASS manual mode removes canvas AI action
+CANVAS_AUDIT PASS assisted mode restores contextual reference
+CANVAS_AUDIT PASS auto arrangement moves existing records without changing identity
+CANVAS_AUDIT PASS auto arrangement can be undone
+CANVAS_AUDIT PASS record drop rejects foreign sessions and unknown records
+CANVAS_AUDIT PASS record drop rejects invalid viewport coordinates
+CANVAS_AUDIT PASS record drop reaches the live engine
+CANVAS_AUDIT PASS record drop uses current pan and zoom
+CANVAS_AUDIT PASS record drop preserves viewport and avoids duplicate cards
+CANVAS_AUDIT PASS record drop selects the complete card group
+CANVAS_AUDIT PASS record drop move is undoable
+CANVAS_AUDIT PASS new record drop creates a linked card
+CANVAS_AUDIT PASS new record drop can be undone
+CANVAS_AUDIT PASS reference drops reject stale sessions, invalid points and external URLs
+CANVAS_AUDIT PASS a source reference reaches the live engine
+CANVAS_AUDIT PASS reference cards use current pan and zoom without becoming record cards
+CANVAS_AUDIT PASS dropping the reference again moves its card without duplicate links
+CANVAS_AUDIT PASS reference movement is undoable
+CANVAS_AUDIT PASS reference links and placement survive save/load
+CANVAS_AUDIT PASS opening an image reference selects its exact element
+CANVAS_AUDIT PASS board export produces a real PNG
+CANVAS_AUDIT PASS scene persisted after engine audit
+CANVAS_AUDIT PASS persisted board retains records and image files
+CANVAS_AUDIT PASS an unrelated autosave does not acknowledge a pending flush
+CANVAS_AUDIT PASS confirmed retry clears canvas save failure
+CANVAS_AUDIT PASS reviewed placement preserves the viewport
+CANVAS_AUDIT PASS reviewed placement reaches the live engine
+CANVAS_AUDIT PASS repeated board reload retains the viewport
+CANVAS_AUDIT PASS the outgoing canvas stops accepting drops during a board switch
+CANVAS_AUDIT PASS native record drop is acknowledged and saved
+CANVAS_AUDIT PASS native record drop survives a board reload without duplicates
+CANVAS_AUDIT PASS native record drop preserves source lore and canon state
+CANVAS_AUDIT PASS a stale reference drop cannot enter the reloaded board
+CANVAS_AUDIT PASS native event drop confirms a saved reference with board coordinates
+CAPTURE canvas 1440x900, bitmap 2880x1800, 844ms
+CAPTURE graph-neighbourhood-one 1440x900, bitmap 2880x1800, 3771ms
+CAPTURE graph-neighbourhood-two 1440x900, bitmap 2880x1800, 3860ms
+CAPTURE request-pins 1440x900, bitmap 2880x1800, 955ms
+CAPTURE request-pins-browser 1440x900, bitmap 2880x1800, 2228ms
+CAPTURE atlas-regions 1440x900, bitmap 2880x1800, 865ms
+CAPTURE quick-capture-empty 1024x768, bitmap 2048x1536, 574ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-empty: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-writing 1024x768, bitmap 2048x1536, 579ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-writing: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-other-world 1024x768, bitmap 2048x1536, 581ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-other-world: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-error 1024x768, bitmap 2048x1536, 550ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-error: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE quick-capture-saved 1024x768, bitmap 2048x1536, 555ms
+QUICK_CAPTURE_AUDIT PASS one idea saved, scratch cleared, repeat ignored, canon untouched
+QUICK_CAPTURE_AUDIT PASS quick-capture-saved: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE light-quick-capture-writing 1024x768, bitmap 2048x1536, 575ms
+QUICK_CAPTURE_AUDIT PASS light-quick-capture-writing: native nonactivating panel, 560pt, world-scoped draft
+CAPTURE properties-fields 1024x768, bitmap 2048x1536, 469ms
+CAPTURE light-properties-fields 1024x768, bitmap 2048x1536, 473ms
+CAPTURE entity-types-edit 1024x768, bitmap 2048x1536, 690ms
+CAPTURE properties-template 1024x768, bitmap 2048x1536, 611ms
+CAPTURE relationship-history 1024x768, bitmap 2048x1536, 1023ms
+CAPTURE chronology-hierarchy 1024x768, bitmap 2048x1536, 448ms
+CAPTURE chronology-hierarchy-age 1024x768, bitmap 2048x1536, 444ms
+CAPTURE canvas-reference-events 1024x768, bitmap 2048x1536, 1045ms
+CAPTURE canvas-reference-proposals 1024x768, bitmap 2048x1536, 1041ms
+CAPTURE manual-canvas-reference-atlas 1024x768, bitmap 2048x1536, 677ms
+CAPTURE canvas-reference-empty 1024x768, bitmap 2048x1536, 1100ms
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE session-writing 1024x768, bitmap 2048x1536, 458ms
+SESSION_AUDIT PASS light-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE light-session-writing 1024x768, bitmap 2048x1536, 469ms
+SESSION_AUDIT PASS manual-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE manual-session-writing 1024x768, bitmap 2048x1536, 100ms
+SESSION_AUDIT PASS session-sections: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-sections 1024x768, bitmap 2048x1536, 457ms
+SESSION_AUDIT PASS session-split: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-split 1024x768, bitmap 2048x1536, 428ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 1024x768, bitmap 2048x1536, 548ms
+CAPTURE profile-artwork 1024x768, bitmap 2048x1536, 463ms
+CAPTURE light-profile-artwork 1024x768, bitmap 2048x1536, 482ms
+CAPTURE profile-artwork-place 1024x768, bitmap 2048x1536, 473ms
+CAPTURE profile-artwork-banner 1024x768, bitmap 2048x1536, 435ms
+CAPTURE atlas-details 1024x768, bitmap 2048x1536, 981ms
+CAPTURE atlas-new 1024x768, bitmap 2048x1536, 1012ms
+CAPTURE atlas-local 1024x768, bitmap 2048x1536, 533ms
+CAPTURE atlas-hierarchy-selected 1024x768, bitmap 2048x1536, 1058ms
+CAPTURE atlas-hierarchy-empty-parent 1024x768, bitmap 2048x1536, 551ms
+CAPTURE canvas 1024x768, bitmap 2048x1536, 543ms
+CAPTURE graph-neighbourhood-one 1024x768, bitmap 2048x1536, 1934ms
+CAPTURE graph-neighbourhood-two 1024x768, bitmap 2048x1536, 1664ms
+CAPTURE request-pins 1024x768, bitmap 2048x1536, 598ms
+CAPTURE request-pins-browser 1024x768, bitmap 2048x1536, 1394ms
+CAPTURE atlas-regions 1024x768, bitmap 2048x1536, 551ms
+CAPTURE quick-capture-empty 720x800, bitmap 1440x1600, 549ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-empty: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE quick-capture-writing 720x800, bitmap 1440x1600, 534ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-writing: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE quick-capture-other-world 720x800, bitmap 1440x1600, 527ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-other-world: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE quick-capture-error 720x800, bitmap 1440x1600, 556ms
+QUICK_CAPTURE_AUDIT PASS quick-capture-error: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE quick-capture-saved 720x800, bitmap 1440x1600, 532ms
+QUICK_CAPTURE_AUDIT PASS one idea saved, scratch cleared, repeat ignored, canon untouched
+QUICK_CAPTURE_AUDIT PASS quick-capture-saved: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE light-quick-capture-writing 720x800, bitmap 1440x1600, 557ms
+QUICK_CAPTURE_AUDIT PASS light-quick-capture-writing: native nonactivating panel, 420pt, world-scoped draft
+CAPTURE properties-fields 720x800, bitmap 1440x1600, 353ms
+CAPTURE light-properties-fields 720x800, bitmap 1440x1600, 356ms
+CAPTURE entity-types-edit 720x800, bitmap 1440x1600, 519ms
+CAPTURE properties-template 720x800, bitmap 1440x1600, 471ms
+CAPTURE relationship-history 720x800, bitmap 1440x1600, 928ms
+CAPTURE chronology-hierarchy 720x800, bitmap 1440x1600, 314ms
+CAPTURE chronology-hierarchy-age 720x800, bitmap 1440x1600, 338ms
+CAPTURE canvas-reference-events 720x800, bitmap 1440x1600, 835ms
+CAPTURE canvas-reference-proposals 720x800, bitmap 1440x1600, 816ms
+CAPTURE manual-canvas-reference-atlas 720x800, bitmap 1440x1600, 538ms
+CAPTURE canvas-reference-empty 720x800, bitmap 1440x1600, 856ms
+SESSION_AUDIT PASS session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE session-writing 720x800, bitmap 1440x1600, 356ms
+SESSION_AUDIT PASS light-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE light-session-writing 720x800, bitmap 1440x1600, 351ms
+SESSION_AUDIT PASS manual-session-writing: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh native editor restored the selected text
+CAPTURE manual-session-writing 720x800, bitmap 1440x1600, 69ms
+SESSION_AUDIT PASS session-sections: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-sections 720x800, bitmap 1440x1600, 339ms
+SESSION_AUDIT PASS session-split: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+CAPTURE session-split 720x800, bitmap 1440x1600, 347ms
+SESSION_AUDIT PASS session-canvas: new native root restored views, tabs, selection and latest draft; lore/mode unchanged
+SESSION_AUDIT PASS fresh Canvas engine restores selection, viewport and stored cards
+CAPTURE session-canvas 720x800, bitmap 1440x1600, 421ms
+CAPTURE profile-artwork 720x800, bitmap 1440x1600, 371ms
+CAPTURE light-profile-artwork 720x800, bitmap 1440x1600, 332ms
+CAPTURE profile-artwork-place 720x800, bitmap 1440x1600, 356ms
+CAPTURE profile-artwork-banner 720x800, bitmap 1440x1600, 355ms
+CAPTURE atlas-details 720x800, bitmap 1440x1600, 873ms
+CAPTURE atlas-new 720x800, bitmap 1440x1600, 848ms
+CAPTURE atlas-local 720x800, bitmap 1440x1600, 426ms
+CAPTURE atlas-hierarchy-selected 720x800, bitmap 1440x1600, 939ms
+CAPTURE atlas-hierarchy-empty-parent 720x800, bitmap 1440x1600, 399ms
+CAPTURE canvas 720x800, bitmap 1440x1600, 431ms
+CAPTURE graph-neighbourhood-one 720x800, bitmap 1440x1600, 1841ms
+CAPTURE graph-neighbourhood-two 720x800, bitmap 1440x1600, 1564ms
+CAPTURE request-pins 720x800, bitmap 1440x1600, 574ms
+CAPTURE request-pins-browser 720x800, bitmap 1440x1600, 1192ms
+CAPTURE atlas-regions 720x800, bitmap 1440x1600, 424ms
+Native captures complete: /private/tmp/synthesis-expansion-434a7cc/wave-2-capture

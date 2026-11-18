@@ -112,7 +112,8 @@ extension WorkspaceStore {
     worldID: String, boardID: String? = nil, chronologyLaneID: String? = nil,
     allowedRecordIDs: Set<String>? = nil, includedBoardIDs: Set<String>? = nil,
     includedLaneIDs: Set<String>? = nil, preferredBoardIDs: Set<String> = [],
-    preferredLaneIDs: Set<String> = []
+    preferredLaneIDs: Set<String> = [], pinnedLaneIDs: Set<String> = [],
+    pinnedHistoryIDs: Set<String> = []
   ) throws -> String {
     let records = try records(worldID: worldID).filter { allowedRecordIDs?.contains($0.id) ?? true }
     let known = Set(records.map(\.id))
@@ -156,7 +157,9 @@ extension WorkspaceStore {
     }
     let events = try events(worldID: worldID).filter { known.contains($0.sourceID) }
     func lanePriority(_ lane: ChronologyLane) -> Int {
-      lane.id == chronologyLaneID ? 0 : preferredLaneIDs.contains(lane.id) ? 1 : 2
+      if pinnedLaneIDs.contains(lane.id) { return 0 }
+      if lane.id == chronologyLaneID { return 1 }
+      return preferredLaneIDs.contains(lane.id) ? 2 : 3
     }
     let lanes = try chronologyLanes(worldID: worldID).filter {
       includedLaneIDs?.contains($0.id) ?? true
@@ -165,6 +168,15 @@ extension WorkspaceStore {
       throw SynthesisError.notFound
     }
     let placements = try chronologyPlacements(worldID: worldID)
+    let shownLanes = lanes.prefix(60)
+    let placedInPinnedHistory = pinnedHistoryIDs.intersection(shownLanes.map(\.id))
+    func eventPriority(_ event: WorldEvent) -> Int {
+      guard let laneID = placements[event.id] else { return 2 }
+      if pinnedLaneIDs.contains(laneID) { return 0 }
+      return placedInPinnedHistory.contains(laneID) ? 1 : 2
+    }
+    let shownEvents = events.sorted { eventPriority($0) < eventPriority($1) }.prefix(60)
+    let shownEventIDs = Set(shownEvents.map(\.id))
     let object: [String: Any] = [
       "activeChronologyLane": chronologyLaneID ?? "",
       "records": records.prefix(100).map {
@@ -195,14 +207,14 @@ extension WorkspaceStore {
       "relationships": relations.prefix(100).map {
         ["id": $0.id, "source": $0.sourceID, "target": $0.targetID, "label": $0.label]
       },
-      "chronology": lanes.prefix(60).map {
+      "chronology": shownLanes.map {
         [
           "id": $0.id, "name": $0.name, "kind": $0.kind, "parent": $0.parentID ?? "",
           "start": $0.start, "end": $0.end,
         ]
       },
-      "eventPlacement": placements.filter { key, _ in events.prefix(60).contains { $0.id == key } },
-      "events": events.prefix(60).map {
+      "eventPlacement": placements.filter { key, _ in shownEventIDs.contains(key) },
+      "events": shownEvents.map {
         ["id": $0.id, "title": $0.title, "date": $0.dateLabel, "source": $0.sourceID]
       },
       "boards": boards,

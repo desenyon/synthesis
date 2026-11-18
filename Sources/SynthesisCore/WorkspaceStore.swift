@@ -600,6 +600,21 @@ public final class WorkspaceStore {
       "UPDATE boards SET archived=?,updated_at=? WHERE id=? AND world_id=?",
       [archived ? "1" : "0", timestamp(), id, worldID])
   }
+  public func archiveCanvasBoard(worldID: String, id: String, blankContent: String) throws -> String
+  {
+    try db.transaction {
+      let active = try db.rows(
+        "SELECT id FROM boards WHERE world_id=? AND kind='canvas' AND archived=0 ORDER BY created_at,rowid",
+        [worldID]
+      ).compactMap { $0["id"] }
+      guard active.contains(id) else { throw SynthesisError.notFound }
+      try setBoardArchived(worldID: worldID, id: id, archived: true)
+      if let next = active.first(where: { $0 != id }) { return next }
+      return try saveBoard(
+        worldID: worldID, name: "Untitled board", kind: "canvas", content: blankContent
+      ).id
+    }
+  }
   public func unlinkRecord(worldID: String, source: String, target: String) throws {
     _ = try world(worldID)
     try db.execute(

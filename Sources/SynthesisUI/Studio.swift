@@ -586,10 +586,16 @@ public struct Toast: Identifiable {
     -> Bool
   {
     guard worldID == self.worldID, draft == base else { return false }
+    if draft != text {
+      do {
+        try store.setPreference("composer:\(worldID)", value: text)
+      } catch {
+        self.error = error.localizedDescription
+        return false
+      }
+      draft = text
+    }
     if pendingComposer?.world == worldID, pendingComposer?.text == text { pendingComposer = nil }
-    guard draft != text else { return true }
-    draft = text
-    persistComposer()
     return true
   }
   public func persistComposer() {

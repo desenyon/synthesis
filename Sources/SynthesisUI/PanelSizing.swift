@@ -73,6 +73,7 @@ extension Studio {
 /// A native splitter supplies pointer tracking, keyboard adjustment and accessibility
 /// without depending on a transparent SwiftUI shape becoming an accessibility element.
 struct PanelResizeHandle: View {
+  static let width: CGFloat = 9
   @ObservedObject var studio: Studio
   let panel: StudioPanel
   var displayedWidth: Double?
@@ -82,7 +83,7 @@ struct PanelResizeHandle: View {
     PanelResizeControl(
       studio: studio, panel: panel, displayedWidth: displayedWidth,
       maximum: maximum, divider: divider
-    ).frame(width: 9).frame(maxHeight: .infinity)
+    ).frame(width: Self.width).frame(maxHeight: .infinity)
   }
 }
 

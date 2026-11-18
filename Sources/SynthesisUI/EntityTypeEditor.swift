@@ -279,7 +279,7 @@ struct EntityTypeEditor: View {
                 }
               }
             } label: {
-              StudioLabel("Previous versions", icon: "clock")
+              StudioLabel("Previous versions", icon: "clock.arrow.circlepath")
             }
           }
           HStack {
@@ -580,7 +580,7 @@ struct EntityTemplateEditor: View {
                 }
               }
             } label: {
-              StudioLabel("Previous versions", icon: "clock")
+              StudioLabel("Previous versions", icon: "clock.arrow.circlepath")
             }
           }
           FormField(

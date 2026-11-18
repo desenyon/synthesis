@@ -55,14 +55,23 @@ extension WorkspaceStore {
       for (edge, _, _) in stored where edge.ruleID != ruleID {
         graph[edge.ruleID, default: []].insert(edge.requiresID)
       }
-      var remaining = Array(wanted)
-      var visited = Set<String>()
+      graph[ruleID] = wanted
+      var remaining = [(id: ruleID, leaving: false)]
+      var visiting = Set<String>()
+      var completed = Set<String>()
       while let node = remaining.popLast() {
-        guard node != ruleID else {
+        if node.leaving {
+          visiting.remove(node.id)
+          completed.insert(node.id)
+          continue
+        }
+        if completed.contains(node.id) { continue }
+        guard visiting.insert(node.id).inserted else {
           throw SynthesisError.invalid(
             "That would make a loop: a technique cannot, through others, require itself.")
         }
-        if visited.insert(node).inserted { remaining.append(contentsOf: graph[node] ?? []) }
+        remaining.append((node.id, true))
+        remaining.append(contentsOf: (graph[node.id] ?? []).map { ($0, false) })
       }
       let now = timestamp()
       for id in current.subtracting(wanted).sorted() {

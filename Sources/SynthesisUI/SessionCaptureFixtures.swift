@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import SynthesisCore
 
@@ -38,7 +39,6 @@ extension Studio {
     updatePreferences { $0.launchWorkspace = "remember" }
     try store.setPreference("theme", value: dark ? "dark" : "light")
     if let record = selectedRecord {
-      editorPositions[record.id] = EditorPosition(location: 4, length: 3, scrollY: 0)
       if state.hasSuffix("sections") { openRecordTab(.sections, recordID: record.id) }
       if let other = records.first(where: { $0.title == "The Glass Sea" && $0.id != record.id }) {
         retainDocument(other)
@@ -108,6 +108,17 @@ extension Studio {
     if !state.hasSuffix("canvas"), !(await flushCanvas()) {
       throw SynthesisError.invalid("Session capture could not save its original Canvas.")
     }
+    let editorID = selectedRecord?.id
+    let range = NSRange(location: 4, length: 3)
+    if let record = selectedRecord {
+      let handle = editorHandle(for: record)
+      if let view = handle.view {
+        view.setSelectedRange(range)
+      } else {
+        handle.pendingPosition = EditorPosition(
+          location: range.location, length: range.length, scrollY: 0)
+      }
+    }
     pendingComposer = (worldID, expectedDraft, draft)
     guard saveSessionForClose() else {
       throw SynthesisError.invalid("Session capture could not save its original workspace.")
@@ -125,11 +136,24 @@ extension Studio {
       reopened.documentSession == documentSession, reopened.recordTabs == recordTabs,
       reopened.error == nil
     else { throw SynthesisError.invalid("Session reconstruction differed for \(state).") }
+    if let editorID {
+      guard let position = reopened.editorPositions[editorID], position.location == range.location,
+        position.length == range.length
+      else { throw SynthesisError.invalid("Session reconstruction lost the selected text.") }
+    }
     reopened.captureHint = state
     print(
       "SESSION_AUDIT PASS \(state): new native root restored views, tabs, selection and latest draft; lore/mode unchanged"
     )
     return reopened
+  }
+
+  public func auditRestoredWritingSession() throws {
+    guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil,
+      let record = selectedRecord,
+      editorHandle(for: record).view?.selectedRange() == NSRange(location: 4, length: 3)
+    else { throw SynthesisError.invalid("The reopened editor did not select the saved text.") }
+    print("SESSION_AUDIT PASS fresh native editor restored the selected text")
   }
 
   /// Compare the newly mounted engine with its pre-reconstruction state. The expectation is

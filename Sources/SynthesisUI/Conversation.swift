@@ -348,7 +348,7 @@ struct ConversationStudio: View {
               proxy.scrollTo("latest", anchor: .bottom)
             }
           } label: {
-            StudioLabel("Latest", icon: "arrow.down").font(.studio(size: 12.5, weight: .medium))
+            StudioLabel("Latest", icon: "chevron.down").font(.studio(size: 12.5, weight: .medium))
               .padding(.horizontal, 12).padding(.vertical, 8).floatingPanel(studio.t)
           }.buttonStyle(.plain).padding(16).transition(
             .opacity.combined(with: .move(edge: .bottom)))

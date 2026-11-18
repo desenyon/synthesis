@@ -65,7 +65,6 @@ extension QuickCaptureController {
     panel.setContentSize(NSSize(width: screenSize.width <= 720 ? 420 : 560, height: 330))
     panel.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
     panel.orderBack(nil)
-    panel.layoutWindowControls()
     defer { panel.orderOut(nil) }
     try await Task.sleep(for: .milliseconds(180))
     guard !panel.isKeyWindow, !panel.isMainWindow, !NSApp.isActive,
@@ -73,10 +72,24 @@ extension QuickCaptureController {
     else { throw SynthesisError.invalid("Quick capture fixture unexpectedly took focus.") }
     view.layoutSubtreeIfNeeded()
     view.displayIfNeeded()
+    // A reused offscreen panel can finish laying out its title bar after orderBack.
+    panel.layoutWindowControls()
     guard let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else {
       throw SynthesisError.invalid("Could not allocate the quick capture image.")
     }
     view.cacheDisplay(in: view.bounds, to: bitmap)
+    let headerCenter =
+      view.isFlipped
+      ? view.bounds.minY + QuickCapturePanel.headerHeight / 2
+      : view.bounds.maxY - QuickCapturePanel.headerHeight / 2
+    let buttons: [NSWindow.ButtonType] = [.closeButton, .miniaturizeButton, .zoomButton]
+    for type in buttons {
+      guard let button = panel.standardWindowButton(type),
+        abs(view.convert(button.bounds, from: button).midY - headerCenter) <= 1
+      else {
+        throw SynthesisError.invalid("Quick capture title-bar controls are not centered.")
+      }
+    }
     guard let png = bitmap.representation(using: .png, properties: [:]) else {
       throw SynthesisError.invalid("Could not encode the quick capture image.")
     }

@@ -459,9 +459,15 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       throw SynthesisError.invalid("Could not allocate a capture bitmap.")
     }
     frameView.cacheDisplay(in: frameView.bounds, to: bitmap)
-    if web, let webView = studio.canvasWebView as? WKWebView, webView.window === window,
-      let image = try? await webView.takeSnapshot(configuration: nil)
-    {
+    if web {
+      guard let webView = studio.canvasWebView as? WKWebView, webView.window === window else {
+        throw SynthesisError.invalid("The Canvas was not mounted for capture.")
+      }
+      let rect = webView.convert(webView.bounds, to: frameView)
+      guard frameView.bounds.insetBy(dx: -1, dy: -1).contains(rect) else {
+        throw SynthesisError.invalid("Canvas viewport \(rect) extended beyond the window.")
+      }
+      let image = try await webView.takeSnapshot(configuration: nil)
       lay(image, from: webView, into: bitmap, of: frameView)
     }
     guard let png = bitmap.representation(using: .png, properties: [:]) else {
@@ -609,6 +615,9 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
           try await Task.sleep(for: .milliseconds(200))
           if state == "session-canvas" {
             try await studio.auditRestoredCanvasSession()
+          }
+          if state.hasSuffix("session-writing") {
+            try studio.auditRestoredWritingSession()
           }
           if state != "toast" { studio.toast = nil }
           window.layoutTrafficLights()

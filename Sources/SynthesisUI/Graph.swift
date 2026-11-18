@@ -35,6 +35,10 @@ struct RelationshipGraph: View {
     get { studio.graphSelectedID }
     nonmutating set { studio.graphSelectedID = newValue }
   }
+  private var neighborhood: GraphNeighborhood? {
+    get { studio.graphView.neighborhood }
+    nonmutating set { studio.graphView.neighborhood = newValue }
+  }
   @State private var connecting: String?
   @State private var hoveredEdge: String?
   private var zoom: Double {
@@ -59,29 +63,43 @@ struct RelationshipGraph: View {
     query.isEmpty || entity.title.localizedCaseInsensitiveContains(query)
       || entity.category.localizedCaseInsensitiveContains(query)
   }
+  private func neighborhoodProjection(_ nodes: [LoreRecord]) -> GraphNeighborhood.Projection? {
+    neighborhood?.project(
+      nodeIDs: Set(nodes.map(\.id)), edges: relationships.map { ($0.sourceID, $0.targetID) })
+  }
   var body: some View {
-    let nodes = entities
+    let allNodes = entities
+    let projection = neighborhoodProjection(allNodes)
+    let nodes =
+      projection.map { visible in allNodes.filter { visible.nodeIDs.contains($0.id) } }
+      ?? allNodes
+    let edges =
+      projection.map { visible in
+        relationships.filter {
+          visible.nodeIDs.contains($0.sourceID) && visible.nodeIDs.contains($0.targetID)
+        }
+      } ?? relationships
     VStack(spacing: 0) {
       WorkspaceBar(studio: studio) {
         BarTitle(
           icon: Destination.knowledge.icon, title: "Graph",
           detail:
-            "\(nodes.count) \(nodes.count == 1 ? "entity" : "entities") · \(relationships.count) \(relationships.count == 1 ? "relationship" : "relationships")",
+            "\(nodes.count) \(nodes.count == 1 ? "entity" : "entities") · \(edges.count) \(edges.count == 1 ? "relationship" : "relationships")",
           t: studio.t)
       } trailing: {
         SearchField(text: $studio.graphView.query, placeholder: "Find an entity", t: studio.t)
           .frame(minWidth: 120, idealWidth: 200, maxWidth: 200)
         BarAction(
-          title: selected == nil ? "Copy to canvas" : "Copy neighbourhood",
+          title: selected == nil && neighborhood == nil ? "Copy to canvas" : "Copy neighbourhood",
           icon: "rectangle.on.rectangle", t: studio.t,
           help: "Create an editable board from what is shown. The graph itself is not changed."
         ) { transferToCanvas() }.disabled(nodes.isEmpty)
         BarAction(
           title: "Relationship", icon: "plus", t: studio.t, primary: true,
-          help: nodes.count < 2 ? "Create two entities first" : "Connect two entities"
+          help: allNodes.count < 2 ? "Create two entities first" : "Connect two entities"
         ) {
           beginRelationship(from: selected ?? nodes.first?.id ?? "")
-        }.disabled(nodes.count < 2)
+        }.disabled(allNodes.count < 2)
       }
       if nodes.isEmpty {
         EmptyState(
@@ -96,7 +114,7 @@ struct RelationshipGraph: View {
           }.buttonStyle(QuietButton(t: studio.t, primary: true))
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
-        graph(nodes)
+        graph(nodes, edges: edges, projection: projection)
       }
     }
     .onAppear {
@@ -111,7 +129,13 @@ struct RelationshipGraph: View {
         studio.perform { beginRelationshipEdit(try studio.relationshipMetadataCaptureRelation()) }
       }
     }
-    .onChange(of: selected) { _, _ in hoveredEdge = nil }
+    .onChange(of: selected) { _, id in
+      hoveredEdge = nil
+      if let id, let projection = neighborhoodProjection(entities), !projection.nodeIDs.contains(id)
+      {
+        showNeighborhood(nil)
+      }
+    }
     .onChange(of: controlActiveState) { _, _ in hoveredEdge = nil }
     .onChange(of: studio.worldRevision) { _, _ in refresh() }
     .onDisappear {
@@ -140,12 +164,16 @@ struct RelationshipGraph: View {
     hoveredEdge == edge.id || selected == nil || selected == edge.sourceID
       || selected == edge.targetID
   }
-  private func curve(_ edge: Relation, _ size: CGSize, lanes: [String: Double]) -> GraphRoute? {
+  private func curve(
+    _ edge: Relation, _ size: CGSize, lanes: [String: Double], nodes: [String]
+  ) -> GraphRoute? {
     guard layout[edge.sourceID] != nil, layout[edge.targetID] != nil else { return nil }
     return GraphRoute.between(
       point(edge.sourceID, size), point(edge.targetID, size),
       scale: zoom, lane: (lanes[edge.id] ?? 0) * zoom, cardSize: detailLevel.cardSize,
-      obstacles: layout.keys.filter { $0 != edge.sourceID && $0 != edge.targetID }.map {
+      obstacles: nodes.filter {
+        $0 != edge.sourceID && $0 != edge.targetID && layout[$0] != nil
+      }.map {
         let centre = point($0, size)
         return CGRect(
           x: centre.x - detailLevel.cardSize.width * zoom / 2,
@@ -153,19 +181,22 @@ struct RelationshipGraph: View {
           width: detailLevel.cardSize.width * zoom, height: detailLevel.cardSize.height * zoom)
       })
   }
-  private func graph(_ nodes: [LoreRecord]) -> some View {
+  private func graph(
+    _ nodes: [LoreRecord], edges: [Relation], projection: GraphNeighborhood.Projection?
+  ) -> some View {
     GeometryReader { geo in
+      let ids = nodes.map(\.id)
       let lanes = edgeLanes(
-        relationships.map {
+        edges.map {
           DisplayEdge(id: $0.id, source: $0.sourceID, target: $0.targetID, label: $0.label)
         }, spacing: 30)
       let routes = Dictionary(
-        uniqueKeysWithValues: relationships.compactMap { edge in
-          curve(edge, geo.size, lanes: lanes).map { (edge.id, $0) }
+        uniqueKeysWithValues: edges.compactMap { edge in
+          curve(edge, geo.size, lanes: lanes, nodes: ids).map { (edge.id, $0) }
         })
       ZStack {
         Canvas { context, size in
-          for edge in relationships {
+          for edge in edges {
             guard let c = routes[edge.id] else { continue }
             let strong = emphasized(edge)
             let color = studio.t.accent.opacity(strong ? (hoveredEdge == edge.id ? 1 : 0.7) : 0.16)
@@ -214,13 +245,13 @@ struct RelationshipGraph: View {
             connecting = nil
             return true
           })
-        ForEach(relationships) { edge in
+        ForEach(edges) { edge in
           if let route = routes[edge.id] { edgeControl(edge, route: route) }
         }
         ForEach(nodes.filter { visible($0.id, in: geo.size) }) { entity in
-          node(entity, size: geo.size)
+          node(entity, size: geo.size, edges: edges)
         }
-        if relationships.isEmpty || connecting != nil {
+        if (edges.isEmpty && neighborhood == nil) || connecting != nil {
           Text(
             connecting == nil
               ? "Choose a card’s connector to link two entities."
@@ -234,17 +265,29 @@ struct RelationshipGraph: View {
           if !studio.focusMode && !studio.workspaceInspector,
             let entity = nodes.first(where: { $0.id == selected })
           {
-            detail(entity).frame(
+            detail(entity, edges: edges).frame(
               maxWidth: .infinity, alignment: studio.companionExpanded ? .leading : .trailing
             )
             .id(entity.id).transition(Motion.panelTransition)
           }
           Spacer(minLength: 0)
-          HStack {
-            Spacer()
-            ZoomControls(
-              zoom: zoom, t: studio.t, zoomOut: { stepZoom(1 / 1.2) },
-              zoomIn: { stepZoom(1.2) }, fit: { frame(geo.size) })
+          let zoomControls = ZoomControls(
+            zoom: zoom, t: studio.t, zoomOut: { stepZoom(1 / 1.2) },
+            zoomIn: { stepZoom(1.2) }, fit: { frame(geo.size) })
+          if let neighborhood, let projection {
+            ViewThatFits(in: .horizontal) {
+              HStack {
+                neighborhoodControls(neighborhood, projection: projection).fixedSize()
+                Spacer(minLength: 8)
+                zoomControls.fixedSize()
+              }
+              VStack(alignment: .trailing, spacing: 6) {
+                neighborhoodControls(neighborhood, projection: projection)
+                zoomControls
+              }.frame(maxWidth: .infinity, alignment: .trailing)
+            }
+          } else {
+            zoomControls.frame(maxWidth: .infinity, alignment: .trailing)
           }
         }.padding(14).animation(reduceMotion ? nil : Motion.panelAnimation, value: selected)
       }
@@ -324,17 +367,18 @@ struct RelationshipGraph: View {
       }
   }
 
-  private func node(_ entity: LoreRecord, size: CGSize) -> some View {
+  private func node(_ entity: LoreRecord, size: CGSize, edges: [Relation]) -> some View {
     let tint = studio.t.category(entity.category)
     let isSelected = selected == entity.id
     let neighbour =
       selected == nil || isSelected
-      || relationships.contains {
+      || neighborhood != nil
+      || edges.contains {
         ($0.sourceID == selected && $0.targetID == entity.id)
           || ($0.targetID == selected && $0.sourceID == entity.id)
       }
     let dim = !neighbour || !matches(entity)
-    let count = relationships.filter { $0.sourceID == entity.id || $0.targetID == entity.id }.count
+    let count = edges.filter { $0.sourceID == entity.id || $0.targetID == entity.id }.count
     return VStack(alignment: .leading, spacing: 0) {
       if detailLevel == .overview {
         HStack(spacing: 9) {
@@ -418,6 +462,7 @@ struct RelationshipGraph: View {
       .contextMenu {
         Button("Open record") { studio.openRecord(entity) }
         Button("Inspect") { studio.inspect(.record(entity.id)) }
+        Button("Explore neighbourhood") { exploreNeighborhood(around: entity.id) }
         Button("Connect from here…") {
           beginRelationship(from: entity.id)
         }.disabled(entities.count < 2)
@@ -430,6 +475,9 @@ struct RelationshipGraph: View {
       .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
       .accessibilityAction { selected = entity.id }
       .accessibilityAction(named: "Open record") { studio.openRecord(entity) }
+      .accessibilityAction(named: "Explore neighbourhood") {
+        exploreNeighborhood(around: entity.id)
+      }
   }
   private func beginRelationship(from id: String, to other: String? = nil) {
     connecting = nil
@@ -453,13 +501,13 @@ struct RelationshipGraph: View {
     )
     .accessibilityLabel("Connect \(entity.title)")
   }
-  private func detail(_ entity: LoreRecord) -> some View {
-    detailContent(entity).padding(14).frame(width: 290)
+  private func detail(_ entity: LoreRecord, edges: [Relation]) -> some View {
+    detailContent(entity, edges: edges).padding(14).frame(width: 290)
       .floatingPanel(studio.t, radius: Metric.cardRadius)
       .accessibilityElement(children: .contain).accessibilityLabel("Entity details")
   }
-  private func detailContent(_ entity: LoreRecord) -> some View {
-    let related = relationships.filter { $0.sourceID == entity.id || $0.targetID == entity.id }
+  private func detailContent(_ entity: LoreRecord, edges: [Relation]) -> some View {
+    let related = edges.filter { $0.sourceID == entity.id || $0.targetID == entity.id }
     return VStack(alignment: .leading, spacing: 12) {
       HStack(alignment: .top, spacing: 10) {
         CategoryTile(record: entity, t: studio.t, size: 32)
@@ -474,6 +522,11 @@ struct RelationshipGraph: View {
           }
         }
         Spacer(minLength: 0)
+        IconButton(
+          icon: "point.3.connected.trianglepath.dotted", label: "Explore neighbourhood",
+          t: studio.t, active: neighborhood?.rootID == entity.id, size: 22
+        ) { exploreNeighborhood(around: entity.id) }
+        .disabled(neighborhood?.rootID == entity.id)
         IconButton(icon: "xmark", label: "Clear selection", t: studio.t, size: 22) {
           selected = nil
         }
@@ -509,6 +562,45 @@ struct RelationshipGraph: View {
       }
     }
   }
+  private func neighborhoodControls(
+    _ scope: GraphNeighborhood, projection: GraphNeighborhood.Projection
+  ) -> some View {
+    HStack(spacing: 2) {
+      IconButton(icon: "minus", label: "Show one fewer degree", t: studio.t) {
+        showNeighborhood(GraphNeighborhood(rootID: scope.rootID, depth: scope.depth - 1))
+      }.disabled(scope.depth <= 1)
+      Text("\(scope.depth) \(scope.depth == 1 ? "degree" : "degrees")")
+        .font(.studio(.captionStrong)).monospacedDigit().foregroundStyle(studio.t.secondary)
+        .padding(.horizontal, 4)
+      IconButton(icon: "plus", label: "Expand one degree", t: studio.t) {
+        showNeighborhood(GraphNeighborhood(rootID: scope.rootID, depth: scope.depth + 1))
+      }.disabled(!projection.canExpand)
+      IconButton(icon: "xmark", label: "Show the full graph", t: studio.t) {
+        showNeighborhood(nil)
+      }
+    }.padding(3).floatingPanel(studio.t)
+      .accessibilityElement(children: .contain)
+      .accessibilityLabel("Neighbourhood of \(name(scope.rootID))")
+  }
+
+  private func exploreNeighborhood(around id: String) {
+    guard neighborhood?.rootID != id else { return }
+    selected = id
+    showNeighborhood(GraphNeighborhood(rootID: id, depth: 1))
+  }
+
+  private func showNeighborhood(_ scope: GraphNeighborhood?) {
+    neighborhood = scope
+    connecting = nil
+    hoveredEdge = nil
+    if let scope, let selected, let projection = neighborhoodProjection(entities),
+      !projection.nodeIDs.contains(selected)
+    {
+      self.selected = scope.rootID
+    }
+    frame(area)
+  }
+
   private func name(_ id: String) -> String {
     studio.records.first { $0.id == id }?.title ?? "Unknown"
   }
@@ -565,7 +657,16 @@ struct RelationshipGraph: View {
           }
         }
       }
-      if let selected, !nodes.contains(selected) { self.selected = nil }
+      if let neighborhood, !nodes.contains(neighborhood.rootID) { self.neighborhood = nil }
+      if let selected {
+        if !nodes.contains(selected) {
+          self.selected = nil
+        } else if let projection = neighborhoodProjection(entities),
+          !projection.nodeIDs.contains(selected)
+        {
+          self.neighborhood = nil
+        }
+      }
     }
   }
   private func changeZoom(_ factor: Double, anchor: CGPoint = .zero) {
@@ -577,11 +678,15 @@ struct RelationshipGraph: View {
   private func stepZoom(_ factor: Double) {
     withAnimation(reduceMotion ? nil : Motion.panelAnimation) { changeZoom(factor) }
   }
-  /// Centres and scales the whole graph into the visible area.
+  /// Centres and scales the displayed graph into the visible area.
   private func frame(_ size: CGSize, animated: Bool = true) {
-    guard !layout.isEmpty else { return }
-    let xs = layout.values.map(\.x)
-    let ys = layout.values.map(\.y)
+    let positions =
+      neighborhoodProjection(entities).map { projection in
+        layout.filter { projection.nodeIDs.contains($0.key) }
+      } ?? layout
+    guard !positions.isEmpty else { return }
+    let xs = positions.values.map(\.x)
+    let ys = positions.values.map(\.y)
     let width = (xs.max()! - xs.min()!) + GraphLayout.cardSize.width + 96
     let height = (ys.max()! - ys.min()!) + GraphLayout.cardSize.height + 96
     // Fit uses maximum card bounds. Semantic detail never rearranges node centres.
@@ -612,7 +717,10 @@ struct RelationshipGraph: View {
     studio.perform {
       var ids = Set(entities.filter(matches).map(\.id))
       var title = "Graph copy"
-      if let selected {
+      if let neighborhood, let projection = neighborhoodProjection(entities) {
+        ids = projection.nodeIDs
+        title = "Around \(name(neighborhood.rootID))"
+      } else if let selected {
         ids = [selected]
         for relation in relationships
         where relation.sourceID == selected || relation.targetID == selected {
