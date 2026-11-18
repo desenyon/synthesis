@@ -22,6 +22,7 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 ### Added
 - Expansion #35: typed world references in Canvas, native writing and the composer. Canvas and Atlas expose board and image drag handles. Context counts unique direct references together and filters app-inserted labels for excluded sources before sending.
 - Expansion #36: one natural-language operation can propose several connected records. Review identifies prerequisite drafts, and validated local keys disambiguate proposed records from existing records with similar names.
+- Expansion #67–69: both entity profiles show the same directed connection. Shared relationship creation and editing support typed meaning, fictional dates, strength, secrecy, mutuality, status and linked evidence, with history and portable v11 / JSON14 export.
 - Expansion #33: device-local workspace sessions retain document tabs, editor positions, Graph/Timeline/Atlas/Canvas context, conversation position and the newest unsent draft after restart. Restoring keeps Manual mode and reconciles archived sources.
 - Expansion #34: universal Quick Capture (Control–Option–Space) opens a small nonactivating panel. Per-world scratch drafts, atomic retry-safe saving, failure recovery and the existing Library/search/history paths keep captures connected.
 - Expansion #43–44: branch at a message without changing the original conversation; follow its exact source point and preserve citation lineage. Save, search, edit and reuse world-owned prompt recipes with optimistic updates, archive and Undo.

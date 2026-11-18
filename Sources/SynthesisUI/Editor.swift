@@ -770,7 +770,7 @@ struct RecordInspector: View {
   var editRule: (WorldRule?) -> Void
   @State private var outgoing: [LoreRecord] = []
   @State private var incoming: [LoreRecord] = []
-  @State private var relations: [Relation] = []
+  @State private var relations: [RecordRelationship] = []
   @State private var events: [WorldEvent] = []
   @State private var rules: [WorldRule] = []
   @State private var newTag = ""
@@ -811,14 +811,7 @@ struct RecordInspector: View {
               hint("No relationships yet. Connect entities in Graph or on a canvas.")
             }
             ForEach(relations) { relation in
-              let outward = relation.sourceID == record.id
-              let other = studio.records.first {
-                $0.id == (outward ? relation.targetID : relation.sourceID)
-              }
-              if let other {
-                linkRow(
-                  other, prefix: outward ? relation.label : "← \(relation.label)", removable: false)
-              }
+              linkRow(relation.counterpart, prefix: relation.detail, removable: false)
             }
             Button("Open in Graph") { studio.navigate(.knowledge) }
               .buttonStyle(QuietButton(t: t, role: .ghost)).padding(.leading, -12)
@@ -1015,9 +1008,7 @@ struct RecordInspector: View {
       outgoing = try studio.store.linkedRecords(worldID: studio.worldID, id: record.id)
       incoming = try studio.store.linkedRecords(
         worldID: studio.worldID, id: record.id, incoming: true)
-      relations = try studio.store.relations(worldID: studio.worldID).filter {
-        $0.sourceID == record.id || $0.targetID == record.id
-      }
+      relations = try studio.recordRelationships(for: record)
       events = try studio.store.events(worldID: studio.worldID).filter {
         $0.sourceID == record.id
       }

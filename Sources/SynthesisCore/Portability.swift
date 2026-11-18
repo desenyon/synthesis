@@ -155,13 +155,26 @@ extension WorkspaceStore {
         )
       )
     }
-    let related = try relations(worldID: worldID).map {
-      "- \(titles[$0.sourceID] ?? $0.sourceID) — \($0.label) → \(titles[$0.targetID] ?? $0.targetID)"
+    let related = try relations(worldID: worldID).map { edge in
+      let details = edge.attributes
+      var values = ["Canon state · \(edge.state)"]
+      if details.kind != .unknown { values.append("Kind · \(details.kind.title)") }
+      if !details.startLabel.isEmpty { values.append("Start · \(details.startLabel)") }
+      if !details.endLabel.isEmpty { values.append("End · \(details.endLabel)") }
+      if details.strength != .unknown { values.append("Strength · \(details.strength.title)") }
+      if details.secrecy != .unknown { values.append("Secrecy · \(details.secrecy.title)") }
+      if details.mutuality != .unknown { values.append("Mutuality · \(details.mutuality.title)") }
+      if details.status != .unknown { values.append("Status · \(details.status.title)") }
+      let evidence = details.evidenceRecordIDs.map { titles[$0] ?? "Archived source \($0)" }
+      if !evidence.isEmpty { values.append("Evidence · \(evidence.joined(separator: ", "))") }
+      return
+        "- \(titles[edge.sourceID] ?? edge.sourceID) — \(edge.label) → \(titles[edge.targetID] ?? edge.targetID)"
+        + values.map { "\n  - \($0)" }.joined()
     }
     files.append(
       (
         "Relationships.md",
-        "# Relationships\n\nDraft relationships between entities in \(world.name).\n\n"
+        "# Relationships\n\nRelationships between entities in \(world.name).\n\n"
           + (related.isEmpty ? "None yet.\n" : related.joined(separator: "\n") + "\n")
       ))
     let history = try events(worldID: worldID).map {

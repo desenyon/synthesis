@@ -7,7 +7,7 @@ struct EntityProfileStart: View {
   @ObservedObject var studio: Studio
   let record: LoreRecord
   var write: (String?) -> Void
-  @State private var relationships: [Relation] = []
+  @State private var relationships: [RecordRelationship] = []
   @State private var events: [WorldEvent] = []
   @Environment(\.studioDensity) private var density
   private var prompts: [String] {
@@ -58,18 +58,16 @@ struct EntityProfileStart: View {
                 .font(.studio(.label)).foregroundStyle(studio.t.secondary)
             } else {
               ForEach(relationships.prefix(3)) { relation in
-                let otherID = relation.sourceID == record.id ? relation.targetID : relation.sourceID
-                if let other = studio.records.first(where: { $0.id == otherID }) {
-                  Button {
-                    studio.openRecord(other)
-                  } label: {
-                    VStack(alignment: .leading, spacing: Space.xs) {
-                      Text(other.title).font(.studio(.control)).lineLimit(1)
-                      Text(relation.label).font(.studio(.caption)).foregroundStyle(
-                        studio.t.secondary)
-                    }
-                  }.buttonStyle(.plain).help("Open \(other.title)")
-                }
+                Button {
+                  studio.openRecord(relation.counterpart)
+                } label: {
+                  VStack(alignment: .leading, spacing: Space.xs) {
+                    Text(relation.counterpart.title).font(.studio(.control)).lineLimit(1)
+                    Text(relation.detail).font(.studio(.caption)).foregroundStyle(
+                      studio.t.secondary
+                    ).lineLimit(1)
+                  }
+                }.buttonStyle(.plain).help("Open \(relation.counterpart.title)")
               }
             }
             Button("Open relationship map") { studio.showRelationships(for: record) }
@@ -103,9 +101,7 @@ struct EntityProfileStart: View {
   }
   private func refresh() {
     studio.perform {
-      relationships = try studio.store.relations(worldID: record.worldID).filter {
-        $0.sourceID == record.id || $0.targetID == record.id
-      }
+      relationships = try studio.recordRelationships(for: record)
       events = try studio.store.events(worldID: record.worldID).filter { $0.sourceID == record.id }
     }
   }

@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 10
+  var version = 11
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -73,7 +73,7 @@ extension WorkspaceStore {
         "prompt_recipes",
       ] { archive.tables[table] = [] }
     }
-    guard archive.format == "dev.synthesis.world", (1...10).contains(archive.version),
+    guard archive.format == "dev.synthesis.world", (1...11).contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -161,6 +161,20 @@ extension WorkspaceStore {
             else { throw SynthesisError.invalid("The world file contains invalid artwork.") }
             row["image"] = image
           }
+          if ["relationships", "relationship_history"].contains(table),
+            let raw = source["attributes"]
+          {
+            // Only evidence addresses are IDs. Date labels are the creator's own wording.
+            var attributes = try RelationshipAttributes.decodeStored(raw)
+            attributes.evidenceRecordIDs = try attributes.evidenceRecordIDs.map { id in
+              guard let replacement = ids[id] else {
+                throw SynthesisError.invalid(
+                  "The world file contains relationship evidence outside this world.")
+              }
+              return replacement
+            }
+            row["attributes"] = try attributes.encodeStored()
+          }
           // Reject external references even on tables whose historical schema lacks FKs.
           for (key, value) in source where key.hasSuffix("_id") && key != "owner_id" {
             guard ids[value] != nil else {
@@ -188,6 +202,7 @@ extension WorkspaceStore {
         try ActivityHistoryMigration.backfill(db, worldID: newWorld)
       }
       try validateActivitySources(worldID: newWorld)
+      try validateRelationshipArchive(worldID: newWorld)
       try validateEntitySchemas(worldID: newWorld)
       try refreshEntityPropertySearch(worldID: newWorld)
       try validateConversationTools(worldID: newWorld)

@@ -15,6 +15,7 @@
 | [Keyboard creation](KEYBOARD.md) | New entities, source links, typed relationships and native shortcuts |
 | [Navigation history](NAVIGATION.md) | Shared Back/Forward across documents, maps, conversations and tool subpages |
 | [Drag references](DRAG_RECORDS.md) | Drag lore, events, images and proposals into writing, Canvas and the composer |
+| [Relationships](RELATIONSHIPS.md) | See both endpoints, edit meanings and attributes, and inspect evidence |
 | [Focus](FOCUS.md) | Temporarily hide unrelated controls and return to the original layout |
 | [Startup](STARTUP.md) | Choose a device-local home or reopen the last workspace |
 | [Sessions](SESSION_RESTORE.md) | Restore document tabs, views, selections and unsent drafts after restart |

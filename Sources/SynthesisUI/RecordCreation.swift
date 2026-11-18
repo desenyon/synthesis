@@ -15,6 +15,7 @@ struct RecordLinkDraft: Equatable {
   var reverseLabel = ""
   var entitiesOnly = false
   var kind = RecordLinkKind.relationship
+  var attributes = RelationshipAttributes()
 
   func isValid(records: [LoreRecord]) -> Bool {
     let choices = records.filter {
@@ -25,9 +26,23 @@ struct RecordLinkDraft: Equatable {
       && (kind == .reference
         || (!label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
           && label.count <= 80
+          && relationshipDatesFit(attributes)
           && (!reverse
             || (!reverseLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
               && reverseLabel.count <= 80))))
+  }
+}
+
+struct RelationshipEditTarget: Identifiable {
+  let worldID: String
+  let relation: Relation
+  var id: String { relation.id }
+}
+
+func relationshipDatesFit(_ attributes: RelationshipAttributes) -> Bool {
+  [attributes.startLabel, attributes.endLabel].allSatisfy {
+    $0.trimmingCharacters(in: .whitespacesAndNewlines).count
+      <= RelationshipAttributes.dateLabelLimit
   }
 }
 
@@ -84,7 +99,8 @@ extension Studio {
           worldID: worldID, source: draft.sourceID, target: draft.targetID,
           label: draft.label.trimmingCharacters(in: .whitespacesAndNewlines),
           inverse: draft.reverse
-            ? draft.reverseLabel.trimmingCharacters(in: .whitespacesAndNewlines) : nil)
+            ? draft.reverseLabel.trimmingCharacters(in: .whitespacesAndNewlines) : nil,
+          attributes: draft.attributes)
       }
       try reload()
       recordLinkDraft = nil
@@ -99,5 +115,47 @@ extension Studio {
       self.error = error.localizedDescription
       return false
     }
+  }
+
+  @discardableResult func saveRelationshipEdit(
+    _ target: RelationshipEditTarget, label: String, attributes: RelationshipAttributes
+  ) -> Bool {
+    guard prepareRelationshipEdit(target) else { return false }
+    do {
+      _ = try store.updateRelation(
+        worldID: target.worldID, expected: target.relation, label: label, attributes: attributes)
+      perform { try reload() }
+      return true
+    } catch {
+      self.error = error.localizedDescription
+      return false
+    }
+  }
+
+  @discardableResult func archiveRelationship(_ target: RelationshipEditTarget) -> Bool {
+    guard prepareRelationshipEdit(target) else { return false }
+    do {
+      let edge = target.relation
+      try store.archiveRelation(worldID: target.worldID, id: edge.id, expected: edge)
+      perform { try reload() }
+      show("Archived “\(edge.label)”", icon: "archivebox", actionTitle: "Undo") {
+        self.perform {
+          try self.store.restoreRelation(worldID: target.worldID, id: edge.id)
+          if self.worldID == target.worldID { try self.reload() }
+        }
+      }
+      return true
+    } catch {
+      self.error = error.localizedDescription
+      return false
+    }
+  }
+
+  private func prepareRelationshipEdit(_ target: RelationshipEditTarget) -> Bool {
+    guard target.worldID == worldID else {
+      error = "The selected world changed. Reopen the relationship in its world."
+      return false
+    }
+    return flushEditor()
   }
 }

@@ -73,6 +73,7 @@ struct CanvasBoardContent {
 @MainActor final class CanvasSession: NSObject, ObservableObject {
   struct Connection: Identifiable {
     let id = UUID()
+    let sessionID: String
     var arrowID: String
     var source: LoreRecord
     var target: LoreRecord
@@ -86,7 +87,7 @@ struct CanvasBoardContent {
   @Published var loaded = false
   @Published var hiddenCount = 0
   @Published var connection: Connection?
-  @Published var editingRelation: Relation?
+  @Published var editingRelation: RelationshipEditTarget?
   private var capturedElements: Set<String> = []
   /// A request raised from the canvas's own menu: `library`, `entity`, `image` or `export`.
   @Published var request: String?
@@ -207,6 +208,8 @@ struct CanvasBoardContent {
       selection = []
       selectionWithArt = []
       selectedImageID = nil
+      connection = nil
+      editingRelation = nil
       capturedElements = []
       loaded = false
       writable = false
@@ -762,15 +765,18 @@ struct CanvasBoardContent {
         studio.show("Idea saved in Library and linked to this board.", icon: "lightbulb")
       }
     case "inspectRelation":
-      guard let id = message["relationID"] as? String else { return }
-      editingRelation = (try? studio.store.relations(worldID: worldID))?.first { $0.id == id }
+      guard worldID == studio.worldID, let id = message["relationID"] as? String,
+        let edge = (try? studio.store.relations(worldID: worldID))?.first(where: { $0.id == id })
+      else { return }
+      editingRelation = RelationshipEditTarget(worldID: worldID, relation: edge)
     case "connect":
-      guard let arrow = message["arrowID"] as? String,
+      guard worldID == studio.worldID, let arrow = message["arrowID"] as? String,
         let source = studio.records.first(where: { $0.id == message["source"] as? String }),
         let target = studio.records.first(where: { $0.id == message["target"] as? String })
       else { return }
       connection = Connection(
-        arrowID: arrow, source: source, target: target, label: message["label"] as? String ?? "")
+        sessionID: loadID, arrowID: arrow, source: source, target: target,
+        label: message["label"] as? String ?? "")
     case "relabel":
       guard let id = message["relationID"] as? String, let label = message["label"] as? String
       else { return }
@@ -821,11 +827,19 @@ struct CanvasBoardContent {
   }
   func hideRelationship(_ id: String) { call("hideRelationship", [id]) }
   /// Creates a draft relationship for an arrow the creator drew between two entity cards.
-  func saveConnection(_ connection: Connection, label: String) {
+  func saveConnection(_ connection: Connection, label: String, attributes: RelationshipAttributes) {
+    guard self.connection?.id == connection.id, connection.sessionID == loadID,
+      connection.source.worldID == worldID, connection.target.worldID == worldID,
+      studio.worldID == worldID
+    else {
+      studio.error = "This canvas changed. Draw the relationship again."
+      return
+    }
+    guard studio.flushEditor() else { return }
     studio.perform {
       let relation = try studio.store.addRelation(
         worldID: worldID, source: connection.source.id, target: connection.target.id,
-        label: label.trimmingCharacters(in: .whitespacesAndNewlines))
+        label: label.trimmingCharacters(in: .whitespacesAndNewlines), attributes: attributes)
       call(
         "relationSaved",
         [

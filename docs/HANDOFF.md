@@ -6,7 +6,17 @@ Implementation checkpoint [`dd9fd84`](https://github.com/desenyon/synthesis/comm
 
 ## Linux continuation — 2026-11-17
 
-Source work for #35 resumed with owner approval after the runtime exposed only the Linux checkout. Start with [the new run record](PROGRESS.md) and [the reference guide](DRAG_RECORDS.md). The original checkpoint below preserves the Mac evidence and error history. Before accepting #35, run the full Mac check and Canvas audit and append `reference-editor,reference-composer` to the 56-state capture manifest. Inspect all three sizes and confirm native drop precedence in an authorized isolated session. The acceptance ledger remains at 32 Verified, 11 In progress and 351 Open.
+Source work for #35, #36 and #67–69 resumed with owner approval after the runtime exposed only the Linux checkout. Start with [the run record](PROGRESS.md), [the reference guide](DRAG_RECORDS.md) and [the relationship guide](RELATIONSHIPS.md). The original checkpoint below preserves the Mac evidence and error history. The acceptance ledger now has 32 Verified, 15 In progress, 346 Open and 1 Decision needed.
+
+Run the full Mac check and Canvas audit, then inspect the 63-state capture sweep at all three sizes. Confirm physical #35 drop routing in an authorized isolated session.
+
+```sh
+SYNTHESIS_CAPTURE_SIZES='1440x900,1024x768,720x800' \
+SYNTHESIS_CAPTURE_STATES="$(cat docs/verification/expansion-parallel-checkpoint/capture-states.txt),reference-editor,reference-composer,proposal-faction-batch,relationship-outgoing,relationship-incoming,relationship-metadata-editor,relationship-metadata-inspector" \
+SYNTHESIS_CANVAS_AUDIT=1 \
+./scripts/verify-ui.sh docs/verification/expansion-parallel-final
+uv run --with pillow python scripts/contact-sheets.py docs/verification/expansion-parallel-final
+```
 
 ## Where things are
 

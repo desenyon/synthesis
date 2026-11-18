@@ -312,89 +312,201 @@ public final class WorkspaceStore {
   }
   public func addRelation(
     worldID: String, source: String, target: String, label: String,
-    origin: String = "user-authored"
+    origin: String = "user-authored", attributes: RelationshipAttributes = .init()
   ) throws -> Relation {
-    let a = try record(worldID: worldID, id: source)
-    let b = try record(worldID: worldID, id: target)
-    guard a.kind == "entity", b.kind == "entity", source != target, !label.isEmpty,
-      label.count <= 80
-    else { throw SynthesisError.invalid("Choose two different entities and a relationship label.") }
-    let id = UUID().uuidString
-    let now = timestamp()
-    try db.execute(
-      "INSERT INTO relationships(id,world_id,source_id,target_id,label,state,origin,created_at,updated_at) VALUES(?,?,?,?,?,'draft',?,?,?)",
-      [id, worldID, source, target, label, origin, now, now])
-    return Relation(id: id, sourceID: source, targetID: target, label: label)
+    let value = try relationshipLabel(label)
+    let attributes = try attributes.validated()
+    return try db.transaction {
+      let a = try record(worldID: worldID, id: source)
+      let b = try record(worldID: worldID, id: target)
+      guard a.kind == "entity", b.kind == "entity", source != target,
+        try !isArchived(worldID: worldID, recordID: source),
+        try !isArchived(worldID: worldID, recordID: target)
+      else { throw SynthesisError.invalid("Choose two different available entities.") }
+      try validateRelationshipEvidence(worldID: worldID, attributes: attributes)
+      let id = UUID().uuidString
+      let now = timestamp()
+      try db.execute(
+        "INSERT INTO relationships(id,world_id,source_id,target_id,label,state,origin,created_at,updated_at,attributes) VALUES(?,?,?,?,?,'draft',?,?,?,?)",
+        [id, worldID, source, target, value, origin, now, now, try attributes.encodeStored()])
+      return Relation(
+        id: id, sourceID: source, targetID: target, label: value, attributes: attributes)
+    }
   }
+
+  private static let visibleRelationships = """
+    SELECT r.* FROM relationships r
+    JOIN records a ON a.id=r.source_id AND a.world_id=r.world_id
+    JOIN records b ON b.id=r.target_id AND b.world_id=r.world_id
+    WHERE r.world_id=? AND r.archived=0 AND a.archived=0 AND b.archived=0
+    """
+
   public func relations(worldID: String) throws -> [Relation] {
     _ = try world(worldID)
     return try db.rows(
-      "SELECT r.* FROM relationships r JOIN records a ON a.id=r.source_id JOIN records b ON b.id=r.target_id WHERE r.world_id=? AND r.archived=0 AND a.archived=0 AND b.archived=0 ORDER BY r.created_at,r.rowid",
+      Self.visibleRelationships + " ORDER BY r.created_at,r.rowid",
       [worldID]
-    ).map {
-      Relation(
-        id: $0["id"]!, sourceID: $0["source_id"]!, targetID: $0["target_id"]!, label: $0["label"]!)
-    }
+    ).map(decodeRelationship)
   }
+
+  /// An outgoing edge is visible from both of its endpoints without saving a second edge.
+  public func relations(worldID: String, recordID: String) throws -> [Relation] {
+    _ = try record(worldID: worldID, id: recordID)
+    return try db.rows(
+      Self.visibleRelationships
+        + " AND (r.source_id=? OR r.target_id=?) ORDER BY r.created_at,r.rowid",
+      [worldID, recordID, recordID]
+    ).map(decodeRelationship)
+  }
+
   public func updateRelation(worldID: String, id: String, label: String) throws {
-    let value = label.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !value.isEmpty, value.count <= 80 else {
-      throw SynthesisError.invalid("Use a relationship label of 1–80 characters.")
-    }
-    guard let relation = try relations(worldID: worldID).first(where: { $0.id == id }) else {
-      throw SynthesisError.notFound
-    }
-    guard
-      try db.rows("SELECT state FROM relationships WHERE id=? AND world_id=?", [id, worldID])
-        .first?["state"] != "canon"
-    else {
-      throw SynthesisError.invalid(
-        "Canonical relationships require a reviewed revision. This connection was not changed.")
-    }
     try db.transaction {
-      try archiveRelationSnapshot(worldID: worldID, relation: relation, action: "rename")
-      try db.execute(
-        "UPDATE relationships SET label=?,updated_at=? WHERE id=? AND world_id=?",
-        [value, timestamp(), id, worldID])
+      let current = try visibleRelationship(worldID: worldID, id: id)
+      _ = try saveRelationship(
+        worldID: worldID, current: current, label: label, attributes: current.attributes)
     }
   }
-  public func archiveRelation(worldID: String, id: String) throws {
-    guard let relation = try relations(worldID: worldID).first(where: { $0.id == id }) else {
-      throw SynthesisError.notFound
-    }
-    guard
-      try db.rows("SELECT state FROM relationships WHERE id=? AND world_id=?", [id, worldID])
-        .first?["state"] != "canon"
-    else {
-      throw SynthesisError.invalid(
-        "Canonical relationships require a reviewed revision. This connection was not changed.")
-    }
+
+  /// Save against the version the creator opened, even if two edits share a timestamp.
+  @discardableResult public func updateRelation(
+    worldID: String, expected: Relation, label: String, attributes: RelationshipAttributes
+  ) throws -> Relation {
     try db.transaction {
+      let current = try visibleRelationship(worldID: worldID, id: expected.id)
+      guard current == expected else { throw SynthesisError.stale }
+      return try saveRelationship(
+        worldID: worldID, current: current, label: label, attributes: attributes)
+    }
+  }
+
+  public func archiveRelation(worldID: String, id: String, expected: Relation? = nil) throws {
+    try db.transaction {
+      let relation = try visibleRelationship(worldID: worldID, id: id)
+      if let expected, expected != relation { throw SynthesisError.stale }
+      try requireDraftRelationship(relation)
       try archiveRelationSnapshot(worldID: worldID, relation: relation, action: "archive")
       try db.execute(
-        "UPDATE relationships SET archived=1,updated_at=? WHERE id=? AND world_id=?",
+        "UPDATE relationships SET archived=1,updated_at=?,revision=revision+1 WHERE id=? AND world_id=?",
         [timestamp(), id, worldID])
     }
   }
+
   public func restoreRelation(worldID: String, id: String) throws {
     _ = try world(worldID)
-    guard
-      let row = try db.rows(
-        "SELECT id FROM relationships WHERE world_id=? AND id=? AND archived=1", [worldID, id]
-      ).first, row["id"] == id
-    else { throw SynthesisError.notFound }
-    try db.execute(
-      "UPDATE relationships SET archived=0,updated_at=? WHERE id=? AND world_id=?",
-      [timestamp(), id, worldID])
+    try db.transaction {
+      guard
+        try !db.rows(
+          "SELECT id FROM relationships WHERE world_id=? AND id=? AND archived=1", [worldID, id]
+        ).isEmpty
+      else { throw SynthesisError.notFound }
+      try db.execute(
+        "UPDATE relationships SET archived=0,updated_at=?,revision=revision+1 WHERE id=? AND world_id=?",
+        [timestamp(), id, worldID])
+    }
   }
+
+  private func relationshipLabel(_ label: String) throws -> String {
+    let value = label.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !value.isEmpty, value.count <= 80, !value.contains("\0") else {
+      throw SynthesisError.invalid("Use a relationship label of 1–80 characters.")
+    }
+    return value
+  }
+
+  private func requireDraftRelationship(_ relation: Relation) throws {
+    guard relation.state == "draft" else {
+      throw SynthesisError.invalid(
+        "Canonical relationships require a reviewed revision. This connection was not changed.")
+    }
+  }
+
+  private func decodeRelationship(_ row: [String: String]) throws -> Relation {
+    Relation(
+      id: row["id"]!, sourceID: row["source_id"]!, targetID: row["target_id"]!,
+      label: row["label"]!, attributes: try RelationshipAttributes.decodeStored(row["attributes"]!),
+      state: row["state"]!, revision: Int(row["revision"]!)!)
+  }
+
+  private func visibleRelationship(worldID: String, id: String) throws -> Relation {
+    _ = try world(worldID)
+    guard
+      let row = try db.rows(Self.visibleRelationships + " AND r.id=?", [worldID, id]).first
+    else { throw SynthesisError.notFound }
+    return try decodeRelationship(row)
+  }
+
+  private func validateRelationshipEvidence(
+    worldID: String, attributes: RelationshipAttributes, allowedArchived: Set<String> = []
+  ) throws {
+    let ids = attributes.evidenceRecordIDs
+    guard !ids.isEmpty else { return }
+    let placeholders = ids.map { _ in "?" }.joined(separator: ",")
+    let rows = try db.rows(
+      "SELECT id,archived FROM records WHERE world_id=? AND id IN (\(placeholders))",
+      [worldID] + ids)
+    guard rows.count == ids.count,
+      rows.allSatisfy({ $0["archived"] == "0" || $0["id"].map(allowedArchived.contains) == true })
+    else {
+      throw SynthesisError.invalid("Choose evidence from available records in this world.")
+    }
+  }
+
+  private func saveRelationship(
+    worldID: String, current: Relation, label: String, attributes: RelationshipAttributes
+  ) throws -> Relation {
+    try requireDraftRelationship(current)
+    let value = try relationshipLabel(label)
+    let attributes = try attributes.validated()
+    guard value != current.label || attributes != current.attributes else { return current }
+    try validateRelationshipEvidence(
+      worldID: worldID, attributes: attributes,
+      allowedArchived: Set(current.attributes.evidenceRecordIDs))
+    try archiveRelationSnapshot(
+      worldID: worldID, relation: current,
+      action: attributes == current.attributes ? "rename" : "edit")
+    try db.execute(
+      "UPDATE relationships SET label=?,attributes=?,updated_at=?,revision=revision+1 WHERE id=? AND world_id=?",
+      [value, try attributes.encodeStored(), timestamp(), current.id, worldID])
+    return try visibleRelationship(worldID: worldID, id: current.id)
+  }
+
   private func archiveRelationSnapshot(worldID: String, relation: Relation, action: String) throws {
     try db.execute(
-      "INSERT INTO relationship_history VALUES(?,?,?,?,?,?,?,?)",
+      "INSERT INTO relationship_history(id,world_id,relationship_id,source_id,target_id,label,action,created_at,attributes,revision) VALUES(?,?,?,?,?,?,?,?,?,?)",
       [
         UUID().uuidString, worldID, relation.id, relation.sourceID, relation.targetID,
-        relation.label, action, timestamp(),
+        relation.label, action, timestamp(), try relation.attributes.encodeStored(),
+        String(relation.revision),
       ])
   }
+
+  func validateRelationshipArchive(worldID: String) throws {
+    let known = Set(
+      try db.rows("SELECT id FROM records WHERE world_id=?", [worldID]).compactMap { $0["id"] })
+    let attributes = try db.rows(
+      """
+      SELECT attributes FROM relationships WHERE world_id=?
+      UNION ALL SELECT attributes FROM relationship_history WHERE world_id=?
+      """, [worldID, worldID])
+    for row in attributes {
+      let value = try RelationshipAttributes.decodeStored(row["attributes"]!)
+      guard value.evidenceRecordIDs.allSatisfy(known.contains) else {
+        throw SynthesisError.invalid(
+          "The world file contains relationship evidence outside this world.")
+      }
+    }
+    guard
+      try db.rows(
+        """
+        SELECT h.id FROM relationship_history h
+        LEFT JOIN relationships r ON r.id=h.relationship_id AND r.world_id=h.world_id
+        WHERE h.world_id=? AND (r.id IS NULL OR r.source_id<>h.source_id OR r.target_id<>h.target_id)
+        LIMIT 1
+        """, [worldID]
+      ).isEmpty
+    else { throw SynthesisError.invalid("The world file contains invalid relationship history.") }
+  }
+
   public func addEvent(
     worldID: String, title: String, date: String, source: String, order: Int? = nil,
     origin: String = "user-authored"
@@ -544,7 +656,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 13
+      var schemaVersion = 14
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -552,6 +664,7 @@ public final class WorkspaceStore {
       var relationships: [Relation]
       var relationshipHistory: [[String: String]]
       var archivedRelationships: [[String: String]]
+      var hiddenRelationships: [[String: String]]
       var events: [WorldEvent]
       var boards: [Board]
       var revisions: [RecordRevision]
@@ -595,6 +708,13 @@ public final class WorkspaceStore {
       relationshipHistory: db.rows("SELECT * FROM relationship_history WHERE world_id=?", [id]),
       archivedRelationships: db.rows(
         "SELECT * FROM relationships WHERE world_id=? AND archived=1", [id]),
+      hiddenRelationships: db.rows(
+        """
+        SELECT r.* FROM relationships r
+        JOIN records a ON a.id=r.source_id AND a.world_id=r.world_id
+        JOIN records b ON b.id=r.target_id AND b.world_id=r.world_id
+        WHERE r.world_id=? AND r.archived=0 AND (a.archived=1 OR b.archived=1)
+        """, [id]),
       events: events(worldID: id),
       boards: boards(worldID: id, kind: "canvas") + boards(worldID: id, kind: "atlas"),
       revisions: pages.flatMap { try history(worldID: id, id: $0.id) },

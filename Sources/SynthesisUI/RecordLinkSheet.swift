@@ -56,6 +56,9 @@ struct RecordLinkSheet: View {
             }
           }.scrollIndicators(.never)
         }
+        RelationshipAttributesFields(
+          attributes: $draft.attributes,
+          records: studio.records.filter { $0.worldID == draft.worldID }, t: studio.t)
       }
       Text(
         draft.kind == .reference

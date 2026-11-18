@@ -1,5 +1,11 @@
 # Development progress
 
+## 2026-11-17 — #67–69 relationship direction and attributes
+
+Both profiles show one stored relationship with Incoming or Outgoing wording and a navigable counterpart. Link Records, Graph and Canvas share typed meanings and optional start, end, strength, secrecy, mutuality, status and evidence. The inspector reads saved values and opens current same-world sources. Migration 0018 writes metadata, prior snapshots and activity. Draft updates and archives check the original edge revision. Undo retains the edge and metadata. Archives are v11 and JSON is schema 14.
+
+The updated Linux probe passed 65 tests across 11 suites. It includes real SQLite migrations and coverage for both endpoints, stale changes, evidence scope, canonical edit rejection, history, activity, old and new archives, and label-only proposal compatibility. Independent SQLite checks exercised migration of a legacy database through 0018 and rejected invalid revisions. Repository-wide strict Swift format lint and parsing of the changed Swift files passed. Native relationship tests and the four new capture states remain pending on macOS.
+
 ## 2026-11-17 — #36 connected proposal batches
 
 A single Propose request can stage multiple draft entities and their relationships with batch-local keys. Keys resolve to app-owned change IDs. Ambiguous names, duplicate keys and relationships to proposed lore documents are rejected at staging. Review displays and enforces the prerequisite for each dependent draft. Creator acceptance remains explicit, and established canon stays untouched.

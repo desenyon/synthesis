@@ -1,6 +1,6 @@
 # Architecture
 
-## Current parallel additions — expansion #33–36, #43–44, #61–66
+## Current parallel additions — expansion #33–36, #43–44, #61–69
 
 `WorkspaceSession` stores per-world device presentation separately from portable lore: document tabs, editor positions, view framing/selections, filters, inspectors and conversation read positions. It checkpoints the latest composer draft in the same transaction. Restoring filters stale addresses, preserves unreadable preferences and cannot enable AI or replay a request. Native editor Undo remains in-memory. The independent `verify-session.sh` runner exercises two actual executable processes against disposable data.
 
@@ -8,11 +8,13 @@ Quick capture uses an ordinary nonactivating `NSPanel`, a launch-local Carbon sh
 
 Migration 0016 adds optional entity types, inheritance, typed profile values, templates, accepted property snapshots and revision histories. Derived FTS is rebuilt from validated data. Formulas use a bounded arithmetic parser, never executable code. Structured canon requires a frozen review token; later schema/default edits cannot rewrite the accepted snapshot. Migration 0017 adds conversation lineage, copied-message origins and optimistic prompt recipes. Branches copy a selected message prefix with new IDs; proposal ownership and approvals stay with the original conversation.
 
-Portable archives are v10 and JSON exports schema 13. Nested references are remapped and validated before import commits; device sessions, scratch drafts and provider credentials are excluded. [Entity schema details](ENTITY_SCHEMAS.md), [conversation tools](CONVERSATION_TOOLS.md), [sessions](SESSION_RESTORE.md) and [quick capture](QUICK_CAPTURE.md) describe the new boundaries. #35 reference transport is still in progress; the ledger is authoritative for verification status.
+Portable archives are v11 and JSON exports schema 14. Nested references are remapped and validated before import commits; device sessions, scratch drafts and provider credentials are excluded. [Entity schema details](ENTITY_SCHEMAS.md), [conversation tools](CONVERSATION_TOOLS.md), [sessions](SESSION_RESTORE.md) and [quick capture](QUICK_CAPTURE.md) describe the new boundaries. The ledger tracks verification status.
 
 Workspace transfers use process-local typed addresses. A recipient claims one gesture and validates its world, source, target and Canvas generation before writing. Opening a reference resolves its current source. Canvas correlates each explicit save acknowledgment with its request. Rich-text links remain portable in working, accepted and historical snapshots.
 
 Related AI operations can stage together. A model-defined key for a newly proposed record resolves to the app's generated change ID within that batch. Existing records use stored IDs. Review displays unmet prerequisites, and the store checks that each dependency was explicitly accepted before allowing its dependent draft. Canon approval remains separate.
+
+Migration 0018 adds typed and versioned metadata to the existing directed relationship. Both endpoints query the same edge, preserving direction. Draft metadata writes save the prior values and activity in the same transaction. Evidence addresses are restricted to the same world and remap independently of creator-authored date text. [Relationship guide](RELATIONSHIPS.md)
 
 Primary source: `main` in `/Users/desenyon/Developer/synthesis`; development bundle: `dist/Synthesis.app`. The former `swift-falcon` worktree is retired.
 

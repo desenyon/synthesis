@@ -6,7 +6,8 @@ import SynthesisCore
 extension Studio {
   public static let captureStates =
     QuickCaptureController.captureStates + conversationToolsCaptureStates
-    + entitySchemaCaptureStates + [
+    + entitySchemaCaptureStates + bidirectionalRelationshipCaptureStates
+    + relationshipMetadataCaptureStates + [
       "session-writing", "light-session-writing", "manual-session-writing", "session-sections",
       "session-split", "session-graph", "session-timeline", "session-atlas", "session-canvas",
       "session-conversation", "session-library",
@@ -367,6 +368,14 @@ extension Studio {
     }
     if state == "proposal-faction-batch" {
       configureFactionBatchCapture(board: board, conversation: conversation)
+      return
+    }
+    if Self.bidirectionalRelationshipCaptureStates.contains(state) {
+      configureBidirectionalRelationshipCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if Self.relationshipMetadataCaptureStates.contains(state) {
+      configureRelationshipMetadataCapture(state, board: board, conversation: conversation)
       return
     }
     if state.contains("split-") {

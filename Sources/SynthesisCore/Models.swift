@@ -43,11 +43,32 @@ public struct RecordRevision: Identifiable, Codable, Sendable {
   public var snapshot: LoreRecord
   public var createdAt: String
 }
-public struct Relation: Identifiable, Codable, Sendable {
+public struct Relation: Identifiable, Codable, Equatable, Sendable {
   public var id: String
   public var sourceID: String
   public var targetID: String
   public var label: String
+  public var attributes = RelationshipAttributes()
+  public var state = "draft"
+  public var revision = 1
+}
+extension Relation {
+  private enum CodingKeys: String, CodingKey {
+    case id, sourceID, targetID, label, attributes, state, revision
+  }
+
+  public init(from decoder: Decoder) throws {
+    let values = try decoder.container(keyedBy: CodingKeys.self)
+    id = try values.decode(String.self, forKey: .id)
+    sourceID = try values.decode(String.self, forKey: .sourceID)
+    targetID = try values.decode(String.self, forKey: .targetID)
+    label = try values.decode(String.self, forKey: .label)
+    attributes =
+      try values.decodeIfPresent(RelationshipAttributes.self, forKey: .attributes)
+      ?? .init()
+    state = try values.decodeIfPresent(String.self, forKey: .state) ?? "draft"
+    revision = try values.decodeIfPresent(Int.self, forKey: .revision) ?? 1
+  }
 }
 public struct WorldEvent: Identifiable, Codable, Sendable {
   public var id: String

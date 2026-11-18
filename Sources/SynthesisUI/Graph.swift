@@ -49,8 +49,7 @@ struct RelationshipGraph: View {
   @State private var dragNode: (id: String, origin: CGPoint)?
   @State private var area = CGSize(width: 900, height: 600)
   @State private var panel: Panel?
-  @State private var label = ""
-  @State private var editing: Relation?
+  @State private var editing: RelationshipEditTarget?
   private var framed: Bool {
     get { studio.graphView.framed }
     nonmutating set { studio.graphView.framed = newValue }
@@ -108,6 +107,8 @@ struct RelationshipGraph: View {
           sourceID: entities.first { $0.title == "Oren Ashe" }?.id,
           targetID: entities.first { $0.title == "The Glass Sea" }?.id, entitiesOnly: true)
         studio.recordLinkDraft?.label = "fears"
+      } else if studio.captureHint == "relationship-metadata-editor" {
+        studio.perform { beginRelationshipEdit(try studio.relationshipMetadataCaptureRelation()) }
       }
     }
     .onChange(of: selected) { _, _ in hoveredEdge = nil }
@@ -290,9 +291,7 @@ struct RelationshipGraph: View {
           width: labelWidth, height: 22), cornerSize: CGSize(width: 11, height: 11))
     }
     return Button {
-      editing = edge
-      label = edge.label
-      panel = .edit
+      beginRelationshipEdit(edge)
     } label: {
       ZStack {
         path.stroke(Color.clear, lineWidth: 14)
@@ -311,9 +310,12 @@ struct RelationshipGraph: View {
       }.contentShape(hit)
     }.buttonStyle(.plain)
       .accessibilityLabel(
-        "\(name(edge.sourceID)) \(edge.label) \(name(edge.targetID)). Edit relationship."
+        "\(relationshipTitle(edge)). Open relationship."
       )
-      .help("\(name(edge.sourceID)) \(edge.label) \(name(edge.targetID))")
+      .help(relationshipTitle(edge))
+      .contextMenu {
+        Button("Inspect relationship") { studio.inspect(.relationship(edge.id)) }
+      }
       .onContinuousHover { phase in
         switch phase {
         case .active: if controlActiveState == .key { hoveredEdge = edge.id }
@@ -642,32 +644,38 @@ struct RelationshipGraph: View {
   private var suggestions: [String] {
     Array(Set(relationships.map(\.label))).sorted().prefix(6).map { $0 }
   }
+  private func beginRelationshipEdit(_ relation: Relation) {
+    editing = RelationshipEditTarget(worldID: studio.worldID, relation: relation)
+    panel = .edit
+  }
+  private func relationshipTitle(_ relation: Relation) -> String {
+    let summary = "\(name(relation.sourceID)) \(relation.label) \(name(relation.targetID))"
+    return relation.attributes.kind == .unknown
+      ? summary : "\(summary) · \(relation.attributes.kind.title)"
+  }
   private func closePanel() { panel = nil }
   @ViewBuilder private var editSheet: some View {
-    if let relation = editing {
+    if let target = editing {
+      let relation = target.relation
       RelationEditor(
-        t: studio.t, title: "Edit relationship", source: name(relation.sourceID),
-        target: name(relation.targetID), label: $label,
-        note: "A draft relationship between two entities. Changes are recorded in its history.",
-        suggestions: suggestions, removable: true,
-        save: {
-          studio.perform {
-            try studio.store.updateRelation(worldID: studio.worldID, id: relation.id, label: label)
+        t: studio.t, title: relation.state == "canon" ? "Relationship" : "Edit relationship",
+        source: name(relation.sourceID), target: name(relation.targetID), label: relation.label,
+        attributes: relation.attributes,
+        records: studio.records.filter { $0.worldID == target.worldID },
+        note: relation.state == "canon"
+          ? "This relationship is accepted canon."
+          : "A draft relationship between two entities. Changes are recorded in its history.",
+        suggestions: suggestions, editable: relation.state != "canon", removable: true,
+        save: { label, attributes in
+          if studio.saveRelationshipEdit(target, label: label, attributes: attributes) {
             panel = nil
             refresh()
           }
         },
         remove: {
-          studio.perform {
-            try studio.store.archiveRelation(worldID: studio.worldID, id: relation.id)
+          if studio.archiveRelationship(target) {
             panel = nil
             refresh()
-            studio.show("Removed “\(relation.label)”", icon: "minus.circle", actionTitle: "Undo") {
-              studio.perform {
-                try studio.store.restoreRelation(worldID: studio.worldID, id: relation.id)
-                refresh()
-              }
-            }
           }
         }, cancel: { panel = nil })
     }

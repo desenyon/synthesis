@@ -234,11 +234,24 @@ extension Studio {
       guard let edge = try store.relations(worldID: worldID).first(where: { $0.id == id }) else {
         throw SynthesisError.notFound
       }
+      let attributes = edge.attributes
+      let evidence = attributes.evidenceRecordIDs.compactMap { reference($0, "Evidence") }
+      var fields = [
+        property("Meaning", attributes.kind.title),
+        property("Start", attributes.startLabel.isEmpty ? "Unknown" : attributes.startLabel),
+        property("End", attributes.endLabel.isEmpty ? "Unknown" : attributes.endLabel),
+        property("Strength", attributes.strength.title),
+        property("Secrecy", attributes.secrecy.title),
+        property("Mutuality", attributes.mutuality.title),
+        property("Status", attributes.status.title),
+      ]
+      let unavailable = attributes.evidenceRecordIDs.count - evidence.count
+      if unavailable > 0 { fields.append(property("Evidence", "\(unavailable) unavailable")) }
       return ObjectInspection(
-        title: edge.label, kind: "Relationship", icon: "arrow.triangle.branch",
-        references: [reference(edge.sourceID, "From"), reference(edge.targetID, "To")].compactMap {
-          $0
-        })
+        title: edge.label, kind: "Relationship", icon: "arrow.triangle.branch", state: edge.state,
+        properties: fields,
+        references: [reference(edge.sourceID, "From"), reference(edge.targetID, "To")]
+          .compactMap { $0 } + evidence)
     case .conversation(let id):
       guard let chat = try store.conversations(worldID: worldID).first(where: { $0.id == id })
       else { throw SynthesisError.notFound }

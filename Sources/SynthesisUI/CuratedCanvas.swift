@@ -19,7 +19,6 @@ struct CuratedCanvas: View {
   @State private var formCategory = "Characters"
   @State private var boardName = ""
   @State private var pickerQuery = ""
-  @State private var edgeLabel = ""
   init(studio: Studio) {
     self.studio = studio
     session = studio.canvas()
@@ -118,52 +117,53 @@ struct CuratedCanvas: View {
     .studioSheet(item: $session.connection) { connection in
       RelationEditor(
         t: studio.t, title: "Is this a relationship?", source: connection.source.title,
-        target: connection.target.title, label: $edgeLabel,
+        target: connection.target.title, label: connection.label,
+        records: studio.records.filter { $0.worldID == connection.source.worldID },
         note:
           "Saving creates a draft relationship that also appears in Graph. Keeping it as an arrow changes nothing in your lore.",
         suggestions: relationSuggestions,
-        save: { session.saveConnection(connection, label: edgeLabel) },
+        save: { label, attributes in
+          session.saveConnection(connection, label: label, attributes: attributes)
+        },
         cancel: { session.connection = nil }
-      ).onAppear { edgeLabel = connection.label }
+      )
     }
-    .studioSheet(item: $session.editingRelation) { relation in
+    .studioSheet(item: $session.editingRelation) { target in
+      let relation = target.relation
       RelationEditor(
         t: studio.t, title: "World relationship",
-        source: studio.records.first { $0.id == relation.sourceID }?.title ?? "Unavailable",
-        target: studio.records.first { $0.id == relation.targetID }?.title ?? "Unavailable",
-        label: $edgeLabel,
-        note: "This relationship is shared by Graph, Canvas and the assistant's world context.",
-        suggestions: relationSuggestions, removable: true,
+        source: studio.records.first {
+          $0.worldID == target.worldID && $0.id == relation.sourceID
+        }?.title ?? "Unavailable",
+        target: studio.records.first {
+          $0.worldID == target.worldID && $0.id == relation.targetID
+        }?.title ?? "Unavailable",
+        label: relation.label, attributes: relation.attributes,
+        records: studio.records.filter { $0.worldID == target.worldID },
+        note: relation.state == "canon"
+          ? "This relationship is accepted canon."
+          : "This draft relationship is shared by Graph and Canvas.",
+        suggestions: relationSuggestions, editable: relation.state != "canon", removable: true,
         hide: {
+          guard target.worldID == studio.worldID, session.editingRelation?.id == target.id else {
+            return
+          }
           session.hideRelationship(relation.id)
           session.editingRelation = nil
         },
-        save: {
-          studio.perform {
-            try studio.store.updateRelation(
-              worldID: studio.worldID, id: relation.id, label: edgeLabel)
-            try studio.reload()
+        save: { label, attributes in
+          if studio.saveRelationshipEdit(target, label: label, attributes: attributes) {
             session.sync()
             session.editingRelation = nil
           }
         },
         remove: {
-          studio.perform {
-            let world = studio.worldID
-            try studio.store.archiveRelation(worldID: world, id: relation.id)
-            try studio.reload()
+          if studio.archiveRelationship(target) {
             session.sync()
             session.editingRelation = nil
-            studio.show("Relationship archived", icon: "archivebox", actionTitle: "Undo") {
-              studio.perform {
-                try studio.store.restoreRelation(worldID: world, id: relation.id)
-                try studio.reload()
-                session.sync()
-              }
-            }
           }
         }, cancel: { session.editingRelation = nil }
-      ).onAppear { edgeLabel = relation.label }
+      )
     }
   }
   private var relationSuggestions: [String] {
@@ -508,20 +508,48 @@ struct CuratedCanvas: View {
   }
 }
 
-/// Label editor shared by Canvas and Graph for relationships.
+/// Edits a frozen relationship snapshot shared by Graph and Canvas.
 struct RelationEditor: View {
   let t: Theme
   let title: String
   let source: String
   let target: String
-  @Binding var label: String
+  @State private var label: String
+  @State private var attributes: RelationshipAttributes
+  let records: [LoreRecord]
   let note: String
-  var suggestions: [String] = []
-  var removable = false
-  var hide: (() -> Void)? = nil
-  var save: () -> Void
-  var remove: () -> Void = {}
-  var cancel: () -> Void
+  let suggestions: [String]
+  let editable: Bool
+  let removable: Bool
+  let hide: (() -> Void)?
+  let save: (String, RelationshipAttributes) -> Void
+  let remove: () -> Void
+  let cancel: () -> Void
+
+  init(
+    t: Theme, title: String, source: String, target: String, label: String,
+    attributes: RelationshipAttributes = .init(), records: [LoreRecord], note: String,
+    suggestions: [String] = [], editable: Bool = true, removable: Bool = false,
+    hide: (() -> Void)? = nil, save: @escaping (String, RelationshipAttributes) -> Void,
+    remove: @escaping () -> Void = {}, cancel: @escaping () -> Void
+  ) {
+    self.t = t
+    self.title = title
+    self.source = source
+    self.target = target
+    _label = State(initialValue: label)
+    _attributes = State(initialValue: attributes)
+    self.records = records
+    self.note = note
+    self.suggestions = suggestions
+    self.editable = editable
+    self.removable = removable
+    self.hide = hide
+    self.save = save
+    self.remove = remove
+    self.cancel = cancel
+  }
+
   var body: some View {
     SheetScaffold(title: title, t: t, close: cancel) {
       HStack(spacing: 8) {
@@ -532,8 +560,9 @@ struct RelationEditor: View {
       }
       FormField(
         label: "How are they connected?", placeholder: "guided by, rules, born in…", text: $label,
-        t: t, submit: { if valid { save() } })
-      if !suggestions.isEmpty {
+        t: t, submit: submit
+      ).disabled(!editable)
+      if editable && !suggestions.isEmpty {
         ScrollView(.horizontal) {
           HStack(spacing: 6) {
             ForEach(suggestions, id: \.self) { value in
@@ -542,21 +571,29 @@ struct RelationEditor: View {
           }
         }.scrollIndicators(.never)
       }
+      RelationshipAttributesFields(
+        attributes: $attributes, records: records, t: t, editable: editable)
       Text(note).font(.studio(size: 12.5)).foregroundStyle(t.muted).lineSpacing(2)
         .fixedSize(horizontal: false, vertical: true)
     } footer: {
       if let hide { Button("Hide on board", action: hide).buttonStyle(QuietButton(t: t)) }
-      if removable {
+      if removable && editable {
         Button("Remove", action: remove).buttonStyle(QuietButton(t: t, role: .danger))
       }
       Spacer()
-      Button(removable ? "Cancel" : "Keep as an arrow", action: cancel)
+      Button(editable ? (removable ? "Cancel" : "Keep as an arrow") : "Close", action: cancel)
         .buttonStyle(QuietButton(t: t, role: .ghost))
-      Button("Save", action: save).buttonStyle(QuietButton(t: t, primary: true))
-        .keyboardShortcut(.defaultAction).disabled(!valid)
+      if editable {
+        Button("Save", action: submit).buttonStyle(QuietButton(t: t, primary: true))
+          .keyboardShortcut(.defaultAction).disabled(!valid)
+      }
     }
   }
-  private var valid: Bool { !label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+  private var valid: Bool {
+    editable && !label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+      && label.count <= 80 && relationshipDatesFit(attributes)
+  }
+  private func submit() { if valid { save(label, attributes) } }
   private func endpoint(_ name: String) -> some View {
     Text(name).font(.studio(.label)).lineLimit(1)
       .padding(.horizontal, 10).frame(height: 28)
