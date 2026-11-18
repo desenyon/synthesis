@@ -70,12 +70,16 @@ struct ConversationStudio: View {
       }
       .overlay(alignment: .trailing) {
         // Background verification renders the same popover contents without activating macOS.
-        if ["composer-context", "light-composer-context", "composer-browser"].contains(
+        if [
+          "composer-context", "light-composer-context", "composer-browser", "request-pins-browser",
+        ]
+        .contains(
           studio.captureHint)
         {
           AssistantContextPanel(
             studio: studio, prompt: studio.draft,
-            attachments: studio.captureHint == "composer-browser"
+            attachments: ["composer-browser", "request-pins-browser"].contains(studio.captureHint),
+            nextMessageOnly: studio.captureHint == "request-pins-browser"
           )
           .floatingPanel(studio.t).padding(16)
         }

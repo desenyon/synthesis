@@ -4,6 +4,52 @@ import Testing
 @testable import SynthesisCore
 
 @MainActor struct AssistantContextTests {
+  @Test func requestPinsTakePriorityAndKeepTheirPeriodInTheBoundedContext() async throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "One request")
+    let mira = try store.createRecord(worldID: world.id, title: "Mira Vale", body: "Navigator")
+    let keepers = try store.createRecord(worldID: world.id, title: "Tidekeepers", body: "Order")
+    let note = try store.createRecord(worldID: world.id, title: "Survey", body: "First crossing")
+    let period = try store.createChronologyLane(
+      worldID: world.id, name: "Crossing era", kind: "period", start: "Early summer")
+    _ = try store.saveChronologyEvent(
+      worldID: world.id, id: nil, title: "First crossing", date: "Early summer", source: note.id,
+      order: nil, laneID: period.id)
+    for index in 1...61 {
+      _ = try store.createChronologyLane(worldID: world.id, name: "Era \(index)", kind: "period")
+    }
+    var saved = AssistantContextOptions()
+    saved.budget = .focused
+    saved.recordIDs = [keepers.id]
+    try store.setAssistantContextOptions(worldID: world.id, options: saved)
+    var pins = AssistantRequestPins()
+    pins.recordIDs = [mira.id, keepers.id]
+    pins.laneIDs = [period.id]
+    let preview = try store.assistantContext(
+      worldID: world.id, prompt: "Compare their roles", options: saved, requestPins: pins)
+    #expect(preview.sources.prefix(2).map(\.id) == [mira.id, keepers.id])
+    #expect(preview.sources.prefix(2).allSatisfy { $0.reason == "Pinned for this request" })
+    #expect(preview.workspace.contains("Crossing era"))
+
+    let chat = try store.createConversation(worldID: world.id)
+    let transport = CountingTransport()
+    let engine = AgentEngine(store: store, transport: transport)
+    try await engine.submit(
+      worldID: world.id, conversationID: chat.id, prompt: "Compare their roles", preset: "Develop",
+      contextOptions: saved, requestPins: pins
+    ) { _ in }
+    let request = try #require(await transport.lastRequest)
+    #expect(request.instructions.contains(preview.workspace))
+    #expect(request.instructions.contains(preview.lore))
+    #expect(try store.assistantContextOptions(worldID: world.id) == saved)
+
+    saved.excludedRecordIDs = [mira.id]
+    let restricted = try store.assistantContext(
+      worldID: world.id, prompt: "Compare their roles", options: saved, requestPins: pins)
+    #expect(!restricted.sources.map(\.id).contains(mira.id))
+    #expect(restricted.sources.first?.id == keepers.id)
+  }
+
   @Test func worldScopeRetainsSectionsAndNeighborsOfSelectedOrAttachedLore() throws {
     let store = try WorkspaceStore(path: ":memory:")
     let world = try store.createWorld(name: "Selected context")
@@ -84,7 +130,7 @@ import Testing
     let preview = try store.assistantContext(worldID: world.id, prompt: "Harbor", options: options)
     try await engine.submit(
       worldID: world.id, conversationID: chat.id, prompt: "Harbor", preset: "Develop",
-      contextOptions: options
+      workspaceName: "Split workspace · EXCLUDED_SENTINEL", contextOptions: options
     ) { _ in }
     let request = try #require(await transport.lastRequest)
     #expect(request.instructions.contains(preview.workspace))

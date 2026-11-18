@@ -1,5 +1,11 @@
 # Development progress
 
+## 2026-11-17 — #47 one-request context pins
+
+The shared attachment browser adds Next message only for records, boards and history. Pinned sources take priority in the shared preview and send builder. A source can be both pinned and saved. Its single chip removes the one-request pin first. Admission consumes the submitted pins, preserving unrelated pins added while waiting and preserving saved attachments. Restricted requests now omit private titles from the workspace descriptor.
+
+The Linux core probe passed 66 tests in 11 suites, including a pinned period behind the index limit, duplicate saved/pinned IDs, exclusions, preview/send parity and the restricted workspace descriptor. Strict lint and parsing passed on the changed files. Native Studio admission, cancellation and chip tests remain pending. Capture `request-pins` and `request-pins-browser` at the same three sizes.
+
 ## 2026-11-17 — #67–69 relationship direction and attributes
 
 Both profiles show one stored relationship with Incoming or Outgoing wording and a navigable counterpart. Link Records, Graph and Canvas share typed meanings and optional start, end, strength, secrecy, mutuality, status and evidence. The inspector reads saved values and opens current same-world sources. Migration 0018 writes metadata, prior snapshots and activity. Draft updates and archives check the original edge revision. Undo retains the edge and metadata. Archives are v11 and JSON is schema 14.

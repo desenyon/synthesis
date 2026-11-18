@@ -2,41 +2,75 @@ import SwiftUI
 import SynthesisCore
 
 struct ComposerAttachment: Identifiable {
-  enum Kind { case record, board, history }
+  enum Kind: Equatable {
+    case record, board, history
+
+    var saved: WritableKeyPath<AssistantContextOptions, [String]> {
+      switch self {
+      case .record: \.recordIDs
+      case .board: \.boardIDs
+      case .history: \.laneIDs
+      }
+    }
+
+    var temporary: WritableKeyPath<AssistantRequestPins, [String]> {
+      switch self {
+      case .record: \.recordIDs
+      case .board: \.boardIDs
+      case .history: \.laneIDs
+      }
+    }
+  }
   let key: String
   let title: String
   let icon: String
   let kind: Kind
+  let pinned: Bool
   var id: String { "\(kind):\(key)" }
 }
 
 extension Studio {
   var composerAttachments: [ComposerAttachment] {
-    contextOptions.recordIDs.compactMap { id in
-      records.first { $0.id == id }.map {
-        ComposerAttachment(key: id, title: $0.title, icon: categoryIcon($0.category), kind: .record)
+    let pins = activeRequestPins
+    let excluded = Set(contextOptions.excludedRecordIDs)
+    func joined(_ kind: ComposerAttachment.Kind) -> [(id: String, pinned: Bool)] {
+      let temporarilyPinned = Set(pins[keyPath: kind.temporary])
+      var seen = Set<String>()
+      return (contextOptions[keyPath: kind.saved] + pins[keyPath: kind.temporary]).compactMap {
+        guard seen.insert($0).inserted, kind != .record || !excluded.contains($0) else {
+          return nil
+        }
+        return ($0, temporarilyPinned.contains($0))
       }
     }
-      + contextOptions.boardIDs.compactMap { id in
+    let items: [ComposerAttachment] =
+      joined(.record).compactMap { id, pinned in
+        records.first { $0.id == id }.map {
+          ComposerAttachment(
+            key: id, title: $0.title, icon: categoryIcon($0.category), kind: .record, pinned: pinned
+          )
+        }
+      }
+      + joined(.board).compactMap { id, pinned in
         contextBoards.first { $0.id == id }.map {
           ComposerAttachment(
             key: id, title: $0.name, icon: $0.kind == "atlas" ? "map" : "rectangle.on.rectangle",
-            kind: .board)
+            kind: .board, pinned: pinned)
         }
       }
-      + contextOptions.laneIDs.compactMap { id in
+      + joined(.history).compactMap { id, pinned in
         contextLanes.first { $0.id == id }.map {
-          ComposerAttachment(key: id, title: $0.name, icon: "calendar", kind: .history)
+          ComposerAttachment(
+            key: id, title: $0.name, icon: "calendar", kind: .history, pinned: pinned)
         }
       }
+    return items.filter(\.pinned) + items.filter { !$0.pinned }
   }
   func removeAttachment(_ item: ComposerAttachment) {
-    updateContext {
-      switch item.kind {
-      case .record: $0.recordIDs.removeAll { $0 == item.key }
-      case .board: $0.boardIDs.removeAll { $0 == item.key }
-      case .history: $0.laneIDs.removeAll { $0 == item.key }
-      }
+    if item.pinned {
+      updateRequestPins { $0[keyPath: item.kind.temporary].removeAll { $0 == item.key } }
+    } else {
+      updateContext { $0[keyPath: item.kind.saved].removeAll { $0 == item.key } }
     }
   }
 }
@@ -44,12 +78,21 @@ extension Studio {
 /// Local inspection, never a provider call. The preview and send use the same core builder.
 struct AssistantContextPanel: View {
   @ObservedObject var studio: Studio
-  var prompt: String
-  var attachments = false
+  let prompt: String
+  let attachments: Bool
+  @State private var nextMessageOnly: Bool
   @State private var section = "Records"
   @State private var query = ""
   @State private var preview: AssistantContext?
   @State private var failure: String?
+
+  init(studio: Studio, prompt: String, attachments: Bool = false, nextMessageOnly: Bool = false) {
+    self.studio = studio
+    self.prompt = prompt
+    self.attachments = attachments
+    _nextMessageOnly = State(initialValue: nextMessageOnly)
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 14) {
       HStack(spacing: 8) {
@@ -67,6 +110,7 @@ struct AssistantContextPanel: View {
       .foregroundStyle(studio.t.text).background(studio.t.surface)
       .onAppear(perform: refresh)
       .onChange(of: studio.contextOptions) { _, _ in refresh() }
+      .onChange(of: studio.activeRequestPins) { _, _ in refresh() }
       .onChange(of: studio.worldRevision) { _, _ in refresh() }
   }
 
@@ -76,6 +120,20 @@ struct AssistantContextPanel: View {
         "Live references from \(studio.world?.name ?? "this universe"). Nothing is copied or sent yet."
       )
       .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+      HStack {
+        SegmentedSwitch(
+          choices: [
+            .init(value: false, title: "Saved attachments"),
+            .init(value: true, title: "Next message only"),
+          ],
+          selected: nextMessageOnly, label: "Attachment duration", t: studio.t
+        ) { nextMessageOnly = $0 }
+        Spacer(minLength: 6)
+        if nextMessageOnly && !studio.activeRequestPins.isEmpty {
+          Button("Clear pins", action: studio.clearRequestPins)
+            .buttonStyle(QuietButton(t: studio.t, role: .ghost))
+        }
+      }
       HStack(spacing: 4) {
         ForEach(["Records", "Canvas", "Atlas", "History"], id: \.self) { name in
           Button {
@@ -101,10 +159,7 @@ struct AssistantContextPanel: View {
                 title: lane.name,
                 subtitle: [lane.kind.capitalized, lane.start, lane.end].filter { !$0.isEmpty }
                   .joined(separator: " · "), icon: "calendar",
-                selected: studio.contextOptions.laneIDs.contains(lane.id)
-              ) {
-                studio.updateContext { toggle(lane.id, in: &$0.laneIDs) }
-              }
+                key: lane.id, kind: .history)
             }
             if matchingLanes.isEmpty { empty }
           } else {
@@ -115,17 +170,16 @@ struct AssistantContextPanel: View {
                   ? "Map metadata and linked places · no image bytes"
                   : "Linked records and their positions",
                 icon: board.kind == "atlas" ? "map" : "rectangle.on.rectangle",
-                selected: studio.contextOptions.boardIDs.contains(board.id)
-              ) {
-                studio.updateContext { toggle(board.id, in: &$0.boardIDs) }
-              }
+                key: board.id, kind: .board)
             }
             if matchingBoards.isEmpty { empty }
           }
         }
       }
       Text(
-        "Attachments stay with this universe until removed. History includes nested periods; Canvas and Atlas attach linked lore, not a screenshot."
+        nextMessageOnly
+          ? "Pins apply to your next message. History includes nested periods. Maps and boards include linked lore and metadata."
+          : "Attachments stay with this universe until removed. History includes nested periods. Maps and boards include linked lore and metadata."
       )
       .font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
       .fixedSize(horizontal: false, vertical: true)
@@ -143,6 +197,11 @@ struct AssistantContextPanel: View {
           choices: AssistantContextBudget.allCases.map { ($0, $0.title) }, t: studio.t
         )
         .help("Limits direct references and the number of full record excerpts.")
+        if !studio.activeRequestPins.isEmpty {
+          let count = studio.composerAttachments.filter(\.pinned).count
+          StudioLabel("\(count) pinned for the next message", icon: "pin")
+            .font(.studio(.caption)).foregroundStyle(studio.t.accent)
+        }
         Toggle("Include workspace selection", isOn: option(\.includeSelection)).font(
           .studio(size: 13)
         )
@@ -253,23 +312,15 @@ struct AssistantContextPanel: View {
     .font(.studio(size: 13)).foregroundStyle(studio.t.secondary).padding(.vertical, 24)
   }
   private func recordRow(_ record: LoreRecord) -> some View {
-    HStack(spacing: 3) {
+    let excluded = studio.contextOptions.excludedRecordIDs.contains(record.id)
+    return HStack(spacing: 3) {
       attachRow(
         title: record.title, subtitle: Vocabulary.displayCategory(record.category),
-        icon: categoryIcon(record.category),
-        selected: studio.contextOptions.recordIDs.contains(record.id)
-      ) {
-        studio.updateContext {
-          toggle(record.id, in: &$0.recordIDs)
-          $0.excludedRecordIDs.removeAll { $0 == record.id }
-        }
-      }
+        icon: categoryIcon(record.category), key: record.id, kind: .record, excluded: excluded)
       IconButton(
-        icon: studio.contextOptions.excludedRecordIDs.contains(record.id)
-          ? "eye.slash" : "minus.circle",
-        label: studio.contextOptions.excludedRecordIDs.contains(record.id)
-          ? "Include \(record.title) again" : "Exclude \(record.title)", t: studio.t,
-        active: studio.contextOptions.excludedRecordIDs.contains(record.id)
+        icon: excluded ? "eye.slash" : "minus.circle",
+        label: excluded ? "Include \(record.title) again" : "Exclude \(record.title)", t: studio.t,
+        active: excluded
       ) {
         studio.updateContext {
           toggle(record.id, in: &$0.excludedRecordIDs)
@@ -279,19 +330,40 @@ struct AssistantContextPanel: View {
     }
   }
   private func attachRow(
-    title: String, subtitle: String, icon: String, selected: Bool, action: @escaping () -> Void
+    title: String, subtitle: String, icon: String, key: String, kind: ComposerAttachment.Kind,
+    excluded: Bool = false
   ) -> some View {
-    Button(action: action) {
+    let saved = studio.contextOptions[keyPath: kind.saved].contains(key)
+    let pinned = studio.activeRequestPins[keyPath: kind.temporary].contains(key)
+    let selected = nextMessageOnly ? pinned : saved
+    let blocked = nextMessageOnly && excluded && !pinned
+    let detail = [
+      subtitle, excluded ? "Excluded" : (nextMessageOnly && saved ? "Saved attachment" : ""),
+    ].filter { !$0.isEmpty }.joined(separator: " · ")
+    let action = nextMessageOnly ? (selected ? "Unpin" : "Pin") : (selected ? "Remove" : "Attach")
+    return Button {
+      if nextMessageOnly {
+        studio.updateRequestPins { toggle(key, in: &$0[keyPath: kind.temporary]) }
+      } else {
+        studio.updateContext {
+          toggle(key, in: &$0[keyPath: kind.saved])
+          if kind == .record { $0.excludedRecordIDs.removeAll { $0 == key } }
+        }
+      }
+    } label: {
       HStack(spacing: 9) {
         StudioIcon(icon, size: 16).foregroundStyle(studio.t.secondary)
         VStack(alignment: .leading, spacing: 3) {
           Text(title).font(.studio(.label)).lineLimit(1)
-          Text(subtitle).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(2)
+          Text(detail).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(2)
         }
         Spacer(minLength: 6)
-        StudioIcon(selected ? "checkmark" : "plus", size: 12).foregroundStyle(studio.t.secondary)
+        StudioIcon(blocked ? "eye.slash" : (selected ? "checkmark" : "plus"), size: 12)
+          .foregroundStyle(nextMessageOnly && pinned ? studio.t.accent : studio.t.secondary)
       }.padding(9).frame(maxWidth: .infinity, alignment: .leading).hoverFill(studio.t)
-    }.buttonStyle(.plain).accessibilityLabel("\(selected ? "Remove" : "Attach") \(title)")
+    }.buttonStyle(.plain).disabled(blocked)
+      .accessibilityLabel(blocked ? "\(title), excluded from context" : "\(action) \(title)")
+      .accessibilityAddTraits(selected ? .isSelected : [])
   }
   private func toggle(_ id: String, in values: inout [String]) {
     if values.contains(id) { values.removeAll { $0 == id } } else { values.append(id) }

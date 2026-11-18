@@ -35,6 +35,15 @@ public struct AssistantContextOptions: Codable, Equatable, Sendable {
   public var restricted: Bool { scope == .attachments || !excludedRecordIDs.isEmpty }
 }
 
+/// Extra sources for one admitted request. These are never part of saved preferences.
+public struct AssistantRequestPins: Equatable, Sendable {
+  public var recordIDs: [String] = []
+  public var boardIDs: [String] = []
+  public var laneIDs: [String] = []
+  public var isEmpty: Bool { recordIDs.isEmpty && boardIDs.isEmpty && laneIDs.isEmpty }
+  public init() {}
+}
+
 /// Built once per preview/submission using the same world-scoped selection and serialization.
 public struct AssistantContext: Sendable {
   public var sources: [ContextSource]
@@ -96,6 +105,7 @@ extension WorkspaceStore {
 
   public func assistantContext(
     worldID: String, prompt: String, options: AssistantContextOptions = .init(),
+    requestPins: AssistantRequestPins = .init(),
     selectedRecordIDs: [String] = [], boardID: String? = nil, chronologyLaneID: String? = nil
   ) throws -> AssistantContext {
     _ = try world(worldID)
@@ -124,13 +134,15 @@ extension WorkspaceStore {
       $0.reference.id
     }
     let selected = options.includeSelection ? selectedRecordIDs : []
+    let directRecordAttachments = requestPins.recordIDs + options.recordIDs
     let boardIDs = Set(
-      options.boardIDs + referenceBoardIDs
+      requestPins.boardIDs + options.boardIDs + referenceBoardIDs
         + (options.includeSelection ? boardID.map { [$0] } ?? [] : []))
     let laneIDs = Set(
-      options.laneIDs + (options.includeSelection ? chronologyLaneID.map { [$0] } ?? [] : []))
+      requestPins.laneIDs + options.laneIDs
+        + (options.includeSelection ? chronologyLaneID.map { [$0] } ?? [] : []))
     guard
-      (options.recordIDs + selected).allSatisfy({ byID[$0] != nil }),
+      (directRecordAttachments + selected).allSatisfy({ byID[$0] != nil }),
       options.excludedRecordIDs.allSatisfy(exclusionIDs.contains),
       boardIDs.isSubset(of: Set(boards.map(\.id))), laneIDs.isSubset(of: Set(lanes.map(\.id)))
     else {
@@ -146,7 +158,7 @@ extension WorkspaceStore {
     let modernRecordIDs = referenceSources.compactMap {
       $0.reference.kind == .record ? $0.reference.id : nil
     }
-    let directRecordIDs = Set(options.recordIDs + typedRecordIDs + modernRecordIDs)
+    let directRecordIDs = Set(directRecordAttachments + typedRecordIDs + modernRecordIDs)
       .subtracting(excluded)
     let otherDirectSources = referenceSources.count - modernRecordIDs.count
     guard directRecordIDs.count + otherDirectSources <= options.budget.limit else {
@@ -160,6 +172,7 @@ extension WorkspaceStore {
       else { return }
       anchors.append(.init(record: record, reason: reason))
     }
+    for id in requestPins.recordIDs { add(id, "Pinned for this request") }
     for id in options.recordIDs { add(id, "Attached by you") }
     for id in referenceRecordIDs + typedRecordIDs { add(id, "You referenced it") }
     for id in selected { add(id, "Current selection") }

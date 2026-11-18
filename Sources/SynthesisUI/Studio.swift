@@ -160,6 +160,7 @@ public struct Toast: Identifiable {
   @Published public var draft = ""
   @Published public var preset = "Create"
   @Published public var contextOptions = AssistantContextOptions()
+  @Published private var requestPinsByWorld: [String: AssistantRequestPins] = [:]
   @Published public var contextBoards: [Board] = []
   @Published public var contextLanes: [ChronologyLane] = []
   @Published public var busy = false
@@ -440,6 +441,7 @@ public struct Toast: Identifiable {
     contextBoards = try store.assistantBoards(worldID: worldID)
     contextLanes = try store.chronologyLanes(worldID: worldID)
     contextOptions = try store.assistantContextOptions(worldID: worldID)
+    if !activeRequestPins.isEmpty { updateRequestPins { _ in } }
     conversations = try store.conversations(worldID: worldID)
     pendingProposals = try store.proposals(worldID: worldID).filter { $0.pending > 0 }
     try reloadMessages()
@@ -966,11 +968,33 @@ public struct Toast: Identifiable {
     perform {
       try store.setAssistantContextOptions(worldID: worldID, options: next)
       contextOptions = next
+      if !activeRequestPins.isEmpty { updateRequestPins { _ in } }
     }
   }
+  var activeRequestPins: AssistantRequestPins { requestPinsByWorld[worldID] ?? .init() }
+
+  func updateRequestPins(_ edit: (inout AssistantRequestPins) -> Void) {
+    var pins = activeRequestPins
+    edit(&pins)
+    func eligible(_ ids: [String], among available: Set<String>) -> [String] {
+      var seen = Set<String>()
+      return ids.filter { available.contains($0) && seen.insert($0).inserted }
+    }
+    pins.recordIDs = eligible(
+      pins.recordIDs, among: Set(records.map(\.id)).subtracting(contextOptions.excludedRecordIDs))
+    pins.boardIDs = eligible(pins.boardIDs, among: Set(contextBoards.map(\.id)))
+    pins.laneIDs = eligible(pins.laneIDs, among: Set(contextLanes.map(\.id)))
+    guard pins != activeRequestPins else { return }
+    if pins.isEmpty { clearRequestPins() } else { requestPinsByWorld[worldID] = pins }
+  }
+
+  func clearRequestPins() {
+    if requestPinsByWorld[worldID] != nil { requestPinsByWorld.removeValue(forKey: worldID) }
+  }
+
   public func previewContext(prompt: String) throws -> AssistantContext {
     try store.assistantContext(
-      worldID: worldID, prompt: prompt, options: contextOptions,
+      worldID: worldID, prompt: prompt, options: contextOptions, requestPins: activeRequestPins,
       selectedRecordIDs: contextualRecordIDs,
       boardID: destination == .canvas
         ? canvasSession?.boardID : (destination == .atlas ? mapBoardID : nil),
@@ -999,6 +1023,7 @@ public struct Toast: Identifiable {
       let cid = conversationID!
       let chosenPreset = preset
       let chosenContext = contextOptions
+      let chosenPins = activeRequestPins
       let request = UUID()
       requestID = request
       busy = true
@@ -1021,13 +1046,20 @@ public struct Toast: Identifiable {
           try await self.engine.submit(
             worldID: wid, conversationID: cid, prompt: prompt, preset: chosenPreset,
             boardID: activeBoard, selectedRecordIDs: selectedIDs, workspaceName: workspaceName,
-            chronologyLaneID: laneID, contextOptions: chosenContext,
+            chronologyLaneID: laneID, contextOptions: chosenContext, requestPins: chosenPins,
             onActivity: { [weak self] step in
               guard let self, self.requestID == request, self.worldID == wid,
                 self.conversationID == cid, self.mode == .assisted
               else { return }
               if step.id == "response", step.state == .running {
                 self.pendingSubmission = nil
+                if !chosenPins.isEmpty {
+                  self.updateRequestPins {
+                    $0.recordIDs.removeAll(where: chosenPins.recordIDs.contains)
+                    $0.boardIDs.removeAll(where: chosenPins.boardIDs.contains)
+                    $0.laneIDs.removeAll(where: chosenPins.laneIDs.contains)
+                  }
+                }
                 self.perform { try self.reload() }
               }
               if let index = self.activity.firstIndex(where: { $0.id == step.id }) {

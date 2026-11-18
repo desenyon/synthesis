@@ -6,7 +6,7 @@ Implementation checkpoint `dd9fd840b204226b46fb6618a1f95c524db1399f` is pushed t
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **32 Verified, 15 In progress, 346 Open, 1 Decision needed.** Source work resumed on Linux with owner approval. The runtime supported one integration agent and three workers. It rejected a fifth agent with `agent thread limit reached`.
+The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **32 Verified, 16 In progress, 345 Open, 1 Decision needed.** Source work resumed on Linux with owner approval. The runtime supported one integration agent and three workers. It rejected a fifth agent with `agent thread limit reached`.
 
 **No new release or tag is authorized. The owner requires all 394 requirements completed before another release; completing them does not itself authorize publication.** The current 0.0.3 release is unchanged.
 
@@ -17,6 +17,8 @@ The #35 source now includes Canvas/editor destinations, image and board drag han
 The #36 continuation adds batch-local keys for proposals and a prerequisite indicator in Review. The same Linux probe passed 34 tests, including the three-faction request and rejected ambiguous or invalid dependencies. The `proposal-faction-batch` capture still requires macOS. #375 needs an owner decision about credentials under the subscription-only boundary. [Run record](PROGRESS.md) · [Ledger](EXPANSION.md)
 
 The #67–69 continuation shows a single directed connection from both profiles and adds editable meanings and relationship attributes in the shared native forms. Migration 0018 saves history and activity and advances portable exports to v11 / JSON14. The expanded Linux probe passed 65 tests across 11 suites. Four relationship states are registered for native capture. [Relationship guide](RELATIONSHIPS.md) · [Run record](PROGRESS.md)
+
+The #47 continuation adds one-request context pins that prioritize chosen records and history. The updated Linux probe passed 66 core tests in 11 suites. The composer and attachment browser captures remain pending. [Composer guide](COMPOSER_CONTEXT.md) · [Run record](PROGRESS.md)
 
 The saved Codex agent limit remains 50. The canonical Mac checkout is unavailable from Linux. Local Git HTTPS credentials were unavailable when checking the push path. [Ownership and errors](PARALLEL_WORK.md) · [Handoff](HANDOFF.md) · [Continue prompt](RUN_PROMPT.md)
 

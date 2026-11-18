@@ -76,7 +76,9 @@ struct UnifiedComposer: View {
       }
     )
     .popover(isPresented: $contextPicker) {
-      AssistantContextPanel(studio: studio, prompt: text, attachments: true)
+      AssistantContextPanel(
+        studio: studio, prompt: text, attachments: true,
+        nextMessageOnly: !studio.activeRequestPins.isEmpty)
     }
     .popover(isPresented: $inspectingContext) {
       AssistantContextPanel(studio: studio, prompt: text)
@@ -121,12 +123,13 @@ struct UnifiedComposer: View {
     }
   }
   private var fullField: some View {
-    VStack(alignment: .leading, spacing: 12) {
+    let attachments = studio.composerAttachments
+    return VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 8) {
         Text("World assistant").font(.studio(.label))
           .foregroundStyle(studio.t.secondary)
-        if studio.composerAttachments.count > 3 {
-          Text("\(studio.composerAttachments.count) attached")
+        if attachments.count > 3 {
+          Text("\(attachments.count) references")
             .font(.studio(size: 11)).foregroundStyle(studio.t.muted)
         }
         Spacer(minLength: 0)
@@ -147,11 +150,11 @@ struct UnifiedComposer: View {
       ).frame(height: expanded ? 220 : min(160, max(56, inputHeight)))
         // NSTextView has its own 5pt line-fragment inset. Align typed text to the heading.
         .padding(.horizontal, -5)
-      if !studio.composerAttachments.isEmpty || !selectedReferences.isEmpty {
+      if !attachments.isEmpty || !selectedReferences.isEmpty {
         GeometryReader { viewport in
           ScrollView {
             FlowLayout(spacing: 6) {
-              ForEach(studio.composerAttachments) { item in attachmentChip(item) }
+              ForEach(attachments) { item in attachmentChip(item) }
               ForEach(selectedReferences) { record in
                 HStack(spacing: 6) {
                   StudioIcon(categoryIcon(record.category), size: 12)
@@ -191,54 +194,71 @@ struct UnifiedComposer: View {
     }
   }
   private var compactField: some View {
-    HStack(alignment: .bottom, spacing: 4) {
-      attachment
-      ComposerInput(
-        text: $text,
-        placeholder: "Ask about \(studio.contextLabel)…", color: studio.t.text,
-        placeholderColor: studio.t.muted, accent: studio.t.accent,
-        accentSoft: studio.t.accentSoft, sendShortcut: studio.preferences.sendShortcut,
-        handle: handle, onFocus: { focused = $0 }, onHeight: { inputHeight = $0 },
-        onMention: updateMention, onMentionKey: mentionKey, submit: send
-      ).frame(height: min(96, max(ComposerMetric.control, inputHeight)))
-      contextControl(labels: false)
-      IconButton(
-        icon: "sidebar.right", label: "Open the companion conversation", t: studio.t,
-        size: ComposerMetric.control
-      ) {
-        commitDraft()
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
-          studio.companionExpanded = true
+    let pins = studio.composerAttachments.filter(\.pinned)
+    return VStack(alignment: .leading, spacing: Space.sm) {
+      HStack(alignment: .bottom, spacing: 4) {
+        attachment
+        ComposerInput(
+          text: $text,
+          placeholder: "Ask about \(studio.contextLabel)…", color: studio.t.text,
+          placeholderColor: studio.t.muted, accent: studio.t.accent,
+          accentSoft: studio.t.accentSoft, sendShortcut: studio.preferences.sendShortcut,
+          handle: handle, onFocus: { focused = $0 }, onHeight: { inputHeight = $0 },
+          onMention: updateMention, onMentionKey: mentionKey, submit: send
+        ).frame(height: min(96, max(ComposerMetric.control, inputHeight)))
+        contextControl(labels: false)
+        IconButton(
+          icon: "sidebar.right", label: "Open the companion conversation", t: studio.t,
+          size: ComposerMetric.control
+        ) {
+          commitDraft()
+          withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
+            studio.companionExpanded = true
+          }
         }
+        sendButton
       }
-      sendButton
+      if !pins.isEmpty {
+        ScrollView(.horizontal) {
+          HStack(spacing: 6) {
+            ForEach(pins) { item in attachmentChip(item) }
+          }
+        }.scrollBounceBehavior(.basedOnSize).frame(height: 28)
+      }
     }.padding(12)
   }
   private var selectedReferences: [LoreRecord] {
     guard studio.contextOptions.includeSelection else { return [] }
+    let pins = Set(studio.activeRequestPins.recordIDs)
     return studio.records.filter {
       studio.contextualRecordIDs.contains($0.id) && !studio.contextOptions.recordIDs.contains($0.id)
-        && !studio.contextOptions.excludedRecordIDs.contains($0.id)
+        && !studio.contextOptions.excludedRecordIDs.contains($0.id) && !pins.contains($0.id)
     }
   }
   private func attachmentChip(_ item: ComposerAttachment) -> some View {
-    HStack(spacing: 6) {
-      StudioIcon(item.icon, size: 12)
+    let remove = item.pinned ? "Remove pin for \(item.title)" : "Remove attachment \(item.title)"
+    return HStack(spacing: 6) {
+      StudioIcon(item.pinned ? "pin" : item.icon, size: 12)
+        .foregroundStyle(item.pinned ? studio.t.accent : studio.t.secondary)
       Text(item.title).font(.studio(size: 12.5)).lineLimit(1).frame(maxWidth: 170)
       Button {
         studio.removeAttachment(item)
       } label: {
         StudioIcon("xmark", size: 9).frame(width: 22, height: 24)
           .hoverFill(studio.t, radius: 5)
-      }.buttonStyle(.plain).help("Remove \(item.title)").accessibilityLabel(
-        "Remove attachment \(item.title)")
+      }.buttonStyle(.plain).help(remove).accessibilityLabel(remove)
     }.padding(.leading, 8).padding(.trailing, 2).frame(height: 28)
       .foregroundStyle(studio.t.secondary)
-      .background(studio.t.secondarySurface, in: RoundedRectangle(cornerRadius: Metric.radius))
+      .background(
+        item.pinned ? studio.t.accentSoft : studio.t.secondarySurface,
+        in: RoundedRectangle(cornerRadius: Metric.radius)
+      )
       .overlay(
-        RoundedRectangle(cornerRadius: Metric.radius).stroke(studio.t.hairline, lineWidth: 0.5)
-          .allowsHitTesting(false)
-      ).help(item.title)
+        RoundedRectangle(cornerRadius: Metric.radius).stroke(
+          item.pinned ? studio.t.accent.opacity(0.3) : studio.t.hairline, lineWidth: 0.5
+        )
+        .allowsHitTesting(false)
+      ).help(item.pinned ? "\(item.title) · Next message only" : item.title)
   }
   private var intentMenu: some View {
     PlainMenu {
