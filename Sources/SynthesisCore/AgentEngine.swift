@@ -131,7 +131,7 @@ public protocol ModelTransport: Sendable {
           "content": ($0.state == "interrupted" ? "[This response ended before completion.]\n" : "")
             + String($0.body.prefix(16000)),
         ]
-      } + [["role": "user", "content": text]]
+      } + [["role": "user", "content": prepared.providerPrompt]]
     try store.appendMessage(
       worldID: worldID, conversationID: conversationID, role: "user", body: text, state: "complete")
     if history.isEmpty {

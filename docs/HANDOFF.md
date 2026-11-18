@@ -4,6 +4,10 @@ Start here when picking up Synthesis.
 
 Implementation checkpoint [`dd9fd84`](https://github.com/desenyon/synthesis/commit/dd9fd840b204226b46fb6618a1f95c524db1399f) was pushed to `origin/main`; the remote SHA was checked. This follow-up only records that push. Resume from the latest main, keeping the checkpoint's incomplete statuses.
 
+## Linux continuation — 2026-11-17
+
+Source work for #35 resumed with owner approval after the runtime exposed only the Linux checkout. Start with [the new run record](PROGRESS.md) and [the reference guide](DRAG_RECORDS.md). The original checkpoint below preserves the Mac evidence and error history. Before accepting #35, run the full Mac check and Canvas audit and append `reference-editor,reference-composer` to the 56-state capture manifest. Inspect all three sizes and confirm native drop precedence in an authorized isolated session. The acceptance ledger remains at 32 Verified, 11 In progress and 351 Open.
+
 ## Where things are
 
 - Canonical checkout: `/Users/desenyon/Developer/synthesis`, branch `main` (also the GitHub default). Build and open `dist/Synthesis.app` here; no other worktrees are current.

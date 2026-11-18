@@ -175,8 +175,13 @@ struct CuratedCanvas: View {
 
   private var bar: some View {
     WorkspaceBar(studio: studio) {
-      StudioIcon(Destination.canvas.icon, size: 14)
-        .foregroundStyle(studio.t.accent).accessibilityHidden(true)
+      if let reference = session.boardReference {
+        SpatialReferenceHandle(
+          studio: studio, reference: reference, title: session.name, icon: "link", label: "Board")
+      } else {
+        StudioIcon(Destination.canvas.icon, size: 14)
+          .foregroundStyle(studio.t.accent).accessibilityHidden(true)
+      }
       PlainMenu(flexible: true) {
         boardMenu
       } label: {
@@ -195,6 +200,11 @@ struct CuratedCanvas: View {
           .help("This board is saved on this device")
       }
     } trailing: {
+      if let reference = session.selectedImageReference {
+        SpatialReferenceHandle(
+          studio: studio, reference: reference, title: "Image · \(session.name)",
+          icon: "photo", label: "Image")
+      }
       if studio.mode == .assisted, !session.selection.isEmpty {
         BarAction(
           title: session.selection.count == 1
@@ -328,12 +338,34 @@ struct CuratedCanvas: View {
 
   private var board: some View {
     GeometryReader { geo in
+      let acceptingDrop = studio.canReceiveWorkspaceReference && session.dropSessionID != nil
       ZStack(alignment: .bottom) {
         // Transparent: the engine's web view is mounted beneath the workspace by the shell.
-        Color.clear.background(
-          GeometryReader { area in
-            Color.clear.preference(key: CanvasFrameKey.self, value: area.frame(in: .named("shell")))
-          })
+        Color.clear
+          .contentShape(Rectangle())
+          .workspaceReferenceDrop(
+            studio: studio, enabled: acceptingDrop,
+            target: { point in
+              guard let boardID = session.boardID, let sessionID = session.dropSessionID else {
+                return nil
+              }
+              return { source in
+                guard studio.destination == .canvas, studio.selectedRecord == nil,
+                  studio.flushEditor()
+                else { return false }
+                try await session.drop(source, at: point, boardID: boardID, sessionID: sessionID)
+                studio.show("Placed \(source.title) on the canvas")
+                return true
+              }
+            }
+          )
+          // Only drag gestures should hit this region. Drawing and the composer keep their input.
+          .allowsHitTesting(acceptingDrop)
+          .background(
+            GeometryReader { area in
+              Color.clear.preference(
+                key: CanvasFrameKey.self, value: area.frame(in: .named("shell")))
+            })
         if !session.loaded && session.failure == nil {
           ProgressView().controlSize(.small).frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(studio.t.background)
@@ -356,9 +388,6 @@ struct CuratedCanvas: View {
             // Clear of the engine's zoom and undo controls on narrower canvases.
             .padding(.bottom, 76)
         }
-      }.recordDropDestination(studio: studio, enabled: session.dropSessionID != nil) { point in
-        .canvas(
-          boardID: session.boardID ?? "", sessionID: session.dropSessionID ?? "", point: point)
       }
     }
   }
@@ -539,4 +568,29 @@ struct RelationEditor: View {
 private struct CanvasComposerHeightKey: PreferenceKey {
   static let defaultValue: CGFloat = 76
   static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+/// The same local address can be dragged or copied by activating the control with the keyboard.
+struct SpatialReferenceHandle: View {
+  @ObservedObject var studio: Studio
+  let reference: WorldReference
+  let title: String
+  let icon: String
+  let label: String
+
+  var body: some View {
+    IconButton(icon: icon, label: "Copy \(label.lowercased()) reference", t: studio.t) {
+      studio.perform {
+        let source = try studio.store.resolveReference(reference, worldID: studio.worldID)
+        let clipboard = NSPasteboard.general
+        clipboard.clearContents()
+        guard clipboard.setString(source.markdown, forType: .string) else {
+          throw SynthesisError.invalid("The reference could not be copied.")
+        }
+        studio.show("\(label) reference copied", icon: "link")
+      }
+    }
+    .help("Drag the \(label.lowercased()) reference, or click to copy it")
+    .workspaceReferenceDraggable(reference, title: title, icon: icon, studio: studio)
+  }
 }

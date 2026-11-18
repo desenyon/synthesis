@@ -139,8 +139,10 @@ struct AssistantContextPanel: View {
           title: "Read from", selection: option(\.scope),
           choices: AssistantContextScope.allCases.map { ($0, $0.title) }, t: studio.t)
         ChoiceField(
-          title: "Full record excerpts", selection: option(\.budget),
-          choices: AssistantContextBudget.allCases.map { ($0, $0.title) }, t: studio.t)
+          title: "Context size", selection: option(\.budget),
+          choices: AssistantContextBudget.allCases.map { ($0, $0.title) }, t: studio.t
+        )
+        .help("Limits direct references and the number of full record excerpts.")
         Toggle("Include workspace selection", isOn: option(\.includeSelection)).font(
           .studio(size: 13)
         )

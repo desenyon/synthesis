@@ -78,6 +78,10 @@ public struct WorldReferenceSource: Equatable, Sendable {
   public let state: String
   public let recordIDs: [String]
   public let boardKind: String?
+  let originRecordIDs: [String]
+
+  /// Previously shared context can make a proposal sensitive without being a new attachment.
+  public var exclusionRecordIDs: [String] { recordIDs + originRecordIDs }
 
   public var markdown: String {
     let label = title.replacingOccurrences(of: "\\", with: "\\\\")
@@ -100,11 +104,11 @@ extension WorkspaceStore {
     _ = try world(worldID)
     func result(
       _ title: String, _ detail: String, _ excerpt: String = "", _ state: String = "draft",
-      records: [String] = [], boardKind: String? = nil
+      records: [String] = [], boardKind: String? = nil, originRecords: [String] = []
     ) -> WorldReferenceSource {
       WorldReferenceSource(
         reference: reference, title: title, detail: detail, excerpt: String(excerpt.prefix(4000)),
-        state: state, recordIDs: records, boardKind: boardKind)
+        state: state, recordIDs: records, boardKind: boardKind, originRecordIDs: originRecords)
     }
     func activeRecord(_ id: String) throws -> LoreRecord {
       guard try !isArchived(worldID: worldID, recordID: id) else { throw SynthesisError.notFound }
@@ -152,12 +156,12 @@ extension WorkspaceStore {
           var dependencies =
             change.evidence
             + [
-              change.recordID, change.source, change.target, change.resultID,
+              change.recordID, change.source, change.target, change.resultID, change.resultSourceID,
               change.workspaceBefore?["source"], change.workspaceBefore?["target"],
               change.ruleBefore?.systemID,
             ].compactMap { $0 }
-          // An accepted standalone event creates a History source; resultID names the event,
-          // not that record. Keep this provenance even after event/source archival.
+          // Older accepted events have only a result ID. Include the current owner on both
+          // old and new proposals, even after event or source archival.
           if change.action == "add_event", let result = change.resultID,
             let source = eventSources[result]
           {
@@ -166,13 +170,22 @@ extension WorkspaceStore {
           return dependencies
         }
       ).intersection(known)
+      let originRecords: [String]
+      if let messageID = proposal.messageID {
+        originRecords = try db.rows(
+          "SELECT record_id FROM message_context WHERE world_id=? AND message_id=? ORDER BY position",
+          [worldID, messageID]
+        ).compactMap { $0["record_id"] }.filter(known.contains)
+      } else {
+        originRecords = []
+      }
       let descriptions = proposal.changes.map {
         "\($0.status): \($0.action) · \($0.title ?? $0.label ?? "Change"). \($0.reason ?? "") \(String(($0.body ?? "").prefix(1000)))"
       }.joined(separator: "\n")
       return result(
         proposal.summary, "Proposal · \(pending.count) pending",
         "Proposed changes, not established lore.\n\(descriptions)", "proposal",
-        records: linked.sorted())
+        records: linked.sorted(), originRecords: originRecords)
     case .board, .atlasImage, .canvasImage:
       let id = reference.containerID ?? reference.id
       let kinds = reference.kind == .atlasImage ? ["atlas"] : ["canvas", "atlas"]
@@ -210,16 +223,70 @@ extension WorkspaceStore {
     }
   }
 
-  /// Extract only bounded local addresses. The resolver still validates every source and world.
+  /// Extract bounded addresses for local use. Submissions check overflow explicitly.
   public static func worldReferences(in text: String) -> [WorldReference] {
-    let expression = try? NSRegularExpression(pattern: #"synthesis://reference/[^\s<>\)\]]+"#)
-    let range = NSRange(text.startIndex..., in: text)
-    var seen = Set<WorldReference>()
-    return (expression?.matches(in: text, range: range) ?? []).prefix(64).compactMap { match in
-      guard let range = Range(match.range, in: text), let url = URL(string: String(text[range])),
-        let reference = try? WorldReference(url: url), seen.insert(reference).inserted
-      else { return nil }
-      return reference
+    uniqueWorldReferences(in: text, limit: referenceScanLimit)
+  }
+
+  static func requestWorldReferences(in text: String) throws -> [WorldReference] {
+    let references = uniqueWorldReferences(in: text, limit: referenceScanLimit + 1)
+    guard references.count <= referenceScanLimit else {
+      throw SynthesisError.invalid(
+        "Use up to \(referenceScanLimit) distinct references per request.")
     }
+    return references
+  }
+
+  /// App-created inline references include a source label. Filter the entire link when its
+  /// source is excluded, retaining the surrounding prose and original local message.
+  static func assistantPrompt(
+    _ text: String, excluding references: Set<WorldReference>, excludingRecordIDs: Set<String>
+  ) -> String {
+    guard !references.isEmpty || !excludingRecordIDs.isEmpty else { return text }
+    let replacements = referenceLinks(in: text).compactMap { link -> NSRange? in
+      if let reference = try? WorldReference(url: link.url) {
+        return references.contains(reference) ? link.range : nil
+      }
+      guard link.url.host == "record",
+        excludingRecordIDs.contains(link.url.lastPathComponent)
+      else { return nil }
+      return link.range
+    }
+    let result = NSMutableString(string: text)
+    for range in replacements.reversed() {
+      result.replaceCharacters(in: range, with: "[Excluded source]")
+    }
+    return result as String
+  }
+
+  private static let referenceScanLimit = 64
+  private static let referenceAddressPattern =
+    #"synthesis://(?:reference/[^\s<>()\[\]]+|record/[\p{L}\p{N}-]+)"#
+  private static let referenceLinkPattern = try? NSRegularExpression(
+    pattern: #"\[(?:\\[\s\S]|[^\[\]\\])*\]\((\#(referenceAddressPattern))\)"#
+      + #"|(\#(referenceAddressPattern))"#)
+
+  private static func referenceLinks(in text: String) -> [(url: URL, range: NSRange)] {
+    let source = text as NSString
+    let range = NSRange(location: 0, length: source.length)
+    return (referenceLinkPattern?.matches(in: text, range: range) ?? []).compactMap { match in
+      let inlineAddress = match.range(at: 1)
+      let address = inlineAddress.location == NSNotFound ? match.range(at: 2) : inlineAddress
+      guard let url = URL(string: source.substring(with: address)) else { return nil }
+      return (url, match.range)
+    }
+  }
+
+  private static func uniqueWorldReferences(in text: String, limit: Int) -> [WorldReference] {
+    var seen = Set<WorldReference>()
+    var references: [WorldReference] = []
+    for (url, _) in referenceLinks(in: text) {
+      guard let reference = try? WorldReference(url: url), seen.insert(reference).inserted else {
+        continue
+      }
+      references.append(reference)
+      if references.count == limit { break }
+    }
+    return references
   }
 }

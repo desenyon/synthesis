@@ -20,6 +20,7 @@ test('close parallel connections keep their labels on separate outside curves', 
     }
 });
 import { cardFrame, visibleFrame, relationDisposition, acceptsSession, cardGroup, containsCardPoint } from '../src/sceneRules.ts';
+import { canvasImageElement, referenceCardElements, selectedCanvasImageID } from '../src/sceneRules.ts';
 test('overlay stays attached through pan, zoom and a nonzero webview offset', () => {
     assert.deepEqual(cardFrame({ x: 100, y: 80, width: 300, height: 180 }, { scrollX: -20, scrollY: 10, zoom: { value: 1.5 } }), { x: 120, y: 135, width: 450, height: 270, zoom: 1.5 });
 });
@@ -42,6 +43,39 @@ test('delayed messages must not write into a newly opened board', () => {
 test('nested board groups keep each record group separate', () => {
     assert.equal(cardGroup({ groupIds: ['card:a', 'board-group'] }), 'card:a');
     assert.equal(cardGroup({ groupIds: ['card:b', 'board-group'] }), 'card:b');
+});
+
+test('moving a saved workspace reference only moves its own active card and parts', () => {
+    const link = 'synthesis://reference/event/event-1?world=world-1';
+    const make = (id: string, type: string, synthesis: string, group: string) => ({
+        id, type, customData: { synthesis }, groupIds: [group, 'outer'],
+    });
+    const elements = [
+        { ...make('deleted', 'rectangle', 'reference', 'ref:deleted'), link, isDeleted: true },
+        { ...make('other-card', 'rectangle', 'reference', 'ref:other'), link: link + '-other' },
+        { ...make('link-only', 'rectangle', 'card', 'rect:old'), link },
+        { ...make('card', 'rectangle', 'reference', 'ref:one'), link },
+        make('title', 'text', 'referencePart', 'ref:one'),
+        make('other-title', 'text', 'referencePart', 'ref:other'),
+        make('ordinary-text', 'text', 'part', 'ref:one'),
+    ];
+    assert.deepEqual(referenceCardElements(elements, link).map(element => element.id), ['card', 'title']);
+});
+
+test('only live image elements backed by board files can become selected image references', () => {
+    const files = { 'has-file': {} };
+    const elements = [
+        { id: 'caption', type: 'text' },
+        { id: 'broken', type: 'image', fileId: 'missing' },
+        { id: 'removed', type: 'image', fileId: 'has-file', isDeleted: true },
+        { id: 'first', type: 'image', fileId: 'has-file' },
+        { id: 'second', type: 'image', fileId: 'has-file' },
+    ];
+    assert.equal(canvasImageElement(elements, files, 'first')?.id, 'first');
+    assert.equal(canvasImageElement(elements, files, 'broken'), undefined);
+    assert.equal(canvasImageElement(elements, files, 'removed'), undefined);
+    assert.equal(selectedCanvasImageID(elements, files, { caption: true, broken: true, first: true }), 'first');
+    assert.equal(selectedCanvasImageID(elements, files, { first: true, second: true }), undefined);
 });
 
 test('rotated record hit testing follows the visible card instead of its old bounds', () => {

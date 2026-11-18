@@ -51,6 +51,42 @@ export function cardGroup(element: {
     groupIds?: string[];
 }) { return element.groupIds?.[0]; }
 
+type ReferenceElement = {
+    id: string;
+    type: string;
+    isDeleted?: boolean;
+    fileId?: string | null;
+    link?: string | null;
+    groupIds?: string[];
+    customData?: { synthesis?: unknown } | null;
+};
+
+export function isReferenceCard(element: ReferenceElement) {
+    return !element.isDeleted && element.type === 'rectangle' && element.customData?.synthesis === 'reference';
+}
+
+export function referenceCardElements<T extends ReferenceElement>(elements: readonly T[], link: string): T[] {
+    const card = elements.find(element => isReferenceCard(element) && element.link === link);
+    if (!card) return [];
+    const group = cardGroup(card);
+    return [card, ...elements.filter(element => !element.isDeleted && group
+        && cardGroup(element) === group && element.customData?.synthesis === 'referencePart')];
+}
+
+function hasImageFile(element: ReferenceElement, files: Record<string, unknown>) {
+    return !element.isDeleted && element.type === 'image' && !!element.fileId
+        && Object.hasOwn(files, element.fileId);
+}
+
+export function canvasImageElement<T extends ReferenceElement>(elements: readonly T[], files: Record<string, unknown>, id: string) {
+    return elements.find(element => element.id === id && hasImageFile(element, files));
+}
+
+export function selectedCanvasImageID(elements: readonly ReferenceElement[], files: Record<string, unknown>, selected: Record<string, boolean>) {
+    const images = elements.filter(element => selected[element.id] && hasImageFile(element, files));
+    return images.length === 1 ? images[0].id : undefined;
+}
+
 /** Test in the rectangle's local axes, including rotated cards. */
 export function containsCardPoint(card: { x: number; y: number; width: number; height: number; angle?: number }, point: { x: number; y: number }) {
     const dx = point.x - card.x - card.width / 2;

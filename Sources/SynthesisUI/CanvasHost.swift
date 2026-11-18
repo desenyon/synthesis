@@ -93,7 +93,9 @@ struct CanvasBoardContent {
   /// Records whose cards are selected on the board, and which of those carry artwork.
   @Published var selection: [String] = []
   @Published var selectionWithArt: [String] = []
+  @Published private(set) var selectedImageID: String?
   private var pendingReveal: [String] = []
+  private var pendingImageReveal: WorldReference?
   private var worldID = ""
   private var content = CanvasBoardContent()
   private var composerHeight: CGFloat = 76
@@ -114,8 +116,11 @@ struct CanvasBoardContent {
   private var loadID = UUID().uuidString
   private var pendingLoad = false
   private var writable = false
-  private var flushWaiters: [CheckedContinuation<Void, Never>] = []
-  private var flushTimeout: Task<Void, Never>?
+  private struct FlushRequest {
+    let continuation: CheckedContinuation<Bool, Never>
+    let timeout: Task<Void, Never>
+  }
+  private var flushRequests: [String: FlushRequest] = [:]
   private var observers: Set<AnyCancellable> = []
   private static let scheme = "synthesis-canvas"
 
@@ -169,8 +174,7 @@ struct CanvasBoardContent {
     openRequestID = requestID
     if loaded && (worldID != studio.worldID || (requested != nil && requested != boardID)) {
       Task {
-        await flush()
-        guard openRequestID == requestID, failure == nil else { return }
+        guard await flush(), openRequestID == requestID, failure == nil else { return }
         openBoard(boardID: requested)
       }
     } else {
@@ -191,12 +195,18 @@ struct CanvasBoardContent {
       let preferred = try requested ?? studio.store.preference("canvas-selected:\(world)")
       let board = boards.first { $0.id == preferred } ?? boards[0]
       if board.id == boardID, world == worldID, loaded { return }
+      if let pendingImageReveal,
+        pendingImageReveal.worldID != world || pendingImageReveal.containerID != board.id
+      {
+        self.pendingImageReveal = nil
+      }
       loadID = UUID().uuidString
       worldID = world
       boardID = board.id
       name = board.name
       selection = []
       selectionWithArt = []
+      selectedImageID = nil
       capturedElements = []
       loaded = false
       writable = false
@@ -287,6 +297,17 @@ struct CanvasBoardContent {
 
   var dropSessionID: String? { loaded && writable ? loadID : nil }
 
+  var boardReference: WorldReference? {
+    guard let boardID, loaded, worldID == studio.worldID else { return nil }
+    return WorldReference(worldID: worldID, kind: .board, id: boardID)
+  }
+
+  var selectedImageReference: WorldReference? {
+    guard let board = boardReference, let selectedImageID else { return nil }
+    return WorldReference(
+      worldID: board.worldID, kind: .canvasImage, id: selectedImageID, containerID: board.id)
+  }
+
   /// A native drop is measured in this web view's points. Excalidraw converts it using the
   /// current pan/zoom. The captured board generation prevents a late drop entering another board.
   func drop(_ record: LoreRecord, at point: CGPoint, boardID: String, sessionID: String)
@@ -304,10 +325,75 @@ struct CanvasBoardContent {
     guard accepted as? Bool == true, self.boardID == boardID, loadID == sessionID,
       worldID == studio.worldID
     else { throw SynthesisError.invalid("The record could not be placed on this canvas.") }
-    await flush()
-    if let failure { throw SynthesisError.invalid(failure) }
+    guard await flush() else {
+      throw SynthesisError.invalid(failure ?? "The record placement could not be saved.")
+    }
     guard self.boardID == boardID, loadID == sessionID, worldID == studio.worldID else {
       throw SynthesisError.invalid("The canvas changed before its save completed.")
+    }
+  }
+
+  func drop(_ source: WorldReferenceSource, at point: CGPoint, boardID: String, sessionID: String)
+    async throws
+  {
+    guard loaded, writable, worldID == studio.worldID, source.reference.worldID == worldID,
+      self.boardID == boardID, loadID == sessionID, point.x.isFinite, point.y.isFinite,
+      webView.bounds.contains(point)
+    else { throw SynthesisError.invalid("This canvas changed. Drag the reference again.") }
+    let current = try studio.store.resolveReference(source.reference, worldID: worldID)
+    if current.reference.kind == .record {
+      let record = try studio.store.record(worldID: worldID, id: current.reference.id)
+      try await drop(record, at: point, boardID: boardID, sessionID: sessionID)
+      return
+    }
+    let payload = [
+      "url": current.reference.url.absoluteString,
+      "title": String(current.title.prefix(160)),
+      "detail": String(current.detail.prefix(100)),
+    ]
+    let accepted = try await webView.callAsyncJavaScript(
+      "return window.synthesis.dropReference(reference, x, y, sessionID)",
+      arguments: ["reference": payload, "x": point.x, "y": point.y, "sessionID": sessionID],
+      in: nil, contentWorld: .page)
+    guard accepted as? Bool == true, self.boardID == boardID, loadID == sessionID,
+      worldID == studio.worldID
+    else { throw SynthesisError.invalid("The reference could not be placed on this canvas.") }
+    guard await flush() else {
+      throw SynthesisError.invalid(failure ?? "The reference placement could not be saved.")
+    }
+    guard self.boardID == boardID, loadID == sessionID, worldID == studio.worldID else {
+      throw SynthesisError.invalid("The canvas changed before its save completed.")
+    }
+  }
+
+  func revealImage(_ reference: WorldReference) {
+    guard reference.kind == .canvasImage, reference.worldID == studio.worldID,
+      reference.containerID == studio.canvasBoardID, studio.destination == .canvas
+    else { return }
+    pendingImageReveal = reference
+    revealPendingImage()
+  }
+
+  private func revealPendingImage() {
+    guard loaded, writable, let reference = pendingImageReveal,
+      reference.worldID == worldID, reference.containerID == boardID
+    else { return }
+    pendingImageReveal = nil
+    let sessionID = loadID
+    Task {
+      guard loadID == sessionID, studio.worldID == reference.worldID,
+        studio.canvasBoardID == reference.containerID, studio.destination == .canvas,
+        studio.selectedRecord == nil
+      else { return }
+      let revealed = try? await webView.callAsyncJavaScript(
+        "return window.synthesis.revealImage(id, sessionID)",
+        arguments: ["id": reference.id, "sessionID": sessionID], in: nil, contentWorld: .page)
+      if loadID == sessionID, studio.worldID == reference.worldID,
+        studio.destination == .canvas, revealed as? Bool != true
+      {
+        studio.show(
+          "This image is no longer available on the canvas.", icon: "exclamationmark.triangle")
+      }
     }
   }
 
@@ -357,26 +443,27 @@ struct CanvasBoardContent {
   }
   func exportImage() { call("exportImage", []) }
   /// Asks the canvas to send its latest scene and waits briefly for it to be saved.
-  func flush() async {
-    guard loaded, writable else { return }
-    await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-      flushWaiters.append(continuation)
-      guard flushWaiters.count == 1 else { return }
-      flushTimeout = Task { @MainActor [weak self] in
+  @discardableResult func flush() async -> Bool {
+    guard loaded, writable else { return failure == nil }
+    let generation = loadID
+    let id = UUID().uuidString
+    return await withCheckedContinuation { continuation in
+      let timeout = Task { @MainActor [weak self] in
         do { try await Task.sleep(for: .milliseconds(900)) } catch { return }
-        guard let self, !self.flushWaiters.isEmpty else { return }
-        self.failure = "The canvas did not confirm its save. Keep this board open and retry."
-        self.resumeFlush()
+        guard let self else { return }
+        if self.loadID == generation {
+          self.failure = "The canvas did not confirm its save. Keep this board open and retry."
+        }
+        self.resumeFlush(id, saved: false)
       }
-      command("flush")
+      flushRequests[id] = FlushRequest(continuation: continuation, timeout: timeout)
+      call("command", ["flush", NSNull(), id])
     }
   }
-  private func resumeFlush() {
-    flushTimeout?.cancel()
-    flushTimeout = nil
-    let waiting = flushWaiters
-    flushWaiters = []
-    for continuation in waiting { continuation.resume() }
+  private func resumeFlush(_ id: String, saved: Bool) {
+    guard let request = flushRequests.removeValue(forKey: id) else { return }
+    request.timeout.cancel()
+    request.continuation.resume(returning: saved)
   }
   func audit() async throws -> [String] {
     guard ProcessInfo.processInfo.environment["SYNTHESIS_CAPTURE_DIR"] != nil else { return [] }
@@ -413,10 +500,18 @@ struct CanvasBoardContent {
     _ = try await webView.evaluateJavaScript(
       "window.__auditCommand = window.synthesis.command; window.synthesis.command = name => { if (name !== 'flush') window.__auditCommand(name); }; true"
     )
-    let mayClose = await studio.flushCanvas()
+    let blockedFlush = Task { await studio.flushCanvas() }
+    let flushDeadline = Date().addingTimeInterval(0.5)
+    while flushRequests.isEmpty, Date() < flushDeadline {
+      try await Task.sleep(for: .milliseconds(20))
+    }
+    if let scene = content.scene {
+      receive(["type": "change", "sessionID": loadID, "scene": scene])
+    }
+    let mayClose = await blockedFlush.value
     checks.append(
       !mayClose
-        ? "PASS unacknowledged canvas save blocks shutdown"
+        ? "PASS an unrelated autosave does not acknowledge a pending flush"
         : "FAIL shutdown allowed without save acknowledgement")
     _ = try await webView.evaluateJavaScript(
       "window.synthesis.command = window.__auditCommand; delete window.__auditCommand")
@@ -525,6 +620,36 @@ struct CanvasBoardContent {
         try studio.store.record(worldID: worldID, id: record.id) == record
           ? "PASS native record drop preserves source lore and canon state"
           : "FAIL native drop modified lore")
+      if let event = try studio.store.events(worldID: worldID).first,
+        let referenceSession = dropSessionID
+      {
+        let reference = WorldReference(worldID: worldID, kind: .event, id: event.id)
+        let source = try studio.store.resolveReference(reference, worldID: worldID)
+        do {
+          try await drop(source, at: point, boardID: boardID, sessionID: sessionID)
+          checks.append("FAIL stale reference drop entered the reloaded board")
+        } catch {
+          checks.append("PASS a stale reference drop cannot enter the reloaded board")
+        }
+        try await drop(source, at: point, boardID: boardID, sessionID: referenceSession)
+        let savedBoard = try studio.store.boards(worldID: worldID, kind: "canvas").first {
+          $0.id == boardID
+        }
+        let savedElements =
+          try savedBoard.map { try CanvasBoardContent.decode($0.content) }?
+          .scene?["elements"] as? [[String: Any]] ?? []
+        let references = savedElements.filter { element in
+          let data = element["customData"] as? [String: Any]
+          return data?["synthesis"] as? String == "reference"
+            && element["link"] as? String == reference.url.absoluteString
+        }
+        checks.append(
+          references.count == 1 && references[0]["x"] is Double && references[0]["y"] is Double
+            ? "PASS native event drop confirms a saved reference with board coordinates"
+            : "FAIL native event drop did not persist a located reference")
+      } else {
+        checks.append("FAIL missing writable canvas or event for native reference drop")
+      }
       // Keep later appearance fixtures independent from the audit's deliberately overlapping drop.
       _ = try studio.store.saveBoard(
         worldID: worldID, id: boardID, name: name, kind: "canvas", content: beforeDrop)
@@ -582,15 +707,18 @@ struct CanvasBoardContent {
       writable = true
       selection = []
       selectionWithArt = []
+      selectedImageID = nil
       store(message, migrated: message["migrated"] as? Bool == true)
       if !pendingReveal.isEmpty {
         sync()
         call("addCards", [pendingReveal])
         pendingReveal = []
       }
+      revealPendingImage()
     case "selection":
       selection = message["recordIDs"] as? [String] ?? []
       selectionWithArt = message["withArt"] as? [String] ?? []
+      selectedImageID = message["imageID"] as? String
       if writable, let boardID {
         studio.perform {
           try studio.store.setPreference(
@@ -603,8 +731,8 @@ struct CanvasBoardContent {
       }
       studio.objectWillChange.send()
     case "change":
-      store(message, migrated: false)
-      resumeFlush()
+      let saved = store(message, migrated: false)
+      if let id = message["flushID"] as? String { resumeFlush(id, saved: saved) }
     case "openRecord":
       guard let id = message["id"] as? String else { return }
       if let record = studio.records.first(where: { $0.id == id }) {
@@ -612,6 +740,12 @@ struct CanvasBoardContent {
       } else {
         studio.show("This card’s record is archived. Restore it from Library.", icon: "archivebox")
       }
+    case "openReference":
+      guard worldID == studio.worldID, studio.destination == .canvas, studio.selectedRecord == nil,
+        let raw = message["url"] as? String, raw.utf8.count <= 2048,
+        let url = URL(string: raw)
+      else { return }
+      _ = studio.openWorkspaceReference(url)
     case "captureText":
       guard let id = message["elementID"] as? String, let body = message["body"] as? String,
         !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, body.count <= 100_000,
@@ -664,10 +798,12 @@ struct CanvasBoardContent {
   }
   /// Writes the scene the canvas sent. Image data is only resent when it changes, so the last
   /// known files are carried forward.
-  private func store(_ message: [String: Any], migrated: Bool) {
+  @discardableResult private func store(_ message: [String: Any], migrated: Bool) -> Bool {
     // Saved against the world and board this scene was loaded from, even if the creator has
     // already navigated elsewhere.
-    guard writable, let boardID, var scene = message["scene"] as? [String: Any] else { return }
+    guard writable, let boardID, var scene = message["scene"] as? [String: Any] else {
+      return false
+    }
     if scene["files"] == nil { scene["files"] = content.scene?["files"] ?? [String: Any]() }
     content.scene = scene
     content.hiddenRelations = message["hiddenRelations"] as? [String] ?? content.hiddenRelations
@@ -678,8 +814,10 @@ struct CanvasBoardContent {
       failure = nil
     } catch {
       failure = error.localizedDescription
+      return false
     }
     if migrated { studio.show("This board now uses the new canvas. The original layout is kept.") }
+    return true
   }
   func hideRelationship(_ id: String) { call("hideRelationship", [id]) }
   /// Creates a draft relationship for an arrow the creator drew between two entity cards.

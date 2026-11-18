@@ -2,12 +2,14 @@ import AppKit
 import SwiftUI
 import SynthesisCore
 
-/// Converts between the stored message text, where a lore reference is a Markdown link
-/// `[Title](synthesis://record/<id>)`, and the composer's display, where it is one styled token.
+/// Converts saved local Markdown links into styled composer tokens while preserving their addresses.
 enum MentionCodec {
   static let key = NSAttributedString.Key("synthesisRecord")
+  private static let legacyPrefix = "synthesis://record/"
+  private static let referencePrefix = "synthesis://reference/"
   private static let pattern = try? NSRegularExpression(
-    pattern: #"\[([^\]\n]+)\]\(synthesis://record/([A-Za-z0-9-]+)\)"#)
+    pattern: #"\[([^\]\n]+)\]\((synthesis://record/[A-Za-z0-9-]+)\)"#
+      + #"|\[((?:\\[^\r\n]|[^\]\\\r\n])+)\]\((synthesis://reference/[^\s()]+)\)"#)
   static func attributed(
     _ markdown: String, base: [NSAttributedString.Key: Any], accent: NSColor, soft: NSColor
   ) -> NSAttributedString {
@@ -17,15 +19,29 @@ enum MentionCodec {
     for match in pattern?.matches(in: markdown, range: NSRange(location: 0, length: source.length))
       ?? []
     {
+      let typed = match.range(at: 3).location != NSNotFound
+      let label = source.substring(with: match.range(at: typed ? 3 : 1))
+      let destination = source.substring(with: match.range(at: typed ? 4 : 2))
+      let tokenText: String
+      let tokenAddress: String
+      if typed {
+        guard let url = URL(string: destination), (try? WorldReference(url: url)) != nil else {
+          continue
+        }
+        tokenText = label.replacingOccurrences(
+          of: #"\\([\\\[\]])"#, with: "$1", options: .regularExpression)
+        tokenAddress = destination
+      } else {
+        tokenText = label
+        tokenAddress = String(destination.dropFirst(legacyPrefix.count))
+      }
       result.append(
         NSAttributedString(
           string: source.substring(
             with: NSRange(location: cursor, length: match.range.location - cursor)),
           attributes: base))
       result.append(
-        token(
-          title: source.substring(with: match.range(at: 1)),
-          id: source.substring(with: match.range(at: 2)), base: base, accent: accent, soft: soft))
+        token(title: tokenText, address: tokenAddress, base: base, accent: accent, soft: soft))
       cursor = match.range.location + match.range.length
     }
     result.append(
@@ -33,10 +49,11 @@ enum MentionCodec {
     return result
   }
   static func token(
-    title: String, id: String, base: [NSAttributedString.Key: Any], accent: NSColor, soft: NSColor
+    title: String, address: String, base: [NSAttributedString.Key: Any], accent: NSColor,
+    soft: NSColor
   ) -> NSAttributedString {
     var attributes = base
-    attributes[key] = id
+    attributes[key] = address
     attributes[.foregroundColor] = accent
     attributes[.backgroundColor] = soft
     return NSAttributedString(string: title, attributes: attributes)
@@ -47,8 +64,15 @@ enum MentionCodec {
       key, in: NSRange(location: 0, length: attributed.length)
     ) { value, range, _ in
       let text = attributed.attributedSubstring(from: range).string
-      if let id = value as? String {
-        output += "[\(text)](synthesis://record/\(id))"
+      if let address = value as? String {
+        if address.hasPrefix(referencePrefix) {
+          let escaped = text.replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "[", with: "\\[")
+            .replacingOccurrences(of: "]", with: "\\]")
+          output += "[\(escaped)](\(address))"
+        } else {
+          output += "[\(text)](\(legacyPrefix)\(address))"
+        }
       } else {
         output += text
       }
@@ -311,7 +335,7 @@ struct ComposerInput: NSViewRepresentable {
       }
       piece.append(
         MentionCodec.token(
-          title: title, id: id, base: parent.baseAttributes, accent: NSColor(parent.accent),
+          title: title, address: id, base: parent.baseAttributes, accent: NSColor(parent.accent),
           soft: NSColor(parent.accentSoft)))
       piece.append(NSAttributedString(string: " ", attributes: parent.baseAttributes))
       updating = true
@@ -383,6 +407,38 @@ struct ComposerInput: NSViewRepresentable {
   let undoManager = UndoManager()
   var body: String?
   var rtf: String?
+  /// Inserts one undoable rich link at the selection, through the usual autosave callback.
+  @discardableResult func insertReference(_ source: WorldReferenceSource) -> Bool {
+    guard let view, view.isEditable, !view.hasMarkedText(), let storage = view.textStorage else {
+      return false
+    }
+    let text = storage.string
+    let selection = view.selectedRange()
+    guard let range = Range(selection, in: text) else { return false }
+    let label = source.title.split(whereSeparator: \.isNewline).joined(separator: " ")
+    guard !label.isEmpty else { return false }
+    let prefix = text[..<range.lowerBound].last?.isWhitespace == false ? " " : ""
+    let suffix =
+      text[range.upperBound...].first.map { !$0.isWhitespace && !$0.isPunctuation } == true
+      ? " " : ""
+    var attributes = view.typingAttributes
+    attributes.removeValue(forKey: .link)
+    let piece = NSMutableAttributedString(string: prefix + label + suffix, attributes: attributes)
+    piece.addAttribute(
+      .link, value: source.reference.url,
+      range: NSRange(location: prefix.utf16.count, length: label.utf16.count))
+    view.breakUndoCoalescing()
+    guard view.shouldChangeText(in: selection, replacementString: piece.string) else {
+      return false
+    }
+    storage.replaceCharacters(in: selection, with: piece)
+    view.didChangeText()
+    view.setSelectedRange(NSRange(location: selection.location + piece.length, length: 0))
+    view.typingAttributes = attributes
+    view.breakUndoCoalescing()
+    view.window?.makeFirstResponder(view)
+    return true
+  }
   func send(_ selector: String) {
     guard let view else { return }
     view.window?.makeFirstResponder(view)
@@ -436,6 +492,7 @@ struct RichDocumentEditor: NSViewRepresentable {
   let reloadToken: Int
   var preferences = StudioPreferences()
   var handle: EditorHandle?
+  var openLink: ((URL) -> Void)?
   var changed: (String, String?) -> Void
   func makeCoordinator() -> Coordinator { Coordinator(self) }
   func makeNSView(context: Context) -> NSScrollView {
@@ -533,6 +590,9 @@ struct RichDocumentEditor: NSViewRepresentable {
     configureWriting(view)
   }
   func configureWriting(_ view: NSTextView) {
+    view.linkTextAttributes = [
+      .foregroundColor: NSColor(t.accent), .underlineStyle: NSUnderlineStyle.single.rawValue,
+    ]
     view.isContinuousSpellCheckingEnabled = preferences.spellCheck
     view.isAutomaticSpellingCorrectionEnabled = false
     view.isAutomaticQuoteSubstitutionEnabled = preferences.smartQuotes
@@ -548,6 +608,14 @@ struct RichDocumentEditor: NSViewRepresentable {
     func textViewDidChangeSelection(_ notification: Notification) {
       guard !updating else { return }
       parent.handle?.positionChanged?()
+    }
+    func textView(_ textView: NSTextView, clickedOnLink link: Any, at charIndex: Int) -> Bool {
+      let url = (link as? URL) ?? (link as? String).flatMap { URL(string: $0) }
+      guard let url, url.scheme == "synthesis", let openLink = parent.openLink else {
+        return false
+      }
+      openLink(url)
+      return true
     }
     func textDidChange(_ notification: Notification) {
       guard !updating, let view = notification.object as? NSTextView else { return }

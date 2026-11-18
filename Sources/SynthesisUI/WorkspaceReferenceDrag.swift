@@ -25,7 +25,76 @@ enum WorkspaceReferenceDrag {
   }
 }
 
+struct WorkspaceReferenceDragSession {
+  let id = UUID()
+  let reference: WorldReference
+  var receiving = false
+}
+
+struct WorkspaceReferenceDelivery {
+  let id: UUID
+  let reference: WorldReference
+  let location: NavigationLocation
+}
+
+typealias WorkspaceReferenceDropAction = @MainActor (WorldReferenceSource) async throws -> Bool
+
 extension Studio {
+  func beginWorkspaceReferenceDrag(_ reference: WorldReference, monitor: Bool = true) throws
+    -> NSItemProvider
+  {
+    _ = try store.resolveReference(reference, worldID: worldID)
+    let provider = try WorkspaceReferenceDrag.provider(reference)
+    endRecordDrag()
+    workspaceReferenceDrag = WorkspaceReferenceDragSession(reference: reference)
+    if monitor { monitorWorkspaceDragEnd() }
+    return provider
+  }
+
+  /// Outside drops and cancelled gestures must release temporary targets above AppKit/WebKit.
+  func monitorWorkspaceDragEnd() {
+    let started = Date()
+    let timer = Timer(timeInterval: 0.08, repeats: true) { [weak self] timer in
+      MainActor.assumeIsolated {
+        guard let self else {
+          timer.invalidate()
+          return
+        }
+        guard self.canReceiveWorkspaceReference else { return }
+        if Date().timeIntervalSince(started) > 0.25 && NSEvent.pressedMouseButtons == 0 {
+          self.endRecordDrag()
+        }
+      }
+    }
+    workspaceDragTimer = timer
+    RunLoop.main.add(timer, forMode: .common)
+  }
+
+  var canReceiveWorkspaceReference: Bool {
+    recordDrag?.receiving == false || workspaceReferenceDrag?.receiving == false
+  }
+
+  func claimWorkspaceReferenceDrop() -> WorkspaceReferenceDelivery? {
+    let location = navigationLocation
+    if let drag = recordDrag, !drag.receiving {
+      recordDrag?.receiving = true
+      return WorkspaceReferenceDelivery(
+        id: drag.id,
+        reference: WorldReference(
+          worldID: drag.address.worldID, kind: .record, id: drag.address.recordID),
+        location: location)
+    }
+    if let drag = workspaceReferenceDrag, !drag.receiving {
+      workspaceReferenceDrag?.receiving = true
+      return WorkspaceReferenceDelivery(id: drag.id, reference: drag.reference, location: location)
+    }
+    return nil
+  }
+
+  func isCurrentWorkspaceReferenceDrop(_ delivery: WorkspaceReferenceDelivery) -> Bool {
+    recordDrag?.id == delivery.id || workspaceReferenceDrag?.id == delivery.id
+  }
+
   @discardableResult func appendWorkspaceReference(_ reference: WorldReference) -> Bool {
     do {
       let source = try store.resolveReference(reference, worldID: worldID)
@@ -74,8 +143,11 @@ extension Studio {
         }
       case .board, .atlasImage, .canvasImage:
         let boardID = reference.containerID ?? reference.id
-        openBoard(boardID, kind: source.boardKind ?? "canvas")
-        inspect(.board(boardID, kind: source.boardKind ?? "canvas"))
+        let kind = source.boardKind ?? "canvas"
+        openBoard(boardID, kind: kind)
+        guard navigationLocation.boardID == boardID else { return true }
+        if reference.kind == .canvasImage { canvas().revealImage(reference) }
+        inspect(.board(boardID, kind: kind))
       }
     } catch {
       show(error.localizedDescription, icon: "exclamationmark.triangle")
@@ -85,20 +157,39 @@ extension Studio {
 
   /// Revalidation happens after asynchronous pasteboard delivery and before any target mutation.
   @discardableResult func receiveWorkspaceReference(
-    _ data: Data, at location: NavigationLocation, receive: (WorldReferenceSource) -> Bool
-  ) -> Bool {
+    _ data: Data?, delivery: WorkspaceReferenceDelivery,
+    receive: WorkspaceReferenceDropAction
+  ) async -> Bool {
+    guard isCurrentWorkspaceReferenceDrop(delivery) else { return false }
+    defer {
+      if isCurrentWorkspaceReferenceDrop(delivery) { endRecordDrag() }
+    }
     do {
-      guard navigationLocation == location else {
-        throw SynthesisError.invalid("The workspace changed. Drop the reference again.")
+      guard let data else {
+        throw SynthesisError.invalid("This reference could not be read. Drag it again.")
       }
-      let source = try store.resolveReference(WorldReference.decode(data), worldID: worldID)
-      guard receive(source) else { return false }
-      endRecordDrag(completed: true)
+      let source = try resolveDroppedReference(data, at: delivery.location)
+      guard source.reference == delivery.reference else {
+        throw SynthesisError.invalid("This is not the original reference. Drag it again.")
+      }
+      guard try await receive(source) else { return false }
+      if isCurrentWorkspaceReferenceDrop(delivery) { endRecordDrag(completed: true) }
       return true
     } catch {
-      show(error.localizedDescription, icon: "exclamationmark.triangle")
+      if isCurrentWorkspaceReferenceDrop(delivery) {
+        show(error.localizedDescription, icon: "exclamationmark.triangle")
+      }
       return false
     }
+  }
+
+  private func resolveDroppedReference(_ data: Data, at location: NavigationLocation) throws
+    -> WorldReferenceSource
+  {
+    guard navigationLocation == location else {
+      throw SynthesisError.invalid("The workspace changed. Drop the reference again.")
+    }
+    return try store.resolveReference(WorldReference.decode(data), worldID: worldID)
   }
 }
 
@@ -112,9 +203,17 @@ extension View {
   }
 
   func workspaceReferenceDrop(
-    studio: Studio, receive: @escaping (WorldReferenceSource) -> Bool
+    studio: Studio, receive: @escaping @MainActor (WorldReferenceSource) -> Bool
   ) -> some View {
-    modifier(WorkspaceReferenceDestination(studio: studio, receive: receive))
+    workspaceReferenceDrop(studio: studio, target: { _ in receive })
+  }
+
+  /// Resolve destination state before asking an item provider to deliver its data.
+  func workspaceReferenceDrop(
+    studio: Studio, enabled: Bool = true,
+    target: @escaping @MainActor (CGPoint) -> WorkspaceReferenceDropAction?
+  ) -> some View {
+    modifier(WorkspaceReferenceDestination(studio: studio, enabled: enabled, target: target))
   }
 }
 
@@ -127,8 +226,7 @@ private struct WorkspaceReferenceSourceModifier: ViewModifier {
     if let reference {
       content.onDrag {
         do {
-          _ = try studio.store.resolveReference(reference, worldID: studio.worldID)
-          return try WorkspaceReferenceDrag.provider(reference)
+          return try studio.beginWorkspaceReferenceDrag(reference)
         } catch {
           studio.show(error.localizedDescription, icon: "exclamationmark.triangle")
           return NSItemProvider()
@@ -148,7 +246,8 @@ private struct WorkspaceReferenceSourceModifier: ViewModifier {
 
 private struct WorkspaceReferenceDestination: ViewModifier {
   @ObservedObject var studio: Studio
-  var receive: (WorldReferenceSource) -> Bool
+  let enabled: Bool
+  var target: @MainActor (CGPoint) -> WorkspaceReferenceDropAction?
   @State private var targeted = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   func body(content: Content) -> some View {
@@ -160,7 +259,7 @@ private struct WorkspaceReferenceDestination: ViewModifier {
     }.onDrop(
       of: [WorkspaceReferenceDrag.type],
       delegate: WorkspaceReferenceReceiver(
-        studio: studio, targeted: $targeted, receive: receive)
+        studio: studio, targeted: $targeted, enabled: enabled, target: target)
     )
     .animation(reduceMotion ? nil : Motion.feedbackAnimation, value: targeted)
   }
@@ -169,9 +268,11 @@ private struct WorkspaceReferenceDestination: ViewModifier {
 private struct WorkspaceReferenceReceiver: DropDelegate {
   let studio: Studio
   @Binding var targeted: Bool
-  let receive: (WorldReferenceSource) -> Bool
+  let enabled: Bool
+  let target: @MainActor (CGPoint) -> WorkspaceReferenceDropAction?
   func validateDrop(info: DropInfo) -> Bool {
-    info.hasItemsConforming(to: [WorkspaceReferenceDrag.type])
+    enabled && studio.canReceiveWorkspaceReference
+      && info.hasItemsConforming(to: [WorkspaceReferenceDrag.type])
   }
   func dropEntered(info: DropInfo) { targeted = true }
   func dropExited(info: DropInfo) { targeted = false }
@@ -179,17 +280,13 @@ private struct WorkspaceReferenceReceiver: DropDelegate {
   func performDrop(info: DropInfo) -> Bool {
     targeted = false
     let providers = info.itemProviders(for: [WorkspaceReferenceDrag.type])
-    guard providers.count == 1, let provider = providers.first else { return false }
-    let location = studio.navigationLocation
+    guard enabled, providers.count == 1, let provider = providers.first,
+      let receive = target(info.location), let delivery = studio.claimWorkspaceReferenceDrop()
+    else { return false }
     provider.loadDataRepresentation(forTypeIdentifier: WorkspaceReferenceDrag.type.identifier) {
       data, _ in
       Task { @MainActor in
-        guard let data else {
-          studio.show(
-            "This reference could not be read. Drag it again.", icon: "exclamationmark.triangle")
-          return
-        }
-        _ = studio.receiveWorkspaceReference(data, at: location, receive: receive)
+        await studio.receiveWorkspaceReference(data, delivery: delivery, receive: receive)
       }
     }
     return true

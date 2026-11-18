@@ -53,6 +53,12 @@ struct AtlasScreen: View {
   var body: some View {
     VStack(spacing: 0) {
       WorkspaceBar(studio: studio) {
+        if let board = currentBoard, loadedWorld == studio.worldID, !loadFailed {
+          SpatialReferenceHandle(
+            studio: studio,
+            reference: WorldReference(worldID: loadedWorld, kind: .board, id: board.id),
+            title: board.name, icon: "link", label: "Map")
+        }
         PlainMenu(flexible: true) {
           MenuSection("Maps") {
             ForEach(maps) { board in
@@ -66,7 +72,9 @@ struct AtlasScreen: View {
           }
         } label: {
           HStack(spacing: 8) {
-            StudioIcon("map", size: 16)
+            if currentBoard == nil || loadFailed {
+              StudioIcon("map", size: 16)
+            }
             Text(currentBoard?.name ?? "Atlas").font(.studio(.cardTitle))
               .lineLimit(1)
             StudioIcon("chevron.down", size: 10)
@@ -403,6 +411,13 @@ struct AtlasScreen: View {
             }
           }
           Spacer()
+          if let board = currentBoard, loadedWorld == studio.worldID {
+            SpatialReferenceHandle(
+              studio: studio,
+              reference: WorldReference(worldID: loadedWorld, kind: .atlasImage, id: board.id),
+              title: "Map image · \(board.name)", icon: "photo", label: "Map image"
+            ).floatingPanel(studio.t)
+          }
         }
         if let id = drawingRecord {
           HStack(spacing: 10) {

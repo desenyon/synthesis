@@ -66,11 +66,15 @@ struct UnifiedComposer: View {
     }
     .animation(reduceMotion ? nil : .easeOut(duration: ComposerMetric.transition), value: focused)
     .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: expanded)
-    .workspaceReferenceDrop(studio: studio) { source in
-      saveTask?.cancel()
-      commitDraft()
-      return studio.appendWorkspaceReference(source.reference)
-    }
+    .workspaceReferenceDrop(
+      studio: studio,
+      receive: { source in
+        guard loadedWorld == source.reference.worldID else { return false }
+        saveTask?.cancel()
+        commitDraft()
+        return studio.appendWorkspaceReference(source.reference)
+      }
+    )
     .popover(isPresented: $contextPicker) {
       AssistantContextPanel(studio: studio, prompt: text, attachments: true)
     }

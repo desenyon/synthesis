@@ -117,6 +117,37 @@ extension WorkspaceStore {
       }
       return result as String
     }
+    func remapRTF(_ raw: String) -> String {
+      guard let bytes = Data(base64Encoded: raw), let text = String(data: bytes, encoding: .utf8)
+      else { return raw }
+      let updated = remap(text)
+      return updated == text ? raw : Data(updated.utf8).base64EncodedString()
+    }
+    func remapSnapshotRTF(_ raw: String, includesCanon: Bool = false) throws -> String {
+      guard
+        var snapshot = (try? JSONSerialization.jsonObject(with: Data(raw.utf8)))
+          as? [String: Any]
+      else { return raw }
+      var changed = false
+      if let rtf = snapshot["rtf"] as? String {
+        let updated = remapRTF(rtf)
+        if updated != rtf {
+          snapshot["rtf"] = updated
+          changed = true
+        }
+      }
+      if includesCanon, let canon = snapshot["canonical"] as? String {
+        let updated = try remapSnapshotRTF(canon)
+        if updated != canon {
+          snapshot["canonical"] = updated
+          changed = true
+        }
+      }
+      guard changed else { return raw }
+      return String(
+        decoding: try JSONSerialization.data(withJSONObject: snapshot, options: [.sortedKeys]),
+        as: UTF8.self)
+    }
     return try db.transaction {
       let newWorld = ids[oldWorld]!
       try db.execute("INSERT INTO activity_imports(world_id) VALUES(?)", [newWorld])
@@ -137,10 +168,14 @@ extension WorkspaceStore {
             }
           }
           if table == "worlds" { row["owner_id"] = "local" }
-          if table == "rich_documents", let raw = source["rtf"],
-            let bytes = Data(base64Encoded: raw), let text = String(data: bytes, encoding: .utf8)
-          {
-            row["rtf"] = Data(remap(text).utf8).base64EncodedString()
+          if table == "rich_documents", let rtf = source["rtf"] {
+            row["rtf"] = remapRTF(rtf)
+          }
+          if table == "records", let canon = row["canonical"] {
+            row["canonical"] = try remapSnapshotRTF(canon)
+          }
+          if table == "native_revisions", let snapshot = row["snapshot"] {
+            row["snapshot"] = try remapSnapshotRTF(snapshot, includesCanon: true)
           }
           let columns = row.keys.sorted()
           let placeholders = columns.map { _ in "?" }.joined(separator: ",")

@@ -96,6 +96,8 @@ public struct ProposedChange: Identifiable, Codable, Equatable, Sendable {
   public var status: String
   /// ID of the record, relationship or event an accepted change produced.
   public var resultID: String?
+  /// Source record of an accepted event when it was created, before any reassignment.
+  public var resultSourceID: String? = nil
   public var laneID: String? = nil
   public var endDate: String? = nil
   public var ruleBefore: WorldRule? = nil

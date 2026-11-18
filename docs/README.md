@@ -14,7 +14,7 @@
 | [Split workspace](SPLIT_WORKSPACE.md) | Open and edit a source beside a spatial tool or another document |
 | [Keyboard creation](KEYBOARD.md) | New entities, source links, typed relationships and native shortcuts |
 | [Navigation history](NAVIGATION.md) | Shared Back/Forward across documents, maps, conversations and tool subpages |
-| [Drag records](DRAG_RECORDS.md) | Drag current lore into editor panes or onto Canvas |
+| [Drag references](DRAG_RECORDS.md) | Drag lore, events, images and proposals into writing, Canvas and the composer |
 | [Focus](FOCUS.md) | Temporarily hide unrelated controls and return to the original layout |
 | [Startup](STARTUP.md) | Choose a device-local home or reopen the last workspace |
 | [Sessions](SESSION_RESTORE.md) | Restore document tabs, views, selections and unsent drafts after restart |

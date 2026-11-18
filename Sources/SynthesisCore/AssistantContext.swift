@@ -17,7 +17,7 @@ public enum AssistantContextBudget: String, Codable, CaseIterable, Sendable {
     case .broad: return 32
     }
   }
-  public var title: String { "\(rawValue.capitalized) · \(limit) records" }
+  public var title: String { "\(rawValue.capitalized) · \(limit) sources" }
 }
 
 /// Device-local choices per universe. These are permissions for a request, never world facts.
@@ -43,6 +43,7 @@ public struct AssistantContext: Sendable {
   public var includesHistory: Bool
   public var eligibleCount: Int
   public var selectedIDs: [String]
+  var providerPrompt: String
 }
 
 extension WorkspaceStore {
@@ -108,9 +109,16 @@ extension WorkspaceStore {
     let excluded = Set(options.excludedRecordIDs)
     // A dropped link is explicit context, including in attachment-only mode. Resolve it
     // against the active world; a stale or foreign address must never become guessed lore.
-    let referenceSources = try Self.worldReferences(in: prompt).map {
+    let resolvedReferences = try Self.requestWorldReferences(in: prompt).map {
       try resolveReference($0, worldID: worldID)
-    }.filter { source in Set(source.recordIDs).isDisjoint(with: excluded) }
+    }
+    let excludedReferences = resolvedReferences.filter {
+      !excluded.isDisjoint(with: $0.exclusionRecordIDs)
+    }
+    let excludedAddresses = Set(excludedReferences.map(\.reference))
+    let referenceSources = resolvedReferences.filter { !excludedAddresses.contains($0.reference) }
+    let providerPrompt = Self.assistantPrompt(
+      prompt, excluding: excludedAddresses, excludingRecordIDs: excluded)
     let referenceRecordIDs = referenceSources.flatMap(\.recordIDs).filter { byID[$0] != nil }
     let referenceBoardIDs = referenceSources.filter { $0.reference.kind == .board }.map {
       $0.reference.id
@@ -132,12 +140,16 @@ extension WorkspaceStore {
     guard boardIDs.count <= 24, laneIDs.count <= 60 else {
       throw SynthesisError.invalid("Attach up to 24 boards and 60 history groups per request.")
     }
-    let typedRecordIDs = Self.referencedRecordIDs(in: prompt).filter { byID[$0] != nil }
-    let explicit = Array(
-      NSOrderedSet(array: options.recordIDs + referenceRecordIDs + typedRecordIDs)
-    ).compactMap { $0 as? String }.filter { !excluded.contains($0) }
-    guard explicit.count <= options.budget.limit, referenceSources.count <= options.budget.limit
-    else {
+    let typedRecordIDs = Self.referencedRecordIDs(in: providerPrompt).filter { byID[$0] != nil }
+    // A record chip and either link format identify the same source. An event or image
+    // still counts as its own source even when it shares a backing record with another source.
+    let modernRecordIDs = referenceSources.compactMap {
+      $0.reference.kind == .record ? $0.reference.id : nil
+    }
+    let directRecordIDs = Set(options.recordIDs + typedRecordIDs + modernRecordIDs)
+      .subtracting(excluded)
+    let otherDirectSources = referenceSources.count - modernRecordIDs.count
+    guard directRecordIDs.count + otherDirectSources <= options.budget.limit else {
       throw SynthesisError.invalid(
         "The \(options.budget.rawValue) context fits \(options.budget.limit) directly referenced sources. Increase context size or remove an attachment."
       )
@@ -183,7 +195,8 @@ extension WorkspaceStore {
     if options.scope == .world {
       // Preserve entity sections and graph neighbours when the anchor came from a chip or
       // workspace selection instead of a typed mention. Restricted scope never expands this way.
-      let retrievalPrompt = prompt + sources.map { " [](synthesis://record/\($0.id))" }.joined()
+      let retrievalPrompt =
+        providerPrompt + sources.map { " [](synthesis://record/\($0.id))" }.joined()
       for source in try contextRecords(
         worldID: worldID, prompt: retrievalPrompt, limit: options.budget.limit, allowedIDs: allowed)
       where sources.count < options.budget.limit && !sources.contains(where: { $0.id == source.id })
@@ -237,7 +250,8 @@ extension WorkspaceStore {
     return AssistantContext(
       sources: sources, workspace: workspace, lore: lore,
       includesHistory: options.includeHistory && !options.restricted,
-      eligibleCount: allowed.count, selectedIDs: selected.filter(allowed.contains))
+      eligibleCount: allowed.count, selectedIDs: selected.filter(allowed.contains),
+      providerPrompt: providerPrompt)
   }
 
   private func scopedWorkspaceContext(

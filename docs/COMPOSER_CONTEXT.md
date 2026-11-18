@@ -19,7 +19,7 @@ The 2026-11-17 refinement uses 16pt bundled Inter for both placeholder and typed
 - Attach real records, maps, boards and history branches/periods by stable world-scoped IDs. Text/Markdown import and inline mentions remain available.
 - World context selects relevant lore; Attachments only limits retrieval to attached or selected records and records represented on attached boards/history. Explicit exclusions win over all automatic sources. Context size bounds full record excerpts, not subscription cost or model reasoning.
 - Preview locally, with no model call: source names/reasons/excerpts, structured workspace data, truncation limits and whether prior messages are included. The send path uses the same builder and revalidates against current data.
-- Restricted context omits prior conversation messages to avoid reintroducing excluded lore. This is record-level filtering, not redaction of mentions inside allowed text or the creator's own prompt.
+- Restricted context omits prior conversation messages to avoid reintroducing excluded lore. The request also filters inline Synthesis links whose sources are excluded. The app keeps the original draft and transcript. Ordinary prose typed by the creator travels as written.
 - Explore produces prose only; any model proposal block is discarded with an explanatory notice. Propose retains validated, reviewable draft operations. Neither can alter canon.
 - Context choices persist per world and survive workspace switches/restart. Manual remains enforced at the core boundary. Tests use stand-in transports; no new live subscription request is authorized.
 
@@ -33,7 +33,7 @@ The 2026-11-17 refinement uses 16pt bundled Inter for both placeholder and typed
 
 The default remains Propose with World context for compatibility with existing conversations. Context preferences belong to this device/world and are not exported as lore. Archiving excluded records preserves their exclusion and the restriction on earlier chat history. If saved context preferences become unreadable, access falls back to Explore/Attachments-only with workspace selection and history off; choose new settings explicitly to broaden it.
 
-Excerpt limits are 8/16/32 records. The workspace index additionally contains bounded identities and structured metadata; inspect it to see exactly what is eligible. Explicit record attachments exceeding the chosen limit block Send with an actionable error. Board/history membership may exceed the excerpt limit; board placement totals and the preview's source counts identify partial coverage. Filtering cannot remove a secret repeated in allowed prose or a new typed message.
+Excerpt limits are 8/16/32 records. The same size applies to the combined count of record chips and distinct inline references. Different links to the same record count once. Exceeding the limit blocks Send with an actionable error. The workspace index includes bounded identities and structured metadata. Board/history membership may exceed the excerpt limit, so inspect board placement totals and preview counts for partial coverage. Filtering cannot remove lore repeated in allowed prose.
 
 ## Verification
 

@@ -419,12 +419,29 @@ struct EditorScreen: View {
           .overlay(alignment: .bottom) { Rectangle().fill(studio.t.hairline).frame(height: 1) }
         RichDocumentEditor(
           id: record.id, body: bodyText, rtf: richText, t: studio.t, reloadToken: reloadToken,
-          preferences: studio.preferences, handle: handle
+          preferences: studio.preferences, handle: handle,
+          openLink: { recordLinkAction(studio)($0) }
         ) { text, rtf in
           bodyText = text
           richText = rtf
           changed()
         }.frame(minHeight: minimumBodyHeight, maxHeight: .infinity)
+          .workspaceReferenceDrop(
+            studio: studio,
+            receive: { source in
+              let target = placement == .main ? studio.selectedRecord : studio.splitRecord
+              guard target?.id == record.id, record.worldID == studio.worldID,
+                studio.flushEditor()
+              else { return false }
+              guard handle.insertReference(source) else {
+                studio.show(
+                  "Place the text caret and drop the reference again.",
+                  icon: "exclamationmark.triangle")
+                return false
+              }
+              return true
+            }
+          )
           .onAppear { if writingStarted && placement == .main { handle.focus() } }
       }
     }.padding(.horizontal, placement == .beside ? 24 : 36).padding(.top, 18).frame(

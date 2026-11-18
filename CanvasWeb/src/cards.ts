@@ -19,6 +19,7 @@ export type RecordInfo = {
   canonKept: boolean;
 };
 export type RelationInfo = { id: string; sourceID: string; targetID: string; label: string };
+export type CanvasReference = { url: string; title: string; detail: string };
 type El = any;
 
 export const CARD_WIDTH = 300;
@@ -78,7 +79,7 @@ export function cardHash(record: RecordInfo | undefined, theme: Theme): string {
   return JSON.stringify([record ?? "archived", theme]);
 }
 
-function text(id: string, x: number, y: number, value: string, size: number, color: string, group: string, role: string): El {
+function text(id: string, x: number, y: number, value: string, size: number, color: string, group: string, role: string, synthesis = "part"): El {
   return convertToExcalidrawElements(
     [
       {
@@ -92,7 +93,7 @@ function text(id: string, x: number, y: number, value: string, size: number, col
         strokeColor: color,
         textAlign: "left",
         groupIds: [group],
-        customData: { synthesis: "part", role },
+        customData: { synthesis, role },
       } as any,
     ],
     { regenerateIds: false },
@@ -164,6 +165,40 @@ export function buildCard(
     { regenerateIds: false },
   )[0];
   return { rect, parts };
+}
+
+/** A reference remembers an address and display label. It carries no copied source text. */
+export function buildReferenceCard(
+  reference: CanvasReference, x: number, y: number, theme: Theme, group: string,
+): El[] {
+  const colors = palette(theme);
+  const width = CARD_WIDTH - PAD * 2;
+  const label = (value: string, size: number, maxLines: number) =>
+    wrap(value, size, width, maxLines).split("\n").map(line => {
+      if (measurer!.measureText(line).width <= width) return line;
+      const characters = Array.from(line);
+      while (characters.length && measurer!.measureText(characters.join("") + "…").width > width) {
+        characters.pop();
+      }
+      return characters.join("") + "…";
+    }).join("\n");
+  const detail = text(
+    `${group}:detail`, x + PAD, y + PAD, label(reference.detail, 12, 1),
+    12, colors.accent, group, "detail", "referencePart",
+  );
+  const title = text(
+    `${group}:title`, x + PAD, detail.y + detail.height + 6, label(reference.title, 18, 2),
+    18, colors.text, group, "title", "referencePart",
+  );
+  const [rect] = convertToExcalidrawElements([{
+    type: "rectangle",
+    id: `${group}:rect`,
+    x, y, width: CARD_WIDTH, height: title.y + title.height + PAD - y,
+    backgroundColor: colors.surface, fillStyle: "solid", strokeColor: colors.border,
+    strokeWidth: 1, roughness: 0, roundness: { type: 3, value: 12 },
+    groupIds: [group], customData: { synthesis: "reference" },
+  } as any], { regenerateIds: false });
+  return [{ ...rect, link: reference.url }, detail, title];
 }
 
 export const isCard = (el: El) => !el.isDeleted && el.type === "rectangle" && el.customData?.synthesis === "card";

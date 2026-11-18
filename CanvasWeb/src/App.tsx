@@ -14,16 +14,21 @@ import {
   arrowLabel,
   buildArrow,
   buildCard,
+  buildReferenceCard,
   CARD_WIDTH,
   isCard,
   isRelation,
   syncCards,
   syncRelations,
+  type CanvasReference,
   type RecordInfo,
   type RelationInfo,
 } from "./cards";
 import { palette, displayPalette, engineTheme, type Theme } from "./palette";
-import { acceptsSession, containsCardPoint } from "./sceneRules";
+import {
+  acceptsSession, canvasImageElement, containsCardPoint, isReferenceCard, referenceCardElements,
+  selectedCanvasImageID,
+} from "./sceneRules";
 import { arrangeCards } from "./layout";
 import { exportBoard } from "./exportBoard";
 import { StudioOverlay } from "./StudioOverlay";
@@ -60,6 +65,10 @@ type LoadPayload = {
 };
 
 const randomId = () => Math.random().toString(36).slice(2, 12);
+
+function isWorldReferenceLink(value: unknown): value is string {
+  return typeof value === "string" && value.length <= 2048 && value.startsWith("synthesis://reference/");
+}
 
 function imageMime(base64: string): string {
   if (base64.startsWith("/9j/")) return "image/jpeg";
@@ -123,10 +132,22 @@ export function App() {
     const relations = syncRelations(elements, s.relations, s.hidden, s.theme);
     if (relations) elements = relations;
     let presentationChanged = false;
+    const colors = palette(s.theme);
     elements = elements.map(e => {
       if (["card", "part"].includes(e.customData?.synthesis) && e.opacity !== 0) {
         presentationChanged = true;
         return newElementWith(e, {opacity:0});
+      }
+      if (isReferenceCard(e) && (e.backgroundColor !== colors.surface || e.strokeColor !== colors.border)) {
+        presentationChanged = true;
+        return newElementWith(e, { backgroundColor: colors.surface, strokeColor: colors.border });
+      }
+      if (!e.isDeleted && e.customData?.synthesis === "referencePart") {
+        const strokeColor = e.customData.role === "detail" ? colors.accent : colors.text;
+        if (e.strokeColor !== strokeColor) {
+          presentationChanged = true;
+          return newElementWith(e, { strokeColor });
+        }
       }
       return e;
     });
@@ -224,10 +245,11 @@ export function App() {
           elements.some((e) => e.type === "image" && e.customData?.role === "art" && e.groupIds?.some((g: string) => c.groupIds?.includes(g))),
       ),
     );
-    const key = recordIDs.join(",") + "|" + withArt.join(",");
+    const imageID = selectedCanvasImageID(elements, s.api.getFiles(), selected);
+    const key = recordIDs.join(",") + "|" + withArt.join(",") + "|" + (imageID ?? "");
     if (key === s.selectionKey) return;
     s.selectionKey = key;
-    post({ type: "selection", recordIDs, withArt });
+    post({ type: "selection", recordIDs, withArt, imageID: imageID ?? null });
   }, []);
 
   const onChange = useCallback(() => {
@@ -268,6 +290,16 @@ export function App() {
     if (!api) return;
     const s = live.current;
     s.api = api;
+
+    function dropOrigin(x: number, y: number, sessionID: string) {
+      const state = api.getAppState();
+      if (!s.loaded || !acceptsSession(activeSession, sessionID)
+        || !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0
+        || x >= state.width || y >= state.height) return undefined;
+      const point = viewportCoordsToSceneCoords(
+        { clientX: x + state.offsetLeft, clientY: y + state.offsetTop }, state);
+      return { x: point.x - CARD_WIDTH / 2, y: point.y - 32 };
+    }
 
     const bridge = {
       async load(payload: LoadPayload) {
@@ -392,13 +424,9 @@ export function App() {
       },
       /** Place a real record at a native drop point without panning or cloning its lore. */
       dropCard(id: string, x: number, y: number, sessionID: string) {
-        const state = api.getAppState();
-        if (!s.loaded || !acceptsSession(activeSession, sessionID) || !s.records.has(id) ||
-          !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 ||
-          x >= state.width || y >= state.height) return false;
-        const point = viewportCoordsToSceneCoords(
-          {clientX: x + state.offsetLeft, clientY: y + state.offsetTop}, state);
-        const left = point.x - CARD_WIDTH / 2, top = point.y - 32;
+        const origin = dropOrigin(x, y, sessionID);
+        if (!origin || !s.records.has(id)) return false;
+        const { x: left, y: top } = origin;
         let all: El[] = api.getSceneElementsIncludingDeleted();
         const card = all.find(e => !e.isDeleted && isCard(e) && e.customData.recordID === id);
         const selected: Record<string, true> = {};
@@ -418,6 +446,45 @@ export function App() {
         api.updateScene({elements: all, appState: {selectedElementIds: selected, selectedGroupIds: {}, editingGroupId: null},
           captureUpdate: CaptureUpdateAction.IMMEDIATELY});
         synchronise();
+        onChange();
+        return true;
+      },
+      dropReference(reference: CanvasReference, x: number, y: number, sessionID: string) {
+        const origin = dropOrigin(x, y, sessionID);
+        if (!origin || !isWorldReferenceLink(reference.url)) return false;
+        let elements: El[] = api.getSceneElementsIncludingDeleted();
+        let group = referenceCardElements(elements, reference.url);
+        if (group.length) {
+          const dx = origin.x - group[0].x;
+          const dy = origin.y - group[0].y;
+          const ids = new Set(group.map(element => element.id));
+          elements = elements.map(element => ids.has(element.id)
+            ? newElementWith(element, { x: element.x + dx, y: element.y + dy })
+            : element);
+        } else {
+          group = buildReferenceCard(reference, origin.x, origin.y, s.theme, `reference:${randomId()}`);
+          elements = [...elements, ...group];
+        }
+        const selectedElementIds = Object.fromEntries(group.map(element => [element.id, true]));
+        // Native flushes as soon as this call returns, so commit the scene before acknowledging.
+        flushSync(() => api.updateScene({
+          elements, appState: { selectedElementIds, selectedGroupIds: {}, editingGroupId: null },
+          captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+        }));
+        onChange();
+        return true;
+      },
+      revealImage(id: string, sessionID: string) {
+        if (!s.loaded || !acceptsSession(activeSession, sessionID)) return false;
+        const image = canvasImageElement(api.getSceneElements(), api.getFiles(), id);
+        if (!image) return false;
+        flushSync(() => {
+          api.updateScene({
+            appState: { selectedElementIds: { [id]: true }, selectedGroupIds: {}, editingGroupId: null },
+            captureUpdate: CaptureUpdateAction.NEVER,
+          });
+          api.scrollToContent([image], { fitToContent: false, animate: false });
+        });
         onChange();
         return true;
       },
@@ -549,7 +616,7 @@ export function App() {
         onChange();
       },
       setFitInsets(insets: FitInsets) { s.fitInsets = insets; },
-      command(name: string, insets?: FitInsets) {
+      command(name: string, insets?: FitInsets | null, flushID?: string) {
         if (name === "arrange") {
           const all: El[] = api.getSceneElementsIncludingDeleted();
           const cards = all.filter(isCard);
@@ -584,7 +651,7 @@ export function App() {
           window.clearTimeout(s.saveTimer);
           window.clearTimeout(s.analyzeTimer);
           analyse(); synchronise();
-          if (s.loaded) post({ type: "change", ...serialise(true) });
+          if (s.loaded) post({ type: "change", flushID: flushID ?? null, ...serialise(true) });
         }
       },
       async exportImage() {
@@ -738,6 +805,45 @@ export function App() {
           bridge.command("undo"); await wait();
           check("new record drop can be undone", !api.getSceneElements().some((e:El)=>isCard(e)&&e.customData.recordID===missing.id));
         } else check("new record drop fixture contains an unplaced record", false);
+        const reference = {
+          url: "synthesis://reference/event/audit-event?world=audit-world",
+          title: "A source in the audit",
+          detail: "Event · Year 7",
+        };
+        check("reference drops reject stale sessions, invalid points and external URLs",
+          !bridge.dropReference(reference, dropX, dropY, "stale")
+          && !bridge.dropReference(reference, -1, dropY, activeSession)
+          && !bridge.dropReference({...reference, url:"https://example.com"}, dropX, dropY, activeSession));
+        check("a source reference reaches the live engine", bridge.dropReference(reference, dropX, dropY, activeSession));
+        let referenceGroup = referenceCardElements<El>(api.getSceneElements(), reference.url);
+        const firstReferencePosition = { x: referenceGroup[0]?.x, y: referenceGroup[0]?.y };
+        check("reference cards use current pan and zoom without becoming record cards",
+          referenceGroup.length === 3 && !isCard(referenceGroup[0])
+          && Math.abs((firstReferencePosition.x + CARD_WIDTH / 2 + dropState.scrollX) * dropState.zoom.value - dropX) < 0.01
+          && Math.abs((firstReferencePosition.y + 32 + dropState.scrollY) * dropState.zoom.value - dropY) < 0.01);
+        await wait();
+        const movedDropY = dropY + 30;
+        bridge.dropReference(reference, dropX, movedDropY, activeSession); await wait();
+        referenceGroup = referenceCardElements<El>(api.getSceneElements(), reference.url);
+        check("dropping the reference again moves its card without duplicate links",
+          api.getSceneElements().filter((e: El) => isReferenceCard(e) && e.link === reference.url).length === 1
+          && Math.abs(referenceGroup[0]?.y - firstReferencePosition.y - 30 / dropState.zoom.value) < 0.01);
+        bridge.command("undo"); await wait();
+        check("reference movement is undoable",
+          referenceCardElements<El>(api.getSceneElements(), reference.url)[0]?.y === firstReferencePosition.y);
+        const referenceScene = serialise(true).scene as LoadPayload["scene"];
+        await bridge.load({ ...original, scene: referenceScene });
+        const savedReferenceGroup = referenceCardElements<El>(api.getSceneElements(), reference.url);
+        check("reference links and placement survive save/load",
+          savedReferenceGroup.length === 3 && savedReferenceGroup[0].x === firstReferencePosition.x
+          && savedReferenceGroup[0].y === firstReferencePosition.y
+          && Math.abs(api.getAppState().scrollX - dropState.scrollX) < 0.01);
+        const image = api.getSceneElements().find((e: El) => e.type === "image"
+          && canvasImageElement(api.getSceneElements(), api.getFiles(), e.id));
+        check("opening an image reference selects its exact element",
+          Boolean(image && !bridge.revealImage(image.id, "stale")
+            && bridge.revealImage(image.id, activeSession)
+            && api.getAppState().selectedElementIds[image.id]));
         await bridge.load(original); await wait();
         try {
           const blob = await exportBoard(api.getSceneElements(), api.getAppState(), api.getFiles(), s.records, s.relations, s.theme);
@@ -821,18 +927,22 @@ export function App() {
     };
     (window as any).synthesis = bridge;
 
-    // Double-clicking a card opens its record instead of starting a text edit.
+    // Double-clicking a card opens its source instead of starting a text edit.
     const openOnDoubleClick = (event: MouseEvent) => {
       if (!s.loaded) return;
       const state = api.getAppState();
       const point = viewportCoordsToSceneCoords({ clientX: event.clientX, clientY: event.clientY }, state);
       const hit = [...api.getSceneElements()]
         .reverse()
-        .find((e: El) => isCard(e) && containsCardPoint(e, point));
+        .find((e: El) => (isCard(e) || isReferenceCard(e)) && containsCardPoint(e, point));
       if (!hit || (event.target as HTMLElement)?.closest?.(".layer-ui__wrapper, .excalidraw-textEditorContainer, .studio-overlay button")) return;
       event.stopPropagation();
       event.preventDefault();
-      post({ type: "openRecord", id: hit.customData.recordID });
+      if (isReferenceCard(hit)) {
+        if (isWorldReferenceLink(hit.link)) post({ type: "openReference", url: hit.link });
+      } else {
+        post({ type: "openRecord", id: hit.customData.recordID });
+      }
     };
     window.addEventListener("dblclick", openOnDoubleClick, true);
     // A short trace of pointer activity, read by the interaction self-test.
@@ -887,6 +997,9 @@ export function App() {
         if (link.startsWith("synthesis://record/")) {
           event.preventDefault();
           post({ type: "openRecord", id: link.replace("synthesis://record/", "") });
+        } else if (isWorldReferenceLink(link)) {
+          event.preventDefault();
+          post({ type: "openReference", url: link });
         }
       }}
     >

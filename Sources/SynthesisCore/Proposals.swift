@@ -396,13 +396,15 @@ extension WorkspaceStore {
             start: change.date ?? "", end: change.endDate ?? "", notes: change.body ?? ""
           ).id
         case "add_event":
-          change.resultID = try saveChronologyEvent(
+          let event = try saveChronologyEvent(
             worldID: worldID, id: nil, title: change.title ?? "Untitled event",
             date: change.date ?? "",
             source: try change.source.map { try resolved($0) }, order: nil,
             laneID: try change.laneID.map { try resolved($0) },
             origin: proposal.isBranchMerge ? "imported" : "ai-proposed"
-          ).id
+          )
+          change.resultID = event.id
+          change.resultSourceID = event.sourceID
         case "create_map":
           change.resultID = try createAtlasMap(
             worldID: worldID, name: change.title ?? "Map",

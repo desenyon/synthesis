@@ -1,5 +1,14 @@
 # Development progress
 
+## 2026-11-17 — #35 source continuation from Linux
+
+Added typed reference cards and image reveal in Canvas, local board and image drag sources in Canvas and Atlas, undoable native editor links, modern composer tokens, and an exported drag UTI. Drop receivers claim one gesture, confirm active navigation and resolve the latest source. Explicit Canvas flush requests correlate each acknowledgment with the save that requested it. The assistant enforces a combined direct-source budget, filters app-inserted labels for exclusions and keeps provenance from the original History document for newly accepted event proposals. Archive import remaps rich links in working, accepted and historical text.
+
+- Canvas `npm ci`, `npm test` (20 tests), `npm run typecheck` and `npm run build` passed on ARM64 Node 24. The install retains upstream peer warnings. The regenerated offline bundle is checked in with its source.
+- Swift 6.3 strict format lint passed for `Sources`, `Tests` and `Package.swift`. `swiftc -frontend -parse` passed for the changed Swift files. A temporary Linux package ran 32 core tests across AssistantContext, Agent, WorldReferenceContext and WorldReferencePrivacy with system SQLite and stand-in transports. It omitted macOS artwork decoding, rendering, Quick Capture and live harness code. Initial probe attempts lacked SQLite headers and the macOS Foundation `FileHandle.bytes` API. One test initially checked a raw URL against JSON with escaped slashes, then passed after decoding the index before assertion.
+- The Linux host cannot run `./scripts/check.sh` or the native capture runner. `./scripts/check.sh` returned exit 127 because zsh is unavailable. The native build, editor/Undo tests, WebKit audit and checked contact sheets remain pending on macOS. Run the saved 56-state manifest plus `reference-editor,reference-composer`. Physical AppKit drop routing remains a separate check. No foreground input or live provider calls ran.
+- The ledger still records 32 Verified, 11 In progress and 351 Open. Git push preflight reported missing HTTPS authentication. The 0.0.3 release and tags remain untouched.
+
 ## 2026-11-15 — continuation
 
 Baseline: main at `353728c`; owner's `docs/DESIGN_AGENT_BRIEF.md` remains untracked and untouched. No releases. Verification uses temporary databases and background windows; the user's running application is not restarted.

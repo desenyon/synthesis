@@ -75,7 +75,8 @@ public struct Toast: Identifiable {
   @Published var timelineView = TimelineViewState()
   @Published public var worldRevision = 0
   @Published var recordDrag: RecordDragSession?
-  var recordDragTimer: Timer?
+  @Published var workspaceReferenceDrag: WorkspaceReferenceDragSession?
+  var workspaceDragTimer: Timer?
   @Published public var reviewingProposal = false
   @Published var reviewProgress: ReviewProgress?
   @Published var reviewFocusID: String?
@@ -108,8 +109,7 @@ public struct Toast: Identifiable {
   /// Gives the canvas a moment to hand over unsaved edits; used before the app quits.
   public func flushCanvas() async -> Bool {
     guard let canvasSession else { return true }
-    await canvasSession.flush()
-    return canvasSession.failure == nil
+    return await canvasSession.flush()
   }
   public var canvasWebView: NSView? { canvasSession?.webView }
   public var canvasLoaded: Bool { canvasSession?.loaded ?? false }

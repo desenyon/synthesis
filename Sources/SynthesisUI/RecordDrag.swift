@@ -54,31 +54,14 @@ extension Studio {
     guard let provider = try? address.provider() else { return NSItemProvider() }
     endRecordDrag()
     recordDrag = RecordDragSession(address: address)
-    // SwiftUI's onDrag has no end callback. Observe only this gesture, in the tracking run loop,
-    // so an outside drop, Escape or mouse release always removes the transient targets.
-    if monitor {
-      let started = Date()
-      let timer = Timer(timeInterval: 0.08, repeats: true) { [weak self] timer in
-        MainActor.assumeIsolated {
-          guard let self else {
-            timer.invalidate()
-            return
-          }
-          guard self.recordDrag?.receiving == false else { return }
-          if Date().timeIntervalSince(started) > 0.25 && NSEvent.pressedMouseButtons == 0 {
-            self.endRecordDrag()
-          }
-        }
-      }
-      recordDragTimer = timer
-      RunLoop.main.add(timer, forMode: .common)
-    }
+    if monitor { monitorWorkspaceDragEnd() }
     return provider
   }
   func endRecordDrag(completed: Bool = false) {
-    recordDragTimer?.invalidate()
-    recordDragTimer = nil
+    workspaceDragTimer?.invalidate()
+    workspaceDragTimer = nil
     recordDrag = nil
+    workspaceReferenceDrag = nil
     if completed {
       palette = false
       mobileNavigation = false
@@ -115,7 +98,7 @@ extension Studio {
         try await session.drop(record, at: point, boardID: boardID, sessionID: sessionID)
         show("Placed \(record.title) on the canvas")
       }
-      endRecordDrag(completed: true)
+      if recordDrag?.id == dragID { endRecordDrag(completed: true) }
       return true
     } catch {
       show(error.localizedDescription, icon: "exclamationmark.triangle")
@@ -146,33 +129,6 @@ private struct RecordDragModifier: ViewModifier {
 extension View {
   func recordDraggable(_ record: LoreRecord?, studio: Studio) -> some View {
     modifier(RecordDragModifier(studio: studio, record: record))
-  }
-  /// Parent drop regions do not sit on top of child inputs. A composer keeps its own typed
-  /// reference receiver, while empty canvas space retains the existing record-placement action.
-  func recordDropDestination(
-    studio: Studio, enabled: Bool = true, target: @escaping (CGPoint) -> RecordDropTarget
-  ) -> some View {
-    modifier(RecordDropDestination(studio: studio, enabled: enabled, target: target))
-  }
-}
-
-private struct RecordDropDestination: ViewModifier {
-  @ObservedObject var studio: Studio
-  let enabled: Bool
-  var target: (CGPoint) -> RecordDropTarget
-  @State private var targeted = false
-  func body(content: Content) -> some View {
-    content.onDrop(
-      of: [RecordDragAddress.type],
-      delegate: RecordDropReceiver(
-        studio: studio, targeted: $targeted, target: target, enabled: enabled)
-    )
-    .overlay {
-      if targeted {
-        RoundedRectangle(cornerRadius: Metric.radius).strokeBorder(studio.t.accent, lineWidth: 1)
-          .allowsHitTesting(false).accessibilityHidden(true)
-      }
-    }
   }
 }
 
@@ -211,18 +167,19 @@ private struct RecordDropReceiver: DropDelegate {
   let studio: Studio
   @Binding var targeted: Bool
   let target: (CGPoint) -> RecordDropTarget
-  var enabled = true
   func validateDrop(info: DropInfo) -> Bool {
-    enabled && studio.recordDrag != nil && info.hasItemsConforming(to: [RecordDragAddress.type])
+    studio.recordDrag?.receiving == false
+      && info.hasItemsConforming(to: [RecordDragAddress.type])
   }
   func dropEntered(info: DropInfo) { targeted = true }
   func dropExited(info: DropInfo) { targeted = false }
   func dropUpdated(info: DropInfo) -> DropProposal? { DropProposal(operation: .copy) }
   func performDrop(info: DropInfo) -> Bool {
     targeted = false
-    guard enabled else { return false }
     let providers = info.itemProviders(for: [RecordDragAddress.type])
-    guard providers.count == 1, let provider = providers.first, let drag = studio.recordDrag else {
+    guard providers.count == 1, let provider = providers.first, let drag = studio.recordDrag,
+      !drag.receiving
+    else {
       return false
     }
     let destination = target(info.location)
