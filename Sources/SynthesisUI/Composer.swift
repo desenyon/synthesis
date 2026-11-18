@@ -230,10 +230,12 @@ struct UnifiedComposer: View {
   private var selectedReferences: [LoreRecord] {
     guard studio.contextOptions.includeSelection else { return [] }
     let pins = Set(studio.activeRequestPins.recordIDs)
-    return studio.records.filter {
+    let selected = studio.records.filter {
       studio.contextualRecordIDs.contains($0.id) && !studio.contextOptions.recordIDs.contains($0.id)
-        && !studio.contextOptions.excludedRecordIDs.contains($0.id) && !pins.contains($0.id)
+        && !studio.contextExcludedRecordIDs.contains($0.id) && !pins.contains($0.id)
     }
+    return studio.contextOptions.canonOnly
+      ? WorkspaceStore.assistantAcceptedRecords(selected) : selected
   }
   private func attachmentChip(_ item: ComposerAttachment) -> some View {
     let remove = item.pinned ? "Remove pin for \(item.title)" : "Remove attachment \(item.title)"

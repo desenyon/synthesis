@@ -1,5 +1,11 @@
 # Development progress
 
+## 2026-11-17 — #48 context exclusions and accepted-only snapshots
+
+History exclusions apply to descendants through archived parents, their events and backing records. Excluded sources are withheld before pins, board membership, retrieval, proposal references and index selection. The inspector can clear an explicit exclusion after archive. Accepted lore only projects valid frozen record snapshots and omits live workspace metadata, draft overlays and earlier messages. Provider-facing links use accepted titles and the local transcript retains original text.
+
+The Linux core probe passed 75 tests in 14 suites. New coverage checks the complete outbound request with a stand-in transport, including board and active selection bypass attempts, archived ancestry, proposal lineage and private draft labels. Strict Swift format lint and changed-file parsing passed. The quiet native capture script returned exit 127 on Linux because the zsh interpreter is absent. The context panel capture and native presentation test remain pending.
+
 ## 2026-11-17 — #47 one-request context pins
 
 The shared attachment browser adds Next message only for records, boards and history. Pinned sources take priority in the shared preview and send builder. A source can be both pinned and saved. Its single chip removes the one-request pin first. Admission consumes the submitted pins, preserving unrelated pins added while waiting and preserving saved attachments. Restricted requests now omit private titles from the workspace descriptor.

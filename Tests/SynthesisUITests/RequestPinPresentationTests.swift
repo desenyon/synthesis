@@ -34,4 +34,41 @@ import Testing
     #expect(studio.composerAttachments.isEmpty)
     #expect(studio.contextOptions.recordIDs == [mira.id])
   }
+
+  @Test func exclusionMasksHideSavedAndPinnedChipsWithoutDeletingSavedPreferences() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let studio = try Studio(store: store)
+    let world = studio.worldID
+    let source = try store.createRecord(worldID: world, title: "An unfinished account")
+    let branch = try store.createChronologyLane(
+      worldID: world, name: "Hidden history", kind: "branch")
+    let period = try store.createChronologyLane(
+      worldID: world, name: "Later years", kind: "period", parentID: branch.id)
+    _ = try store.saveChronologyEvent(
+      worldID: world, id: nil, title: "The crossing", date: "", source: source.id, order: nil,
+      laneID: period.id)
+    try studio.reload()
+    studio.updateContext {
+      $0.recordIDs = [source.id]
+      $0.laneIDs = [period.id]
+    }
+    studio.updateRequestPins {
+      $0.recordIDs = [source.id]
+      $0.laneIDs = [period.id]
+    }
+    #expect(studio.composerAttachments.count == 2)
+    studio.updateContext { $0.excludedLaneIDs = [branch.id] }
+    #expect(studio.composerAttachments.isEmpty)
+    #expect(studio.activeRequestPins.isEmpty)
+    #expect(studio.contextOptions.recordIDs == [source.id])
+    #expect(studio.contextOptions.laneIDs == [period.id])
+
+    studio.updateContext {
+      $0.excludedLaneIDs = []
+      $0.canonOnly = true
+    }
+    #expect(studio.composerAttachments.map(\.key) == [period.id])
+    studio.updateContext { $0.canonOnly = false }
+    #expect(studio.composerAttachments.map(\.key) == [source.id, period.id])
+  }
 }

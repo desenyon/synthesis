@@ -31,8 +31,20 @@ public struct AssistantContextOptions: Codable, Equatable, Sendable {
   public var excludedRecordIDs: [String] = []
   public var includeSelection = true
   public var includeHistory = true
+  private var historyExclusions: [String]?
+  private var acceptedRecordSnapshotsOnly: Bool?
+  public var excludedLaneIDs: [String] {
+    get { historyExclusions ?? [] }
+    set { historyExclusions = newValue.isEmpty ? nil : newValue }
+  }
+  public var canonOnly: Bool {
+    get { acceptedRecordSnapshotsOnly ?? false }
+    set { acceptedRecordSnapshotsOnly = newValue ? true : nil }
+  }
   public init() {}
-  public var restricted: Bool { scope == .attachments || !excludedRecordIDs.isEmpty }
+  public var restricted: Bool {
+    scope == .attachments || canonOnly || !excludedRecordIDs.isEmpty || !excludedLaneIDs.isEmpty
+  }
 }
 
 /// Extra sources for one admitted request. These are never part of saved preferences.
@@ -86,6 +98,7 @@ extension WorkspaceStore {
     let boards = Set(try assistantBoards(worldID: worldID).map(\.id))
     let lanes = Set(try chronologyLanes(worldID: worldID).map(\.id))
     let exclusionIDs = try contextRecordIDs(worldID: worldID)
+    _ = try assistantChronologyExclusions(worldID: worldID, laneIDs: options.excludedLaneIDs)
     guard options.recordIDs.allSatisfy(records.contains),
       options.excludedRecordIDs.allSatisfy(exclusionIDs.contains),
       options.boardIDs.allSatisfy(boards.contains), options.laneIDs.allSatisfy(lanes.contains)
@@ -99,6 +112,17 @@ extension WorkspaceStore {
     try boards(worldID: worldID, kind: "canvas") + boards(worldID: worldID, kind: "atlas")
   }
 
+  public func assistantHistoryExclusions(worldID: String, laneIDs: [String]) throws
+    -> (lanes: Set<String>, records: Set<String>)
+  {
+    let result = try assistantChronologyExclusions(worldID: worldID, laneIDs: laneIDs)
+    return (result.laneIDs, result.recordIDs)
+  }
+
+  public static func assistantAcceptedRecordIDs(in records: [LoreRecord]) -> Set<String> {
+    Set(assistantAcceptedRecords(records).map(\.id))
+  }
+
   private func contextRecordIDs(worldID: String) throws -> Set<String> {
     Set(try db.rows("SELECT id FROM records WHERE world_id=?", [worldID]).compactMap { $0["id"] })
   }
@@ -110,25 +134,27 @@ extension WorkspaceStore {
   ) throws -> AssistantContext {
     _ = try world(worldID)
     let all = try records(worldID: worldID)
-    let byID = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
+    let activeIDs = Set(all.map(\.id))
+    let available = options.canonOnly ? Self.assistantAcceptedRecords(all) : all
+    let byID = Dictionary(uniqueKeysWithValues: available.map { ($0.id, $0) })
     let boards = try assistantBoards(worldID: worldID)
     let lanes = try chronologyLanes(worldID: worldID)
     let events = try events(worldID: worldID)
     let placements = try chronologyPlacements(worldID: worldID)
     let exclusionIDs = try contextRecordIDs(worldID: worldID)
-    let excluded = Set(options.excludedRecordIDs)
+    let excludedHistory = try assistantChronologyExclusions(
+      worldID: worldID, laneIDs: options.excludedLaneIDs)
+    let excluded = Set(options.excludedRecordIDs).union(excludedHistory.recordIDs)
+      .union(activeIDs.subtracting(byID.keys))
     // A dropped link is explicit context, including in attachment-only mode. Resolve it
     // against the active world; a stale or foreign address must never become guessed lore.
-    let resolvedReferences = try Self.requestWorldReferences(in: prompt).map {
-      try resolveReference($0, worldID: worldID)
-    }
-    let excludedReferences = resolvedReferences.filter {
-      !excluded.isDisjoint(with: $0.exclusionRecordIDs)
-    }
-    let excludedAddresses = Set(excludedReferences.map(\.reference))
-    let referenceSources = resolvedReferences.filter { !excludedAddresses.contains($0.reference) }
+    let approvedRecords = options.canonOnly ? byID.filter { !excluded.contains($0.key) } : nil
+    let (referenceSources, excludedAddresses) = try assistantReferences(
+      in: prompt, worldID: worldID, excludedRecords: excluded, excludedHistory: excludedHistory,
+      approvedRecords: approvedRecords)
     let providerPrompt = Self.assistantPrompt(
-      prompt, excluding: excludedAddresses, excludingRecordIDs: excluded)
+      prompt, excluding: excludedAddresses, excludingRecordIDs: excluded,
+      approvedRecords: approvedRecords)
     let referenceRecordIDs = referenceSources.flatMap(\.recordIDs).filter { byID[$0] != nil }
     let referenceBoardIDs = referenceSources.filter { $0.reference.kind == .board }.map {
       $0.reference.id
@@ -138,17 +164,19 @@ extension WorkspaceStore {
     let boardIDs = Set(
       requestPins.boardIDs + options.boardIDs + referenceBoardIDs
         + (options.includeSelection ? boardID.map { [$0] } ?? [] : []))
-    let laneIDs = Set(
+    let requestedLaneIDs = Set(
       requestPins.laneIDs + options.laneIDs
         + (options.includeSelection ? chronologyLaneID.map { [$0] } ?? [] : []))
     guard
-      (directRecordAttachments + selected).allSatisfy({ byID[$0] != nil }),
+      (directRecordAttachments + selected).allSatisfy(activeIDs.contains),
       options.excludedRecordIDs.allSatisfy(exclusionIDs.contains),
-      boardIDs.isSubset(of: Set(boards.map(\.id))), laneIDs.isSubset(of: Set(lanes.map(\.id)))
+      boardIDs.isSubset(of: Set(boards.map(\.id))),
+      requestedLaneIDs.isSubset(of: Set(lanes.map(\.id)))
     else {
       throw SynthesisError.invalid(
         "Some context is no longer available in this universe. Reattach it before sending.")
     }
+    let laneIDs = requestedLaneIDs.subtracting(excludedHistory.laneIDs)
     guard boardIDs.count <= 24, laneIDs.count <= 60 else {
       throw SynthesisError.invalid("Attach up to 24 boards and 60 history groups per request.")
     }
@@ -186,16 +214,21 @@ extension WorkspaceStore {
       for entry in entries where entry["isDeleted"] as? Bool != true {
         let custom = entry["customData"] as? [String: Any]
         if let id = (custom?["recordID"] ?? entry["recordID"]) as? String {
-          add(id, "On \(board.name)")
+          add(id, options.canonOnly ? "In an attached board" : "On \(board.name)")
         }
       }
-      if let place = object["placeID"] as? String { add(place, "Place of \(board.name)") }
+      if let place = object["placeID"] as? String {
+        add(place, options.canonOnly ? "Place of an attached map" : "Place of \(board.name)")
+      }
     }
     var includedLanes = laneIDs
     var changed = true
     while changed {
       changed = false
-      for lane in lanes where lane.parentID.map(includedLanes.contains) == true {
+      for lane in lanes
+      where lane.parentID.map(includedLanes.contains) == true
+        && !excludedHistory.laneIDs.contains(lane.id)
+      {
         if includedLanes.insert(lane.id).inserted { changed = true }
       }
     }
@@ -210,18 +243,35 @@ extension WorkspaceStore {
       // workspace selection instead of a typed mention. Restricted scope never expands this way.
       let retrievalPrompt =
         providerPrompt + sources.map { " [](synthesis://record/\($0.id))" }.joined()
-      for source in try contextRecords(
-        worldID: worldID, prompt: retrievalPrompt, limit: options.budget.limit, allowedIDs: allowed)
+      let additional =
+        if options.canonOnly {
+          Self.assistantAcceptedSources(
+            available.filter { allowed.contains($0.id) }, prompt: retrievalPrompt,
+            limit: options.budget.limit)
+        } else {
+          try contextRecords(
+            worldID: worldID, prompt: retrievalPrompt, limit: options.budget.limit,
+            allowedIDs: allowed)
+        }
+      for source in additional
       where sources.count < options.budget.limit && !sources.contains(where: { $0.id == source.id })
       {
         sources.append(source)
       }
     }
-    var workspace = try scopedWorkspaceContext(
-      worldID: worldID, allowedIDs: allowed, boardIDs: boardIDs, laneIDs: includedLanes,
-      boardID: options.includeSelection ? boardID : nil,
-      chronologyLaneID: options.includeSelection ? chronologyLaneID : nil,
-      restricted: options.restricted)
+    let activeLane =
+      options.includeSelection && chronologyLaneID.map(laneIDs.contains) == true
+      ? chronologyLaneID : nil
+    var workspace =
+      if options.canonOnly {
+        try Self.assistantAcceptedContextIndex(
+          available.filter { allowed.contains($0.id) }, prioritizedIDs: sources.map(\.id))
+      } else {
+        try scopedWorkspaceContext(
+          worldID: worldID, allowedIDs: allowed, boardIDs: boardIDs, laneIDs: includedLanes,
+          boardID: options.includeSelection ? boardID : nil,
+          chronologyLaneID: activeLane, restricted: options.restricted)
+      }
     if !referenceSources.isEmpty {
       guard
         var object = try JSONSerialization.jsonObject(with: Data(workspace.utf8)) as? [String: Any]
@@ -248,6 +298,10 @@ extension WorkspaceStore {
     }
     let lore = sources.map { source -> String in
       let r = source.record
+      if options.canonOnly {
+        return
+          "Record \(r.id), title: \(r.title), kind: \(r.kind), category: \(r.category). Accepted canon: \(String(r.body.prefix(6000)))"
+      }
       let canon = r.canonical.flatMap { $0.data(using: .utf8) }.flatMap {
         try? JSONSerialization.jsonObject(with: $0) as? [String: Any]
       }
@@ -265,6 +319,43 @@ extension WorkspaceStore {
       includesHistory: options.includeHistory && !options.restricted,
       eligibleCount: allowed.count, selectedIDs: selected.filter(allowed.contains),
       providerPrompt: providerPrompt)
+  }
+
+  private func assistantReferences(
+    in prompt: String, worldID: String, excludedRecords: Set<String>,
+    excludedHistory: AssistantChronologyExclusions, approvedRecords: [String: LoreRecord]?
+  ) throws -> ([WorldReferenceSource], Set<WorldReference>) {
+    var sources: [WorldReferenceSource] = []
+    var excluded: Set<WorldReference> = []
+    for reference in try Self.requestWorldReferences(in: prompt) {
+      let hiddenHistory = try isChronologyReferenceExcluded(
+        reference, worldID: worldID, exclusions: excludedHistory)
+      let hiddenRecord = reference.kind == .record && excludedRecords.contains(reference.id)
+      if hiddenHistory || hiddenRecord {
+        excluded.insert(reference)
+        continue
+      }
+      if let approvedRecords {
+        guard reference.kind == .record, let record = approvedRecords[reference.id] else {
+          excluded.insert(reference)
+          continue
+        }
+        sources.append(
+          WorldReferenceSource(
+            reference: reference, title: record.title,
+            detail: record.kind == "entity" ? record.category : "Source",
+            excerpt: "", state: "canon", recordIDs: [record.id], boardKind: nil,
+            originRecordIDs: []))
+        continue
+      }
+      let source = try resolveReference(reference, worldID: worldID)
+      if excludedRecords.isDisjoint(with: source.exclusionRecordIDs) {
+        sources.append(source)
+      } else {
+        excluded.insert(reference)
+      }
+    }
+    return (sources, excluded)
   }
 
   private func scopedWorkspaceContext(

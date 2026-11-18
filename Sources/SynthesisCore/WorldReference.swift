@@ -83,12 +83,15 @@ public struct WorldReferenceSource: Equatable, Sendable {
   /// Previously shared context can make a proposal sensitive without being a new attachment.
   public var exclusionRecordIDs: [String] { recordIDs + originRecordIDs }
 
-  public var markdown: String {
+  public var markdown: String { Self.markdown(title: title, url: reference.url) }
+
+  static func markdown(title: String, url: URL) -> String {
     let label = title.replacingOccurrences(of: "\\", with: "\\\\")
       .replacingOccurrences(of: "[", with: "\\[")
       .replacingOccurrences(of: "]", with: "\\]")
       .replacingOccurrences(of: "\n", with: " ")
-    return "[\(label)](\(reference.url.absoluteString))"
+      .replacingOccurrences(of: "\r", with: " ")
+    return "[\(label)](\(url.absoluteString))"
   }
 }
 
@@ -240,21 +243,32 @@ extension WorkspaceStore {
   /// App-created inline references include a source label. Filter the entire link when its
   /// source is excluded, retaining the surrounding prose and original local message.
   static func assistantPrompt(
-    _ text: String, excluding references: Set<WorldReference>, excludingRecordIDs: Set<String>
+    _ text: String, excluding references: Set<WorldReference>, excludingRecordIDs: Set<String>,
+    approvedRecords: [String: LoreRecord]? = nil
   ) -> String {
-    guard !references.isEmpty || !excludingRecordIDs.isEmpty else { return text }
-    let replacements = referenceLinks(in: text).compactMap { link -> NSRange? in
+    guard !references.isEmpty || !excludingRecordIDs.isEmpty || approvedRecords != nil else {
+      return text
+    }
+    let hidden = "[Excluded source]"
+    let replacements = referenceLinks(in: text).compactMap { link -> (NSRange, String)? in
+      let recordID: String
       if let reference = try? WorldReference(url: link.url) {
-        return references.contains(reference) ? link.range : nil
+        if references.contains(reference) { return (link.range, hidden) }
+        guard reference.kind == .record else { return nil }
+        recordID = reference.id
+      } else if link.url.host == "record" {
+        recordID = link.url.lastPathComponent
+      } else {
+        return approvedRecords == nil ? nil : (link.range, hidden)
       }
-      guard link.url.host == "record",
-        excludingRecordIDs.contains(link.url.lastPathComponent)
-      else { return nil }
-      return link.range
+      if excludingRecordIDs.contains(recordID) { return (link.range, hidden) }
+      guard let approvedRecords else { return nil }
+      guard let record = approvedRecords[recordID] else { return (link.range, hidden) }
+      return (link.range, WorldReferenceSource.markdown(title: record.title, url: link.url))
     }
     let result = NSMutableString(string: text)
-    for range in replacements.reversed() {
-      result.replaceCharacters(in: range, with: "[Excluded source]")
+    for (range, replacement) in replacements.reversed() {
+      result.replaceCharacters(in: range, with: replacement)
     }
     return result as String
   }

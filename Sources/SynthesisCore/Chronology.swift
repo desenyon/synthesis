@@ -40,10 +40,13 @@ extension WorkspaceStore {
         start: start, end: end, notes: notes)
     }
   }
-  public func chronologyLanes(worldID: String) throws -> [ChronologyLane] {
+  public func chronologyLanes(worldID: String, includingArchived: Bool = false) throws
+    -> [ChronologyLane]
+  {
     _ = try world(worldID)
+    let visible = includingArchived ? "" : " AND archived=0"
     return try db.rows(
-      "SELECT * FROM chronology_lanes WHERE world_id=? AND archived=0 ORDER BY created_at,rowid",
+      "SELECT * FROM chronology_lanes WHERE world_id=?\(visible) ORDER BY created_at,rowid",
       [worldID]
     ).map {
       ChronologyLane(

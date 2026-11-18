@@ -32,14 +32,19 @@ struct ComposerAttachment: Identifiable {
 extension Studio {
   var composerAttachments: [ComposerAttachment] {
     let pins = activeRequestPins
-    let excluded = Set(contextOptions.excludedRecordIDs)
+    let excludedRecords = contextExcludedRecordIDs
+    let excludedHistory = contextExcludedLaneIDs
     func joined(_ kind: ComposerAttachment.Kind) -> [(id: String, pinned: Bool)] {
       let temporarilyPinned = Set(pins[keyPath: kind.temporary])
+      let excluded: Set<String>
+      switch kind {
+      case .record: excluded = excludedRecords
+      case .history: excluded = excludedHistory
+      case .board: excluded = []
+      }
       var seen = Set<String>()
       return (contextOptions[keyPath: kind.saved] + pins[keyPath: kind.temporary]).compactMap {
-        guard seen.insert($0).inserted, kind != .record || !excluded.contains($0) else {
-          return nil
-        }
+        guard seen.insert($0).inserted, !excluded.contains($0) else { return nil }
         return ($0, temporarilyPinned.contains($0))
       }
     }
@@ -77,12 +82,24 @@ extension Studio {
 
 /// Local inspection, never a provider call. The preview and send use the same core builder.
 struct AssistantContextPanel: View {
+  private enum Exclusion: Equatable {
+    case explicit, inherited
+
+    var reason: String {
+      switch self {
+      case .explicit: "Excluded from context"
+      case .inherited: "Excluded with its history branch"
+      }
+    }
+  }
+
   @ObservedObject var studio: Studio
   let prompt: String
   let attachments: Bool
   @State private var nextMessageOnly: Bool
   @State private var section = "Records"
   @State private var query = ""
+  @State private var acceptedRecordIDs: Set<String> = []
   @State private var preview: AssistantContext?
   @State private var failure: String?
 
@@ -115,7 +132,9 @@ struct AssistantContextPanel: View {
   }
 
   private var attachmentBrowser: some View {
-    VStack(alignment: .leading, spacing: 10) {
+    let excludedRecords = studio.contextExcludedRecordIDs
+    let excludedHistory = studio.contextExcludedLaneIDs
+    return VStack(alignment: .leading, spacing: 10) {
       Text(
         "Live references from \(studio.world?.name ?? "this universe"). Nothing is copied or sent yet."
       )
@@ -150,16 +169,15 @@ struct AssistantContextPanel: View {
         LazyVStack(alignment: .leading, spacing: 3) {
           if section == "Records" {
             ForEach(matchingRecords) { record in
-              recordRow(record)
+              recordRow(
+                record, effectiveExclusions: excludedRecords,
+                hasAcceptedVersion: !studio.contextOptions.canonOnly
+                  || acceptedRecordIDs.contains(record.id))
             }
             if matchingRecords.isEmpty { empty }
           } else if section == "History" {
             ForEach(matchingLanes) { lane in
-              attachRow(
-                title: lane.name,
-                subtitle: [lane.kind.capitalized, lane.start, lane.end].filter { !$0.isEmpty }
-                  .joined(separator: " · "), icon: "calendar",
-                key: lane.id, kind: .history)
+              historyRow(lane, effectiveExclusions: excludedHistory)
             }
             if matchingLanes.isEmpty { empty }
           } else {
@@ -192,13 +210,23 @@ struct AssistantContextPanel: View {
         ChoiceField(
           title: "Read from", selection: option(\.scope),
           choices: AssistantContextScope.allCases.map { ($0, $0.title) }, t: studio.t)
+        Toggle("Accepted lore only", isOn: option(\.canonOnly))
+          .font(.studio(size: 13))
+          .help("Use saved versions that you accepted as canon")
+        if studio.contextOptions.canonOnly {
+          Text(
+            "Context uses saved accepted versions. Attachments and pins select eligible records. Working drafts, earlier messages and live workspace details are omitted."
+          )
+          .font(.studio(.caption)).foregroundStyle(studio.t.secondary)
+        }
+        exclusionSettings
         ChoiceField(
           title: "Context size", selection: option(\.budget),
           choices: AssistantContextBudget.allCases.map { ($0, $0.title) }, t: studio.t
         )
         .help("Limits direct references and the number of full record excerpts.")
-        if !studio.activeRequestPins.isEmpty {
-          let count = studio.composerAttachments.filter(\.pinned).count
+        let count = studio.composerAttachments.filter(\.pinned).count
+        if count > 0 {
           StudioLabel("\(count) pinned for the next message", icon: "pin")
             .font(.studio(.caption)).foregroundStyle(studio.t.accent)
         }
@@ -232,7 +260,9 @@ struct AssistantContextPanel: View {
           }
           if preview.sources.isEmpty {
             Text(
-              "No lore excerpts. Attach records or broaden the scope to give the assistant more context."
+              studio.contextOptions.canonOnly
+                ? "No accepted record versions match this context."
+                : "No lore excerpts. Attach records or broaden the scope to give the assistant more context."
             )
             .font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
           }
@@ -264,35 +294,64 @@ struct AssistantContextPanel: View {
               .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
           }.font(.studio(size: 12.5)).tint(studio.t.secondary)
         }
-        if !studio.contextOptions.excludedRecordIDs.isEmpty {
-          Text("Excluded records").font(.studio(size: 12, weight: .semibold))
-          ForEach(excludedRecords) { record in
-            HStack {
-              Text(record.title).font(.studio(size: 12.5)).lineLimit(1)
-              Spacer()
-              Button("Include") {
-                studio.updateContext { $0.excludedRecordIDs.removeAll { $0 == record.id } }
-              }
-              .buttonStyle(QuietButton(t: studio.t))
-            }
-          }
-        }
         Text(
-          "Preview is local and refreshed at Send. Exclusions filter records and their indexed data, not mentions inside allowed text or your message. Images are not sent."
+          "Preview refreshes on Send. Exclusions apply to context sources and their indexed data. Creator-written text is included. Images stay local."
         )
         .font(.studio(size: 11.5)).foregroundStyle(studio.t.muted)
       }
     }
   }
 
+  @ViewBuilder private var exclusionSettings: some View {
+    let recordIDs = studio.contextOptions.excludedRecordIDs
+    let laneIDs = studio.contextOptions.excludedLaneIDs
+    if !recordIDs.isEmpty {
+      Text("Excluded records").font(.studio(.captionStrong))
+      ForEach(recordIDs, id: \.self) { id in
+        let available = studio.records.first { $0.id == id }
+        let retained = available ?? (try? studio.store.record(worldID: studio.worldID, id: id))
+        exclusionSetting(
+          title: retained?.title ?? "Unavailable record", archived: available == nil,
+          id: id, path: \.excludedRecordIDs)
+      }
+    }
+    if !laneIDs.isEmpty {
+      let active = Set(studio.contextLanes.map(\.id))
+      let groups =
+        (try? studio.store.chronologyLanes(
+          worldID: studio.worldID, includingArchived: true)) ?? []
+      Text("Excluded history").font(.studio(.captionStrong))
+      ForEach(laneIDs, id: \.self) { id in
+        exclusionSetting(
+          title: groups.first { $0.id == id }?.name ?? "Unavailable history group",
+          archived: !active.contains(id), id: id, path: \.excludedLaneIDs)
+      }
+    }
+  }
+
+  private func exclusionSetting(
+    title: String, archived: Bool, id: String,
+    path: WritableKeyPath<AssistantContextOptions, [String]>
+  ) -> some View {
+    HStack(spacing: Space.sm) {
+      VStack(alignment: .leading, spacing: 3) {
+        Text(title).font(.studio(.label)).lineLimit(1)
+        if archived {
+          Text("Archived").font(.studio(.caption)).foregroundStyle(studio.t.muted)
+        }
+      }.help(title)
+      Spacer(minLength: 6)
+      Button("Clear") {
+        studio.updateContext { $0[keyPath: path].removeAll { $0 == id } }
+      }
+      .buttonStyle(QuietButton(t: studio.t))
+      .accessibilityLabel("Clear explicit exclusion for \(title)")
+    }
+  }
+
   private var matchingRecords: [LoreRecord] {
     studio.records.filter {
       matches($0.title) || (!query.isEmpty && ($0.aliases ?? []).contains(where: matches))
-    }
-  }
-  private var excludedRecords: [LoreRecord] {
-    studio.contextOptions.excludedRecordIDs.compactMap {
-      try? studio.store.record(worldID: studio.worldID, id: $0)
     }
   }
   private var matchingLanes: [ChronologyLane] { studio.contextLanes.filter { matches($0.name) } }
@@ -311,44 +370,88 @@ struct AssistantContextPanel: View {
     )
     .font(.studio(size: 13)).foregroundStyle(studio.t.secondary).padding(.vertical, 24)
   }
-  private func recordRow(_ record: LoreRecord) -> some View {
-    let excluded = studio.contextOptions.excludedRecordIDs.contains(record.id)
+  private func recordRow(
+    _ record: LoreRecord, effectiveExclusions: Set<String>, hasAcceptedVersion: Bool
+  ) -> some View {
+    let status = exclusion(
+      record.id, explicit: studio.contextOptions.excludedRecordIDs,
+      effective: hasAcceptedVersion ? effectiveExclusions : [])
     return HStack(spacing: 3) {
       attachRow(
         title: record.title, subtitle: Vocabulary.displayCategory(record.category),
-        icon: categoryIcon(record.category), key: record.id, kind: .record, excluded: excluded)
-      IconButton(
-        icon: excluded ? "eye.slash" : "minus.circle",
-        label: excluded ? "Include \(record.title) again" : "Exclude \(record.title)", t: studio.t,
-        active: excluded
-      ) {
-        studio.updateContext {
-          toggle(record.id, in: &$0.excludedRecordIDs)
-          $0.recordIDs.removeAll { $0 == record.id }
+        icon: categoryIcon(record.category), key: record.id, kind: .record,
+        blockedReason: status?.reason ?? (hasAcceptedVersion ? nil : "No accepted version"))
+      exclusionButton(
+        title: record.title, id: record.id, status: status, kind: .record,
+        path: \.excludedRecordIDs)
+    }
+  }
+
+  private func historyRow(_ lane: ChronologyLane, effectiveExclusions: Set<String>) -> some View {
+    let status = exclusion(
+      lane.id, explicit: studio.contextOptions.excludedLaneIDs, effective: effectiveExclusions)
+    return HStack(spacing: 3) {
+      attachRow(
+        title: lane.name,
+        subtitle: [lane.kind.capitalized, lane.start, lane.end].filter { !$0.isEmpty }
+          .joined(separator: " · "),
+        icon: "calendar", key: lane.id, kind: .history,
+        blockedReason: status == .inherited ? "Excluded by a parent history group" : status?.reason)
+      exclusionButton(
+        title: lane.name, id: lane.id, status: status, kind: .history,
+        path: \.excludedLaneIDs)
+    }
+  }
+
+  private func exclusion(_ id: String, explicit: [String], effective: Set<String>) -> Exclusion? {
+    if explicit.contains(id) { return .explicit }
+    if effective.contains(id) { return .inherited }
+    return nil
+  }
+
+  private func exclusionButton(
+    title: String, id: String, status: Exclusion?, kind: ComposerAttachment.Kind,
+    path: WritableKeyPath<AssistantContextOptions, [String]>
+  ) -> some View {
+    let label =
+      switch status {
+      case .explicit: "Include \(title) again"
+      case .inherited: "\(title): \(Exclusion.inherited.reason)"
+      case nil: "Exclude \(title)"
+      }
+    return IconButton(
+      icon: status == nil ? "minus.circle" : "eye.slash",
+      label: label, t: studio.t, active: status != nil
+    ) {
+      studio.updateContext {
+        if $0[keyPath: path].contains(id) {
+          $0[keyPath: path].removeAll { $0 == id }
+        } else {
+          $0[keyPath: path].append(id)
+          $0[keyPath: kind.saved].removeAll { $0 == id }
         }
       }
     }
+    .disabled(status == .inherited)
   }
+
   private func attachRow(
     title: String, subtitle: String, icon: String, key: String, kind: ComposerAttachment.Kind,
-    excluded: Bool = false
+    blockedReason: String? = nil
   ) -> some View {
     let saved = studio.contextOptions[keyPath: kind.saved].contains(key)
     let pinned = studio.activeRequestPins[keyPath: kind.temporary].contains(key)
     let selected = nextMessageOnly ? pinned : saved
-    let blocked = nextMessageOnly && excluded && !pinned
+    let blocked = blockedReason != nil && !selected
     let detail = [
-      subtitle, excluded ? "Excluded" : (nextMessageOnly && saved ? "Saved attachment" : ""),
+      subtitle, blockedReason ?? (nextMessageOnly && saved ? "Saved attachment" : ""),
     ].filter { !$0.isEmpty }.joined(separator: " · ")
     let action = nextMessageOnly ? (selected ? "Unpin" : "Pin") : (selected ? "Remove" : "Attach")
     return Button {
       if nextMessageOnly {
         studio.updateRequestPins { toggle(key, in: &$0[keyPath: kind.temporary]) }
       } else {
-        studio.updateContext {
-          toggle(key, in: &$0[keyPath: kind.saved])
-          if kind == .record { $0.excludedRecordIDs.removeAll { $0 == key } }
-        }
+        studio.updateContext { toggle(key, in: &$0[keyPath: kind.saved]) }
       }
     } label: {
       HStack(spacing: 9) {
@@ -358,11 +461,15 @@ struct AssistantContextPanel: View {
           Text(detail).font(.studio(size: 11.5)).foregroundStyle(studio.t.muted).lineLimit(2)
         }
         Spacer(minLength: 6)
-        StudioIcon(blocked ? "eye.slash" : (selected ? "checkmark" : "plus"), size: 12)
-          .foregroundStyle(nextMessageOnly && pinned ? studio.t.accent : studio.t.secondary)
+        StudioIcon(
+          blockedReason == nil
+            ? (selected ? "checkmark" : "plus") : (selected ? "minus.circle" : "eye.slash"),
+          size: 12
+        )
+        .foregroundStyle(nextMessageOnly && pinned ? studio.t.accent : studio.t.secondary)
       }.padding(9).frame(maxWidth: .infinity, alignment: .leading).hoverFill(studio.t)
     }.buttonStyle(.plain).disabled(blocked)
-      .accessibilityLabel(blocked ? "\(title), excluded from context" : "\(action) \(title)")
+      .accessibilityLabel(blocked ? "\(title), \(blockedReason ?? "")" : "\(action) \(title)")
       .accessibilityAddTraits(selected ? .isSelected : [])
   }
   private func toggle(_ id: String, in values: inout [String]) {
@@ -376,6 +483,12 @@ struct AssistantContextPanel: View {
       set: { value in studio.updateContext { $0[keyPath: path] = value } })
   }
   private func refresh() {
+    if attachments {
+      acceptedRecordIDs =
+        studio.contextOptions.canonOnly
+        ? WorkspaceStore.assistantAcceptedRecordIDs(in: studio.records) : []
+      return
+    }
     do {
       preview = try studio.previewContext(prompt: prompt)
       failure = nil

@@ -101,7 +101,7 @@ extension Studio {
       "drag-search", "light-drag-search", "drag-favorites", "drag-targets", "light-drag-targets",
       "manual-drag-targets", "drag-second-pane", "drag-opened", "light-drag-opened", "drag-canvas",
       "reference-editor", "reference-composer", "proposal-faction-batch",
-      "request-pins", "request-pins-browser",
+      "request-pins", "request-pins-browser", "context-exclusions",
       "changes-history", "light-changes-history", "manual-changes-history", "changes-approvals",
       "changes-relations", "changes-search", "changes-empty", "changes-archived",
       "changes-dashboard", "changes-reconstructed",
@@ -374,6 +374,10 @@ extension Studio {
     }
     if ["request-pins", "request-pins-browser"].contains(state) {
       configureRequestPinsCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if state == "context-exclusions" {
+      configureContextExclusionCapture(board: board, conversation: conversation)
       return
     }
     if Self.bidirectionalRelationshipCaptureStates.contains(state) {

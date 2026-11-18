@@ -161,6 +161,8 @@ public struct Toast: Identifiable {
   @Published public var preset = "Create"
   @Published public var contextOptions = AssistantContextOptions()
   @Published private var requestPinsByWorld: [String: AssistantRequestPins] = [:]
+  @Published private(set) var contextExcludedRecordIDs: Set<String> = []
+  @Published private(set) var contextExcludedLaneIDs: Set<String> = []
   @Published public var contextBoards: [Board] = []
   @Published public var contextLanes: [ChronologyLane] = []
   @Published public var busy = false
@@ -441,7 +443,7 @@ public struct Toast: Identifiable {
     contextBoards = try store.assistantBoards(worldID: worldID)
     contextLanes = try store.chronologyLanes(worldID: worldID)
     contextOptions = try store.assistantContextOptions(worldID: worldID)
-    if !activeRequestPins.isEmpty { updateRequestPins { _ in } }
+    try refreshContextExclusions()
     conversations = try store.conversations(worldID: worldID)
     pendingProposals = try store.proposals(worldID: worldID).filter { $0.pending > 0 }
     try reloadMessages()
@@ -968,8 +970,20 @@ public struct Toast: Identifiable {
     perform {
       try store.setAssistantContextOptions(worldID: worldID, options: next)
       contextOptions = next
-      if !activeRequestPins.isEmpty { updateRequestPins { _ in } }
+      try refreshContextExclusions()
     }
+  }
+
+  private func refreshContextExclusions() throws {
+    let hidden = try store.assistantHistoryExclusions(
+      worldID: worldID, laneIDs: contextOptions.excludedLaneIDs)
+    contextExcludedLaneIDs = hidden.lanes
+    contextExcludedRecordIDs = Set(contextOptions.excludedRecordIDs).union(hidden.records)
+    if contextOptions.canonOnly {
+      contextExcludedRecordIDs.formUnion(
+        Set(records.map(\.id)).subtracting(WorkspaceStore.assistantAcceptedRecordIDs(in: records)))
+    }
+    if !activeRequestPins.isEmpty { updateRequestPins { _ in } }
   }
   var activeRequestPins: AssistantRequestPins { requestPinsByWorld[worldID] ?? .init() }
 
@@ -981,9 +995,10 @@ public struct Toast: Identifiable {
       return ids.filter { available.contains($0) && seen.insert($0).inserted }
     }
     pins.recordIDs = eligible(
-      pins.recordIDs, among: Set(records.map(\.id)).subtracting(contextOptions.excludedRecordIDs))
+      pins.recordIDs, among: Set(records.map(\.id)).subtracting(contextExcludedRecordIDs))
     pins.boardIDs = eligible(pins.boardIDs, among: Set(contextBoards.map(\.id)))
-    pins.laneIDs = eligible(pins.laneIDs, among: Set(contextLanes.map(\.id)))
+    pins.laneIDs = eligible(
+      pins.laneIDs, among: Set(contextLanes.map(\.id)).subtracting(contextExcludedLaneIDs))
     guard pins != activeRequestPins else { return }
     if pins.isEmpty { clearRequestPins() } else { requestPinsByWorld[worldID] = pins }
   }
