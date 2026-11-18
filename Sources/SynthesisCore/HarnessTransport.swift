@@ -140,6 +140,9 @@ enum HarnessProcess {
       at: url, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
     return url
   }
+  static func eventObject(_ line: String) -> [String: Any]? {
+    (try? JSONSerialization.jsonObject(with: Data(line.utf8))) as? [String: Any]
+  }
   /// One prompt holding the conversation so far and the creator's new message.
   static func transcript(_ messages: [[String: String]]) -> String {
     guard let last = messages.last else { return "" }
@@ -174,9 +177,10 @@ public struct ClaudeCodeTransport: ModelTransport {
   }
   /// Interprets one line of `--output-format stream-json` output.
   public static func parse(_ line: String) -> Event {
-    guard let data = line.data(using: .utf8),
-      let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
-    else { return .ignored }
+    parse(HarnessProcess.eventObject(line))
+  }
+  private static func parse(_ object: [String: Any]?) -> Event {
+    guard let object else { return .ignored }
     switch object["type"] as? String {
     case "stream_event":
       guard let event = object["event"] as? [String: Any],
@@ -209,6 +213,11 @@ public struct ClaudeCodeTransport: ModelTransport {
   public func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
   {
+    try await generateResult(request, onDelta: onDelta).text
+  }
+  public func generateResult(
+    _ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void
+  ) async throws -> ModelGenerationResult {
     guard let path = executable() else { throw SynthesisError.unavailable }
     let signIn = await ProviderStatus.check(.claudeCode, executable: path)
     try Task.checkCancellation()
@@ -232,9 +241,12 @@ public struct ClaudeCodeTransport: ModelTransport {
       executable: path, arguments: arguments,
       input: HarnessProcess.transcript(request.messages), directory: directory
     ) { line in
-      switch Self.parse(line) {
+      let event = HarnessProcess.eventObject(line)
+      switch Self.parse(event) {
       case .delta(let text): await onDelta(await state.append(text))
-      case .finished(let text): await state.finish(text)
+      case .finished(let text):
+        let usage = ModelTokenUsage.reported(in: event, provider: .claudeCode)
+        await state.finish(text, usage: usage)
       case .failed(let message): await state.fail(message)
       case .ignored: break
       }
@@ -245,7 +257,7 @@ public struct ClaudeCodeTransport: ModelTransport {
       throw SynthesisError.invalid(
         Self.explain(outcome.errors.isEmpty ? "exit \(outcome.status)" : outcome.errors))
     }
-    return answer
+    return ModelGenerationResult(text: answer, usage: await state.usage)
   }
 }
 
@@ -268,9 +280,10 @@ public struct CodexTransport: ModelTransport {
   }
   /// Interprets one line of `codex exec --json` output.
   public static func parse(_ line: String) -> Event {
-    guard let data = line.data(using: .utf8),
-      let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
-    else { return .ignored }
+    parse(HarnessProcess.eventObject(line))
+  }
+  private static func parse(_ object: [String: Any]?) -> Event {
+    guard let object else { return .ignored }
     switch object["type"] as? String {
     case "item.completed":
       guard let item = object["item"] as? [String: Any], item["type"] as? String == "agent_message",
@@ -299,6 +312,11 @@ public struct CodexTransport: ModelTransport {
   public func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
   {
+    try await generateResult(request, onDelta: onDelta).text
+  }
+  public func generateResult(
+    _ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void
+  ) async throws -> ModelGenerationResult {
     guard let path = executable() else { throw SynthesisError.unavailable }
     let signIn = await ProviderStatus.check(.codex, executable: path)
     try Task.checkCancellation()
@@ -333,10 +351,14 @@ public struct CodexTransport: ModelTransport {
     let outcome = try await HarnessProcess.run(
       executable: path, arguments: arguments, input: prompt, directory: directory
     ) { line in
-      switch Self.parse(line) {
+      let event = HarnessProcess.eventObject(line)
+      switch Self.parse(event) {
       case .message(let text): await onDelta(await state.append(text, separator: "\n\n"))
       case .failed(let message): await state.fail(message)
-      case .ignored: break
+      case .ignored:
+        if event?["type"] as? String == "turn.completed" {
+          await state.recordUsage(ModelTokenUsage.reported(in: event, provider: .codex))
+        }
       }
     }
     if let failure = await state.failure { throw SynthesisError.invalid(Self.explain(failure)) }
@@ -345,18 +367,23 @@ public struct CodexTransport: ModelTransport {
       throw SynthesisError.invalid(
         Self.explain(outcome.errors.isEmpty ? "exit \(outcome.status)" : outcome.errors))
     }
-    return answer
+    return ModelGenerationResult(text: answer, usage: await state.usage)
   }
 }
 
 private actor HarnessState {
   private(set) var answer = ""
+  private(set) var usage: ModelTokenUsage?
   private(set) var failure: String?
   func append(_ text: String, separator: String = "") -> String {
     answer += (answer.isEmpty ? "" : separator) + text
     return answer
   }
-  func finish(_ text: String) { if !text.isEmpty { answer = text } }
+  func finish(_ text: String, usage: ModelTokenUsage?) {
+    if !text.isEmpty { answer = text }
+    self.usage = usage
+  }
+  func recordUsage(_ value: ModelTokenUsage?) { usage = value }
   func fail(_ message: String) { failure = message }
 }
 
@@ -376,9 +403,14 @@ public struct ProviderRouter: ModelTransport {
   public func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
   {
+    try await generateResult(request, onDelta: onDelta).text
+  }
+  public func generateResult(
+    _ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void
+  ) async throws -> ModelGenerationResult {
     switch kind() {
-    case .claudeCode: return try await claude.generate(request, onDelta: onDelta)
-    case .codex: return try await codex.generate(request, onDelta: onDelta)
+    case .claudeCode: return try await claude.generateResult(request, onDelta: onDelta)
+    case .codex: return try await codex.generateResult(request, onDelta: onDelta)
     }
   }
 }

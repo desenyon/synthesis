@@ -7,11 +7,21 @@ public struct ModelRequest: Sendable {
 public protocol ModelTransport: Sendable {
   func generate(_ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void)
     async throws -> String
+  func generateResult(
+    _ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void
+  ) async throws -> ModelGenerationResult
+}
+extension ModelTransport {
+  public func generateResult(
+    _ request: ModelRequest, onDelta: @escaping @Sendable (String) async -> Void
+  ) async throws -> ModelGenerationResult {
+    ModelGenerationResult(text: try await generate(request, onDelta: onDelta), usage: nil)
+  }
 }
 @MainActor public final class AgentEngine {
   private let store: WorkspaceStore
   private let transport: any ModelTransport
-  private var active: Task<String, Error>?
+  private var active: Task<ModelGenerationResult, Error>?
   private var generation = UUID()
   public init(store: WorkspaceStore, transport: any ModelTransport) {
     self.store = store
@@ -134,12 +144,9 @@ public protocol ModelTransport: Sendable {
             + String($0.body.prefix(16000)),
         ]
       } + [["role": "user", "content": prepared.providerPrompt]]
-    try store.appendMessage(
-      worldID: worldID, conversationID: conversationID, role: "user", body: text, state: "complete")
-    if history.isEmpty {
-      try store.renameConversation(
-        worldID: worldID, id: conversationID, title: String(text.prefix(64)))
-    }
+    try Task.checkCancellation()
+    try store.admitAssistantMessage(
+      worldID: worldID, conversationID: conversationID, prompt: text, firstMessage: history.isEmpty)
     let token = UUID()
     generation = token
     onContextPrepared(prepared)
@@ -155,7 +162,7 @@ public protocol ModelTransport: Sendable {
     let partial = PartialResponse()
     let task = Task {
       try Task.checkCancellation()
-      return try await transport.generate(
+      return try await transport.generateResult(
         ModelRequest(instructions: instructions, messages: input)
       ) { text in
         await partial.update(text)
@@ -168,7 +175,7 @@ public protocol ModelTransport: Sendable {
     var responseSaved = false
     defer { if generation == token { active = nil } }
     do {
-      let answer = try await withTaskCancellationHandler {
+      let result = try await withTaskCancellationHandler {
         try await task.value
       } onCancel: {
         task.cancel()
@@ -177,6 +184,7 @@ public protocol ModelTransport: Sendable {
       guard generation == token, try store.preference("mode") != "manual" else {
         throw CancellationError()
       }
+      let answer = result.text
       guard !answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
         throw SynthesisError.invalid(
           "The model returned no text. Your message is saved; try again.")
@@ -184,7 +192,9 @@ public protocol ModelTransport: Sendable {
       // A change set is staged for review, never applied. The transcript keeps the prose.
       onActivity(
         .init(
-          id: "response", title: "Response received", state: .complete,
+          id: "response", title: "Response received",
+          detail: result.usage.map { $0.detail + ". Subscription cost unavailable." }
+            ?? "Token counts unavailable. Subscription cost unavailable.", state: .complete,
           startedAt: responseStart, endedAt: Date()))
       let parsed = ProposalParser.split(answer)
       if contextOptions.intent == .propose, answer.contains(ProposalParser.fence),

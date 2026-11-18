@@ -235,6 +235,7 @@ public struct ConnectedRoot: View {
       case .worlds: WorldsScreen(studio: studio)
       case .settings: SettingsScreen(studio: studio)
       case .dashboard: DashboardScreen(studio: studio)
+      case .simulation: SimulationStudio(studio: studio, worldID: studio.worldID)
       }
     }
   }

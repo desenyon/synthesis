@@ -303,6 +303,12 @@ struct ConversationStudio: View {
                 }
               }
             }
+          } else if let usage = studio.activity.first(where: {
+            $0.id == "response" && $0.state == .complete && !$0.detail.isEmpty
+          }) {
+            Text(usage.detail).font(.studio(.caption)).foregroundStyle(studio.t.muted)
+              .fixedSize(horizontal: false, vertical: true)
+              .accessibilityLabel("Latest response usage. \(usage.detail)")
           }
           Color.clear.frame(height: 1).id("latest")
             .background(

@@ -213,6 +213,7 @@ extension Studio {
     timelineLaneID = session.timelineLane.flatMap { lanes.contains($0) ? $0 : nil }
     libraryQuery = String(session.libraryQuery.prefix(2000))
     libraryCategory = session.libraryCategory
+    libraryEntityTypeID = nil
     libraryFilter = session.libraryFilter
     libraryOrder = session.libraryOrder
     settingsSection = session.settingsSection

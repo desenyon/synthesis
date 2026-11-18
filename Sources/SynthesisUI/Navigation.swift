@@ -24,6 +24,7 @@ struct NavigationContext: Codable, Equatable {
   var libraryQuery: String?
   var libraryFilter: LibraryFilter?
   var libraryOrder: LibraryOrder?
+  var libraryEntityTypeID: String?
   var reviewSection: ReviewSection?
   var reviewFocusID: String?
   var inspection: InspectionTarget?
@@ -60,12 +61,15 @@ extension Studio {
         libraryQuery: destination == .library ? libraryQuery : nil,
         libraryFilter: destination == .library ? libraryFilter : nil,
         libraryOrder: destination == .library ? libraryOrder : nil,
+        libraryEntityTypeID: activeLibraryEntityType?.id,
         reviewSection: destination == .review ? reviewSection : nil,
         reviewFocusID: destination == .review ? reviewFocusID : nil,
         inspection: inspectionTarget, inspectorShown: workspaceInspector))
   }
   var navigationEntry: NavigationEntry {
-    var title = selectedRecord?.title ?? libraryCategory ?? destination.rawValue
+    var title =
+      selectedRecord?.title ?? activeLibraryEntityType?.name ?? libraryCategory
+      ?? destination.rawValue
     if let record = selectedRecord, let tab = recordTabs[record.id], tab != .overview {
       title += " · \(tab.rawValue.capitalized)"
     }
@@ -218,12 +222,18 @@ extension Studio {
       selectedRecord = fresh
       destination = address.destination
       libraryCategory = address.category
+      libraryEntityTypeID = nil
       if let id = fresh?.id, let tab = address.context?.recordTab { recordTabs[id] = tab }
       if let id = splitRecord?.id, let tab = address.context?.splitTab { recordTabs[id] = tab }
       if address.destination == .library {
         libraryQuery = address.context?.libraryQuery ?? ""
         libraryFilter = address.context?.libraryFilter ?? .all
         libraryOrder = address.context?.libraryOrder ?? .recent
+        if let id = address.context?.libraryEntityTypeID,
+          libraryCategory == nil, entityTypeCollections.contains(where: { $0.id == id })
+        {
+          libraryEntityTypeID = id
+        }
       }
       if address.destination == .settings {
         settingsSection = address.context?.settingsSection ?? .general

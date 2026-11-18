@@ -29,6 +29,32 @@ struct LibrarySearchControl: View {
   }
 }
 
+struct LibraryEntityTypeMenu: View {
+  @ObservedObject var studio: Studio
+  var body: some View {
+    PlainMenu {
+      Button("Show all library records") { studio.openLens(nil) }
+      ForEach(studio.entityTypeCollections) { type in
+        Button {
+          studio.openEntityTypeLens(type.id, keepSearch: true)
+        } label: {
+          if studio.libraryEntityTypeID == type.id {
+            StudioLabel(type.name, icon: "checkmark")
+          } else {
+            Text(type.name)
+          }
+        }
+      }
+    } label: {
+      StudioLabel("Type", icon: "circle.hexagongrid")
+        .font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
+        .padding(.horizontal, 8).frame(height: 26).hoverFill(studio.t)
+    }
+    .accessibilityLabel("Filter by entity type")
+    .help("Filter by entity type")
+  }
+}
+
 struct LibraryCategoryBack: View {
   @ObservedObject var studio: Studio
   @Environment(\.barCompact) private var compact

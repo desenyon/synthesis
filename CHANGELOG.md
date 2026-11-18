@@ -4,6 +4,8 @@ All notable changes to Synthesis are recorded here. The format follows [Keep a C
 
 ## [Unreleased]
 
+- Simulation calculates and saves a fictional resource reserve with exact inputs, seeded replay, a step-by-step trace and paused interventions. Runs stay hypothetical and support archive with Undo.
+- Custom entity types open dedicated Library collections. Data Settings can check or rebuild the selected world's search indexes. Assistant Settings exposes a local daily chat limit and recent responses display provider-reported token counts when supplied.
 - Timeline adds a scalable horizontal date axis and configurable fixed calendars. Entity profiles can record independent facts with document revision evidence and an explicit approval step.
 - Review applies an explicitly accepted proposal batch as drafts in one transaction. Reviewed what-if relationships carry their metadata and evidence into the parent world.
 - Graph can isolate a selected entity’s neighborhood and expand it by degrees. The relationship inspector opens recorded revisions. Atlas places open linked child maps, and empty parent maps retain child navigation.

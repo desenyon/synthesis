@@ -33,9 +33,9 @@ enum SettingsItem: CaseIterable, Identifiable {
     inspectorWidth,
     companionWidth, counts, recents, launch, previews
   case textSize, readingWidth, spelling, quotes, dashes, links, words
-  case assistance, connection, sendKey
+  case assistance, connection, dailyChatLimit, sendKey
   case identity, cover, category, chatMode
-  case importLore, importWorld, portable, markdown, json, images, sample
+  case searchIndex, importLore, importWorld, portable, markdown, json, images, sample
   var id: Self { self }
   var section: SettingsSection {
     switch self {
@@ -45,7 +45,7 @@ enum SettingsItem: CaseIterable, Identifiable {
       .previews:
       .general
     case .textSize, .readingWidth, .spelling, .quotes, .dashes, .links, .words: .writing
-    case .assistance, .connection, .sendKey: .assistant
+    case .assistance, .connection, .dailyChatLimit, .sendKey: .assistant
     case .identity, .cover, .category, .chatMode: .world
     default: .data
     }
@@ -74,11 +74,13 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .words: "Word count"
     case .assistance: "AI assistance"
     case .connection: "Subscription connection"
+    case .dailyChatLimit: "Daily chat limit"
     case .sendKey: "Send a message"
     case .identity: "Name and description"
     case .cover: "World cover"
     case .category: "New entity type"
     case .chatMode: "New conversation mode"
+    case .searchIndex: "Search indexes"
     case .importLore: "Import writing"
     case .importWorld: "Open a world file"
     case .portable: "Synthesis world"
@@ -115,11 +117,15 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .words: "Show a running total in the editor toolbar."
     case .assistance: "Manual stops active generation and blocks model requests."
     case .connection: "Codex or Claude Code. Model choice, sign-in and privacy."
+    case .dailyChatLimit:
+      "Chat submissions on this Mac, including stopped or failed attempts. Resets at midnight UTC. Subscription cost and image generation are separate."
     case .sendKey: "Shift–Return always adds a new line."
     case .identity: "The name and description shown in your world library."
     case .cover: "Saved with this world and included in its portable file."
     case .category: "A starting category, including your own clans, sects or orders."
     case .chatMode: "The starting approach for a new chat in this world."
+    case .searchIndex:
+      "Rebuild regenerates local search data for this world and preserves lore, canon and history."
     case .importLore: "Markdown and text become draft documents in the current world."
     case .importWorld: "Import a .synthesis file as an independent world."
     case .portable: "A complete .synthesis snapshot: lore, boards, images, chats and history."
@@ -138,6 +144,7 @@ enum SettingsItem: CaseIterable, Identifiable {
     case .readingWidth: "margins layout"
     case .sendKey: "keyboard shortcut enter return"
     case .connection: "gpt claude codex model subscription login authentication privacy"
+    case .searchIndex: "fts search repair refresh rebuild maintenance integrity"
     case .portable: "export backup snapshot"
     case .markdown, .json, .images: "export save"
     default: ""

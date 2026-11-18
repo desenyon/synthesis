@@ -5,10 +5,12 @@ import SynthesisCore
 // Authored sample data for the isolated screenshot runner only. Never used as a provider.
 extension Studio {
   public static let captureStates =
-    QuickCaptureController.captureStates + conversationToolsCaptureStates
+    entityTypeLibraryCaptureStates + QuickCaptureController.captureStates
+    + conversationToolsCaptureStates
     + entitySchemaCaptureStates + bidirectionalRelationshipCaptureStates
     + relationshipMetadataCaptureStates + entityNamesCaptureStates + structuredFactCaptureStates
-    + chronologyHierarchyCaptureStates + CanvasReferencePicker.captureStates + [
+    + chronologyHierarchyCaptureStates + CanvasReferencePicker.captureStates
+    + simulationCaptureStates + [
       "session-writing", "light-session-writing", "manual-session-writing", "session-sections",
       "session-split", "session-graph", "session-timeline", "session-atlas", "session-canvas",
       "session-conversation", "session-library",
@@ -119,8 +121,10 @@ extension Studio {
       "sections", "light-sections", "manual-sections", "sections-companion", "sections-empty",
       "sheet-section", "section-editor",
       "settings-writing", "settings-assistant", "settings-world", "settings-data",
+      "settings-index-current", "settings-index-stale",
       "settings-search", "settings-no-results", "light-settings", "light-settings-writing",
-      "settings-assistant-details",
+      "settings-assistant-details", "assistant-usage-settings", "assistant-usage-report",
+      "assistant-usage-unavailable",
       "manual-settings", "settings-collapsed", "settings-model-search", "preferences-editor",
       "preferences-library",
       "conversation-interrupted", "review-edits", "timeline-edit", "timeline-companion",
@@ -332,9 +336,39 @@ extension Studio {
     return result
   }
   public func configureConnectedCapture(_ state: String, board: String, conversation: String) {
+    if ["assistant-usage-report", "assistant-usage-unavailable"].contains(captureHint) {
+      activity = []
+    }
     endRecordDrag()
     clearRequestPins()
     submittedAssistantContext = nil
+    if state == "assistant-usage-settings" {
+      configureConnectedCapture("settings-assistant", board: board, conversation: conversation)
+      perform { try store.setAssistantChatLimit(5) }
+      settingsQuery = "Daily chat limit"
+      captureHint = state
+      return
+    }
+    if ["assistant-usage-report", "assistant-usage-unavailable"].contains(state) {
+      configureConnectedCapture("conversation", board: board, conversation: conversation)
+      activity = [
+        AgentActivity(
+          id: "response", title: "Response received",
+          detail: state == "assistant-usage-report"
+            ? "Reported tokens · 514 input · 42 output · 300 cache read. Subscription cost unavailable."
+            : "Token counts unavailable. Subscription cost unavailable.", state: .complete)
+      ]
+      captureHint = state
+      return
+    }
+    if Self.simulationCaptureStates.contains(state) {
+      configureSimulationCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if Self.entityTypeLibraryCaptureStates.contains(state) {
+      configureEntityTypeLibraryCapture(state, board: board, conversation: conversation)
+      return
+    }
     if state.hasPrefix("timeline-axis") {
       configureFixedTimelineCapture(state, board: board, conversation: conversation)
       return
@@ -1256,6 +1290,8 @@ extension Studio {
     case "settings-data":
       destination = .settings
       settingsSection = .data
+    case "settings-index-current", "settings-index-stale":
+      perform { try configureSearchIndexCapture(stale: state.hasSuffix("-stale")) }
     case "settings-search":
       destination = .settings
       settingsQuery = "export"

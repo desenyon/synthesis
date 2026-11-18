@@ -357,7 +357,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
       window.performClose(nil)
     }
   }
-  @objc func newItem() { studio.beginRecordCreation() }
+  @objc func newItem() { studio.beginContextualRecordCreation() }
   @objc func toggleFocus() { studio.toggleFocusMode() }
   @objc func newEntity() { studio.beginRecordCreation(kind: "entity") }
   @objc func linkRecords() { studio.beginLinkRecords() }

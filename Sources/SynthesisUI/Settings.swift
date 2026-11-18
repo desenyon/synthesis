@@ -50,8 +50,9 @@ struct SettingsScreen: View {
               ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                   if searching {
+                    let label = matches.count == 1 ? "setting matches" : "settings match"
                     heading(
-                      "Search results", "\(matches.count) settings match “\(studio.settingsQuery)”."
+                      "Search results", "\(matches.count) \(label) “\(studio.settingsQuery)”."
                     )
                     if matches.isEmpty {
                       VStack(alignment: .leading, spacing: 12) {
@@ -244,6 +245,8 @@ struct SettingsScreen: View {
         AssistantConnection(studio: studio, advanced: true)
       }.padding(.vertical, 20)
         .overlay(alignment: .bottom) { t.hairline.frame(height: 1) }
+    case .dailyChatLimit:
+      row(item) { AssistantChatLimitSettings(studio: studio) }
     case .sendKey:
       row(item) {
         PreferenceMenu(
@@ -274,6 +277,9 @@ struct SettingsScreen: View {
               studio.updateWorldDefaults { $0.chatMode = value }
             }), options: Vocabulary.modes.map { ($0.name, $0.name) }, t: t)
       }
+    case .searchIndex:
+      SearchIndexSettings(item: item, store: studio.store, worldID: studio.worldID, t: t)
+        .id(studio.worldID)
     case .importLore: action(item, "Choose files…") { studio.importDocuments() }
     case .importWorld: action(item, "Open file…") { studio.openPortableWorld() }
     case .portable: action(item, "Export world…") { studio.savePortableWorld() }
@@ -343,6 +349,34 @@ struct AssistantConnection: View {
   }
 }
 
+private struct AssistantChatLimitSettings: View {
+  @ObservedObject var studio: Studio
+  @State private var budget: AssistantChatBudget?
+  var body: some View {
+    VStack(alignment: .trailing, spacing: 6) {
+      PreferenceMenu(
+        title: "Daily chat limit",
+        value: Binding(
+          get: { budget?.limit ?? 0 },
+          set: { limit in
+            studio.perform {
+              try studio.store.setAssistantChatLimit(limit)
+              budget = try studio.store.assistantChatBudget()
+            }
+          }),
+        options: AssistantChatBudget.choices.map { ($0, $0 == 0 ? "No limit" : "\($0) per day") },
+        t: studio.t)
+      Text(budget.map { "\($0.submitted) submitted today" } ?? "Usage unavailable")
+        .font(.studio(.caption)).foregroundStyle(studio.t.muted)
+    }.task(id: studio.busy) {
+      while !Task.isCancelled {
+        budget = try? studio.store.assistantChatBudget()
+        do { try await Task.sleep(for: .seconds(30)) } catch { return }
+      }
+    }
+  }
+}
+
 private struct AssistantAdvancedSettings: View {
   @ObservedObject var studio: Studio
   @State private var model: String
@@ -363,13 +397,13 @@ private struct AssistantAdvancedSettings: View {
                 == (studio.harnessModels[studio.provider] ?? ""))
         }
         Text(
-          "Sign in through the installed \(studio.provider.title) app on this Mac. Synthesis never stores your credentials. If it is not installed, install it and sign in there first."
+          "Use the installed \(studio.provider.title) command-line tool to sign in on this Mac. Your credentials stay with the provider."
         )
         Text(
           "Sending a message shares selected world context with your chosen provider. The subscription harness runs in an empty folder without project access or tools. Manual mode blocks generation."
         )
         Text(
-          "Image generation is not available in this build. When connected, requested images will use your subscription allowance. Nothing is generated automatically."
+          "When you choose Generate image, Codex receives the image description and uses your ChatGPT subscription allowance. The daily chat limit applies to text conversations."
         )
       }.font(.studio(size: 12.5)).foregroundStyle(studio.t.secondary)
         .fixedSize(horizontal: false, vertical: true).padding(.top, 12)

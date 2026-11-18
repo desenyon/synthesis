@@ -18,6 +18,8 @@ struct StudioSheet: View {
     _creationScope = State(initialValue: EntitySchemaScope(worldID: studio.worldID))
     _kind = State(initialValue: studio.newRecordKind)
     _category = State(initialValue: studio.libraryCategory ?? studio.worldDefaults.entityCategory)
+    _entityTypeID = State(
+      initialValue: studio.newRecordKind == "entity" ? studio.activeLibraryEntityType?.id : nil)
     _worldName = State(initialValue: studio.world?.name ?? "")
     let target = studio.renameTarget ?? studio.conversationID
     _name = State(

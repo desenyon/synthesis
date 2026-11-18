@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 14
+  var version = 15
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -20,7 +20,7 @@ extension WorkspaceStore {
     "entity_type_history", "entity_templates", "entity_template_history", "conversation_branches",
     "conversation_message_origins", "prompt_recipes", "entity_name_periods",
     "entity_name_period_history", "timeline_calendars", "timeline_event_dates",
-    "structured_facts", "structured_fact_revisions",
+    "structured_facts", "structured_fact_revisions", "simulation_runs",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
     _ = try world(worldID)
@@ -89,7 +89,10 @@ extension WorkspaceStore {
         archive.tables[table] = archive.tables[table] ?? []
       }
     }
-    guard archive.format == "dev.synthesis.world", (1...14).contains(archive.version),
+    if (1...14).contains(archive.version) {
+      archive.tables["simulation_runs"] = archive.tables["simulation_runs"] ?? []
+    }
+    guard archive.format == "dev.synthesis.world", (1...15).contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -201,6 +204,9 @@ extension WorkspaceStore {
             for key in ["name", "start_label", "end_label"] { row[key] = source[key] }
           }
           if table == "structured_facts" { row["predicate"] = source["predicate"] }
+          if table == "simulation_runs" {
+            for key in ["title", "unit", "snapshot"] { row[key] = source[key] }
+          }
           if table == "structured_fact_revisions" {
             for key in ["text_value", "author"] { row[key] = source[key] }
           }
@@ -246,6 +252,7 @@ extension WorkspaceStore {
       try validateEntityNameArchive(worldID: newWorld)
       try validateTimelineArchive(worldID: newWorld)
       try validateStructuredFactArchive(worldID: newWorld)
+      try validateSimulationArchive(worldID: newWorld)
       try validateEntitySchemas(worldID: newWorld)
       try refreshEntityPropertySearch(worldID: newWorld)
       try validateConversationTools(worldID: newWorld)

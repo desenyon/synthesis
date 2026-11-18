@@ -4,13 +4,16 @@ import Foundation
 public struct LoreSearchScope: Sendable {
   public var kind: String?
   public var category: String?
+  public var entityTypeID: String?
   public var hasCanon: Bool
   public var sectionsOnly: Bool
   public init(
-    kind: String? = nil, category: String? = nil, hasCanon: Bool = false, sectionsOnly: Bool = false
+    kind: String? = nil, category: String? = nil, entityTypeID: String? = nil,
+    hasCanon: Bool = false, sectionsOnly: Bool = false
   ) {
     self.kind = kind
     self.category = category
+    self.entityTypeID = entityTypeID
     self.hasCanon = hasCanon
     self.sectionsOnly = sectionsOnly
   }
@@ -64,6 +67,15 @@ extension WorkspaceStore {
       conditions.append(
         "r.category COLLATE synthesis_search IN (\(names.map { _ in "?" }.joined(separator: ",")))")
       values += names
+    }
+    if let typeID = scope.entityTypeID {
+      conditions.append(
+        """
+        EXISTS (SELECT 1 FROM entity_profiles p JOIN entity_types t
+          ON t.id=p.type_id AND t.world_id=p.world_id
+          WHERE p.world_id=r.world_id AND p.record_id=r.id AND t.id=? AND t.archived=0)
+        """)
+      values.append(typeID)
     }
     if scope.hasCanon { conditions.append("(r.state='canon' OR r.canonical IS NOT NULL)") }
     if scope.sectionsOnly {

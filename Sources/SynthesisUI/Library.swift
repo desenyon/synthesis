@@ -24,6 +24,7 @@ struct LibraryScreen: View {
   @State private var indexed = Set<String>()
   @State private var searchFailure: String?
   private var filter: LibraryFilter { studio.libraryFilter }
+  private var entityType: EntityTypeCollection? { studio.activeLibraryEntityType }
   private var order: LibraryOrder { studio.libraryOrder }
   @State private var archived: [LoreRecord] = []
 
@@ -43,11 +44,12 @@ struct LibraryScreen: View {
       ? archived
       : (filter == .sections || !query.trimmingCharacters(in: .whitespaces).isEmpty
         ? studio.records : studio.topLevelRecords)
-    return source.filter {
-      studio.libraryCategory == nil
-        || Vocabulary.categoryKey($0.category)
-          == Vocabulary.categoryKey(studio.libraryCategory ?? "")
-    }
+    return source.filter(isInLens)
+  }
+  private func isInLens(_ record: LoreRecord) -> Bool {
+    if let entityType { return entityType.recordIDs.contains(record.id) }
+    guard let category = studio.libraryCategory else { return true }
+    return Vocabulary.categoryKey(record.category) == Vocabulary.categoryKey(category)
   }
   private var visible: [LoreRecord] {
     var result = scoped.filter { belongs($0, to: filter) }
@@ -60,39 +62,43 @@ struct LibraryScreen: View {
     }
     return result
   }
+  private func count(for item: LibraryFilter) -> Int? {
+    if item == .all { return nil }
+    let rows =
+      item == .archived
+      ? archived : (item == .sections ? studio.records : studio.topLevelRecords)
+    return rows.lazy.filter { row in
+      (entityType == nil || isInLens(row)) && belongs(row, to: item)
+    }.count
+  }
   var body: some View {
     let rows = visible
     VStack(spacing: 0) {
       WorkspaceBar(studio: studio) {
         BarTitle(
-          icon: studio.libraryCategory.map(categoryIcon) ?? Destination.library.icon,
-          title: studio.libraryCategory ?? "Library",
+          icon: entityType == nil
+            ? studio.libraryCategory.map(categoryIcon) ?? Destination.library.icon
+            : "circle.hexagongrid",
+          title: entityType?.name ?? studio.libraryCategory ?? "Library",
           detail: "\(rows.count) \(rows.count == 1 ? "item" : "items")", t: studio.t)
-        if studio.libraryCategory != nil {
+        if entityType != nil || studio.libraryCategory != nil {
           LibraryCategoryBack(studio: studio)
         }
       } trailing: {
         DocumentHistoryMenu(studio: studio)
         LibrarySearchControl(studio: studio)
         BarAction(title: "New", icon: "plus", t: studio.t, primary: true, help: "New record · ⌘N") {
-          studio.newRecordKind = studio.libraryCategory == nil ? "lore" : "entity"
-          studio.sheet = .document
+          studio.beginContextualRecordCreation()
         }
       }
       ContentHeader {
         ScrollView(.horizontal) {
           HStack(spacing: Space.sm) {
             ForEach(LibraryFilter.allCases, id: \.self) { item in
-              if item != .archived || !archived.isEmpty || filter == .archived {
+              if item != .archived || count(for: .archived) != 0 || filter == .archived {
                 FilterChip(
                   title: item.rawValue,
-                  count: item == .archived
-                    ? archived.count
-                    : (item == .all
-                      ? nil
-                      : (item == .sections ? studio.records : studio.topLevelRecords).filter {
-                        belongs($0, to: item)
-                      }.count),
+                  count: count(for: item),
                   selected: filter == item, t: studio.t
                 ) { studio.libraryFilter = item }
               }
@@ -100,6 +106,7 @@ struct LibraryScreen: View {
           }
         }.scrollIndicators(.never)
         Spacer(minLength: 8)
+        if !studio.entityTypeCollections.isEmpty { LibraryEntityTypeMenu(studio: studio) }
         PlainMenu {
           ForEach(LibraryOrder.allCases, id: \.self) { item in
             Button {
@@ -135,7 +142,10 @@ struct LibraryScreen: View {
           ContentColumn {
             LazyVStack(spacing: 1) {
               ForEach(rows) { record in
-                RecordRow(studio: studio, record: record, archived: filter == .archived) {
+                RecordRow(
+                  studio: studio, record: record, typeName: entityType?.name,
+                  archived: filter == .archived
+                ) {
                   refreshArchive()
                 }.padding(.horizontal, -10)
               }
@@ -155,6 +165,7 @@ struct LibraryScreen: View {
     .onChange(of: query) { _, _ in refreshSearch() }
     .onChange(of: filter) { _, _ in refreshSearch() }
     .onChange(of: studio.libraryCategory) { _, _ in refreshSearch() }
+    .onChange(of: studio.libraryEntityTypeID) { _, _ in refreshSearch() }
     .onChange(of: studio.worldRevision) { _, _ in refreshSearch() }
     .dropDestination(for: URL.self) { urls, _ in
       // Dropped Markdown or text files become imported drafts.
@@ -180,7 +191,7 @@ struct LibraryScreen: View {
           worldID: studio.worldID, query: query,
           archived: filter == .archived,
           scope: LoreSearchScope(
-            kind: kind, category: studio.libraryCategory,
+            kind: kind, category: studio.libraryCategory, entityTypeID: entityType?.id,
             hasCanon: filter == .canon, sectionsOnly: filter == .sections)
         ).map(\.id))
       searchFailure = nil
@@ -206,6 +217,16 @@ struct LibraryScreen: View {
           studio.libraryQuery = ""
           studio.libraryFilter = .all
         }.buttonStyle(QuietButton(t: studio.t))
+      }
+    } else if let entityType {
+      EmptyState(
+        icon: "circle.hexagongrid", title: "No entities of this type yet",
+        message: "Entities assigned to \(entityType.name) collect here.", t: studio.t
+      ) {
+        Button("New entity") {
+          studio.newRecordKind = "entity"
+          studio.sheet = .document
+        }.buttonStyle(QuietButton(t: studio.t, primary: true))
       }
     } else if let category = studio.libraryCategory {
       EmptyState(
@@ -245,6 +266,7 @@ struct RecordRow: View {
   @Environment(\.studioDensity) private var density
   @ObservedObject var studio: Studio
   let record: LoreRecord
+  var typeName: String?
   var archived = false
   var changed: () -> Void = {}
   private var categoryLabel: String {
@@ -253,6 +275,7 @@ struct RecordRow: View {
     {
       return "Section of \(parent.title)"
     }
+    if let typeName { return typeName }
     return record.category.isEmpty
       ? Vocabulary.kindLabel(record.kind) : Vocabulary.displayCategory(record.category)
   }

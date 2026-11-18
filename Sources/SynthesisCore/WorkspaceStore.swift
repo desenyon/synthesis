@@ -3,6 +3,7 @@ import Foundation
 public final class WorkspaceStore {
   let db: Database
   public init(path: String) throws { db = try Database(path: path) }
+  init(database: Database) { db = database }
   public static var defaultPath: String {
     ProcessInfo.processInfo.environment["SYNTHESIS_DATABASE_PATH"]
       ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(
@@ -674,7 +675,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 17
+      var schemaVersion = 18
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -719,6 +720,7 @@ public final class WorkspaceStore {
       var conversationBranches: [[String: String]]
       var conversationMessageOrigins: [[String: String]]
       var promptRecipes: [[String: String]]
+      var simulationRuns: [[String: String]]
     }
     // Archived material is exported too: archiving hides, it never discards.
     let hiddenChats = try conversations(worldID: id, archived: true)
@@ -782,7 +784,8 @@ public final class WorkspaceStore {
       conversationBranches: db.rows("SELECT * FROM conversation_branches WHERE world_id=?", [id]),
       conversationMessageOrigins: db.rows(
         "SELECT * FROM conversation_message_origins WHERE world_id=?", [id]),
-      promptRecipes: db.rows("SELECT * FROM prompt_recipes WHERE world_id=?", [id])
+      promptRecipes: db.rows("SELECT * FROM prompt_recipes WHERE world_id=?", [id]),
+      simulationRuns: db.rows("SELECT * FROM simulation_runs WHERE world_id=? ORDER BY rowid", [id])
     )
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

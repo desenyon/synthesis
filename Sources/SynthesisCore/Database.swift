@@ -2,18 +2,22 @@ import CSQLite
 import Foundation
 
 final class Database {
+  let path: String
   private var handle: OpaquePointer?
-  init(path: String) throws {
-    if path != ":memory:" {
+  init(path: String, openExisting: Bool = false) throws {
+    self.path = path
+    if !openExisting, path != ":memory:" {
       try FileManager.default.createDirectory(
         at: URL(fileURLWithPath: path).deletingLastPathComponent(),
         withIntermediateDirectories: true)
     }
-    guard
-      sqlite3_open_v2(
-        path, &handle, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nil)
-        == SQLITE_OK
-    else { throw SynthesisError.database("Could not open the local database.") }
+    let flags =
+      SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX | (openExisting ? 0 : SQLITE_OPEN_CREATE)
+    guard sqlite3_open_v2(path, &handle, flags, nil) == SQLITE_OK else {
+      sqlite3_close(handle)
+      handle = nil
+      throw SynthesisError.database("Could not open the local database.")
+    }
     sqlite3_busy_timeout(handle, 5000)
     // Match creator-authored names consistently, including accented/non-ASCII aliases.
     guard
@@ -78,6 +82,7 @@ final class Database {
       }
     }
     try execute("PRAGMA foreign_keys=ON")
+    if openExisting { return }
     try execute("PRAGMA journal_mode=WAL")
     try execute(
       "CREATE TABLE IF NOT EXISTS schema_migrations(name TEXT PRIMARY KEY,applied_at TEXT NOT NULL)"
@@ -124,9 +129,15 @@ final class Database {
     guard result == SQLITE_DONE || result == SQLITE_ROW else { throw failure() }
   }
   func rows(_ sql: String, _ values: [String?] = []) throws -> [[String: String]] {
+    var result: [[String: String]] = []
+    try forEachRow(sql, values) { result.append($0) }
+    return result
+  }
+  func forEachRow(
+    _ sql: String, _ values: [String?], _ read: ([String: String]) throws -> Void
+  ) throws {
     let statement = try prepare(sql, values)
     defer { sqlite3_finalize(statement) }
-    var result: [[String: String]] = []
     while true {
       let step = sqlite3_step(statement)
       if step == SQLITE_DONE { break }
@@ -137,16 +148,16 @@ final class Database {
           row[String(cString: sqlite3_column_name(statement, column))] = String(cString: value)
         }
       }
-      result.append(row)
+      try read(row)
     }
-    return result
   }
   private var depth = 0
   /// Atomic unit of work. Nested calls become savepoints, so a store operation can be composed
   /// from other transactional operations and still roll back as a whole.
-  func transaction<T>(_ body: () throws -> T) throws -> T {
+  func transaction<T>(immediate: Bool = true, _ body: () throws -> T) throws -> T {
     let level = depth
-    try execute(level == 0 ? "BEGIN IMMEDIATE" : "SAVEPOINT nested_\(level)")
+    let begin = immediate ? "BEGIN IMMEDIATE" : "BEGIN DEFERRED"
+    try execute(level == 0 ? begin : "SAVEPOINT nested_\(level)")
     depth += 1
     defer { depth -= 1 }
     do {

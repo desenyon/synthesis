@@ -39,7 +39,7 @@ uv run --with pillow python scripts/contact-sheets.py docs/verification/expansio
 2. [STATE](STATE.md): what is verified, with exact checks.
 3. [EXPANSION](EXPANSION.md) and [EXPANSION_SOURCE](EXPANSION_SOURCE.md): all 394 requirements, individual acceptance and exact source. Then [ROADMAP](ROADMAP.md) and [COMPOSER_CONTEXT](COMPOSER_CONTEXT.md).
 4. [PARALLEL_WORK](PARALLEL_WORK.md) and the [checkpoint/error record](verification/expansion-parallel-checkpoint/README.md): ownership, stopped workers, exact failed/passing runs, missing wiring and the final capture manifest.
-5. [ARCHITECTURE](ARCHITECTURE.md): modules and persistence. The current source includes migrations through 0021, portable format v14 and JSON schema 17.
+5. [ARCHITECTURE](ARCHITECTURE.md) covers modules and persistence. The current source includes migrations through 0023, portable format v15 and JSON schema 18.
 
 ## Historical macOS checkpoint
 

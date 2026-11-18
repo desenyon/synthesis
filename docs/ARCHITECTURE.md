@@ -8,7 +8,7 @@ Quick capture uses an ordinary nonactivating `NSPanel`, a launch-local Carbon sh
 
 Migration 0016 adds optional entity types, inheritance, typed profile values, templates, accepted property snapshots and revision histories. Derived FTS is rebuilt from validated data. Formulas use a bounded arithmetic parser, never executable code. Structured canon requires a frozen review token; later schema/default edits cannot rewrite the accepted snapshot. Migration 0017 adds conversation lineage, copied-message origins and optimistic prompt recipes. Branches copy a selected message prefix with new IDs; proposal ownership and approvals stay with the original conversation.
 
-Portable archives are v14 and JSON exports schema 17. Nested references are remapped and validated before import commits. Device sessions, scratch drafts and provider credentials stay local. [Entity schema details](ENTITY_SCHEMAS.md), [conversation tools](CONVERSATION_TOOLS.md), [sessions](SESSION_RESTORE.md) and [quick capture](QUICK_CAPTURE.md) describe the new boundaries. The ledger tracks verification status.
+Portable archives are v15 and JSON exports schema 18. Nested references are remapped and validated before import commits. Device sessions, scratch drafts and provider credentials stay local. [Entity schema details](ENTITY_SCHEMAS.md), [conversation tools](CONVERSATION_TOOLS.md), [sessions](SESSION_RESTORE.md) and [quick capture](QUICK_CAPTURE.md) describe the new boundaries. The ledger tracks verification status.
 
 Workspace transfers use process-local typed addresses. A recipient claims one gesture and validates its world, source, target and Canvas generation before writing. Opening a reference resolves its current source. Canvas correlates each explicit save acknowledgment with its request. Rich-text links remain portable in working, accepted and historical snapshots.
 
@@ -19,6 +19,10 @@ Migration 0018 adds typed and versioned metadata to the existing directed relati
 Migration 0019 adds separate name periods and their revisions for each entity. The Library search index includes active dated names without changing the ordinary alias array. Applying a historical name to the working title uses the existing draft revision path. Imports remap identity columns while preserving the creator's literal names and date labels.
 
 Migration 0020 adds authored fixed civil calendars and elapsed coordinates for events. The native Timeline axis reads the validated coordinates and keeps events without typed dates available in a separate list. Migration 0021 adds independent structured facts and immutable revisions with exact document evidence. Approving a fact freezes one revision. The working fact and record canon remain independent. Both migrations register world activity and the archive validates their scoped references.
+
+Migration 0022 stores immutable world-scoped Simulation snapshots with exact trace, authored inputs and engine version. The Manual engine replays the stored prefix for import validation. Archive and Undo use a revision token. Migration 0023 indexes type membership by world and stable schema ID for the typed Library lens. [Simulation guide](SIMULATION.md)
+
+Data Settings checks three derived FTS tables against saved records, typed properties and names. A file-backed maintenance queue uses a separate SQLite connection and rebuilds only the selected world in one transaction. The device-local chat cap counts admitted submissions and commits the UTC tally alongside the saved prompt. The latest successful activity displays provider-reported counts when available.
 
 Explicit bulk proposal acceptance runs under one transaction and validates the exact reviewed rows and prerequisite results before committing drafts. What-if proposals carry approved-for-review relationship metadata and map evidence through the branch's stable identities.
 

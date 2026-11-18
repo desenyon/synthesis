@@ -50,6 +50,13 @@ extension Studio {
   public var canBeginCreation: Bool { world != nil && sheet == nil }
   public var canBeginLinking: Bool { canBeginCreation && records.count >= 2 }
 
+  public func beginContextualRecordCreation() {
+    let isCollection =
+      destination == .library && selectedRecord == nil
+      && (activeLibraryEntityType != nil || libraryCategory != nil)
+    beginRecordCreation(kind: isCollection ? "entity" : "lore")
+  }
+
   public func beginRecordCreation(kind: String = "lore") {
     guard canBeginCreation, ["lore", "entity", "capture"].contains(kind), flushEditor() else {
       return

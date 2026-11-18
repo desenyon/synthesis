@@ -78,15 +78,27 @@ struct Sidebar: View {
   @ViewBuilder private func navigationSection(_ item: SidebarSection) -> some View {
     switch item {
     case .workspace: section("Workspace", items: [.chat, .canvas, .library, .dashboard])
-    case .explore: section("Explore", items: [.knowledge, .timeline, .atlas, .review])
+    case .explore: section("Explore", items: [.knowledge, .timeline, .atlas, .review, .simulation])
     case .world:
       if !collapsed {
         VStack(spacing: 0) {
           disclosure("World", expanded: $worldExpanded).contextMenu { sectionActions(.world) }
           if worldExpanded {
+            if !studio.entityTypeCollections.isEmpty {
+              let topLevelIDs =
+                studio.preferences.sidebarCounts
+                ? Set(studio.topLevelRecords.map(\.id)) : []
+              heading("Entity types").padding(.horizontal, 10)
+                .frame(height: SidebarMetric.section)
+              LazyVStack(spacing: 0) {
+                ForEach(studio.entityTypeCollections) { type in
+                  entityTypeRow(type, count: type.recordIDs.intersection(topLevelIDs).count)
+                }
+              }
+            }
             ForEach(studio.visibleSidebarCategories, id: \.self) { category in categoryRow(category)
             }
-            if studio.visibleSidebarCategories.isEmpty {
+            if studio.visibleSidebarCategories.isEmpty && studio.entityTypeCollections.isEmpty {
               Button("Choose categories…") { studio.sheet = .navigation }
                 .font(.studio(.caption)).foregroundStyle(palette.secondary)
                 .buttonStyle(.plain).frame(maxWidth: .infinity, alignment: .leading)
@@ -127,6 +139,16 @@ struct Sidebar: View {
         }
       }
     }
+  }
+  private func entityTypeRow(_ type: EntityTypeCollection, count: Int) -> some View {
+    NavRow(
+      t: studio.t, title: type.name, icon: "circle.hexagongrid",
+      selected: studio.activeLibraryEntityType?.id == type.id && studio.selectedRecord == nil,
+      collapsed: collapsed,
+      trailing: studio.preferences.sidebarCounts && count > 0
+        ? count.formatted() : nil
+    ) { studio.openEntityTypeLens(type.id) }
+    .accessibilityHint("Shows records with this entity type")
   }
   private func favoriteRow(_ record: LoreRecord) -> some View {
     let favorites = studio.favoriteRecords
@@ -273,7 +295,7 @@ struct Sidebar: View {
         NavRow(
           t: studio.t, title: item.rawValue, icon: item.icon,
           selected: studio.destination == item && studio.libraryCategory == nil
-            && studio.selectedRecord == nil,
+            && studio.activeLibraryEntityType == nil && studio.selectedRecord == nil,
           collapsed: collapsed,
           trailing: item == .review && studio.reviewCount > 0
             ? studio.reviewCount.formatted() : nil,

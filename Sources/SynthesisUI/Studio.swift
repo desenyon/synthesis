@@ -14,6 +14,7 @@ public enum Destination: String, CaseIterable, Identifiable, Codable {
   case worlds = "Worlds"
   case settings = "Settings"
   case dashboard = "Dashboard"
+  case simulation = "Simulation"
   public var id: String { rawValue }
   var icon: String {
     switch self {
@@ -27,6 +28,7 @@ public enum Destination: String, CaseIterable, Identifiable, Codable {
     case .worlds: return "globe"
     case .settings: return "gearshape"
     case .dashboard: return "rectangle.grid.2x2"
+    case .simulation: return "chart.bar"
     }
   }
   var summary: String {
@@ -41,6 +43,7 @@ public enum Destination: String, CaseIterable, Identifiable, Codable {
     case .worlds: return "Open, save and organize your universes"
     case .settings: return "Application and world preferences"
     case .dashboard: return "Recent work, projects and decisions"
+    case .simulation: return "Calculate hypothetical outcomes"
     }
   }
 }
@@ -216,19 +219,26 @@ public struct Toast: Identifiable {
   }
   var contextLabel: String {
     if let beside = splitRecord {
-      return "\(selectedRecord?.title ?? libraryCategory ?? destination.rawValue) · \(beside.title)"
+      return
+        "\(selectedRecord?.title ?? activeLibraryEntityType?.name ?? libraryCategory ?? destination.rawValue) · \(beside.title)"
     }
     if let selectedRecord { return selectedRecord.title }
     if let id = contextualRecordIDs.first, let record = records.first(where: { $0.id == id }) {
       return record.title
     }
-    return libraryCategory ?? destination.rawValue
+    return activeLibraryEntityType?.name ?? libraryCategory ?? destination.rawValue
   }
   @Published public var companionExpanded = false
   @Published public var companionWidth = 400.0
   @Published var sidebarWidth = Double(Metric.sidebar)
   @Published var inspectorWidth = 300.0
   @Published public var libraryCategory: String?
+  @Published var libraryEntityTypeID: String?
+  @Published private(set) var entityTypeCollections: [EntityTypeCollection] = []
+  var activeLibraryEntityType: EntityTypeCollection? {
+    guard destination == .library else { return nil }
+    return entityTypeCollections.first { $0.id == libraryEntityTypeID }
+  }
   @Published var libraryQuery = ""
   @Published var libraryFilter = LibraryFilter.all
   @Published var libraryOrder = LibraryOrder.recent
@@ -445,6 +455,10 @@ public struct Toast: Identifiable {
     branch = try store.branchInfo(worldID: worldID)
     branchParents = try store.branchParents()
     records = try store.records(worldID: worldID)
+    entityTypeCollections = try store.entityTypeCollections(worldID: worldID)
+    if let id = libraryEntityTypeID, !entityTypeCollections.contains(where: { $0.id == id }) {
+      libraryEntityTypeID = nil
+    }
     refreshSidebarConfiguration()
     try syncDocumentSession()
     try syncSplitWorkspace()
@@ -669,7 +683,10 @@ public struct Toast: Identifiable {
   public func navigate(_ value: Destination) {
     withNavigation {
       guard flushEditor() else { return }
-      guard value != destination || selectedRecord != nil || libraryCategory != nil else { return }
+      guard
+        value != destination || selectedRecord != nil || libraryCategory != nil
+          || libraryEntityTypeID != nil
+      else { return }
       selectedRecord = nil
       editorSave = nil
       destination = value
@@ -681,6 +698,7 @@ public struct Toast: Identifiable {
         canvasFit = nil
       }
       libraryCategory = nil
+      libraryEntityTypeID = nil
       mobileNavigation = false
     }
   }
@@ -706,13 +724,23 @@ public struct Toast: Identifiable {
 
     }
   }
-  public func openLens(_ category: String?) {
+  public func openLens(_ category: String?) { openLibraryLens(category: category) }
+
+  func openEntityTypeLens(_ id: String, keepSearch: Bool = false) {
+    guard entityTypeCollections.contains(where: { $0.id == id }) else { return }
+    openLibraryLens(entityTypeID: id, keepSearch: keepSearch)
+  }
+
+  private func openLibraryLens(
+    category: String? = nil, entityTypeID: String? = nil, keepSearch: Bool = false
+  ) {
     withNavigation {
       guard flushEditor() else { return }
       selectedRecord = nil
       editorSave = nil
       libraryCategory = category
-      libraryQuery = ""
+      libraryEntityTypeID = entityTypeID
+      if !keepSearch { libraryQuery = "" }
       libraryFilter = .all
       destination = .library
       canvasUndo = nil
@@ -737,6 +765,8 @@ public struct Toast: Identifiable {
         inspectionTarget = nil
         companionExpanded = false
         libraryCategory = nil
+        libraryEntityTypeID = nil
+        entityTypeCollections = []
         libraryQuery = ""
         libraryFilter = .all
         libraryOrder = .recent
@@ -1050,6 +1080,7 @@ public struct Toast: Identifiable {
     let prompt = draft
     let wid = worldID
     perform {
+      try store.assistantChatBudget().requireAvailableSubmission()
       _ = try previewContext(prompt: prompt)
       if conversationID == nil {
         conversationID = try store.createConversation(worldID: worldID).id

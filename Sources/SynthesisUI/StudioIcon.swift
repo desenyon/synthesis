@@ -49,6 +49,7 @@ enum StudioIcons {
     "calendar": "\u{e108}",
     "calendar.badge.exclamationmark": "\u{e10c}",
     "calendar.day.timeline.left": "\u{e19a}",
+    "chart.bar": "\u{e150}",
     "checkmark": "\u{e182}",
     "checkmark.circle": "\u{e184}",
     "checkmark.seal": "\u{e606}",

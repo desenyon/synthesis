@@ -1,5 +1,9 @@
 # Development progress
 
+## 2026-11-17 — Simulation and Settings checkpoint
+
+The native shared queue passed 447 tests in 114 suites, strict lint and optimized signing. Both session processes passed. The 48-frame background recapture confirmed a finite Assistant cap, stable typed Library collection, search index status, and local Simulation controls and trace. The acceptance ledger reached 64 of 394 verified. [Run record](verification/expansion-parallel-final/README.md#simulation-typed-library-and-settings)
+
 ## 2026-11-17 — Mac regression checkpoint
 
 Fast-forwarded `main` to `434a7cc` and preserved the untracked design brief. The first native check found a Swift Testing compile error in the pin-chip assertion. After correcting it, 375 native tests passed and both session process phases passed. The first isolated capture stopped after 58 main frames and six panels at 1440×900. Its Canvas session check compared a viewport sampled during animation with a later saved viewport. The fixture now selects without animation and compares the live, saved, and reopened viewports. The session fixture also independently checks the full newest draft.
