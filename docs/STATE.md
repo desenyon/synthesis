@@ -2,7 +2,7 @@
 
 Canonical checkout: `/Users/desenyon/Developer/synthesis`, `main`; build `dist/Synthesis.app` here. Native SwiftUI/AppKit + SQLite, with an offline Excalidraw Canvas. 0.0.x versions are published as full GitHub releases (owner instruction); v0.0.3 is the latest. Licensed GPL-3.0. The owner's untracked `docs/DESIGN_AGENT_BRIEF.md` remains untouched and excluded from commits.
 
-The latest Linux source checkpoint is `45a4a0c`. The historical macOS implementation checkpoint is `dd9fd84`. Use the current [Mac handoff](HANDOFF.md) and [continuation prompt](RUN_PROMPT.md) for the full verification sweep. No release or tag was created.
+The latest Linux source checkpoint on `origin/main` is `df71af3`. The historical macOS implementation checkpoint is `dd9fd84`. Use the current [Mac handoff](HANDOFF.md) and [continuation prompt](RUN_PROMPT.md) for the full verification sweep. No release or tag was created.
 
 ## Active — complete expansion brief
 
@@ -26,7 +26,7 @@ The #347 continuation shows the exact prepared lore and workspace data for a sub
 
 The #70 continuation adds dated names and aliases on the same entity ID, local search, and an explicit draft working-title action with Undo. The expanded Linux probe passed 155 tests across 39 suites. The mounted-editor test and two capture states remain pending. [Name history guide](ENTITY_SCHEMAS.md#names-over-time) · [Run record](PROGRESS.md)
 
-The saved Codex agent limit remains 50. The canonical Mac checkout is unavailable from Linux. Local Git HTTPS credentials were unavailable when checking the push path. [Ownership and errors](PARALLEL_WORK.md) · [Handoff](HANDOFF.md) · [Continue prompt](RUN_PROMPT.md)
+The saved Codex agent limit remains 50. The canonical Mac checkout is unavailable from Linux. The GitHub connector copied the Linux checkpoint to `origin/main` and the source trees matched. [Ownership and errors](PARALLEL_WORK.md) · [Handoff](HANDOFF.md) · [Continue prompt](RUN_PROMPT.md)
 
 The owner's running app was not restarted or controlled. No live provider request, foreground input, image generation, release or tag occurred. AGENTS.md is unchanged; the untracked owner design brief remains untouched and excluded.
 

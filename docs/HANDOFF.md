@@ -2,7 +2,7 @@
 
 Start here when picking up Synthesis.
 
-Use the [copyable Mac continuation prompt](RUN_PROMPT.md) with a coding agent in the canonical checkout. Review local changes before integrating the latest source from `origin/main`. The Linux source checkpoint is `45a4a0c`. Its source changes cover #35, #36, #47–48, #67–70, and #347. The delivery details and any fallback transfer are recorded in the handoff that accompanies these docs.
+Use the [copyable Mac continuation prompt](RUN_PROMPT.md) with a coding agent in the canonical checkout. Review local changes before integrating the latest source from `origin/main`. The Linux source checkpoint on GitHub is [`df71af3`](https://github.com/desenyon/synthesis/commit/df71af3db260cfc188958979d291a90659b92ba4). The GitHub connector preserved all seven implementation trees and commit messages. Local Git on Spark preserves the original hashes on `spark-original-b3602d7`. The source changes cover #35, #36, #47–48, #67–70, and #347.
 
 ## Current continuation — 2026-11-17
 

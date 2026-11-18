@@ -1,5 +1,9 @@
 # Development progress
 
+## Mac continuation handoff
+
+GitHub `main` received all seven Linux implementation commits and the Mac continuation prompt. The connector generated new commit hashes. Each GitHub tree matched the corresponding Spark tree. A fresh fetch confirmed the updated remote ref, and the original history remains on the local `spark-original-b3602d7` branch. This was a source push. Native acceptance and the release gate remain pending. [Current handoff](HANDOFF.md)
+
 ## 2026-11-17 — #70 names and aliases across time
 
 Name history keeps an entity's identity and authored date labels, including open or unknown bounds. Local Library search indexes both historical names and dated aliases. The entity editor manages entries and can use one as a working title with guarded Undo. Title-only refresh preserves caret and existing text Undo. Migration 0019 retains prior rows and updates the derived index on archive and restore. `.synthesis` v12, JSON schema 15 and Markdown carry the entries.
