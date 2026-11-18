@@ -45,7 +45,7 @@ enum TextDiff {
 
 struct EditorScreen: View {
   enum Panel: String, Identifiable {
-    case history, canon
+    case history, canon, names
     var id: String { rawValue }
   }
   @ObservedObject var studio: Studio
@@ -170,6 +170,11 @@ struct EditorScreen: View {
       }
       if studio.captureHint == "sheet-canon" { panel = .canon }
       if studio.captureHint == "sheet-history" { openHistory() }
+      if placement == .main && record.kind == "entity"
+        && Studio.entityNamesCaptureStates.contains(studio.captureHint)
+      {
+        panel = .names
+      }
     }
     .onDisappear {
       saving?.cancel()
@@ -182,12 +187,13 @@ struct EditorScreen: View {
       guard !dirty, let latest = studio.records.first(where: { $0.id == record.id }),
         latest != record
       else { return }
+      let writingChanged = bodyText != latest.body || richText != latest.rtf
       record = latest
       title = latest.title
       bodyText = latest.body
       richText = latest.rtf
       category = latest.category
-      reloadToken += 1
+      if writingChanged { reloadToken += 1 }
     }
     .studioSheet(isPresented: $ruleSheet) {
       RecordRuleEditor(studio: studio, record: record, existing: editingRule) { ruleSheet = false }
@@ -196,6 +202,10 @@ struct EditorScreen: View {
       switch item {
       case .history: historySheet
       case .canon: canonSheet
+      case .names:
+        EntityNamePeriodsSheet(
+          studio: studio, entity: record, placement: placement,
+          editForCapture: studio.captureHint == "entity-name-edit", close: closePanel)
       }
     }
   }
@@ -369,11 +379,18 @@ struct EditorScreen: View {
             .help("Origin of this record. It is a draft until you accept it as canon.")
         }
       }.padding(.bottom, 10)
-      TextField("Untitled", text: $title, axis: .vertical)
+      TextField("Untitled", text: titleInput, axis: .vertical)
         .font(.studio(.entityTitle)).tracking(-0.4).textFieldStyle(.plain)
         .fixedSize(horizontal: false, vertical: true)
-        .accessibilityLabel("Record title")
-        .onChange(of: title) { _, _ in changed() }.accessibilityLabel("Title")
+        .accessibilityLabel("Title")
+      if record.kind == "entity" && !studio.focusMode {
+        Button {
+          if studio.flushEditor() { panel = .names }
+        } label: {
+          StudioLabel("Names over time", icon: "clock.arrow.circlepath")
+        }.buttonStyle(QuietButton(t: studio.t, role: .ghost))
+          .padding(.top, Space.xs)
+      }
       if record.kind == "entity" && bodyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         && !writingStarted && !studio.focusMode
       {
@@ -456,6 +473,15 @@ struct EditorScreen: View {
       Text(name).font(.studio(size: 12.5, weight: .medium)).foregroundStyle(studio.t.secondary)
         .padding(.horizontal, 8).frame(height: 28).hoverFill(studio.t)
     }.buttonStyle(.plain).help("Make the current paragraph \(name.lowercased())")
+  }
+  private var titleInput: Binding<String> {
+    Binding(
+      get: { title },
+      set: { value in
+        guard title != value else { return }
+        title = value
+        changed()
+      })
   }
   @ViewBuilder private var categoryMenu: some View {
     if customCategory {

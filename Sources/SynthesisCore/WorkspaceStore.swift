@@ -656,7 +656,7 @@ public final class WorkspaceStore {
   }
   public func exportWorld(_ id: String) throws -> Data {
     struct Export: Codable {
-      var schemaVersion = 14
+      var schemaVersion = 15
       var world: World
       var records: [LoreRecord]
       var conversations: [Conversation]
@@ -692,6 +692,8 @@ public final class WorkspaceStore {
       var entityTypeHistory: [[String: String]]
       var entityTemplates: [[String: String]]
       var entityTemplateHistory: [[String: String]]
+      var entityNamePeriods: [[String: String]]
+      var entityNamePeriodHistory: [[String: String]]
       var conversationBranches: [[String: String]]
       var conversationMessageOrigins: [[String: String]]
       var promptRecipes: [[String: String]]
@@ -745,6 +747,10 @@ public final class WorkspaceStore {
       entityTemplates: db.rows("SELECT * FROM entity_templates WHERE world_id=?", [id]),
       entityTemplateHistory: db.rows(
         "SELECT * FROM entity_template_history WHERE world_id=?", [id]),
+      entityNamePeriods: db.rows(
+        "SELECT * FROM entity_name_periods WHERE world_id=? ORDER BY rowid", [id]),
+      entityNamePeriodHistory: db.rows(
+        "SELECT * FROM entity_name_period_history WHERE world_id=? ORDER BY rowid", [id]),
       conversationBranches: db.rows("SELECT * FROM conversation_branches WHERE world_id=?", [id]),
       conversationMessageOrigins: db.rows(
         "SELECT * FROM conversation_message_origins WHERE world_id=?", [id]),

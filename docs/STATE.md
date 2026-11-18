@@ -6,7 +6,7 @@ Implementation checkpoint `dd9fd840b204226b46fb6618a1f95c524db1399f` is pushed t
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **32 Verified, 18 In progress, 343 Open, 1 Decision needed.** Source work resumed on Linux with owner approval. The runtime supported one integration agent and three workers. It rejected a fifth agent with `agent thread limit reached`.
+The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **32 Verified, 19 In progress, 342 Open, 1 Decision needed.** Source work resumed on Linux with owner approval. The runtime supported one integration agent and three workers. It rejected a fifth agent with `agent thread limit reached`.
 
 **No new release or tag is authorized. The owner requires all 394 requirements completed before another release; completing them does not itself authorize publication.** The current 0.0.3 release is unchanged.
 
@@ -23,6 +23,8 @@ The #47 continuation adds one-request context pins that prioritize chosen record
 The #48 continuation adds inherited history exclusions and accepted-only record snapshots. The Linux probe passed 75 core tests in 14 suites, with outbound payload regressions for both restrictions. Full Swift format lint and changed-file parsing passed. The context panel capture remains pending. [Composer guide](COMPOSER_CONTEXT.md) · [Run record](PROGRESS.md)
 
 The #347 continuation shows the exact prepared lore and workspace data for a submitted request alongside the current draft preview. The expanded Linux probe passed 150 tests across 38 suites. The native submitted-context capture and Studio test remain pending. [Run record](PROGRESS.md)
+
+The #70 continuation adds dated names and aliases on the same entity ID, local search, and an explicit draft working-title action with Undo. The expanded Linux probe passed 155 tests across 39 suites. The mounted-editor test and two capture states remain pending. [Name history guide](ENTITY_SCHEMAS.md#names-over-time) · [Run record](PROGRESS.md)
 
 The saved Codex agent limit remains 50. The canonical Mac checkout is unavailable from Linux. Local Git HTTPS credentials were unavailable when checking the push path. [Ownership and errors](PARALLEL_WORK.md) · [Handoff](HANDOFF.md) · [Continue prompt](RUN_PROMPT.md)
 

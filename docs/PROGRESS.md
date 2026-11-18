@@ -1,5 +1,11 @@
 # Development progress
 
+## 2026-11-17 — #70 names and aliases across time
+
+Name history keeps an entity's identity and authored date labels, including open or unknown bounds. Local Library search indexes both historical names and dated aliases. The entity editor manages entries and can use one as a working title with guarded Undo. Title-only refresh preserves caret and existing text Undo. Migration 0019 retains prior rows and updates the derived index on archive and restore. `.synthesis` v12, JSON schema 15 and Markdown carry the entries.
+
+The expanded Linux probe passed 155 tests in 39 suites. A separate SQLite check applied all 19 migrations and exercised scoped historical search, edit, archive and restore. Full Swift format lint and parsing of changed files passed. The mounted-editor regression and `entity-names` / `entity-name-edit` captures remain pending on macOS.
+
 ## 2026-11-17 — #347 submitted context inspection
 
 World context can show the immutable prepared lore excerpts and workspace index for the latest admitted request in the current conversation. The view keeps the submitted pins and exclusions after the live composer changes. Draft preview remains available for the next message. A scoped callback receives the prepared context immediately before generation. It never creates a provider request on its own.

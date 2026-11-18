@@ -38,11 +38,19 @@ extension WorkspaceStore {
     if !phrases.isEmpty {
       // Without materialization SQLite reruns the virtual FTS scan for each candidate record.
       // Evaluate it once, then join its indexed IDs while preserving substring-title fallback.
-      prefix =
-        "WITH matches AS MATERIALIZED (SELECT id,MIN(rank) AS rank FROM (SELECT id,rank FROM records_fts WHERE records_fts MATCH ? AND world_id=? UNION ALL SELECT record_id AS id,rank FROM entity_profile_search WHERE entity_profile_search MATCH ? AND world_id=?) GROUP BY id) "
-      values += [
-        phrases.joined(separator: " AND "), worldID, phrases.joined(separator: " AND "), worldID,
-      ]
+      prefix = """
+        WITH matches AS MATERIALIZED (
+          SELECT id,MIN(rank) AS rank FROM (
+            SELECT id,rank FROM records_fts WHERE records_fts MATCH ? AND world_id=?
+            UNION ALL SELECT record_id AS id,rank FROM entity_profile_search
+              WHERE entity_profile_search MATCH ? AND world_id=?
+            UNION ALL SELECT record_id AS id,rank FROM entity_name_search
+              WHERE entity_name_search MATCH ? AND world_id=?
+          ) GROUP BY id
+        )
+        """ + " "
+      let match = phrases.joined(separator: " AND ")
+      values += [match, worldID, match, worldID, match, worldID]
       join = " LEFT JOIN matches ON matches.id=r.id"
       order = "COALESCE(matches.rank,0)," + order
     }
@@ -99,11 +107,19 @@ extension WorkspaceStore {
       case .status:
         conditions.append("r.state=?")
         values.append(value.lowercased())
-      case .tag, .alias:
-        let column = filter.field == .tag ? "tags" : "aliases"
+      case .tag:
         conditions.append(
-          "EXISTS (SELECT 1 FROM json_each(r.\(column)) WHERE value = ? COLLATE synthesis_search)")
+          "EXISTS (SELECT 1 FROM json_each(r.tags) WHERE value = ? COLLATE synthesis_search)")
         values.append(value)
+      case .alias:
+        conditions.append(
+          """
+          (EXISTS (SELECT 1 FROM json_each(r.aliases) WHERE value = ? COLLATE synthesis_search)
+          OR EXISTS (SELECT 1 FROM entity_name_periods n
+            WHERE n.world_id=r.world_id AND n.record_id=r.id AND n.archived=0 AND n.kind='alias'
+              AND n.name = ? COLLATE synthesis_search))
+          """)
+        values += [value, value]
       case .updated, .created:
         let column = filter.field == .updated ? "updated_at" : "created_at"
         conditions.append("r.\(column)>=? AND r.\(column)<=?")

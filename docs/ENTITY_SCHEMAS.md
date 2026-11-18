@@ -22,6 +22,12 @@ World dates preserve authored text and uncertainty; they do not imply Earth-cale
 
 Structured values are searchable through Library/global search and eligible assistant retrieval. Only already permitted record context is serialized for the assistant; excluded linked entities are redacted and image bytes are omitted. Working values and accepted property snapshots have separate context budgets. New schema/property approval methods are not exposed as model tools; model-authored type/typed-field proposals are not implemented. The existing image export includes current schema/template/property media and frozen accepted images, deduplicated with covers, artwork and board images. It preserves valid PNG bytes and converts other raster input with explicit failure reporting. Markdown includes readable working and accepted properties; JSON and `.synthesis` archives retain full schemas, media and histories.
 
+## Names over time
+
+Open **Names over time** on an entity to add a dated name or alias. Enter the start and end using the world's own wording. Blank bounds remain unknown. Entries use the entity's existing ID, so events and relationships still point to the same entity after a rename. Local search finds historical names and aliases, and `alias:` finds dated aliases alongside ordinary aliases.
+
+**Use as working title** makes a separate draft title revision and offers Undo. Accepted canon, writing, and links keep their existing values. Name entries support edit and archive with revision checks. Migration 0019 adds durable entries and previous snapshots. `.synthesis` v12, JSON schema 15 and Markdown retain the dated names. The Linux core checks passed, and the editor and two capture states still need macOS. [Run record](PROGRESS.md)
+
 ## Verification scope
 
 New tests cover persistence/reopen, all field kinds, inheritance, condition retention, explicit/stale canon review, draft restore, foreign-world rejection, formula grammar/cycles/dense dependencies, template copies and history, archive remapping/rollback/old-format compatibility, search and context restrictions. Native isolated capture fixtures cover empty/filled/inherited/conditional profiles, property review/history, type management, templates and every editable field kind in dark/light/manual states. The parent run records actual executed checks and inspected contact sheets in `docs/STATE.md` and `docs/PROGRESS.md`; source/fixtures alone are not verification.

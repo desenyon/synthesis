@@ -2,6 +2,8 @@
 
 Copy this to a coding agent working in this repository.
 
+Read the Linux continuation at the top of [HANDOFF](HANDOFF.md) first. It supersedes the original checkpoint's source status and capture selection below. Native acceptance still uses the canonical Mac checkout and the original checkpoint's recorded error history.
+
 > Work in `/Users/desenyon/Developer/synthesis` on `main`. Read `AGENTS.md`, then `docs/HANDOFF.md`, `docs/STATE.md`, `docs/EXPANSION.md`, `docs/EXPANSION_SOURCE.md`, `docs/COMPOSER_CONTEXT.md` and `docs/ROADMAP.md`. Synthesis is a native SwiftUI/AppKit + SQLite worldbuilding studio with an offline Excalidraw Canvas; the assistant runs only through the creator's Codex or Claude Code subscription.
 >
 > Implement every expansion requirement from `docs/EXPANSION.md`, using the owner's updated parallel-agent instruction. Read `docs/PARALLEL_WORK.md`, assign independent ownership, retain a coordinator and independent checker, and serialize shared builds. Account for each requirement separately and continue iterating. Do not mark partial functionality complete or claim a worker is running when the runtime rejects it. Record specific conflicts or external prerequisites as Decision needed while continuing independent work. Build complete vertical slices: persistence with additive migrations, core logic with meaningful tests, UI from `Theme.swift` and `Components.swift`, empty/error states, and portability in `.synthesis` and JSON exports.

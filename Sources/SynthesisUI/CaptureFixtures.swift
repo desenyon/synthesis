@@ -7,7 +7,7 @@ extension Studio {
   public static let captureStates =
     QuickCaptureController.captureStates + conversationToolsCaptureStates
     + entitySchemaCaptureStates + bidirectionalRelationshipCaptureStates
-    + relationshipMetadataCaptureStates + [
+    + relationshipMetadataCaptureStates + entityNamesCaptureStates + [
       "session-writing", "light-session-writing", "manual-session-writing", "session-sections",
       "session-split", "session-graph", "session-timeline", "session-atlas", "session-canvas",
       "session-conversation", "session-library",
@@ -391,6 +391,10 @@ extension Studio {
     }
     if Self.relationshipMetadataCaptureStates.contains(state) {
       configureRelationshipMetadataCapture(state, board: board, conversation: conversation)
+      return
+    }
+    if Self.entityNamesCaptureStates.contains(state) {
+      configureEntityNamesCapture(state, board: board, conversation: conversation)
       return
     }
     if state.contains("split-") {

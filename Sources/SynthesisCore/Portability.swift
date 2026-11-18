@@ -92,8 +92,17 @@ extension WorkspaceStore {
         "![\(MarkdownText.escape(record.title)) artwork](data:\($0.mimeType);base64,\($0.image))\n\n> Visual reference · \($0.origin)\n\n"
       } ?? ""
     let properties = try entityPropertyText(worldID: worldID, recordID: record.id, limit: 8_000_000)
+    let names =
+      record.kind == "entity" ? try entityNamePeriods(worldID: worldID, recordID: record.id) : []
+    let nameHistory = names.map { period in
+      let start = period.startLabel.isEmpty ? "Unknown" : MarkdownText.escape(period.startLabel)
+      let end = period.endLabel.isEmpty ? "Unknown" : MarkdownText.escape(period.endLabel)
+      return
+        "- \(period.kind.title) · \(MarkdownText.escape(period.name)) · From \(start) · Until \(end)"
+    }.joined(separator: "\n")
     return metadata + heading + illustration + MarkdownText.body(record) + "\n"
       + (properties.isEmpty ? "" : "\n## Structured properties\n\n" + properties + "\n")
+      + (nameHistory.isEmpty ? "" : "\n## Names through time\n\n" + nameHistory + "\n")
       + (rules.isEmpty ? "" : "\n## Rules\n\n\(rules)\n")
   }
 

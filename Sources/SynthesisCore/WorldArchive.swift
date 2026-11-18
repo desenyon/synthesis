@@ -4,7 +4,7 @@ import Foundation
 /// provider settings, device paths, or other worlds. SQLite remains the live working copy.
 struct WorldArchive: Codable {
   var format = "dev.synthesis.world"
-  var version = 11
+  var version = 12
   var tables: [String: [[String: String]]]
   var preferences: [String: String]
 }
@@ -18,7 +18,8 @@ extension WorkspaceStore {
     "chronology_placements", "record_sections", "creative_components", "rule_prerequisites",
     "record_artwork", "world_activity", "entity_types", "entity_profiles", "entity_profile_history",
     "entity_type_history", "entity_templates", "entity_template_history", "conversation_branches",
-    "conversation_message_origins", "prompt_recipes",
+    "conversation_message_origins", "prompt_recipes", "entity_name_periods",
+    "entity_name_period_history",
   ]
   public func exportWorldArchive(worldID: String) throws -> Data {
     _ = try world(worldID)
@@ -73,7 +74,12 @@ extension WorkspaceStore {
         "prompt_recipes",
       ] { archive.tables[table] = [] }
     }
-    guard archive.format == "dev.synthesis.world", (1...11).contains(archive.version),
+    if (1...11).contains(archive.version) {
+      for table in ["entity_name_periods", "entity_name_period_history"] {
+        archive.tables[table] = archive.tables[table] ?? []
+      }
+    }
+    guard archive.format == "dev.synthesis.world", (1...12).contains(archive.version),
       Set(archive.tables.keys) == Set(Self.archiveTables),
       archive.tables["worlds"]?.count == 1,
       let original = archive.tables["worlds"]?.first, let oldWorld = original["id"],
@@ -175,6 +181,11 @@ extension WorkspaceStore {
             }
             row["attributes"] = try attributes.encodeStored()
           }
+          if ["entity_name_periods", "entity_name_period_history"].contains(table) {
+            // Names and date labels are fictional wording, never addresses.
+            try validateEntityNameArchiveLabels(source)
+            for key in ["name", "start_label", "end_label"] { row[key] = source[key] }
+          }
           // Reject external references even on tables whose historical schema lacks FKs.
           for (key, value) in source where key.hasSuffix("_id") && key != "owner_id" {
             guard ids[value] != nil else {
@@ -203,6 +214,7 @@ extension WorkspaceStore {
       }
       try validateActivitySources(worldID: newWorld)
       try validateRelationshipArchive(worldID: newWorld)
+      try validateEntityNameArchive(worldID: newWorld)
       try validateEntitySchemas(worldID: newWorld)
       try refreshEntityPropertySearch(worldID: newWorld)
       try validateConversationTools(worldID: newWorld)
