@@ -6,13 +6,15 @@ Implementation checkpoint `dd9fd840b204226b46fb6618a1f95c524db1399f` is pushed t
 
 ## Active — complete expansion brief
 
-The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **32 Verified, 11 In progress, 351 Open.** Source work resumed on Linux with owner approval. The runtime supported one integration agent and three workers. It rejected a fifth agent with `agent thread limit reached`.
+The owner requires all 394 items individually. [EXPANSION](EXPANSION.md) is the acceptance ledger and [EXPANSION_SOURCE](EXPANSION_SOURCE.md) preserves the exact brief. **32 Verified, 12 In progress, 349 Open, 1 Decision needed.** Source work resumed on Linux with owner approval. The runtime supported one integration agent and three workers. It rejected a fifth agent with `agent thread limit reached`.
 
 **No new release or tag is authorized. The owner requires all 394 requirements completed before another release; completing them does not itself authorize publication.** The current 0.0.3 release is unchanged.
 
 Latest checkpoint: `./scripts/check.sh` passed **334 tests / 81 suites**, strict Swift format lint and the optimized ad-hoc native build. Canvas `npm test && npm run typecheck` passed **18 tests** and TypeScript. Two separate executions of the final built app restored a saved session exactly, without changing lore or Manual mode. [Logs, errors and next actions](verification/expansion-parallel-checkpoint/README.md).
 
 The #35 source now includes Canvas/editor destinations, image and board drag handles, composer token rendering, combined context budgets, exclusion filtering and portable links in rich-text history. Strict Swift format lint, Swift parsing of changed files, 32 scoped Linux core tests, 20 Canvas tests, TypeScript and the rebuilt offline bundle passed. The core probe uses real SQLite and stand-in model transports in a temporary package with macOS-only media, rendering and harness paths excluded. Native acceptance remains pending for #35 and for #33, #34, #43–44 and #61–66. The previous 25 main frames and six panels remain preliminary. Use the prepared three-size run with the two new #35 states. [Run record](PROGRESS.md) · [Reference guide](DRAG_RECORDS.md)
+
+The #36 continuation adds batch-local keys for proposals and a prerequisite indicator in Review. The same Linux probe passed 34 tests, including the three-faction request and rejected ambiguous or invalid dependencies. The `proposal-faction-batch` capture still requires macOS. #375 needs an owner decision about credentials under the subscription-only boundary. [Run record](PROGRESS.md) · [Ledger](EXPANSION.md)
 
 The saved Codex agent limit remains 50. The canonical Mac checkout is unavailable from Linux. Local Git HTTPS credentials were unavailable when checking the push path. [Ownership and errors](PARALLEL_WORK.md) · [Handoff](HANDOFF.md) · [Continue prompt](RUN_PROMPT.md)
 

@@ -1,5 +1,11 @@
 # Development progress
 
+## 2026-11-17 — #36 connected proposal batches
+
+A single Propose request can stage multiple draft entities and their relationships with batch-local keys. Keys resolve to app-owned change IDs. Ambiguous names, duplicate keys and relationships to proposed lore documents are rejected at staging. Review displays and enforces the prerequisite for each dependent draft. Creator acceptance remains explicit, and established canon stays untouched.
+
+The scoped Linux SQLite probe passed 34 tests across four suites after extending it with the three-faction request and invalid-key scenarios. The first compile caught a remaining component-creation branch that still assigned one string to the multi-value title index. It now appends to the shared index. Strict Swift format lint and parsing passed on the changed Swift files. `proposal-faction-batch` is registered for the quiet macOS capture sweep. Native rendering and live subscription verification remain pending. #375 was recorded as Decision needed because its API credential request conflicts with the protected subscription-only setup.
+
 ## 2026-11-17 — #35 source continuation from Linux
 
 Added typed reference cards and image reveal in Canvas, local board and image drag sources in Canvas and Atlas, undoable native editor links, modern composer tokens, and an exported drag UTI. Drop receivers claim one gesture, confirm active navigation and resolve the latest source. Explicit Canvas flush requests correlate each acknowledgment with the save that requested it. The assistant enforces a combined direct-source budget, filters app-inserted labels for exclusions and keeps provenance from the original History document for newly accepted event proposals. Archive import remaps rich links in working, accepted and historical text.

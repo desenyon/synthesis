@@ -35,6 +35,14 @@ public enum ProposalParser {
   }
 }
 
+extension Proposal {
+  public func prerequisites(for change: ProposedChange) -> [ProposedChange] {
+    let references = Set(
+      [change.source, change.target, change.laneID, change.boardID].compactMap { $0 })
+    return changes.filter { references.contains("change:\($0.id)") }
+  }
+}
+
 extension WorkspaceStore {
   private func decodeProposal(_ row: [String: String]) -> Proposal? {
     guard
@@ -86,6 +94,11 @@ extension WorkspaceStore {
       return trimmed.isEmpty ? nil : String(trimmed.prefix(limit))
     }
     let raw = (payload["changes"] as? [[String: Any]] ?? []).prefix(limit)
+    let referenceCounts = raw.reduce(into: [String: Int]()) { counts, item in
+      if item["action"] as? String == "create_record", let key = item["ref"] as? String {
+        counts[key, default: 0] += 1
+      }
+    }
     let boards =
       try boards(worldID: worldID, kind: "canvas") + boards(worldID: worldID, kind: "atlas")
     var createdBoards: [String: String] = [:]
@@ -107,13 +120,19 @@ extension WorkspaceStore {
         ? number : nil
     }
     var changes: [ProposedChange] = []
-    var created: [String: String] = [:]  // lowercased title → change reference
+    var created: [String: [String]] = [:]
+    var createdByKey: [String: String] = [:]
     func resolve(_ value: Any?) -> String? {
       guard let name = text(value, limit: 200) else { return nil }
       if known[name] != nil { return name }
-      if let reference = created[name.lowercased()] { return reference }
-      let matches = known.values.filter { $0.title.caseInsensitiveCompare(name) == .orderedSame }
-      return matches.count == 1 ? matches[0].id : nil
+      if name.hasPrefix("$") { return createdByKey[String(name.dropFirst())] }
+      let existing = known.values.filter { $0.title.caseInsensitiveCompare(name) == .orderedSame }
+      let matches = existing.map(\.id) + (created[name.lowercased()] ?? [])
+      return matches.count == 1 ? matches[0] : nil
+    }
+    func isEntity(_ reference: String) -> Bool {
+      if let record = known[reference] { return record.kind == "entity" }
+      return changes.first { "change:\($0.id)" == reference }?.kind == "entity"
     }
     for item in raw {
       let id = UUID().uuidString
@@ -133,11 +152,18 @@ extension WorkspaceStore {
         guard ["lore", "entity", "capture"].contains(kind),
           let title = text(item["title"], limit: 160)
         else { continue }
+        let reference = "change:\(id)"
+        if let rawKey = item["ref"] {
+          guard let key = rawKey as? String, referenceCounts[key] == 1,
+            key.range(of: #"\A[A-Za-z][A-Za-z0-9_-]{0,39}\z"#, options: .regularExpression) != nil
+          else { continue }
+          createdByKey[key] = reference
+        }
         change.kind = kind
         change.title = title
         change.category = text(item["category"], limit: 60)
         change.body = text(item["body"], limit: 100_000) ?? ""
-        created[title.lowercased()] = "change:\(id)"
+        created[title.lowercased(), default: []].append(reference)
       case "revise_record":
         guard let target = resolve(item["id"] ?? item["record"]), let record = known[target],
           let body = text(item["body"], limit: 100_000), body != record.body
@@ -148,11 +174,9 @@ extension WorkspaceStore {
         change.body = body
       case "relate":
         guard let source = resolve(item["source"]), let target = resolve(item["target"]),
-          source != target, let label = text(item["label"], limit: 80)
+          source != target, isEntity(source), isEntity(target),
+          let label = text(item["label"], limit: 80)
         else { continue }
-        // Relationships join entities; skip pairs that already exist as other kinds.
-        if let record = known[source], record.kind != "entity" { continue }
-        if let record = known[target], record.kind != "entity" { continue }
         change.source = source
         change.target = target
         change.label = label
@@ -182,13 +206,7 @@ extension WorkspaceStore {
       case "create_map":
         guard let title = text(item["title"], limit: 120) else { continue }
         if item["source"] != nil {
-          guard let source = resolve(item["source"]) else { continue }
-          if let record = known[source], record.kind != "entity" { continue }
-          if source.hasPrefix("change:"),
-            changes.first(where: { "change:\($0.id)" == source })?.kind != "entity"
-          {
-            continue
-          }
+          guard let source = resolve(item["source"]), isEntity(source) else { continue }
           change.source = source
         }
         if let parent = item["parentMap"] {
@@ -245,7 +263,7 @@ extension WorkspaceStore {
         change.componentScope = scope.rawValue
         change.title = title
         change.body = body
-        created[title.lowercased()] = "change:\(id)"
+        created[title.lowercased(), default: []].append("change:\(id)")
       case "add_section":
         guard let source = resolve(item["source"]), let title = text(item["title"], limit: 160),
           let body = text(item["body"], limit: 100_000)
@@ -345,7 +363,7 @@ extension WorkspaceStore {
         guard let reference else { throw SynthesisError.notFound }
         guard reference.hasPrefix("change:") else { return reference }
         let dependency = proposal.changes.first { "change:\($0.id)" == reference }
-        guard let id = dependency?.resultID else {
+        guard dependency?.status == "accepted", let id = dependency?.resultID else {
           throw SynthesisError.invalid(
             "Accept “\(dependency?.title ?? "the new record")” first; this change depends on it.")
         }

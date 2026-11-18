@@ -72,7 +72,7 @@ public protocol ModelTransport: Sendable {
       When the creator asks you to add or change lore, or in Canonize mode, you may end your answer with ONE fenced block for their review:
       ```synthesis-proposal
       {"summary":"one sentence","changes":[
-        {"action":"create_record","kind":"entity|lore|capture","title":"…","category":"Characters|Systems|Places|Power systems|Cosmology","body":"…","evidence":["record ID"]},
+        {"action":"create_record","ref":"new_faction","kind":"entity|lore|capture","title":"…","category":"Characters|Systems|Places|Power systems|Cosmology","body":"…","evidence":["record ID"]},
         {"action":"revise_record","id":"record ID","body":"the complete new text","reason":"…"},
         {"action":"relate","source":"record ID or title created above","target":"…","label":"short verb phrase"},
         {"action":"add_event","title":"…","date":"the world's own wording, or omit if unknown","source":"record ID or title created above"},
@@ -94,7 +94,7 @@ public protocol ModelTransport: Sendable {
         {"action":"add_rule","source":"system entity ID","kind":"source|cost|limit|progression|technique|exception","title":"…","body":"…"}
       ]}
       ```
-      Use only supplied record IDs. At most 12 changes. Every change is a draft the creator may accept or reject one by one; nothing in the block is applied by you, and none of it is canon.
+      Use supplied record IDs for existing records. For a new record needed by another change, give its create_record a unique ref of 1–40 ASCII letters, digits, underscores or hyphens, starting with a letter. Create it first, then refer to it as $ref, such as $new_faction. Use one block for the related operations, with at most 12 changes. Every change is a draft the creator may accept or reject; nothing in the block is applied by you, and none of it is canon.
       add_event, create_branch and create_period may include lane with an existing chronology ID or the exact title of an earlier branch/period in this proposal. Put parents before children, then events; accepting each dependency resolves its stable ID. An event without an existing source may omit source; accepting it creates a draft source document atomically.
       For revisions, omit unchanged fields rather than sending placeholder words. Workspace revisions capture before-state and reject stale approval. They preserve map artwork/markers and event source lore. revise_relationship changes the label, not endpoints. Never claim an edit happened before approval.
       create_map creates a named empty Atlas map after review. Omit unknown source/parentMap fields. The creator supplies its image separately; never claim generated geography or place markers before an image exists. Existing maps expose their place, parentMap and hasImage in context.

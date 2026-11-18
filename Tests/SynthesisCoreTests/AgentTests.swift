@@ -66,6 +66,92 @@ struct ScriptedTransport: ModelTransport {
     }
   }
 
+  @Test func oneNaturalLanguageRequestStagesThreeConnectedFactionDrafts() async throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "The old coast")
+    let existing = try store.createRecord(
+      worldID: world.id, title: "Salt League", kind: "entity", category: "Systems")
+    let order = try store.createRecord(
+      worldID: world.id, title: "Tidekeepers", kind: "entity", category: "Systems")
+    let canon = try store.promote(
+      worldID: world.id, id: order.id, version: order.version, confirmation: order.id)
+    let chat = try store.createConversation(worldID: world.id)
+    let answer = """
+      These three coastal factions would compete with the Tidekeepers.
+
+      ```synthesis-proposal
+      {"summary":"Three competing coastal factions","changes":[
+        {"action":"create_record","ref":"salt","kind":"entity","title":"Salt League","category":"Systems"},
+        {"action":"create_record","ref":"reef","kind":"entity","title":"Reef Court","category":"Systems"},
+        {"action":"create_record","ref":"shoal","kind":"entity","title":"Shoal Assembly","category":"Systems"},
+        {"action":"relate","source":"$salt","target":"\(order.id)","label":"competes with"},
+        {"action":"relate","source":"$reef","target":"\(order.id)","label":"competes with"},
+        {"action":"relate","source":"$shoal","target":"\(order.id)","label":"competes with"},
+        {"action":"relate","source":"Salt League","target":"\(order.id)","label":"ambiguous"}
+      ]}
+      ```
+      """
+    let engine = AgentEngine(store: store, transport: ScriptedTransport(answer: answer))
+    try await engine.submit(
+      worldID: world.id, conversationID: chat.id,
+      prompt: "Create three competing coastal factions and connect them to the Tidekeepers.",
+      preset: "Create"
+    ) { _ in }
+    let proposal = try #require(try store.proposals(worldID: world.id).first)
+    #expect(proposal.changes.count == 6 && proposal.pending == 6)
+    #expect(proposal.summary.contains("1 unsupported or invalid"))
+    #expect(try store.records(worldID: world.id).count == 2)
+    #expect(try store.relations(worldID: world.id).isEmpty)
+
+    let declarations = Array(proposal.changes.prefix(3))
+    let relationships = Array(proposal.changes.suffix(3))
+    for (creation, relationship) in zip(declarations, relationships) {
+      #expect(proposal.prerequisites(for: relationship).map(\.id) == [creation.id])
+      #expect(throws: SynthesisError.self) {
+        try store.resolveChange(
+          worldID: world.id, proposalID: proposal.id, changeID: relationship.id,
+          accept: true, confirmation: proposal.id)
+      }
+    }
+    var reviewed = proposal
+    for change in proposal.changes {
+      reviewed = try store.resolveChange(
+        worldID: world.id, proposalID: proposal.id, changeID: change.id,
+        accept: true, confirmation: proposal.id)
+    }
+    #expect(reviewed.pending == 0)
+    let created = Set(reviewed.changes.prefix(3).compactMap(\.resultID))
+    let edges = try store.relations(worldID: world.id)
+    #expect(created.count == 3 && !created.contains(existing.id))
+    #expect(Set(edges.map(\.sourceID)) == created)
+    #expect(edges.allSatisfy { $0.targetID == order.id && $0.label == "competes with" })
+    let records = try store.records(worldID: world.id).filter { created.contains($0.id) }
+    #expect(records.allSatisfy { $0.state == "draft" && $0.canonical == nil })
+    #expect(try store.record(worldID: world.id, id: order.id) == canon)
+  }
+
+  @Test func localProposalKeysRejectAmbiguousInvalidAndWrongKindDependencies() throws {
+    let store = try WorkspaceStore(path: ":memory:")
+    let world = try store.createWorld(name: "Key validation")
+    let target = try store.createRecord(worldID: world.id, title: "Keeper", kind: "entity")
+    let proposal = try #require(
+      try store.stageProposal(
+        worldID: world.id, conversationID: nil, messageID: nil,
+        payload: [
+          "changes": [
+            ["action": "create_record", "kind": "entity", "ref": "repeat", "title": "First"],
+            ["action": "create_record", "kind": "entity", "ref": "repeat", "title": "Second"],
+            ["action": "create_record", "kind": "entity", "ref": "bad/key", "title": "Bad key"],
+            ["action": "create_record", "kind": "lore", "ref": "memo", "title": "Memo"],
+            ["action": "relate", "source": "$repeat", "target": target.id, "label": "rivals"],
+            ["action": "relate", "source": "$memo", "target": target.id, "label": "rivals"],
+          ]
+        ]))
+    #expect(proposal.changes.map(\.title) == ["Memo"])
+    #expect(proposal.summary.contains("5 unsupported or invalid"))
+    #expect(try store.records(worldID: world.id) == [target])
+  }
+
   @Test func modelChangeSetIsStagedForReviewAndNeverApplied() async throws {
     let s = try WorkspaceStore(path: ":memory:")
     let w = try s.createWorld(name: "Aster")

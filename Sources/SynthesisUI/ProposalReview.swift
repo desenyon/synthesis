@@ -162,6 +162,9 @@ struct ProposalCard: View {
     let info = describe(change)
     let open = expanded.contains(change.id)
     let current = studio.records.first { $0.id == change.recordID }
+    let prerequisites = proposal.prerequisites(for: change).filter {
+      $0.status != "accepted" || $0.resultID == nil
+    }
     let detail = [
       "create_record", "create_component", "revise_record", "revise_rule", "add_rule",
       "add_scenario",
@@ -187,6 +190,13 @@ struct ProposalCard: View {
           if let reason = change.reason {
             Text(reason).font(.studio(size: 12.5)).foregroundStyle(t.secondary)
               .fixedSize(horizontal: false, vertical: true)
+          }
+          if change.status == "pending" && !prerequisites.isEmpty {
+            let names = prerequisites.map { $0.title ?? "Untitled" }.joined(separator: ", ")
+            Text(
+              prerequisites.contains { $0.status == "rejected" }
+                ? "Dismissed prerequisite · \(names)" : "Accept first · \(names)"
+            ).font(.studio(.caption)).foregroundStyle(t.warning)
           }
           if change.action == "revise_record", let current,
             current.version != change.baseVersion, change.status == "pending"
@@ -215,9 +225,9 @@ struct ProposalCard: View {
           }
         }
         Spacer(minLength: 8)
-        if !narrow { status(change) }
+        if !narrow { status(change, canAccept: prerequisites.isEmpty) }
       }
-      if narrow { status(change).padding(.leading, 28) }
+      if narrow { status(change, canAccept: prerequisites.isEmpty).padding(.leading, 28) }
       if let before = change.workspaceBefore {
         workspaceChanges(change, before: before).padding(.leading, 28)
       }
@@ -251,7 +261,7 @@ struct ProposalCard: View {
     }.padding(.horizontal, 14).padding(.vertical, 11)
       .opacity(change.status == "rejected" ? 0.55 : 1)
   }
-  @ViewBuilder private func status(_ change: ProposedChange) -> some View {
+  @ViewBuilder private func status(_ change: ProposedChange, canAccept: Bool) -> some View {
     let t = studio.t
     switch change.status {
     case "accepted":
@@ -305,9 +315,10 @@ struct ProposalCard: View {
           .buttonStyle(QuietButton(t: t, primary: true))
           .help("Save this reviewed change")
           .disabled(
-            change.action == "revise_record"
-              && studio.records.first(where: { $0.id == change.recordID })?.version
-                != change.baseVersion
+            !canAccept
+              || (change.action == "revise_record"
+                && studio.records.first(where: { $0.id == change.recordID })?.version
+                  != change.baseVersion)
           )
       }
     }
